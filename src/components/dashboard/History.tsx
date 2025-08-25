@@ -123,7 +123,7 @@ export const History = ({ profile }: HistoryProps) => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold mb-2">История генераций</h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Все ваши созданные карточки и описания
           </p>
         </div>

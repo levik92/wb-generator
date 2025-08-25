@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, UserIcon } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -24,16 +24,13 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) => {
-  const initials = profile.full_name 
-    ? profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase()
-    : profile.email.slice(0, 2).toUpperCase();
 
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-6">
         <div>
           <h1 className="text-2xl font-semibold">Добро пожаловать!</h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Создавайте карточки и описания для Wildberries
           </p>
         </div>
@@ -44,7 +41,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-wb-purple text-white">
-                    {initials}
+                    <UserIcon className="h-5 w-5" />
                   </AvatarFallback>
                 </Avatar>
               </Button>

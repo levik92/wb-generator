@@ -137,18 +137,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       {/* Token Cost */}
-      <Alert>
+      <Alert className="flex items-center">
         <Zap className="h-4 w-4" />
-        <AlertDescription>
+        <AlertDescription className="flex items-center">
           Стоимость генерации: <strong>6 токенов</strong> за комплект из 6 карточек
         </AlertDescription>
       </Alert>
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="flex items-center">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{getGuardMessage()}</AlertDescription>
+          <AlertDescription className="flex items-center">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 
@@ -161,25 +161,25 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-gray-50">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-xs sm:text-sm text-muted-foreground text-center px-2">
-                    <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center">PNG, JPG до 10MB каждый</p>
-                </div>
-                <Input
-                  type="file"
-                  className="hidden input-bordered"
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                />
-              </label>
-            </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-center w-full">
+            <label className="flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-gray-50 overflow-hidden">
+              <div className="flex flex-col items-center justify-center pt-2 pb-2 px-2">
+                <Upload className="w-6 h-6 sm:w-8 sm:h-8 mb-2 sm:mb-4 text-muted-foreground" />
+                <p className="mb-1 sm:mb-2 text-xs text-muted-foreground text-center">
+                  <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
+                </p>
+                <p className="text-xs text-muted-foreground text-center">PNG, JPG до 10MB каждый</p>
+              </div>
+              <Input
+                type="file"
+                className="hidden input-bordered"
+                multiple
+                accept="image/*"
+                onChange={handleFileUpload}
+              />
+            </label>
+          </div>
 
             {files.length > 0 && (
               <div className="grid gap-2 sm:gap-4 grid-cols-3 sm:grid-cols-4">
