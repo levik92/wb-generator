@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { FileText, Copy, Download, AlertCircle, Zap, Loader2 } from "lucide-react";
 
 interface Profile {
@@ -50,47 +51,46 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
 
   const simulateGeneration = async () => {
     setGenerating(true);
+    setGeneratedText("");
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    const mockDescription = `🔥 ${productName.toUpperCase()} - ПРЕМИУМ КАЧЕСТВО ПО ДОСТУПНОЙ ЦЕНЕ!
+    try {
+      const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
+      const keywordsList = keywords.split(',').map(k => k.trim()).filter(Boolean);
+      
+      const { data, error } = await supabase.functions.invoke('generate-description', {
+        body: {
+          productName,
+          category,
+          competitors,
+          keywords: keywordsList,
+          userId: profile.id
+        }
+      });
 
-✅ Наш ${category.toLowerCase()} станет незаменимым помощником в вашей жизни!
+      if (error) throw error;
 
-🌟 ОСНОВНЫЕ ПРЕИМУЩЕСТВА:
-• Высокое качество материалов
-• Современный дизайн 
-• Простота использования
-• Долгий срок службы
-• Гарантия качества
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
-🎯 ИДЕАЛЬНО ПОДХОДИТ ДЛЯ:
-• Повседневного использования
-• Подарка близким
-• Решения повседневных задач
-
-💡 ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ:
-Подробные характеристики указаны в карточке товара
-
-🚀 БЫСТРАЯ ДОСТАВКА ПО ВСЕЙ РОССИИ!
-
-📞 ОСТАЛИСЬ ВОПРОСЫ? 
-Свяжитесь с нами через чат Wildberries - ответим в течение часа!
-
-⭐ ПРИСОЕДИНЯЙТЕСЬ К ТЫСЯЧАМ ДОВОЛЬНЫХ ПОКУПАТЕЛЕЙ!
-
-#${keywords.replace(/,/g, ' #')} #качество #доставка #wildberries`;
-
-    setGeneratedText(mockDescription);
-    setGenerating(false);
-    
-    toast({
-      title: "Описание сгенерировано!",
-      description: `${mockDescription.length} символов готово к использованию`,
-    });
-    
-    onTokensUpdate();
+      setGeneratedText(data.description);
+      
+      // Refresh profile to update token balance
+      onTokensUpdate();
+      
+      toast({
+        title: "Описание создано!",
+        description: "Описание товара успешно сгенерировано",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Ошибка генерации",
+        description: error.message || "Не удалось создать описание",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const copyToClipboard = () => {

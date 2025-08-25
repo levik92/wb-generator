@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Upload, Image, Download, AlertCircle, Zap } from "lucide-react";
 
 interface Profile {
@@ -71,28 +72,52 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setProgress(0);
     setCurrentStage(0);
     setGeneratedImages([]);
-
-    // Simulate generation process
-    for (let i = 0; i < CARD_STAGES.length; i++) {
-      setCurrentStage(i);
-      setProgress((i / CARD_STAGES.length) * 100);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Add a placeholder image for each stage
-      setGeneratedImages(prev => [...prev, `https://via.placeholder.com/960x1280?text=Stage+${i + 1}`]);
-      
-      setProgress(((i + 1) / CARD_STAGES.length) * 100);
-    }
-
-    toast({
-      title: "Карточки сгенерированы!",
-      description: "6 карточек готовы к скачиванию",
-    });
     
-    setGenerating(false);
-    onTokensUpdate();
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-cards', {
+        body: {
+          productName: "Карточки товара", // You can add a product name field later
+          category: "Товары",
+          description,
+          userId: profile.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Simulate generation process for UI
+      for (let i = 0; i < CARD_STAGES.length; i++) {
+        setCurrentStage(i);
+        setProgress((i / CARD_STAGES.length) * 100);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Add placeholder images (in real implementation these would come from API)
+        setGeneratedImages(prev => [...prev, `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${i}`]);
+        
+        setProgress(((i + 1) / CARD_STAGES.length) * 100);
+      }
+      
+      // Refresh profile to update token balance
+      onTokensUpdate();
+      
+      toast({
+        title: "Карточки созданы!",
+        description: "Ваши карточки готовы к скачиванию",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Ошибка генерации",
+        description: error.message || "Не удалось создать карточки",
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const downloadAll = () => {

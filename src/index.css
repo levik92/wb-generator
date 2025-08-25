@@ -188,7 +188,7 @@
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
 textarea, 
 select {
-  @apply border border-border/30 !important;
+  @apply border-2 border-border/60 !important;
 }
 
   /* Token hover effect */

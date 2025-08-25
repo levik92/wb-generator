@@ -90,45 +90,53 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-center">Электроника</h3>
-              <div className="space-y-3">
-                <div className="text-center">
-                  <Badge variant="secondary" className="mb-2">До</Badge>
-                  <img src={exampleBefore1} alt="До обработки - электроника" className="w-full h-48 object-cover rounded-lg border" />
+          <div className="space-y-12">
+            {/* Example 1 */}
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-4">До</h3>
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
+                  <img
+                    src={exampleBefore1}
+                    alt="Пример карточки до обработки"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="text-center">
-                  <Badge className="mb-2 bg-wb-purple">После</Badge>
-                  <img src={exampleBefore1} alt="После обработки - электроника" className="w-full h-48 object-cover rounded-lg border" />
+              </div>
+              
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-4">После</h3>
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-purple-100 to-purple-200">
+                  <img
+                    src={exampleBefore1}
+                    alt="Пример карточки после обработки"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-center">Аксессуары</h3>
-              <div className="space-y-3">
-                <div className="text-center">
-                  <Badge variant="secondary" className="mb-2">До</Badge>
-                  <img src={exampleBefore2} alt="До обработки - аксессуары" className="w-full h-48 object-cover rounded-lg border" />
-                </div>
-                <div className="text-center">
-                  <Badge className="mb-2 bg-wb-purple">После</Badge>
-                  <img src={exampleBefore2} alt="После обработки - аксессуары" className="w-full h-48 object-cover rounded-lg border" />
+            {/* Example 2 */}
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-4">До</h3>
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
+                  <img
+                    src={exampleBefore2}
+                    alt="Пример карточки до обработки"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-center">Одежда</h3>
-              <div className="space-y-3">
-                <div className="text-center">
-                  <Badge variant="secondary" className="mb-2">До</Badge>
-                  <img src={exampleBefore3} alt="До обработки - одежда" className="w-full h-48 object-cover rounded-lg border" />
-                </div>
-                <div className="text-center">
-                  <Badge className="mb-2 bg-wb-purple">После</Badge>
-                  <img src={exampleBefore3} alt="После обработки - одежда" className="w-full h-48 object-cover rounded-lg border" />
+              
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-4">После</h3>
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-purple-100 to-purple-200">
+                  <img
+                    src={exampleBefore2}
+                    alt="Пример карточки после обработки"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </div>
@@ -228,10 +236,6 @@ const Landing = () => {
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     50 описаний товаров (1 токен за описание)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    Интеграция с WB
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />

@@ -16,33 +16,48 @@ export type Database = {
     Tables: {
       generations: {
         Row: {
+          category: string | null
+          competitors: string[] | null
           created_at: string
+          description_requirements: string | null
           generation_type: string
           id: string
           input_data: Json | null
+          keywords: string[] | null
           output_data: Json | null
+          product_name: string | null
           status: string
           tokens_used: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          category?: string | null
+          competitors?: string[] | null
           created_at?: string
+          description_requirements?: string | null
           generation_type: string
           id?: string
           input_data?: Json | null
+          keywords?: string[] | null
           output_data?: Json | null
+          product_name?: string | null
           status?: string
           tokens_used: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          category?: string | null
+          competitors?: string[] | null
           created_at?: string
+          description_requirements?: string | null
           generation_type?: string
           id?: string
           input_data?: Json | null
+          keywords?: string[] | null
           output_data?: Json | null
+          product_name?: string | null
           status?: string
           tokens_used?: number
           updated_at?: string
@@ -220,6 +235,10 @@ export type Database = {
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      spend_tokens: {
+        Args: { tokens_amount: number; user_id_param: string }
+        Returns: boolean
       }
     }
     Enums: {
