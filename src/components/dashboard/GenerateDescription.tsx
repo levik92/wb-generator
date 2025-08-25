@@ -134,7 +134,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       )}
 
       {/* Input Form */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Параметры генерации</CardTitle>

@@ -5,13 +5,15 @@ import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { MobileMenu } from "@/components/dashboard/MobileMenu";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { GenerateCards } from "@/components/dashboard/GenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
 import { History } from "@/components/dashboard/History";
 import { Pricing } from "@/components/dashboard/Pricing";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
-import { Loader2 } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -31,6 +33,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Check for existing session
@@ -145,19 +148,41 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Desktop Sidebar */}
+      {!isMobile && (
         <DashboardSidebar 
           activeTab={activeTab}
           onTabChange={handleTabChange}
           profile={profile}
         />
+      )}
       
       <div className="flex-1 flex flex-col">
-        <DashboardHeader 
-          profile={profile}
-          onSignOut={handleSignOut}
-        />
+        {/* Header with Mobile Menu */}
+        <div className="flex items-center justify-between p-4 border-b md:hidden">
+          <MobileMenu 
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            profile={profile}
+          />
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-hero rounded flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-lg font-semibold">WB Генератор</span>
+          </div>
+          <div className="w-10" /> {/* Spacer for centering */}
+        </div>
         
-        <main className="flex-1 p-6">
+        {/* Desktop Header */}
+        {!isMobile && (
+          <DashboardHeader 
+            profile={profile}
+            onSignOut={handleSignOut}
+          />
+        )}
+        
+        <main className="flex-1 p-4 md:p-6">
           {renderContent()}
         </main>
       </div>

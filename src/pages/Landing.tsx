@@ -8,6 +8,9 @@ import heroDemo from "@/assets/hero-demo.jpg";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleBefore2 from "@/assets/example-before-after-2.jpg";
 import exampleBefore3 from "@/assets/example-before-after-3.jpg";
+import exampleAfter1 from "@/assets/example-after-1.jpg";
+import exampleAfter2 from "@/assets/example-after-2.jpg";
+import exampleAfter3 from "@/assets/example-after-3.jpg";
 
 const Landing = () => {
   const scrollToExamples = () => {
@@ -94,11 +97,11 @@ const Landing = () => {
           <div className="space-y-8 sm:space-y-12">
             {/* Example 1 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Пример карточки 1</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Смартфон - Электроника</h3>
               <BeforeAfterSlider
                 beforeImage={exampleBefore1}
-                afterImage={exampleBefore1}
-                alt="карточки товара"
+                afterImage={exampleAfter1}
+                alt="карточки смартфона"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -107,11 +110,11 @@ const Landing = () => {
 
             {/* Example 2 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Пример карточки 2</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Косметика - Красота</h3>
               <BeforeAfterSlider
                 beforeImage={exampleBefore2}
-                afterImage={exampleBefore2}
-                alt="карточки товара"
+                afterImage={exampleAfter2}
+                alt="карточки косметики"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -120,11 +123,11 @@ const Landing = () => {
 
             {/* Example 3 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Пример карточки 3</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Одежда - Мода</h3>
               <BeforeAfterSlider
                 beforeImage={exampleBefore3}
-                afterImage={exampleBefore3}
-                alt="карточки товара"
+                afterImage={exampleAfter3}
+                alt="карточки одежды"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
