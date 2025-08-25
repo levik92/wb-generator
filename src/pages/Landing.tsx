@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Zap, Image, FileText, Users, Star, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import heroDemo from "@/assets/hero-demo.jpg";
 
 const Landing = () => {
   return (
@@ -32,14 +33,14 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-16">
+      <section className="pt-20 pb-16 animate-fade-in">
         <div className="container mx-auto px-6 text-center">
-          <Badge variant="secondary" className="mb-6">
+          <Badge variant="secondary" className="mb-6 animate-slide-up">
             <Star className="w-4 h-4 mr-2" />
             25 токенов бесплатно при регистрации
           </Badge>
           
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 animate-fade-in">
             Карточки Wildberries <br />
             <span className="text-gradient">за минуты, не дни</span>
           </h1>
@@ -61,14 +62,13 @@ const Landing = () => {
             </Button>
           </div>
 
-          {/* Demo Image Placeholder */}
-          <div className="bg-gradient-card rounded-xl border border-card-border p-8 max-w-4xl mx-auto">
-            <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <Image className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Демо генерации карточек</p>
-              </div>
-            </div>
+          {/* Demo Image */}
+          <div className="bg-gradient-card rounded-xl border border-card-border p-8 max-w-4xl mx-auto animate-slide-up">
+            <img 
+              src={heroDemo} 
+              alt="Демонстрация генерации карточек WB Генератор"
+              className="w-full rounded-lg shadow-lg"
+            />
           </div>
         </div>
       </section>

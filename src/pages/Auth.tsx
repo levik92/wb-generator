@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft, Zap, Loader2 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +16,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref');
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +107,14 @@ const Auth = () => {
         <Card>
           <CardHeader className="space-y-1">
             <div className="bg-wb-purple/10 text-wb-purple px-3 py-2 rounded-lg text-sm text-center">
-              🎉 25 токенов бесплатно при регистрации
+              {referralCode ? (
+                <>
+                  <Gift className="w-4 h-4 inline mr-2" />
+                  🎉 35 токенов при регистрации (25 + 10 по реферальной программе)
+                </>
+              ) : (
+                "🎉 25 токенов бесплатно при регистрации"
+              )}
             </div>
           </CardHeader>
           <CardContent>
