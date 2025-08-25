@@ -63,6 +63,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setFiles(uploadedFiles);
   };
 
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const canGenerate = () => {
     return files.length > 0 && category && description.trim() && profile.tokens_balance >= 6;
   };
@@ -158,8 +162,22 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setRegeneratingIndex(index);
     
     try {
-      // Simulate regeneration (in real implementation, would call API)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { data, error } = await supabase.functions.invoke('regenerate-single-card', {
+        body: {
+          productName: "Карточка товара",
+          category,
+          description,
+          userId: profile.id,
+          cardIndex: index,
+          cardType: CARD_STAGES[index]?.name
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
       
       // Replace the image at specific index in current generation
       const newHistory = [...generationHistory];
@@ -167,6 +185,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       currentGeneration[index] = `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${index}_${Date.now()}`;
       newHistory[currentGenerationIndex] = currentGeneration;
       setGenerationHistory(newHistory);
+      
+      // Refresh profile to update token balance
+      onTokensUpdate();
       
       toast({
         title: "Карточка обновлена!",
@@ -243,7 +264,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             {files.length > 0 && (
               <div className="grid gap-2 sm:gap-4 grid-cols-3 sm:grid-cols-4">
                 {files.map((file, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative group">
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`Upload ${index + 1}`}
@@ -252,6 +273,20 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                     <Badge className="absolute -top-2 -right-2 bg-wb-purple">
                       {index + 1}
                     </Badge>
+                    {/* Desktop remove button */}
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-xs hidden sm:flex"
+                    >
+                      ×
+                    </button>
+                    {/* Mobile remove button */}
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs sm:hidden"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
@@ -339,45 +374,43 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       {generatedImages.length > 0 && !generating && (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div>
-                  <CardTitle>Готовые карточки</CardTitle>
-                  <CardDescription>
-                    {generatedImages.length} карточек готовы к скачиванию
-                  </CardDescription>
-                </div>
-                {generationHistory.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => setCurrentGenerationIndex(Math.max(0, currentGenerationIndex - 1))}
-                      disabled={currentGenerationIndex === 0}
-                      size="sm"
-                      variant="outline"
-                      className="px-2"
-                    >
-                      ←
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      {currentGenerationIndex + 1} / {generationHistory.length}
-                    </span>
-                    <Button
-                      onClick={() => setCurrentGenerationIndex(Math.min(generationHistory.length - 1, currentGenerationIndex + 1))}
-                      disabled={currentGenerationIndex === generationHistory.length - 1}
-                      size="sm"
-                      variant="outline"
-                      className="px-2"
-                    >
-                      →
-                    </Button>
-                  </div>
-                )}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle>Готовые карточки</CardTitle>
+                <CardDescription>
+                  {generatedImages.length} карточек готовы к скачиванию
+                </CardDescription>
               </div>
-            <Button onClick={downloadAll} className="bg-wb-purple hover:bg-wb-purple-dark" size="sm">
-              <Download className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Скачать все</span>
-              <span className="sm:hidden">Все</span>
-            </Button>
+              {generationHistory.length > 1 && (
+                <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-lg border order-last sm:order-none">
+                  <Button
+                    onClick={() => setCurrentGenerationIndex(Math.max(0, currentGenerationIndex - 1))}
+                    disabled={currentGenerationIndex === 0}
+                    size="sm"
+                    variant="outline"
+                    className="px-3 py-1 h-8"
+                  >
+                    ←
+                  </Button>
+                  <span className="text-sm font-medium px-2">
+                    {currentGenerationIndex + 1} / {generationHistory.length}
+                  </span>
+                  <Button
+                    onClick={() => setCurrentGenerationIndex(Math.min(generationHistory.length - 1, currentGenerationIndex + 1))}
+                    disabled={currentGenerationIndex === generationHistory.length - 1}
+                    size="sm"
+                    variant="outline"
+                    className="px-3 py-1 h-8"
+                  >
+                    →
+                  </Button>
+                </div>
+              )}
+              <Button onClick={downloadAll} className="bg-wb-purple hover:bg-wb-purple-dark" size="sm">
+                <Download className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Скачать все</span>
+                <span className="sm:hidden">Все</span>
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -400,7 +433,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                        variant="outline" 
                        onClick={() => regenerateSingle(index)}
                        disabled={regeneratingIndex === index}
-                       className="bg-white/20 text-white border-white/30 border-dashed hover:bg-white/30 hover:border-white/50 disabled:bg-white/10"
+                       className="bg-white/20 text-white border-white/30 hover:bg-white/30 hover:border-white/50 disabled:bg-white/10"
                      >
                        {regeneratingIndex === index ? (
                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -466,7 +499,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             onClick={simulateGeneration}
             disabled={!canGenerate() || generating}
             className={generatedImages.length > 0 ? 
-              "w-full bg-white/5 text-white border border-white/30 border-dashed hover:bg-white/10 hover:border-solid hidden sm:flex" : 
+              "w-full bg-wb-purple hover:bg-wb-purple-dark hidden sm:flex" : 
               "w-full bg-wb-purple hover:bg-wb-purple-dark"
             }
             size="lg"

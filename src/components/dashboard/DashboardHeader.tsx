@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, UserIcon } from "lucide-react";
+import { LogOut, User, UserIcon, Bell } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -36,6 +36,12 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Notifications */}
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Bell className="h-5 w-5" />
+            <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-background"></div>
+          </Button>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
