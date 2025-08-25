@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -34,6 +35,7 @@ const CARD_STAGES = [
 
 export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
@@ -54,11 +56,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    return files.length > 0 && profile.tokens_balance >= 6 && profile.wb_connected;
+    return files.length > 0 && description.trim() && profile.tokens_balance >= 6 && profile.wb_connected;
   };
 
   const getGuardMessage = () => {
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
+    if (!description.trim()) return "Добавьте описание товара";
     if (profile.tokens_balance < 6) return "Недостаточно токенов (нужно 6)";
     if (!profile.wb_connected) return "Подключите Wildberries в настройках";
     return null;
@@ -146,7 +149,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 </div>
                 <Input
                   type="file"
-                  className="hidden"
+                  className="hidden input-bordered"
                   multiple
                   accept="image/*"
                   onChange={handleFileUpload}
@@ -170,6 +173,32 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 ))}
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Product Description */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Описание товара</CardTitle>
+          <CardDescription>
+            Опишите товар, его преимущества и пожелания по дизайну карточек
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="description">Описание и пожелания</Label>
+            <Textarea
+              id="description"
+              placeholder="Опишите ваш товар: основные характеристики, преимущества, целевую аудиторию. Добавьте пожелания по стилю карточек, цветовой гамме, акцентам..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="input-bordered"
+            />
+            <p className="text-xs text-muted-foreground">
+              Чем подробнее описание, тем лучше будут карточки
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -183,4 +183,14 @@
   .transition-smooth {
     transition: var(--transition-base);
   }
+
+  /* Custom input styles with subtle borders */
+  .input-bordered {
+    @apply border border-gray-300/30 focus:border-wb-purple/50 transition-colors;
+  }
+
+  /* Token hover effect */
+  .token-hover:hover {
+    @apply bg-wb-purple/10 backdrop-blur-sm;
+  }
 }

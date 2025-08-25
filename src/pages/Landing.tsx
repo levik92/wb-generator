@@ -4,8 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Zap, Image, FileText, Users, Star, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroDemo from "@/assets/hero-demo.jpg";
+import exampleBefore1 from "@/assets/example-before-after-1.jpg";
+import exampleBefore2 from "@/assets/example-before-after-2.jpg";
+import exampleBefore3 from "@/assets/example-before-after-3.jpg";
 
 const Landing = () => {
+  const scrollToExamples = () => {
+    document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -57,7 +64,7 @@ const Landing = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+            <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={scrollToExamples}>
               Посмотреть примеры
             </Button>
           </div>
@@ -73,6 +80,50 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Examples Section */}
+      <section id="examples" className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Примеры работ</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Посмотрите, как обычные фото превращаются в профессиональные карточки
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                <img src={exampleBefore1} alt="Пример преобразования 1" className="w-full h-48 object-cover" />
+                <div className="p-6">
+                  <h3 className="font-semibold mb-2">Электроника</h3>
+                  <p className="text-sm text-muted-foreground">Простое фото → Стильная карточка с преимуществами</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                <img src={exampleBefore2} alt="Пример преобразования 2" className="w-full h-48 object-cover" />
+                <div className="p-6">
+                  <h3 className="font-semibold mb-2">Аксессуары</h3>
+                  <p className="text-sm text-muted-foreground">Обычное фото → Карточка с характеристиками</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <CardContent className="p-0">
+                <img src={exampleBefore3} alt="Пример преобразования 3" className="w-full h-48 object-cover" />
+                <div className="p-6">
+                  <h3 className="font-semibold mb-2">Одежда</h3>
+                  <p className="text-sm text-muted-foreground">Простое фото → Профессиональная презентация</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-6">
@@ -83,7 +134,7 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-4 gap-8">
             <Card className="text-center">
               <CardHeader>
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -99,9 +150,21 @@ const Landing = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-6 h-6 text-wb-purple" />
+                </div>
+                <CardTitle>2. Опишите товар</CardTitle>
+                <CardDescription>
+                  Добавьте описание, преимущества и пожелания по дизайну
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-wb-purple" />
                 </div>
-                <CardTitle>2. ИИ создает карточки</CardTitle>
+                <CardTitle>3. ИИ создает карточки</CardTitle>
                 <CardDescription>
                   6 этапов: hero, usage, инфографика, сравнение, детали, финал
                 </CardDescription>
@@ -113,9 +176,9 @@ const Landing = () => {
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <FileText className="w-6 h-6 text-wb-purple" />
                 </div>
-                <CardTitle>3. Скачайте и загрузите</CardTitle>
+                <CardTitle>4. Скачайте и загрузите</CardTitle>
                 <CardDescription>
-                  Готовые PNG 960×1280 и SEO-описания в WB
+                  Скачайте готовые PNG и загрузите в свой кабинет WB
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -140,20 +203,27 @@ const Landing = () => {
                 <CardTitle className="text-xl">Стартовый</CardTitle>
                 <div className="text-3xl font-bold">499₽</div>
                 <CardDescription>50 токенов</CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>9,98₽</strong> за токен
+                </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
-                    8 комплектов карточек
+                    8 комплектов карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
-                    50 описаний товаров
+                    50 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
                     Интеграция с WB
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    Поддержка в чате
                   </li>
                 </ul>
                 <Button className="w-full mt-6 bg-wb-purple hover:bg-wb-purple-dark">
@@ -171,20 +241,27 @@ const Landing = () => {
                 <CardTitle className="text-xl">Профи</CardTitle>
                 <div className="text-3xl font-bold">1 499₽</div>
                 <CardDescription>200 токенов</CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>7,50₽</strong> за токен
+                </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
-                    33 комплекта карточек
+                    33 комплекта карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
-                    200 описаний товаров
+                    200 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
                     Приоритетная поддержка
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    Персональный менеджер
                   </li>
                 </ul>
                 <Button className="w-full mt-6 bg-wb-purple hover:bg-wb-purple-dark">
@@ -199,20 +276,27 @@ const Landing = () => {
                 <CardTitle className="text-xl">Бизнес</CardTitle>
                 <div className="text-3xl font-bold">5 999₽</div>
                 <CardDescription>1000 токенов</CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>6,00₽</strong> за токен
+                </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
-                    166 комплектов карточек
+                    166 комплектов карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
-                    1000 описаний товаров
+                    1000 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2" />
                     Персональный менеджер
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    VIP поддержка 24/7
                   </li>
                 </ul>
                 <Button className="w-full mt-6 bg-wb-purple hover:bg-wb-purple-dark">

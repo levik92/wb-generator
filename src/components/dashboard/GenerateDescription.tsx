@@ -25,23 +25,26 @@ interface GenerateDescriptionProps {
 }
 
 export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescriptionProps) => {
+  const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
-  const [competitors, setCompetitors] = useState("");
+  const [competitor1, setCompetitor1] = useState("");
+  const [competitor2, setCompetitor2] = useState("");
+  const [competitor3, setCompetitor3] = useState("");
   const [keywords, setKeywords] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
   const { toast } = useToast();
 
   const canGenerate = () => {
-    return category && competitors && keywords && profile.tokens_balance >= 1 && profile.wb_connected;
+    return productName && category && competitor1 && keywords && profile.tokens_balance >= 1;
   };
 
   const getGuardMessage = () => {
+    if (!productName) return "Введите название товара";
     if (!category) return "Выберите категорию товара";
-    if (!competitors) return "Добавьте ссылки на конкурентов";
+    if (!competitor1) return "Добавьте хотя бы одну ссылку на конкурента";
     if (!keywords) return "Добавьте ключевые слова";
     if (profile.tokens_balance < 1) return "Недостаточно токенов (нужен 1)";
-    if (!profile.wb_connected) return "Подключите Wildberries в настройках";
     return null;
   };
 
@@ -51,9 +54,9 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 3000));
     
-    const mockDescription = `🔥 ПРЕМИУМ КАЧЕСТВО ПО ДОСТУПНОЙ ЦЕНЕ!
+    const mockDescription = `🔥 ${productName.toUpperCase()} - ПРЕМИУМ КАЧЕСТВО ПО ДОСТУПНОЙ ЦЕНЕ!
 
-✅ Наш ${category.toLowerCase()} станет незаменимым помощником в вашей жизни! 
+✅ Наш ${category.toLowerCase()} станет незаменимым помощником в вашей жизни!
 
 🌟 ОСНОВНЫЕ ПРЕИМУЩЕСТВА:
 • Высокое качество материалов
@@ -141,9 +144,20 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="productName">Название товара</Label>
+              <Input
+                id="productName"
+                placeholder="Например: Беспроводные наушники AirPods"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                className="input-bordered"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="category">Категория товара</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
+                <SelectTrigger className="input-bordered">
                   <SelectValue placeholder="Выберите категорию" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,16 +174,29 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="competitors">Ссылки на конкурентов</Label>
-              <Textarea
-                id="competitors"
-                placeholder="Вставьте 1-3 ссылки на похожие товары WB"
-                value={competitors}
-                onChange={(e) => setCompetitors(e.target.value)}
-                rows={3}
-              />
+              <Label>Ссылки на конкурентов</Label>
+              <div className="space-y-2">
+                <Input
+                  placeholder="Ссылка на конкурента 1 (обязательно)"
+                  value={competitor1}
+                  onChange={(e) => setCompetitor1(e.target.value)}
+                  className="input-bordered"
+                />
+                <Input
+                  placeholder="Ссылка на конкурента 2 (по желанию)"
+                  value={competitor2}
+                  onChange={(e) => setCompetitor2(e.target.value)}
+                  className="input-bordered"
+                />
+                <Input
+                  placeholder="Ссылка на конкурента 3 (по желанию)"
+                  value={competitor3}
+                  onChange={(e) => setCompetitor3(e.target.value)}
+                  className="input-bordered"
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
-                Каждая ссылка с новой строки
+                Вставьте ссылки на похожие товары с WB для лучшего анализа
               </p>
             </div>
 
@@ -180,6 +207,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 placeholder="ключ1, ключ2, ключ3"
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
+                className="input-bordered"
               />
               <p className="text-xs text-muted-foreground">
                 Разделяйте запятыми
@@ -232,7 +260,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                   value={generatedText}
                   onChange={(e) => setGeneratedText(e.target.value)}
                   rows={12}
-                  className="font-mono text-sm"
+                  className="font-mono text-sm input-bordered"
                 />
                 
                 <div className="flex space-x-2">

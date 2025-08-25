@@ -33,8 +33,31 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
             <CardTitle>Стартовый</CardTitle>
             <div className="text-3xl font-bold">499₽</div>
             <CardDescription>50 токенов</CardDescription>
+            <div className="text-sm text-muted-foreground mt-2">
+              <strong>9,98₽</strong> за токен
+            </div>
           </CardHeader>
           <CardContent>
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">1 токен =</span>
+                <span className="text-sm font-medium">1 описание товара</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">6 токенов =</span>
+                <span className="text-sm font-medium">1 комплект карточек</span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-wb-purple mr-2" />
+                  <span className="text-sm">8 комплектов карточек</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-wb-purple mr-2" />
+                  <span className="text-sm">50 описаний товаров</span>
+                </div>
+              </div>
+            </div>
             <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
               Купить
             </Button>
@@ -47,8 +70,31 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
             <CardTitle>Профи</CardTitle>
             <div className="text-3xl font-bold">1 499₽</div>
             <CardDescription>200 токенов</CardDescription>
+            <div className="text-sm text-muted-foreground mt-2">
+              <strong>7,50₽</strong> за токен
+            </div>
           </CardHeader>
           <CardContent>
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">1 токен =</span>
+                <span className="text-sm font-medium">1 описание товара</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">6 токенов =</span>
+                <span className="text-sm font-medium">1 комплект карточек</span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-wb-purple mr-2" />
+                  <span className="text-sm">33 комплекта карточек</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-wb-purple mr-2" />
+                  <span className="text-sm">200 описаний товаров</span>
+                </div>
+              </div>
+            </div>
             <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
               Купить
             </Button>
@@ -60,8 +106,31 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
             <CardTitle>Бизнес</CardTitle>
             <div className="text-3xl font-bold">5 999₽</div>
             <CardDescription>1000 токенов</CardDescription>
+            <div className="text-sm text-muted-foreground mt-2">
+              <strong>6,00₽</strong> за токен
+            </div>
           </CardHeader>
           <CardContent>
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">1 токен =</span>
+                <span className="text-sm font-medium">1 описание товара</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">6 токенов =</span>
+                <span className="text-sm font-medium">1 комплект карточек</span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-wb-purple mr-2" />
+                  <span className="text-sm">166 комплектов карточек</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 text-wb-purple mr-2" />
+                  <span className="text-sm">1000 описаний товаров</span>
+                </div>
+              </div>
+            </div>
             <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
               Купить
             </Button>
