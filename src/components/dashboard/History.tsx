@@ -119,11 +119,11 @@ export const History = ({ profile }: HistoryProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 px-2 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold mb-2">История генераций</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">История генераций</h2>
+          <p className="text-sm text-muted-foreground">
             Все ваши созданные карточки и описания
           </p>
         </div>
@@ -131,7 +131,7 @@ export const History = ({ profile }: HistoryProps) => {
         <div className="flex items-center space-x-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
           <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-32 sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -207,12 +207,11 @@ export const History = ({ profile }: HistoryProps) => {
                   <Button 
                     onClick={() => downloadGeneration(generation)}
                     size="sm"
-                    variant="outline"
-                    className="bg-wb-purple/10 hover:bg-wb-purple/20 border-wb-purple/20"
+                    className="bg-wb-purple hover:bg-wb-purple-dark text-white"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Скачать
-                  </Button>                  
+                  </Button>
                 </div>
               </CardContent>
             </Card>

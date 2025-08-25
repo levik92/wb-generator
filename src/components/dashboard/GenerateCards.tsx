@@ -128,8 +128,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
-      <div className="px-1">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
+      <div>
         <h2 className="text-2xl sm:text-3xl font-bold mb-2">Генерация карточек</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
           Создайте 6 профессиональных карточек 960×1280 для Wildberries
@@ -137,7 +137,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-center justify-start">
+      <Alert className="flex items-center justify-center">
         <Zap className="h-4 w-4 flex-shrink-0" />
         <AlertDescription className="flex items-center ml-2">
           Стоимость генерации: <strong>6 токенов</strong> за комплект из 6 карточек
@@ -146,9 +146,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-center">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center">{getGuardMessage()}</AlertDescription>
+        <Alert variant="destructive" className="flex items-center justify-center">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertDescription className="flex items-center ml-2">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 

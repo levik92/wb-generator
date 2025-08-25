@@ -118,23 +118,23 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-center">
-        <Zap className="h-4 w-4" />
-        <AlertDescription className="flex items-center">
+      <Alert className="flex items-center justify-center">
+        <Zap className="h-4 w-4 flex-shrink-0" />
+        <AlertDescription className="flex items-center ml-2">
           Стоимость генерации: <strong>1 токен</strong> за одно описание
         </AlertDescription>
       </Alert>
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-center">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="flex items-center">{getGuardMessage()}</AlertDescription>
+        <Alert variant="destructive" className="flex items-center justify-center">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertDescription className="flex items-center ml-2">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 
       {/* Input Form */}
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-1 xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Параметры генерации</CardTitle>

@@ -75,7 +75,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
 
       {/* Token Balance */}
       <div className="px-6 pb-4">
-        <div className="bg-wb-purple/10 rounded-lg p-4 hover:bg-wb-purple/15 transition-colors cursor-pointer">
+        <div className="bg-wb-purple/10 rounded-lg p-4 hover:bg-wb-purple/20 transition-colors cursor-pointer">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-wb-purple">Токены</span>
             <Badge variant="secondary" className="bg-wb-purple text-white">
@@ -111,7 +111,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                   }`}
                   onClick={() => onTabChange(item.id)}
                 >
-                  <Icon className="w-4 h-4 mr-3" />
+                  <Icon className="w-4 h-4 mr-2" />
                   {item.label}
                 </Button>
               </li>
