@@ -222,7 +222,7 @@ export const History = ({ profile }: HistoryProps) => {
                           <Calendar className="w-4 h-4" />
                           <span>{formatDate(generation.created_at)}</span>
                         </div>
-                        <span>{generation.tokens_used} токенов</span>
+                        <span className="hidden sm:inline">{generation.tokens_used} токенов</span>
                         {generation.input_data?.productName && (
                           <span>• {generation.input_data.productName}</span>
                         )}
@@ -243,7 +243,7 @@ export const History = ({ profile }: HistoryProps) => {
                       onClick={() => deleteGeneration(generation.id)}
                       size="sm"
                       variant="outline"
-                      className="border-red-200 text-red-600 hover:bg-red-50"
+                      className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-500"
                     >
                       Удалить
                     </Button>

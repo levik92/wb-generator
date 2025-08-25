@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,6 +37,7 @@ const CARD_STAGES = [
 
 export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -58,11 +60,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    return files.length > 0 && description.trim() && profile.tokens_balance >= 6;
+    return files.length > 0 && category && description.trim() && profile.tokens_balance >= 6;
   };
 
   const getGuardMessage = () => {
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
+    if (!category) return "Выберите категорию товара";
     if (!description.trim()) return "Добавьте описание товара";
     if (profile.tokens_balance < 6) return "Недостаточно токенов (нужно 6)";
     return null;
@@ -78,7 +81,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       const { data, error } = await supabase.functions.invoke('generate-cards', {
         body: {
           productName: "Карточки товара", // You can add a product name field later
-          category: "Товары",
+          category,
           description,
           userId: profile.id
         }
@@ -184,7 +187,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <AlertDescription className="ml-3">
           <div className="flex flex-col space-y-1">
             <span>Стоимость генерации:</span>
-            <span><strong>6 токенов</strong> за комплект из 6 карточек</span>
+            <span><strong>6 токенов</strong> за комплект из 6 изображений</span>
           </div>
         </AlertDescription>
       </Alert>
@@ -242,6 +245,36 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 ))}
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Category Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Категория товара</CardTitle>
+          <CardDescription>
+            Выберите категорию для лучшей генерации
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="category">Категория товара</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="input-bordered">
+                <SelectValue placeholder="Выберите категорию" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Электроника">Электроника</SelectItem>
+                <SelectItem value="Одежда">Одежда</SelectItem>
+                <SelectItem value="Обувь">Обувь</SelectItem>
+                <SelectItem value="Дом и сад">Дом и сад</SelectItem>
+                <SelectItem value="Красота и здоровье">Красота и здоровье</SelectItem>
+                <SelectItem value="Спорт">Спорт</SelectItem>
+                <SelectItem value="Детские товары">Детские товары</SelectItem>
+                <SelectItem value="Автотовары">Автотовары</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -320,24 +353,24 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                     className="w-full aspect-[3/4] object-cover rounded-lg border"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
-                    <Button size="sm" variant="secondary" onClick={() => downloadSingle(index)}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Скачать
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => regenerateSingle(index)}
-                      disabled={regeneratingIndex === index}
-                      className="bg-white/90 hover:bg-white"
-                    >
-                      {regeneratingIndex === index ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Image className="w-4 h-4 mr-2" />
-                      )}
-                      Сгенерировать заново
-                    </Button>
+                     <Button size="sm" className="bg-wb-purple hover:bg-wb-purple-dark" onClick={() => downloadSingle(index)}>
+                       <Download className="w-4 h-4 mr-2" />
+                       Скачать
+                     </Button>
+                     <Button 
+                       size="sm" 
+                       variant="outline" 
+                       onClick={() => regenerateSingle(index)}
+                       disabled={regeneratingIndex === index}
+                       className="bg-white/20 text-white border-white/30 border-dashed hover:bg-white/30 hover:border-white/50 disabled:bg-white/10"
+                     >
+                       {regeneratingIndex === index ? (
+                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                       ) : (
+                         <Image className="w-4 h-4 mr-2" />
+                       )}
+                       Сгенерировать заново
+                     </Button>
                   </div>
                   <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-wb-purple text-xs">
                     {CARD_STAGES[index]?.name}
@@ -358,30 +391,29 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   <Badge className="absolute top-2 left-2 bg-wb-purple text-xs">
                     {CARD_STAGES[index]?.name}
                   </Badge>
-                  <div className="flex gap-2 mt-3">
-                    <Button 
-                      size="sm" 
-                      className="flex-1 bg-wb-purple hover:bg-wb-purple-dark"
-                      onClick={() => downloadSingle(index)}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Скачать
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => regenerateSingle(index)}
-                      disabled={regeneratingIndex === index}
-                    >
-                      {regeneratingIndex === index ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Image className="w-4 h-4 mr-2" />
-                      )}
-                      Перегенерировать
-                    </Button>
-                  </div>
+                   <div className="flex gap-2 mt-3">
+                     <Button 
+                       size="sm" 
+                       className="bg-wb-purple hover:bg-wb-purple-dark"
+                       onClick={() => downloadSingle(index)}
+                     >
+                       <Download className="w-4 h-4" />
+                     </Button>
+                     <Button 
+                       size="sm" 
+                       variant="outline" 
+                       className="flex-1"
+                       onClick={() => regenerateSingle(index)}
+                       disabled={regeneratingIndex === index}
+                     >
+                       {regeneratingIndex === index ? (
+                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                       ) : (
+                         <Image className="w-4 h-4 mr-2" />
+                       )}
+                       Перегенерировать
+                     </Button>
+                   </div>
                 </div>
               ))}
             </div>
@@ -395,7 +427,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           <Button 
             onClick={simulateGeneration}
             disabled={!canGenerate() || generating}
-            className="w-full bg-wb-purple hover:bg-wb-purple-dark"
+            className={generatedImages.length > 0 ? 
+              "w-full bg-transparent text-white border border-white/30 border-dashed hover:bg-white/10 hover:border-white/50 hidden sm:flex" : 
+              "w-full bg-wb-purple hover:bg-wb-purple-dark"
+            }
             size="lg"
           >
             {generating ? (
@@ -416,9 +451,40 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               </>
             )}
           </Button>
+          
+          {/* Mobile button for regenerate */}
+          {generatedImages.length > 0 && (
+            <Button 
+              onClick={simulateGeneration}
+              disabled={!canGenerate() || generating}
+              className="w-full bg-wb-purple hover:bg-wb-purple-dark sm:hidden mt-2"
+              size="lg"
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Генерирую...
+                </>
+              ) : (
+                <>
+                  <Image className="w-4 h-4 mr-2" />
+                  Еще варианты
+                </>
+              )}
+            </Button>
+          )}
           <p className="text-center text-sm text-muted-foreground mt-3">
-            Стоимость: <strong>6 токенов</strong> за комплект из 6 карточек
+            Стоимость: <strong>6 токенов</strong> за комплект из 6 изображений
           </p>
+          
+          {generatedImages.length > 0 && (
+            <Alert className="mt-4 border-wb-purple/20 bg-wb-purple/5">
+              <Zap className="h-4 w-4 text-wb-purple" />
+              <AlertDescription>
+                <strong>Перегенерация одного изображения = 1 токен</strong>
+              </AlertDescription>
+            </Alert>
+          )}
           
           {generating && (
             <Alert className="mt-4">

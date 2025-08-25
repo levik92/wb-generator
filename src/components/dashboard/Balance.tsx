@@ -67,7 +67,7 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                 <CreditCard className="w-4 h-4 text-wb-purple" />
                 <span className="font-medium">Карточки товара</span>
               </div>
-              <p className="text-sm text-muted-foreground">6 токенов = 6 карточек</p>
+              <p className="text-sm text-muted-foreground">6 токенов за карточку из 6 фотографий</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Доступно: {Math.floor(profile.tokens_balance / 6)} комплектов
               </p>
@@ -97,7 +97,7 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                     <span className="text-sm text-wb-purple font-bold">~10₽</span>
                   </div>
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
-                    <span className="text-sm font-medium">1 комплект карточек</span>
+                    <span className="text-sm font-medium">1 комплект карточки</span>
                     <span className="text-sm text-wb-purple font-bold">~60₽</span>
                   </div>
                 </div>
@@ -118,7 +118,7 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
             </CardContent>
           </Card>
           
-          <Card className="border-wb-purple">
+          <Card className="border-wb-purple ml-0 sm:ml-4">
             <CardHeader>
               <Badge className="w-fit bg-wb-purple">Популярный</Badge>
               <CardTitle>Профи</CardTitle>
@@ -136,7 +136,7 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                     <span className="text-sm text-wb-purple font-bold">~7,50₽</span>
                   </div>
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
-                    <span className="text-sm font-medium">1 комплект карточек</span>
+                    <span className="text-sm font-medium">1 комплект карточки</span>
                     <span className="text-sm text-wb-purple font-bold">~45₽</span>
                   </div>
                 </div>
@@ -174,7 +174,7 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                     <span className="text-sm text-wb-purple font-bold">~6₽</span>
                   </div>
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
-                    <span className="text-sm font-medium">1 комплект карточек</span>
+                    <span className="text-sm font-medium">1 комплект карточки</span>
                     <span className="text-sm text-wb-purple font-bold">~36₽</span>
                   </div>
                 </div>

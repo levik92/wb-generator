@@ -276,7 +276,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                   value={generatedText}
                   onChange={(e) => setGeneratedText(e.target.value)}
                   rows={8}
-                  className="font-mono text-xs sm:text-sm input-bordered"
+                  className="font-mono text-xs sm:text-sm border border-input bg-background hover:bg-accent hover:text-accent-foreground"
                 />
                 
                 <div className="flex flex-wrap gap-2">
