@@ -13,7 +13,62 @@ serve(async (req) => {
   }
 
   try {
-    const { productName, category, description, userId, cardIndex, cardType } = await req.json();
+    const requestBody = await req.json();
+    const { productName, category, description, userId, cardIndex, cardType } = requestBody;
+
+    // Input validation
+    if (!productName || typeof productName !== 'string' || productName.length > 100) {
+      return new Response(JSON.stringify({ error: 'Invalid product name' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!category || typeof category !== 'string' || category.length > 50) {
+      return new Response(JSON.stringify({ error: 'Invalid category' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!description || typeof description !== 'string' || description.length > 2000) {
+      return new Response(JSON.stringify({ error: 'Invalid description' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!userId || typeof userId !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid user ID' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (typeof cardIndex !== 'number' || cardIndex < 0 || cardIndex > 10) {
+      return new Response(JSON.stringify({ error: 'Invalid card index' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!cardType || typeof cardType !== 'string' || cardType.length > 50) {
+      return new Response(JSON.stringify({ error: 'Invalid card type' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Content filtering for harmful content
+    const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror'];
+    const fullText = `${productName} ${category} ${description} ${cardType}`.toLowerCase();
+    
+    if (blockedTerms.some(term => fullText.includes(term))) {
+      return new Response(JSON.stringify({ error: 'Invalid content detected' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

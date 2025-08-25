@@ -13,7 +13,51 @@ serve(async (req) => {
   }
 
   try {
-    const { productName, category, competitors, keywords, userId } = await req.json();
+    const requestBody = await req.json();
+    const { productName, category, competitors, keywords, userId } = requestBody;
+
+    // Input validation
+    if (!productName || typeof productName !== 'string' || productName.length > 100) {
+      return new Response(JSON.stringify({ error: 'Invalid product name' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!category || typeof category !== 'string' || category.length > 50) {
+      return new Response(JSON.stringify({ error: 'Invalid category' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!userId || typeof userId !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid user ID' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Sanitize and validate competitors array
+    const sanitizedCompetitors = Array.isArray(competitors) 
+      ? competitors.slice(0, 10).filter(c => typeof c === 'string' && c.length <= 200)
+      : [];
+
+    // Sanitize and validate keywords array  
+    const sanitizedKeywords = Array.isArray(keywords)
+      ? keywords.slice(0, 20).filter(k => typeof k === 'string' && k.length <= 50)
+      : [];
+
+    // Content filtering for harmful prompts
+    const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror'];
+    const fullText = `${productName} ${category} ${sanitizedCompetitors.join(' ')} ${sanitizedKeywords.join(' ')}`.toLowerCase();
+    
+    if (blockedTerms.some(term => fullText.includes(term))) {
+      return new Response(JSON.stringify({ error: 'Invalid content detected' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
@@ -45,11 +89,16 @@ serve(async (req) => {
       });
     }
 
-    // Build the prompt
-    const competitorLinks = competitors.filter(Boolean).join(', ');
-    const keywordsList = keywords.join(', ');
+    // Build the prompt with sanitized data
+    const competitorText = sanitizedCompetitors.length > 0 
+      ? `\n\nАнализ конкурентов:\n${sanitizedCompetitors.map((comp: string, index: number) => `${index + 1}. ${comp}`).join('\n')}`
+      : '';
+
+    const keywordText = sanitizedKeywords.length > 0 
+      ? `\n\nКлючевые слова для SEO: ${sanitizedKeywords.join(', ')}`
+      : '';
     
-    const prompt = `Ты в роли менеджера маркетплейсов со знанием SEO и продвижением карточек. Твоя задача сделать красивое уникальное описание товара с использованием ключевых слов, чтобы мой товар ранжировался по всем ним. Мой товар называется: ${productName}, и входит в категорию ${category}, вот ссылка на товары моих конкурентов, зайди в описание на карточки и выяви по каким ключевым словам они продвигаются ${competitorLinks}, также обязательно учти ключевые слова при генерации описания карточки товара, которые нужно учесть: ${keywordsList}. Требования: Описание карточки товара должно быть до 2000 символов с учетом пробелов, должно быть вовлекающим и содержать ключевые слова, которые я описал тебе и которые ты собрал от конкурентов, учти, что перемена слов местами и падежи - это относится к разным категориям ключевых слов и нужно их учитывать при генерации описания.`;
+    const prompt = `Ты в роли менеджера маркетплейсов со знанием SEO и продвижением карточек. Твоя задача сделать красивое уникальное описание товара с использованием ключевых слов, чтобы мой товар ранжировался по всем ним. Мой товар называется: ${productName}, и входит в категорию ${category}${competitorText}${keywordText}. Требования: Описание карточки товара должно быть до 2000 символов с учетом пробелов, должно быть вовлекающим и содержать ключевые слова, которые я описал тебе и которые ты собрал от конкурентов, учти, что перемена слов местами и падежи - это относится к разным категориям ключевых слов и нужно их учитывать при генерации описания.`;
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -84,8 +133,8 @@ serve(async (req) => {
         input_data: {
           productName,
           category,
-          competitors: competitors.filter(Boolean),
-          keywords
+          competitors: sanitizedCompetitors,
+          keywords: sanitizedKeywords
         },
         output_data: {
           description: generatedDescription
@@ -94,8 +143,8 @@ serve(async (req) => {
         status: 'completed',
         product_name: productName,
         category: category,
-        keywords: keywords,
-        competitors: competitors.filter(Boolean)
+        keywords: sanitizedKeywords,
+        competitors: sanitizedCompetitors
       });
 
     if (saveError) {
