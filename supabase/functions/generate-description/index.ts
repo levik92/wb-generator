@@ -16,16 +16,16 @@ serve(async (req) => {
     const requestBody = await req.json();
     const { productName, category, competitors, keywords, userId } = requestBody;
 
-    // Input validation
-    if (!productName || typeof productName !== 'string' || productName.length > 100) {
-      return new Response(JSON.stringify({ error: 'Invalid product name' }), {
+    // Input validation with expanded limits for more robust validation
+    if (!productName || typeof productName !== 'string' || productName.length > 200) {
+      return new Response(JSON.stringify({ error: 'Invalid product name (max 200 characters)' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (!category || typeof category !== 'string' || category.length > 50) {
-      return new Response(JSON.stringify({ error: 'Invalid category' }), {
+    if (!category || typeof category !== 'string' || category.length > 100) {
+      return new Response(JSON.stringify({ error: 'Invalid category (max 100 characters)' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -38,19 +38,29 @@ serve(async (req) => {
       });
     }
 
-    // Sanitize and validate competitors array
+    // Sanitize inputs to prevent injection attacks  
+    const sanitizedProductName = productName.replace(/[<>\"']/g, '').trim();
+    const sanitizedCategory = category.replace(/[<>\"']/g, '').trim();
+
+    // Sanitize and validate competitors array with additional security
     const sanitizedCompetitors = Array.isArray(competitors) 
-      ? competitors.slice(0, 10).filter(c => typeof c === 'string' && c.length <= 200)
+      ? competitors.slice(0, 10)
+          .filter(c => typeof c === 'string' && c.length <= 500)
+          .map(c => c.replace(/[<>\"']/g, '').trim())
+          .filter(c => c.length > 0)
       : [];
 
-    // Sanitize and validate keywords array  
+    // Sanitize and validate keywords array with additional security  
     const sanitizedKeywords = Array.isArray(keywords)
-      ? keywords.slice(0, 20).filter(k => typeof k === 'string' && k.length <= 50)
+      ? keywords.slice(0, 20)
+          .filter(k => typeof k === 'string' && k.length <= 100)
+          .map(k => k.replace(/[<>\"']/g, '').trim())
+          .filter(k => k.length > 0)
       : [];
 
-    // Content filtering for harmful prompts
-    const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror'];
-    const fullText = `${productName} ${category} ${sanitizedCompetitors.join(' ')} ${sanitizedKeywords.join(' ')}`.toLowerCase();
+    // Enhanced content filtering for harmful prompts
+    const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror', 'eval(', 'function(', 'setTimeout', 'setInterval'];
+    const fullText = `${sanitizedProductName} ${sanitizedCategory} ${sanitizedCompetitors.join(' ')} ${sanitizedKeywords.join(' ')}`.toLowerCase();
     
     if (blockedTerms.some(term => fullText.includes(term))) {
       return new Response(JSON.stringify({ error: 'Invalid content detected' }), {
@@ -98,7 +108,7 @@ serve(async (req) => {
       ? `\n\nКлючевые слова для SEO: ${sanitizedKeywords.join(', ')}`
       : '';
     
-    const prompt = `Ты в роли менеджера маркетплейсов со знанием SEO и продвижением карточек. Твоя задача сделать красивое уникальное описание товара с использованием ключевых слов, чтобы мой товар ранжировался по всем ним. Мой товар называется: ${productName}, и входит в категорию ${category}${competitorText}${keywordText}. Требования: Описание карточки товара должно быть до 2000 символов с учетом пробелов, должно быть вовлекающим и содержать ключевые слова, которые я описал тебе и которые ты собрал от конкурентов, учти, что перемена слов местами и падежи - это относится к разным категориям ключевых слов и нужно их учитывать при генерации описания.`;
+    const prompt = `Ты в роли менеджера маркетплейсов со знанием SEO и продвижением карточек. Твоя задача сделать красивое уникальное описание товара с использованием ключевых слов, чтобы мой товар ранжировался по всем ним. Мой товар называется: ${sanitizedProductName}, и входит в категорию ${sanitizedCategory}${competitorText}${keywordText}. Требования: Описание карточки товара должно быть до 2000 символов с учетом пробелов, должно быть вовлекающим и содержать ключевые слова, которые я описал тебе и которые ты собрал от конкурентов, учти, что перемена слов местами и падежи - это относится к разным категориям ключевых слов и нужно их учитывать при генерации описания.`;
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -131,8 +141,8 @@ serve(async (req) => {
         user_id: userId,
         generation_type: 'description',
         input_data: {
-          productName,
-          category,
+          productName: sanitizedProductName,
+          category: sanitizedCategory,
           competitors: sanitizedCompetitors,
           keywords: sanitizedKeywords
         },
@@ -141,8 +151,8 @@ serve(async (req) => {
         },
         tokens_used: 1,
         status: 'completed',
-        product_name: productName,
-        category: category,
+        product_name: sanitizedProductName,
+        category: sanitizedCategory,
         keywords: sanitizedKeywords,
         competitors: sanitizedCompetitors
       });

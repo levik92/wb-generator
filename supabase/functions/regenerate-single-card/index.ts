@@ -59,6 +59,11 @@ serve(async (req) => {
       });
     }
 
+    // Sanitize inputs to prevent injection attacks
+    const sanitizedProductName = productName.replace(/[<>\"']/g, '').trim();
+    const sanitizedCategory = category.replace(/[<>\"']/g, '').trim();
+    const sanitizedDescription = description.replace(/[<>\"']/g, '').trim();
+
     // Content filtering for harmful content
     const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror'];
     const fullText = `${productName} ${category} ${description} ${cardType}`.toLowerCase();
@@ -105,9 +110,9 @@ serve(async (req) => {
         user_id: userId,
         generation_type: 'single_card',
         input_data: {
-          productName,
-          category,
-          description,
+          productName: sanitizedProductName,
+          category: sanitizedCategory,
+          description: sanitizedDescription,
           cardIndex,
           cardType
         },
@@ -117,9 +122,9 @@ serve(async (req) => {
         },
         tokens_used: 1,
         status: 'completed',
-        product_name: productName,
-        category: category,
-        description_requirements: description
+        product_name: sanitizedProductName,
+        category: sanitizedCategory,
+        description_requirements: sanitizedDescription
       });
 
     if (saveError) {
@@ -132,7 +137,7 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         title: 'Карточка перегенерирована!',
-        message: `Карточка "${cardType}" успешно перегенерирована для товара "${productName}"`,
+        message: `Карточка "${cardType}" успешно перегенерирована для товара "${sanitizedProductName}"`,
         type: 'generation'
       });
 

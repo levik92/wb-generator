@@ -45,7 +45,10 @@ serve(async (req) => {
       });
     }
 
-    // Content filtering for harmful content
+    // Sanitize inputs to prevent injection attacks
+    const sanitizedProductName = productName.replace(/[<>\"']/g, '').trim();
+    const sanitizedCategory = category.replace(/[<>\"']/g, '').trim();
+    const sanitizedDescription = description.replace(/[<>\"']/g, '').trim();
     const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror'];
     const fullText = `${productName} ${category} ${description}`.toLowerCase();
     
@@ -91,9 +94,9 @@ serve(async (req) => {
         user_id: userId,
         generation_type: 'cards',
         input_data: {
-          productName,
-          category,
-          description
+          productName: sanitizedProductName,
+          category: sanitizedCategory,
+          description: sanitizedDescription
         },
         output_data: {
           cards: ['card1.png', 'card2.png', 'card3.png'],
@@ -101,9 +104,9 @@ serve(async (req) => {
         },
         tokens_used: 6,
         status: 'completed',
-        product_name: productName,
-        category: category,
-        description_requirements: description
+        product_name: sanitizedProductName,
+        category: sanitizedCategory,
+        description_requirements: sanitizedDescription
       });
 
     if (saveError) {
@@ -116,7 +119,7 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         title: 'Карточки созданы!',
-        message: `Сгенерированы карточки для товара "${productName}" в категории "${category}"`,
+        message: `Сгенерированы карточки для товара "${sanitizedProductName}" в категории "${sanitizedCategory}"`,
         type: 'generation'
       });
 
