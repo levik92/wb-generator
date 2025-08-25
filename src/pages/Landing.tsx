@@ -228,20 +228,20 @@ const Landing = () => {
               <CardHeader>
                 <CardTitle className="text-xl">Стартовый</CardTitle>
                 <div className="text-3xl font-bold">499₽</div>
-                <CardDescription>50 токенов</CardDescription>
+                <CardDescription>40 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
-                  <strong>9,98₽</strong> за токен
+                  <strong>12,50₽</strong> за токен
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    8 комплектов карточек (6 токенов за комплект)
+                    6 комплектов карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    50 описаний товаров (1 токен за описание)
+                    40 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
@@ -262,20 +262,20 @@ const Landing = () => {
               <CardHeader className="pt-8">
                 <CardTitle className="text-xl">Профи</CardTitle>
                 <div className="text-3xl font-bold">1 499₽</div>
-                <CardDescription>200 токенов</CardDescription>
+                <CardDescription>130 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
-                  <strong>7,50₽</strong> за токен
+                  <strong>11,50₽</strong> за токен
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    33 комплекта карточек (6 токенов за комплект)
+                    21 комплект карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    200 описаний товаров (1 токен за описание)
+                    130 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
@@ -297,20 +297,20 @@ const Landing = () => {
               <CardHeader>
                 <CardTitle className="text-xl">Бизнес</CardTitle>
                 <div className="text-3xl font-bold">5 999₽</div>
-                <CardDescription>1000 токенов</CardDescription>
+                <CardDescription>550 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
-                  <strong>6,00₽</strong> за токен
+                  <strong>10,90₽</strong> за токен
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    166 комплектов карточек (6 токенов за комплект)
+                    91 комплект карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    1000 описаний товаров (1 токен за описание)
+                    550 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />

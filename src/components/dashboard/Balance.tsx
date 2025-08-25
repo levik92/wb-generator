@@ -84,9 +84,9 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
             <CardHeader>
               <CardTitle>Стартовый</CardTitle>
               <div className="text-3xl font-bold">499₽</div>
-              <CardDescription>50 токенов</CardDescription>
+              <CardDescription>40 токенов</CardDescription>
               <div className="text-sm text-muted-foreground mt-2">
-                <strong>9,98₽</strong> за токен
+                <strong>12,50₽</strong> за токен
               </div>
             </CardHeader>
             <CardContent>
@@ -94,21 +94,21 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                 <div className="flex flex-col space-y-2">
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
                     <span className="text-sm font-medium">1 описание</span>
-                    <span className="text-sm text-wb-purple font-bold">~10₽</span>
+                    <span className="text-sm text-wb-purple font-bold">~12,50₽</span>
                   </div>
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
                     <span className="text-sm font-medium">1 комплект карточки</span>
-                    <span className="text-sm text-wb-purple font-bold">~60₽</span>
+                    <span className="text-sm text-wb-purple font-bold">~75₽</span>
                   </div>
                 </div>
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    <span className="text-sm">8 комплектов карточек</span>
+                    <span className="text-sm">6 комплектов карточек</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    <span className="text-sm">50 описаний товаров</span>
+                    <span className="text-sm">40 описаний товаров</span>
                   </div>
                 </div>
               </div>
@@ -123,9 +123,9 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
               <Badge className="w-fit bg-wb-purple">Популярный</Badge>
               <CardTitle>Профи</CardTitle>
               <div className="text-3xl font-bold">1 499₽</div>
-              <CardDescription>200 токенов</CardDescription>
+              <CardDescription>130 токенов</CardDescription>
               <div className="text-sm text-muted-foreground mt-2">
-                <strong>7,50₽</strong> за токен
+                <strong>11,50₽</strong> за токен
               </div>
             </CardHeader>
             <CardContent>
@@ -133,21 +133,21 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                 <div className="flex flex-col space-y-2">
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
                     <span className="text-sm font-medium">1 описание</span>
-                    <span className="text-sm text-wb-purple font-bold">~7,50₽</span>
+                    <span className="text-sm text-wb-purple font-bold">~11,50₽</span>
                   </div>
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
                     <span className="text-sm font-medium">1 комплект карточки</span>
-                    <span className="text-sm text-wb-purple font-bold">~45₽</span>
+                    <span className="text-sm text-wb-purple font-bold">~69₽</span>
                   </div>
                 </div>
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    <span className="text-sm">33 комплекта карточек</span>
+                    <span className="text-sm">21 комплект карточек</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    <span className="text-sm">200 описаний товаров</span>
+                    <span className="text-sm">130 описаний товаров</span>
                   </div>
                 </div>
               </div>
@@ -161,9 +161,9 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
             <CardHeader>
               <CardTitle>Бизнес</CardTitle>
               <div className="text-3xl font-bold">5 999₽</div>
-              <CardDescription>1000 токенов</CardDescription>
+              <CardDescription>550 токенов</CardDescription>
               <div className="text-sm text-muted-foreground mt-2">
-                <strong>6,00₽</strong> за токен
+                <strong>10,90₽</strong> за токен
               </div>
             </CardHeader>
             <CardContent>
@@ -171,21 +171,21 @@ export const Balance = ({ profile, onTokensUpdate }: BalanceProps) => {
                 <div className="flex flex-col space-y-2">
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
                     <span className="text-sm font-medium">1 описание</span>
-                    <span className="text-sm text-wb-purple font-bold">~6₽</span>
+                    <span className="text-sm text-wb-purple font-bold">~10,90₽</span>
                   </div>
                   <div className="flex justify-between items-center bg-wb-purple/10 rounded-lg p-3">
                     <span className="text-sm font-medium">1 комплект карточки</span>
-                    <span className="text-sm text-wb-purple font-bold">~36₽</span>
+                    <span className="text-sm text-wb-purple font-bold">~65₽</span>
                   </div>
                 </div>
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    <span className="text-sm">166 комплектов карточек</span>
+                    <span className="text-sm">91 комплект карточек</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    <span className="text-sm">1000 описаний товаров</span>
+                    <span className="text-sm">550 описаний товаров</span>
                   </div>
                 </div>
               </div>
