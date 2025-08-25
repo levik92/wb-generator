@@ -128,10 +128,10 @@ export const History = ({ profile }: HistoryProps) => {
           </p>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
           <Filter className="w-4 h-4 text-muted-foreground" />
           <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-32 sm:w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -170,8 +170,8 @@ export const History = ({ profile }: HistoryProps) => {
         <div className="grid gap-4">
           {filteredGenerations.map((generation) => (
             <Card key={generation.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200">
                       {generation.generation_type === 'cards' ? (

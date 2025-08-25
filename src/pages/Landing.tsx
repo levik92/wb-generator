@@ -61,14 +61,14 @@ const Landing = () => {
             с помощью ИИ. Загружайте сразу в личный кабинет WB.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-12 px-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 sm:mb-12 px-4">
             <Link to="/auth" className="w-full sm:w-auto">
               <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
                 Начать генерацию
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 hidden sm:block" onClick={scrollToExamples}>
+            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 hover:bg-wb-purple/20 hover:text-wb-purple-dark border-wb-purple/30" onClick={scrollToExamples}>
               Посмотреть примеры
             </Button>
           </div>
@@ -94,7 +94,7 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="space-y-8 sm:space-y-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-4xl mx-auto">
             {/* Example 1 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Смартфон - Электроника</h3>
@@ -128,6 +128,19 @@ const Landing = () => {
                 beforeImage={exampleBefore3}
                 afterImage={exampleAfter3}
                 alt="карточки одежды"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
+                Перетаскивайте ползунок, чтобы увидеть разницу
+              </p>
+            </div>
+
+            {/* Example 4 - only shown on desktop */}
+            <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Спорт - Фитнес</h3>
+              <BeforeAfterSlider
+                beforeImage={exampleBefore1}
+                afterImage={exampleAfter1}
+                alt="карточки спорттоваров"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу

@@ -137,18 +137,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-center justify-center">
+      <Alert className="flex items-center justify-center py-3">
         <Zap className="h-4 w-4 flex-shrink-0" />
-        <AlertDescription className="flex items-center ml-2">
+        <AlertDescription className="flex items-center ml-2 my-1">
           Стоимость генерации: <strong>6 токенов</strong> за комплект из 6 карточек
         </AlertDescription>
       </Alert>
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-center justify-center">
+        <Alert variant="destructive" className="flex items-center justify-start text-left py-3">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <AlertDescription className="flex items-center ml-2">{getGuardMessage()}</AlertDescription>
+          <AlertDescription className="flex items-center ml-2 my-1">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 
