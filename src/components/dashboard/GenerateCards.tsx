@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Image, Download, AlertCircle, Zap } from "lucide-react";
+import { Upload, Image, Download, AlertCircle, Zap, Loader2 } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -299,7 +299,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             size="lg"
           >
             {generating ? (
-              "Генерирую карточки..."
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Генерирую... (это может занять несколько минут)
+              </>
             ) : (
               <>
                 <Image className="w-5 h-5 mr-2" />
@@ -307,6 +310,16 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               </>
             )}
           </Button>
+          
+          {generating && (
+            <Alert className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Важно:</strong> Генерация карточек может занять несколько минут. 
+                Пожалуйста, не закрывайте страницу и не перезагружайте её.
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
     </div>

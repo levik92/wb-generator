@@ -222,7 +222,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               {generating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Генерирую...
+                  Генерирую... (это может занять несколько минут)
                 </>
               ) : (
                 <>
@@ -231,6 +231,16 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 </>
               )}
             </Button>
+            
+            {generating && (
+              <Alert className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Важно:</strong> Генерация может занять несколько минут. 
+                  Пожалуйста, не закрывайте страницу и не перезагружайте её.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
 

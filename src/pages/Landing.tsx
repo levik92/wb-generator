@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Zap, Image, FileText, Users, Star, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import heroDemo from "@/assets/hero-demo.jpg";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleBefore2 from "@/assets/example-before-after-2.jpg";
@@ -17,21 +18,21 @@ const Landing = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-hero rounded flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold">WB Генератор</span>
+            <span className="text-lg sm:text-xl font-semibold">WB Генератор</span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <Link to="/auth">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-4">
                 Войти
               </Button>
             </Link>
             <Link to="/auth">
-              <Button size="sm" className="bg-wb-purple hover:bg-wb-purple-dark">
+              <Button size="sm" className="bg-wb-purple hover:bg-wb-purple-dark text-xs sm:text-sm px-2 sm:px-4">
                 Начать бесплатно
               </Button>
             </Link>
@@ -40,37 +41,37 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-16 animate-fade-in">
-        <div className="container mx-auto px-6 text-center">
-          <Badge variant="secondary" className="mb-6 animate-slide-up">
-            <Star className="w-4 h-4 mr-2" />
+      <section className="pt-12 sm:pt-20 pb-12 sm:pb-16 animate-fade-in">
+        <div className="container mx-auto px-4 sm:px-6 text-center">
+          <Badge variant="secondary" className="mb-6 animate-slide-up text-xs sm:text-sm">
+            <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             25 токенов бесплатно при регистрации
           </Badge>
           
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 animate-fade-in">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-in px-4">
             Карточки Wildberries <br />
             <span className="text-gradient">за минуты, не дни</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed px-4">
             Создавайте профессиональные карточки товаров 960×1280 и SEO-описания 
             с помощью ИИ. Загружайте сразу в личный кабинет WB.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link to="/auth">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-lg px-8 py-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-12 px-4">
+            <Link to="/auth" className="w-full sm:w-auto">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
                 Начать генерацию
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6" onClick={scrollToExamples}>
+            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 hidden sm:block" onClick={scrollToExamples}>
               Посмотреть примеры
             </Button>
           </div>
 
           {/* Demo Image */}
-          <div className="bg-gradient-card rounded-xl border border-card-border p-8 max-w-4xl mx-auto animate-slide-up">
+          <div className="bg-gradient-card rounded-xl border border-card-border p-4 sm:p-8 max-w-4xl mx-auto animate-slide-up">
             <img 
               src={heroDemo} 
               alt="Демонстрация генерации карточек WB Генератор"
@@ -81,64 +82,53 @@ const Landing = () => {
       </section>
 
       {/* Examples Section */}
-      <section id="examples" className="py-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Примеры работ</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+      <section id="examples" className="py-12 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Примеры работ</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               Посмотрите, как обычные фото превращаются в профессиональные карточки
             </p>
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-8 sm:space-y-12">
             {/* Example 1 */}
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-4">До</h3>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
-                  <img
-                    src={exampleBefore1}
-                    alt="Пример карточки до обработки"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-4">После</h3>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-purple-100 to-purple-200">
-                  <img
-                    src={exampleBefore1}
-                    alt="Пример карточки после обработки"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
+            <div className="max-w-xs sm:max-w-md mx-auto">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Пример карточки 1</h3>
+              <BeforeAfterSlider
+                beforeImage={exampleBefore1}
+                afterImage={exampleBefore1}
+                alt="карточки товара"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
+                Перетаскивайте ползунок, чтобы увидеть разницу
+              </p>
             </div>
 
             {/* Example 2 */}
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-4">До</h3>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
-                  <img
-                    src={exampleBefore2}
-                    alt="Пример карточки до обработки"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-4">После</h3>
-                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gradient-to-br from-purple-100 to-purple-200">
-                  <img
-                    src={exampleBefore2}
-                    alt="Пример карточки после обработки"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
+            <div className="max-w-xs sm:max-w-md mx-auto">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Пример карточки 2</h3>
+              <BeforeAfterSlider
+                beforeImage={exampleBefore2}
+                afterImage={exampleBefore2}
+                alt="карточки товара"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
+                Перетаскивайте ползунок, чтобы увидеть разницу
+              </p>
+            </div>
+
+            {/* Example 3 */}
+            <div className="max-w-xs sm:max-w-md mx-auto">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Пример карточки 3</h3>
+              <BeforeAfterSlider
+                beforeImage={exampleBefore3}
+                afterImage={exampleBefore3}
+                alt="карточки товара"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
+                Перетаскивайте ползунок, чтобы увидеть разницу
+              </p>
             </div>
           </div>
         </div>
