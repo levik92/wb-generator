@@ -71,6 +71,20 @@ serve(async (req) => {
       console.error('Error saving generation:', saveError);
     }
 
+    // Create notification for user
+    const { error: notificationError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        title: 'Карточка перегенерирована!',
+        message: `Карточка "${cardType}" успешно перегенерирована для товара "${productName}"`,
+        type: 'generation'
+      });
+
+    if (notificationError) {
+      console.error('Error creating notification:', notificationError);
+    }
+
     return new Response(JSON.stringify({ 
       success: true,
       message: `Карточка "${cardType}" успешно перегенерирована`,

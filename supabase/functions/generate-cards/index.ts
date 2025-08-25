@@ -23,7 +23,7 @@ serve(async (req) => {
     // Check and spend tokens
     const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
       user_id_param: userId,
-      tokens_amount: 1
+      tokens_amount: 6
     });
 
     if (tokenError) {
@@ -58,7 +58,7 @@ serve(async (req) => {
           cards: ['card1.png', 'card2.png', 'card3.png'],
           message: 'Карточки товара успешно созданы'
         },
-        tokens_used: 1,
+        tokens_used: 6,
         status: 'completed',
         product_name: productName,
         category: category,
@@ -67,6 +67,20 @@ serve(async (req) => {
 
     if (saveError) {
       console.error('Error saving generation:', saveError);
+    }
+
+    // Create notification for user
+    const { error: notificationError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        title: 'Карточки созданы!',
+        message: `Сгенерированы карточки для товара "${productName}" в категории "${category}"`,
+        type: 'generation'
+      });
+
+    if (notificationError) {
+      console.error('Error creating notification:', notificationError);
     }
 
     return new Response(JSON.stringify({ 

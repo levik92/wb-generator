@@ -270,20 +270,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       alt={`Upload ${index + 1}`}
                       className="w-full h-16 sm:h-24 object-cover rounded-lg border"
                     />
-                    <Badge className="absolute -top-2 -right-2 bg-wb-purple">
+                    <Badge className="absolute -top-2 -left-2 bg-wb-purple">
                       {index + 1}
                     </Badge>
-                    {/* Desktop remove button */}
+                    {/* Remove button - always visible */}
                     <button
                       onClick={() => removeFile(index)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center text-xs hidden sm:flex"
-                    >
-                      ×
-                    </button>
-                    {/* Mobile remove button */}
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs sm:hidden"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs"
                     >
                       ×
                     </button>
