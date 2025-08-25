@@ -113,7 +113,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       
       // Add new generation to history and set as current
       setGenerationHistory(prev => [...prev, newGeneration]);
-      setCurrentGenerationIndex(prev => prev + 1);
+      setCurrentGenerationIndex(generationHistory.length);
       
       // Refresh profile to update token balance
       onTokensUpdate();
@@ -272,7 +272,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           <div className="space-y-2">
             <Label htmlFor="category">Категория товара</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="input-bordered">
+              <SelectTrigger className="border-2 border-border/60">
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
               <SelectContent>
