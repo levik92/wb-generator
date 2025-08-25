@@ -93,6 +93,32 @@ export const History = ({ profile }: HistoryProps) => {
     }
   };
 
+  const deleteGeneration = async (generationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('generations')
+        .delete()
+        .eq('id', generationId)
+        .eq('user_id', profile.id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setGenerations(prev => prev.filter(gen => gen.id !== generationId));
+      
+      toast({
+        title: "Удалено",
+        description: "Генерация успешно удалена",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Ошибка удаления",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: '2-digit',
@@ -119,7 +145,7 @@ export const History = ({ profile }: HistoryProps) => {
   }
 
   return (
-    <div className="space-y-6 px-2 sm:px-0">
+    <div className="space-y-6 px-2 sm:px-0 max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">История генераций</h2>
@@ -204,14 +230,24 @@ export const History = ({ profile }: HistoryProps) => {
                     </div>
                   </div>
                   
-                  <Button 
-                    onClick={() => downloadGeneration(generation)}
-                    size="sm"
-                    className="bg-wb-purple hover:bg-wb-purple-dark text-white"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Скачать
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => downloadGeneration(generation)}
+                      size="sm"
+                      className="bg-wb-purple hover:bg-wb-purple-dark text-white"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Скачать
+                    </Button>
+                    <Button 
+                      onClick={() => deleteGeneration(generation.id)}
+                      size="sm"
+                      variant="outline"
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      Удалить
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

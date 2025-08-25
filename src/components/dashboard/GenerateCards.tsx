@@ -26,11 +26,11 @@ interface GenerateCardsProps {
 }
 
 const CARD_STAGES = [
-  { name: "Hero изображение", description: "Главное фото товара" },
-  { name: "Usage", description: "Товар в использовании" },
+  { name: "Главная", description: "Главное фото товара" },
+  { name: "Описание", description: "Товар в использовании" },
   { name: "Инфографика", description: "Характеристики и преимущества" },
-  { name: "Сравнение", description: "Сравнение с конкурентами" },
-  { name: "Детали", description: "Детальные фото и особенности" },
+  { name: "Погружение", description: "Сравнение с конкурентами" },
+  { name: "Детализация", description: "Детальные фото и особенности" },
   { name: "Финал", description: "Призыв к действию" }
 ];
 
@@ -41,6 +41,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,6 +128,47 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     });
   };
 
+  const downloadSingle = (index: number) => {
+    const link = document.createElement('a');
+    link.href = generatedImages[index];
+    link.download = `card_${index + 1}_${CARD_STAGES[index]?.name}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Скачивание началось",
+      description: `Карточка "${CARD_STAGES[index]?.name}" скачивается`,
+    });
+  };
+
+  const regenerateSingle = async (index: number) => {
+    setRegeneratingIndex(index);
+    
+    try {
+      // Simulate regeneration (in real implementation, would call API)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Replace the image at specific index
+      const newImages = [...generatedImages];
+      newImages[index] = `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${index}_${Date.now()}`;
+      setGeneratedImages(newImages);
+      
+      toast({
+        title: "Карточка обновлена!",
+        description: `Карточка "${CARD_STAGES[index]?.name}" успешно перегенерирована`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Ошибка перегенерации",
+        description: error.message || "Не удалось перегенерировать карточку",
+        variant: "destructive",
+      });
+    } finally {
+      setRegeneratingIndex(null);
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
       <div>
@@ -137,18 +179,21 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-center justify-center py-3">
-        <Zap className="h-4 w-4 flex-shrink-0" />
-        <AlertDescription className="flex items-center ml-2 my-1">
-          Стоимость генерации: <strong>6 токенов</strong> за комплект из 6 карточек
+      <Alert className="flex items-start justify-start py-4">
+        <Zap className="h-4 w-4 flex-shrink-0 mt-0.5" />
+        <AlertDescription className="ml-3">
+          <div className="flex flex-col space-y-1">
+            <span>Стоимость генерации:</span>
+            <span><strong>6 токенов</strong> за комплект из 6 карточек</span>
+          </div>
         </AlertDescription>
       </Alert>
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-center justify-start text-left py-3">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <AlertDescription className="flex items-center ml-2 my-1">{getGuardMessage()}</AlertDescription>
+        <Alert variant="destructive" className="flex items-start justify-start text-left py-4">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <AlertDescription className="ml-3">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 
@@ -211,7 +256,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea
               id="description"
               placeholder="Опишите ваш товар: основные характеристики, преимущества, целевую аудиторию. Добавьте пожелания по стилю карточек, цветовой гамме, акцентам..."
@@ -266,7 +310,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
+            {/* Desktop view */}
+            <div className="hidden sm:grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
               {generatedImages.map((imageUrl, index) => (
                 <div key={index} className="relative group">
                   <img
@@ -274,15 +319,69 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                     alt={`Generated card ${index + 1}`}
                     className="w-full aspect-[3/4] object-cover rounded-lg border"
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                    <Button size="sm" variant="secondary">
-                      <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      <span className="text-xs sm:text-sm">Скачать</span>
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => downloadSingle(index)}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Скачать
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => regenerateSingle(index)}
+                      disabled={regeneratingIndex === index}
+                      className="bg-white/90 hover:bg-white"
+                    >
+                      {regeneratingIndex === index ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Image className="w-4 h-4 mr-2" />
+                      )}
+                      Сгенерировать заново
                     </Button>
                   </div>
                   <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-wb-purple text-xs">
                     {CARD_STAGES[index]?.name}
                   </Badge>
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile view */}
+            <div className="sm:hidden space-y-4">
+              {generatedImages.map((imageUrl, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={imageUrl}
+                    alt={`Generated card ${index + 1}`}
+                    className="w-full aspect-[3/4] object-cover rounded-lg border"
+                  />
+                  <Badge className="absolute top-2 left-2 bg-wb-purple text-xs">
+                    {CARD_STAGES[index]?.name}
+                  </Badge>
+                  <div className="flex gap-2 mt-3">
+                    <Button 
+                      size="sm" 
+                      className="flex-1 bg-wb-purple hover:bg-wb-purple-dark"
+                      onClick={() => downloadSingle(index)}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Скачать
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => regenerateSingle(index)}
+                      disabled={regeneratingIndex === index}
+                    >
+                      {regeneratingIndex === index ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Image className="w-4 h-4 mr-2" />
+                      )}
+                      Перегенерировать
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -308,11 +407,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             ) : (
               <>
                 <Image className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                <span className="hidden sm:inline">Сгенерировать карточки (6 токенов)</span>
-                <span className="sm:hidden">Генерация (6 токенов)</span>
+                <span className="hidden sm:inline">
+                  {generatedImages.length > 0 ? 'Сгенерировать еще варианты' : 'Сгенерировать карточки'}
+                </span>
+                <span className="sm:hidden">
+                  {generatedImages.length > 0 ? 'Еще варианты' : 'Генерация'}
+                </span>
               </>
             )}
           </Button>
+          <p className="text-center text-sm text-muted-foreground mt-3">
+            Стоимость: <strong>6 токенов</strong> за комплект из 6 карточек
+          </p>
           
           {generating && (
             <Alert className="mt-4">

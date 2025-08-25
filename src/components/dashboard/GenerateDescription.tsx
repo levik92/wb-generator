@@ -118,18 +118,21 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-center justify-center py-3">
-        <Zap className="h-4 w-4 flex-shrink-0" />
-        <AlertDescription className="flex items-center ml-2 my-1">
-          Стоимость генерации: <strong>1 токен</strong> за одно описание
+      <Alert className="flex items-start justify-start py-4">
+        <Zap className="h-4 w-4 flex-shrink-0 mt-0.5" />
+        <AlertDescription className="ml-3">
+          <div className="flex flex-col space-y-1">
+            <span>Стоимость генерации:</span>
+            <span><strong>1 токен</strong> за одно описание</span>
+          </div>
         </AlertDescription>
       </Alert>
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-center justify-start text-left py-3">
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <AlertDescription className="flex items-center ml-2 my-1">{getGuardMessage()}</AlertDescription>
+        <Alert variant="destructive" className="flex items-start justify-start text-left py-4">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <AlertDescription className="ml-3">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 
@@ -227,10 +230,13 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               ) : (
                 <>
                   <FileText className="w-4 h-4 mr-2" />
-                  Сгенерировать описание (1 токен)
+                  {generatedText ? 'Сгенерировать еще варианты' : 'Сгенерировать описание'}
                 </>
               )}
             </Button>
+            <p className="text-center text-sm text-muted-foreground mt-3">
+              Стоимость: <strong>1 токен</strong> за генерацию
+            </p>
             
             {generating && (
               <Alert className="mt-4">
@@ -249,7 +255,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Готовое описание</CardTitle>
+                <CardTitle className="mb-3">Готовое описание</CardTitle>
                 <CardDescription>
                   {generatedText ? `${generatedText.length} символов` : "Результат появится здесь"}
                 </CardDescription>
