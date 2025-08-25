@@ -137,9 +137,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-center">
-        <Zap className="h-4 w-4" />
-        <AlertDescription className="flex items-center">
+      <Alert className="flex items-center justify-start">
+        <Zap className="h-4 w-4 flex-shrink-0" />
+        <AlertDescription className="flex items-center ml-2">
           Стоимость генерации: <strong>6 токенов</strong> за комплект из 6 карточек
         </AlertDescription>
       </Alert>
