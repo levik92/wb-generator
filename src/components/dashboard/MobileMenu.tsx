@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,8 @@ interface MobileMenuProps {
 }
 
 export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps) => {
+  const [open, setOpen] = useState(false);
+  
   const menuItems = [
     { id: 'cards', label: 'Генерация карточек', icon: CreditCard },
     { id: 'description', label: 'Генерация описаний', icon: FileText },
@@ -28,11 +31,20 @@ export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps)
     { id: 'settings', label: 'Настройки', icon: Settings },
   ];
 
+  const handleTabChange = (tabId: string) => {
+    onTabChange(tabId);
+    setOpen(false); // Close menu after selection
+  };
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="md:hidden bg-wb-purple/10 hover:bg-wb-purple/20 border-wb-purple/20"
+        >
+          <Menu className="h-5 w-5 text-wb-purple" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-80 p-0">
@@ -57,7 +69,7 @@ export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps)
               <Button 
                 size="sm" 
                 className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                onClick={() => onTabChange('pricing')}
+                onClick={() => handleTabChange('pricing')}
               >
                 Пополнить
               </Button>
@@ -78,7 +90,7 @@ export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps)
                     className={`w-full justify-start text-left ${
                       isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
                     }`}
-                    onClick={() => onTabChange(item.id)}
+                    onClick={() => handleTabChange(item.id)}
                   >
                     <Icon className="w-4 h-4 mr-3" />
                     {item.label}

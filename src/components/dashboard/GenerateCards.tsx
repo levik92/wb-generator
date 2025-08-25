@@ -128,11 +128,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Генерация карточек</h2>
-        <p className="text-muted-foreground">
-          Создайте 6 профессиональных карточек товаров 960×1280 пикселей
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
+      <div className="px-1">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Генерация карточек</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Создайте 6 профессиональных карточек 960×1280 для Wildberries
         </p>
       </div>
 
@@ -163,13 +163,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-gray-50">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
+                  <p className="mb-2 text-xs sm:text-sm text-muted-foreground text-center px-2">
                     <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
                   </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG до 10MB каждый</p>
+                  <p className="text-xs text-muted-foreground text-center">PNG, JPG до 10MB каждый</p>
                 </div>
                 <Input
                   type="file"
@@ -182,13 +182,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             </div>
 
             {files.length > 0 && (
-              <div className="grid gap-4 grid-cols-2 sm:grid-cols-4">
+              <div className="grid gap-2 sm:gap-4 grid-cols-3 sm:grid-cols-4">
                 {files.map((file, index) => (
                   <div key={index} className="relative">
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`Upload ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg border"
+                      className="w-full h-16 sm:h-24 object-cover rounded-lg border"
                     />
                     <Badge className="absolute -top-2 -right-2 bg-wb-purple">
                       {index + 1}
@@ -217,8 +217,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               placeholder="Опишите ваш товар: основные характеристики, преимущества, целевую аудиторию. Добавьте пожелания по стилю карточек, цветовой гамме, акцентам..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="input-bordered"
+              rows={3}
+              className="input-bordered text-sm"
             />
             <p className="text-xs text-muted-foreground">
               Чем подробнее описание, тем лучше будут карточки
@@ -258,14 +258,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   {generatedImages.length} карточек готовы к скачиванию
                 </CardDescription>
               </div>
-              <Button onClick={downloadAll} className="bg-wb-purple hover:bg-wb-purple-dark">
-                <Download className="w-4 h-4 mr-2" />
-                Скачать все
-              </Button>
+            <Button onClick={downloadAll} className="bg-wb-purple hover:bg-wb-purple-dark" size="sm">
+              <Download className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Скачать все</span>
+              <span className="sm:hidden">Все</span>
+            </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
               {generatedImages.map((imageUrl, index) => (
                 <div key={index} className="relative group">
                   <img
@@ -275,11 +276,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                     <Button size="sm" variant="secondary">
-                      <Download className="w-4 h-4 mr-2" />
-                      Скачать
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="text-xs sm:text-sm">Скачать</span>
                     </Button>
                   </div>
-                  <Badge className="absolute top-2 left-2 bg-wb-purple">
+                  <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-wb-purple text-xs">
                     {CARD_STAGES[index]?.name}
                   </Badge>
                 </div>
@@ -301,12 +302,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Генерирую... (это может занять несколько минут)
+                <span className="hidden sm:inline">Генерирую... (это может занять несколько минут)</span>
+                <span className="sm:hidden">Генерирую...</span>
               </>
             ) : (
               <>
-                <Image className="w-5 h-5 mr-2" />
-                Сгенерировать карточки (6 токенов)
+                <Image className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                <span className="hidden sm:inline">Сгенерировать карточки (6 токенов)</span>
+                <span className="sm:hidden">Генерация (6 токенов)</span>
               </>
             )}
           </Button>

@@ -109,10 +109,10 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Генерация описаний</h2>
-        <p className="text-muted-foreground">
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
+      <div className="px-1">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Генерация описаний</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Создайте SEO-оптимизированное описание товара (1000-2000 символов)
         </p>
       </div>
@@ -134,7 +134,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       )}
 
       {/* Input Form */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Параметры генерации</CardTitle>
@@ -257,7 +257,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               {generatedText && (
                 <div className="flex space-x-2">
                   <Button size="sm" variant="outline" onClick={copyToClipboard}>
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </div>
               )}
@@ -269,17 +269,17 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 <Textarea
                   value={generatedText}
                   onChange={(e) => setGeneratedText(e.target.value)}
-                  rows={12}
-                  className="font-mono text-sm input-bordered"
+                  rows={8}
+                  className="font-mono text-xs sm:text-sm input-bordered"
                 />
                 
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <Button 
                     size="sm" 
                     variant="outline"
                     onClick={() => downloadAsFile('txt')}
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     TXT
                   </Button>
                   <Button 
@@ -287,7 +287,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                     variant="outline"
                     onClick={() => downloadAsFile('docx')}
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     DOCX
                   </Button>
                   <Button 
@@ -295,7 +295,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                     variant="outline"
                     onClick={() => downloadAsFile('pdf')}
                   >
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     PDF
                   </Button>
                 </div>
