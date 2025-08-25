@@ -42,9 +42,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [generationHistory, setGenerationHistory] = useState<string[][]>([]);
+  const [currentGenerationIndex, setCurrentGenerationIndex] = useState(0);
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const { toast } = useToast();
+
+  // Current generation is the active one being displayed
+  const generatedImages = generationHistory[currentGenerationIndex] || [];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
@@ -75,7 +79,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setGenerating(true);
     setProgress(0);
     setCurrentStage(0);
-    setGeneratedImages([]);
     
     try {
       const { data, error } = await supabase.functions.invoke('generate-cards', {
@@ -93,6 +96,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         throw new Error(data.error);
       }
 
+      const newGeneration: string[] = [];
+
       // Simulate generation process for UI
       for (let i = 0; i < CARD_STAGES.length; i++) {
         setCurrentStage(i);
@@ -101,10 +106,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Add placeholder images (in real implementation these would come from API)
-        setGeneratedImages(prev => [...prev, `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${i}`]);
+        newGeneration.push(`https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${i}_${Date.now()}`);
         
         setProgress(((i + 1) / CARD_STAGES.length) * 100);
       }
+      
+      // Add new generation to history and set as current
+      setGenerationHistory(prev => [...prev, newGeneration]);
+      setCurrentGenerationIndex(prev => prev + 1);
       
       // Refresh profile to update token balance
       onTokensUpdate();
@@ -152,10 +161,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       // Simulate regeneration (in real implementation, would call API)
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Replace the image at specific index
-      const newImages = [...generatedImages];
-      newImages[index] = `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${index}_${Date.now()}`;
-      setGeneratedImages(newImages);
+      // Replace the image at specific index in current generation
+      const newHistory = [...generationHistory];
+      const currentGeneration = [...newHistory[currentGenerationIndex]];
+      currentGeneration[index] = `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${index}_${Date.now()}`;
+      newHistory[currentGenerationIndex] = currentGeneration;
+      setGenerationHistory(newHistory);
       
       toast({
         title: "Карточка обновлена!",
@@ -329,11 +340,38 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Готовые карточки</CardTitle>
-                <CardDescription>
-                  {generatedImages.length} карточек готовы к скачиванию
-                </CardDescription>
+              <div className="flex items-center gap-4">
+                <div>
+                  <CardTitle>Готовые карточки</CardTitle>
+                  <CardDescription>
+                    {generatedImages.length} карточек готовы к скачиванию
+                  </CardDescription>
+                </div>
+                {generationHistory.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => setCurrentGenerationIndex(Math.max(0, currentGenerationIndex - 1))}
+                      disabled={currentGenerationIndex === 0}
+                      size="sm"
+                      variant="outline"
+                      className="px-2"
+                    >
+                      ←
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      {currentGenerationIndex + 1} / {generationHistory.length}
+                    </span>
+                    <Button
+                      onClick={() => setCurrentGenerationIndex(Math.min(generationHistory.length - 1, currentGenerationIndex + 1))}
+                      disabled={currentGenerationIndex === generationHistory.length - 1}
+                      size="sm"
+                      variant="outline"
+                      className="px-2"
+                    >
+                      →
+                    </Button>
+                  </div>
+                )}
               </div>
             <Button onClick={downloadAll} className="bg-wb-purple hover:bg-wb-purple-dark" size="sm">
               <Download className="w-4 h-4 mr-1 sm:mr-2" />
@@ -428,7 +466,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             onClick={simulateGeneration}
             disabled={!canGenerate() || generating}
             className={generatedImages.length > 0 ? 
-              "w-full bg-transparent text-white border border-white/30 border-dashed hover:bg-white/10 hover:border-white/50 hidden sm:flex" : 
+              "w-full bg-white/5 text-white border border-white/30 border-dashed hover:bg-white/10 hover:border-solid hidden sm:flex" : 
               "w-full bg-wb-purple hover:bg-wb-purple-dark"
             }
             size="lg"
