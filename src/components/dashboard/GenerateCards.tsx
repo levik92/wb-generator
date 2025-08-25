@@ -56,14 +56,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    return files.length > 0 && description.trim() && profile.tokens_balance >= 6 && profile.wb_connected;
+    return files.length > 0 && description.trim() && profile.tokens_balance >= 6;
   };
 
   const getGuardMessage = () => {
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
     if (!description.trim()) return "Добавьте описание товара";
     if (profile.tokens_balance < 6) return "Недостаточно токенов (нужно 6)";
-    if (!profile.wb_connected) return "Подключите Wildberries в настройках";
     return null;
   };
 

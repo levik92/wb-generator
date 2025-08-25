@@ -1,32 +1,224 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Image, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Download, FileText, Image, Calendar, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const History = () => {
+interface Generation {
+  id: string;
+  generation_type: string;
+  input_data: any;
+  output_data: any;
+  tokens_used: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  tokens_balance: number;
+  wb_connected: boolean;  
+  referral_code: string;
+}
+
+interface HistoryProps {
+  profile: Profile;
+}
+
+export const History = ({ profile }: HistoryProps) => {
+  const [generations, setGenerations] = useState<Generation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'cards' | 'description'>('all');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const loadHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('generations')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setGenerations(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Ошибка загрузки",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadGeneration = (generation: Generation) => {
+    if (generation.generation_type === 'cards') {
+      // Create mock ZIP file download
+      const link = document.createElement('a');
+      link.href = 'data:application/zip;base64,UEsDBAoAAAAAAKRGBjMAAAAAAAAAAAAAAAAJAAAAY2FyZHMuemlwUEsBAhQACgAAAAAAkEYGMwAAAAAAAAAAAAAAAAkAAAAIACAAAAAAAAAAQAAAAAAAAABjYXJkcy56aXBVVAkAA3qHEFl6hxBZdXgLAAEE9QEAAAQUAAAAUEsFBgAAAAABAAEANgAAADIAAAAAAA==';
+      link.download = `cards_${generation.id.slice(0, 8)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Скачивание началось",
+        description: "ZIP архив с карточками скачивается",
+      });
+    } else {
+      // Create text file download
+      const element = document.createElement('a');
+      const file = new Blob([generation.output_data?.description || 'Описание товара'], { type: 'text/plain' });
+      element.href = URL.createObjectURL(file);
+      element.download = `description_${generation.id.slice(0, 8)}.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      toast({
+        title: "Скачивание началось", 
+        description: "Текстовый файл с описанием скачивается",
+      });
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const filteredGenerations = generations.filter(gen => 
+    filter === 'all' || gen.generation_type === filter
+  );
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">История генераций</h2>
+          <p className="text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">История генераций</h2>
-        <p className="text-muted-foreground">
-          Все ваши созданные карточки и описания
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">История генераций</h2>
+          <p className="text-muted-foreground">
+            Все ваши созданные карточки и описания
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все</SelectItem>
+              <SelectItem value="cards">Карточки</SelectItem>
+              <SelectItem value="description">Описания</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Недавние генерации</CardTitle>
-          <CardDescription>
-            История будет доступна после первых генераций
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <FileText className="w-12 h-12 mx-auto mb-4" />
-            <p>История пуста</p>
-          </div>
-        </CardContent>
-      </Card>
+      {filteredGenerations.length === 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>История пуста</CardTitle>
+            <CardDescription>
+              {filter === 'all' 
+                ? "История будет доступна после первых генераций"
+                : `Нет ${filter === 'cards' ? 'карточек' : 'описаний'} в истории`
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12 text-muted-foreground">
+              <FileText className="w-12 h-12 mx-auto mb-4" />
+              <p>
+                {filter === 'all' 
+                  ? "Начните генерацию, чтобы увидеть историю здесь"
+                  : `Создайте ${filter === 'cards' ? 'карточки' : 'описания'}, чтобы увидеть их здесь`
+                }
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {filteredGenerations.map((generation) => (
+            <Card key={generation.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200">
+                      {generation.generation_type === 'cards' ? (
+                        <Image className="w-6 h-6 text-purple-600" />
+                      ) : (
+                        <FileText className="w-6 h-6 text-purple-600" />
+                      )}
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h3 className="font-semibold">
+                          {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
+                        </h3>
+                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'}>
+                          {generation.status === 'completed' ? 'Готово' : 'В процессе'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formatDate(generation.created_at)}</span>
+                        </div>
+                        <span>{generation.tokens_used} токенов</span>
+                        {generation.input_data?.productName && (
+                          <span>• {generation.input_data.productName}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => downloadGeneration(generation)}
+                    size="sm"
+                    variant="outline"
+                    className="bg-wb-purple/10 hover:bg-wb-purple/20 border-wb-purple/20"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Скачать
+                  </Button>                  
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

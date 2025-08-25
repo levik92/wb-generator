@@ -184,10 +184,12 @@
     transition: var(--transition-base);
   }
 
-  /* Custom input styles with subtle borders */
-  .input-bordered {
-    @apply border border-gray-300/30 focus:border-wb-purple/50 transition-colors;
-  }
+/* Default input styling with borders */
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
+textarea, 
+select {
+  @apply border border-border/30 !important;
+}
 
   /* Token hover effect */
   .token-hover:hover {

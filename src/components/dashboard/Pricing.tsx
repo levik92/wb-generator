@@ -59,7 +59,7 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
               </div>
             </div>
             <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-              Купить
+              Выбрать
             </Button>
           </CardContent>
         </Card>
@@ -96,7 +96,7 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
               </div>
             </div>
             <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-              Купить
+              Выбрать
             </Button>
           </CardContent>
         </Card>
@@ -132,7 +132,7 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
               </div>
             </div>
             <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-              Купить
+              Выбрать
             </Button>
           </CardContent>
         </Card>

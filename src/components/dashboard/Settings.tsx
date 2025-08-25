@@ -264,13 +264,13 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <span>Статус подключения</span>
-            <Badge variant={profile.wb_connected ? "default" : "secondary"}>
-              {profile.wb_connected ? 'Подключен' : 'Не подключен'}
+            <Badge variant="secondary">
+              В разработке
             </Badge>
           </div>
-          <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+          <Button disabled className="w-full bg-muted text-muted-foreground cursor-not-allowed">
             <LinkIcon className="w-4 h-4 mr-2" />
-            {profile.wb_connected ? 'Переподключить' : 'Подключить'} WB
+            Скоро
           </Button>
         </CardContent>
       </Card>

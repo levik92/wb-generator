@@ -91,35 +91,47 @@ const Landing = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <img src={exampleBefore1} alt="Пример преобразования 1" className="w-full h-48 object-cover" />
-                <div className="p-6">
-                  <h3 className="font-semibold mb-2">Электроника</h3>
-                  <p className="text-sm text-muted-foreground">Простое фото → Стильная карточка с преимуществами</p>
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-center">Электроника</h3>
+              <div className="space-y-3">
+                <div className="text-center">
+                  <Badge variant="secondary" className="mb-2">До</Badge>
+                  <img src={exampleBefore1} alt="До обработки - электроника" className="w-full h-48 object-cover rounded-lg border" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-center">
+                  <Badge className="mb-2 bg-wb-purple">После</Badge>
+                  <img src={exampleBefore1} alt="После обработки - электроника" className="w-full h-48 object-cover rounded-lg border" />
+                </div>
+              </div>
+            </div>
 
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <img src={exampleBefore2} alt="Пример преобразования 2" className="w-full h-48 object-cover" />
-                <div className="p-6">
-                  <h3 className="font-semibold mb-2">Аксессуары</h3>
-                  <p className="text-sm text-muted-foreground">Обычное фото → Карточка с характеристиками</p>
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-center">Аксессуары</h3>
+              <div className="space-y-3">
+                <div className="text-center">
+                  <Badge variant="secondary" className="mb-2">До</Badge>
+                  <img src={exampleBefore2} alt="До обработки - аксессуары" className="w-full h-48 object-cover rounded-lg border" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-center">
+                  <Badge className="mb-2 bg-wb-purple">После</Badge>
+                  <img src={exampleBefore2} alt="После обработки - аксессуары" className="w-full h-48 object-cover rounded-lg border" />
+                </div>
+              </div>
+            </div>
 
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <img src={exampleBefore3} alt="Пример преобразования 3" className="w-full h-48 object-cover" />
-                <div className="p-6">
-                  <h3 className="font-semibold mb-2">Одежда</h3>
-                  <p className="text-sm text-muted-foreground">Простое фото → Профессиональная презентация</p>
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-center">Одежда</h3>
+              <div className="space-y-3">
+                <div className="text-center">
+                  <Badge variant="secondary" className="mb-2">До</Badge>
+                  <img src={exampleBefore3} alt="До обработки - одежда" className="w-full h-48 object-cover rounded-lg border" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-center">
+                  <Badge className="mb-2 bg-wb-purple">После</Badge>
+                  <img src={exampleBefore3} alt="После обработки - одежда" className="w-full h-48 object-cover rounded-lg border" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -210,19 +222,19 @@ const Landing = () => {
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     8 комплектов карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     50 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     Интеграция с WB
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     Поддержка в чате
                   </li>
                 </ul>
@@ -234,10 +246,10 @@ const Landing = () => {
 
             {/* Pro */}
             <Card className="relative border-wb-purple">
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-wb-purple">Популярный</Badge>
               </div>
-              <CardHeader>
+              <CardHeader className="pt-8">
                 <CardTitle className="text-xl">Профи</CardTitle>
                 <div className="text-3xl font-bold">1 499₽</div>
                 <CardDescription>200 токенов</CardDescription>
@@ -248,19 +260,19 @@ const Landing = () => {
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     33 комплекта карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     200 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     Приоритетная поддержка
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     Персональный менеджер
                   </li>
                 </ul>
@@ -283,19 +295,19 @@ const Landing = () => {
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     166 комплектов карточек (6 токенов за комплект)
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     1000 описаний товаров (1 токен за описание)
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     Персональный менеджер
                   </li>
                   <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2" />
+                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
                     VIP поддержка 24/7
                   </li>
                 </ul>

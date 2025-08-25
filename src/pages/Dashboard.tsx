@@ -131,7 +131,7 @@ const Dashboard = () => {
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'history':
-        return <History />;
+        return <History profile={profile} />;
       case 'pricing':
         return <Pricing profile={profile} onTokensUpdate={refreshProfile} />;
       case 'referrals':
