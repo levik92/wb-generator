@@ -5,6 +5,7 @@ import { ArrowRight, Zap, Image, FileText, Users, Star, Check } from "lucide-rea
 import { Link } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import heroDemo from "@/assets/hero-demo.jpg";
+import dashboardDemo from "@/assets/dashboard-demo.png";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleBefore2 from "@/assets/example-before-after-2.jpg";
 import exampleBefore3 from "@/assets/example-before-after-3.jpg";
@@ -23,7 +24,7 @@ const Landing = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-hero rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-hero rounded-xl flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg sm:text-xl font-semibold">WB Генератор</span>
@@ -76,8 +77,8 @@ const Landing = () => {
           {/* Demo Image */}
           <div className="bg-gradient-card rounded-xl border border-card-border p-4 sm:p-8 max-w-4xl mx-auto animate-slide-up">
             <img 
-              src={heroDemo} 
-              alt="Демонстрация генерации карточек WB Генератор"
+              src={dashboardDemo} 
+              alt="Интерфейс WB Генератор - панель для создания карточек товаров"
               className="w-full rounded-lg shadow-lg"
             />
           </div>

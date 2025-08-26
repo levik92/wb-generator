@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -13,6 +14,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -21,6 +23,16 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!agreeToTerms) {
+      toast({
+        title: "Ошибка регистрации",
+        description: "Необходимо согласиться с условиями использования и политикой конфиденциальности.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -92,7 +104,7 @@ const Auth = () => {
           </Link>
           
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-8 h-8 bg-gradient-hero rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-hero rounded-xl flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-semibold">WB Генератор</span>
@@ -193,10 +205,32 @@ const Auth = () => {
                       Минимум 6 символов
                     </p>
                   </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="agree-terms"
+                      checked={agreeToTerms}
+                      onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
+                    />
+                    <label
+                      htmlFor="agree-terms"
+                      className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Я соглашаюсь с{" "}
+                      <Link to="/terms" className="text-wb-purple hover:underline">
+                        условиями использования
+                      </Link>{" "}
+                      и{" "}
+                      <Link to="/privacy" className="text-wb-purple hover:underline">
+                        политикой конфиденциальности
+                      </Link>
+                    </label>
+                  </div>
+                  
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading}
+                    disabled={loading || !agreeToTerms}
                   >
                     {loading ? (
                       <>
@@ -211,17 +245,10 @@ const Auth = () => {
               </TabsContent>
             </Tabs>
 
-            <Separator className="my-6" />
+            <Separator className="my-4" />
             
-            <div className="text-center text-sm text-muted-foreground">
-              Создавая аккаунт, вы соглашаетесь с{" "}
-              <a href="#" className="text-wb-purple hover:underline">
-                условиями использования
-              </a>{" "}
-              и{" "}
-              <a href="#" className="text-wb-purple hover:underline">
-                политикой конфиденциальности
-              </a>
+            <div className="text-center text-xs text-muted-foreground">
+              Уже есть аккаунт? Переключитесь на вкладку "Вход"
             </div>
           </CardContent>
         </Card>
