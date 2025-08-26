@@ -308,7 +308,8 @@ serve(async (req) => {
       const imageData = await response.json();
       
       if (!response.ok) {
-        console.error(`OpenAI API error for card ${cardIndex}:`, imageData);
+        console.error(`OpenAI API error for card ${cardIndex}:`, JSON.stringify(imageData, null, 2));
+        console.error(`Response status: ${response.status}, statusText: ${response.statusText}`);
         
         // Refund tokens if generation fails
         await supabase.rpc('refund_tokens', {
@@ -317,19 +318,24 @@ serve(async (req) => {
           reason_text: `Ошибка генерации карточки ${cardIndex}`
         });
         
-        throw new Error(imageData.error?.message || 'Failed to generate image');
+        throw new Error(imageData.error?.message || `Failed to generate image: ${response.status}`);
       }
 
-      const imageUrl = imageData.data[0].url;
+      if (!imageData.data || !imageData.data[0] || !imageData.data[0].b64_json) {
+        console.error('Invalid OpenAI response format:', JSON.stringify(imageData, null, 2));
+        throw new Error('Invalid response format from OpenAI API');
+      }
+
+      const imageBase64 = imageData.data[0].b64_json;
       
-      // Resize and upload to Supabase Storage
-      const resizedImageData = await resizeImage(imageUrl);
+      // Convert base64 to ArrayBuffer
+      const imageBuffer = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));
       const fileName = `${userId}/${Date.now()}_card_${cardIndex}.jpg`;
       
       const { error: uploadError } = await supabase.storage
         .from('generated-cards')
-        .upload(fileName, resizedImageData, {
-          contentType: 'image/jpeg',
+        .upload(fileName, imageBuffer, {
+          contentType: 'image/png',
           cacheControl: '3600',
           upsert: true
         });
@@ -351,7 +357,7 @@ serve(async (req) => {
         .from('generated-cards')
         .getPublicUrl(fileName);
 
-      generatedImages.push(publicUrl.publicUrl);
+      console.log(`Successfully generated and uploaded card ${cardIndex} for user ${userId}`);
       
     } else {
       // Generate all 6 cards in parallel
@@ -374,20 +380,26 @@ serve(async (req) => {
         const imageData = await response.json();
         
         if (!response.ok) {
-          console.error(`OpenAI API error for card ${index}:`, imageData);
-          throw new Error(imageData.error?.message || `Failed to generate card ${index}`);
+          console.error(`OpenAI API error for card ${index}:`, JSON.stringify(imageData, null, 2));
+          console.error(`Response status: ${response.status}, statusText: ${response.statusText}`);
+          throw new Error(imageData.error?.message || `Failed to generate card ${index}: ${response.status}`);
         }
 
-        const imageUrl = imageData.data[0].url;
+        if (!imageData.data || !imageData.data[0] || !imageData.data[0].b64_json) {
+          console.error(`Invalid OpenAI response format for card ${index}:`, JSON.stringify(imageData, null, 2));
+          throw new Error(`Invalid response format from OpenAI API for card ${index}`);
+        }
+
+        const imageBase64 = imageData.data[0].b64_json;
         
-        // Resize and upload to Supabase Storage
-        const resizedImageData = await resizeImage(imageUrl);
+        // Convert base64 to ArrayBuffer
+        const imageBuffer = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));
         const fileName = `${userId}/${Date.now()}_card_${index}.jpg`;
         
         const { error: uploadError } = await supabase.storage
           .from('generated-cards')
-          .upload(fileName, resizedImageData, {
-            contentType: 'image/jpeg',
+          .upload(fileName, imageBuffer, {
+            contentType: 'image/png',
             cacheControl: '3600',
             upsert: true
           });
@@ -401,6 +413,8 @@ serve(async (req) => {
           .from('generated-cards')
           .getPublicUrl(fileName);
 
+        console.log(`Successfully generated and uploaded card ${index} for user ${userId}`);
+        
         return {
           index: parseInt(index),
           url: publicUrl.publicUrl
