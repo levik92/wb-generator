@@ -50,9 +50,11 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-8 py-4 rounded-full text-sm mb-8 border border-gray-200 shadow-sm">
-            <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-              <PartyPopper className="w-4 h-4 text-white" />
-            </div>
+            <img 
+              src="/lovable-uploads/1e3fc63c-a046-40b8-aede-2f40b6764d7a.png" 
+              alt="Празднично-коническая иконка" 
+              className="w-7 h-7"
+            />
             <span className="font-medium">25 токенов бесплатно при регистрации</span>
           </div>
           
@@ -263,6 +265,20 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Decorative Divider */}
+      <div className="relative py-8">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gradient-to-r from-transparent via-wb-purple/20 to-transparent"></div>
+        </div>
+        <div className="relative flex justify-center">
+          <div className="bg-background px-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-full flex items-center justify-center">
+              <Zap className="w-8 h-8 text-wb-purple" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Pricing */}
       <section className="py-16">
         <div className="container mx-auto px-6">
@@ -456,7 +472,7 @@ const Landing = () => {
             25 бесплатных токенов ждут вас. Создайте первые карточки за несколько минут.
           </p>
           <Link to="/auth">
-            <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-lg px-8 py-6">
+            <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base px-8 py-6">
               Получить 25 токенов бесплатно
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
