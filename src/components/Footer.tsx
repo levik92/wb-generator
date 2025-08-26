@@ -31,7 +31,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Пользовательское соглашение
+                  Договор оферты
                 </Link>
               </li>
             </ul>

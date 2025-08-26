@@ -12,7 +12,7 @@ const Terms = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             На главную
           </Link>
-          <h1 className="text-3xl font-bold mb-4">Пользовательское соглашение</h1>
+          <h1 className="text-3xl font-bold mb-4">Договор оферты</h1>
           <p className="text-muted-foreground">Последнее обновление: 26 августа 2025 г.</p>
         </div>
 

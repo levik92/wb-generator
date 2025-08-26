@@ -27,7 +27,7 @@ const Auth = () => {
     if (!agreeToTerms) {
       toast({
         title: "Ошибка регистрации",
-        description: "Необходимо согласиться с условиями использования и политикой конфиденциальности.",
+        description: "Необходимо согласиться с договором оферты и политикой конфиденциальности.",
         variant: "destructive",
       });
       return;
@@ -218,7 +218,7 @@ const Auth = () => {
                     >
                       Я соглашаюсь с{" "}
                       <Link to="/terms" className="text-wb-purple hover:underline">
-                        условиями использования
+                        договором оферты
                       </Link>{" "}
                       и{" "}
                       <Link to="/privacy" className="text-wb-purple hover:underline">
