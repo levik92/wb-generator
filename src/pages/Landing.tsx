@@ -60,7 +60,7 @@ const Landing = () => {
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-in px-4">
             Карточки Wildberries <br />
-            <span className="text-gradient">за минуты и пару рублей, а не недели и большие затраты</span>
+            <span className="text-gradient">за минуты и пару рублей, а не недели с большими затратами</span>
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed px-4">
@@ -109,8 +109,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Шампунь - Красота</h3>
               <BeforeAfterSlider
-                beforeImage="/src/assets/shampoo-before.png"
-                afterImage="/src/assets/shampoo-after.png"
+                beforeImage="/lovable-uploads/bd25566b-5310-4b3e-9566-1ae44adbfd96.png"
+                afterImage="/lovable-uploads/bd25566b-5310-4b3e-9566-1ae44adbfd96.png"
                 alt="карточки шампуня"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -122,8 +122,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Платье - Мода</h3>
               <BeforeAfterSlider
-                beforeImage="/src/assets/dress-before.png"
-                afterImage="/src/assets/dress-after.png"
+                beforeImage="/lovable-uploads/434e64b7-155f-4e2b-991e-315e5410c63f.png"
+                afterImage="/lovable-uploads/e81af743-5bce-4a03-8419-1ccfe55207e2.png"
                 alt="карточки платья"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -135,8 +135,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Йога-коврик - Спорт</h3>
               <BeforeAfterSlider
-                beforeImage="/src/assets/yoga-before.png"
-                afterImage="/src/assets/yoga-after.png"
+                beforeImage="/lovable-uploads/931a1793-5bd1-4b46-aff7-85ff9dbdf802.png"
+                afterImage="/lovable-uploads/1b4f8059-c780-42d1-b232-8937986d71c7.png"
                 alt="карточки йога-коврика"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -148,8 +148,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Наушники - Электроника</h3>
               <BeforeAfterSlider
-                beforeImage="/src/assets/headphones-example.png"
-                afterImage="/src/assets/headphones-example.png"
+                beforeImage="/lovable-uploads/efffc212-88b5-4e2c-bc86-8d71f50283e9.png"
+                afterImage="/lovable-uploads/4fc1d149-23bc-42ba-8a35-f732f142a15d.png"
                 alt="карточки наушников"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -463,20 +463,25 @@ const Landing = () => {
 
 
       {/* CTA */}
-      <section className="py-20">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-gradient-to-r from-wb-purple/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-l from-wb-purple/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
             Начните прямо сейчас
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in">
             25 бесплатных токенов ждут вас. Создайте первые карточки за несколько минут.
           </p>
-          <Link to="/auth">
-            <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base px-8 py-6">
-              Получить 25 токенов бесплатно
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
+          <div className="animate-fade-in">
+            <Link to="/auth">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base px-8 py-6 hover-scale">
+                Получить 25 токенов бесплатно
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
