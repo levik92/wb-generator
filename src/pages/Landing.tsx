@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Image, FileText, Users, Star, Check } from "lucide-react";
+import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import Footer from "@/components/Footer";
@@ -49,9 +49,9 @@ const Landing = () => {
       <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 animate-fade-in overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-wb-purple/15 to-wb-purple/10 text-wb-purple px-6 py-3 rounded-full text-sm mb-8 border border-wb-purple/20">
-            <div className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-8 py-4 rounded-full text-sm mb-8 border border-gray-200 shadow-sm">
+            <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+              <PartyPopper className="w-4 h-4 text-white" />
             </div>
             <span className="font-medium">25 токенов бесплатно при регистрации</span>
           </div>
@@ -105,11 +105,11 @@ const Landing = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-4xl mx-auto">
             {/* Example 1 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Смартфон - Электроника</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Шампунь - Красота</h3>
               <BeforeAfterSlider
-                beforeImage={exampleBefore1}
-                afterImage={exampleAfter1}
-                alt="карточки смартфона"
+                beforeImage="/src/assets/shampoo-before.png"
+                afterImage="/src/assets/shampoo-after.png"
+                alt="карточки шампуня"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -118,11 +118,11 @@ const Landing = () => {
 
             {/* Example 2 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Косметика - Красота</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Платье - Мода</h3>
               <BeforeAfterSlider
-                beforeImage={exampleBefore2}
-                afterImage={exampleAfter2}
-                alt="карточки косметики"
+                beforeImage="/src/assets/dress-before.png"
+                afterImage="/src/assets/dress-after.png"
+                alt="карточки платья"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -131,11 +131,11 @@ const Landing = () => {
 
             {/* Example 3 */}
             <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Одежда - Мода</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Йога-коврик - Спорт</h3>
               <BeforeAfterSlider
-                beforeImage={exampleBefore3}
-                afterImage={exampleAfter3}
-                alt="карточки одежды"
+                beforeImage="/src/assets/yoga-before.png"
+                afterImage="/src/assets/yoga-after.png"
+                alt="карточки йога-коврика"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -144,11 +144,11 @@ const Landing = () => {
 
             {/* Example 4 - only shown on desktop */}
             <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Спорт - Фитнес</h3>
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Наушники - Электроника</h3>
               <BeforeAfterSlider
-                beforeImage={exampleBefore1}
-                afterImage={exampleAfter1}
-                alt="карточки спорттоваров"
+                beforeImage="/src/assets/headphones-example.png"
+                afterImage="/src/assets/headphones-example.png"
+                alt="карточки наушников"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -220,158 +220,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="py-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Прозрачные тарифы</h2>
-            <p className="text-xl text-muted-foreground">
-              Платите только за то, что генерируете
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {/* Starter */}
-            <Card className="relative">
-              <CardHeader>
-                <CardTitle className="text-xl">Стартовый</CardTitle>
-                <div className="text-3xl font-bold">499₽</div>
-                <CardDescription>40 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>12,50₽</strong> за токен
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    6 комплектов карточек (6 токенов за комплект)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    40 описаний товаров (1 токен за описание)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    Поддержка в чате
-                  </li>
-                </ul>
-                <Button className="w-full mt-6 bg-wb-purple hover:bg-wb-purple-dark">
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Pro */}
-            <Card className="relative border-wb-purple">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-wb-purple">Популярный</Badge>
-              </div>
-              <CardHeader className="pt-8">
-                <CardTitle className="text-xl">Профи</CardTitle>
-                <div className="text-3xl font-bold">1 499₽</div>
-                <CardDescription>130 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>11,50₽</strong> за токен
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    21 комплект карточек (6 токенов за комплект)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    130 описаний товаров (1 токен за описание)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    Приоритетная поддержка
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    Персональный менеджер
-                  </li>
-                </ul>
-                <Button className="w-full mt-6 bg-wb-purple hover:bg-wb-purple-dark">
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Business */}
-            <Card className="relative">
-              <CardHeader>
-                <CardTitle className="text-xl">Бизнес</CardTitle>
-                <div className="text-3xl font-bold">5 999₽</div>
-                <CardDescription>550 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>10,90₽</strong> за токен
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    91 комплект карточек (6 токенов за комплект)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    550 описаний товаров (1 токен за описание)
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    Персональный менеджер
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="w-4 h-4 text-wb-purple mr-2 flex-shrink-0" />
-                    VIP поддержка 24/7
-                  </li>
-                </ul>
-                <Button className="w-full mt-6 bg-wb-purple hover:bg-wb-purple-dark">
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Referrals */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Реферальная программа</h2>
-            <p className="text-xl text-muted-foreground">
-              Приглашайте друзей и получайте бонусы
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card>
-              <CardHeader>
-                <Users className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Для вас</CardTitle>
-                <CardDescription>
-                  Получайте +25 токенов за каждого друга, который совершил покупку
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Star className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Для друзей</CardTitle>
-                <CardDescription>
-                  Ваши друзья получают +10 токенов при регистрации по вашей ссылке
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Description Generation */}
       <section className="py-16">
         <div className="container mx-auto px-6">
@@ -414,6 +262,189 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* Pricing */}
+      <section className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Прозрачные тарифы</h2>
+            <p className="text-xl text-muted-foreground">
+              Платите только за то, что генерируете
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {/* Starter */}
+            <Card className="relative">
+              <CardHeader>
+                <CardTitle className="text-xl">Стартовый</CardTitle>
+                <div className="text-3xl font-bold">499₽</div>
+                <CardDescription>50 токенов</CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>9,98₽</strong> за токен
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-xs sm:text-sm">1 токен =</span>
+                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-xs sm:text-sm">6 токенов =</span>
+                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
+                  </div>
+                  <div className="border-t pt-2">
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">8 комплектов карточек</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">50 описаний товаров</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">Поддержка в чате</span>
+                    </div>
+                  </div>
+                </div>
+                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+                  Выбрать план
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro */}
+            <Card className="relative border-wb-purple">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-wb-purple">Популярный</Badge>
+              </div>
+              <CardHeader className="pt-8">
+                <CardTitle className="text-xl">Профи</CardTitle>
+                <div className="text-3xl font-bold">1 499₽</div>
+                <CardDescription>200 токенов</CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>7,50₽</strong> за токен
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-xs sm:text-sm">1 токен =</span>
+                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-xs sm:text-sm">6 токенов =</span>
+                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
+                  </div>
+                  <div className="border-t pt-2">
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">33 комплекта карточек</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">200 описаний товаров</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">Приоритетная поддержка</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">Персональный менеджер</span>
+                    </div>
+                  </div>
+                </div>
+                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+                  Выбрать план
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Business */}
+            <Card className="relative">
+              <CardHeader>
+                <CardTitle className="text-xl">Бизнес</CardTitle>
+                <div className="text-3xl font-bold">5 999₽</div>
+                <CardDescription>1000 токенов</CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>6,00₽</strong> за токен
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-xs sm:text-sm">1 токен =</span>
+                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-xs sm:text-sm">6 токенов =</span>
+                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
+                  </div>
+                  <div className="border-t pt-2">
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">166 комплектов карточек</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">1000 описаний товаров</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">Персональный менеджер</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">VIP поддержка 24/7</span>
+                    </div>
+                  </div>
+                </div>
+                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+                  Выбрать план
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Referrals */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Реферальная программа</h2>
+            <p className="text-xl text-muted-foreground">
+              Приглашайте друзей и получайте бонусы
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <Users className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>Для вас</CardTitle>
+                <CardDescription>
+                  Получайте +25 токенов за каждого друга, который совершил покупку
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Star className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>Для друзей</CardTitle>
+                <CardDescription>
+                  Ваши друзья получают +10 токенов при регистрации по вашей ссылке
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
 
       {/* CTA */}
       <section className="py-20">
