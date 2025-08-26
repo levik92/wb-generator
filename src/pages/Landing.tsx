@@ -49,11 +49,11 @@ const Landing = () => {
       <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 animate-fade-in overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-8 py-4 rounded-full text-sm mb-8 border border-gray-200 shadow-sm">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-4 py-2 rounded-full text-xs mb-6 border border-gray-200 shadow-sm">
             <img 
               src="/lovable-uploads/1e3fc63c-a046-40b8-aede-2f40b6764d7a.png" 
               alt="Празднично-коническая иконка" 
-              className="w-7 h-7"
+              className="w-4 h-4"
             />
             <span className="font-medium">25 токенов бесплатно при регистрации</span>
           </div>
@@ -105,11 +105,37 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-4xl mx-auto">
-            {/* Example 1 */}
+            {/* Example 1 - Наушники */}
+            <div className="max-w-xs sm:max-w-md mx-auto">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Наушники - Электроника</h3>
+              <BeforeAfterSlider
+                beforeImage="/lovable-uploads/4fc1d149-23bc-42ba-8a35-f732f142a15d.png"
+                afterImage="/lovable-uploads/efffc212-88b5-4e2c-bc86-8d71f50283e9.png"
+                alt="карточки наушников"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
+                Перетаскивайте ползунок, чтобы увидеть разницу
+              </p>
+            </div>
+
+            {/* Example 2 - Платье */}
+            <div className="max-w-xs sm:max-w-md mx-auto">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Платье - Мода</h3>
+              <BeforeAfterSlider
+                beforeImage="/lovable-uploads/e81af743-5bce-4a03-8419-1ccfe55207e2.png"
+                afterImage="/lovable-uploads/434e64b7-155f-4e2b-991e-315e5410c63f.png"
+                alt="карточки платья"
+              />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
+                Перетаскивайте ползунок, чтобы увидеть разницу
+              </p>
+            </div>
+
+            {/* Example 3 - Шампунь */}
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Шампунь - Красота</h3>
               <BeforeAfterSlider
-                beforeImage="/lovable-uploads/bd25566b-5310-4b3e-9566-1ae44adbfd96.png"
+                beforeImage="/lovable-uploads/f6516fa1-8576-4774-8a31-c2ef5b995e6a.png"
                 afterImage="/lovable-uploads/bd25566b-5310-4b3e-9566-1ae44adbfd96.png"
                 alt="карточки шампуня"
               />
@@ -118,39 +144,13 @@ const Landing = () => {
               </p>
             </div>
 
-            {/* Example 2 */}
-            <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Платье - Мода</h3>
-              <BeforeAfterSlider
-                beforeImage="/lovable-uploads/434e64b7-155f-4e2b-991e-315e5410c63f.png"
-                afterImage="/lovable-uploads/e81af743-5bce-4a03-8419-1ccfe55207e2.png"
-                alt="карточки платья"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
-                Перетаскивайте ползунок, чтобы увидеть разницу
-              </p>
-            </div>
-
-            {/* Example 3 */}
-            <div className="max-w-xs sm:max-w-md mx-auto">
+            {/* Example 4 - Йога-коврик - только на десктопе */}
+            <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Йога-коврик - Спорт</h3>
               <BeforeAfterSlider
-                beforeImage="/lovable-uploads/931a1793-5bd1-4b46-aff7-85ff9dbdf802.png"
-                afterImage="/lovable-uploads/1b4f8059-c780-42d1-b232-8937986d71c7.png"
+                beforeImage="/lovable-uploads/1b4f8059-c780-42d1-b232-8937986d71c7.png"
+                afterImage="/lovable-uploads/931a1793-5bd1-4b46-aff7-85ff9dbdf802.png"
                 alt="карточки йога-коврика"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
-                Перетаскивайте ползунок, чтобы увидеть разницу
-              </p>
-            </div>
-
-            {/* Example 4 - only shown on desktop */}
-            <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Наушники - Электроника</h3>
-              <BeforeAfterSlider
-                beforeImage="/lovable-uploads/efffc212-88b5-4e2c-bc86-8d71f50283e9.png"
-                afterImage="/lovable-uploads/4fc1d149-23bc-42ba-8a35-f732f142a15d.png"
-                alt="карточки наушников"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 Перетаскивайте ползунок, чтобы увидеть разницу
@@ -289,138 +289,22 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {/* Starter */}
-            <Card className="relative">
-              <CardHeader>
-                <CardTitle className="text-xl">Стартовый</CardTitle>
-                <div className="text-3xl font-bold">499₽</div>
-                <CardDescription>50 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>9,98₽</strong> за токен
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <Card className="relative bg-gradient-to-br from-purple-50 to-white border-purple-200">
+              <CardContent className="p-6">
+                <div className="text-left">
+                  <div className="text-sm text-purple-600 font-medium mb-2">1 описание</div>
+                  <div className="text-2xl font-bold text-purple-700">~12,50₽</div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 токен =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">6 токенов =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">8 комплектов карточек</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">50 описаний товаров</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Поддержка в чате</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-                  Выбрать план
-                </Button>
               </CardContent>
             </Card>
 
-            {/* Pro */}
-            <Card className="relative border-wb-purple">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-wb-purple">Популярный</Badge>
-              </div>
-              <CardHeader className="pt-8">
-                <CardTitle className="text-xl">Профи</CardTitle>
-                <div className="text-3xl font-bold">1 499₽</div>
-                <CardDescription>200 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>7,50₽</strong> за токен
+            <Card className="relative bg-gradient-to-br from-purple-50 to-white border-purple-200">
+              <CardContent className="p-6">
+                <div className="text-left">
+                  <div className="text-sm text-purple-600 font-medium mb-2">1 комплект карточки</div>
+                  <div className="text-2xl font-bold text-purple-700">~75₽</div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 токен =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">6 токенов =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">33 комплекта карточек</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">200 описаний товаров</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Приоритетная поддержка</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Персональный менеджер</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Business */}
-            <Card className="relative">
-              <CardHeader>
-                <CardTitle className="text-xl">Бизнес</CardTitle>
-                <div className="text-3xl font-bold">5 999₽</div>
-                <CardDescription>1000 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>6,00₽</strong> за токен
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 токен =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">6 токенов =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">166 комплектов карточек</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">1000 описаний товаров</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Персональный менеджер</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">VIP поддержка 24/7</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-                  Выбрать план
-                </Button>
               </CardContent>
             </Card>
           </div>
