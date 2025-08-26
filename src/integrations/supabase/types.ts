@@ -269,6 +269,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      refund_tokens: {
+        Args: {
+          reason_text?: string
+          tokens_amount: number
+          user_id_param: string
+        }
+        Returns: boolean
+      }
       spend_tokens: {
         Args: { tokens_amount: number; user_id_param: string }
         Returns: boolean

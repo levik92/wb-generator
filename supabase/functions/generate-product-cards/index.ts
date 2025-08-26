@@ -308,7 +308,15 @@ serve(async (req) => {
       const imageData = await response.json();
       
       if (!response.ok) {
-        console.error('OpenAI API error:', imageData);
+        console.error(`OpenAI API error for card ${cardIndex}:`, imageData);
+        
+        // Refund tokens if generation fails
+        await supabase.rpc('refund_tokens', {
+          user_id_param: userId,
+          tokens_amount: tokensNeeded,
+          reason_text: `Ошибка генерации карточки ${cardIndex}`
+        });
+        
         throw new Error(imageData.error?.message || 'Failed to generate image');
       }
 
@@ -326,10 +334,18 @@ serve(async (req) => {
           upsert: true
         });
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw new Error('Failed to save generated image');
-      }
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          
+          // Refund tokens if upload fails
+          await supabase.rpc('refund_tokens', {
+            user_id_param: userId,
+            tokens_amount: tokensNeeded,
+            reason_text: 'Ошибка сохранения изображения'
+          });
+          
+          throw new Error('Failed to save generated image');
+        }
 
       const { data: publicUrl } = supabase.storage
         .from('generated-cards')
@@ -470,8 +486,24 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in generate-product-cards function:', error);
+    
+    // Refund tokens if any error occurred after token validation
+    if (userId && error.message !== 'Недостаточно токенов для генерации') {
+      try {
+        const tokensNeeded = (cardType && cardIndex !== null) ? 1 : 6;
+        await supabase.rpc('refund_tokens', {
+          user_id_param: userId,
+          tokens_amount: tokensNeeded,
+          reason_text: 'Ошибка генерации - возврат токенов'
+        });
+        console.log(`Refunded ${tokensNeeded} tokens to user ${userId} due to generation error`);
+      } catch (refundError) {
+        console.error('Error refunding tokens:', refundError);
+      }
+    }
+
     return new Response(JSON.stringify({
       error: error.message || 'Произошла ошибка при генерации карточек'
     }), {
