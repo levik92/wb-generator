@@ -64,25 +64,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check and spend tokens
-    const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
-      user_id_param: userId,
-      tokens_amount: 6
-    });
-
-    if (tokenError) {
-      console.error('Token spending error:', tokenError);
-      throw new Error('Ошибка при списании токенов');
-    }
-
-    if (!tokenResult) {
-      return new Response(JSON.stringify({ 
-        error: 'Недостаточно токенов для генерации' 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Token validation and spending will be handled by generate-product-cards function
 
     // Call the new generate-product-cards function
     const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-product-cards', {

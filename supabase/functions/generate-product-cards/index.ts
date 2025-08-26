@@ -254,18 +254,19 @@ serve(async (req) => {
     const isRegeneration = cardType && cardIndex !== null;
     const tokensNeeded = isRegeneration ? 1 : 6;
 
-    // Check and spend tokens
-    const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
-      user_id_param: userId,
-      tokens_amount: tokensNeeded
-    });
+    // Check if user has enough tokens (without spending yet)
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('tokens_balance')
+      .eq('id', userId)
+      .single();
 
-    if (tokenError) {
-      console.error('Token spending error:', tokenError);
-      throw new Error('Ошибка при списании токенов');
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+      throw new Error('Ошибка при проверке баланса токенов');
     }
 
-    if (!tokenResult) {
+    if (profileData.tokens_balance < tokensNeeded) {
       return new Response(JSON.stringify({ 
         error: 'Недостаточно токенов для генерации' 
       }), {
@@ -299,7 +300,7 @@ serve(async (req) => {
           model: 'gpt-image-1',
           prompt: prompt,
           size: '1024x1792',
-          quality: 'hd',
+          quality: 'high',
           n: 1
         }),
       });
@@ -349,7 +350,7 @@ serve(async (req) => {
             model: 'gpt-image-1',
             prompt: prompt,
             size: '1024x1792',
-            quality: 'hd',
+            quality: 'high',
             n: 1
           }),
         });
@@ -393,6 +394,18 @@ serve(async (req) => {
       const results = await Promise.all(imagePromises);
       results.sort((a, b) => a.index - b.index);
       generatedImages.push(...results.map(r => r.url));
+    }
+
+    // After successful generation of all images, spend the tokens
+    const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
+      user_id_param: userId,
+      tokens_amount: tokensNeeded
+    });
+
+    if (tokenError) {
+      console.error('Token spending error:', tokenError);
+      // If token spending fails after generation, we should still return success
+      // since the images were generated successfully
     }
 
     // Save generation to database
