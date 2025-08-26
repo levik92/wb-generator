@@ -109,7 +109,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-wb-purple/10 dark:hover:bg-wb-purple/10">
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-wb-purple/10">
                 <Bell className="h-5 w-5 text-foreground" />
                 {unreadCount > 0 && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-background"></div>
@@ -124,7 +124,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                     variant="ghost" 
                     size="sm" 
                     onClick={markAllAsRead}
-                    className="text-xs h-auto p-1 hover:bg-wb-purple/10 dark:hover:bg-wb-purple/10 text-foreground"
+                    className="text-xs h-auto p-1 hover:bg-wb-purple/10 text-foreground"
                   >
                     Прочитать все
                   </Button>
@@ -138,8 +138,8 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                 notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
-                    className={`p-3 cursor-pointer border-b last:border-b-0 hover:bg-wb-purple/10 dark:hover:bg-wb-purple/10 ${
-                      !notification.read ? 'bg-wb-purple/5 dark:bg-wb-purple/5' : ''
+                    className={`p-3 cursor-pointer border-b last:border-b-0 hover:bg-wb-purple/10 ${
+                      !notification.read ? 'bg-wb-purple/5' : ''
                     }`}
                     onClick={() => markAsRead(notification.id)}
                   >

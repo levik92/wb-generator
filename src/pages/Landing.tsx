@@ -25,7 +25,7 @@ const Landing = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-hero rounded-xl flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg sm:text-xl font-semibold">WB Генератор</span>
@@ -46,8 +46,9 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-12 sm:pt-20 pb-12 sm:pb-16 animate-fade-in">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
+      <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 animate-fade-in overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
+        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
           <Badge variant="secondary" className="mb-6 animate-slide-up text-xs sm:text-sm">
             <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             25 токенов бесплатно при регистрации
@@ -77,11 +78,13 @@ const Landing = () => {
 
           {/* Dashboard Preview Image */}
           <div className="mb-8 sm:mb-12 px-4">
-            <img 
-              src="/lovable-uploads/87afb2c1-c274-438e-83b8-8e802d3cbc2f.png" 
-              alt="Интерфейс WB Генератор - панель для создания карточек товаров"
-              className="w-full max-w-4xl mx-auto rounded-lg shadow-lg"
-            />
+            <div className="relative w-full max-w-4xl mx-auto">
+              <img 
+                src="/lovable-uploads/87afb2c1-c274-438e-83b8-8e802d3cbc2f.png" 
+                alt="Интерфейс WB Генератор - панель для создания карточек товаров"
+                className="w-full rounded-lg border-2 border-wb-purple/20 shadow-2xl shadow-wb-purple/10"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -153,7 +156,7 @@ const Landing = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Как это работает</h2>

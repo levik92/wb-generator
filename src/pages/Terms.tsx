@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Footer from "@/components/Footer";
 
 const Terms = () => {
   return (
@@ -26,7 +27,7 @@ const Terms = () => {
                 1.1. Настоящий Договор-оферта (далее — Договор) является официальным предложением WB Генератор (далее — Исполнитель) на оказание услуг по генерации карточек товаров и SEO-описаний для маркетплейсов.
               </p>
               <p className="mb-4">
-                1.2. Договор вступает в силу с момента его акцепта Заказчиком. Акцептом является регистрация на сайте https://wildberry-boost.lovable.app/ и/или начало использования услуг Исполнителя.
+                1.2. Договор вступает в силу с момента его акцепта Заказчиком. Акцептом является регистрация на сайте wbgen.ru и/или начало использования услуг Исполнителя.
               </p>
               <p className="mb-4">
                 1.3. Заказчик — физическое или юридическое лицо, заключившее с Исполнителем настоящий Договор на условиях, содержащихся в данной оферте.
@@ -176,7 +177,7 @@ const Terms = () => {
                   <li><strong>Название банка:</strong> ООО "Банк Точка"</li>
                   <li><strong>БИК:</strong> 044525104</li>
                   <li><strong>Корреспондентский счёт:</strong> 30101810745374525104</li>
-                  <li><strong>Электронная почта:</strong> info@wb-generator.ru</li>
+                  <li><strong>Электронная почта:</strong> info@wbgen.ru</li>
                   <li><strong>Сайт:</strong> wbgen.ru</li>
                 </ul>
               </div>
@@ -184,6 +185,7 @@ const Terms = () => {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 };
