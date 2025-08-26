@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.regenerate-single-card]
 verify_jwt = true
+
+[functions.generate-product-cards]
+verify_jwt = true

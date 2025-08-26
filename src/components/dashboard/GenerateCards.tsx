@@ -37,6 +37,7 @@ const CARD_STAGES = [
 
 export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -52,10 +53,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
-    if (uploadedFiles.length > 10) {
+    if (uploadedFiles.length > 5) {
       toast({
         title: "Слишком много файлов",
-        description: "Максимум 10 изображений за раз",
+        description: "Максимум 5 изображений за раз",
         variant: "destructive",
       });
       return;
@@ -68,11 +69,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    return files.length > 0 && category && description.trim() && profile.tokens_balance >= 6;
+    return files.length > 0 && productName.trim() && category && description.trim() && profile.tokens_balance >= 6;
   };
 
   const getGuardMessage = () => {
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
+    if (!productName.trim()) return "Введите название товара";
     if (!category) return "Выберите категорию товара";
     if (!description.trim()) return "Добавьте описание товара";
     if (profile.tokens_balance < 6) return "Недостаточно токенов (нужно 6)";
@@ -85,12 +87,24 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setCurrentStage(0);
     
     try {
+      // Convert files to base64 for sending to API
+      const productImages = await Promise.all(
+        files.map(async (file) => {
+          const reader = new FileReader();
+          return new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
       const { data, error } = await supabase.functions.invoke('generate-cards', {
         body: {
-          productName: "Карточки товара", // You can add a product name field later
+          productName: productName,
           category,
           description,
-          userId: profile.id
+          userId: profile.id,
+          productImages
         }
       });
 
@@ -100,17 +114,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         throw new Error(data.error);
       }
 
-      const newGeneration: string[] = [];
+      // Use the actual generated images from the response
+      const newGeneration: string[] = data.images || [];
 
-      // Simulate generation process for UI
+      // Simulate progress for UI
       for (let i = 0; i < CARD_STAGES.length; i++) {
         setCurrentStage(i);
         setProgress((i / CARD_STAGES.length) * 100);
         
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Add placeholder images (in real implementation these would come from API)
-        newGeneration.push(`https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${i}_${Date.now()}`);
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         setProgress(((i + 1) / CARD_STAGES.length) * 100);
       }
@@ -162,14 +174,26 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setRegeneratingIndex(index);
     
     try {
+      // Convert files to base64 for sending to API
+      const productImages = await Promise.all(
+        files.map(async (file) => {
+          const reader = new FileReader();
+          return new Promise<string>((resolve) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
       const { data, error } = await supabase.functions.invoke('regenerate-single-card', {
         body: {
-          productName: "Карточка товара",
+          productName: productName,
           category,
           description,
           userId: profile.id,
           cardIndex: index,
-          cardType: CARD_STAGES[index]?.name
+          cardType: CARD_STAGES[index]?.name,
+          productImages
         }
       });
 
@@ -182,7 +206,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       // Replace the image at specific index in current generation
       const newHistory = [...generationHistory];
       const currentGeneration = [...newHistory[currentGenerationIndex]];
-      currentGeneration[index] = `https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=960&h=1280&fit=crop&crop=center&sig=${index}_${Date.now()}`;
+      currentGeneration[index] = data.regeneratedCard || currentGeneration[index];
       newHistory[currentGenerationIndex] = currentGeneration;
       setGenerationHistory(newHistory);
       
@@ -237,7 +261,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <CardHeader>
           <CardTitle>Загрузка изображений</CardTitle>
           <CardDescription>
-            Загрузите до 10 фотографий товара на белом фоне
+            Загрузите до 5 фотографий товара на белом фоне
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -284,6 +308,28 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 ))}
               </div>
             )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Product Name */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Название товара</CardTitle>
+          <CardDescription>
+            Введите точное название вашего товара
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="productName">Название товара</Label>
+            <Input
+              id="productName"
+              placeholder="Например: Беспроводные наушники Apple AirPods Pro"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              className="border-2 border-border/60"
+            />
           </div>
         </CardContent>
       </Card>

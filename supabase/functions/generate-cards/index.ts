@@ -84,53 +84,30 @@ serve(async (req) => {
       });
     }
 
-    // Simulate card generation processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Save generation to database
-    const { error: saveError } = await supabase
-      .from('generations')
-      .insert({
-        user_id: userId,
-        generation_type: 'cards',
-        input_data: {
-          productName: sanitizedProductName,
-          category: sanitizedCategory,
-          description: sanitizedDescription
-        },
-        output_data: {
-          cards: ['card1.png', 'card2.png', 'card3.png'],
-          message: 'Карточки товара успешно созданы'
-        },
-        tokens_used: 6,
-        status: 'completed',
-        product_name: sanitizedProductName,
+    // Call the new generate-product-cards function
+    const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-product-cards', {
+      body: {
+        productName: sanitizedProductName,
         category: sanitizedCategory,
-        description_requirements: sanitizedDescription
-      });
+        description: sanitizedDescription,
+        userId: userId,
+        productImages: requestBody.productImages || []
+      }
+    });
 
-    if (saveError) {
-      console.error('Error saving generation:', saveError);
+    if (generationError) {
+      console.error('Error calling generate-product-cards:', generationError);
+      throw new Error('Ошибка при генерации карточек');
     }
 
-    // Create notification for user
-    const { error: notificationError } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: userId,
-        title: 'Карточки созданы!',
-        message: `Сгенерированы карточки для товара "${sanitizedProductName}" в категории "${sanitizedCategory}"`,
-        type: 'generation'
-      });
-
-    if (notificationError) {
-      console.error('Error creating notification:', notificationError);
+    if (generationData.error) {
+      throw new Error(generationData.error);
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: 'Карточки товара успешно созданы',
-      cards: ['card1.png', 'card2.png', 'card3.png']
+      message: generationData.message || 'Карточки товара успешно созданы',
+      images: generationData.images || []
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

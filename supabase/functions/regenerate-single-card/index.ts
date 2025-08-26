@@ -63,6 +63,7 @@ serve(async (req) => {
     const sanitizedProductName = productName.replace(/[<>\"']/g, '').trim();
     const sanitizedCategory = category.replace(/[<>\"']/g, '').trim();
     const sanitizedDescription = description.replace(/[<>\"']/g, '').trim();
+    const sanitizedCardType = cardType.replace(/[<>\"']/g, '').trim();
 
     // Content filtering for harmful content
     const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror'];
@@ -100,55 +101,33 @@ serve(async (req) => {
       });
     }
 
-    // Simulate single card regeneration processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Save generation to database
-    const { error: saveError } = await supabase
-      .from('generations')
-      .insert({
-        user_id: userId,
-        generation_type: 'single_card',
-        input_data: {
-          productName: sanitizedProductName,
-          category: sanitizedCategory,
-          description: sanitizedDescription,
-          cardIndex,
-          cardType
-        },
-        output_data: {
-          card: `regenerated_${cardType}_${cardIndex}.png`,
-          message: `Карточка "${cardType}" успешно перегенерирована`
-        },
-        tokens_used: 1,
-        status: 'completed',
-        product_name: sanitizedProductName,
+    // Call the new generate-product-cards function for single regeneration
+    const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-product-cards', {
+      body: {
+        productName: sanitizedProductName,
         category: sanitizedCategory,
-        description_requirements: sanitizedDescription
-      });
+        description: sanitizedDescription,
+        userId: userId,
+        productImages: requestBody.productImages || [],
+        cardType: sanitizedCardType,
+        cardIndex: cardIndex
+      }
+    });
 
-    if (saveError) {
-      console.error('Error saving generation:', saveError);
+    if (generationError) {
+      console.error('Error calling generate-product-cards:', generationError);
+      throw new Error('Ошибка при перегенерации карточки');
     }
 
-    // Create notification for user
-    const { error: notificationError } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: userId,
-        title: 'Карточка перегенерирована!',
-        message: `Карточка "${cardType}" успешно перегенерирована для товара "${sanitizedProductName}"`,
-        type: 'generation'
-      });
-
-    if (notificationError) {
-      console.error('Error creating notification:', notificationError);
+    if (generationData.error) {
+      throw new Error(generationData.error);
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Карточка "${cardType}" успешно перегенерирована`,
-      card: `regenerated_${cardType}_${cardIndex}.png`
+      message: generationData.message || `Карточка ${sanitizedCardType} перегенерирована`,
+      regeneratedCard: generationData.images?.[0] || null,
+      cardIndex: generationData.cardIndex
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
