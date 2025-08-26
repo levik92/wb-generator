@@ -166,11 +166,20 @@ const Terms = () => {
               <p className="mb-4">
                 9.2. Все споры разрешаются путем переговоров, а при невозможности достижения соглашения — в суде по месту нахождения Исполнителя.
               </p>
-              <p className="mb-4">
-                9.3. Исполнитель: WB Генератор<br />
-                Электронная почта: info@wb-generator.ru<br />
-                Сайт: https://wildberry-boost.lovable.app/
-              </p>
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">9.3. Реквизиты Исполнителя:</h4>
+                <ul className="list-none space-y-1 ml-4 text-sm">
+                  <li><strong>Наименование:</strong> ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ "МАРКЕТШОП №1"</li>
+                  <li><strong>ИНН:</strong> 6700002780</li>
+                  <li><strong>КПП:</strong> 670001001</li>
+                  <li><strong>Расчётный счёт:</strong> 40702810820000198340</li>
+                  <li><strong>Название банка:</strong> ООО "Банк Точка"</li>
+                  <li><strong>БИК:</strong> 044525104</li>
+                  <li><strong>Корреспондентский счёт:</strong> 30101810745374525104</li>
+                  <li><strong>Электронная почта:</strong> info@wb-generator.ru</li>
+                  <li><strong>Сайт:</strong> wbgen.ru</li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>

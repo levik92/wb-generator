@@ -188,7 +188,14 @@
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
 textarea, 
 select {
-  @apply border-2 border-border/60 !important;
+  @apply border-2 border-border/60 text-sm !important;
+}
+
+/* Mobile button text size adjustments */
+@media (max-width: 640px) {
+  .btn-mobile-text {
+    font-size: 0.875rem !important;
+  }
 }
 
   /* Token hover effect */

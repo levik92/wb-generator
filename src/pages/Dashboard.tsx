@@ -13,6 +13,7 @@ import { History } from "@/components/dashboard/History";
 import { Balance } from "@/components/dashboard/Balance";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
+import Footer from "@/components/Footer";
 import { Loader2, Zap } from "lucide-react";
 
 interface Profile {
@@ -185,6 +186,8 @@ const Dashboard = () => {
         <main className="flex-1 p-4 md:p-6">
           {renderContent()}
         </main>
+        
+        <Footer />
       </div>
     </div>
   );

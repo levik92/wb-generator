@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Zap, Image, FileText, Users, Star, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import Footer from "@/components/Footer";
 import heroDemo from "@/assets/hero-demo.jpg";
 import dashboardDemo from "@/assets/dashboard-demo.png";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
@@ -54,32 +55,32 @@ const Landing = () => {
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-in px-4">
             Карточки Wildberries <br />
-            <span className="text-gradient">за минуты, не дни</span>
+            <span className="text-gradient">за минуты и пару рублей, а не недели и большие затраты</span>
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed px-4">
-            Создавайте профессиональные карточки товаров 960×1280 и SEO-описания 
-            с помощью ИИ. Загружайте сразу в личный кабинет WB.
+            Создавайте профессиональные изображения и описания для карточек товара 
+            с помощью AI. Загружайте сразу в кабинет WB.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8 sm:mb-12 px-4">
             <Link to="/auth" className="w-full sm:w-auto">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
                 Начать генерацию
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 hover:bg-wb-purple/20 hover:text-wb-purple-dark border-wb-purple/30" onClick={scrollToExamples}>
+            <Button variant="outline" size="lg" className="text-sm sm:text-lg px-6 sm:px-8 py-4 sm:py-6 hover:bg-wb-purple/20 hover:text-wb-purple-dark border-wb-purple/30" onClick={scrollToExamples}>
               Посмотреть примеры
             </Button>
           </div>
 
-          {/* Demo Image */}
-          <div className="bg-gradient-card rounded-xl border border-card-border p-4 sm:p-8 max-w-4xl mx-auto animate-slide-up">
+          {/* Dashboard Preview Image */}
+          <div className="mb-8 sm:mb-12 px-4">
             <img 
-              src={dashboardDemo} 
+              src="/lovable-uploads/87afb2c1-c274-438e-83b8-8e802d3cbc2f.png" 
               alt="Интерфейс WB Генератор - панель для создания карточек товаров"
-              className="w-full rounded-lg shadow-lg"
+              className="w-full max-w-4xl mx-auto rounded-lg shadow-lg"
             />
           </div>
         </div>
@@ -167,7 +168,7 @@ const Landing = () => {
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Image className="w-6 h-6 text-wb-purple" />
                 </div>
-                <CardTitle>1. Загрузите фото</CardTitle>
+                <CardTitle className="text-lg">1. Загрузите фото</CardTitle>
                 <CardDescription>
                   До 10 фотографий товара на белом фоне
                 </CardDescription>
@@ -179,7 +180,7 @@ const Landing = () => {
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <FileText className="w-6 h-6 text-wb-purple" />
                 </div>
-                <CardTitle>2. Опишите товар</CardTitle>
+                <CardTitle className="text-lg">2. Опишите товар</CardTitle>
                 <CardDescription>
                   Добавьте описание, преимущества и пожелания по дизайну
                 </CardDescription>
@@ -191,7 +192,7 @@ const Landing = () => {
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-wb-purple" />
                 </div>
-                <CardTitle>3. ИИ создает карточки</CardTitle>
+                <CardTitle className="text-lg">3. ИИ создает карточки</CardTitle>
                 <CardDescription>
                   6 этапов: hero, usage, инфографика, сравнение, детали, финал
                 </CardDescription>
@@ -203,7 +204,7 @@ const Landing = () => {
                 <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <FileText className="w-6 h-6 text-wb-purple" />
                 </div>
-                <CardTitle>4. Скачайте и загрузите</CardTitle>
+                <CardTitle className="text-lg">4. Скачайте и загрузите</CardTitle>
                 <CardDescription>
                   Скачайте готовые PNG и загрузите в свой кабинет WB
                 </CardDescription>
@@ -365,6 +366,49 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Description Generation */}
+      <section className="py-16">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Генерация описаний</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              SEO-оптимизированные описания товаров для повышения конверсии
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card>
+              <CardHeader>
+                <FileText className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>Анализ конкурентов</CardTitle>
+                <CardDescription>
+                  ИИ анализирует описания конкурентов и создает уникальный контент с использованием эффективных ключевых слов
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Zap className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>SEO-оптимизация</CardTitle>
+                <CardDescription>
+                  Автоматическое распределение ключевых слов и создание продающих текстов до 1800 символов
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="text-center mt-8">
+            <Link to="/auth">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
+                Попробовать генерацию описаний
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20">
         <div className="container mx-auto px-6 text-center">
@@ -383,12 +427,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8">
-        <div className="container mx-auto px-6 text-center text-muted-foreground">
-          <p>&copy; 2024 WB Генератор. Все права защищены.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
