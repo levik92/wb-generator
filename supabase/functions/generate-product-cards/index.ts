@@ -299,7 +299,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: 'gpt-image-1',
           prompt: prompt,
-          size: '1024x1792',
+          size: '1024x1536',
           quality: 'high',
           n: 1
         }),
@@ -362,13 +362,13 @@ serve(async (req) => {
             'Authorization': `Bearer ${openaiApiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model: 'gpt-image-1',
-            prompt: prompt,
-            size: '1024x1792',
-            quality: 'high',
-            n: 1
-          }),
+            body: JSON.stringify({
+              model: 'gpt-image-1',
+              prompt: prompt,
+              size: '1024x1536',
+              quality: 'high',
+              n: 1
+            }),
         });
 
         const imageData = await response.json();
