@@ -121,7 +121,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="bg-muted p-2 rounded-lg">
-              <Info className="h-4 w-4 text-muted-foreground" />
+              <Info className="h-4 w-4 text-purple-600" />
             </div>
             <CardTitle className="text-sm font-medium text-muted-foreground">Стоимость генерации</CardTitle>
           </div>
@@ -144,15 +144,15 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-start justify-start text-left py-4">
-          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-          <AlertDescription className="ml-3">{getGuardMessage()}</AlertDescription>
+        <Alert className="flex items-start justify-start text-left py-4 border-purple-200 bg-purple-50">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-purple-600" />
+          <AlertDescription className="ml-3 text-purple-700">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 
       {/* Input Form */}
       <div className="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2">
-        <Card>
+        <Card className="bg-muted/30">
           <CardHeader>
             <CardTitle>Параметры генерации</CardTitle>
             <CardDescription>
@@ -265,7 +265,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         </Card>
 
         {/* Generated Result */}
-        <Card>
+        <Card className="bg-muted/30">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>

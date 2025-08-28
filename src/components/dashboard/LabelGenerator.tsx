@@ -189,9 +189,9 @@ export default function LabelGenerator() {
         height: Math.round(mmToPx(barsMM, dpi))
       });
 
-      const scale = (innerW / barsCanvas.width);
-      const bw = Math.floor(barsCanvas.width * scale);
-      const bh = Math.floor(barsCanvas.height * scale);
+      // Don't scale the barcode - keep it original size
+      const bw = barsCanvas.width;
+      const bh = barsCanvas.height;
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(barsCanvas, x, y, bw, bh);
       y += bh + Math.round((currentState.format === '58x40' ? 42 : 66) * 0.35);
@@ -310,10 +310,9 @@ export default function LabelGenerator() {
           height: format === '58x40' ? 120 : 300
         });
 
-        // Center the barcode horizontally
-        const barcodeScale = Math.min(1, innerW / barsCanvas.width);
-        const bw = Math.floor(barsCanvas.width * barcodeScale);
-        const bh = Math.floor(barsCanvas.height * barcodeScale);
+        // Center the barcode horizontally without scaling
+        const bw = barsCanvas.width;
+        const bh = barsCanvas.height;
         const barcodeX = x + (innerW - bw) / 2; // Center horizontally
         
         ctx.imageSmoothingEnabled = false;
@@ -408,7 +407,7 @@ export default function LabelGenerator() {
         <div className="bg-green-100 border border-green-300 rounded-lg p-3 max-w-sm">
           <div className="flex items-center gap-2">
             <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
-            <span className="text-green-700 text-sm font-medium">3 месяца для новых пользователей</span>
+            <span className="text-green-700 text-sm font-medium">для всех пользователей WB Генератор</span>
           </div>
         </div>
       </div>

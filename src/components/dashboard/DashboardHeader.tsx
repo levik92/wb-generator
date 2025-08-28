@@ -101,7 +101,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
         <div>
           <h1 className="text-2xl font-semibold">Добро пожаловать!</h1>
           <p className="text-xs text-muted-foreground">
-            Создавайте карточки и описания для Wildberries
+            Создавайте карточки, описания и т.д. для Wildberries с AI
           </p>
         </div>
 

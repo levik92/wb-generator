@@ -150,7 +150,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </p>
       </div>
 
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Профиль</CardTitle>
           <CardDescription>Основная информация аккаунта</CardDescription>
@@ -181,7 +181,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Смена email</CardTitle>
           <CardDescription>Изменить адрес электронной почты</CardDescription>
@@ -209,7 +209,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Смена пароля</CardTitle>
           <CardDescription>Изменить пароль для входа</CardDescription>
@@ -256,7 +256,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Wildberries</CardTitle>
           <CardDescription>Подключение к личному кабинету</CardDescription>
@@ -275,7 +275,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Действия</CardTitle>
         </CardHeader>

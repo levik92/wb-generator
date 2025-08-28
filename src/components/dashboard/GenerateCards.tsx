@@ -233,7 +233,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       <div>
         <h2 className="text-2xl sm:text-3xl font-semibold mb-2">Генерация карточек</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Создайте 6 профессиональных карточек 960×1280 для Wildberries
+          Создайте профессиональные карточки для Wildberries
         </p>
       </div>
 
@@ -241,7 +241,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="bg-muted p-2 rounded-lg">
-              <Info className="h-4 w-4 text-muted-foreground" />
+              <Info className="h-4 w-4 text-purple-600" />
             </div>
             <CardTitle className="text-sm font-medium text-muted-foreground">Стоимость генерации</CardTitle>
           </div>
@@ -271,7 +271,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       )}
 
       {/* File Upload */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Загрузка изображений</CardTitle>
           <CardDescription>
@@ -327,7 +327,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </Card>
 
       {/* Product Name */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Название товара</CardTitle>
           <CardDescription>
@@ -349,7 +349,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </Card>
 
       {/* Category Selection */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Категория товара</CardTitle>
           <CardDescription>
@@ -379,7 +379,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </Card>
 
       {/* Product Description */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Описание товара</CardTitle>
           <CardDescription>
@@ -546,7 +546,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       )}
 
       {/* Generate Button */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardContent className="pt-6">
           <Button 
             onClick={simulateGeneration}

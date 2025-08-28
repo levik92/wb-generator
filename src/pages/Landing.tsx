@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper } from "lucide-react";
+import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper, BarChart3, QrCode, Package } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import Footer from "@/components/Footer";
@@ -263,6 +263,65 @@ const Landing = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Label Generator */}
+      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Генератор этикеток</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-8">
+            <Card>
+              <CardHeader>
+                <BarChart3 className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>Штрих-коды</CardTitle>
+                <CardDescription>
+                  Создавайте CODE-128 штрихкоды для товаров с наименованием и артикулом
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <QrCode className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>QR-коды</CardTitle>
+                <CardDescription>
+                  Генерируйте QR-коды для ссылок, текста и любой другой информации
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <Package className="w-12 h-12 text-wb-purple mb-4" />
+                <CardTitle>Короба WB</CardTitle>
+                <CardDescription>
+                  Специальные этикетки для коробов Wildberries с порядковыми номерами
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-green-100 border border-green-300 text-green-700 px-6 py-3 rounded-lg text-sm font-medium mb-6">
+              <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
+              <span>для всех пользователей WB Генератор</span>
+            </div>
+            <div className="block">
+              <Link to="/auth">
+                <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
+                  Создать этикетки бесплатно
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
