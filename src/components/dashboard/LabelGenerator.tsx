@@ -148,6 +148,43 @@ export default function LabelGenerator() {
     }]);
   };
 
+  // Generate SVG barcode with separate text and barcode layers
+  const generateSVGBarcode = (text: string, width: number = 200, height: number = 50): string => {
+    if (!text) return '';
+    
+    const svg = `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="white"/>
+        <g id="barcode-bars">
+          <!-- Barcode bars will be generated here -->
+          ${generateBarcodePattern(text, width - 20, height - 25)}
+        </g>
+        <text x="${width/2}" y="${height - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="black" encoding="UTF-8">${text}</text>
+      </svg>
+    `;
+    return svg;
+  };
+
+  // Generate barcode pattern (simplified CODE128)
+  const generateBarcodePattern = (text: string, width: number, height: number): string => {
+    const bars = [];
+    // More realistic barcode pattern generation
+    const code128Pattern = text.split('').map(char => char.charCodeAt(0) % 8); // Simple pattern
+    let x = 10;
+    
+    for (let i = 0; i < code128Pattern.length; i++) {
+      const pattern = code128Pattern[i];
+      for (let j = 0; j < 8; j++) {
+        const barWidth = (width - 20) / (code128Pattern.length * 8);
+        if ((pattern >> j) & 1) {
+          bars.push(`<rect x="${x}" y="5" width="${barWidth}" height="${height}" fill="black"/>`);
+        }
+        x += barWidth;
+      }
+    }
+    return bars.join('\n          ');
+  };
+
   const parseLabelSize = (sizeStr: string): [number, number] => {
     const [width, height] = sizeStr.split('x').map(Number);
     return [width || 40, height || 25];
@@ -230,34 +267,33 @@ export default function LabelGenerator() {
           currentY += 6;
         }
 
-        // Generate barcode using JsBarcode
+        // Generate SVG barcode instead of canvas-based barcode
         if (product.barcode) {
           try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 300;
-            canvas.height = 100;
-            
-            JsBarcode(canvas, product.barcode, {
-              format: "CODE128",
-              width: Math.max(1, Math.floor((labelWidth - 10) / product.barcode.length * 0.8)),
-              height: Math.min(40, labelHeight - currentY + y - 10),
-              displayValue: true,
-              fontSize: 10,
-              fontOptions: "",
-              font: "Arial, sans-serif",
-              textAlign: "center",
-              textPosition: "bottom",
-              textMargin: 2,
-              margin: 2,
-              background: "#ffffff",
-              lineColor: "#000000"
-            });
-            
-            const barcodeDataURL = canvas.toDataURL('image/png');
+            const barcodeWidth = labelWidth - 10;
             const barcodeHeight = Math.min(20, labelHeight - currentY + y - 5);
-            doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, labelWidth - 10, barcodeHeight);
+            const svgBarcode = generateSVGBarcode(product.barcode, barcodeWidth * 3, barcodeHeight * 3);
+            
+            // Convert SVG to data URL for PDF
+            const svgBlob = new Blob([svgBarcode], { type: 'image/svg+xml;charset=utf-8' });
+            const svgURL = URL.createObjectURL(svgBlob);
+            
+            // Create image from SVG
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = barcodeWidth * 3;
+              canvas.height = barcodeHeight * 3;
+              const ctx = canvas.getContext('2d')!;
+              ctx.drawImage(img, 0, 0);
+              
+              const barcodeDataURL = canvas.toDataURL('image/png');
+              doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, barcodeWidth, barcodeHeight);
+              URL.revokeObjectURL(svgURL);
+            };
+            img.src = svgURL;
           } catch (error) {
-            console.error('Barcode generation error:', error);
+            console.error('SVG Barcode generation error:', error);
             // Fallback: add text instead of barcode
             doc.setFontSize(8);
             doc.setFont("helvetica", "normal");
@@ -372,34 +408,33 @@ export default function LabelGenerator() {
         doc.text(`Количество: ${box.quantity}`, x + 2, currentY);
         currentY += 6;
 
-        // Generate barcode using JsBarcode
+        // Generate SVG barcode for WB boxes
         if (box.boxBarcode) {
           try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 300;
-            canvas.height = 100;
-            
-            JsBarcode(canvas, box.boxBarcode, {
-              format: "CODE128",
-              width: Math.max(1, Math.floor((labelWidth - 10) / box.boxBarcode.length * 0.8)),
-              height: Math.min(40, labelHeight - currentY + y - 10),
-              displayValue: true,
-              fontSize: 10,
-              fontOptions: "",
-              font: "Arial, sans-serif",
-              textAlign: "center",
-              textPosition: "bottom",
-              textMargin: 2,
-              margin: 2,
-              background: "#ffffff",
-              lineColor: "#000000"
-            });
-            
-            const barcodeDataURL = canvas.toDataURL('image/png');
+            const barcodeWidth = labelWidth - 10;
             const barcodeHeight = Math.min(20, labelHeight - currentY + y - 5);
-            doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, labelWidth - 10, barcodeHeight);
+            const svgBarcode = generateSVGBarcode(box.boxBarcode, barcodeWidth * 3, barcodeHeight * 3);
+            
+            // Convert SVG to data URL for PDF
+            const svgBlob = new Blob([svgBarcode], { type: 'image/svg+xml;charset=utf-8' });
+            const svgURL = URL.createObjectURL(svgBlob);
+            
+            // Create image from SVG
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = barcodeWidth * 3;
+              canvas.height = barcodeHeight * 3;
+              const ctx = canvas.getContext('2d')!;
+              ctx.drawImage(img, 0, 0);
+              
+              const barcodeDataURL = canvas.toDataURL('image/png');
+              doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, barcodeWidth, barcodeHeight);
+              URL.revokeObjectURL(svgURL);
+            };
+            img.src = svgURL;
           } catch (error) {
-            console.error('Barcode generation error:', error);
+            console.error('SVG Barcode generation error:', error);
             // Fallback: add text instead of barcode
             doc.setFontSize(8);
             doc.setFont("helvetica", "normal");
@@ -451,12 +486,7 @@ export default function LabelGenerator() {
         <div className="block sm:hidden mb-4">
           <Select value={activeTab} onValueChange={setActiveTab}>
             <SelectTrigger className="w-full border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-colors">
-              <div className="flex items-center justify-between w-full">
-                <SelectValue />
-                <div className="flex items-center">
-                  <span className="text-purple-600 mr-1">▼</span>
-                </div>
-              </div>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white border-purple-200 shadow-lg">
               <SelectItem value="barcode" className="hover:bg-purple-50">
@@ -521,38 +551,63 @@ export default function LabelGenerator() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/30">
-                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Штрихкод*</TableHead>
-                        <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Артикул</TableHead>
-                        <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Название товара*</TableHead>
-                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Наименование продавца</TableHead>
+                        <TableHead className="sm:hidden">Товары</TableHead>
+                        <TableHead className="min-w-[70px] w-full sm:min-w-[80px] hidden sm:table-cell">Артикул</TableHead>
+                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Название товара*</TableHead>
+                        <TableHead className="min-w-[90px] w-full sm:min-w-[100px] hidden sm:table-cell">Наименование продавца</TableHead>
                         <TableHead className="w-10"></TableHead>
                       </TableRow>
                     </TableHeader>
                   <TableBody>
                     {products.map((product, index) => (
                       <TableRow key={index}>
-                        <TableCell>
+                        {/* Mobile: Show fields vertically */}
+                        <TableCell className="sm:hidden p-2">
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground">Штрихкод*</Label>
+                              <Input
+                                value={product.barcode}
+                                onChange={(e) => updateProduct(index, 'barcode', e.target.value)}
+                                className="w-full mt-1"
+                                placeholder="Введите штрихкод"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground">Название товара*</Label>
+                              <Input
+                                value={product.productName}
+                                onChange={(e) => updateProduct(index, 'productName', e.target.value)}
+                                className="w-full mt-1"
+                                placeholder="Введите название товара"
+                              />
+                            </div>
+                          </div>
+                        </TableCell>
+                        
+                        {/* Desktop: Show all fields */}
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={product.barcode}
                             onChange={(e) => updateProduct(index, 'barcode', e.target.value)}
                             className="w-full min-w-0"
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={product.article}
                             onChange={(e) => updateProduct(index, 'article', e.target.value)}
                             className="w-full min-w-0"
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={product.productName}
                             onChange={(e) => updateProduct(index, 'productName', e.target.value)}
                             className="w-full min-w-0"
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={product.supplier}
                             onChange={(e) => updateProduct(index, 'supplier', e.target.value)}
@@ -590,7 +645,7 @@ export default function LabelGenerator() {
               <Settings className="h-5 w-5 text-muted-foreground" />
               <CardTitle>Основные настройки</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 bg-muted/30 rounded-lg p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
                   <Label>Тип печати</Label>
@@ -656,7 +711,7 @@ export default function LabelGenerator() {
               <CardTitle>Генератор QR-кодов</CardTitle>
               <CardDescription>Создайте QR-код для любого текста или ссылки</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 bg-muted/30 rounded-lg p-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -689,10 +744,10 @@ export default function LabelGenerator() {
                   
                   <div className="space-y-2">
                     <Label>Формат файла</Label>
-                    <Select value={qrFormat} onValueChange={setQrFormat}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
+                     <Select value={qrFormat} onValueChange={setQrFormat}>
+                       <SelectTrigger className="w-full border-2 border-input">
+                         <SelectValue />
+                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="PNG">PNG</SelectItem>
                         <SelectItem value="JPG">JPG</SelectItem>
@@ -769,17 +824,43 @@ export default function LabelGenerator() {
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/30">
-                        <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">ШК короба*</TableHead>
-                        <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Количество*</TableHead>
-                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Порядковый номер</TableHead>
-                        <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Свободное поле</TableHead>
+                        <TableHead className="sm:hidden">Короба</TableHead>
+                        <TableHead className="min-w-[70px] w-full sm:min-w-[80px] hidden sm:table-cell">Количество*</TableHead>
+                        <TableHead className="min-w-[90px] w-full sm:min-w-[100px] hidden sm:table-cell">Порядковый номер</TableHead>
+                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px] hidden sm:table-cell">Свободное поле</TableHead>
                         <TableHead className="w-10"></TableHead>
                       </TableRow>
                     </TableHeader>
                   <TableBody>
                     {wbBoxes.map((box, index) => (
                       <TableRow key={index}>
-                        <TableCell>
+                        {/* Mobile: Show only barcode and quantity vertically */}
+                        <TableCell className="sm:hidden p-2">
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground">ШК короба*</Label>
+                              <Input
+                                value={box.boxBarcode}
+                                onChange={(e) => updateWBBox(index, 'boxBarcode', e.target.value)}
+                                className="w-full mt-1"
+                                placeholder="Введите штрихкод короба"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground">Количество*</Label>
+                              <Input
+                                value={box.quantity}
+                                onChange={(e) => updateWBBox(index, 'quantity', parseInt(e.target.value) || 1)}
+                                type="number"
+                                className="w-full mt-1"
+                                min="1"
+                              />
+                            </div>
+                          </div>
+                        </TableCell>
+                        
+                        {/* Desktop: Show all fields */}
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={box.boxBarcode}
                             onChange={(e) => updateWBBox(index, 'boxBarcode', e.target.value)}
@@ -787,7 +868,7 @@ export default function LabelGenerator() {
                             placeholder="Штрихкод короба"
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={box.quantity}
                             onChange={(e) => updateWBBox(index, 'quantity', parseInt(e.target.value) || 1)}
@@ -796,7 +877,7 @@ export default function LabelGenerator() {
                             min="1"
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={box.sequenceNumber}
                             onChange={(e) => updateWBBox(index, 'sequenceNumber', e.target.value)}
@@ -804,7 +885,7 @@ export default function LabelGenerator() {
                             placeholder="№1, №2, etc."
                           />
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <Input
                             value={box.freeField}
                             onChange={(e) => updateWBBox(index, 'freeField', e.target.value)}
@@ -843,7 +924,7 @@ export default function LabelGenerator() {
               <Settings className="h-5 w-5 text-muted-foreground" />
               <CardTitle>Настройки коробов WB</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 bg-muted/30 rounded-lg p-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
                   <Label>Тип печати</Label>

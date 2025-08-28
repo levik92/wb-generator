@@ -54,7 +54,7 @@ export const Referrals = ({ profile }: ReferralsProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="bg-gradient-to-r from-muted/50 to-muted/30 border border-muted rounded-[12px] p-6 shadow-sm">
+          <div className="bg-muted/30 border border-muted rounded-[12px] p-6 shadow-sm">
             <h3 className="font-medium mb-4 text-foreground flex items-center gap-2">
               <Link2 className="h-4 w-4" />
               Ваша реферальная ссылка:
@@ -77,13 +77,13 @@ export const Referrals = ({ profile }: ReferralsProps) => {
           </div>
           
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl">
-              <div className="text-3xl font-bold text-green-600 mb-1">+20</div>
-              <div className="text-sm text-green-700 font-medium">токенов за первую покупку друга</div>
+            <div className="text-center p-4 bg-muted/30 border-2 border-muted rounded-xl">
+              <div className="text-3xl font-bold text-muted-foreground mb-1">+20</div>
+              <div className="text-sm text-muted-foreground font-medium">токенов за первую покупку друга</div>
             </div>
-            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl">
-              <div className="text-3xl font-bold text-blue-600 mb-1">+10</div>
-              <div className="text-sm text-blue-700 font-medium">токенов другу при регистрации</div>
+            <div className="text-center p-4 bg-muted/30 border-2 border-muted rounded-xl">
+              <div className="text-3xl font-bold text-muted-foreground mb-1">+10</div>
+              <div className="text-sm text-muted-foreground font-medium">токенов другу при регистрации</div>
             </div>
           </div>
           

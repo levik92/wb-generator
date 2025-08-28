@@ -247,7 +247,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-background/50 border border-border/50 rounded-[8px] p-3 flex items-center gap-3">
+          <div className="bg-muted/30 border border-border/50 rounded-[8px] p-3 flex items-center gap-3">
             <div className="bg-muted/70 p-2 rounded-lg">
               <Images className="h-4 w-4 text-muted-foreground" />
             </div>

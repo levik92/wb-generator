@@ -79,7 +79,7 @@ export default function Balance() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="bg-muted/50 border border-border rounded-[10px] p-4 flex items-center gap-3">
+            <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
               <div className="bg-muted p-2 rounded-lg">
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -91,7 +91,7 @@ export default function Balance() {
                 1 токен
               </div>
             </div>
-            <div className="bg-muted/50 border border-border rounded-[10px] p-4 flex items-center gap-3">
+            <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
               <div className="bg-muted p-2 rounded-lg">
                 <Images className="h-4 w-4 text-muted-foreground" />
               </div>
