@@ -264,9 +264,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert variant="destructive" className="flex items-start justify-start text-left py-4">
-          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-          <AlertDescription className="ml-3">{getGuardMessage()}</AlertDescription>
+        <Alert className="flex items-start justify-start text-left py-4 border-purple-200 bg-purple-50">
+          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-purple-600" />
+          <AlertDescription className="ml-3 text-purple-700">{getGuardMessage()}</AlertDescription>
         </Alert>
       )}
 

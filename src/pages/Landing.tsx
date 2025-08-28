@@ -268,9 +268,13 @@ const Landing = () => {
       </section>
 
       {/* Label Generator */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-16 bg-gradient-to-b from-green-50/50 to-green-100/30">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 bg-green-100 border border-green-300 text-green-700 px-6 py-3 rounded-lg text-sm font-medium mb-6">
+              <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
+              <span>для всех пользователей WB Генератор</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Генератор этикеток</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров
@@ -310,35 +314,15 @@ const Landing = () => {
           </div>
 
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-green-100 border border-green-300 text-green-700 px-6 py-3 rounded-lg text-sm font-medium mb-6">
-              <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
-              <span>для всех пользователей WB Генератор</span>
-            </div>
-            <div className="block">
-              <Link to="/auth">
-                <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
-                  Создать этикетки бесплатно
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-            </div>
+            <Link to="/auth">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
+                Создать этикетки бесплатно
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* Decorative Divider */}
-      <div className="relative py-8">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gradient-to-r from-transparent via-wb-purple/20 to-transparent"></div>
-        </div>
-        <div className="relative flex justify-center">
-          <div className="bg-background px-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-full flex items-center justify-center">
-              <Zap className="w-8 h-8 text-wb-purple" />
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Pricing */}
       <section className="py-16">
