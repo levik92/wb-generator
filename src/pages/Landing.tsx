@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import Footer from "@/components/Footer";
 import heroDemo from "@/assets/hero-demo.jpg";
@@ -15,6 +15,8 @@ import exampleAfter2 from "@/assets/example-after-2.jpg";
 import exampleAfter3 from "@/assets/example-after-3.jpg";
 
 const Landing = () => {
+  const navigate = useNavigate();
+  
   const scrollToExamples = () => {
     document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -324,7 +326,7 @@ const Landing = () => {
                     </div>
                   </div>
                 </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark" onClick={() => navigate('/auth')}>
                   Выбрать план
                 </Button>
               </CardContent>
@@ -365,7 +367,7 @@ const Landing = () => {
                     </div>
                   </div>
                 </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark" onClick={() => navigate('/auth')}>
                   Выбрать план
                 </Button>
               </CardContent>
@@ -405,7 +407,7 @@ const Landing = () => {
                     </div>
                   </div>
                 </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
+                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark" onClick={() => navigate('/auth')}>
                   Выбрать план
                 </Button>
               </CardContent>

@@ -2,6 +2,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface Profile {
   id: string;
@@ -18,6 +21,39 @@ interface PricingProps {
 }
 
 export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
+  const [loading, setLoading] = useState(false);
+
+  const handlePayment = async (packageName: string, amount: number, tokens: number) => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: { packageName, amount, tokens }
+      });
+
+      if (error) {
+        toast({
+          title: "Ошибка",
+          description: error.message || "Не удалось создать платеж",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.payment_url) {
+        window.location.href = data.payment_url;
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при создании платежа",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="space-y-6">
       <div>
@@ -58,8 +94,12 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
                 </div>
               </div>
             </div>
-            <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-              Выбрать
+            <Button 
+              className="w-full bg-wb-purple hover:bg-wb-purple-dark" 
+              onClick={() => handlePayment('Стартовый', 499, 50)}
+              disabled={loading}
+            >
+              {loading ? 'Обработка...' : 'Выбрать'}
             </Button>
           </CardContent>
         </Card>
@@ -95,8 +135,12 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
                 </div>
               </div>
             </div>
-            <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-              Выбрать
+            <Button 
+              className="w-full bg-wb-purple hover:bg-wb-purple-dark" 
+              onClick={() => handlePayment('Профи', 1499, 200)}
+              disabled={loading}
+            >
+              {loading ? 'Обработка...' : 'Выбрать'}
             </Button>
           </CardContent>
         </Card>
@@ -131,8 +175,12 @@ export const Pricing = ({ profile, onTokensUpdate }: PricingProps) => {
                 </div>
               </div>
             </div>
-            <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark">
-              Выбрать
+            <Button 
+              className="w-full bg-wb-purple hover:bg-wb-purple-dark" 
+              onClick={() => handlePayment('Бизнес', 5999, 1000)}
+              disabled={loading}
+            >
+              {loading ? 'Обработка...' : 'Выбрать'}
             </Button>
           </CardContent>
         </Card>
