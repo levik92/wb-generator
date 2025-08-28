@@ -1,7 +1,9 @@
 import { AdminAnalyticsChart } from "./AdminAnalyticsChart";
+import SecurityDashboard from "./SecurityDashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FileSpreadsheet, Users, CreditCard, Coins } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Download, FileSpreadsheet, Users, CreditCard, Coins, Shield } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -101,57 +103,70 @@ export default function AdminAnalytics() {
 
   return (
     <div className="space-y-8">
-      {/* Export Controls */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5" />
-            Экспорт данных
-          </CardTitle>
-          <CardDescription>
-            Экспортируйте данные в формате CSV для дальнейшего анализа
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => exportToCSV('users')}
-              disabled={exporting}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Users className="h-4 w-4" />
-              {exporting ? 'Экспорт...' : 'Пользователи'}
-              <Download className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              onClick={() => exportToCSV('payments')}
-              disabled={exporting}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <CreditCard className="h-4 w-4" />
-              {exporting ? 'Экспорт...' : 'Платежи'}
-              <Download className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              onClick={() => exportToCSV('generations')}
-              disabled={exporting}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Coins className="h-4 w-4" />
-              {exporting ? 'Экспорт...' : 'Генерации'}
-              <Download className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="analytics" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="analytics">Аналитика</TabsTrigger>
+          <TabsTrigger value="security">Безопасность</TabsTrigger>
+        </TabsList>
 
-      {/* Beautiful Analytics Charts */}
-      <AdminAnalyticsChart />
+        <TabsContent value="analytics" className="space-y-8">
+          {/* Export Controls */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5" />
+                Экспорт данных
+              </CardTitle>
+              <CardDescription>
+                Экспортируйте данные в формате CSV для дальнейшего анализа
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button
+                  onClick={() => exportToCSV('users')}
+                  disabled={exporting}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  {exporting ? 'Экспорт...' : 'Пользователи'}
+                  <Download className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  onClick={() => exportToCSV('payments')}
+                  disabled={exporting}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {exporting ? 'Экспорт...' : 'Платежи'}
+                  <Download className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  onClick={() => exportToCSV('generations')}
+                  disabled={exporting}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Coins className="h-4 w-4" />
+                  {exporting ? 'Экспорт...' : 'Генерации'}
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Beautiful Analytics Charts */}
+          <AdminAnalyticsChart />
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-8">
+          <SecurityDashboard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

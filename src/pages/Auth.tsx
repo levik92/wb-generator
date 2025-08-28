@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSecurityLogger } from "@/hooks/useSecurityLogger";
 import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -17,6 +18,7 @@ const Auth = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
@@ -46,7 +48,14 @@ const Auth = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log failed signup attempt
+        await logLoginAttempt(email, false, error.message);
+        throw error;
+      }
+
+      // Log successful signup
+      await logLoginAttempt(email, true);
 
       toast({
         title: "Аккаунт создан! 📧",
@@ -74,9 +83,16 @@ const Auth = () => {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Log failed login attempt
+        await logLoginAttempt(email, false, error.message);
+        throw error;
+      }
 
       if (data.user) {
+        // Log successful login
+        await logLoginAttempt(email, true);
+        
         toast({
           title: "Добро пожаловать!",
           description: "Вы успешно вошли в систему.",

@@ -27,6 +27,10 @@ serve(async (req) => {
   try {
     console.log('Create payment request received');
     
+    // Extract client information for security logging
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    const userAgent = req.headers.get('user-agent');
+    
     const supabaseServiceRole = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -134,6 +138,16 @@ serve(async (req) => {
       throw new Error(`Database error: ${insertError.message}`);
     }
 
+    // Log security event for payment creation
+    await supabaseServiceRole.rpc('log_security_event', {
+      user_id_param: user.id,
+      event_type_param: 'payment_created',
+      event_description_param: `Payment created for package: ${packageName}, amount: ${amount} RUB`,
+      ip_address_param: clientIP,
+      user_agent_param: userAgent,
+      metadata_param: { payment_id: yookassaData.id, package_name: packageName }
+    });
+
     return new Response(JSON.stringify({ 
       payment_url: yookassaData.confirmation.confirmation_url,
       payment_id: yookassaData.id
@@ -144,6 +158,28 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in create-payment function:', error);
+    
+    // Log security event for payment error
+    try {
+      const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+      const userAgent = req.headers.get('user-agent');
+      const supabaseServiceRole = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      await supabaseServiceRole.rpc('log_security_event', {
+        user_id_param: null,
+        event_type_param: 'payment_error',
+        event_description_param: `Payment creation failed: ${error.message}`,
+        ip_address_param: clientIP,
+        user_agent_param: userAgent,
+        metadata_param: { error: error.message }
+      });
+    } catch (logError) {
+      console.error('Failed to log security event:', logError);
+    }
+    
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
