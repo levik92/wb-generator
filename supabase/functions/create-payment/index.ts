@@ -80,6 +80,24 @@ serve(async (req) => {
         },
         capture: true,
         description: `Пополнение баланса: ${packageName} (${tokens} токенов)`,
+        receipt: {
+          customer: {
+            email: user.email
+          },
+          items: [
+            {
+              description: `Токены для WB Генератор: ${packageName}`,
+              quantity: "1.00",
+              amount: {
+                value: amount.toFixed(2),
+                currency: 'RUB'
+              },
+              vat_code: 1,
+              payment_mode: "full_payment",
+              payment_subject: "service"
+            }
+          ]
+        },
         metadata: {
           user_id: user.id,
           package_name: packageName,
