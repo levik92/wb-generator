@@ -296,29 +296,29 @@ const Landing = () => {
               <CardHeader>
                 <CardTitle>Стартовый</CardTitle>
                 <div className="text-3xl font-bold">499₽</div>
-                <CardDescription>50 токенов</CardDescription>
+                <CardDescription>40 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
-                  <strong>9,98₽</strong> за токен
+                  <strong>12,48₽</strong> за токен
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 mb-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 токен =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
+                    <span className="text-xs sm:text-sm">1 описание =</span>
+                    <span className="text-xs sm:text-sm font-medium">12,48₽</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">6 токенов =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
+                    <span className="text-xs sm:text-sm">1 карточка из 6 изображений =</span>
+                    <span className="text-xs sm:text-sm font-medium">74,88₽</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">8 комплектов карточек</span>
+                      <span className="text-xs sm:text-sm">6 комплектов карточек</span>
                     </div>
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">50 описаний товаров</span>
+                      <span className="text-xs sm:text-sm">40 описаний товаров</span>
                     </div>
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
@@ -337,29 +337,29 @@ const Landing = () => {
                 <Badge className="w-fit bg-wb-purple">Популярный</Badge>
                 <CardTitle>Профи</CardTitle>
                 <div className="text-3xl font-bold">1 499₽</div>
-                <CardDescription>200 токенов</CardDescription>
+                <CardDescription>130 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
-                  <strong>7,50₽</strong> за токен
+                  <strong>11,53₽</strong> за токен
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 mb-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 токен =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
+                    <span className="text-xs sm:text-sm">1 описание =</span>
+                    <span className="text-xs sm:text-sm font-medium">11,53₽</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">6 токенов =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
+                    <span className="text-xs sm:text-sm">1 карточка из 6 изображений =</span>
+                    <span className="text-xs sm:text-sm font-medium">69,18₽</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">33 комплекта карточек</span>
+                      <span className="text-xs sm:text-sm">21 комплект карточек</span>
                     </div>
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">200 описаний товаров</span>
+                      <span className="text-xs sm:text-sm">130 описаний товаров</span>
                     </div>
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
@@ -377,29 +377,29 @@ const Landing = () => {
               <CardHeader>
                 <CardTitle>Бизнес</CardTitle>
                 <div className="text-3xl font-bold">5 999₽</div>
-                <CardDescription>1000 токенов</CardDescription>
+                <CardDescription>550 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
-                  <strong>6,00₽</strong> за токен
+                  <strong>10,91₽</strong> за токен
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 mb-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 токен =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 описание товара</span>
+                    <span className="text-xs sm:text-sm">1 описание =</span>
+                    <span className="text-xs sm:text-sm font-medium">10,91₽</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">6 токенов =</span>
-                    <span className="text-xs sm:text-sm font-medium">1 комплект карточек</span>
+                    <span className="text-xs sm:text-sm">1 карточка из 6 изображений =</span>
+                    <span className="text-xs sm:text-sm font-medium">65,46₽</span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">166 комплектов карточек</span>
+                      <span className="text-xs sm:text-sm">91 комплект карточек</span>
                     </div>
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">1000 описаний товаров</span>
+                      <span className="text-xs sm:text-sm">550 описаний товаров</span>
                     </div>
                     <div className="flex items-center">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
