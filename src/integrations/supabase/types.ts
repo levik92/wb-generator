@@ -281,6 +281,41 @@ export type Database = {
           },
         ]
       }
+      referrals_completed: {
+        Row: {
+          created_at: string
+          id: string
+          payment_id: string
+          referred_id: string
+          referrer_id: string
+          tokens_awarded: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_id: string
+          referred_id: string
+          referrer_id: string
+          tokens_awarded?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_id?: string
+          referred_id?: string
+          referrer_id?: string
+          tokens_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_completed_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       token_transactions: {
         Row: {
           amount: number

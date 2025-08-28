@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coins, FileText, Images } from "lucide-react";
@@ -39,20 +40,35 @@ export default function Balance() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-xl font-semibold">Баланс токенов</CardTitle>
-          <Coins className="h-5 w-5 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="bg-muted/80 border border-border rounded-lg px-4 py-2 inline-block">
-            <div className="text-3xl font-bold text-foreground">{balance}</div>
+      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-wb-purple/20 p-3 rounded-lg">
+              <Coins className="h-6 w-6 text-wb-purple" />
+            </div>
+            <h2 className="text-xl font-semibold text-wb-purple">Баланс токенов</h2>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            токенов доступно для генерации
-          </p>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-4xl font-bold text-wb-purple mb-2">{balance}</div>
+            <p className="text-sm text-muted-foreground">
+              токенов доступно для генерации
+            </p>
+          </div>
+          <Button 
+            onClick={() => {
+              const pricingElement = document.getElementById('pricing-section');
+              if (pricingElement) {
+                pricingElement.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="bg-wb-purple hover:bg-wb-purple-dark"
+          >
+            Пополнить
+          </Button>
+        </div>
+      </div>
 
       <Card>
         <CardHeader>
@@ -94,7 +110,7 @@ export default function Balance() {
           <TabsTrigger value="history">История пополнений</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pricing">
+        <TabsContent value="pricing" id="pricing-section">
           <Pricing />
         </TabsContent>
         

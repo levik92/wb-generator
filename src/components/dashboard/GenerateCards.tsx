@@ -238,15 +238,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       {/* Token Cost */}
-      <Alert className="flex items-start justify-start py-4">
-        <Zap className="h-4 w-4 flex-shrink-0 mt-0.5" />
-        <AlertDescription className="ml-3">
-          <div className="flex flex-col space-y-1">
-            <span>Стоимость генерации:</span>
-            <span><strong>6 токенов</strong> за комплект из 6 изображений</span>
+      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-6">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="bg-wb-purple/20 p-2 rounded-lg">
+            <Zap className="h-5 w-5 text-wb-purple" />
           </div>
-        </AlertDescription>
-      </Alert>
+          <h3 className="text-lg font-semibold text-wb-purple">Стоимость генерации</h3>
+        </div>
+        <div className="text-muted-foreground">
+          <span className="text-2xl font-bold text-wb-purple">6 токенов</span>
+          <span className="text-sm ml-2">за комплект из 6 изображений</span>
+        </div>
+      </div>
 
       {/* Guard Messages */}
       {!canGenerate() && (
