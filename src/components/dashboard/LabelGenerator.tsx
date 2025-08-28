@@ -128,7 +128,7 @@ export default function LabelGenerator() {
     return [width || 40, height || 25];
   };
 
-  const generateProductPDF = () => {
+  const generateProductPDF = async () => {
     if (products.length === 0) {
       toast("Добавьте товары в таблицу");
       return;
@@ -164,7 +164,8 @@ export default function LabelGenerator() {
 
       let currentPage = 0;
       
-      products.forEach((product, index) => {
+      for (let index = 0; index < products.length; index++) {
+        const product = products[index];
         const labelIndex = index % (labelsPerRow * labelsPerColumn);
         const row = Math.floor(labelIndex / labelsPerRow);
         const col = labelIndex % labelsPerRow;
@@ -204,34 +205,39 @@ export default function LabelGenerator() {
           doc.text(`Бренд: ${product.brand}`, x + 2, y + 38);
         }
 
-        // Generate barcode
-        const canvas = document.createElement('canvas');
-        canvas.width = 200;
-        canvas.height = 80;
-        
-        try {
-          JsBarcode(canvas, product.barcode, {
-            format: settings.barcodeFormat,
-            width: 1,
-            height: 40,
-            displayValue: true,
-            fontSize: 10,
-            textMargin: 2,
-            margin: 0
-          });
-          
-          const barcodeDataURL = canvas.toDataURL('image/png');
-          doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 45, labelWidth - 10, 20);
-        } catch (error) {
-          console.error('Barcode generation error:', error);
-          toast("Ошибка генерации штрихкода");
-          return;
+        // Generate barcode using online API
+        if (product.barcode) {
+          try {
+            const barcodeUrl = `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(product.barcode)}&code=${settings.barcodeFormat}&dpi=96&dataseparator=&color=%23000000&bgcolor=%23ffffff&qunit=Mm&quiet=0`;
+            
+            // Create a promise to load the image
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            await new Promise((resolve, reject) => {
+              img.onload = () => {
+                try {
+                  doc.addImage(img, 'PNG', x + 2, y + 45, labelWidth - 10, 20);
+                  resolve(true);
+                } catch (err) {
+                  reject(err);
+                }
+              };
+              img.onerror = reject;
+              img.src = barcodeUrl;
+            });
+          } catch (error) {
+            console.error('Barcode generation error:', error);
+            // Fallback: add text instead of barcode
+            doc.setFontSize(8);
+            doc.text(`Штрихкод: ${product.barcode}`, x + 2, y + 55);
+          }
         }
 
         // Add quantity at bottom
         doc.setFontSize(7);
         doc.text(`Количество: ${product.quantity}`, x + 2, y + labelHeight - 5);
-      });
+      }
 
       doc.save('labels.pdf');
       toast("PDF файл успешно создан!");
@@ -281,16 +287,14 @@ export default function LabelGenerator() {
 
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-0">
-      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-4 sm:p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="bg-wb-purple/20 p-3 rounded-lg">
-            <FileText className="h-6 w-6 text-wb-purple" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-wb-purple">Сервис генерации этикеток штрихкодов (баркодов)</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Генератор этикеток</h1>
+          <p className="text-muted-foreground mt-1">Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров</p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          — это онлайн-генератор этикеток и штрихкодов. Он создан для того, чтобы упростить генерацию этикеток на товар, штрихкодов (баркодов) и наклеек на дополнительную упаковку.
-        </p>
+        <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
+          FREE
+        </Badge>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
