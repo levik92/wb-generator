@@ -124,6 +124,14 @@ export default function Pricing() {
               <div className="text-sm text-muted-foreground mt-2">
                 <strong>{(plan.price / plan.tokens).toFixed(2)}₽</strong> за токен
               </div>
+              <div className="mt-3 space-y-2">
+                <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
+                  1 описание = {(plan.price / plan.tokens * 1).toFixed(2)}₽
+                </div>
+                <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
+                  1 карточка = {(plan.price / plan.tokens * 6).toFixed(2)}₽
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 mb-6">

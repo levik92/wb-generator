@@ -300,6 +300,14 @@ const Landing = () => {
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>12,48₽</strong> за токен
                 </div>
+                <div className="mt-3 space-y-2">
+                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
+                    1 описание = 12,48₽
+                  </div>
+                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
+                    1 карточка = 74,88₽
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 mb-6">
@@ -341,6 +349,14 @@ const Landing = () => {
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>11,53₽</strong> за токен
                 </div>
+                <div className="mt-3 space-y-2">
+                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
+                    1 описание = 11,53₽
+                  </div>
+                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
+                    1 карточка = 69,18₽
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 mb-6">
@@ -380,6 +396,14 @@ const Landing = () => {
                 <CardDescription>550 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>10,91₽</strong> за токен
+                </div>
+                <div className="mt-3 space-y-2">
+                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
+                    1 описание = 10,91₽
+                  </div>
+                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
+                    1 карточка = 65,46₽
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
