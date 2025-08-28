@@ -87,7 +87,7 @@ const Landing = () => {
           <div className="mb-8 sm:mb-12 px-4">
             <div className="relative w-full max-w-4xl mx-auto">
               <img 
-                src="/lovable-uploads/87afb2c1-c274-438e-83b8-8e802d3cbc2f.png" 
+                src="/lovable-uploads/289c8992-c5b0-4dab-8da4-70befe803ab0.png" 
                 alt="Интерфейс WB Генератор - панель для создания карточек товаров"
                 className="w-full rounded-lg border-4 border-wb-purple/30 shadow-2xl shadow-wb-purple/20"
               />

@@ -177,17 +177,17 @@ export default function LabelGenerator() {
     const barsCanvas = document.createElement('canvas');
     
     try {
-      JsBarcode(barsCanvas, currentState.data, {
-        format: 'code128',
-        displayValue: true,
-        font: 'Inter, Arial',
-        textPosition: 'bottom',
-        fontSize: currentState.format === '58x40' ? 36 : 46,
-        textMargin: currentState.format === '58x40' ? 24 : 32,
-        margin: 0,
-        width: currentState.format === '58x40' ? 4 : 5,
-        height: Math.round(mmToPx(barsMM, dpi))
-      });
+        JsBarcode(barsCanvas, currentState.data, {
+          format: 'code128',
+          displayValue: false,
+          font: 'Inter, Arial',
+          textPosition: 'bottom',
+          fontSize: currentState.format === '58x40' ? 36 : 46,
+          textMargin: currentState.format === '58x40' ? 24 : 32,
+          margin: 0,
+          width: currentState.format === '58x40' ? 4 : 5,
+          height: Math.round(mmToPx(barsMM, dpi))
+        });
 
       // Don't scale the barcode - keep it original size
       const bw = barsCanvas.width;
@@ -300,7 +300,7 @@ export default function LabelGenerator() {
       try {
         JsBarcode(barsCanvas, currentState.data, {
           format: 'code128',
-          displayValue: true,
+          displayValue: false,
           font: 'Arial',
           textPosition: 'bottom',
           fontSize: format === '58x40' ? 18 : 60,
