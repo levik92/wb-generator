@@ -19,12 +19,8 @@ import QRCodeGenerator from 'qrcode';
 interface Product {
   barcode: string;
   article: string;
-  color: string;
-  size: string;
   productName: string;
   supplier: string;
-  quantity: number;
-  brand?: string;
 }
 
 interface WBBox {
@@ -66,11 +62,8 @@ export default function LabelGenerator() {
   const [products, setProducts] = useState<Product[]>([{
     barcode: "",
     article: "",
-    color: "",
-    size: "",
     productName: "",
-    supplier: "",
-    quantity: 1
+    supplier: ""
   }]);
 
   const [settings, setSettings] = useState<Settings>({
@@ -97,11 +90,8 @@ export default function LabelGenerator() {
     setProducts([...products, {
       barcode: "",
       article: "",
-      color: "",
-      size: "",
       productName: "",
-      supplier: useSameSupplier && products.length > 0 ? products[0].supplier : "",
-      quantity: 1
+      supplier: useSameSupplier && products.length > 0 ? products[0].supplier : ""
     }]);
   };
 
@@ -160,11 +150,8 @@ export default function LabelGenerator() {
     setProducts([{
       barcode: "",
       article: "",
-      color: "",
-      size: "",
       productName: "",
-      supplier: "",
-      quantity: 1
+      supplier: ""
     }]);
   };
 
@@ -225,30 +212,17 @@ export default function LabelGenerator() {
 
         // Add supplier name
         doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
         doc.text(product.supplier || "ИП Продавец", x + 2, y + 8);
         
         // Add product name
         doc.setFontSize(9);
-        doc.setFont("helvetica", "bold");
         const productName = product.productName || "Название товара";
         const splitName = doc.splitTextToSize(productName, labelWidth - 10);
         doc.text(splitName, x + 2, y + 15);
         
         // Add article
         doc.setFontSize(8);
-        doc.setFont("helvetica", "normal");
         doc.text(`Артикул: ${product.article || ""}`, x + 2, y + 25);
-        
-        // Add color and size
-        const colorSize = `Цв.: ${product.color || ""}, ${product.size || ""} / Раз.: ${product.size || ""}`;
-        const splitColorSize = doc.splitTextToSize(colorSize, labelWidth - 10);
-        doc.text(splitColorSize, x + 2, y + 32);
-        
-        // Add brand
-        if (product.brand) {
-          doc.text(`Бренд: ${product.brand}`, x + 2, y + 38);
-        }
 
         // Generate barcode using JsBarcode
         if (product.barcode) {
@@ -263,6 +237,10 @@ export default function LabelGenerator() {
               height: 50,
               displayValue: true,
               fontSize: 12,
+              fontOptions: "",
+              font: "monospace",
+              textAlign: "center",
+              textPosition: "bottom",
               textMargin: 2,
               margin: 5,
               background: "#ffffff",
@@ -270,18 +248,14 @@ export default function LabelGenerator() {
             });
             
             const barcodeDataURL = canvas.toDataURL('image/png');
-            doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 45, labelWidth - 10, 20);
+            doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 35, labelWidth - 10, 20);
           } catch (error) {
             console.error('Barcode generation error:', error);
             // Fallback: add text instead of barcode
             doc.setFontSize(8);
-            doc.text(`Штрихкод: ${product.barcode}`, x + 2, y + 55);
+            doc.text(`Штрихкод: ${product.barcode}`, x + 2, y + 45);
           }
         }
-
-        // Add quantity at bottom
-        doc.setFontSize(7);
-        doc.text(`Количество: ${product.quantity}`, x + 2, y + labelHeight - 5);
       }
 
       doc.save('labels.pdf');
@@ -397,6 +371,10 @@ export default function LabelGenerator() {
               height: 50,
               displayValue: true,
               fontSize: 12,
+              fontOptions: "",
+              font: "monospace",
+              textAlign: "center",
+              textPosition: "bottom",
               textMargin: 2,
               margin: 5,
               background: "#ffffff",
@@ -453,20 +431,48 @@ export default function LabelGenerator() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-3 h-12 sm:h-10">
-          <TabsTrigger value="barcode" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Этикетки</span>
-            <span className="sm:hidden">ШК</span>
+        {/* Mobile Tab Selector */}
+        <div className="block sm:hidden mb-4">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="barcode">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Этикетки
+                </div>
+              </SelectItem>
+              <SelectItem value="qr">
+                <div className="flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  QR-коды
+                </div>
+              </SelectItem>
+              <SelectItem value="wb">
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Короба WB
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop Tab List */}
+        <TabsList className="hidden sm:grid w-full grid-cols-3 h-10">
+          <TabsTrigger value="barcode" className="flex items-center gap-2 text-sm">
+            <BarChart3 className="h-4 w-4" />
+            Этикетки
           </TabsTrigger>
-          <TabsTrigger value="qr" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-            <QrCode className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>QR</span>
+          <TabsTrigger value="qr" className="flex items-center gap-2 text-sm">
+            <QrCode className="h-4 w-4" />
+            QR-коды
           </TabsTrigger>
-          <TabsTrigger value="wb" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-            <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Короба WB</span>
-            <span className="sm:hidden">WB</span>
+          <TabsTrigger value="wb" className="flex items-center gap-2 text-sm">
+            <Package className="h-4 w-4" />
+            Короба WB
           </TabsTrigger>
         </TabsList>
 
@@ -485,7 +491,7 @@ export default function LabelGenerator() {
                     <Trash2 className="h-4 w-4 mr-2" />
                     Очистить таблицу
                   </Button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 bg-gray-100 p-3 rounded-lg border">
                     <Checkbox
                       id="same-supplier"
                       checked={useSameSupplier}
@@ -505,11 +511,8 @@ export default function LabelGenerator() {
                     <TableRow className="bg-muted/30">
                       <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Штрихкод*</TableHead>
                       <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Артикул</TableHead>
-                      <TableHead className="min-w-[60px] w-full sm:min-w-[80px]">Цвет</TableHead>
-                      <TableHead className="min-w-[60px] w-full sm:min-w-[80px]">Размер</TableHead>
                       <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Название товара*</TableHead>
                       <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Наименование продавца</TableHead>
-                      <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Количество*</TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -532,20 +535,6 @@ export default function LabelGenerator() {
                         </TableCell>
                         <TableCell>
                           <Input
-                            value={product.color}
-                            onChange={(e) => updateProduct(index, 'color', e.target.value)}
-                            className="w-full min-w-0"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={product.size}
-                            onChange={(e) => updateProduct(index, 'size', e.target.value)}
-                            className="w-full min-w-0"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
                             value={product.productName}
                             onChange={(e) => updateProduct(index, 'productName', e.target.value)}
                             className="w-full min-w-0"
@@ -556,14 +545,6 @@ export default function LabelGenerator() {
                             value={useSameSupplier && index > 0 ? products[0].supplier : product.supplier}
                             onChange={(e) => updateProduct(index, 'supplier', e.target.value)}
                             disabled={useSameSupplier && index > 0}
-                            className="w-full min-w-0"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            value={product.quantity}
-                            onChange={(e) => updateProduct(index, 'quantity', parseInt(e.target.value) || 1)}
-                            type="number"
                             className="w-full min-w-0"
                           />
                         </TableCell>
@@ -598,21 +579,9 @@ export default function LabelGenerator() {
               <CardTitle>Основные настройки</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
-                  <Label>Формат штрихкода</Label>
-                  <Select value={settings.barcodeFormat} onValueChange={(value) => setSettings(prev => ({ ...prev, barcodeFormat: value }))}>
-                    <SelectTrigger className="border border-input w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CODE128">CODE-128</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Тип штрихкода</Label>
+                  <Label>Тип печати</Label>
                   <div className="flex gap-4">
                     <div className="flex items-center space-x-2">
                       <input 
@@ -639,34 +608,21 @@ export default function LabelGenerator() {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label>Размер наклейки (мм, ШхВ)</Label>
-                  <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
-                    <SelectTrigger className="border border-input w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {labelSizes.map((size) => (
-                        <SelectItem key={size} value={size}>{size}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Или введите свой размер (мм, ШхВ) - макс. 210x297 (A4)
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Размер шрифта (px)</Label>
-                  <Input
-                    type="number"
-                    value={settings.fontSize}
-                    onChange={(e) => setSettings(prev => ({ ...prev, fontSize: parseInt(e.target.value) || 12 }))}
-                    min="8"
-                    max="24"
-                    className="w-full"
-                  />
-                </div>
+                {settings.labelType === 'Термоэтикетка' && (
+                  <div className="space-y-2">
+                    <Label>Размер термоэтикетки (мм, ШхВ)</Label>
+                    <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {labelSizes.map((size) => (
+                          <SelectItem key={size} value={size}>{size}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-center pt-4">
@@ -874,9 +830,9 @@ export default function LabelGenerator() {
               <CardTitle>Настройки коробов WB</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
-                  <Label>Тип штрихкода</Label>
+                  <Label>Тип печати</Label>
                   <div className="flex gap-4">
                     <div className="flex items-center space-x-2">
                       <input 
@@ -903,31 +859,21 @@ export default function LabelGenerator() {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label>Размер наклейки (мм, ШхВ)</Label>
-                  <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
-                    <SelectTrigger className="border border-input w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {labelSizes.map((size) => (
-                        <SelectItem key={size} value={size}>{size}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Размер шрифта (px)</Label>
-                  <Input
-                    type="number"
-                    value={settings.fontSize}
-                    onChange={(e) => setSettings(prev => ({ ...prev, fontSize: parseInt(e.target.value) || 12 }))}
-                    min="8"
-                    max="24"
-                    className="w-full"
-                  />
-                </div>
+                {settings.labelType === 'Термоэтикетка' && (
+                  <div className="space-y-2">
+                    <Label>Размер термоэтикетки (мм, ШхВ)</Label>
+                    <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {labelSizes.map((size) => (
+                          <SelectItem key={size} value={size}>{size}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-center pt-4">

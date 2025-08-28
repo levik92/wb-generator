@@ -25,8 +25,9 @@ export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps)
   const menuItems = [
     { id: 'cards', label: 'Генерация карточек', icon: CreditCard },
     { id: 'description', label: 'Генерация описаний', icon: FileText },
+    { id: 'labels', label: 'Генератор этикеток', icon: FileText, badge: 'FREE', badgeColor: 'bg-green-500' },
     { id: 'history', label: 'История', icon: History },
-    { id: 'pricing', label: 'Тарифы', icon: DollarSign },
+    { id: 'pricing', label: 'Баланс', icon: DollarSign },
     { id: 'referrals', label: 'Рефералы', icon: Users },
     { id: 'settings', label: 'Настройки', icon: Settings },
   ];
@@ -84,17 +85,25 @@ export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps)
                 const isActive = activeTab === item.id;
                 
                 return (
-                  <Button
-                    key={item.id}
-                    variant={isActive ? "secondary" : "ghost"}
-                    className={`w-full justify-start text-left ${
-                      isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
-                    }`}
-                    onClick={() => handleTabChange(item.id)}
-                  >
-                    <Icon className="w-4 h-4 mr-3" />
-                    {item.label}
-                  </Button>
+                  <div key={item.id} className="relative">
+                    <Button
+                      variant={isActive ? "secondary" : "ghost"}
+                      className={`w-full justify-start text-left ${
+                        isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
+                      }`}
+                      onClick={() => handleTabChange(item.id)}
+                    >
+                      <Icon className="w-4 h-4 mr-3" />
+                      {item.label}
+                    </Button>
+                    {item.badge && (
+                      <div className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 rounded text-white ${
+                        item.badgeColor || 'bg-muted'
+                      } border-0 shadow-sm z-10 pointer-events-none`}>
+                        {item.badge}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
