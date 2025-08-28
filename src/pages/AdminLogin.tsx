@@ -92,7 +92,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@wbgenerator.com"
+                placeholder="Введите email администратора"
               />
             </div>
             <div className="space-y-2">

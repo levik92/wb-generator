@@ -51,6 +51,24 @@ export default function Balance() {
           </p>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Стоимость генерации</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between items-center">
+              <span>1 описание товара:</span>
+              <span className="font-medium">1 токен</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>1 комплект карточек (6 шт):</span>
+              <span className="font-medium">6 токенов</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       <Tabs defaultValue="pricing" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
