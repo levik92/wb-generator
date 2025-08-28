@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import AdminLogin from "./pages/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Admin />
             </ProtectedRoute>
           } />
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -10,7 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { GenerateCards } from "@/components/dashboard/GenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
 import { History } from "@/components/dashboard/History";
-import { Balance } from "@/components/dashboard/Balance";
+import Balance from "@/components/dashboard/Balance";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
 import Footer from "@/components/Footer";
@@ -137,7 +137,7 @@ const Dashboard = () => {
       case 'history':
         return <History profile={profile} />;
       case 'pricing':
-        return <Balance profile={profile} onTokensUpdate={refreshProfile} />;
+        return <Balance />;
       case 'referrals':
         return <Referrals profile={profile} />;
       case 'settings':
