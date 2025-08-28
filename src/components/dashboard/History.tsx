@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Generation {
@@ -35,25 +35,54 @@ export const History = ({ profile }: HistoryProps) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'cards' | 'description'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const { toast } = useToast();
+
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     loadHistory();
-  }, []);
+  }, [currentPage, filter]);
 
   const loadHistory = async () => {
     try {
-      const { data, error } = await supabase
+      setLoading(true);
+      
+      // Get total count first
+      let countQuery = supabase
+        .from('generations')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile.id);
+        
+      if (filter !== 'all') {
+        countQuery = countQuery.eq('generation_type', filter);
+      }
+      
+      const { count } = await countQuery;
+      const totalItems = count || 0;
+      const calculatedTotalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+      setTotalPages(calculatedTotalPages);
+      
+      // Get paginated data
+      let query = supabase
         .from('generations')
         .select('*')
         .eq('user_id', profile.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+        
+      if (filter !== 'all') {
+        query = query.eq('generation_type', filter);
+      }
+      
+      const { data, error } = await query;
 
       if (error) throw error;
       setGenerations(data || []);
     } catch (error: any) {
       toast({
-        title: "Ошибка загрузки",
+        title: "Ошибка загрузки истории",
         description: error.message,
         variant: "destructive",
       });
@@ -129,9 +158,7 @@ export const History = ({ profile }: HistoryProps) => {
     });
   };
 
-  const filteredGenerations = generations.filter(gen => 
-    filter === 'all' || gen.generation_type === filter
-  );
+  const filteredGenerations = generations;
 
   if (loading) {
     return (
@@ -252,6 +279,50 @@ export const History = ({ profile }: HistoryProps) => {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Назад
+          </Button>
+          
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+              if (pageNum > totalPages) return null;
+              
+              return (
+                <Button
+                  key={pageNum}
+                  variant={currentPage === pageNum ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={currentPage === pageNum ? "bg-wb-purple hover:bg-wb-purple/80" : ""}
+                >
+                  {pageNum}
+                </Button>
+              );
+            })}
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Вперед
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>

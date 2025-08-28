@@ -124,7 +124,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             const isActive = activeTab === item.id;
             
             return (
-              <li key={item.id}>
+              <li key={item.id} className="relative">
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full justify-start ${
@@ -135,16 +135,16 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                 >
                   <Icon className="w-4 h-4 mr-3" />
                   <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && (
-                    <Badge 
-                      className={`ml-2 text-xs ${
-                        item.badgeColor || 'bg-gray-200 text-gray-600'
-                      }`}
-                    >
-                      {item.badge}
-                    </Badge>
-                  )}
                 </Button>
+                {item.badge && (
+                  <Badge 
+                    className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 min-w-0 ${
+                      item.badgeColor || 'bg-muted text-muted-foreground'
+                    } border-0 rounded-md shadow-sm z-10`}
+                  >
+                    {item.badge}
+                  </Badge>
+                )}
               </li>
             );
           })}

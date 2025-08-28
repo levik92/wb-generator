@@ -100,7 +100,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
       <div className="flex h-16 items-center justify-between px-6">
         <div>
           <h1 className="text-2xl font-semibold">Добро пожаловать!</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Создавайте карточки и описания для Wildberries
           </p>
         </div>

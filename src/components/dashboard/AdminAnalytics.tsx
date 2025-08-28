@@ -13,35 +13,60 @@ export default function AdminAnalytics() {
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [generationsData, setGenerationsData] = useState<any[]>([]);
 
-  // Mock data - replace with real API calls
+  // Load analytics data from server
   useEffect(() => {
-    // Simulate API call based on period
-    const generateMockData = () => {
-      const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
-      const revenue = [];
-      const generations = [];
+    const loadAnalyticsData = async () => {
+      try {
+        // Get date range based on period selection
+        let startDate, endDate = new Date();
+        
+        if (period === "custom" && dateRange?.from && dateRange?.to) {
+          startDate = dateRange.from;
+          endDate = dateRange.to;
+        } else {
+          const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - days);
+        }
 
-      for (let i = days - 1; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
+        // Format dates for API
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
 
-        revenue.push({
-          date: dateStr,
-          amount: Math.floor(Math.random() * 50000) + 10000,
-        });
+        // TODO: Replace with actual API calls to your server
+        // Example API calls:
+        // const revenueResponse = await fetch(`/api/analytics/revenue?start=${startDateStr}&end=${endDateStr}`);
+        // const generationsResponse = await fetch(`/api/analytics/generations?start=${startDateStr}&end=${endDateStr}`);
+        
+        // For now, generate mock data based on period
+        const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const revenue = [];
+        const generations = [];
 
-        generations.push({
-          date: dateStr,
-          count: Math.floor(Math.random() * 200) + 50,
-        });
+        for (let i = 0; i < days; i++) {
+          const date = new Date(startDate);
+          date.setDate(date.getDate() + i);
+          const dateStr = date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
+
+          revenue.push({
+            date: dateStr,
+            amount: Math.floor(Math.random() * 50000) + 10000,
+          });
+
+          generations.push({
+            date: dateStr,
+            count: Math.floor(Math.random() * 200) + 50,
+          });
+        }
+
+        setRevenueData(revenue);
+        setGenerationsData(generations);
+      } catch (error) {
+        console.error('Error loading analytics data:', error);
       }
-
-      setRevenueData(revenue);
-      setGenerationsData(generations);
     };
 
-    generateMockData();
+    loadAnalyticsData();
   }, [period, dateRange]);
 
   const exportData = () => {
