@@ -41,11 +41,13 @@ export default function Balance() {
     <div className="space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-xl font-bold">Баланс токенов</CardTitle>
+          <CardTitle className="text-xl font-semibold">Баланс токенов</CardTitle>
           <Coins className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{balance}</div>
+          <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-2 inline-block">
+            <div className="text-3xl font-bold text-primary">{balance}</div>
+          </div>
           <p className="text-sm text-muted-foreground mt-1">
             токенов доступно для генерации
           </p>
@@ -54,7 +56,7 @@ export default function Balance() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Стоимость генерации</CardTitle>
+          <CardTitle className="text-xl font-semibold">Стоимость генерации</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

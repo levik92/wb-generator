@@ -8,8 +8,25 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { Users, Settings, DollarSign, Activity, Ban, Shield, Pencil } from "lucide-react";
+import { 
+  Users, 
+  DollarSign, 
+  Activity, 
+  Ban, 
+  Shield, 
+  Pencil, 
+  LogOut,
+  Search,
+  UserCheck,
+  TrendingUp,
+  Download,
+  Eye,
+  Coins,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 
 interface User {
   id: string;
@@ -29,18 +46,49 @@ interface UserStats {
   total_revenue: number;
 }
 
+interface UserDetails {
+  totalPaid: number;
+  tokensSpent: number;
+  generationsCount: number;
+  referralsCount: number;
+  referralsEarnings: number;
+  recentGenerations: any[];
+  paymentHistory: any[];
+  referrals: any[];
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newTokenBalance, setNewTokenBalance] = useState<string>("");
+  const [searchEmail, setSearchEmail] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  
+  const usersPerPage = 20;
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const startIndex = (currentPage - 1) * usersPerPage;
+  const endIndex = startIndex + usersPerPage;
+  const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
   useEffect(() => {
     checkAdminAccess();
   }, []);
+
+  useEffect(() => {
+    const filtered = users.filter(user => 
+      user.email.toLowerCase().includes(searchEmail.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
+  }, [users, searchEmail]);
 
   const checkAdminAccess = async () => {
     try {
@@ -50,7 +98,6 @@ export default function Admin() {
         return;
       }
 
-      // Check if user is admin
       const { data: userRoles, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -98,17 +145,14 @@ export default function Admin() {
 
   const loadStats = async () => {
     try {
-      // Get total users
       const { count: totalUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      // Get total generations
       const { count: totalGenerations } = await supabase
         .from('generations')
         .select('*', { count: 'exact', head: true });
 
-      // Get total tokens spent
       const { data: tokensData } = await supabase
         .from('token_transactions')
         .select('amount')
@@ -116,13 +160,12 @@ export default function Admin() {
 
       const totalTokensSpent = tokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
 
-      // Get total revenue
       const { data: revenueData } = await supabase
         .from('payments')
         .select('amount')
         .eq('status', 'succeeded');
 
-      const totalRevenue = revenueData?.reduce((sum, p) => sum + p.amount, 0) || 0;
+      const totalRevenue = revenueData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
 
       setStats({
         total_users: totalUsers || 0,
@@ -132,6 +175,40 @@ export default function Admin() {
       });
     } catch (error) {
       console.error('Error loading stats:', error);
+    }
+  };
+
+  const loadUserDetails = async (user: User) => {
+    setDetailsLoading(true);
+    try {
+      // Загружаем детальную информацию о пользователе
+      const [paymentsRes, tokensRes, generationsRes, referralsRes] = await Promise.all([
+        supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
+        supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
+        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+        supabase.from('referrals').select('*, referred:profiles!referred_id(email)').eq('referrer_id', user.id)
+      ]);
+
+      const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+      const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
+      const generationsCount = generationsRes.data?.length || 0;
+      const referralsCount = referralsRes.data?.length || 0;
+      const referralsEarnings = referralsRes.data?.reduce((sum, r) => sum + (r.tokens_awarded || 0), 0) || 0;
+
+      setUserDetails({
+        totalPaid,
+        tokensSpent,
+        generationsCount,
+        referralsCount,
+        referralsEarnings,
+        recentGenerations: generationsRes.data || [],
+        paymentHistory: paymentsRes.data || [],
+        referrals: referralsRes.data || []
+      });
+    } catch (error) {
+      console.error('Error loading user details:', error);
+    } finally {
+      setDetailsLoading(false);
     }
   };
 
@@ -181,7 +258,6 @@ export default function Admin() {
         variant: "destructive",
       });
     } else {
-      // Record transaction
       const difference = newBalance - editingUser.tokens_balance;
       await supabase
         .from('token_transactions')
@@ -203,11 +279,37 @@ export default function Admin() {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
+  const exportStats = () => {
+    if (!stats) return;
+    
+    const data = {
+      export_date: new Date().toISOString(),
+      statistics: stats,
+      users_summary: {
+        total_users: users.length,
+        active_users: users.filter(u => !u.is_blocked).length,
+        wb_connected_users: users.filter(u => u.wb_connected).length
+      }
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `admin-stats-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-wb-purple mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-lg">Загрузка админ-панели...</p>
         </div>
       </div>
@@ -220,166 +322,442 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Админ-панель</h1>
             <p className="text-muted-foreground mt-1">Управление системой WB Генератор</p>
           </div>
-          <Button onClick={() => navigate('/dashboard')} variant="outline">
-            Вернуться в дашборд
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={exportStats} variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Экспорт
+            </Button>
+            <Button onClick={handleSignOut} variant="destructive" className="gap-2">
+              <LogOut className="h-4 w-4" />
+              Выйти
+            </Button>
+          </div>
         </div>
 
-        {/* Statistics Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Обзор</TabsTrigger>
+            <TabsTrigger value="users">Пользователи</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Statistics Cards */}
+            {stats && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Всего пользователей</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.total_users}</div>
+                    <p className="text-xs text-muted-foreground">
+                      +{users.filter(u => new Date(u.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length} за неделю
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Всего генераций</CardTitle>
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.total_generations}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Активность пользователей
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Потрачено токенов</CardTitle>
+                    <Coins className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.total_tokens_spent}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Всего использовано
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Доход</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.total_revenue.toLocaleString('ru-RU')}₽</div>
+                    <p className="text-xs text-muted-foreground">
+                      Подтвержденные платежи
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Активные пользователи</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-green-600">
+                    {users.filter(u => !u.is_blocked).length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {((users.filter(u => !u.is_blocked).length / users.length) * 100).toFixed(1)}% от общего числа
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Подключений WB</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {users.filter(u => u.wb_connected).length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {((users.filter(u => u.wb_connected).length / users.length) * 100).toFixed(1)}% пользователей
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Заблокированные</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-600">
+                    {users.filter(u => u.is_blocked).length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Требуют внимания
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-6">
+            {/* Search */}
+            <div className="flex items-center space-x-2">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Поиск по email..."
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Найдено: {filteredUsers.length} из {users.length}
+              </div>
+            </div>
+
+            {/* Users Table */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Всего пользователей</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Управление пользователями</CardTitle>
+                <CardDescription>
+                  Просмотр и управление всеми пользователями системы
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.total_users}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Всего генераций</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total_generations}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Потрачено токенов</CardTitle>
-                <Settings className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total_tokens_spent}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Доход</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total_revenue}₽</div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Users Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Управление пользователями</CardTitle>
-            <CardDescription>
-              Просмотр и управление всеми пользователями системы
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Имя</TableHead>
-                    <TableHead>Токены</TableHead>
-                    <TableHead>WB</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>Дата регистрации</TableHead>
-                    <TableHead>Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
-                      <TableCell>{user.full_name || 'Не указано'}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{user.tokens_balance}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.wb_connected ? "default" : "secondary"}>
-                          {user.wb_connected ? 'Подключен' : 'Не подключен'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.is_blocked ? "destructive" : "default"}>
-                          {user.is_blocked ? 'Заблокирован' : 'Активен'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {new Date(user.created_at).toLocaleDateString('ru-RU')}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Имя</TableHead>
+                        <TableHead>Токены</TableHead>
+                        <TableHead>WB</TableHead>
+                        <TableHead>Статус</TableHead>
+                        <TableHead>Дата регистрации</TableHead>
+                        <TableHead>Действия</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {currentUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium cursor-pointer hover:text-primary" 
+                            onClick={() => {
+                              setSelectedUser(user);
+                              loadUserDetails(user);
+                            }}>
+                            {user.email}
+                          </TableCell>
+                          <TableCell>{user.full_name || 'Не указано'}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{user.tokens_balance}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.wb_connected ? "default" : "secondary"}>
+                              {user.wb_connected ? 'Подключен' : 'Не подключен'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.is_blocked ? "destructive" : "default"}>
+                              {user.is_blocked ? 'Заблокирован' : 'Активен'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(user.created_at).toLocaleDateString('ru-RU')}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  setEditingUser(user);
-                                  setNewTokenBalance(user.tokens_balance.toString());
+                                  setSelectedUser(user);
+                                  loadUserDetails(user);
                                 }}
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Eye className="h-4 w-4" />
                               </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Редактировать баланс токенов</DialogTitle>
-                                <DialogDescription>
-                                  Пользователь: {user.email}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="tokens" className="text-right">
-                                    Токены
-                                  </Label>
-                                  <Input
-                                    id="tokens"
-                                    type="number"
-                                    min="0"
-                                    value={newTokenBalance}
-                                    onChange={(e) => setNewTokenBalance(e.target.value)}
-                                    className="col-span-3"
-                                  />
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button onClick={updateTokenBalance}>
-                                  Сохранить изменения
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                          
-                          <Button
-                            variant={user.is_blocked ? "default" : "destructive"}
-                            size="sm"
-                            onClick={() => toggleUserBlock(user.id, user.is_blocked)}
-                          >
-                            {user.is_blocked ? <Shield className="h-4 w-4" /> : <Ban className="h-4 w-4" />}
-                          </Button>
+                              
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingUser(user);
+                                      setNewTokenBalance(user.tokens_balance.toString());
+                                    }}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Редактировать баланс токенов</DialogTitle>
+                                    <DialogDescription>
+                                      Пользователь: {user.email}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="tokens" className="text-right">
+                                        Токены
+                                      </Label>
+                                      <Input
+                                        id="tokens"
+                                        type="number"
+                                        min="0"
+                                        value={newTokenBalance}
+                                        onChange={(e) => setNewTokenBalance(e.target.value)}
+                                        className="col-span-3"
+                                      />
+                                    </div>
+                                  </div>
+                                  <DialogFooter>
+                                    <Button onClick={updateTokenBalance}>
+                                      Сохранить изменения
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                              
+                              <Button
+                                variant={user.is_blocked ? "default" : "destructive"}
+                                size="sm"
+                                onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                              >
+                                {user.is_blocked ? <Shield className="h-4 w-4" /> : <Ban className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between space-x-2 py-4">
+                    <div className="text-sm text-muted-foreground">
+                      Страница {currentPage} из {totalPages} (всего {filteredUsers.length} пользователей)
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Назад
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Вперед
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* User Details Modal */}
+        <Dialog open={!!selectedUser} onOpenChange={() => {
+          setSelectedUser(null);
+          setUserDetails(null);
+        }}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Детали пользователя</DialogTitle>
+              <DialogDescription>
+                {selectedUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {detailsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : userDetails ? (
+              <Tabs defaultValue="stats" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="stats">Статистика</TabsTrigger>
+                  <TabsTrigger value="payments">Платежи</TabsTrigger>
+                  <TabsTrigger value="generations">Генерации</TabsTrigger>
+                  <TabsTrigger value="referrals">Рефералы</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="stats" className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-2xl font-bold">{userDetails.totalPaid.toLocaleString('ru-RU')}₽</div>
+                        <p className="text-xs text-muted-foreground">Оплачено</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-2xl font-bold">{userDetails.tokensSpent}</div>
+                        <p className="text-xs text-muted-foreground">Токенов потрачено</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-2xl font-bold">{userDetails.generationsCount}</div>
+                        <p className="text-xs text-muted-foreground">Генераций</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-2xl font-bold">{userDetails.referralsCount}</div>
+                        <p className="text-xs text-muted-foreground">Рефералов</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="payments">
+                  <div className="space-y-2">
+                    {userDetails.paymentHistory.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-4">Нет платежей</p>
+                    ) : (
+                      userDetails.paymentHistory.map((payment: any) => (
+                        <div key={payment.id} className="flex justify-between items-center p-3 border rounded">
+                          <div>
+                            <div className="font-medium">{payment.package_name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(payment.created_at).toLocaleDateString('ru-RU')}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold">{Number(payment.amount).toLocaleString('ru-RU')}₽</div>
+                            <div className="text-sm text-green-600">{payment.tokens_amount} токенов</div>
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="generations">
+                  <div className="space-y-2">
+                    {userDetails.recentGenerations.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-4">Нет генераций</p>
+                    ) : (
+                      userDetails.recentGenerations.map((generation: any) => (
+                        <div key={generation.id} className="flex justify-between items-center p-3 border rounded">
+                          <div>
+                            <div className="font-medium">{generation.generation_type}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(generation.created_at).toLocaleDateString('ru-RU')}
+                            </div>
+                          </div>
+                          <Badge variant={generation.status === 'completed' ? 'default' : 
+                                        generation.status === 'failed' ? 'destructive' : 'secondary'}>
+                            {generation.status}
+                          </Badge>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="referrals">
+                  <div className="space-y-4">
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-lg font-bold">{userDetails.referralsEarnings} токенов</div>
+                        <p className="text-sm text-muted-foreground">Заработано за рефералов</p>
+                      </CardContent>
+                    </Card>
+                    <div className="space-y-2">
+                      {userDetails.referrals.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-4">Нет рефералов</p>
+                      ) : (
+                        userDetails.referrals.map((referral: any) => (
+                          <div key={referral.id} className="flex justify-between items-center p-3 border rounded">
+                            <div>
+                              <div className="font-medium">{referral.referred?.email}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(referral.created_at).toLocaleDateString('ru-RU')}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="secondary">{referral.status}</Badge>
+                              {referral.tokens_awarded && (
+                                <div className="text-sm text-green-600">+{referral.tokens_awarded} токенов</div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

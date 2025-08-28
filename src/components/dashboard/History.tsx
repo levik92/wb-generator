@@ -148,7 +148,7 @@ export const History = ({ profile }: HistoryProps) => {
     <div className="space-y-6 px-2 sm:px-0 max-w-full overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">История генераций</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold mb-2">История генераций</h2>
           <p className="text-sm text-muted-foreground">
             Все ваши созданные карточки и описания
           </p>
