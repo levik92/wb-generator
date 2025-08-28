@@ -80,7 +80,7 @@ export default function LabelGenerator() {
     freeField: ""
   }]);
 
-  const [useSameSupplier, setUseSameSupplier] = useState(false);
+  
   const [qrText, setQrText] = useState("");
   const [qrSize, setQrSize] = useState([100]);
   const [qrFormat, setQrFormat] = useState("PNG");
@@ -91,7 +91,7 @@ export default function LabelGenerator() {
       barcode: "",
       article: "",
       productName: "",
-      supplier: useSameSupplier && products.length > 0 ? products[0].supplier : ""
+      supplier: ""
     }]);
   };
 
@@ -133,16 +133,9 @@ export default function LabelGenerator() {
   };
 
   const updateProduct = (index: number, field: keyof Product, value: string | number) => {
-    const updatedProducts = products.map((product, i) => {
-      if (i === index) {
-        return { ...product, [field]: value };
-      }
-      // If using same supplier, update all supplier fields
-      if (useSameSupplier && field === 'supplier' && index === 0) {
-        return { ...product, supplier: value as string };
-      }
-      return product;
-    });
+    const updatedProducts = products.map((product, i) => 
+      i === index ? { ...product, [field]: value } : product
+    );
     setProducts(updatedProducts);
   };
 
@@ -210,19 +203,32 @@ export default function LabelGenerator() {
         const x = col * labelWidth + 5;
         const y = row * labelHeight + 5;
 
-        // Add supplier name
-        doc.setFontSize(10);
-        doc.text(product.supplier || "ИП Продавец", x + 2, y + 8);
+        let currentY = y + 8;
         
-        // Add product name
-        doc.setFontSize(9);
-        const productName = product.productName || "Название товара";
-        const splitName = doc.splitTextToSize(productName, labelWidth - 10);
-        doc.text(splitName, x + 2, y + 15);
+        // Add supplier name (only if filled)
+        if (product.supplier.trim()) {
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.text(product.supplier, x + 2, currentY);
+          currentY += 7;
+        }
         
-        // Add article
-        doc.setFontSize(8);
-        doc.text(`Артикул: ${product.article || ""}`, x + 2, y + 25);
+        // Add product name (only if filled)
+        if (product.productName.trim()) {
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          const splitName = doc.splitTextToSize(product.productName, labelWidth - 10);
+          doc.text(splitName, x + 2, currentY);
+          currentY += splitName.length * 5 + 2;
+        }
+        
+        // Add article (only if filled)
+        if (product.article.trim()) {
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          doc.text(`Артикул: ${product.article}`, x + 2, currentY);
+          currentY += 6;
+        }
 
         // Generate barcode using JsBarcode
         if (product.barcode) {
@@ -233,27 +239,29 @@ export default function LabelGenerator() {
             
             JsBarcode(canvas, product.barcode, {
               format: "CODE128",
-              width: 2,
-              height: 50,
+              width: Math.max(1, Math.floor((labelWidth - 10) / product.barcode.length * 0.8)),
+              height: Math.min(40, labelHeight - currentY + y - 10),
               displayValue: true,
-              fontSize: 12,
+              fontSize: 10,
               fontOptions: "",
-              font: "monospace",
+              font: "Arial, sans-serif",
               textAlign: "center",
               textPosition: "bottom",
               textMargin: 2,
-              margin: 5,
+              margin: 2,
               background: "#ffffff",
               lineColor: "#000000"
             });
             
             const barcodeDataURL = canvas.toDataURL('image/png');
-            doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 35, labelWidth - 10, 20);
+            const barcodeHeight = Math.min(20, labelHeight - currentY + y - 5);
+            doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, labelWidth - 10, barcodeHeight);
           } catch (error) {
             console.error('Barcode generation error:', error);
             // Fallback: add text instead of barcode
             doc.setFontSize(8);
-            doc.text(`Штрихкод: ${product.barcode}`, x + 2, y + 45);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Штрихкод: ${product.barcode}`, x + 2, currentY + 2);
           }
         }
       }
@@ -339,24 +347,30 @@ export default function LabelGenerator() {
         const x = col * labelWidth + 5;
         const y = row * labelHeight + 5;
 
-        // Add sequence number
-        if (box.sequenceNumber) {
+        let currentY = y + 8;
+        
+        // Add sequence number (only if filled)
+        if (box.sequenceNumber.trim()) {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.text(box.sequenceNumber, x + 2, y + 8);
+          doc.text(box.sequenceNumber, x + 2, currentY);
+          currentY += 7;
         }
         
-        // Add free field
-        if (box.freeField) {
+        // Add free field (only if filled)
+        if (box.freeField.trim()) {
           doc.setFontSize(9);
           doc.setFont("helvetica", "normal");
           const splitField = doc.splitTextToSize(box.freeField, labelWidth - 10);
-          doc.text(splitField, x + 2, y + 15);
+          doc.text(splitField, x + 2, currentY);
+          currentY += splitField.length * 5 + 2;
         }
         
         // Add quantity
         doc.setFontSize(8);
-        doc.text(`Количество: ${box.quantity}`, x + 2, y + 25);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Количество: ${box.quantity}`, x + 2, currentY);
+        currentY += 6;
 
         // Generate barcode using JsBarcode
         if (box.boxBarcode) {
@@ -367,27 +381,29 @@ export default function LabelGenerator() {
             
             JsBarcode(canvas, box.boxBarcode, {
               format: "CODE128",
-              width: 2,
-              height: 50,
+              width: Math.max(1, Math.floor((labelWidth - 10) / box.boxBarcode.length * 0.8)),
+              height: Math.min(40, labelHeight - currentY + y - 10),
               displayValue: true,
-              fontSize: 12,
+              fontSize: 10,
               fontOptions: "",
-              font: "monospace",
+              font: "Arial, sans-serif",
               textAlign: "center",
               textPosition: "bottom",
               textMargin: 2,
-              margin: 5,
+              margin: 2,
               background: "#ffffff",
               lineColor: "#000000"
             });
             
             const barcodeDataURL = canvas.toDataURL('image/png');
-            doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 35, labelWidth - 10, 20);
+            const barcodeHeight = Math.min(20, labelHeight - currentY + y - 5);
+            doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, labelWidth - 10, barcodeHeight);
           } catch (error) {
             console.error('Barcode generation error:', error);
             // Fallback: add text instead of barcode
             doc.setFontSize(8);
-            doc.text(`Штрихкод: ${box.boxBarcode}`, x + 2, y + 45);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Штрихкод: ${box.boxBarcode}`, x + 2, currentY + 2);
           }
         }
       }
@@ -434,26 +450,31 @@ export default function LabelGenerator() {
         {/* Mobile Tab Selector */}
         <div className="block sm:hidden mb-4">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
+            <SelectTrigger className="w-full border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-colors">
+              <div className="flex items-center justify-between w-full">
+                <SelectValue />
+                <div className="flex items-center">
+                  <span className="text-purple-600 mr-1">▼</span>
+                </div>
+              </div>
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="barcode">
+            <SelectContent className="bg-white border-purple-200 shadow-lg">
+              <SelectItem value="barcode" className="hover:bg-purple-50">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  Этикетки
+                  <BarChart3 className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium">Этикетки</span>
                 </div>
               </SelectItem>
-              <SelectItem value="qr">
+              <SelectItem value="qr" className="hover:bg-purple-50">
                 <div className="flex items-center gap-2">
-                  <QrCode className="h-4 w-4" />
-                  QR-коды
+                  <QrCode className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium">QR-коды</span>
                 </div>
               </SelectItem>
-              <SelectItem value="wb">
+              <SelectItem value="wb" className="hover:bg-purple-50">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Короба WB
+                  <Package className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium">Короба WB</span>
                 </div>
               </SelectItem>
             </SelectContent>
@@ -491,31 +512,22 @@ export default function LabelGenerator() {
                     <Trash2 className="h-4 w-4 mr-2" />
                     Очистить таблицу
                   </Button>
-                  <div className="flex items-center gap-2 bg-gray-100 p-3 rounded-lg border">
-                    <Checkbox
-                      id="same-supplier"
-                      checked={useSameSupplier}
-                      onCheckedChange={(checked) => setUseSameSupplier(checked as boolean)}
-                    />
-                    <Label htmlFor="same-supplier" className="text-sm">
-                      Одинаковое название поставщика на всех наклейках
-                    </Label>
-                  </div>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30">
-                      <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Штрихкод*</TableHead>
-                      <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Артикул</TableHead>
-                      <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Название товара*</TableHead>
-                      <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Наименование продавца</TableHead>
-                      <TableHead className="w-10"></TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <div className="overflow-x-auto max-w-full">
+                <div className="min-w-max">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Штрихкод*</TableHead>
+                        <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Артикул</TableHead>
+                        <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Название товара*</TableHead>
+                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Наименование продавца</TableHead>
+                        <TableHead className="w-10"></TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {products.map((product, index) => (
                       <TableRow key={index}>
@@ -542,9 +554,8 @@ export default function LabelGenerator() {
                         </TableCell>
                         <TableCell>
                           <Input
-                            value={useSameSupplier && index > 0 ? products[0].supplier : product.supplier}
+                            value={product.supplier}
                             onChange={(e) => updateProduct(index, 'supplier', e.target.value)}
-                            disabled={useSameSupplier && index > 0}
                             className="w-full min-w-0"
                           />
                         </TableCell>
@@ -561,7 +572,8 @@ export default function LabelGenerator() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
               </div>
               <div className="p-4 border-t">
                 <Button onClick={addProduct} variant="outline" className="w-full sm:w-auto">
@@ -678,7 +690,7 @@ export default function LabelGenerator() {
                   <div className="space-y-2">
                     <Label>Формат файла</Label>
                     <Select value={qrFormat} onValueChange={setQrFormat}>
-                      <SelectTrigger className="border border-input w-full">
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -752,17 +764,18 @@ export default function LabelGenerator() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30">
-                      <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">ШК короба*</TableHead>
-                      <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Количество*</TableHead>
-                      <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Порядковый номер</TableHead>
-                      <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Свободное поле</TableHead>
-                      <TableHead className="w-10"></TableHead>
-                    </TableRow>
-                  </TableHeader>
+              <div className="overflow-x-auto max-w-full">
+                <div className="min-w-max">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">ШК короба*</TableHead>
+                        <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Количество*</TableHead>
+                        <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Порядковый номер</TableHead>
+                        <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Свободное поле</TableHead>
+                        <TableHead className="w-10"></TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {wbBoxes.map((box, index) => (
                       <TableRow key={index}>
@@ -812,7 +825,8 @@ export default function LabelGenerator() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                  </Table>
+                </div>
               </div>
               <div className="p-4 border-t">
                 <Button onClick={addWBBox} variant="outline" className="w-full sm:w-auto">
