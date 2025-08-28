@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Plus, Download, QrCode, BarChart3, Package, Settings, FileText } from "lucide-react";
+import { Trash2, Plus, Download, QrCode, BarChart3, Package, Settings } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from 'jspdf';
 import JsBarcode from 'jsbarcode';
@@ -148,41 +147,27 @@ export default function LabelGenerator() {
     }]);
   };
 
-  // Generate SVG barcode with separate text and barcode layers
-  const generateSVGBarcode = (text: string, width: number = 200, height: number = 50): string => {
-    if (!text) return '';
-    
-    const svg = `
-      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="white"/>
-        <g id="barcode-bars">
-          <!-- Barcode bars will be generated here -->
-          ${generateBarcodePattern(text, width - 20, height - 25)}
-        </g>
-        <text x="${width/2}" y="${height - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="black" encoding="UTF-8">${text}</text>
-      </svg>
-    `;
-    return svg;
-  };
-
-  // Generate barcode pattern (simplified CODE128)
-  const generateBarcodePattern = (text: string, width: number, height: number): string => {
-    const bars = [];
-    // More realistic barcode pattern generation
-    const code128Pattern = text.split('').map(char => char.charCodeAt(0) % 8); // Simple pattern
-    let x = 10;
-    
-    for (let i = 0; i < code128Pattern.length; i++) {
-      const pattern = code128Pattern[i];
-      for (let j = 0; j < 8; j++) {
-        const barWidth = (width - 20) / (code128Pattern.length * 8);
-        if ((pattern >> j) & 1) {
-          bars.push(`<rect x="${x}" y="5" width="${barWidth}" height="${height}" fill="black"/>`);
-        }
-        x += barWidth;
+  // Generate barcode using JsBarcode (proper CODE128)  
+  const makeBarcode = (data: string, barWidthPx: number, fontSizePx: number, isThermal: boolean): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      try {
+        JsBarcode(canvas, data, {
+          format: 'code128',
+          displayValue: true,
+          font: 'helvetica',
+          textPosition: 'bottom',
+          fontSize: fontSizePx,
+          textMargin: isThermal ? 8 : 10,
+          margin: 0,
+          width: barWidthPx,
+          height: isThermal ? 220 : 260
+        });
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) {
+        reject(e);
       }
-    }
-    return bars.join('\n          ');
+    });
   };
 
   const parseLabelSize = (sizeStr: string): [number, number] => {
@@ -191,122 +176,81 @@ export default function LabelGenerator() {
   };
 
   const generateProductPDF = async () => {
-    if (products.length === 0) {
-      toast("Добавьте товары в таблицу");
+    if (!products || products.length === 0 || !products[0].barcode) {
+      toast("Добавьте штрихкод в таблицу");
       return;
     }
 
+    const btn = document.activeElement as HTMLButtonElement;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Генерация...';
+    }
+
     try {
+      const isThermal = settings.labelType === 'Термоэтикетка';
+      const [labelW, labelH] = isThermal ? parseLabelSize(settings.labelSize) : [210, 297];
+
       const doc = new jsPDF({
-        orientation: settings.labelType === 'A4' ? 'portrait' : 'landscape',
+        orientation: isThermal ? 'portrait' : 'portrait',
         unit: 'mm',
-        format: settings.labelType === 'A4' ? 'a4' : parseLabelSize(settings.labelSize)
+        format: isThermal ? [labelW, labelH] : 'a4'
       });
 
-      // Calculate label dimensions based on settings
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      
-      let labelsPerRow, labelsPerColumn, labelWidth, labelHeight;
-      
-      if (settings.labelType === 'A4') {
-        // For A4, calculate based on label size
-        const [width, height] = parseLabelSize(settings.labelSize);
-        labelsPerRow = Math.floor(pageWidth / width);
-        labelsPerColumn = Math.floor(pageHeight / height);
-        labelWidth = width;
-        labelHeight = height;
-      } else {
-        // For thermal labels, use full page
-        labelsPerRow = 1;
-        labelsPerColumn = 1;
-        labelWidth = pageWidth;
-        labelHeight = pageHeight;
+      for (let i = 0; i < products.length; i++) {
+        const product = products[i];
+        if (i > 0) doc.addPage();
+
+        await placeLabelOnPDF(doc, product, isThermal);
       }
 
-      let currentPage = 0;
-      
-      for (let index = 0; index < products.length; index++) {
-        const product = products[index];
-        const labelIndex = index % (labelsPerRow * labelsPerColumn);
-        const row = Math.floor(labelIndex / labelsPerRow);
-        const col = labelIndex % labelsPerRow;
-        
-        if (labelIndex === 0 && index > 0) {
-          doc.addPage();
-          currentPage++;
-        }
-
-        const x = col * labelWidth + 5;
-        const y = row * labelHeight + 5;
-
-        let currentY = y + 8;
-        
-        // Add supplier name (only if filled)
-        if (product.supplier.trim()) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "normal");
-          doc.text(product.supplier, x + 2, currentY);
-          currentY += 7;
-        }
-        
-        // Add product name (only if filled)
-        if (product.productName.trim()) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          const splitName = doc.splitTextToSize(product.productName, labelWidth - 10);
-          doc.text(splitName, x + 2, currentY);
-          currentY += splitName.length * 5 + 2;
-        }
-        
-        // Add article (only if filled)
-        if (product.article.trim()) {
-          doc.setFontSize(8);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Артикул: ${product.article}`, x + 2, currentY);
-          currentY += 6;
-        }
-
-        // Generate SVG barcode instead of canvas-based barcode
-        if (product.barcode) {
-          try {
-            const barcodeWidth = labelWidth - 10;
-            const barcodeHeight = Math.min(20, labelHeight - currentY + y - 5);
-            const svgBarcode = generateSVGBarcode(product.barcode, barcodeWidth * 3, barcodeHeight * 3);
-            
-            // Convert SVG to data URL for PDF
-            const svgBlob = new Blob([svgBarcode], { type: 'image/svg+xml;charset=utf-8' });
-            const svgURL = URL.createObjectURL(svgBlob);
-            
-            // Create image from SVG
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = barcodeWidth * 3;
-              canvas.height = barcodeHeight * 3;
-              const ctx = canvas.getContext('2d')!;
-              ctx.drawImage(img, 0, 0);
-              
-              const barcodeDataURL = canvas.toDataURL('image/png');
-              doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, barcodeWidth, barcodeHeight);
-              URL.revokeObjectURL(svgURL);
-            };
-            img.src = svgURL;
-          } catch (error) {
-            console.error('SVG Barcode generation error:', error);
-            // Fallback: add text instead of barcode
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Штрихкод: ${product.barcode}`, x + 2, currentY + 2);
-          }
-        }
-      }
-
-      doc.save('labels.pdf');
+      const filename = `label_${isThermal ? settings.labelSize + 'mm' : 'A4'}_${(products[0].article || 'sku').replace(/[^a-z0-9_-]/gi, '')}.pdf`;
+      doc.save(filename);
       toast("PDF файл успешно создан!");
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      toast("Ошибка при создании PDF файла");
+    } catch (e: any) {
+      console.error('PDF generation error:', e);
+      toast('Не удалось сформировать PDF: ' + e.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Получить наклейки';
+      }
+    }
+  };
+
+  const placeLabelOnPDF = async (doc: any, product: Product, isThermal: boolean) => {
+    const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
+    const margin = isThermal ? 3 : 12;
+    let x = margin, y = margin;
+    const innerW = page.w - margin * 2;
+
+    // Product name with proper font encoding
+    if (product.productName?.trim()) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(isThermal ? 10.5 : 16);
+      const nameLines = doc.splitTextToSize(product.productName, innerW);
+      doc.text(nameLines, x, y + (isThermal ? 4 : 6));
+      y += (isThermal ? 5 : 8) * nameLines.length + (isThermal ? 1.5 : 2);
+    }
+
+    // Article number
+    if (product.article?.trim()) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(isThermal ? 9 : 12);
+      doc.text('Артикул: ' + product.article, x, y + (isThermal ? 3 : 4));
+      y += (isThermal ? 6 : 8);
+    }
+
+    // Generate and add barcode
+    if (product.barcode?.trim()) {
+      const barURL = await makeBarcode(product.barcode, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
+      const barH = isThermal ? 20 : 30;
+      const textOffset = isThermal ? 4 : 6;
+      doc.addImage(barURL, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
+      y += barH + textOffset + (isThermal ? 1.5 : 2);
+      
+      doc.setFontSize(isThermal ? 8.2 : 10);
+      doc.text('ШК: ' + product.barcode + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
     }
   };
 
@@ -334,120 +278,87 @@ export default function LabelGenerator() {
   };
 
   const generateWBBoxPDF = async () => {
-    if (wbBoxes.length === 0 || !wbBoxes[0].boxBarcode) {
-      toast("Добавьте штрихкоды коробов в таблицу");
+    if (!wbBoxes || wbBoxes.length === 0 || !wbBoxes[0].boxBarcode) {
+      toast("Добавьте штрихкод короба в таблицу");
       return;
     }
 
+    const btn = document.activeElement as HTMLButtonElement;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Генерация...';
+    }
+
     try {
+      const isThermal = settings.labelType === 'Термоэтикетка';
+      const [labelW, labelH] = isThermal ? parseLabelSize(settings.labelSize) : [210, 297];
+
       const doc = new jsPDF({
-        orientation: settings.labelType === 'A4' ? 'portrait' : 'landscape',
+        orientation: isThermal ? 'portrait' : 'portrait',
         unit: 'mm',
-        format: settings.labelType === 'A4' ? 'a4' : parseLabelSize(settings.labelSize)
+        format: isThermal ? [labelW, labelH] : 'a4'
       });
 
-      // Calculate label dimensions based on settings
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      
-      let labelsPerRow, labelsPerColumn, labelWidth, labelHeight;
-      
-      if (settings.labelType === 'A4') {
-        // For A4, calculate based on label size
-        const [width, height] = parseLabelSize(settings.labelSize);
-        labelsPerRow = Math.floor(pageWidth / width);
-        labelsPerColumn = Math.floor(pageHeight / height);
-        labelWidth = width;
-        labelHeight = height;
-      } else {
-        // For thermal labels, use full page
-        labelsPerRow = 1;
-        labelsPerColumn = 1;
-        labelWidth = pageWidth;
-        labelHeight = pageHeight;
+      for (let i = 0; i < wbBoxes.length; i++) {
+        const box = wbBoxes[i];
+        if (i > 0) doc.addPage();
+
+        await placeWBBoxLabelOnPDF(doc, box, isThermal);
       }
 
-      let currentPage = 0;
-
-      for (let index = 0; index < wbBoxes.length; index++) {
-        const box = wbBoxes[index];
-        const labelIndex = index % (labelsPerRow * labelsPerColumn);
-        const row = Math.floor(labelIndex / labelsPerRow);
-        const col = labelIndex % labelsPerRow;
-        
-        if (labelIndex === 0 && index > 0) {
-          doc.addPage();
-          currentPage++;
-        }
-
-        const x = col * labelWidth + 5;
-        const y = row * labelHeight + 5;
-
-        let currentY = y + 8;
-        
-        // Add sequence number (only if filled)
-        if (box.sequenceNumber.trim()) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.text(box.sequenceNumber, x + 2, currentY);
-          currentY += 7;
-        }
-        
-        // Add free field (only if filled)
-        if (box.freeField.trim()) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          const splitField = doc.splitTextToSize(box.freeField, labelWidth - 10);
-          doc.text(splitField, x + 2, currentY);
-          currentY += splitField.length * 5 + 2;
-        }
-        
-        // Add quantity
-        doc.setFontSize(8);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Количество: ${box.quantity}`, x + 2, currentY);
-        currentY += 6;
-
-        // Generate SVG barcode for WB boxes
-        if (box.boxBarcode) {
-          try {
-            const barcodeWidth = labelWidth - 10;
-            const barcodeHeight = Math.min(20, labelHeight - currentY + y - 5);
-            const svgBarcode = generateSVGBarcode(box.boxBarcode, barcodeWidth * 3, barcodeHeight * 3);
-            
-            // Convert SVG to data URL for PDF
-            const svgBlob = new Blob([svgBarcode], { type: 'image/svg+xml;charset=utf-8' });
-            const svgURL = URL.createObjectURL(svgBlob);
-            
-            // Create image from SVG
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = barcodeWidth * 3;
-              canvas.height = barcodeHeight * 3;
-              const ctx = canvas.getContext('2d')!;
-              ctx.drawImage(img, 0, 0);
-              
-              const barcodeDataURL = canvas.toDataURL('image/png');
-              doc.addImage(barcodeDataURL, 'PNG', x + 2, currentY + 2, barcodeWidth, barcodeHeight);
-              URL.revokeObjectURL(svgURL);
-            };
-            img.src = svgURL;
-          } catch (error) {
-            console.error('SVG Barcode generation error:', error);
-            // Fallback: add text instead of barcode
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Штрихкод: ${box.boxBarcode}`, x + 2, currentY + 2);
-          }
-        }
-      }
-
-      doc.save('wb-box-labels.pdf');
+      const filename = `wb_labels_${isThermal ? settings.labelSize + 'mm' : 'A4'}_${(wbBoxes[0].sequenceNumber || 'box').replace(/[^a-z0-9_-]/gi, '')}.pdf`;
+      doc.save(filename);
       toast("PDF файл с этикетками коробов успешно создан!");
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      toast("Ошибка при создании PDF файла");
+    } catch (e: any) {
+      console.error('WB PDF generation error:', e);
+      toast('Не удалось сформировать PDF: ' + e.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Получить этикетки коробов';
+      }
+    }
+  };
+
+  const placeWBBoxLabelOnPDF = async (doc: any, box: WBBox, isThermal: boolean) => {
+    const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
+    const margin = isThermal ? 3 : 12;
+    let x = margin, y = margin;
+    const innerW = page.w - margin * 2;
+
+    // Sequence number with proper font encoding
+    if (box.sequenceNumber?.trim()) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(isThermal ? 10.5 : 16);
+      doc.text(box.sequenceNumber, x, y + (isThermal ? 4 : 6));
+      y += (isThermal ? 6 : 8);
+    }
+
+    // Free field
+    if (box.freeField?.trim()) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(isThermal ? 9 : 12);
+      const fieldLines = doc.splitTextToSize(box.freeField, innerW);
+      doc.text(fieldLines, x, y + (isThermal ? 3 : 4));
+      y += (isThermal ? 5 : 7) * fieldLines.length + (isThermal ? 1 : 2);
+    }
+
+    // Quantity
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(isThermal ? 9 : 12);
+    doc.text('Количество: ' + box.quantity, x, y + (isThermal ? 3 : 4));
+    y += (isThermal ? 6 : 8);
+
+    // Generate and add barcode for WB boxes
+    if (box.boxBarcode?.trim()) {
+      const barURL = await makeBarcode(box.boxBarcode, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
+      const barH = isThermal ? 20 : 30;
+      const textOffset = isThermal ? 4 : 6;
+      doc.addImage(barURL, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
+      y += barH + textOffset + (isThermal ? 1.5 : 2);
+      
+      doc.setFontSize(isThermal ? 8.2 : 10);
+      doc.text('ШК: ' + box.boxBarcode + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
     }
   };
 
