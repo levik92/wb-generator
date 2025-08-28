@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { CalendarDays, TrendingUp, Download } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Area, AreaChart } from "recharts";
+import { CalendarDays, TrendingUp, Download, DollarSign, Activity } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
 export default function AdminAnalytics() {
@@ -12,6 +12,10 @@ export default function AdminAnalytics() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [generationsData, setGenerationsData] = useState<any[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalGenerations, setTotalGenerations] = useState(0);
+  const [revenueGrowth, setRevenueGrowth] = useState(0);
+  const [generationsGrowth, setGenerationsGrowth] = useState(0);
 
   // Load analytics data from server
   useEffect(() => {
@@ -48,19 +52,46 @@ export default function AdminAnalytics() {
           date.setDate(date.getDate() + i);
           const dateStr = date.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' });
 
+          const revenueAmount = Math.floor(Math.random() * 50000) + 10000;
+          const generationsCount = Math.floor(Math.random() * 200) + 50;
+
           revenue.push({
             date: dateStr,
-            amount: Math.floor(Math.random() * 50000) + 10000,
+            amount: revenueAmount,
           });
 
           generations.push({
             date: dateStr,
-            count: Math.floor(Math.random() * 200) + 50,
+            count: generationsCount,
           });
         }
 
         setRevenueData(revenue);
         setGenerationsData(generations);
+        
+        // Calculate totals and growth
+        const revenueTotal = revenue.reduce((sum, item) => sum + item.amount, 0);
+        const generationsTotal = generations.reduce((sum, item) => sum + item.count, 0);
+        
+        setTotalRevenue(revenueTotal);
+        setTotalGenerations(generationsTotal);
+        
+        // Calculate growth (comparing last period vs previous period)
+        const midPoint = Math.floor(revenue.length / 2);
+        const firstHalf = revenue.slice(0, midPoint);
+        const secondHalf = revenue.slice(midPoint);
+        
+        const firstHalfRevenue = firstHalf.reduce((sum, item) => sum + item.amount, 0);
+        const secondHalfRevenue = secondHalf.reduce((sum, item) => sum + item.amount, 0);
+        
+        const firstHalfGenerations = generations.slice(0, midPoint).reduce((sum, item) => sum + item.count, 0);
+        const secondHalfGenerations = generations.slice(midPoint).reduce((sum, item) => sum + item.count, 0);
+        
+        const revGrowth = firstHalfRevenue > 0 ? ((secondHalfRevenue - firstHalfRevenue) / firstHalfRevenue) * 100 : 0;
+        const genGrowth = firstHalfGenerations > 0 ? ((secondHalfGenerations - firstHalfGenerations) / firstHalfGenerations) * 100 : 0;
+        
+        setRevenueGrowth(revGrowth);
+        setGenerationsGrowth(genGrowth);
       } catch (error) {
         console.error('Error loading analytics data:', error);
       }
@@ -88,6 +119,37 @@ export default function AdminAnalytics() {
 
   return (
     <div className="space-y-6">
+      {/* Header Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Revenue Stats */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Общий доход</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">₽{totalRevenue.toLocaleString('ru-RU')}</div>
+            <p className={`text-xs ${revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {revenueGrowth >= 0 ? '+' : ''}{revenueGrowth.toFixed(1)}% от предыдущего периода
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Generations Stats */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Всего генераций</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalGenerations.toLocaleString('ru-RU')}</div>
+            <p className={`text-xs ${generationsGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {generationsGrowth >= 0 ? '+' : ''}{generationsGrowth.toFixed(1)}% от предыдущего периода
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Controls */}
       <div className="flex flex-wrap gap-4 items-center justify-between">
         <div className="flex gap-4 items-center">
@@ -123,42 +185,56 @@ export default function AdminAnalytics() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Доходы
+            Доходы за период
           </CardTitle>
           <CardDescription>
-            Динамика доходов за выбранный период
+            Динамика доходов с трендом роста
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <AreaChart data={revenueData}>
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis 
                   dataKey="date" 
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  className="text-muted-foreground"
                 />
                 <YAxis 
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => `₽${(value / 1000).toFixed(0)}k`}
+                  className="text-muted-foreground"
                 />
                 <Tooltip 
                   formatter={(value) => [`₽${value.toLocaleString('ru-RU')}`, 'Доход']}
                   labelFormatter={(label) => `Дата: ${label}`}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
                 />
-                <Line 
+                <Area 
                   type="monotone" 
                   dataKey="amount" 
                   stroke="hsl(var(--primary))" 
-                  strokeWidth={2}
+                  strokeWidth={3}
+                  fill="url(#revenueGradient)"
                   dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6 }}
+                  activeDot={{ r: 6, fill: "hsl(var(--primary))" }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
@@ -172,35 +248,45 @@ export default function AdminAnalytics() {
             Количество генераций
           </CardTitle>
           <CardDescription>
-            Количество выполненных генераций за период
+            Статистика выполненных генераций по дням
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={generationsData}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <LineChart data={generationsData}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis 
                   dataKey="date" 
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  className="text-muted-foreground"
                 />
                 <YAxis 
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
+                  className="text-muted-foreground"
                 />
                 <Tooltip 
                   formatter={(value) => [value, 'Генерации']}
                   labelFormatter={(label) => `Дата: ${label}`}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
                 />
-                <Bar 
+                <Line 
+                  type="monotone" 
                   dataKey="count" 
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
+                  stroke="hsl(var(--chart-2))"
+                  strokeWidth={3}
+                  dot={{ fill: "hsl(var(--chart-2))", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, fill: "hsl(var(--chart-2))" }}
                 />
-              </BarChart>
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </CardContent>

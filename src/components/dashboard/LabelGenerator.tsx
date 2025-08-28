@@ -11,6 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Trash2, Plus, Download, QrCode, BarChart3, Package, Settings } from "lucide-react";
 import { toast } from "sonner";
+import jsPDF from 'jspdf';
+import JsBarcode from 'jsbarcode';
+import QRCodeGenerator from 'qrcode';
 
 interface ProductRow {
   id: string;
@@ -153,7 +156,7 @@ export default function LabelGenerator() {
   };
 
   // Generate functions
-  const generateLabels = () => {
+  const generateLabels = async () => {
     const filledRows = rows.filter(row => 
       row.barcode && row.productName
     );
@@ -163,14 +166,66 @@ export default function LabelGenerator() {
       return;
     }
 
-    toast.success(`Генерация ${filledRows.length} этикеток начата. Файл будет готов через несколько секунд.`);
-    
-    setTimeout(() => {
-      toast.success("PDF файл готов к скачиванию!");
-    }, 2000);
+    try {
+      const pdf = new jsPDF({
+        orientation: barcodeType === 'A4' ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: barcodeType === 'A4' ? 'a4' : [parseInt(labelSize.split('x')[0]) || 58, parseInt(labelSize.split('x')[1]) || 40]
+      });
+
+      let pageY = 20;
+      const pageHeight = pdf.internal.pageSize.height;
+      
+      for (let i = 0; i < filledRows.length; i++) {
+        const row = filledRows[i];
+        
+        if (pageY > pageHeight - 60) {
+          pdf.addPage();
+          pageY = 20;
+        }
+
+        // Generate barcode
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, row.barcode, {
+          format: barcodeFormat,
+          width: 2,
+          height: 50,
+          displayValue: true,
+          fontSize: parseInt(fontSize),
+        });
+        
+        const barcodeImage = canvas.toDataURL('image/png');
+        
+        // Add barcode to PDF
+        pdf.addImage(barcodeImage, 'PNG', 20, pageY, 100, 30);
+        
+        // Add text information
+        pdf.setFontSize(parseInt(fontSize));
+        pageY += 35;
+        pdf.text(`Товар: ${row.productName}`, 20, pageY);
+        pageY += 5;
+        if (row.article) pdf.text(`Артикул: ${row.article}`, 20, pageY);
+        pageY += 5;
+        if (row.color) pdf.text(`Цвет: ${row.color}`, 20, pageY);
+        pageY += 5;
+        if (row.size) pdf.text(`Размер: ${row.size}`, 20, pageY);
+        pageY += 5;
+        if (row.sellerName || globalSellerName) {
+          pdf.text(`Продавец: ${sameSellerName ? globalSellerName : row.sellerName}`, 20, pageY);
+        }
+        pageY += 15;
+      }
+
+      pdf.save(`product-labels-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success("PDF файл успешно создан и скачан!");
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("Ошибка при создании PDF файла");
+    }
   };
 
-  const generateBoxLabels = () => {
+  const generateBoxLabels = async () => {
     const filledRows = boxRows.filter(row => row.barcode);
 
     if (filledRows.length === 0) {
@@ -178,20 +233,90 @@ export default function LabelGenerator() {
       return;
     }
 
-    toast.success(`Генерация ${filledRows.length} этикеток коробов начата. Файл будет готов через несколько секунд.`);
-    
-    setTimeout(() => {
-      toast.success("PDF файл готов к скачиванию!");
-    }, 2000);
+    try {
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [parseInt(boxLabelSize.split('x')[0]) || 52, parseInt(boxLabelSize.split('x')[1]) || 34]
+      });
+
+      let pageY = 10;
+      
+      for (let i = 0; i < filledRows.length; i++) {
+        const row = filledRows[i];
+        
+        if (i > 0) {
+          pdf.addPage();
+          pageY = 10;
+        }
+
+        // Generate barcode
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, row.barcode, {
+          format: 'CODE-128',
+          width: 1,
+          height: 40,
+          displayValue: true,
+          fontSize: parseInt(boxFontSize),
+        });
+        
+        const barcodeImage = canvas.toDataURL('image/png');
+        
+        // Add barcode to PDF
+        pdf.addImage(barcodeImage, 'PNG', 5, pageY, 40, 20);
+        
+        // Add text information
+        pdf.setFontSize(parseInt(boxFontSize));
+        pageY += 25;
+        if (row.freeField) pdf.text(row.freeField, 5, pageY);
+        pageY += 5;
+        if (orderNumber && row.boxNumber) pdf.text(`Короб: ${row.boxNumber}`, 5, pageY);
+      }
+
+      pdf.save(`box-labels-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success("PDF файл успешно создан и скачан!");
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("Ошибка при создании PDF файла");
+    }
   };
 
-  const generateQR = () => {
+  const generateQR = async () => {
     if (!qrText.trim()) {
       toast.error("Введите информацию для QR кода");
       return;
     }
 
-    toast.success("QR код сгенерирован и готов к скачиванию!");
+    try {
+      const qrCodeDataURL = await QRCodeGenerator.toDataURL(qrText, {
+        width: qrSize[0],
+        margin: 2,
+      });
+
+      if (qrFormat === 'PDF') {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        pdf.addImage(qrCodeDataURL, 'PNG', 50, 50, qrSize[0] / 4, qrSize[0] / 4);
+        pdf.save(`qr-code-${new Date().toISOString().slice(0, 10)}.pdf`);
+      } else {
+        // Download as image
+        const link = document.createElement('a');
+        link.download = `qr-code-${new Date().toISOString().slice(0, 10)}.${qrFormat.toLowerCase()}`;
+        link.href = qrCodeDataURL;
+        link.click();
+      }
+
+      toast.success("QR код успешно создан и скачан!");
+      
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      toast.error("Ошибка при создании QR кода");
+    }
   };
 
   return (
@@ -258,11 +383,11 @@ export default function LabelGenerator() {
 
           {/* Controls */}
           <div className="flex flex-wrap gap-4 items-center">
-            <Button variant="outline" onClick={clearTable} className="shadow-sm">
+            <Button variant="outline" onClick={clearTable} className="shadow-sm bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-200">
               Очистить таблицу
             </Button>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-md">
               <Checkbox 
                 id="same-seller" 
                 checked={sameSellerName}
@@ -379,7 +504,7 @@ export default function LabelGenerator() {
               </div>
 
               <div className="mt-4 flex justify-center">
-                <Button onClick={addRow} variant="outline" className="w-full sm:w-auto shadow-sm bg-blue-500 text-white hover:bg-blue-600 border-blue-500">
+                <Button onClick={addRow} className="w-full sm:w-auto shadow-sm bg-blue-500 text-white hover:bg-blue-600">
                   <Plus className="h-4 w-4 mr-2" />
                   Добавить строку
                 </Button>
@@ -591,11 +716,11 @@ export default function LabelGenerator() {
 
           {/* Controls */}
           <div className="flex flex-wrap gap-4 items-center">
-            <Button variant="outline" onClick={clearBoxTable} className="shadow-sm">
+            <Button variant="outline" onClick={clearBoxTable} className="shadow-sm bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-200">
               Очистить таблицу
             </Button>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-md">
               <Checkbox 
                 id="same-supplier" 
                 checked={sameSellerName}
@@ -675,7 +800,7 @@ export default function LabelGenerator() {
               </div>
 
               <div className="mt-4 flex justify-center">
-                <Button onClick={addBoxRow} variant="outline" className="w-full sm:w-auto shadow-sm bg-blue-500 text-white hover:bg-blue-600 border-blue-500">
+                <Button onClick={addBoxRow} className="w-full sm:w-auto shadow-sm bg-blue-500 text-white hover:bg-blue-600">
                   <Plus className="h-4 w-4 mr-2" />
                   Добавить строку
                 </Button>
