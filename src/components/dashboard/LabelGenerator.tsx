@@ -7,18 +7,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Plus, Download, QrCode, BarChart3, Package, Settings } from "lucide-react";
+import { Download, QrCode, BarChart3, Package, Settings } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from 'jspdf';
 import JsBarcode from 'jsbarcode';
 import QRCodeGenerator from 'qrcode';
 
+// Types based on the provided HTML/JS code
 interface LabelState {
   data: string;
   name: string;
   sku: string;
+  format: 'A4' | '58x40';
   copies: number;
 }
 
@@ -27,11 +28,7 @@ interface WBState {
   quantity: number;
   sequenceNumber: string;
   freeField: string;
-}
-
-interface Settings {
-  labelType: 'A4' | 'Термоэтикетка';
-  labelSize: string;
+  format: 'A4' | '58x40';
 }
 
 const labelSizes = [
@@ -57,180 +54,180 @@ const labelSizes = [
 export default function LabelGenerator() {
   const [activeTab, setActiveTab] = useState("barcode");
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const previewRef = useRef<HTMLImageElement>(null);
   
-  // Label state
+  // Label state based on provided code
   const [labelState, setLabelState] = useState<LabelState>({
-    data: "",
-    name: "",
-    sku: "",
+    data: "123123123",
+    name: "Бордюр садовый",
+    sku: "MNG-58x40-001",
+    format: 'A4',
     copies: 1
   });
 
-  // WB Box state  
+  // WB Box state
   const [wbState, setWbState] = useState<WBState>({
     data: "",
     quantity: 1,
     sequenceNumber: "",
-    freeField: ""
-  });
-
-  const [settings, setSettings] = useState<Settings>({
-    labelType: 'A4',
-    labelSize: "58x40"
+    freeField: "",
+    format: 'A4'
   });
   
+  // QR code state
   const [qrText, setQrText] = useState("");
   const [qrSize, setQrSize] = useState([100]);
   const [qrFormat, setQrFormat] = useState("PNG");
   const [qrPreview, setQrPreview] = useState("");
 
-  // Render preview
+  // Utility functions from the provided code
+  const mmToPx = (mm: number, dpi: number = 300) => (mm / 25.4) * dpi;
+  
+  const dims = (format: 'A4' | '58x40') => 
+    format === '58x40' 
+      ? { wmm: 58, hmm: 40, title: '58×40 мм' }
+      : { wmm: 210, hmm: 297, title: 'A4' };
+
+  // Text wrapping function from provided code
+  const drawWrap = (ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines: number = 1) => {
+    const words = (text || '-').toString().split(/\s+/);
+    let line = '', lines = 0;
+    for (let i = 0; i < words.length; i++) {
+      const test = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+        lines++;
+        if (lines >= Math.max(1, maxLines) - 1) {
+          line = words.slice(i).join(' ');
+          break;
+        }
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    ctx.fillText(line, x, y);
+    return y + lineHeight;
+  };
+
+  // Render preview function adapted from provided code
   const renderPreview = () => {
     if (!canvasRef.current) return;
     
+    const currentState = activeTab === 'barcode' ? labelState : wbState;
+    if (!currentState.data) return;
+    
+    const { wmm, hmm } = dims(currentState.format);
+    
+    const dpi = 300;
+    const W = Math.round(mmToPx(wmm, dpi));
+    const H = Math.round(mmToPx(hmm, dpi));
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d')!;
-    const isThermal = settings.labelType === 'Термоэтикетка';
-    const [labelW, labelH] = isThermal ? parseLabelSize(settings.labelSize) : [210, 297];
     
-    // Set canvas size
-    const scale = isThermal ? 2 : 1;
-    canvas.width = labelW * scale;
-    canvas.height = labelH * scale;
+    canvas.width = W;
+    canvas.height = H;
     
-    // Clear canvas
+    // White background
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw label content based on active tab
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#000000';
+
+    const margin = Math.round(mmToPx(currentState.format === '58x40' ? 3 : 12, dpi));
+    const innerW = W - margin * 2;
+    let x = margin, y = margin;
+
     if (activeTab === 'barcode') {
-      drawProductLabel(ctx, labelState, isThermal, scale);
-    } else if (activeTab === 'wb') {
-      drawWBLabel(ctx, wbState, isThermal, scale);
+      // Product label rendering
+      // Title
+      const titlePx = currentState.format === '58x40' ? 42 : 66;
+      ctx.font = `700 ${titlePx}px Inter, Arial`;
+      y = drawWrap(ctx, labelState.name || '-', x, y, innerW, Math.round(titlePx * 1.2), currentState.format === '58x40' ? 2 : 3);
+
+      // Article
+      const skuPx = currentState.format === '58x40' ? 32 : 46;
+      ctx.font = `500 ${skuPx}px Inter, Arial`;
+      ctx.fillText('Артикул: ' + (labelState.sku || '-'), x, y);
+      y += Math.round(skuPx * 1.2);
+    } else {
+      // WB Box label rendering
+      // Sequence number
+      if (wbState.sequenceNumber?.trim()) {
+        const titlePx = currentState.format === '58x40' ? 42 : 66;
+        ctx.font = `700 ${titlePx}px Inter, Arial`;
+        ctx.fillText(wbState.sequenceNumber, x, y);
+        y += Math.round(titlePx * 1.2);
+      }
+
+      // Free field
+      if (wbState.freeField?.trim()) {
+        const fieldPx = currentState.format === '58x40' ? 32 : 46;
+        ctx.font = `500 ${fieldPx}px Inter, Arial`;
+        y = drawWrap(ctx, wbState.freeField, x, y, innerW, Math.round(fieldPx * 1.2), currentState.format === '58x40' ? 2 : 3);
+      }
+
+      // Quantity
+      const skuPx = currentState.format === '58x40' ? 32 : 46;
+      ctx.font = `500 ${skuPx}px Inter, Arial`;
+      ctx.fillText('Количество: ' + wbState.quantity, x, y);
+      y += Math.round(skuPx * 1.2);
     }
+
+    // Barcode rendering
+    const barsMM = currentState.format === '58x40' ? 20 : 30;
+    const barsCanvas = document.createElement('canvas');
     
-    // Update preview image
-    const imageUrl = canvas.toDataURL('image/jpeg', 0.92);
-    if (previewRef.current) {
-      previewRef.current.removeAttribute('width');
-      previewRef.current.removeAttribute('height');  
-      previewRef.current.src = imageUrl;
-    }
-  };
+    try {
+      JsBarcode(barsCanvas, currentState.data, {
+        format: 'code128',
+        displayValue: true,
+        font: 'Inter, Arial',
+        textPosition: 'bottom',
+        fontSize: currentState.format === '58x40' ? 36 : 46,
+        textMargin: currentState.format === '58x40' ? 24 : 32,
+        margin: 0,
+        width: currentState.format === '58x40' ? 4 : 5,
+        height: Math.round(mmToPx(barsMM, dpi))
+      });
 
-  const drawProductLabel = (ctx: CanvasRenderingContext2D, state: LabelState, isThermal: boolean, scale: number) => {
-    const margin = isThermal ? 3 * scale : 12 * scale;
-    let x = margin, y = margin;
-    const innerW = ctx.canvas.width - margin * 2;
+      const scale = (innerW / barsCanvas.width);
+      const bw = Math.floor(barsCanvas.width * scale);
+      const bh = Math.floor(barsCanvas.height * scale);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(barsCanvas, x, y, bw, bh);
+      y += bh + Math.round((currentState.format === '58x40' ? 42 : 66) * 0.35);
 
-    ctx.fillStyle = '#000000';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-
-    // Product name
-    if (state.name?.trim()) {
-      ctx.font = `bold ${(isThermal ? 10.5 : 16) * scale}px Arial`;
-      const nameLines = wrapText(ctx, state.name, innerW);
-      for (let i = 0; i < nameLines.length; i++) {
-        ctx.fillText(nameLines[i], x, y);
-        y += (isThermal ? 5 : 8) * scale;
-      }
-      y += (isThermal ? 1.5 : 2) * scale;
-    }
-
-    // Article/SKU  
-    if (state.sku?.trim()) {
-      ctx.font = `${(isThermal ? 9 : 12) * scale}px Arial`;
-      ctx.fillText('Артикул: ' + state.sku, x, y);
-      y += (isThermal ? 6 : 8) * scale;
-    }
-
-    // Barcode placeholder
-    if (state.data?.trim()) {
-      const barH = (isThermal ? 20 : 30) * scale;
+      // Tech line
+      const infoPx = currentState.format === '58x40' ? 28 : 34;
+      ctx.font = `400 ${infoPx}px Inter, Arial`;
+      ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', x, y);
+    } catch (error) {
+      console.warn('Barcode generation failed:', error);
+      // Fallback: just show placeholder
       ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(x, y, innerW, barH);
+      ctx.fillRect(x, y, innerW, Math.round(mmToPx(barsMM, dpi)));
       ctx.fillStyle = '#000000';
-      ctx.font = `${(isThermal ? 8.2 : 10) * scale}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.fillText('ШК: ' + state.data + ' · Code‑128', ctx.canvas.width / 2, y + barH + (isThermal ? 2.5 : 3) * scale);
-      ctx.textAlign = 'left';
+      ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', x, y + Math.round(mmToPx(barsMM, dpi)) + 20);
+    }
+
+    // Scale canvas to fit preview area
+    const box = canvas.parentElement;
+    if (box) {
+      const pad = 16;
+      const boxRect = box.getBoundingClientRect();
+      const availW = Math.max(100, boxRect.width - pad * 2);
+      const availH = Math.max(100, boxRect.height - pad * 2);
+      const fit = Math.min(availW / W, availH / H, 1);
+      canvas.style.transform = `scale(${fit})`;
+      canvas.style.transformOrigin = 'top left';
+      canvas.style.display = 'block';
+      canvas.style.background = '#fff';
+      canvas.style.border = '1px dashed #dcd6fb';
     }
   };
 
-  const drawWBLabel = (ctx: CanvasRenderingContext2D, state: WBState, isThermal: boolean, scale: number) => {
-    const margin = isThermal ? 3 * scale : 12 * scale;
-    let x = margin, y = margin;
-    const innerW = ctx.canvas.width - margin * 2;
-
-    ctx.fillStyle = '#000000';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-
-    // Sequence number
-    if (state.sequenceNumber?.trim()) {
-      ctx.font = `bold ${(isThermal ? 10.5 : 16) * scale}px Arial`;
-      ctx.fillText(state.sequenceNumber, x, y);
-      y += (isThermal ? 6 : 8) * scale;
-    }
-
-    // Free field
-    if (state.freeField?.trim()) {
-      ctx.font = `${(isThermal ? 9 : 12) * scale}px Arial`;
-      const fieldLines = wrapText(ctx, state.freeField, innerW);
-      for (let i = 0; i < fieldLines.length; i++) {
-        ctx.fillText(fieldLines[i], x, y);
-        y += (isThermal ? 5 : 7) * scale;
-      }
-      y += (isThermal ? 1 : 2) * scale;
-    }
-
-    // Quantity
-    ctx.font = `${(isThermal ? 9 : 12) * scale}px Arial`;
-    ctx.fillText('Количество: ' + state.quantity, x, y);
-    y += (isThermal ? 6 : 8) * scale;
-
-    // Barcode placeholder
-    if (state.data?.trim()) {
-      const barH = (isThermal ? 20 : 30) * scale;
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(x, y, innerW, barH);
-      ctx.fillStyle = '#000000';
-      ctx.font = `${(isThermal ? 8.2 : 10) * scale}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.fillText('ШК: ' + state.data + ' · Code‑128', ctx.canvas.width / 2, y + barH + (isThermal ? 2.5 : 3) * scale);
-      ctx.textAlign = 'left';
-    }
-  };
-
-  const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
-    const words = text.split(' ');
-    const lines: string[] = [];
-    let currentLine = words[0];
-
-    for (let i = 1; i < words.length; i++) {
-      const word = words[i];
-      const width = ctx.measureText(currentLine + ' ' + word).width;
-      if (width < maxWidth) {
-        currentLine += ' ' + word;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    }
-    lines.push(currentLine);
-    return lines;
-  };
-
-  // Helper functions
-  const parseLabelSize = (sizeStr: string): [number, number] => {
-    const [width, height] = sizeStr.split('x').map(Number);
-    return [width || 40, height || 25];
-  };
-
-  // Generate barcode using JsBarcode (proper CODE128)  
-  const makeBarcode = (data: string, barWidthPx: number, fontSizePx: number, isThermal: boolean): Promise<string> => {
+  // Barcode generation function from provided code
+  const makeBar = (data: string, barWidthPx: number, fontSizePx: number, isThermal: boolean): Promise<string> => {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       try {
@@ -252,6 +249,130 @@ export default function LabelGenerator() {
     });
   };
 
+  // Place same label function from provided code
+  const placeSameLabel = async (doc: any, isThermal: boolean) => {
+    const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
+    const margin = isThermal ? 3 : 12;
+    let x = margin, y = margin;
+    const innerW = page.w - margin * 2;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(isThermal ? 10.5 : 16);
+    const nameLines = doc.splitTextToSize(labelState.name || '-', innerW);
+    doc.text(nameLines, x, y + (isThermal ? 4 : 6));
+    y += (isThermal ? 5 : 8) * nameLines.length + (isThermal ? 1.5 : 2);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(isThermal ? 9 : 12);
+    doc.text('Артикул: ' + (labelState.sku || '-'), x, y + (isThermal ? 3 : 4));
+    y += (isThermal ? 6 : 8);
+    
+    const url = await makeBar(labelState.data, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
+    const barH = isThermal ? 20 : 30;
+    const textOffset = isThermal ? 4 : 6;
+    doc.addImage(url, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
+    y += barH + textOffset + (isThermal ? 1.5 : 2);
+    
+    doc.setFontSize(isThermal ? 8.2 : 10);
+    doc.text('ШК: ' + labelState.data + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
+  };
+
+  // PDF generation function adapted from provided code
+  const downloadPDF = async (format: 'A4' | '58x40', isWB: boolean = false) => {
+    const currentState = isWB ? wbState : labelState;
+    if (!currentState.data) {
+      toast('Введите данные для штрих‑кода');
+      return;
+    }
+
+    const btn = document.activeElement as HTMLButtonElement;
+    const isThermal = format === '58x40';
+    
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Генерируется…';
+      }
+      
+      const doc = new jsPDF({
+        unit: 'mm',
+        format: isThermal ? [58, 40] : 'a4',
+        compress: true
+      });
+
+      const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
+      const margin = isThermal ? 3 : 12;
+      let x = margin, y = margin;
+      const innerW = page.w - margin * 2;
+
+      if (isWB) {
+        // WB Box PDF generation
+        if (wbState.sequenceNumber?.trim()) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(isThermal ? 10.5 : 16);
+          doc.text(wbState.sequenceNumber, x, y + (isThermal ? 4 : 6));
+          y += (isThermal ? 6 : 8);
+        }
+
+        if (wbState.freeField?.trim()) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(isThermal ? 9 : 12);
+          const fieldLines = doc.splitTextToSize(wbState.freeField, innerW);
+          doc.text(fieldLines, x, y + (isThermal ? 3 : 4));
+          y += (isThermal ? 5 : 7) * fieldLines.length + (isThermal ? 1 : 2);
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(isThermal ? 9 : 12);
+        doc.text('Количество: ' + wbState.quantity, x, y + (isThermal ? 3 : 4));
+        y += (isThermal ? 6 : 8);
+      } else {
+        // Product label PDF generation
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(isThermal ? 10.5 : 16);
+        const nameLines = doc.splitTextToSize(labelState.name || '-', innerW);
+        doc.text(nameLines, x, y + (isThermal ? 4 : 6));
+        y += (isThermal ? 5 : 8) * nameLines.length + (isThermal ? 1.5 : 2);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(isThermal ? 9 : 12);
+        doc.text('Артикул: ' + (labelState.sku || '-'), x, y + (isThermal ? 3 : 4));
+        y += (isThermal ? 6 : 8);
+      }
+
+      // Add barcode
+      const barURL = await makeBar(currentState.data, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
+      const barH = isThermal ? 20 : 30;
+      const textOffset = isThermal ? 4 : 6;
+      doc.addImage(barURL, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
+      y += barH + textOffset + (isThermal ? 1.5 : 2);
+      
+      doc.setFontSize(isThermal ? 8.2 : 10);
+      doc.text('ШК: ' + currentState.data + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
+
+      // Add copies for A4 product labels
+      if (!isThermal && !isWB) {
+        const copies = Math.max(1, Math.min(12, labelState.copies || 1));
+        for (let i = 1; i < copies; i++) {
+          doc.addPage('a4');
+          await placeSameLabel(doc, isThermal);
+        }
+      }
+
+      const filename = `${isWB ? 'wb_' : ''}label_${isThermal ? '58x40mm' : 'A4'}_${((isWB ? wbState.sequenceNumber : labelState.sku) || 'sku').replace(/[^a-z0-9_-]/gi, '')}.pdf`;
+      doc.save(filename);
+      toast("PDF файл успешно создан!");
+    } catch (e: any) {
+      toast('Не удалось сформировать PDF: ' + e.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Скачать PDF';
+      }
+    }
+  };
+
+  // QR code functions
   const generateQR = async () => {
     if (!qrText.trim()) {
       toast("Введите текст для QR-кода");
@@ -275,168 +396,6 @@ export default function LabelGenerator() {
     }
   };
 
-  const generateProductPDF = async () => {
-    if (!labelState.data?.trim()) {
-      toast("Введите штрихкод");
-      return;
-    }
-
-    const btn = document.activeElement as HTMLButtonElement;
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'Генерация...';
-    }
-
-    try {
-      const isThermal = settings.labelType === 'Термоэтикетка';
-      const [labelW, labelH] = isThermal ? parseLabelSize(settings.labelSize) : [210, 297];
-
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: isThermal ? [labelW, labelH] : 'a4'
-      });
-
-      if (!isThermal) {
-        const copies = Math.max(1, Math.min(12, labelState.copies || 1));
-        for (let i = 0; i < copies; i++) {
-          if (i > 0) doc.addPage('a4');
-          await placeLabelOnPDF(doc, labelState, isThermal);
-        }
-      } else {
-        await placeLabelOnPDF(doc, labelState, isThermal);
-      }
-
-      const filename = `label_${isThermal ? settings.labelSize + 'mm' : 'A4'}_${(labelState.sku || 'sku').replace(/[^a-z0-9_-]/gi, '')}.pdf`;
-      doc.save(filename);
-      toast("PDF файл успешно создан!");
-    } catch (e: any) {
-      console.error('PDF generation error:', e);
-      toast('Не удалось сформировать PDF: ' + e.message);
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Скачать PDF';
-      }
-    }
-  };
-
-  const placeLabelOnPDF = async (doc: any, state: LabelState, isThermal: boolean) => {
-    const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
-    const margin = isThermal ? 3 : 12;
-    let x = margin, y = margin;
-    const innerW = page.w - margin * 2;
-
-    // Product name with proper font encoding
-    if (state.name?.trim()) {
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(isThermal ? 10.5 : 16);
-      const nameLines = doc.splitTextToSize(state.name, innerW);
-      doc.text(nameLines, x, y + (isThermal ? 4 : 6));
-      y += (isThermal ? 5 : 8) * nameLines.length + (isThermal ? 1.5 : 2);
-    }
-
-    // Article number
-    if (state.sku?.trim()) {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(isThermal ? 9 : 12);
-      doc.text('Артикул: ' + state.sku, x, y + (isThermal ? 3 : 4));
-      y += (isThermal ? 6 : 8);
-    }
-
-    // Generate and add barcode
-    if (state.data?.trim()) {
-      const barURL = await makeBarcode(state.data, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
-      const barH = isThermal ? 20 : 30;
-      const textOffset = isThermal ? 4 : 6;
-      doc.addImage(barURL, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
-      y += barH + textOffset + (isThermal ? 1.5 : 2);
-      
-      doc.setFontSize(isThermal ? 8.2 : 10);
-      doc.text('ШК: ' + state.data + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
-    }
-  };
-
-  const generateWBBoxPDF = async () => {
-    if (!wbState.data?.trim()) {
-      toast("Введите штрихкод короба");
-      return;
-    }
-
-    const btn = document.activeElement as HTMLButtonElement;
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'Генерация...';
-    }
-
-    try {
-      const isThermal = settings.labelType === 'Термоэтикетка';
-      const [labelW, labelH] = isThermal ? parseLabelSize(settings.labelSize) : [210, 297];
-
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: isThermal ? [labelW, labelH] : 'a4'
-      });
-
-      await placeWBBoxLabelOnPDF(doc, wbState, isThermal);
-
-      const filename = `wb_label_${isThermal ? settings.labelSize + 'mm' : 'A4'}_${(wbState.sequenceNumber || 'box').replace(/[^a-z0-9_-]/gi, '')}.pdf`;
-      doc.save(filename);
-      toast("PDF файл с этикеткой короба успешно создан!");
-    } catch (e: any) {
-      console.error('WB PDF generation error:', e);
-      toast('Не удалось сформировать PDF: ' + e.message);
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Скачать PDF';
-      }
-    }
-  };
-
-  const placeWBBoxLabelOnPDF = async (doc: any, state: WBState, isThermal: boolean) => {
-    const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
-    const margin = isThermal ? 3 : 12;
-    let x = margin, y = margin;
-    const innerW = page.w - margin * 2;
-
-    // Sequence number with proper font encoding
-    if (state.sequenceNumber?.trim()) {
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(isThermal ? 10.5 : 16);
-      doc.text(state.sequenceNumber, x, y + (isThermal ? 4 : 6));
-      y += (isThermal ? 6 : 8);
-    }
-
-    // Free field
-    if (state.freeField?.trim()) {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(isThermal ? 9 : 12);
-      const fieldLines = doc.splitTextToSize(state.freeField, innerW);
-      doc.text(fieldLines, x, y + (isThermal ? 3 : 4));
-      y += (isThermal ? 5 : 7) * fieldLines.length + (isThermal ? 1 : 2);
-    }
-
-    // Quantity
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(isThermal ? 9 : 12);
-    doc.text('Количество: ' + state.quantity, x, y + (isThermal ? 3 : 4));
-    y += (isThermal ? 6 : 8);
-
-    // Generate and add barcode for WB boxes
-    if (state.data?.trim()) {
-      const barURL = await makeBarcode(state.data, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
-      const barH = isThermal ? 20 : 30;
-      const textOffset = isThermal ? 4 : 6;
-      doc.addImage(barURL, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
-      y += barH + textOffset + (isThermal ? 1.5 : 2);
-      
-      doc.setFontSize(isThermal ? 8.2 : 10);
-      doc.text('ШК: ' + state.data + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
-    }
-  };
-
   const downloadQR = () => {
     if (!qrPreview) {
       toast("Сначала сгенерируйте QR-код");
@@ -451,6 +410,11 @@ export default function LabelGenerator() {
     document.body.removeChild(link);
     toast("QR-код скачан!");
   };
+
+  // Update preview when state changes
+  useEffect(() => {
+    renderPreview();
+  }, [labelState, wbState, activeTab]);
 
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-0">
@@ -520,23 +484,23 @@ export default function LabelGenerator() {
               <CardContent className="space-y-4 bg-muted/30 rounded-lg p-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="barcode">Штрихкод*</Label>
+                    <Label htmlFor="barcode">ШК (данные для Code‑128)*</Label>
                     <Input
                       id="barcode"
                       value={labelState.data}
-                      onChange={(e) => setLabelState(prev => ({ ...prev, data: e.target.value }))}
-                      placeholder="Введите штрихкод"
+                      onChange={(e) => setLabelState(prev => ({ ...prev, data: e.target.value.trim() }))}
+                      placeholder="Например: 123123123"
                       className="w-full"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="productName">Название товара</Label>
+                    <Label htmlFor="productName">Наименование</Label>
                     <Input
                       id="productName"
                       value={labelState.name}
                       onChange={(e) => setLabelState(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Введите название товара"
+                      placeholder="Название товара"
                       className="w-full"
                     />
                   </div>
@@ -547,25 +511,63 @@ export default function LabelGenerator() {
                       id="article"
                       value={labelState.sku}
                       onChange={(e) => setLabelState(prev => ({ ...prev, sku: e.target.value }))}
-                      placeholder="Введите артикул"
+                      placeholder="SKU / Артикул"
                       className="w-full"
                     />
                   </div>
 
-                  {settings.labelType === 'A4' && (
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="copies">Количество копий (для A4)</Label>
+                      <Label>Формат печати</Label>
+                      <Select 
+                        value={labelState.format} 
+                        onValueChange={(value: 'A4' | '58x40') => setLabelState(prev => ({ ...prev, format: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="A4">A4 (лист)</SelectItem>
+                          <SelectItem value="58x40">Термоэтикетка 58×40 мм</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="copies">Копий (A4)</Label>
                       <Input
                         id="copies"
                         type="number"
                         min="1"
                         max="12"
                         value={labelState.copies}
-                        onChange={(e) => setLabelState(prev => ({ ...prev, copies: parseInt(e.target.value) || 1 }))}
+                        onChange={(e) => setLabelState(prev => ({ ...prev, copies: Math.max(1, Math.min(12, parseInt(e.target.value) || 1)) }))}
                         className="w-full"
+                        disabled={labelState.format === '58x40'}
                       />
                     </div>
-                  )}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      onClick={renderPreview}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Предпросмотр
+                    </Button>
+                    <Button 
+                      onClick={() => downloadPDF(labelState.format)} 
+                      className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Скачать PDF
+                    </Button>
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Для термопринтера выбирайте 58×40 мм и печатайте без масштабирования (Actual size).
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -573,103 +575,28 @@ export default function LabelGenerator() {
             {/* Preview Area */}
             <Card>
               <CardHeader>
-                <CardTitle>Превью этикетки</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Превью макета</CardTitle>
+                  <span className="text-sm text-muted-foreground">{dims(labelState.format).title}</span>
+                </div>
               </CardHeader>
               <CardContent>
                 <div 
                   className="border border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center bg-muted/10"
-                  style={{ height: '80vh', overflow: 'hidden', padding: '10px' }}
+                  style={{ height: '80vh', overflow: 'hidden', padding: '16px' }}
                 >
-                  <div className="w-full h-full flex items-center justify-center">
-                    <canvas 
-                      ref={canvasRef} 
-                      className="hidden"
-                    />
-                    <img 
-                      ref={previewRef}
-                      id="previewImg"
-                      alt="Превью этикетки"
-                      style={{
-                        background: '#fff',
-                        border: '1px dashed #dcd6fb',
-                        display: 'block',
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        width: 'auto',
-                        height: 'auto',
-                        objectFit: 'contain'
-                      }}
-                    />
-                  </div>
+                  <canvas 
+                    ref={canvasRef}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      imageRendering: 'pixelated'
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Settings Section */}
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-3 pb-4">
-              <Settings className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Основные настройки</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 bg-muted/30 rounded-lg p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-2">
-                  <Label>Тип печати</Label>
-                  <div className="flex gap-4">
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="radio" 
-                        id="a4" 
-                        name="labelType" 
-                        value="A4" 
-                        checked={settings.labelType === 'A4'}
-                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
-                      />
-                      <Label htmlFor="a4">A4</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="radio" 
-                        id="thermal" 
-                        name="labelType" 
-                        value="Термоэтикетка" 
-                        checked={settings.labelType === 'Термоэтикетка'}
-                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
-                      />
-                      <Label htmlFor="thermal">Термоэтикетка</Label>
-                    </div>
-                  </div>
-                </div>
-                
-                {settings.labelType === 'Термоэтикетка' && (
-                  <div className="space-y-2">
-                    <Label>Размер термоэтикетки (мм, ШхВ)</Label>
-                    <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {labelSizes.map((size) => (
-                          <SelectItem key={size} value={size}>{size}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex justify-center pt-4">
-                <Button 
-                  onClick={generateProductPDF} 
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 w-full sm:w-auto"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Скачать PDF
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="qr" className="space-y-4 sm:space-y-6">
@@ -711,10 +638,10 @@ export default function LabelGenerator() {
                   
                   <div className="space-y-2">
                     <Label>Формат файла</Label>
-                     <Select value={qrFormat} onValueChange={setQrFormat}>
-                       <SelectTrigger className="w-full border-2 border-input">
-                         <SelectValue />
-                       </SelectTrigger>
+                    <Select value={qrFormat} onValueChange={setQrFormat}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="PNG">PNG</SelectItem>
                         <SelectItem value="JPG">JPG</SelectItem>
@@ -778,7 +705,7 @@ export default function LabelGenerator() {
                     <Input
                       id="wbBarcode"
                       value={wbState.data}
-                      onChange={(e) => setWbState(prev => ({ ...prev, data: e.target.value }))}
+                      onChange={(e) => setWbState(prev => ({ ...prev, data: e.target.value.trim() }))}
                       placeholder="Введите штрихкод короба"
                       className="w-full"
                     />
@@ -817,6 +744,39 @@ export default function LabelGenerator() {
                       className="w-full"
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Формат печати</Label>
+                    <Select 
+                      value={wbState.format} 
+                      onValueChange={(value: 'A4' | '58x40') => setWbState(prev => ({ ...prev, format: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A4">A4 (лист)</SelectItem>
+                        <SelectItem value="58x40">Термоэтикетка 58×40 мм</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      onClick={renderPreview}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Предпросмотр
+                    </Button>
+                    <Button 
+                      onClick={() => downloadPDF(wbState.format, true)} 
+                      className="bg-wb-purple hover:bg-wb-purple-dark text-white flex-1"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Скачать PDF
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -824,103 +784,28 @@ export default function LabelGenerator() {
             {/* Preview Area */}
             <Card>
               <CardHeader>
-                <CardTitle>Превью этикетки короба</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Превью этикетки короба</CardTitle>
+                  <span className="text-sm text-muted-foreground">{dims(wbState.format).title}</span>
+                </div>
               </CardHeader>
               <CardContent>
                 <div 
                   className="border border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center bg-muted/10"
-                  style={{ height: '80vh', overflow: 'hidden', padding: '10px' }}
+                  style={{ height: '80vh', overflow: 'hidden', padding: '16px' }}
                 >
-                  <div className="w-full h-full flex items-center justify-center">
-                    <canvas 
-                      ref={canvasRef} 
-                      className="hidden"
-                    />
-                    <img 
-                      ref={previewRef}
-                      id="previewImg"
-                      alt="Превью этикетки короба"
-                      style={{
-                        background: '#fff',
-                        border: '1px dashed #dcd6fb',
-                        display: 'block',
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        width: 'auto',
-                        height: 'auto',
-                        objectFit: 'contain'
-                      }}
-                    />
-                  </div>
+                  <canvas 
+                    ref={canvasRef}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      imageRendering: 'pixelated'
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* Settings Section */}
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-3 pb-4">
-              <Settings className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Настройки коробов WB</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 bg-muted/30 rounded-lg p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-2">
-                  <Label>Тип печати</Label>
-                  <div className="flex gap-4">
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="radio" 
-                        id="wb-a4" 
-                        name="wbLabelType" 
-                        value="A4" 
-                        checked={settings.labelType === 'A4'}
-                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
-                      />
-                      <Label htmlFor="wb-a4">A4</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input 
-                        type="radio" 
-                        id="wb-thermal" 
-                        name="wbLabelType" 
-                        value="Термоэтикетка" 
-                        checked={settings.labelType === 'Термоэтикетка'}
-                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
-                      />
-                      <Label htmlFor="wb-thermal">Термоэтикетка</Label>
-                    </div>
-                  </div>
-                </div>
-                
-                {settings.labelType === 'Термоэтикетка' && (
-                  <div className="space-y-2">
-                    <Label>Размер термоэтикетки (мм, ШхВ)</Label>
-                    <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {labelSizes.map((size) => (
-                          <SelectItem key={size} value={size}>{size}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex justify-center pt-4">
-                <Button 
-                  onClick={generateWBBoxPDF} 
-                  className="bg-wb-purple hover:bg-wb-purple-dark text-white px-8 py-2 w-full sm:w-auto"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Скачать PDF
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
