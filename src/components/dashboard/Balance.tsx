@@ -40,13 +40,13 @@ export default function Balance() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Баланс токенов</CardTitle>
-          <Coins className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <CardTitle className="text-xl font-bold">Баланс токенов</CardTitle>
+          <Coins className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{balance}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-3xl font-bold">{balance}</div>
+          <p className="text-sm text-muted-foreground mt-1">
             токенов доступно для генерации
           </p>
         </CardContent>
@@ -54,31 +54,31 @@ export default function Balance() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Стоимость генерации</CardTitle>
+          <CardTitle className="text-xl font-bold">Стоимость генерации</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-[10px] p-4 flex items-center gap-3">
-              <div className="bg-primary/20 p-2 rounded-lg">
-                <FileText className="h-4 w-4 text-primary" />
+            <div className="bg-muted/50 border border-border rounded-[10px] p-4 flex items-center gap-3">
+              <div className="bg-muted p-2 rounded-lg">
+                <FileText className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="flex-1">
                 <div className="font-medium text-sm">1 описание товара</div>
                 <div className="text-xs text-muted-foreground">Генерация описания</div>
               </div>
-              <div className="bg-primary text-primary-foreground px-3 py-1 rounded-lg font-medium text-sm">
+              <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
                 1 токен
               </div>
             </div>
-            <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border border-secondary/20 rounded-[10px] p-4 flex items-center gap-3">
-              <div className="bg-secondary/20 p-2 rounded-lg">
-                <Images className="h-4 w-4 text-secondary-foreground" />
+            <div className="bg-muted/50 border border-border rounded-[10px] p-4 flex items-center gap-3">
+              <div className="bg-muted p-2 rounded-lg">
+                <Images className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="flex-1">
                 <div className="font-medium text-sm">1 комплект карточек</div>
                 <div className="text-xs text-muted-foreground">6 изображений товара</div>
               </div>
-              <div className="bg-secondary text-secondary-foreground px-3 py-1 rounded-lg font-medium text-sm">
+              <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
                 6 токенов
               </div>
             </div>
