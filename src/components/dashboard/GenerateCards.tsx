@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Image, Download, AlertCircle, Zap, Loader2 } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -237,19 +237,30 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         </p>
       </div>
 
-      {/* Token Cost */}
-      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="bg-wb-purple/20 p-2 rounded-lg">
-            <Zap className="h-5 w-5 text-wb-purple" />
+      <Card className="bg-muted/30 border border-muted">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="bg-muted p-2 rounded-lg">
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Стоимость генерации</CardTitle>
           </div>
-          <h3 className="text-lg font-semibold text-wb-purple">Стоимость генерации</h3>
-        </div>
-        <div className="text-muted-foreground">
-          <span className="text-2xl font-bold text-wb-purple">6 токенов</span>
-          <span className="text-sm ml-2">за комплект из 6 изображений</span>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-background/50 border border-border/50 rounded-[8px] p-3 flex items-center gap-3">
+            <div className="bg-muted/70 p-2 rounded-lg">
+              <Images className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="flex-1">
+              <div className="font-medium text-sm text-muted-foreground">1 комплект карточек</div>
+              <div className="text-xs text-muted-foreground">6 изображений товара</div>
+            </div>
+            <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm text-muted-foreground">
+              6 токенов
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Guard Messages */}
       {!canGenerate() && (
@@ -480,7 +491,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                        {regeneratingIndex === index ? (
                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                        ) : (
-                         <Image className="w-4 h-4 mr-2" />
+                          <RefreshCw className="w-4 h-4 mr-2" />
                        )}
                        Сгенерировать заново
                      </Button>
@@ -522,7 +533,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                        {regeneratingIndex === index ? (
                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                        ) : (
-                         <Image className="w-4 h-4 mr-2" />
+                          <RefreshCw className="w-4 h-4 mr-2" />
                        )}
                        Перегенерировать
                      </Button>
@@ -554,7 +565,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               </>
             ) : (
               <>
-                <Image className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 <span className="hidden sm:inline">
                   {generatedImages.length > 0 ? 'Сгенерировать еще варианты' : 'Сгенерировать карточки'}
                 </span>
@@ -580,7 +591,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 </>
               ) : (
                 <>
-                  <Image className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   Еще варианты
                 </>
               )}

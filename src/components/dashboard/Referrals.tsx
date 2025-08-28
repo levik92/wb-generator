@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Users } from "lucide-react";
+import { Copy, Users, ExternalLink, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
@@ -22,7 +22,7 @@ export const Referrals = ({ profile }: ReferralsProps) => {
   const { toast } = useToast();
   const referralLink = `${window.location.origin}/auth?ref=${profile.referral_code}`;
 
-  const copyLink = () => {
+  const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
     toast({
       title: "Ссылка скопирована!",
@@ -39,29 +39,41 @@ export const Referrals = ({ profile }: ReferralsProps) => {
         </p>
       </div>
 
-      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="bg-wb-purple/20 p-3 rounded-lg">
-            <Users className="h-6 w-6 text-wb-purple" />
+      <Card className="bg-muted/30 border border-muted/50">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="bg-muted p-3 rounded-lg">
+              <Users className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-semibold text-foreground">Реферальная программа</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Приглашайте друзей и получайте бонусы
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-wb-purple">Ваша реферальная ссылка</h3>
-            <p className="text-sm text-muted-foreground">
-              Поделитесь этой ссылкой с друзьями
-            </p>
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="flex space-x-2">
-            <Input 
-              value={referralLink} 
-              readOnly 
-              className="bg-background/80 border-2 border-border/60"
-            />
-            <Button onClick={copyLink} className="bg-wb-purple hover:bg-wb-purple-dark px-4">
-              <Copy className="w-4 h-4" />
-            </Button>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="bg-gradient-to-r from-muted/50 to-muted/30 border border-muted rounded-[12px] p-6 shadow-sm">
+            <h3 className="font-medium mb-4 text-foreground flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Ваша реферальная ссылка:
+            </h3>
+            <div className="flex gap-2">
+              <Input
+                value={referralLink}
+                readOnly
+                className="flex-1 bg-background/80"
+              />
+              <Button
+                onClick={copyReferralLink}
+                variant="outline"
+                className="px-4 hover:bg-primary hover:text-primary-foreground"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Копировать
+              </Button>
+            </div>
           </div>
           
           <div className="grid md:grid-cols-2 gap-4">
@@ -79,8 +91,8 @@ export const Referrals = ({ profile }: ReferralsProps) => {
             <strong>Как это работает:</strong> Ваш друг получает +10 токенов сразу при регистрации (итого 35 токенов). 
             Вы получаете +20 токенов только после его первого пополнения баланса.
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

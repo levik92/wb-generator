@@ -40,33 +40,36 @@ export default function Balance() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-wb-purple/20 p-3 rounded-lg">
-              <Coins className="h-6 w-6 text-wb-purple" />
+      <div className="bg-gradient-to-br from-wb-purple/5 via-wb-purple/10 to-wb-purple-dark/15 border border-wb-purple/20 rounded-xl p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-wb-purple/20 to-wb-purple-dark/20 p-3 rounded-lg shadow-lg">
+                <Coins className="h-6 w-6 text-wb-purple" />
+              </div>
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-wb-purple to-wb-purple-dark bg-clip-text text-transparent">Баланс токенов</h2>
             </div>
-            <h2 className="text-xl font-semibold text-wb-purple">Баланс токенов</h2>
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-4xl font-bold text-wb-purple mb-2">{balance}</div>
-            <p className="text-sm text-muted-foreground">
-              токенов доступно для генерации
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-wb-purple to-wb-purple-dark bg-clip-text text-transparent mb-2">{balance}</div>
+              <p className="text-sm text-muted-foreground">
+                токенов доступно для генерации
+              </p>
+            </div>
+            <Button 
+              onClick={() => {
+                const pricingElement = document.getElementById('pricing-section');
+                if (pricingElement) {
+                  pricingElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="bg-gradient-to-r from-wb-purple to-wb-purple-dark hover:from-wb-purple-dark hover:to-wb-purple shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              Пополнить
+            </Button>
           </div>
-          <Button 
-            onClick={() => {
-              const pricingElement = document.getElementById('pricing-section');
-              if (pricingElement) {
-                pricingElement.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="bg-wb-purple hover:bg-wb-purple-dark"
-          >
-            Пополнить
-          </Button>
         </div>
       </div>
 

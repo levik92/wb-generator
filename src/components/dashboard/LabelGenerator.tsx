@@ -8,291 +8,242 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Slider } from "@/components/ui/slider";
-import { Trash2, Plus, Download, QrCode, BarChart3, Package, Settings } from "lucide-react";
+import { Trash2, Plus, Download, QrCode, BarChart3, Package, Settings, FileText } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from 'jspdf';
 import JsBarcode from 'jsbarcode';
 import QRCodeGenerator from 'qrcode';
 
-interface ProductRow {
-  id: string;
+interface Product {
   barcode: string;
   article: string;
   color: string;
   size: string;
   productName: string;
-  sellerName: string;
+  supplier: string;
   quantity: number;
+  brand?: string;
 }
 
-interface BoxRow {
-  id: string;
-  barcode: string;
-  quantity: number;
-  freeField: string;
-  boxNumber: string;
+interface Settings {
+  barcodeFormat: string;
+  labelType: 'A4' | 'Термоэтикетка';
+  labelSize: string;
+  fontSize: number;
 }
+
+const labelSizes = [
+  "38x21.2",
+  "43x25", 
+  "48.5x25.4",
+  "52x28.5",
+  "52x34",
+  "52.5x29.7",
+  "52.5x35",
+  "58x40",
+  "70x37",
+  "64x33.4",
+  "64.6x33.8",
+  "64.6x34.8",
+  "66.7x46",
+  "70x42",
+  "70x42.3",
+  "70x49.5",
+  "105x48"
+];
 
 export default function LabelGenerator() {
-  const [activeTab, setActiveTab] = useState("product-labels");
-  
-  // Product labels state
-  const [rows, setRows] = useState<ProductRow[]>([
-    {
-      id: "1",
-      barcode: "",
-      article: "",
-      color: "",
-      size: "",
-      productName: "",
-      sellerName: "",
-      quantity: 1
-    }
-  ]);
+  const [activeTab, setActiveTab] = useState("barcode");
+  const [products, setProducts] = useState<Product[]>([{
+    barcode: "",
+    article: "",
+    color: "",
+    size: "",
+    productName: "",
+    supplier: "",
+    quantity: 1
+  }]);
 
-  // Box labels state
-  const [boxRows, setBoxRows] = useState<BoxRow[]>([
-    {
-      id: "1",
-      barcode: "",
-      quantity: 1,
-      freeField: "",
-      boxNumber: ""
-    }
-  ]);
+  const [settings, setSettings] = useState<Settings>({
+    barcodeFormat: "EAN13",
+    labelType: 'A4',
+    labelSize: "58x40",
+    fontSize: 12
+  });
 
-  // QR code state
+  const [useSameSupplier, setUseSameSupplier] = useState(false);
   const [qrText, setQrText] = useState("");
   const [qrSize, setQrSize] = useState([100]);
   const [qrFormat, setQrFormat] = useState("PNG");
   const [qrPreview, setQrPreview] = useState("");
 
-  // Settings
-  const [sameSellerName, setSameSellerName] = useState(false);
-  const [globalSellerName, setGlobalSellerName] = useState("");
-  const [barcodeFormat, setBarcodeFormat] = useState("CODE-128");
-  const [barcodeType, setBarcodeType] = useState("A4");
-  const [labelSize, setLabelSize] = useState("40x25");
-  const [fontSize, setFontSize] = useState("12");
-  
-  // Box settings
-  const [boxLabelSize, setBoxLabelSize] = useState("52x34");
-  const [boxFontSize, setBoxFontSize] = useState("11");
-  const [orderNumber, setOrderNumber] = useState(false);
-  const [cutLines, setCutLines] = useState(false);
-
-  // Product functions
-  const addRow = () => {
-    const newRow: ProductRow = {
-      id: Date.now().toString(),
+  const addProduct = () => {
+    setProducts([...products, {
       barcode: "",
       article: "",
       color: "",
       size: "",
       productName: "",
-      sellerName: sameSellerName ? globalSellerName : "",
+      supplier: useSameSupplier && products.length > 0 ? products[0].supplier : "",
       quantity: 1
-    };
-    setRows([...rows, newRow]);
+    }]);
   };
 
-  const removeRow = (id: string) => {
-    if (rows.length > 1) {
-      setRows(rows.filter(row => row.id !== id));
+  const removeProduct = (index: number) => {
+    if (products.length > 1) {
+      setProducts(products.filter((_, i) => i !== index));
     }
   };
 
-  const updateRow = (id: string, field: keyof ProductRow, value: string | number) => {
-    setRows(rows.map(row => 
-      row.id === id ? { ...row, [field]: value } : row
-    ));
+  const updateProduct = (index: number, field: keyof Product, value: string | number) => {
+    const updatedProducts = products.map((product, i) => {
+      if (i === index) {
+        return { ...product, [field]: value };
+      }
+      // If using same supplier, update all supplier fields
+      if (useSameSupplier && field === 'supplier' && index === 0) {
+        return { ...product, supplier: value as string };
+      }
+      return product;
+    });
+    setProducts(updatedProducts);
   };
 
   const clearTable = () => {
-    setRows([{
-      id: "1",
+    setProducts([{
       barcode: "",
       article: "",
       color: "",
       size: "",
       productName: "",
-      sellerName: "",
+      supplier: "",
       quantity: 1
     }]);
   };
 
-  // Box functions
-  const addBoxRow = () => {
-    const newRow: BoxRow = {
-      id: Date.now().toString(),
-      barcode: "",
-      quantity: 1,
-      freeField: "",
-      boxNumber: ""
-    };
-    setBoxRows([...boxRows, newRow]);
-  };
-
-  const removeBoxRow = (id: string) => {
-    if (boxRows.length > 1) {
-      setBoxRows(boxRows.filter(row => row.id !== id));
-    }
-  };
-
-  const updateBoxRow = (id: string, field: keyof BoxRow, value: string | number) => {
-    setBoxRows(boxRows.map(row => 
-      row.id === id ? { ...row, [field]: value } : row
-    ));
-  };
-
-  const clearBoxTable = () => {
-    setBoxRows([{
-      id: "1",
-      barcode: "",
-      quantity: 1,
-      freeField: "",
-      boxNumber: ""
-    }]);
+  const parseLabelSize = (sizeStr: string): [number, number] => {
+    const [width, height] = sizeStr.split('x').map(Number);
+    return [width || 40, height || 25];
   };
 
   const generateProductPDF = () => {
-    try {
-      const doc = new jsPDF();
-      
-      // Set up page based on label size and format
-      let pageFormat = 'a4';
-      let pageOrientation: 'portrait' | 'landscape' = 'portrait';
-      
-      if (barcodeType === 'thermal') {
-        pageFormat = 'a6';
-      }
-      
-      doc.setPage(1);
-      
-      let yPosition = 20;
-      let labelCount = 0;
-      
-      rows.forEach((row, index) => {
-        if (row.barcode && row.productName) {
-          // Generate barcode for each row
-          const canvas = document.createElement('canvas');
-          JsBarcode(canvas, row.barcode, {
-            format: barcodeFormat as any,
-            width: 2,
-            height: 50,
-            displayValue: true,
-            fontSize: parseInt(fontSize),
-            textMargin: 2
-          });
-          
-          // Add barcode to PDF
-          const barcodeImg = canvas.toDataURL('image/png');
-          
-          for (let i = 0; i < row.quantity; i++) {
-            // Add product info
-            doc.setFontSize(parseInt(fontSize));
-            doc.text(`${row.productName}`, 20, yPosition);
-            doc.text(`Артикул: ${row.article}`, 20, yPosition + 8);
-            doc.text(`Цвет: ${row.color}, Размер: ${row.size}`, 20, yPosition + 16);
-            doc.text(`Продавец: ${row.sellerName}`, 20, yPosition + 24);
-            
-            // Add barcode image
-            doc.addImage(barcodeImg, 'PNG', 20, yPosition + 30, 80, 20);
-            
-            yPosition += 80;
-            labelCount++;
-            
-            // Add new page if needed
-            if (yPosition > 250) {
-              doc.addPage();
-              yPosition = 20;
-            }
-          }
-        }
-      });
-      
-      if (labelCount === 0) {
-        toast.error("Нет данных для генерации PDF");
-        return;
-      }
-      
-      doc.save(`product-labels-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success(`PDF создан с ${labelCount} этикетками!`);
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      toast.error("Ошибка создания PDF");
+    if (products.length === 0) {
+      toast("Добавьте товары в таблицу");
+      return;
     }
-  };
 
-  const generateBoxPDF = () => {
     try {
-      const doc = new jsPDF();
+      const doc = new jsPDF({
+        orientation: settings.labelType === 'A4' ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: settings.labelType === 'A4' ? 'a4' : parseLabelSize(settings.labelSize)
+      });
+
+      // Calculate label dimensions based on settings
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
       
-      let yPosition = 20;
-      let labelCount = 0;
+      let labelsPerRow, labelsPerColumn, labelWidth, labelHeight;
       
-      boxRows.forEach((row, index) => {
-        if (row.barcode) {
-          // Generate barcode for each box
-          const canvas = document.createElement('canvas');
-          JsBarcode(canvas, row.barcode, {
-            format: barcodeFormat as any,
-            width: 2,
-            height: 50,
+      if (settings.labelType === 'A4') {
+        // For A4, calculate based on label size
+        const [width, height] = parseLabelSize(settings.labelSize);
+        labelsPerRow = Math.floor(pageWidth / width);
+        labelsPerColumn = Math.floor(pageHeight / height);
+        labelWidth = width;
+        labelHeight = height;
+      } else {
+        // For thermal labels, use full page
+        labelsPerRow = 1;
+        labelsPerColumn = 1;
+        labelWidth = pageWidth;
+        labelHeight = pageHeight;
+      }
+
+      let currentPage = 0;
+      
+      products.forEach((product, index) => {
+        const labelIndex = index % (labelsPerRow * labelsPerColumn);
+        const row = Math.floor(labelIndex / labelsPerRow);
+        const col = labelIndex % labelsPerRow;
+        
+        if (labelIndex === 0 && index > 0) {
+          doc.addPage();
+          currentPage++;
+        }
+
+        const x = col * labelWidth + 5;
+        const y = row * labelHeight + 5;
+
+        // Add supplier name
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(product.supplier || "ИП Продавец", x + 2, y + 8);
+        
+        // Add product name
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        const productName = product.productName || "Название товара";
+        const splitName = doc.splitTextToSize(productName, labelWidth - 10);
+        doc.text(splitName, x + 2, y + 15);
+        
+        // Add article
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Артикул: ${product.article || ""}`, x + 2, y + 25);
+        
+        // Add color and size
+        const colorSize = `Цв.: ${product.color || ""}, ${product.size || ""} / Раз.: ${product.size || ""}`;
+        const splitColorSize = doc.splitTextToSize(colorSize, labelWidth - 10);
+        doc.text(splitColorSize, x + 2, y + 32);
+        
+        // Add brand
+        if (product.brand) {
+          doc.text(`Бренд: ${product.brand}`, x + 2, y + 38);
+        }
+
+        // Generate barcode
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 80;
+        
+        try {
+          JsBarcode(canvas, product.barcode, {
+            format: settings.barcodeFormat,
+            width: 1,
+            height: 40,
             displayValue: true,
-            fontSize: parseInt(boxFontSize),
-            textMargin: 2
+            fontSize: 10,
+            textMargin: 2,
+            margin: 0
           });
           
-          const barcodeImg = canvas.toDataURL('image/png');
-          
-          for (let i = 0; i < row.quantity; i++) {
-            // Add box info
-            doc.setFontSize(parseInt(boxFontSize));
-            doc.text(`Короб #${row.boxNumber}`, 20, yPosition);
-            doc.text(`Количество: ${row.quantity}`, 20, yPosition + 8);
-            if (row.freeField) {
-              doc.text(`${row.freeField}`, 20, yPosition + 16);
-            }
-            
-            // Add barcode image
-            doc.addImage(barcodeImg, 'PNG', 20, yPosition + 30, 80, 20);
-            
-            if (cutLines) {
-              // Add cut lines
-              doc.setLineWidth(0.1);
-              doc.line(10, yPosition - 5, 200, yPosition - 5);
-            }
-            
-            yPosition += 80;
-            labelCount++;
-            
-            // Add new page if needed
-            if (yPosition > 250) {
-              doc.addPage();
-              yPosition = 20;
-            }
-          }
+          const barcodeDataURL = canvas.toDataURL('image/png');
+          doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 45, labelWidth - 10, 20);
+        } catch (error) {
+          console.error('Barcode generation error:', error);
+          toast("Ошибка генерации штрихкода");
+          return;
         }
+
+        // Add quantity at bottom
+        doc.setFontSize(7);
+        doc.text(`Количество: ${product.quantity}`, x + 2, y + labelHeight - 5);
       });
-      
-      if (labelCount === 0) {
-        toast.error("Нет данных для генерации PDF");
-        return;
-      }
-      
-      doc.save(`box-labels-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success(`PDF создан с ${labelCount} этикетками коробов!`);
+
+      doc.save('labels.pdf');
+      toast("PDF файл успешно создан!");
     } catch (error) {
       console.error('PDF generation error:', error);
-      toast.error("Ошибка создания PDF");
+      toast("Ошибка при создании PDF файла");
     }
   };
 
   const generateQR = async () => {
     if (!qrText.trim()) {
-      toast.error("Введите текст для QR-кода");
+      toast("Введите текст для QR-кода");
       return;
     }
     
@@ -306,16 +257,16 @@ export default function LabelGenerator() {
         }
       });
       setQrPreview(qrCode);
-      toast.success("QR-код сгенерирован!");
+      toast("QR-код сгенерирован!");
     } catch (error) {
       console.error('QR generation error:', error);
-      toast.error("Ошибка генерации QR-кода");
+      toast("Ошибка генерации QR-кода");
     }
   };
 
   const downloadQR = () => {
     if (!qrPreview) {
-      toast.error("Сначала сгенерируйте QR-код");
+      toast("Сначала сгенерируйте QR-код");
       return;
     }
     
@@ -325,566 +276,363 @@ export default function LabelGenerator() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("QR-код скачан!");
+    toast("QR-код скачан!");
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold mb-2">Генератор этикеток</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров
-          </p>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-0">
+      <div className="bg-gradient-to-r from-wb-purple/10 to-wb-purple-dark/10 border-2 border-wb-purple/20 rounded-xl p-4 sm:p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-wb-purple/20 p-3 rounded-lg">
+            <FileText className="h-6 w-6 text-wb-purple" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-semibold text-wb-purple">Сервис генерации этикеток штрихкодов (баркодов)</h1>
         </div>
-        <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100 w-fit">
-          <QrCode className="w-3 h-3 mr-1" />
-          FREE
-        </Badge>
+        <p className="text-sm text-muted-foreground">
+          — это онлайн-генератор этикеток и штрихкодов. Он создан для того, чтобы упростить генерацию этикеток на товар, штрихкодов (баркодов) и наклеек на дополнительную упаковку.
+        </p>
       </div>
 
-      {/* Free Service Notice */}
-      <Card className="bg-green-50 border-green-200">
-        <CardContent className="pt-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge className="bg-green-500 hover:bg-green-500 text-white">
-              БЕСПЛАТНО
-            </Badge>
-            <span className="text-sm text-green-800">
-              Сервис генерации этикеток бесплатный для новых пользователей
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-3 h-12 sm:h-10">
-          <TabsTrigger value="product-labels" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <TabsTrigger value="barcode" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
             <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>Этикетки</span>
+            <span className="hidden sm:inline">Этикетки</span>
+            <span className="sm:hidden">ШК</span>
           </TabsTrigger>
-          <TabsTrigger value="qr-codes" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <TabsTrigger value="qr" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
             <QrCode className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>QR коды</span>
+            <span>QR</span>
           </TabsTrigger>
-          <TabsTrigger value="box-labels" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <TabsTrigger value="wb" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
             <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>Короба WB</span>
+            <span className="hidden sm:inline">Короба WB</span>
+            <span className="sm:hidden">WB</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* Product Labels Tab */}
-        <TabsContent value="product-labels" className="space-y-4 sm:space-y-6">
-          {/* Description */}
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="pt-4">
-              <p className="text-sm text-blue-800">
-                <strong>Сервис генерации этикеток штрихкодов (баркодов)</strong> — это онлайн генератор этикеток и штрихкодов. 
-                Он создан для того, чтобы упростить генерацию этикеток на товар, штрихкодов (баркодов) и наклеек на дополнительную упаковку.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Settings */}
+        <TabsContent value="barcode" className="space-y-4 sm:space-y-6">
+          {/* Data Input Section */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
-                Настройки этикеток
-              </CardTitle>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={clearTable}
+                    className="text-red-500 hover:text-red-600 hover:border-red-500 border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Очистить таблицу
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="same-supplier"
+                      checked={useSameSupplier}
+                      onCheckedChange={(checked) => setUseSameSupplier(checked as boolean)}
+                    />
+                    <Label htmlFor="same-supplier" className="text-sm">
+                      Одинаковое название поставщика на всех наклейках
+                    </Label>
+                  </div>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label>Формат штрихкода</Label>
-                  <Select value={barcodeFormat} onValueChange={setBarcodeFormat}>
-                    <SelectTrigger className="border-2 border-border/60">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CODE-128">CODE-128</SelectItem>
-                      <SelectItem value="EAN13">EAN-13</SelectItem>
-                      <SelectItem value="EAN8">EAN-8</SelectItem>
-                      <SelectItem value="UPC">UPC</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Тип печати</Label>
-                  <Select value={barcodeType} onValueChange={setBarcodeType}>
-                    <SelectTrigger className="border-2 border-border/60">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A4">A4</SelectItem>
-                      <SelectItem value="thermal">Термопринтер</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="labelSize">Размер наклейки</Label>
-                  <Select value={labelSize} onValueChange={setLabelSize}>
-                    <SelectTrigger className="border-2 border-border/60">
-                      <SelectValue placeholder="Выберите размер" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="40x25">40x25 мм</SelectItem>
-                      <SelectItem value="58x40">58x40 мм</SelectItem>
-                      <SelectItem value="58x30">58x30 мм</SelectItem>
-                      <SelectItem value="43x25">43x25 мм</SelectItem>
-                      <SelectItem value="100x100">100x100 мм</SelectItem>
-                      <SelectItem value="100x70">100x70 мм</SelectItem>
-                      <SelectItem value="70x42">70x42 мм</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Размер шрифта (px)</Label>
-                  <Input 
-                    type="number" 
-                    value={fontSize} 
-                    onChange={(e) => setFontSize(e.target.value)}
-                    placeholder="12"
-                    min="8"
-                    max="20"
-                    className="border-2 border-border/60"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-lg border">
-                  <Checkbox 
-                    id="sameSellerName" 
-                    checked={sameSellerName}
-                    onCheckedChange={(checked) => setSameSellerName(checked === true)}
-                  />
-                  <label htmlFor="sameSellerName" className="text-sm">
-                    Одинаковое название поставщика на всех наклейках
-                  </label>
-                </div>
-
-                {sameSellerName && (
-                  <Input
-                    placeholder="Название поставщика"
-                    value={globalSellerName}
-                    onChange={(e) => setGlobalSellerName(e.target.value)}
-                    className="border-2 border-border/60"
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Controls */}
-          <div className="flex flex-wrap gap-4 items-center">
-            <Button 
-              variant="outline" 
-              onClick={clearTable}
-              className="text-red-600 border-red-200 bg-red-50/50 hover:bg-red-100 hover:border-red-300 transition-colors"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Очистить таблицу
-            </Button>
-          </div>
-
-          {/* Product Table */}
-          <Card>
-            <CardContent className="pt-6 overflow-x-auto">
-              <div className="min-w-[800px]">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2 font-medium text-sm">Штрихкод*</th>
-                      <th className="text-left p-2 font-medium text-sm">Артикул</th>
-                      <th className="text-left p-2 font-medium text-sm">Цвет</th>
-                      <th className="text-left p-2 font-medium text-sm">Размер</th>
-                      <th className="text-left p-2 font-medium text-sm">Название товара*</th>
-                      <th className="text-left p-2 font-medium text-sm">Продавец</th>
-                      <th className="text-left p-2 font-medium text-sm">Кол-во*</th>
-                      <th className="text-left p-2 font-medium text-sm"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row) => (
-                      <tr key={row.id} className="border-b">
-                        <td className="p-2">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Штрихкод*</TableHead>
+                      <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Артикул</TableHead>
+                      <TableHead className="min-w-[60px] w-full sm:min-w-[80px]">Цвет</TableHead>
+                      <TableHead className="min-w-[60px] w-full sm:min-w-[80px]">Размер</TableHead>
+                      <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Название товара*</TableHead>
+                      <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Наименование продавца</TableHead>
+                      <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Количество*</TableHead>
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {products.map((product, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
                           <Input
-                            placeholder="Штрихкод"
-                            value={row.barcode}
-                            onChange={(e) => updateRow(row.id, 'barcode', e.target.value)}
-                            className="min-w-[120px] text-sm border-2 border-border/60"
+                            value={product.barcode}
+                            onChange={(e) => updateProduct(index, 'barcode', e.target.value)}
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Input
-                            placeholder="Артикул"
-                            value={row.article}
-                            onChange={(e) => updateRow(row.id, 'article', e.target.value)}
-                            className="min-w-[100px] text-sm border-2 border-border/60"
+                            value={product.article}
+                            onChange={(e) => updateProduct(index, 'article', e.target.value)}
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Input
-                            placeholder="Цвет"
-                            value={row.color}
-                            onChange={(e) => updateRow(row.id, 'color', e.target.value)}
-                            className="min-w-[80px] text-sm border-2 border-border/60"
+                            value={product.color}
+                            onChange={(e) => updateProduct(index, 'color', e.target.value)}
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Input
-                            placeholder="Размер"
-                            value={row.size}
-                            onChange={(e) => updateRow(row.id, 'size', e.target.value)}
-                            className="min-w-[80px] text-sm border-2 border-border/60"
+                            value={product.size}
+                            onChange={(e) => updateProduct(index, 'size', e.target.value)}
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Input
-                            placeholder="Название товара"
-                            value={row.productName}
-                            onChange={(e) => updateRow(row.id, 'productName', e.target.value)}
-                            className="min-w-[150px] text-sm border-2 border-border/60"
+                            value={product.productName}
+                            onChange={(e) => updateProduct(index, 'productName', e.target.value)}
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Input
-                            placeholder="Продавец"
-                            value={sameSellerName ? globalSellerName : row.sellerName}
-                            onChange={(e) => updateRow(row.id, 'sellerName', e.target.value)}
-                            disabled={sameSellerName}
-                            className="min-w-[150px] text-sm border-2 border-border/60"
+                            value={useSameSupplier && index > 0 ? products[0].supplier : product.supplier}
+                            onChange={(e) => updateProduct(index, 'supplier', e.target.value)}
+                            disabled={useSameSupplier && index > 0}
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Input
+                            value={product.quantity}
+                            onChange={(e) => updateProduct(index, 'quantity', parseInt(e.target.value) || 1)}
                             type="number"
-                            placeholder="1"
-                            value={row.quantity}
-                            onChange={(e) => updateRow(row.id, 'quantity', parseInt(e.target.value) || 1)}
-                            className="min-w-[80px] text-sm border-2 border-border/60"
-                            min="1"
+                            className="w-full min-w-0"
                           />
-                        </td>
-                        <td className="p-2">
+                        </TableCell>
+                        <TableCell>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeRow(row.id)}
-                            disabled={rows.length === 1}
+                            onClick={() => removeProduct(index)}
+                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
-
-              <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={addRow} className="bg-blue-500 text-white hover:bg-blue-600">
+              <div className="p-4 border-t">
+                <Button onClick={addProduct} variant="outline" className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
                   Добавить строку
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Settings Section - Below table */}
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-3 pb-4">
+              <Settings className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Основные настройки</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="space-y-2">
+                  <Label>Формат штрихкода</Label>
+                  <Select value={settings.barcodeFormat} onValueChange={(value) => setSettings(prev => ({ ...prev, barcodeFormat: value }))}>
+                    <SelectTrigger className="border border-input w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EAN13">EAN-13</SelectItem>
+                      <SelectItem value="EAN8">EAN-8</SelectItem>
+                      <SelectItem value="CODE128">CODE-128</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Тип штрихкода</Label>
+                  <div className="flex gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="radio" 
+                        id="a4" 
+                        name="labelType" 
+                        value="A4" 
+                        checked={settings.labelType === 'A4'}
+                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
+                      />
+                      <Label htmlFor="a4">A4</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="radio" 
+                        id="thermal" 
+                        name="labelType" 
+                        value="Термоэтикетка" 
+                        checked={settings.labelType === 'Термоэтикетка'}
+                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
+                      />
+                      <Label htmlFor="thermal">Термоэтикетка</Label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Размер наклейки (мм, ШхВ)</Label>
+                  <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
+                    <SelectTrigger className="border border-input w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {labelSizes.map((size) => (
+                        <SelectItem key={size} value={size}>{size}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Или введите свой размер (мм, ШхВ) - макс. 210x297 (A4)
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Размер шрифта (px)</Label>
+                  <Input
+                    type="number"
+                    value={settings.fontSize}
+                    onChange={(e) => setSettings(prev => ({ ...prev, fontSize: parseInt(e.target.value) || 12 }))}
+                    min="8"
+                    max="24"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-center pt-4">
                 <Button 
                   onClick={generateProductPDF} 
-                  className="bg-wb-purple hover:bg-wb-purple-dark"
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-2 w-full sm:w-auto"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Скачать этикетки
+                  Получить наклейки
                 </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* QR Codes Tab */}
-        <TabsContent value="qr-codes" className="space-y-4 sm:space-y-6">
-          {/* Description */}
-          <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="pt-4">
-              <p className="text-sm text-blue-800">
-                <strong>Универсальный генератор QR-кода</strong> — Закодируйте любой текст, ссылку и информацию с помощью универсального генератора QR-кода. 
-                Помогите клиентам быстро найти вашу страницу в интернете. Достаточно отсканировать QR-код и вся зашитая в QR-код информация уже у клиента.
-              </p>
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Input Section */}
-            <div className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="qr-text">Введите информацию (ссылку) для QR кода</Label>
-                      <Textarea
-                        id="qr-text"
-                        placeholder="Введите информацию для QR кода..."
-                        value={qrText}
-                        onChange={(e) => setQrText(e.target.value)}
-                        className="min-h-[120px] mt-2 border-2 border-border/60"
+        <TabsContent value="qr" className="space-y-4 sm:space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Генератор QR-кодов</CardTitle>
+              <CardDescription>Создайте QR-код для любого текста или ссылки</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Текст для QR-кода</Label>
+                    <Textarea
+                      value={qrText}
+                      onChange={(e) => setQrText(e.target.value)}
+                      placeholder="Введите текст, ссылку или любую информацию..."
+                      rows={4}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Размер QR-кода (px)</Label>
+                    <div className="px-3">
+                      <Slider
+                        value={qrSize}
+                        onValueChange={setQrSize}
+                        max={300}
+                        min={100}
+                        step={10}
+                        className="w-full"
                       />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Размер</Label>
-                        <Slider
-                          value={qrSize}
-                          onValueChange={setQrSize}
-                          max={300}
-                          min={50}
-                          step={10}
-                          className="w-full"
-                        />
-                        <div className="text-center text-sm text-muted-foreground">
-                          {qrSize[0]}px
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label>Формат</Label>
-                        <Select value={qrFormat} onValueChange={setQrFormat}>
-                          <SelectTrigger className="border-2 border-border/60">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PNG">PNG</SelectItem>
-                            <SelectItem value="JPG">JPG</SelectItem>
-                            <SelectItem value="SVG">SVG</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="text-center text-sm text-muted-foreground mt-1">
+                        {qrSize[0]}px
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Preview Section */}
-            <div>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="aspect-square bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                  
+                  <div className="space-y-2">
+                    <Label>Формат файла</Label>
+                    <Select value={qrFormat} onValueChange={setQrFormat}>
+                      <SelectTrigger className="border border-input w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PNG">PNG</SelectItem>
+                        <SelectItem value="JPG">JPG</SelectItem>
+                        <SelectItem value="SVG">SVG</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button 
+                      onClick={generateQR} 
+                      className="bg-wb-purple hover:bg-wb-purple-dark flex-1"
+                      disabled={!qrText.trim()}
+                    >
+                      <QrCode className="h-4 w-4 mr-2" />
+                      Сгенерировать
+                    </Button>
+                    <Button 
+                      onClick={downloadQR} 
+                      variant="outline" 
+                      disabled={!qrPreview}
+                      className="flex-1 hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Скачать
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Превью QR-кода</Label>
+                  <div className="border border-dashed border-muted-foreground/25 rounded-lg p-8 flex items-center justify-center min-h-[200px] bg-muted/10">
                     {qrPreview ? (
-                      <img src={qrPreview} alt="QR Code Preview" className="max-w-full max-h-full" />
-                    ) : qrText ? (
-                      <div className="text-center">
-                        <QrCode className="h-16 w-16 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-600">Нажмите "Сгенерировать QR"</p>
-                      </div>
+                      <img 
+                        src={qrPreview} 
+                        alt="QR Code" 
+                        className="max-w-full h-auto"
+                        style={{ width: qrSize[0], height: qrSize[0] }}
+                      />
                     ) : (
-                      <div className="text-center">
-                        <QrCode className="h-16 w-16 mx-auto text-gray-300 mb-2" />
-                        <p className="text-sm text-gray-500">Введите данные для превью</p>
+                      <div className="text-center text-muted-foreground">
+                        <QrCode className="h-12 w-12 mx-auto mb-2" />
+                        <p>QR-код появится здесь</p>
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              onClick={generateQR} 
-              className="bg-wb-purple hover:bg-wb-purple-dark flex-1"
-            >
-              <QrCode className="w-4 h-4 mr-2" />
-              Сгенерировать QR
-            </Button>
-            
-            {qrPreview && (
-              <Button 
-                onClick={downloadQR} 
-                variant="outline"
-                className="flex-1 border-2 border-border/60 hover:bg-accent"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Скачать QR
-              </Button>
-            )}
-          </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* Box Labels Tab */}
-        <TabsContent value="box-labels" className="space-y-4 sm:space-y-6">
-          {/* Description */}
-          <Card className="bg-purple-50 border-purple-200">
-            <CardContent className="pt-4">
-              <p className="text-sm text-purple-800">
-                <strong>Универсальная форма для штрихкода CODE128</strong> — это онлайн генератор штрихкодов. 
-                Он создан для того, чтобы упростить генерацию штрихкодов (баркодов) и наклеек на транспортную упаковку Wildberries формата WB_1234567890.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Settings */}
+        <TabsContent value="wb" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
-                Настройки коробов
-              </CardTitle>
+              <CardTitle>Короба для Wildberries</CardTitle>
+              <CardDescription>Скоро доступно</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Размер наклейки</Label>
-                  <Select value={boxLabelSize} onValueChange={setBoxLabelSize}>
-                    <SelectTrigger className="border-2 border-border/60">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="52x34">52x34 мм</SelectItem>
-                      <SelectItem value="40x25">40x25 мм</SelectItem>
-                      <SelectItem value="58x40">58x40 мм</SelectItem>
-                      <SelectItem value="100x100">100x100 мм</SelectItem>
-                      <SelectItem value="100x70">100x70 мм</SelectItem>
-                      <SelectItem value="70x42">70x42 мм</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Размер шрифта (px)</Label>
-                  <Input 
-                    type="number" 
-                    value={boxFontSize} 
-                    onChange={(e) => setBoxFontSize(e.target.value)}
-                    placeholder="11"
-                    min="8"
-                    max="20"
-                    className="border-2 border-border/60"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-lg border">
-                  <Checkbox 
-                    id="orderNumber" 
-                    checked={orderNumber}
-                    onCheckedChange={(checked) => setOrderNumber(checked === true)}
-                  />
-                  <label htmlFor="orderNumber" className="text-sm">
-                    Номер заказа на наклейке
-                  </label>
-                </div>
-                
-                <div className="flex items-center space-x-2 bg-muted/30 p-3 rounded-lg border">
-                  <Checkbox 
-                    id="cutLines" 
-                    checked={cutLines}
-                    onCheckedChange={(checked) => setCutLines(checked === true)}
-                  />
-                  <label htmlFor="cutLines" className="text-sm">
-                    Линии отреза
-                  </label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Controls */}
-          <div className="flex flex-wrap gap-4 items-center">
-            <Button 
-              variant="outline" 
-              onClick={clearBoxTable}
-              className="text-red-600 border-red-200 bg-red-50/50 hover:bg-red-100 hover:border-red-300 transition-colors"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Очистить таблицу
-            </Button>
-          </div>
-
-          {/* Box Table */}
-          <Card>
-            <CardContent className="pt-6 overflow-x-auto">
-              <div className="min-w-[600px]">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2 font-medium text-sm">Штрихкод*</th>
-                      <th className="text-left p-2 font-medium text-sm">Количество</th>
-                      <th className="text-left p-2 font-medium text-sm">Свободное поле</th>
-                      <th className="text-left p-2 font-medium text-sm">Номер коробки</th>
-                      <th className="text-left p-2 font-medium text-sm"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {boxRows.map((row) => (
-                      <tr key={row.id} className="border-b">
-                        <td className="p-2">
-                          <Input
-                            placeholder="Штрихкод"
-                            value={row.barcode}
-                            onChange={(e) => updateBoxRow(row.id, 'barcode', e.target.value)}
-                            className="min-w-[150px] text-sm border-2 border-border/60"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <Input
-                            type="number"
-                            placeholder="1"
-                            value={row.quantity}
-                            onChange={(e) => updateBoxRow(row.id, 'quantity', parseInt(e.target.value) || 1)}
-                            className="min-w-[100px] text-sm border-2 border-border/60"
-                            min="1"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <Input
-                            placeholder="Свободное поле"
-                            value={row.freeField}
-                            onChange={(e) => updateBoxRow(row.id, 'freeField', e.target.value)}
-                            className="min-w-[120px] text-sm border-2 border-border/60"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <Input
-                            placeholder="1"
-                            value={row.boxNumber}
-                            onChange={(e) => updateBoxRow(row.id, 'boxNumber', e.target.value)}
-                            className="min-w-[120px] text-sm border-2 border-border/60"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeBoxRow(row.id)}
-                            disabled={boxRows.length === 1}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={addBoxRow} className="bg-blue-500 text-white hover:bg-blue-600">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Добавить строку
-                </Button>
-                <Button 
-                  onClick={generateBoxPDF} 
-                  className="bg-wb-purple hover:bg-wb-purple-dark"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Скачать этикетки коробов
-                </Button>
+              <div className="text-center py-12">
+                <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-4">
+                  Функция генерации этикеток для коробов находится в разработке
+                </p>
+                <Badge variant="secondary">Скоро</Badge>
               </div>
             </CardContent>
           </Card>
