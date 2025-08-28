@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins } from "lucide-react";
+import { Coins, FileText, Images } from "lucide-react";
 import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
 
@@ -57,14 +57,30 @@ export default function Balance() {
           <CardTitle className="text-sm font-medium">Стоимость генерации</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between items-center">
-              <span>1 описание товара:</span>
-              <span className="font-medium">1 токен</span>
+          <div className="space-y-3">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-[10px] p-4 flex items-center gap-3">
+              <div className="bg-primary/20 p-2 rounded-lg">
+                <FileText className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-sm">1 описание товара</div>
+                <div className="text-xs text-muted-foreground">Генерация описания</div>
+              </div>
+              <div className="bg-primary text-primary-foreground px-3 py-1 rounded-lg font-medium text-sm">
+                1 токен
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span>1 комплект карточек (6 шт):</span>
-              <span className="font-medium">6 токенов</span>
+            <div className="bg-gradient-to-r from-secondary/10 to-secondary/5 border border-secondary/20 rounded-[10px] p-4 flex items-center gap-3">
+              <div className="bg-secondary/20 p-2 rounded-lg">
+                <Images className="h-4 w-4 text-secondary-foreground" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-sm">1 комплект карточек</div>
+                <div className="text-xs text-muted-foreground">6 изображений товара</div>
+              </div>
+              <div className="bg-secondary text-secondary-foreground px-3 py-1 rounded-lg font-medium text-sm">
+                6 токенов
+              </div>
             </div>
           </div>
         </CardContent>
