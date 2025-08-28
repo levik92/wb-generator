@@ -168,7 +168,8 @@ const Landing = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Как это работает</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Три простых шага до готовых карточек товаров
+              <span className="sm:hidden">Простые шаги создания</span>
+              <span className="hidden sm:inline">Три простых шага до готовых карточек товаров</span>
             </p>
           </div>
 
@@ -230,7 +231,8 @@ const Landing = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Генерация описаний</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              SEO-оптимизированные описания товаров для повышения конверсии
+              <span className="sm:hidden">SEO-описания для конверсии</span>
+              <span className="hidden sm:inline">SEO-оптимизированные описания товаров для повышения конверсии</span>
             </p>
           </div>
 
@@ -259,7 +261,8 @@ const Landing = () => {
           <div className="text-center mt-8">
             <Link to="/auth">
               <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
-                Попробовать генерацию описаний
+                <span className="sm:hidden">Генерация описаний</span>
+                <span className="hidden sm:inline">Попробовать генерацию описаний</span>
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
@@ -277,7 +280,8 @@ const Landing = () => {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Генератор этикеток</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров
+              <span className="sm:hidden">Этикетки и коды для товаров</span>
+              <span className="hidden sm:inline">Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров</span>
             </p>
           </div>
 
@@ -330,7 +334,8 @@ const Landing = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Прозрачные тарифы</h2>
             <p className="text-xl text-muted-foreground">
-              Платите только за то, что генерируете
+              <span className="sm:hidden">Платите за генерацию</span>
+              <span className="hidden sm:inline">Платите только за то, что генерируете</span>
             </p>
           </div>
 
@@ -489,7 +494,8 @@ const Landing = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Реферальная программа</h2>
             <p className="text-xl text-muted-foreground">
-              Приглашайте друзей и получайте бонусы
+              <span className="sm:hidden">Приглашайте и получайте бонусы</span>
+              <span className="hidden sm:inline">Приглашайте друзей и получайте бонусы</span>
             </p>
           </div>
 

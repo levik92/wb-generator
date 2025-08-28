@@ -222,7 +222,7 @@ export const History = ({ profile }: HistoryProps) => {
       ) : (
         <div className="grid gap-4">
           {filteredGenerations.map((generation) => (
-            <Card key={generation.id} className="hover:shadow-md transition-shadow">
+            <Card key={generation.id} className="hover:shadow-md transition-shadow bg-muted/30">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center space-x-4">

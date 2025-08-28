@@ -144,7 +144,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
 
       {/* Guard Messages */}
       {!canGenerate() && (
-        <Alert className="flex items-start justify-start text-left py-4 border-purple-200 bg-purple-50">
+        <Alert className="flex items-start justify-start text-left py-4 border-purple-200 bg-white">
           <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-purple-600" />
           <AlertDescription className="ml-3 text-purple-700">{getGuardMessage()}</AlertDescription>
         </Alert>
@@ -181,11 +181,21 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                   <SelectItem value="Электроника">Электроника</SelectItem>
                   <SelectItem value="Одежда">Одежда</SelectItem>
                   <SelectItem value="Обувь">Обувь</SelectItem>
+                  <SelectItem value="Аксессуары">Аксессуары</SelectItem>
                   <SelectItem value="Дом и сад">Дом и сад</SelectItem>
                   <SelectItem value="Красота и здоровье">Красота и здоровье</SelectItem>
-                  <SelectItem value="Спорт">Спорт</SelectItem>
+                  <SelectItem value="Спорт и отдых">Спорт и отдых</SelectItem>
                   <SelectItem value="Детские товары">Детские товары</SelectItem>
                   <SelectItem value="Автотовары">Автотовары</SelectItem>
+                  <SelectItem value="Канцелярия">Канцелярия</SelectItem>
+                  <SelectItem value="Книги">Книги</SelectItem>
+                  <SelectItem value="Игрушки">Игрушки</SelectItem>
+                  <SelectItem value="Мебель">Мебель</SelectItem>
+                  <SelectItem value="Бытовая техника">Бытовая техника</SelectItem>
+                  <SelectItem value="Строительство">Строительство</SelectItem>
+                  <SelectItem value="Продукты питания">Продукты питания</SelectItem>
+                  <SelectItem value="Зоотовары">Зоотовары</SelectItem>
+                  <SelectItem value="Хобби и творчество">Хобби и творчество</SelectItem>
                 </SelectContent>
               </Select>
             </div>

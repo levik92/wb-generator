@@ -14,6 +14,7 @@ import Balance from "@/components/dashboard/Balance";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
 import LabelGenerator from "@/components/dashboard/LabelGenerator";
+import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import Footer from "@/components/Footer";
 import { Loader2, Zap } from "lucide-react";
 
@@ -26,7 +27,7 @@ interface Profile {
   referral_code: string;
 }
 
-type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings';
+type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications';
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -135,6 +136,8 @@ const Dashboard = () => {
         return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
+      case 'notifications':
+        return <NotificationCenter profile={profile} />;
       case 'labels':
         return <LabelGenerator />;
       case 'history':

@@ -611,7 +611,7 @@ export default function LabelGenerator() {
                   <div className="flex flex-col sm:flex-row gap-2">
                     <Button 
                       onClick={generateQR} 
-                      className="bg-wb-purple hover:bg-wb-purple-dark flex-1"
+                      className="bg-green-500 hover:bg-green-600 text-white flex-1"
                       disabled={!qrText.trim()}
                     >
                       <QrCode className="h-4 w-4 mr-2" />
