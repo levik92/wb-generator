@@ -56,9 +56,9 @@ export default function LabelGenerator() {
   
   // Label state based on provided code
   const [labelState, setLabelState] = useState<LabelState>({
-    data: "123123123",
-    name: "Бордюр садовый",
-    sku: "MNG-58x40-001",
+    data: "",
+    name: "",
+    sku: "",
     format: 'A4',
     copies: 1
   });
@@ -199,14 +199,14 @@ export default function LabelGenerator() {
       // Tech line
       const infoPx = currentState.format === '58x40' ? 28 : 34;
       ctx.font = `400 ${infoPx}px Inter, Arial`;
-      ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', x, y);
+      ctx.fillText('ШК: ' + currentState.data, x, y);
     } catch (error) {
       console.warn('Barcode generation failed:', error);
       // Fallback: just show placeholder
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(x, y, innerW, Math.round(mmToPx(barsMM, dpi)));
       ctx.fillStyle = '#000000';
-      ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', x, y + Math.round(mmToPx(barsMM, dpi)) + 20);
+      ctx.fillText('ШК: ' + currentState.data, x, y + Math.round(mmToPx(barsMM, dpi)) + 20);
     }
 
     // Scale canvas to fit preview area
@@ -324,14 +324,14 @@ export default function LabelGenerator() {
         const infoPx = format === '58x40' ? 16 : 50;
         ctx.font = `400 ${infoPx}px Arial, sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', W / 2, y);
+        ctx.fillText('ШК: ' + currentState.data, W / 2, y);
       } catch (error) {
         console.warn('Barcode generation failed:', error);
         ctx.fillStyle = '#f0f0f0';
         ctx.fillRect(x, y, innerW, format === '58x40' ? 60 : 150);
         ctx.fillStyle = '#000000';
         ctx.textAlign = 'center';
-        ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', W / 2, y + (format === '58x40' ? 40 : 100));
+        ctx.fillText('ШК: ' + currentState.data, W / 2, y + (format === '58x40' ? 40 : 100));
       }
 
       // Download PNG
@@ -466,12 +466,12 @@ export default function LabelGenerator() {
               <CardContent className="space-y-4 bg-muted/30 rounded-lg p-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="barcode">ШК (данные для Code‑128)*</Label>
+                    <Label htmlFor="barcode">Штрих-код (Code-128)*</Label>
                     <Input
                       id="barcode"
                       value={labelState.data}
                       onChange={(e) => setLabelState(prev => ({ ...prev, data: e.target.value.trim() }))}
-                      placeholder="Например: 123123123"
+                      placeholder="Введите штрихкод"
                       className="w-full"
                     />
                   </div>
@@ -482,7 +482,7 @@ export default function LabelGenerator() {
                       id="productName"
                       value={labelState.name}
                       onChange={(e) => setLabelState(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Название товара"
+                      placeholder="Введите наименование товара"
                       className="w-full"
                     />
                   </div>
@@ -493,53 +493,31 @@ export default function LabelGenerator() {
                       id="article"
                       value={labelState.sku}
                       onChange={(e) => setLabelState(prev => ({ ...prev, sku: e.target.value }))}
-                      placeholder="SKU / Артикул"
+                      placeholder="Введите артикул товара"
                       className="w-full"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Формат печати</Label>
-                      <Select 
-                        value={labelState.format} 
-                        onValueChange={(value: 'A4' | '58x40') => setLabelState(prev => ({ ...prev, format: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="A4">A4 (лист)</SelectItem>
-                          <SelectItem value="58x40">Термоэтикетка 58×40 мм</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="copies">Копий (A4)</Label>
-                      <Input
-                        id="copies"
-                        type="number"
-                        min="1"
-                        max="12"
-                        value={labelState.copies}
-                        onChange={(e) => setLabelState(prev => ({ ...prev, copies: Math.max(1, Math.min(12, parseInt(e.target.value) || 1)) }))}
-                        className="w-full"
-                        disabled={labelState.format === '58x40'}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Формат печати</Label>
+                    <Select 
+                      value={labelState.format} 
+                      onValueChange={(value: 'A4' | '58x40') => setLabelState(prev => ({ ...prev, format: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A4">A4 (лист)</SelectItem>
+                        <SelectItem value="58x40">Термоэтикетка 58×40 мм</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      onClick={renderPreview}
-                      className="bg-purple-600 hover:bg-purple-700 text-white flex-1"
-                    >
-                      Сгенерировать
-                    </Button>
+                  <div className="pt-2">
                     <Button 
                       onClick={() => generatePNG(labelState.format)} 
-                      className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                      className="bg-green-600 hover:bg-green-700 text-white w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Скачать PNG
@@ -682,24 +660,12 @@ export default function LabelGenerator() {
               <CardContent className="space-y-4 bg-muted/30 rounded-lg p-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="wbBarcode">ШК короба*</Label>
+                    <Label htmlFor="wbBarcode">Штрих-код (Code-128)*</Label>
                     <Input
                       id="wbBarcode"
                       value={wbState.data}
                       onChange={(e) => setWbState(prev => ({ ...prev, data: e.target.value.trim() }))}
-                      placeholder="Введите штрихкод короба"
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="quantity">Количество*</Label>
-                    <Input
-                      id="quantity"
-                      type="number"
-                      min="1"
-                      value={wbState.quantity}
-                      onChange={(e) => setWbState(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+                      placeholder="Введите штрихкод"
                       className="w-full"
                     />
                   </div>
@@ -710,7 +676,7 @@ export default function LabelGenerator() {
                       id="sequenceNumber"
                       value={wbState.sequenceNumber}
                       onChange={(e) => setWbState(prev => ({ ...prev, sequenceNumber: e.target.value }))}
-                      placeholder="№1, №2, etc."
+                      placeholder="Введите порядковый номер"
                       className="w-full"
                     />
                   </div>
@@ -721,7 +687,7 @@ export default function LabelGenerator() {
                       id="freeField"
                       value={wbState.freeField}
                       onChange={(e) => setWbState(prev => ({ ...prev, freeField: e.target.value }))}
-                      placeholder="Дополнительная информация"
+                      placeholder="Введите свободное поле"
                       className="w-full"
                     />
                   </div>
@@ -742,21 +708,19 @@ export default function LabelGenerator() {
                     </Select>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      onClick={renderPreview}
-                      className="bg-purple-600 hover:bg-purple-700 text-white flex-1"
-                    >
-                      Сгенерировать
-                    </Button>
+                  <div className="pt-2">
                     <Button 
                       onClick={() => generatePNG(wbState.format, true)} 
-                      className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                      className="bg-green-600 hover:bg-green-700 text-white w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Скачать PNG
                     </Button>
                   </div>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Для термопринтера выбирайте 58×40 мм и печатайте без масштабирования (Actual size).
+                  </p>
                 </div>
               </CardContent>
             </Card>
