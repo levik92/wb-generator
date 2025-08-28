@@ -45,8 +45,8 @@ export default function Balance() {
           <Coins className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-2 inline-block">
-            <div className="text-3xl font-bold text-primary">{balance}</div>
+          <div className="bg-muted/80 border border-border rounded-lg px-4 py-2 inline-block">
+            <div className="text-3xl font-bold text-foreground">{balance}</div>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             токенов доступно для генерации

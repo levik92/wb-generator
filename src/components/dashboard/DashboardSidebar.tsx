@@ -40,6 +40,13 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: FileText,
     },
     {
+      id: 'labels',
+      label: 'Генератор этикеток',
+      icon: FileText,
+      badge: 'FREE',
+      badgeColor: 'bg-green-500'
+    },
+    {
       id: 'history',
       label: 'История',
       icon: History,
@@ -53,6 +60,20 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'referrals',
       label: 'Рефералы',
       icon: Users,
+    },
+    {
+      id: 'ai-questions',
+      label: 'AI Ответы на вопросы',
+      icon: FileText,
+      disabled: true,
+      badge: 'Скоро'
+    },
+    {
+      id: 'ai-reviews',
+      label: 'AI Ответы на отзывы',
+      icon: FileText,
+      disabled: true,
+      badge: 'Скоро'
     },
     {
       id: 'settings',
@@ -108,11 +129,21 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full justify-start ${
                     isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
-                  }`}
-                  onClick={() => onTabChange(item.id)}
+                  } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !item.disabled && onTabChange(item.id)}
+                  disabled={item.disabled}
                 >
                   <Icon className="w-4 h-4 mr-3" />
-                  {item.label}
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && (
+                    <Badge 
+                      className={`ml-2 text-xs ${
+                        item.badgeColor || 'bg-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
                 </Button>
               </li>
             );
