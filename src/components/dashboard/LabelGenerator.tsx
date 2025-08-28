@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Download, QrCode, BarChart3, Package, Settings } from "lucide-react";
 import { toast } from "sonner";
-import jsPDF from 'jspdf';
 import JsBarcode from 'jsbarcode';
 import QRCodeGenerator from 'qrcode';
 
@@ -226,59 +225,8 @@ export default function LabelGenerator() {
     }
   };
 
-  // Barcode generation function from provided code
-  const makeBar = (data: string, barWidthPx: number, fontSizePx: number, isThermal: boolean): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      try {
-        JsBarcode(canvas, data, {
-          format: 'code128',
-          displayValue: true,
-          font: 'helvetica',
-          textPosition: 'bottom',
-          fontSize: fontSizePx,
-          textMargin: isThermal ? 8 : 10,
-          margin: 0,
-          width: barWidthPx,
-          height: isThermal ? 220 : 260
-        });
-        resolve(canvas.toDataURL('image/png'));
-      } catch (e) {
-        reject(e);
-      }
-    });
-  };
-
-  // Place same label function from provided code
-  const placeSameLabel = async (doc: any, isThermal: boolean) => {
-    const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
-    const margin = isThermal ? 3 : 12;
-    let x = margin, y = margin;
-    const innerW = page.w - margin * 2;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(isThermal ? 10.5 : 16);
-    const nameLines = doc.splitTextToSize(labelState.name || '-', innerW);
-    doc.text(nameLines, x, y + (isThermal ? 4 : 6));
-    y += (isThermal ? 5 : 8) * nameLines.length + (isThermal ? 1.5 : 2);
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(isThermal ? 9 : 12);
-    doc.text('Артикул: ' + (labelState.sku || '-'), x, y + (isThermal ? 3 : 4));
-    y += (isThermal ? 6 : 8);
-    
-    const url = await makeBar(labelState.data, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
-    const barH = isThermal ? 20 : 30;
-    const textOffset = isThermal ? 4 : 6;
-    doc.addImage(url, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
-    y += barH + textOffset + (isThermal ? 1.5 : 2);
-    
-    doc.setFontSize(isThermal ? 8.2 : 10);
-    doc.text('ШК: ' + labelState.data + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
-  };
-
-  // PDF generation function adapted from provided code
-  const downloadPDF = async (format: 'A4' | '58x40', isWB: boolean = false) => {
+  // Generate and download PNG function
+  const generatePNG = async (format: 'A4' | '58x40', isWB: boolean = false) => {
     const currentState = isWB ? wbState : labelState;
     if (!currentState.data) {
       toast('Введите данные для штрих‑кода');
@@ -286,88 +234,122 @@ export default function LabelGenerator() {
     }
 
     const btn = document.activeElement as HTMLButtonElement;
-    const isThermal = format === '58x40';
     
     try {
       if (btn) {
         btn.disabled = true;
         btn.textContent = 'Генерируется…';
       }
-      
-      const doc = new jsPDF({
-        unit: 'mm',
-        format: isThermal ? [58, 40] : 'a4',
-        compress: true
-      });
 
-      const page = { w: doc.internal.pageSize.getWidth(), h: doc.internal.pageSize.getHeight() };
-      const margin = isThermal ? 3 : 12;
-      let x = margin, y = margin;
-      const innerW = page.w - margin * 2;
+      // PNG dimensions as specified: A4: 2481×3507, 58x40: 685x472
+      const W = format === '58x40' ? 685 : 2481;
+      const H = format === '58x40' ? 472 : 3507;
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d')!;
+      
+      // White background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#000000';
+      
+      // Calculate margins and positioning - center the content
+      const margin = format === '58x40' ? 20 : 100;
+      const innerW = W - margin * 2;
+      let x = margin, y = margin + (format === '58x40' ? 40 : 150);
 
       if (isWB) {
-        // WB Box PDF generation
+        // WB Box label rendering
         if (wbState.sequenceNumber?.trim()) {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(isThermal ? 10.5 : 16);
-          doc.text(wbState.sequenceNumber, x, y + (isThermal ? 4 : 6));
-          y += (isThermal ? 6 : 8);
+          const titlePx = format === '58x40' ? 32 : 120;
+          ctx.font = `700 ${titlePx}px Arial, sans-serif`;
+          ctx.textAlign = 'left';
+          ctx.fillText(wbState.sequenceNumber, x, y);
+          y += Math.round(titlePx * 1.3);
         }
 
         if (wbState.freeField?.trim()) {
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(isThermal ? 9 : 12);
-          const fieldLines = doc.splitTextToSize(wbState.freeField, innerW);
-          doc.text(fieldLines, x, y + (isThermal ? 3 : 4));
-          y += (isThermal ? 5 : 7) * fieldLines.length + (isThermal ? 1 : 2);
+          const fieldPx = format === '58x40' ? 24 : 80;
+          ctx.font = `500 ${fieldPx}px Arial, sans-serif`;
+          y = drawWrap(ctx, wbState.freeField, x, y, innerW, Math.round(fieldPx * 1.3), format === '58x40' ? 2 : 3);
+          y += Math.round(fieldPx * 0.5);
         }
 
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(isThermal ? 9 : 12);
-        doc.text('Количество: ' + wbState.quantity, x, y + (isThermal ? 3 : 4));
-        y += (isThermal ? 6 : 8);
+        const skuPx = format === '58x40' ? 24 : 80;
+        ctx.font = `500 ${skuPx}px Arial, sans-serif`;
+        ctx.fillText('Количество: ' + wbState.quantity, x, y);
+        y += Math.round(skuPx * 1.5);
       } else {
-        // Product label PDF generation
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(isThermal ? 10.5 : 16);
-        const nameLines = doc.splitTextToSize(labelState.name || '-', innerW);
-        doc.text(nameLines, x, y + (isThermal ? 4 : 6));
-        y += (isThermal ? 5 : 8) * nameLines.length + (isThermal ? 1.5 : 2);
+        // Product label rendering
+        const titlePx = format === '58x40' ? 32 : 120;
+        ctx.font = `700 ${titlePx}px Arial, sans-serif`;
+        ctx.textAlign = 'left';
+        y = drawWrap(ctx, labelState.name || '-', x, y, innerW, Math.round(titlePx * 1.3), format === '58x40' ? 2 : 3);
+        y += Math.round(titlePx * 0.5);
+
+        const skuPx = format === '58x40' ? 24 : 80;
+        ctx.font = `500 ${skuPx}px Arial, sans-serif`;
+        ctx.fillText('Артикул: ' + (labelState.sku || '-'), x, y);
+        y += Math.round(skuPx * 1.5);
+      }
+
+      // Barcode rendering
+      const barsCanvas = document.createElement('canvas');
+      try {
+        JsBarcode(barsCanvas, currentState.data, {
+          format: 'code128',
+          displayValue: true,
+          font: 'Arial',
+          textPosition: 'bottom',
+          fontSize: format === '58x40' ? 18 : 60,
+          textMargin: format === '58x40' ? 8 : 20,
+          margin: 0,
+          width: format === '58x40' ? 2 : 6,
+          height: format === '58x40' ? 120 : 300
+        });
+
+        // Center the barcode horizontally
+        const barcodeScale = Math.min(1, innerW / barsCanvas.width);
+        const bw = Math.floor(barsCanvas.width * barcodeScale);
+        const bh = Math.floor(barsCanvas.height * barcodeScale);
+        const barcodeX = x + (innerW - bw) / 2; // Center horizontally
         
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(isThermal ? 9 : 12);
-        doc.text('Артикул: ' + (labelState.sku || '-'), x, y + (isThermal ? 3 : 4));
-        y += (isThermal ? 6 : 8);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(barsCanvas, barcodeX, y, bw, bh);
+        y += bh + (format === '58x40' ? 20 : 40);
+
+        // Tech line
+        const infoPx = format === '58x40' ? 16 : 50;
+        ctx.font = `400 ${infoPx}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', W / 2, y);
+      } catch (error) {
+        console.warn('Barcode generation failed:', error);
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(x, y, innerW, format === '58x40' ? 60 : 150);
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.fillText('ШК: ' + currentState.data + ' · Code‑128', W / 2, y + (format === '58x40' ? 40 : 100));
       }
 
-      // Add barcode
-      const barURL = await makeBar(currentState.data, isThermal ? 4 : 3, isThermal ? 22 : 28, isThermal);
-      const barH = isThermal ? 20 : 30;
-      const textOffset = isThermal ? 4 : 6;
-      doc.addImage(barURL, 'PNG', x, y, innerW, barH + textOffset, undefined, 'FAST');
-      y += barH + textOffset + (isThermal ? 1.5 : 2);
+      // Download PNG
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      const filename = `${isWB ? 'wb_' : ''}label_${format === '58x40' ? '58x40mm' : 'A4'}_${((isWB ? wbState.sequenceNumber : labelState.sku) || 'sku').replace(/[^a-z0-9_-]/gi, '')}.png`;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
-      doc.setFontSize(isThermal ? 8.2 : 10);
-      doc.text('ШК: ' + currentState.data + ' · Code‑128', x, y + (isThermal ? 2.5 : 3));
-
-      // Add copies for A4 product labels
-      if (!isThermal && !isWB) {
-        const copies = Math.max(1, Math.min(12, labelState.copies || 1));
-        for (let i = 1; i < copies; i++) {
-          doc.addPage('a4');
-          await placeSameLabel(doc, isThermal);
-        }
-      }
-
-      const filename = `${isWB ? 'wb_' : ''}label_${isThermal ? '58x40mm' : 'A4'}_${((isWB ? wbState.sequenceNumber : labelState.sku) || 'sku').replace(/[^a-z0-9_-]/gi, '')}.pdf`;
-      doc.save(filename);
-      toast("PDF файл успешно создан!");
+      toast("PNG файл успешно создан!");
     } catch (e: any) {
-      toast('Не удалось сформировать PDF: ' + e.message);
+      toast('Не удалось сформировать PNG: ' + e.message);
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = 'Скачать PDF';
+        btn.textContent = 'Скачать PNG';
       }
     }
   };
@@ -551,17 +533,16 @@ export default function LabelGenerator() {
                   <div className="flex gap-2 pt-2">
                     <Button 
                       onClick={renderPreview}
-                      variant="outline"
-                      className="flex-1"
+                      className="bg-purple-600 hover:bg-purple-700 text-white flex-1"
                     >
-                      Предпросмотр
+                      Сгенерировать
                     </Button>
                     <Button 
-                      onClick={() => downloadPDF(labelState.format)} 
+                      onClick={() => generatePNG(labelState.format)} 
                       className="bg-green-600 hover:bg-green-700 text-white flex-1"
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Скачать PDF
+                      Скачать PNG
                     </Button>
                   </div>
                   
@@ -764,17 +745,16 @@ export default function LabelGenerator() {
                   <div className="flex gap-2 pt-2">
                     <Button 
                       onClick={renderPreview}
-                      variant="outline"
-                      className="flex-1"
+                      className="bg-purple-600 hover:bg-purple-700 text-white flex-1"
                     >
-                      Предпросмотр
+                      Сгенерировать
                     </Button>
                     <Button 
-                      onClick={() => downloadPDF(wbState.format, true)} 
-                      className="bg-wb-purple hover:bg-wb-purple-dark text-white flex-1"
+                      onClick={() => generatePNG(wbState.format, true)} 
+                      className="bg-green-600 hover:bg-green-700 text-white flex-1"
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      Скачать PDF
+                      Скачать PNG
                     </Button>
                   </div>
                 </div>
