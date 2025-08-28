@@ -27,6 +27,13 @@ interface Product {
   brand?: string;
 }
 
+interface WBBox {
+  boxBarcode: string;
+  quantity: number;
+  sequenceNumber: string;
+  freeField: string;
+}
+
 interface Settings {
   barcodeFormat: string;
   labelType: 'A4' | 'Термоэтикетка';
@@ -67,11 +74,18 @@ export default function LabelGenerator() {
   }]);
 
   const [settings, setSettings] = useState<Settings>({
-    barcodeFormat: "EAN13",
+    barcodeFormat: "CODE128",
     labelType: 'A4',
     labelSize: "58x40",
     fontSize: 12
   });
+
+  const [wbBoxes, setWbBoxes] = useState<WBBox[]>([{
+    boxBarcode: "",
+    quantity: 1,
+    sequenceNumber: "",
+    freeField: ""
+  }]);
 
   const [useSameSupplier, setUseSameSupplier] = useState(false);
   const [qrText, setQrText] = useState("");
@@ -88,6 +102,37 @@ export default function LabelGenerator() {
       productName: "",
       supplier: useSameSupplier && products.length > 0 ? products[0].supplier : "",
       quantity: 1
+    }]);
+  };
+
+  const addWBBox = () => {
+    setWbBoxes([...wbBoxes, {
+      boxBarcode: "",
+      quantity: 1,
+      sequenceNumber: "",
+      freeField: ""
+    }]);
+  };
+
+  const removeWBBox = (index: number) => {
+    if (wbBoxes.length > 1) {
+      setWbBoxes(wbBoxes.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateWBBox = (index: number, field: keyof WBBox, value: string | number) => {
+    const updated = wbBoxes.map((box, i) => 
+      i === index ? { ...box, [field]: value } : box
+    );
+    setWbBoxes(updated);
+  };
+
+  const clearWBTable = () => {
+    setWbBoxes([{
+      boxBarcode: "",
+      quantity: 1,
+      sequenceNumber: "",
+      freeField: ""
     }]);
   };
 
@@ -205,27 +250,27 @@ export default function LabelGenerator() {
           doc.text(`Бренд: ${product.brand}`, x + 2, y + 38);
         }
 
-        // Generate barcode using online API
+        // Generate barcode using JsBarcode
         if (product.barcode) {
           try {
-            const barcodeUrl = `https://barcode.tec-it.com/barcode.ashx?data=${encodeURIComponent(product.barcode)}&code=${settings.barcodeFormat}&dpi=96&dataseparator=&color=%23000000&bgcolor=%23ffffff&qunit=Mm&quiet=0`;
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 100;
             
-            // Create a promise to load the image
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            
-            await new Promise((resolve, reject) => {
-              img.onload = () => {
-                try {
-                  doc.addImage(img, 'PNG', x + 2, y + 45, labelWidth - 10, 20);
-                  resolve(true);
-                } catch (err) {
-                  reject(err);
-                }
-              };
-              img.onerror = reject;
-              img.src = barcodeUrl;
+            JsBarcode(canvas, product.barcode, {
+              format: "CODE128",
+              width: 2,
+              height: 50,
+              displayValue: true,
+              fontSize: 12,
+              textMargin: 2,
+              margin: 5,
+              background: "#ffffff",
+              lineColor: "#000000"
             });
+            
+            const barcodeDataURL = canvas.toDataURL('image/png');
+            doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 45, labelWidth - 10, 20);
           } catch (error) {
             console.error('Barcode generation error:', error);
             // Fallback: add text instead of barcode
@@ -270,6 +315,113 @@ export default function LabelGenerator() {
     }
   };
 
+  const generateWBBoxPDF = async () => {
+    if (wbBoxes.length === 0 || !wbBoxes[0].boxBarcode) {
+      toast("Добавьте штрихкоды коробов в таблицу");
+      return;
+    }
+
+    try {
+      const doc = new jsPDF({
+        orientation: settings.labelType === 'A4' ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: settings.labelType === 'A4' ? 'a4' : parseLabelSize(settings.labelSize)
+      });
+
+      // Calculate label dimensions based on settings
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      let labelsPerRow, labelsPerColumn, labelWidth, labelHeight;
+      
+      if (settings.labelType === 'A4') {
+        // For A4, calculate based on label size
+        const [width, height] = parseLabelSize(settings.labelSize);
+        labelsPerRow = Math.floor(pageWidth / width);
+        labelsPerColumn = Math.floor(pageHeight / height);
+        labelWidth = width;
+        labelHeight = height;
+      } else {
+        // For thermal labels, use full page
+        labelsPerRow = 1;
+        labelsPerColumn = 1;
+        labelWidth = pageWidth;
+        labelHeight = pageHeight;
+      }
+
+      let currentPage = 0;
+
+      for (let index = 0; index < wbBoxes.length; index++) {
+        const box = wbBoxes[index];
+        const labelIndex = index % (labelsPerRow * labelsPerColumn);
+        const row = Math.floor(labelIndex / labelsPerRow);
+        const col = labelIndex % labelsPerRow;
+        
+        if (labelIndex === 0 && index > 0) {
+          doc.addPage();
+          currentPage++;
+        }
+
+        const x = col * labelWidth + 5;
+        const y = row * labelHeight + 5;
+
+        // Add sequence number
+        if (box.sequenceNumber) {
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.text(box.sequenceNumber, x + 2, y + 8);
+        }
+        
+        // Add free field
+        if (box.freeField) {
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          const splitField = doc.splitTextToSize(box.freeField, labelWidth - 10);
+          doc.text(splitField, x + 2, y + 15);
+        }
+        
+        // Add quantity
+        doc.setFontSize(8);
+        doc.text(`Количество: ${box.quantity}`, x + 2, y + 25);
+
+        // Generate barcode using JsBarcode
+        if (box.boxBarcode) {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 100;
+            
+            JsBarcode(canvas, box.boxBarcode, {
+              format: "CODE128",
+              width: 2,
+              height: 50,
+              displayValue: true,
+              fontSize: 12,
+              textMargin: 2,
+              margin: 5,
+              background: "#ffffff",
+              lineColor: "#000000"
+            });
+            
+            const barcodeDataURL = canvas.toDataURL('image/png');
+            doc.addImage(barcodeDataURL, 'PNG', x + 2, y + 35, labelWidth - 10, 20);
+          } catch (error) {
+            console.error('Barcode generation error:', error);
+            // Fallback: add text instead of barcode
+            doc.setFontSize(8);
+            doc.text(`Штрихкод: ${box.boxBarcode}`, x + 2, y + 45);
+          }
+        }
+      }
+
+      doc.save('wb-box-labels.pdf');
+      toast("PDF файл с этикетками коробов успешно создан!");
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast("Ошибка при создании PDF файла");
+    }
+  };
+
   const downloadQR = () => {
     if (!qrPreview) {
       toast("Сначала сгенерируйте QR-код");
@@ -287,14 +439,17 @@ export default function LabelGenerator() {
 
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-0">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Генератор этикеток</h1>
           <p className="text-muted-foreground mt-1">Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров</p>
         </div>
-        <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
-          FREE
-        </Badge>
+        <div className="bg-green-100 border border-green-300 rounded-lg p-3 max-w-sm">
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
+            <span className="text-green-700 text-sm font-medium">3 месяца для новых пользователей</span>
+          </div>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
@@ -451,8 +606,6 @@ export default function LabelGenerator() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="EAN13">EAN-13</SelectItem>
-                      <SelectItem value="EAN8">EAN-8</SelectItem>
                       <SelectItem value="CODE128">CODE-128</SelectItem>
                     </SelectContent>
                   </Select>
@@ -625,18 +778,166 @@ export default function LabelGenerator() {
         </TabsContent>
 
         <TabsContent value="wb" className="space-y-4 sm:space-y-6">
+          {/* WB Boxes Data Input Section */}
           <Card>
-            <CardHeader>
-              <CardTitle>Короба для Wildberries</CardTitle>
-              <CardDescription>Скоро доступно</CardDescription>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={clearWBTable}
+                    className="text-red-500 hover:text-red-600 hover:border-red-500 border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Очистить таблицу
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">
-                  Функция генерации этикеток для коробов находится в разработке
-                </p>
-                <Badge variant="secondary">Скоро</Badge>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">ШК короба*</TableHead>
+                      <TableHead className="min-w-[80px] w-full sm:min-w-[100px]">Количество*</TableHead>
+                      <TableHead className="min-w-[100px] w-full sm:min-w-[120px]">Порядковый номер</TableHead>
+                      <TableHead className="min-w-[120px] w-full sm:min-w-[150px]">Свободное поле</TableHead>
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {wbBoxes.map((box, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Input
+                            value={box.boxBarcode}
+                            onChange={(e) => updateWBBox(index, 'boxBarcode', e.target.value)}
+                            className="w-full min-w-0"
+                            placeholder="Штрихкод короба"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={box.quantity}
+                            onChange={(e) => updateWBBox(index, 'quantity', parseInt(e.target.value) || 1)}
+                            type="number"
+                            className="w-full min-w-0"
+                            min="1"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={box.sequenceNumber}
+                            onChange={(e) => updateWBBox(index, 'sequenceNumber', e.target.value)}
+                            className="w-full min-w-0"
+                            placeholder="№1, №2, etc."
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value={box.freeField}
+                            onChange={(e) => updateWBBox(index, 'freeField', e.target.value)}
+                            className="w-full min-w-0"
+                            placeholder="Дополнительная информация"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeWBBox(index)}
+                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="p-4 border-t">
+                <Button onClick={addWBBox} variant="outline" className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Добавить короб
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* WB Settings Section */}
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-3 pb-4">
+              <Settings className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Настройки коробов WB</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="space-y-2">
+                  <Label>Тип штрихкода</Label>
+                  <div className="flex gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="radio" 
+                        id="wb-a4" 
+                        name="wbLabelType" 
+                        value="A4" 
+                        checked={settings.labelType === 'A4'}
+                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
+                      />
+                      <Label htmlFor="wb-a4">A4</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="radio" 
+                        id="wb-thermal" 
+                        name="wbLabelType" 
+                        value="Термоэтикетка" 
+                        checked={settings.labelType === 'Термоэтикетка'}
+                        onChange={(e) => setSettings(prev => ({ ...prev, labelType: e.target.value as 'A4' | 'Термоэтикетка' }))}
+                      />
+                      <Label htmlFor="wb-thermal">Термоэтикетка</Label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Размер наклейки (мм, ШхВ)</Label>
+                  <Select value={settings.labelSize} onValueChange={(value) => setSettings(prev => ({ ...prev, labelSize: value }))}>
+                    <SelectTrigger className="border border-input w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {labelSizes.map((size) => (
+                        <SelectItem key={size} value={size}>{size}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Размер шрифта (px)</Label>
+                  <Input
+                    type="number"
+                    value={settings.fontSize}
+                    onChange={(e) => setSettings(prev => ({ ...prev, fontSize: parseInt(e.target.value) || 12 }))}
+                    min="8"
+                    max="24"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-center pt-4">
+                <Button 
+                  onClick={() => generateWBBoxPDF()} 
+                  className="bg-wb-purple hover:bg-wb-purple-dark text-white px-8 py-2 w-full sm:w-auto"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Получить этикетки коробов
+                </Button>
               </div>
             </CardContent>
           </Card>
