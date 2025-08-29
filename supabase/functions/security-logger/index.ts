@@ -29,7 +29,9 @@ serve(async (req) => {
     const { eventType, eventDescription, userId, metadata = {} }: SecurityEvent = await req.json();
     
     // Extract client information
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    const rawClientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    // Handle comma-separated IPs and take the first one
+    const clientIP = rawClientIP ? rawClientIP.split(',')[0].trim() : null;
     const userAgent = req.headers.get('user-agent');
 
     // Log security event

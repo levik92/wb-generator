@@ -301,6 +301,7 @@ serve(async (req) => {
           prompt: prompt,
           size: '1024x1536',
           quality: 'high',
+          response_format: 'b64_json',
           n: 1
         }),
       });
@@ -338,13 +339,13 @@ serve(async (req) => {
       const imageBuffer = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));
       const fileName = `${userId}/${Date.now()}_card_${cardIndex}.jpg`;
       
-      const { error: uploadError } = await supabase.storage
-        .from('generated-cards')
-        .upload(fileName, imageBuffer, {
-          contentType: 'image/png',
-          cacheControl: '3600',
-          upsert: true
-        });
+        const { error: uploadError } = await supabase.storage
+          .from('generated-cards')
+          .upload(fileName, imageBuffer, {
+            contentType: 'image/jpeg',
+            cacheControl: '3600',
+            upsert: true
+          });
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
@@ -365,6 +366,8 @@ serve(async (req) => {
 
       console.log(`Successfully generated and uploaded card ${cardIndex} for user ${userId}`);
       
+      generatedImages.push(publicUrl.publicUrl);
+      
     } else {
       // Generate all 6 cards in parallel
       const imagePromises = Object.entries(prompts).map(async ([index, prompt]) => {
@@ -379,6 +382,7 @@ serve(async (req) => {
               prompt: prompt,
               size: '1024x1536',
               quality: 'high',
+              response_format: 'b64_json',
               n: 1
             }),
         });
@@ -412,7 +416,7 @@ serve(async (req) => {
         const { error: uploadError } = await supabase.storage
           .from('generated-cards')
           .upload(fileName, imageBuffer, {
-            contentType: 'image/png',
+            contentType: 'image/jpeg',
             cacheControl: '3600',
             upsert: true
           });
@@ -516,34 +520,15 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Error in generate-product-cards function:', error);
     
-    // Extract variables safely for refund logic
-    let userIdForRefund: string | null = null;
-    let cardTypeForRefund: string | null = null;
-    let cardIndexForRefund: number | null = null;
-    
-    try {
-      const requestBody = await req.json().catch(() => ({}));
-      userIdForRefund = requestBody.userId || null;
-      cardTypeForRefund = requestBody.cardType || null;
-      cardIndexForRefund = requestBody.cardIndex || null;
-    } catch {
-      // Ignore errors when extracting request body for refund
-    }
-    
-    // Refund tokens if any error occurred after token validation
-    if (userIdForRefund && error.message !== 'Недостаточно токенов для генерации') {
+    // Refund tokens if any error occurred after token validation and userId is available
+    if (userId && error.message !== 'Недостаточно токенов для генерации') {
       try {
-        const tokensNeeded = (cardTypeForRefund && cardIndexForRefund !== null) ? 1 : 6;
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        
         await supabase.rpc('refund_tokens', {
-          user_id_param: userIdForRefund,
+          user_id_param: userId,
           tokens_amount: tokensNeeded,
           reason_text: 'Ошибка генерации - возврат токенов'
         });
-        console.log(`Refunded ${tokensNeeded} tokens to user ${userIdForRefund} due to generation error`);
+        console.log(`Refunded ${tokensNeeded} tokens to user ${userId} due to generation error`);
       } catch (refundError) {
         console.error('Error refunding tokens:', refundError);
       }
