@@ -318,7 +318,13 @@ serve(async (req) => {
           reason_text: `Ошибка генерации карточки ${cardIndex}`
         });
         
-        throw new Error(imageData.error?.message || `Failed to generate image: ${response.status}`);
+        if (response.status === 429) {
+          throw new Error('Слишком много запросов к OpenAI API. Попробуйте через несколько минут.');
+        } else if (imageData.error?.code === 'billing_hard_limit_reached') {
+          throw new Error('Достигнут лимит биллинга OpenAI API. Обратитесь в поддержку.');
+        } else {
+          throw new Error(imageData.error?.message || `Ошибка OpenAI API: ${response.status}. Попробуйте позже.`);
+        }
       }
 
       if (!imageData.data || !imageData.data[0] || !imageData.data[0].b64_json) {
@@ -382,7 +388,14 @@ serve(async (req) => {
         if (!response.ok) {
           console.error(`OpenAI API error for card ${index}:`, JSON.stringify(imageData, null, 2));
           console.error(`Response status: ${response.status}, statusText: ${response.statusText}`);
-          throw new Error(imageData.error?.message || `Failed to generate card ${index}: ${response.status}`);
+          
+          if (response.status === 429) {
+            throw new Error('Слишком много запросов к OpenAI API. Попробуйте через несколько минут.');
+          } else if (imageData.error?.code === 'billing_hard_limit_reached') {
+            throw new Error('Достигнут лимит биллинга OpenAI API. Обратитесь в поддержку.');
+          } else {
+            throw new Error(imageData.error?.message || `Ошибка OpenAI API: ${response.status}. Попробуйте позже.`);
+          }
         }
 
         if (!imageData.data || !imageData.data[0] || !imageData.data[0].b64_json) {
@@ -503,16 +516,34 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Error in generate-product-cards function:', error);
     
+    // Extract variables safely for refund logic
+    let userIdForRefund: string | null = null;
+    let cardTypeForRefund: string | null = null;
+    let cardIndexForRefund: number | null = null;
+    
+    try {
+      const requestBody = await req.json().catch(() => ({}));
+      userIdForRefund = requestBody.userId || null;
+      cardTypeForRefund = requestBody.cardType || null;
+      cardIndexForRefund = requestBody.cardIndex || null;
+    } catch {
+      // Ignore errors when extracting request body for refund
+    }
+    
     // Refund tokens if any error occurred after token validation
-    if (userId && error.message !== 'Недостаточно токенов для генерации') {
+    if (userIdForRefund && error.message !== 'Недостаточно токенов для генерации') {
       try {
-        const tokensNeeded = (cardType && cardIndex !== null) ? 1 : 6;
+        const tokensNeeded = (cardTypeForRefund && cardIndexForRefund !== null) ? 1 : 6;
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
         await supabase.rpc('refund_tokens', {
-          user_id_param: userId,
+          user_id_param: userIdForRefund,
           tokens_amount: tokensNeeded,
           reason_text: 'Ошибка генерации - возврат токенов'
         });
-        console.log(`Refunded ${tokensNeeded} tokens to user ${userId} due to generation error`);
+        console.log(`Refunded ${tokensNeeded} tokens to user ${userIdForRefund} due to generation error`);
       } catch (refundError) {
         console.error('Error refunding tokens:', refundError);
       }

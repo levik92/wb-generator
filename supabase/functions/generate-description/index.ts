@@ -153,7 +153,23 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorData = await response.json().catch(() => null);
+      console.error('OpenAI API error:', response.status, errorData);
+      
+      // Refund tokens on API error
+      await supabase.rpc('refund_tokens', {
+        user_id_param: userId,
+        tokens_amount: 1,
+        reason_text: 'Ошибка OpenAI API при генерации описания'
+      });
+
+      if (response.status === 429) {
+        throw new Error('Слишком много запросов к OpenAI API. Попробуйте через несколько минут.');
+      } else if (response.status === 400 && errorData?.error?.code === 'billing_hard_limit_reached') {
+        throw new Error('Достигнут лимит биллинга OpenAI API. Обратитесь в поддержку.');
+      } else {
+        throw new Error(`Ошибка OpenAI API: ${response.status}. Попробуйте позже.`);
+      }
     }
 
     const data = await response.json();
