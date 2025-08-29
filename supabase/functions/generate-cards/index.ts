@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { generateProductCards } from '../_shared/card-generator.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -58,33 +58,15 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Token validation and spending will be handled by generate-product-cards function
-
-    // Call the new generate-product-cards function
-    const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-product-cards', {
-      body: {
-        productName: sanitizedProductName,
-        category: sanitizedCategory,
-        description: sanitizedDescription,
-        userId: userId,
-        productImages: requestBody.productImages || []
-      }
+    // Call the shared generation logic directly (no HTTP call - prevents recursion!)
+    const generationData = await generateProductCards({
+      productName: sanitizedProductName,
+      category: sanitizedCategory,
+      description: sanitizedDescription,
+      userId: userId,
+      productImages: requestBody.productImages || []
     });
-
-    if (generationError) {
-      console.error('Error calling generate-product-cards:', generationError);
-      throw new Error('Ошибка при генерации карточек');
-    }
-
-    if (generationData.error) {
-      throw new Error(generationData.error);
-    }
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -94,7 +76,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in generate-cards function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Произошла ошибка при генерации карточек' 

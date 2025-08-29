@@ -1,11 +1,13 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { generateProductCards } from '../_shared/card-generator.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const IS_EDGE = typeof Deno !== 'undefined' && !!(Deno as any).serve;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -75,46 +77,28 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Token validation and spending will be handled by generate-product-cards function
-
-    // Call the new generate-product-cards function for single regeneration
-    const { data: generationData, error: generationError } = await supabase.functions.invoke('generate-product-cards', {
-      body: {
-        productName: sanitizedProductName,
-        category: sanitizedCategory,
-        description: sanitizedDescription,
-        userId: userId,
-        productImages: requestBody.productImages || [],
-        cardType: sanitizedCardType,
-        cardIndex: cardIndex
-      }
+    // Call the shared generation logic directly (no HTTP call - this prevents recursion!)
+    const result = await generateProductCards({
+      productName: sanitizedProductName,
+      category: sanitizedCategory,
+      description: sanitizedDescription,
+      userId: userId,
+      productImages: requestBody.productImages || [],
+      cardType: sanitizedCardType,
+      cardIndex: cardIndex
     });
-
-    if (generationError) {
-      console.error('Error calling generate-product-cards:', generationError);
-      throw new Error('Ошибка при перегенерации карточки');
-    }
-
-    if (generationData.error) {
-      throw new Error(generationData.error);
-    }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: generationData.message || `Карточка ${sanitizedCardType} перегенерирована`,
-      regeneratedCard: generationData.images?.[0] || null,
-      cardIndex: generationData.cardIndex
+      message: result.message || `Карточка ${sanitizedCardType} перегенерирована`,
+      regeneratedCard: result.images?.[0] || null,
+      cardIndex: result.cardIndex
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in regenerate-single-card function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Произошла ошибка при перегенерации карточки' 
