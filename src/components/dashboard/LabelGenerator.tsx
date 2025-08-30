@@ -472,13 +472,13 @@ export default function LabelGenerator() {
     <div class="wb-card wb-form">
       <label class="wb-label req">Штрих-код (Code-128)*</label>
       <input id="f_code" class="wb-input" placeholder="Введите штрихкод" value="ABC-abc-1234"/>
-      
+
       <label class="wb-label">Наименование</label>
       <input id="f_title" class="wb-input" placeholder="Введите наименование товара"/>
-      
+
       <label class="wb-label">Артикул</label>
       <input id="f_sku" class="wb-input" placeholder="Введите артикул товара"/>
-      
+
       <label class="wb-label">Формат печати</label>
       <div class="wb-select-wrap">
         <select id="f_format" class="wb-select">
@@ -487,7 +487,7 @@ export default function LabelGenerator() {
         </select>
         <span class="wb-select-arrow">▾</span>
       </div>
-      
+
       <div class="wb-row">
         <div class="wb-range">
           <div class="wb-range-top">
@@ -502,14 +502,14 @@ export default function LabelGenerator() {
           <input id="r_hpct" type="range" min="20" max="80" step="1" value="45" />
         </div>
       </div>
-      
+
       <button id="btn_download" class="wb-btn wb-primary">
         <span class="wb-btn-ico">⬇</span> Скачать PNG
       </button>
-      
+
       <p class="wb-note">Для термопринтера выбирайте 58×40 мм и печатайте без масштабирования (Actual size).</p>
     </div>
-    
+
     <!-- RIGHT: preview -->
     <div class="wb-card wb-preview">
       <div class="wb-prev-head">
@@ -539,11 +539,11 @@ export default function LabelGenerator() {
     font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
     background:var(--bg); padding:0; border-radius:var(--radius);
   }
-  
+
   /* layout */
   #wb-gen .wb-grid{display:grid;grid-template-columns:minmax(320px,520px) 1fr;gap:18px}
   #wb-gen .wb-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden}
-  
+
   /* compact fields */
   .wb-input,.wb-select,.wb-btn{width:100%;max-width:520px} /* ограничение ширины */
   .wb-input,.wb-select{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;outline:none;background:#fff}
@@ -558,7 +558,7 @@ export default function LabelGenerator() {
   .wb-btn-ico{font-size:16px}
   .wb-note{margin:10px 2px 0;color:var(--muted);font-size:13px}
   .wb-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;max-width:520px}
-  
+
   /* ranges */
   .wb-range{display:flex;flex-direction:column;gap:8px}
   .wb-range-top{display:flex;justify-content:space-between;align-items:center;font-weight:600}
@@ -569,7 +569,7 @@ export default function LabelGenerator() {
   .wb-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .wb-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .wb-range input[type=range]::-moz-range-progress{height:8px;background:rgba(32,160,75,.25);border-radius:999px}
-  
+
   /* preview */
   .wb-preview{display:flex;flex-direction:column;gap:14px}
   .wb-prev-head{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 0}
@@ -578,7 +578,7 @@ export default function LabelGenerator() {
   .wb-prev-stage{flex:1;border:1px dashed #dcdedd;border-radius:12px;padding:14px;background:var(--card);min-height:360px}
   .wb-stage-in{background:#fff;border-radius:10px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:auto}
   #preview{display:block;max-width:100%;height:auto}
-  
+
   /* responsive */
   @media (max-width:980px){
     #wb-gen .wb-grid{grid-template-columns:1fr}
@@ -590,13 +590,13 @@ export default function LabelGenerator() {
 <script>
 (function(){
   const $ = (s,scope=document)=>scope.querySelector(s);
-  
+
   const elCode=$('#f_code'), elTitle=$('#f_title'), elSku=$('#f_sku'),
         elFormat=$('#f_format'), elPrev=$('#preview'), elBadge=$('#badge'),
         rWidth=$('#r_width'), rHPct=$('#r_hpct'),
         vWidth=$('#val_width'), vHPct=$('#val_hpct'),
         btnDownload=$('#btn_download');
-  
+
   const PRESETS = {
     a4:   { w_mm:210, h_mm:297, dpi:300, badge:'A4',
             margins_mm:{top:15,left:15,right:15,bottom:25},
@@ -606,31 +606,31 @@ export default function LabelGenerator() {
                titlePx:16, skuPx:13 }
   };
   const mm2px = (mm, dpi)=> Math.round(mm/25.4*dpi);
-  
+
   function render(){
     vWidth.textContent = rWidth.value;
     vHPct.textContent  = rHPct.value + '%';
-    
+
     const fmt = PRESETS[elFormat.value];
     elBadge.textContent = fmt.badge;
-    
+
     const W = mm2px(fmt.w_mm, fmt.dpi);
     const H = mm2px(fmt.h_mm, fmt.dpi);
-    
+
     const off = document.createElement('canvas');
     off.width=W; off.height=H;
     const ctx = off.getContext('2d');
-    
+
     ctx.fillStyle='#ffffff';
     ctx.fillRect(0,0,W,H);
-    
+
     const ML=mm2px(fmt.margins_mm.left, fmt.dpi);
     const MR=mm2px(fmt.margins_mm.right, fmt.dpi);
     const MT=mm2px(fmt.margins_mm.top, fmt.dpi);
     const MB=mm2px(fmt.margins_mm.bottom, fmt.dpi);
     const innerW = W-ML-MR;
     const usableH = H-MT-MB;
-    
+
     // title measure
     let titleLines=[], titleH=0, skuH=0;
     if(elTitle.value.trim()){
@@ -647,14 +647,14 @@ export default function LabelGenerator() {
       titleH = lineH*titleLines.length + Math.round(lineH*0.4);
     }
     if(elSku.value.trim()){ skuH = Math.round(fmt.skuPx*1.2); }
-    
+
     const barHeight = Math.max(60, Math.round(usableH * (Number(rHPct.value)/100)));
     const barLineW  = Number(rWidth.value);
-    
+
     const bCanvas = document.createElement('canvas');
     bCanvas.width  = innerW;
     bCanvas.height = barHeight;
-    
+
     try{
       JsBarcode(bCanvas, elCode.value.trim() || ' ', {
         format:'CODE128',
@@ -673,11 +673,11 @@ export default function LabelGenerator() {
       ctx.textAlign='center';
       ctx.fillText('Ошибка: ' + e.message, ML+innerW/2, MT + fmt.skuPx*1.2);
     }
-    
+
     // Центровка всего блока по вертикали в границах печати
     const totalH = titleH + skuH + barHeight;
     let y = MT + Math.max(0, Math.floor((usableH - totalH)/2));
-    
+
     // draw title
     if(titleLines.length){
       ctx.fillStyle='#111';
@@ -688,7 +688,7 @@ export default function LabelGenerator() {
       titleLines.forEach((ln,i)=> ctx.fillText(ln, cx, y + lineH*(i+1)) );
       y += lineH*titleLines.length + Math.round(lineH*0.4);
     }
-    
+
     // draw SKU
     if(elSku.value.trim()){
       ctx.fillStyle='#333';
@@ -697,11 +697,11 @@ export default function LabelGenerator() {
       ctx.fillText(elSku.value.trim(), ML+innerW/2, y + fmt.skuPx*1.2);
       y += skuH;
     }
-    
+
     // barcode centered horizontally
     const bx = ML + Math.round((innerW - bCanvas.width)/2);
     ctx.drawImage(bCanvas, bx, y);
-    
+
     // preview scale
     const box = document.querySelector('.wb-stage-in').getBoundingClientRect();
     const scale = Math.min(box.width / W, box.height / H, 1) || 1;
@@ -712,10 +712,10 @@ export default function LabelGenerator() {
     pctx.imageSmoothingQuality = 'high';
     pctx.clearRect(0,0,elPrev.width, elPrev.height);
     pctx.drawImage(off, 0,0, elPrev.width, elPrev.height);
-    
+
     elPrev.__fullImage = off;
   }
-  
+
   function downloadPNG(){
     const full = elPrev.__fullImage;
     if(!full) return;
@@ -725,14 +725,14 @@ export default function LabelGenerator() {
     a.href = full.toDataURL('image/png', 1.0);
     a.click();
   }
-  
+
   ['input','change'].forEach(ev=>{
     ['#f_code','#f_title','#f_sku','#f_format','#r_width','#r_hpct']
       .map(s=>document.querySelector(s)).forEach(el=> el.addEventListener(ev, render));
     window.addEventListener('resize', render);
   });
   document.querySelector('#btn_download').addEventListener('click', downloadPNG);
-  
+
   render();
 })();
 </script>
