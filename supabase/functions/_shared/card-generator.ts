@@ -277,7 +277,6 @@ export async function generateProductCards(request: GenerationRequest): Promise<
           prompt: prompt,
           size: '1024x1536',
           quality: 'high',
-          response_format: 'b64_json',
           n: 1
         }),
       });
@@ -343,7 +342,6 @@ export async function generateProductCards(request: GenerationRequest): Promise<
             prompt: prompt,
             size: '1024x1536',
             quality: 'high',
-            response_format: 'b64_json',
             n: 1
           }),
         });
