@@ -222,10 +222,12 @@ export async function generateProductCards(request: GenerationRequest): Promise<
   
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const openaiApiKey = Deno.env.get('OPENAI_API_KEY')!;
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
   
-  if (!openaiApiKey) {
-    throw new Error('OpenAI API key not configured');
+  console.log('OpenAI API Key check:', openaiApiKey ? `${openaiApiKey.slice(0,2)}...${openaiApiKey.slice(-4)}` : 'null');
+  
+  if (!openaiApiKey || !openaiApiKey.startsWith('sk-')) {
+    throw new Error('OPENAI_API_KEY is missing in Functions secrets');
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -266,20 +268,21 @@ export async function generateProductCards(request: GenerationRequest): Promise<
       // Generate single card
       const prompt = prompts[cardIndex as keyof typeof prompts];
       
-      const response = await fetch('https://api.openai.com/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openaiApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-image-1',
-          prompt: prompt,
-          size: '1024x1536',
-          quality: 'high',
-          n: 1
-        }),
-      });
+        const response = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: prompt,
+            size: '1024x1792',
+            quality: 'standard',
+            style: 'vivid',
+            n: 1
+          }),
+        });
 
       const imageData = await response.json();
       
@@ -331,20 +334,21 @@ export async function generateProductCards(request: GenerationRequest): Promise<
     } else {
       // Generate all 6 cards in parallel
       const imagePromises = Object.entries(prompts).map(async ([index, prompt]) => {
-        const response = await fetch('https://api.openai.com/v1/images/generations', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openaiApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-image-1',
-            prompt: prompt,
-            size: '1024x1536',
-            quality: 'high',
-            n: 1
-          }),
-        });
+          const response = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openaiApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'dall-e-3',
+              prompt: prompt,
+              size: '1024x1792',
+              quality: 'standard',
+              style: 'vivid',
+              n: 1
+            }),
+          });
 
         const imageData = await response.json();
         

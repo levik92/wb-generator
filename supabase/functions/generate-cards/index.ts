@@ -12,6 +12,15 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Debug endpoint to check API key
+  if (req.method === 'GET') {
+    const k = Deno.env.get('OPENAI_API_KEY');
+    const masked = k ? `${k.slice(0,2)}...${k.slice(-4)}` : 'null';
+    return new Response(JSON.stringify({ hasKey: !!k, keyMask: masked }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
     const requestBody = await req.json();
     const { productName, category, description, userId } = requestBody;
