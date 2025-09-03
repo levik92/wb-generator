@@ -9,161 +9,123 @@ const corsHeaders = {
 
 const CARD_PROMPTS = {
   cover: (productName: string, category: string, benefits: string) => 
-    `Роль: Ты — профессиональный UX/UI-дизайнер и арт-директор маркетплейс-контента. 
-Твоя задача — создать коммерческое обложечное изображение для карточки товара.
+    `Create a professional product card cover image for e-commerce marketplace.
 
-Данные:
-• Товар: ${productName}
-• Категория: ${category}
-• Главные преимущества: ${benefits}
+Product: ${productName}
+Category: ${category}
+Benefits: ${benefits}
 
-Правила по продукту:
-• На итоговом изображении товар должен быть показан полностью, крупным планом, с высокой читаемостью.  
-• Все мелкие детали (швы, фурнитура, бирки, фактура, логотипы) должны быть сохранены без изменений.  
-• Если товар — одежда и среди фото нет снимка на модели, можно показать ЭТУ ЖЕ одежду на модели, но строго сохранив крой, длину и посадку.  
-• Недопустимы стилизации, упрощения или «улучшения», искажающие товар.  
-
-Композиция:
-• Вертикальный кадр (3:4, целевой размер 1024×1536).  
-• Товар в центре, на переднем плане, максимально читаемый, не обрезанный.  
-• Фон допускается студийный (чистый) или нейтральный контекст применения.  
-• Фон и окружение должны подчёркивать товар, но не отвлекать от него.  
-• Свет мягкий, аккуратный, цветопередача точная, как на исходных фото.  
-
-Отображение преимуществ:
-• Можно добавить одно короткое преимущество в виде читаемого заголовка.  
-• Текст — крупный, лаконичный, контрастный.  
-• Допускается минимальная иконка/плашка для визуализации (например «10 лет гарантии»).  
-• Запрещено накладывать текст друг на друга или на сам товар.  
-
-Технические требования:
-• Итоговое изображение должно быть фотореалистичным, высокого качества.  
-• Запрещены водяные знаки, посторонние надписи, декоративные элементы.  
-• Формат: вертикаль 1024×1536 (последующая обрезка до 960×1280).
-
-English helper:
-• Show the product fully, centered, and clear.  
-• One short headline with a key benefit is optional, must be readable and not overlap the product.  
-• Photorealistic, commercial e-commerce style, 1024×1536.`,
+Requirements:
+- Show the product fully, centered, and clear
+- Vertical format 1024x1536 pixels
+- High quality, photorealistic commercial style
+- Clean background that highlights the product
+- Professional lighting
+- One optional benefit headline if relevant`,
 
   lifestyle: (productName: string, category: string, benefits: string) =>
-    `Роль: Ты — арт-директор e-commerce. Создай реалистичное изображение товара в контексте применения (lifestyle).
+    `Create a lifestyle product shot showing the item in natural use context.
 
-Данные:
-• Товар: ${productName}
-• Категория: ${category}
-• Главные преимущества: ${benefits}
+Product: ${productName} 
+Category: ${category}
+Benefits: ${benefits}
 
-Правила композиции:
-• Вертикальный формат 1024×1536 (3:4).
-• Товар должен быть в центре внимания, но показан в естественной среде использования.
-• Человек может быть в кадре, но товар — главный герой.
-• Освещение естественное, атмосферное.
-
-English helper:
-• Lifestyle shot showing the product in natural use context.
-• Product should be the main focus but shown in realistic environment.
-• Natural lighting, authentic atmosphere, 1024×1536.`,
+Requirements:
+- Vertical format 1024x1536 pixels
+- Product as main focus in realistic environment
+- Natural lighting and authentic atmosphere
+- Shows practical application of the product`,
 
   macro: (productName: string, category: string, benefits: string) =>
-    `Роль: Ты — продуктовый фотограф. Создай макросъёмку товара, показывающую качество и детали.
+    `Create a macro detail shot emphasizing product quality and craftsmanship.
 
-Данные:
-• Товар: ${productName}
-• Категория: ${category}
-• Главные преимущества: ${benefits}
+Product: ${productName}
+Category: ${category} 
+Benefits: ${benefits}
 
-Правила съёмки:
-• Вертикальный формат 1024×1536.
-• Крупный план важных деталей товара (фактура, швы, материал).
-• Резкость на переднем плане, мягкое размытие фона.
-• Подчеркнуть качество изготовления.
-
-English helper:
-• Macro shot focusing on product details and quality.
-• Sharp foreground, soft background blur.
-• Emphasize craftsmanship and materials, 1024×1536.`,
+Requirements:
+- Vertical format 1024x1536 pixels
+- Close-up showing important details
+- Sharp foreground, soft background blur
+- Emphasize materials and quality`,
 
   beforeAfter: (productName: string, category: string, benefits: string) =>
-    `Роль: Ты — маркетинговый дизайнер. Создай изображение "до и после" использования товара.
+    `Create a before/after comparison showing product benefits.
 
-Данные:
-• Товар: ${productName}
-• Категория: ${category}
-• Главные преимущества: ${benefits}
+Product: ${productName}
+Category: ${category}
+Benefits: ${benefits}
 
-Правила композиции:
-• Вертикальный формат 1024×1536.
-• Разделение на две части: "до" и "после".
-• Четкий контраст, показывающий эффект от использования.
-• Минимум текста: "ДО" и "ПОСЛЕ".
-
-English helper:
-• Before/after comparison showing product benefits.
-• Split composition with clear contrast.
-• Minimal text labels, 1024×1536.`,
+Requirements:
+- Vertical format 1024x1536 pixels
+- Split composition showing clear contrast
+- Minimal text labels "BEFORE" and "AFTER"`,
 
   bundle: (productName: string, category: string, benefits: string) =>
-    `Роль: Ты — коммерческий фотограф. Создай изображение товара в комплекте с аксессуарами.
+    `Create a product bundle shot with complementary accessories.
 
-Данные:
-• Товар: ${productName}
-• Категория: ${category}
-• Главные преимущества: ${benefits}
+Product: ${productName}
+Category: ${category}
+Benefits: ${benefits}
 
-Правила композиции:
-• Вертикальный формат 1024×1536.
-• Основной товар + дополнительные элементы/аксессуары.
-• Гармоничная композиция, все элементы дополняют друг друга.
-• Студийное освещение.
-
-English helper:
-• Product bundle with complementary accessories.
-• Harmonious composition, studio lighting.
-• Main product prominently featured, 1024×1536.`,
+Requirements:
+- Vertical format 1024x1536 pixels
+- Harmonious composition with accessories
+- Studio lighting
+- Main product prominently featured`,
 
   guarantee: (productName: string, category: string, benefits: string) =>
-    `Роль: Ты — дизайнер доверия. Создай изображение, подчёркивающее надёжность и гарантии товара.
+    `Create a trust-building product shot emphasizing quality and reliability.
 
-Данные:
-• Товар: ${productName}
-• Категория: ${category}
-• Главные преимущества: ${benefits}
+Product: ${productName}
+Category: ${category}
+Benefits: ${benefits}
 
-Правила композиции:
-• Вертикальный формат 1024×1536.
-• Товар на чистом фоне с элементами доверия (сертификаты, знаки качества).
-• Профессиональная съёмка, внушающая доверие.
-• Возможны элементы текста о гарантии.
-
-English helper:
-• Trust-building product shot with quality indicators.
-• Clean background, professional presentation.
-• Guarantee/quality elements, 1024×1536.`
+Requirements:
+- Vertical format 1024x1536 pixels
+- Clean background with quality indicators
+- Professional presentation
+- Trust-building elements`
 };
 
 const MAX_CONCURRENT_TASKS = 2;
 const MAX_RETRY_COUNT = 3;
-const RETRY_BASE_DELAY = 60; // Base delay in seconds
+const RETRY_BASE_DELAY = 60;
 
 serve(async (req) => {
+  console.log(`Process generation tasks called: ${req.method}`);
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY not found');
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      hasOpenAIKey: !!openAIApiKey
+    });
+    
+    if (!supabaseUrl || !supabaseServiceKey || !openAIApiKey) {
+      const missing = [];
+      if (!supabaseUrl) missing.push('SUPABASE_URL');
+      if (!supabaseServiceKey) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+      if (!openAIApiKey) missing.push('OPENAI_API_KEY');
+      
+      console.error('Missing environment variables:', missing);
+      throw new Error(`Missing environment variables: ${missing.join(', ')}`);
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const requestBody = await req.json();
     const { jobId } = requestBody;
+    
+    console.log('Processing job:', jobId);
 
     if (!jobId) {
       return new Response(JSON.stringify({ error: 'jobId is required' }), {
@@ -186,6 +148,8 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    console.log('Job found:', job.id, 'status:', job.status);
 
     // Mark job as processing
     await supabase
@@ -222,7 +186,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
     console.log(`Starting background processing for job ${job.id}`);
 
     while (true) {
-      // Get ready tasks (pending or retrying with expired retry_after)
+      // Get ready tasks
       const now = Math.floor(Date.now() / 1000);
       const { data: tasks, error: tasksError } = await supabase
         .from('generation_tasks')
@@ -239,7 +203,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       }
 
       if (!tasks || tasks.length === 0) {
-        // Check if all tasks are completed or failed
+        // Check if all tasks are completed
         const { data: allTasks, error: allTasksError } = await supabase
           .from('generation_tasks')
           .select('status')
@@ -256,13 +220,25 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
 
         if (!pendingTasks || pendingTasks.length === 0) {
           console.log(`All tasks completed for job ${job.id}`);
+          
+          // Update job status
+          await supabase
+            .from('generation_jobs')
+            .update({ 
+              status: 'completed',
+              completed_at: new Date().toISOString()
+            })
+            .eq('id', job.id);
+          
           break;
         }
 
-        // Wait a bit before checking again
+        // Wait before checking again
         await new Promise(resolve => setTimeout(resolve, 5000));
         continue;
       }
+
+      console.log(`Processing ${tasks.length} tasks for job ${job.id}`);
 
       // Process tasks concurrently
       const taskPromises = tasks.map(task => processTask(supabase, openAIApiKey, job, task));
@@ -278,7 +254,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
 
 async function processTask(supabase: any, openAIApiKey: string, job: any, task: any) {
   try {
-    console.log(`Processing task ${task.id} (card ${task.card_index})`);
+    console.log(`Processing task ${task.id} (${task.card_type})`);
 
     // Mark task as processing
     await supabase
@@ -296,6 +272,8 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
     }
 
     const prompt = promptTemplate(job.product_name, job.category, job.description);
+    
+    console.log(`Generated prompt for task ${task.id}: ${prompt.substring(0, 100)}...`);
 
     // Update task with prompt
     await supabase
@@ -304,6 +282,8 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
       .eq('id', task.id);
 
     // Generate image with OpenAI
+    console.log(`Calling OpenAI API for task ${task.id}`);
+    
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -311,23 +291,22 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-image-1',
+        model: 'dall-e-3',
         prompt: prompt,
         n: 1,
-        size: '1024x1536',
-        quality: 'high',
-        output_format: 'png'
+        size: '1024x1792',
+        quality: 'hd'
       }),
     });
 
     if (!imageResponse.ok) {
-      const errorData = await imageResponse.json();
-      console.error(`OpenAI API error for task ${task.id}:`, errorData);
+      const errorText = await imageResponse.text();
+      console.error(`OpenAI API error for task ${task.id}:`, imageResponse.status, errorText);
 
       // Handle rate limit
       if (imageResponse.status === 429) {
         const retryAfter = parseInt(imageResponse.headers.get('retry-after') || '60');
-        const jitter = Math.floor(Math.random() * 10); // Add jitter
+        const jitter = Math.floor(Math.random() * 10);
         const retryDelay = retryAfter + jitter;
 
         console.log(`Rate limited for task ${task.id}, retrying after ${retryDelay} seconds`);
@@ -339,47 +318,32 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
               status: 'retrying',
               retry_count: task.retry_count + 1,
               retry_after: Math.floor(Date.now() / 1000) + retryDelay,
-              last_error: errorData.error?.message || 'Rate limit exceeded'
+              last_error: 'Rate limit exceeded'
             })
             .eq('id', task.id);
           return;
         }
       }
 
-      throw new Error(errorData.error?.message || 'OpenAI API error');
+      throw new Error(`OpenAI API error: ${errorText}`);
     }
 
     const imageData = await imageResponse.json();
+    console.log(`OpenAI response for task ${task.id}:`, imageData);
 
-    // For gpt-image-1, data comes as base64
-    let imageBuffer: ArrayBuffer;
-    if (imageData.data[0].b64_json) {
-      // Decode base64 to buffer using Deno's TextEncoder/Decoder
-      const base64Data = imageData.data[0].b64_json;
-      // Remove data URL prefix if present
-      const cleanBase64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
-      
-      try {
-        // Use Deno's built-in base64 decoding
-        const decoder = new TextDecoder();
-        const encoder = new TextEncoder();
-        const binaryString = atob(cleanBase64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        imageBuffer = bytes.buffer;
-      } catch (decodeError) {
-        console.error('Base64 decode error:', decodeError);
-        throw new Error(`Failed to decode base64 image: ${decodeError.message}`);
-      }
-    } else if (imageData.data[0].url) {
-      // Fallback for URL-based response
-      imageBuffer = await fetch(imageData.data[0].url).then(r => r.arrayBuffer());
-    } else {
-      throw new Error('No image data received from OpenAI');
+    if (!imageData.data || !imageData.data[0] || !imageData.data[0].url) {
+      throw new Error('Invalid OpenAI response - no image URL');
     }
+
+    const imageUrl = imageData.data[0].url;
+
+    // Download and upload to Supabase Storage
+    console.log(`Downloading image for task ${task.id} from:`, imageUrl);
+    
+    const imageBuffer = await fetch(imageUrl).then(r => r.arrayBuffer());
     const fileName = `${job.id}/${task.card_index}_${task.card_type}.png`;
+    
+    console.log(`Uploading to storage: ${fileName}`);
     
     const { error: uploadError } = await supabase.storage
       .from('generated-cards')
@@ -389,6 +353,7 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
       });
 
     if (uploadError) {
+      console.error(`Upload error for task ${task.id}:`, uploadError);
       throw new Error(`Upload error: ${uploadError.message}`);
     }
 
@@ -396,6 +361,8 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
     const { data: { publicUrl } } = supabase.storage
       .from('generated-cards')
       .getPublicUrl(fileName);
+
+    console.log(`Public URL for task ${task.id}:`, publicUrl);
 
     // Mark task as completed
     await supabase
