@@ -173,7 +173,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
             asChild
           >
             <a 
-              href="https://t.me/support_wbgen" 
+              href="https://t.me/wbgen_support/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2"

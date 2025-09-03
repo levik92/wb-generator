@@ -212,7 +212,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setGenerating(true);
     setProgress(0);
     setCurrentStage(0);
-    setJobStatus('Создание задачи...');
+    setJobStatus('Создание задачи генерации...');
 
     try {
       const productImagesData = files.map(file => ({
@@ -494,7 +494,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </Card>
 
       {/* Card Selection */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
@@ -523,12 +523,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm mb-1">{stage.name}</h4>
-                    <p className="text-xs text-muted-foreground">{stage.description}</p>
-                    {index === 0 && (
-                      <Badge variant="secondary" className="text-xs mt-2">
-                        Рекомендуется
-                      </Badge>
-                    )}
+                    <p className="text-xs text-muted-foreground leading-relaxed">{stage.description}</p>
                   </div>
                 </div>
               </div>
