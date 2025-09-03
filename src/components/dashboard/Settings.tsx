@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Link as LinkIcon, Save, Lock, Mail } from "lucide-react";
+import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones } from "lucide-react";
 
 interface Profile {
   id: string;
