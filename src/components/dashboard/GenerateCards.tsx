@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -27,12 +27,12 @@ interface GenerateCardsProps {
 }
 
 const CARD_STAGES = [
-  { name: "Главная", description: "Главное фото товара" },
-  { name: "Описание", description: "Товар в использовании" },
-  { name: "Инфографика", description: "Характеристики и преимущества" },
-  { name: "Погружение", description: "Сравнение с конкурентами" },
-  { name: "Детализация", description: "Детальные фото и особенности" },
-  { name: "Финал", description: "Призыв к действию" }
+  { name: "Главная", key: "cover", description: "Главное фото товара" },
+  { name: "Образ жизни", key: "lifestyle", description: "Товар в использовании" },
+  { name: "Макро", key: "macro", description: "Макро-съемка деталей" },
+  { name: "До/После", key: "beforeAfter", description: "Сравнение результатов" },
+  { name: "Комплект", key: "bundle", description: "Товар в комплекте" },
+  { name: "Гарантия", key: "guarantee", description: "Гарантии и доверие" }
 ];
 
 export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) => {
@@ -43,33 +43,36 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
-  const [generationHistory, setGenerationHistory] = useState<string[][]>([]);
-  const [currentGenerationIndex, setCurrentGenerationIndex] = useState(0);
-  const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<any[]>([]);
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [jobStatus, setJobStatus] = useState<string>('');
   const { toast } = useToast();
-
-  // Current generation is the active one being displayed
-  const generatedImages = generationHistory[currentGenerationIndex] || [];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
-    if (uploadedFiles.length > 5) {
+    if (uploadedFiles.length + files.length > 10) {
       toast({
         title: "Слишком много файлов",
-        description: "Максимум 5 изображений за раз",
+        description: "Максимум 10 изображений",
         variant: "destructive",
       });
       return;
     }
-    setFiles(uploadedFiles);
+    setFiles(prev => [...prev, ...uploadedFiles]);
   };
 
   const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   const canGenerate = () => {
-    return files.length > 0 && productName.trim() && category && description.trim() && profile.tokens_balance >= 6;
+    return files.length > 0 && 
+           productName.trim() && 
+           category && 
+           description.trim() && 
+           profile.tokens_balance >= 6 && 
+           !generating;
   };
 
   const getGuardMessage = () => {
@@ -78,162 +81,221 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     if (!category) return "Выберите категорию товара";
     if (!description.trim()) return "Добавьте описание товара";
     if (profile.tokens_balance < 6) return "Недостаточно токенов (нужно 6)";
+    if (generating) return "Генерация уже выполняется";
     return null;
   };
 
+  const startJobPolling = (jobId: string) => {
+    setCurrentJobId(jobId);
+    
+    const pollJob = async () => {
+      try {
+        const { data: job, error } = await supabase
+          .from('generation_jobs')
+          .select(`
+            *,
+            generation_tasks (
+              id,
+              card_index,
+              card_type,
+              status,
+              image_url,
+              storage_path
+            )
+          `)
+          .eq('id', jobId)
+          .single();
+
+        if (error) {
+          console.error('Polling error:', error);
+          return;
+        }
+
+        if (job) {
+          const completedTasks = job.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
+          const processingTasks = job.generation_tasks?.filter((t: any) => t.status === 'processing') || [];
+          const failedTasks = job.generation_tasks?.filter((t: any) => t.status === 'failed') || [];
+          const retryingTasks = job.generation_tasks?.filter((t: any) => t.status === 'retrying') || [];
+          
+          const progressPercent = (completedTasks.length / job.total_cards) * 100;
+          
+          setProgress(progressPercent);
+          setCurrentStage(completedTasks.length);
+
+          // Set job status for display
+          if (job.status === 'processing') {
+            if (retryingTasks.length > 0) {
+              setJobStatus(`Обработка... (${retryingTasks.length} задач ожидают повтора)`);
+            } else if (processingTasks.length > 0) {
+              setJobStatus(`Генерация... (${processingTasks.length} активных)`);
+            } else {
+              setJobStatus('Обработка...');
+            }
+          } else {
+            setJobStatus(job.status);
+          }
+
+          // Update generated images
+          if (completedTasks.length > 0) {
+            const images = completedTasks
+              .sort((a: any, b: any) => a.card_index - b.card_index)
+              .map((task: any) => ({
+                id: task.id,
+                url: task.image_url,
+                stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                stageIndex: task.card_index
+              }));
+            setGeneratedImages(images);
+          }
+
+          // Check if job is completed
+          if (job.status === 'completed') {
+            setGenerating(false);
+            toast({
+              title: "Генерация завершена!",
+              description: "Все карточки готовы для скачивания",
+            });
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            setCurrentJobId(null);
+            onTokensUpdate?.();
+          } else if (job.status === 'failed') {
+            setGenerating(false);
+            toast({
+              title: "Ошибка генерации",
+              description: job.error_message || "Генерация не удалась",
+              variant: "destructive",
+            });
+            
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            setCurrentJobId(null);
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    };
+
+    // Poll immediately and then every 5 seconds
+    pollJob();
+    const interval = setInterval(pollJob, 5000);
+    setPollingInterval(interval);
+  };
+
   const simulateGeneration = async () => {
+    if (!canGenerate()) return;
+
     setGenerating(true);
     setProgress(0);
     setCurrentStage(0);
-    
-    try {
-      // Convert files to base64 for sending to API
-      const productImages = await Promise.all(
-        files.map(async (file) => {
-          const reader = new FileReader();
-          return new Promise<string>((resolve) => {
-            reader.onload = () => resolve(reader.result as string);
-            reader.readAsDataURL(file);
-          });
-        })
-      );
+    setJobStatus('Создание задачи...');
 
-      const { data, error } = await supabase.functions.invoke('generate-cards', {
+    try {
+      const productImagesData = files.map(file => ({
+        url: URL.createObjectURL(file),
+        name: file.name
+      }));
+
+      // Create generation job
+      const { data, error } = await supabase.functions.invoke('create-generation-job', {
         body: {
-          productName: productName,
+          productName,
           category,
           description,
           userId: profile.id,
-          productImages
+          productImages: productImagesData
         }
       });
 
-      if (error) throw error;
-
-      if (data.error) {
-        throw new Error(data.error);
+      if (error) {
+        console.error('Job creation error:', error);
+        toast({
+          title: "Ошибка создания задачи",
+          description: error.message || "Произошла ошибка при создании задачи генерации",
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Use the actual generated images from the response
-      const newGeneration: string[] = data.images || [];
-
-      // Simulate progress for UI
-      for (let i = 0; i < CARD_STAGES.length; i++) {
-        setCurrentStage(i);
-        setProgress((i / CARD_STAGES.length) * 100);
+      if (data.success && data.jobId) {
+        // Start polling for job progress
+        startJobPolling(data.jobId);
         
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setProgress(((i + 1) / CARD_STAGES.length) * 100);
+        toast({
+          title: "Генерация начата!",
+          description: "Ваша задача поставлена в очередь. Следите за прогрессом.",
+        });
+      } else {
+        throw new Error(data.error || 'Job creation failed');
       }
-      
-      // Add new generation to history and set as current
-      setGenerationHistory(prev => [...prev, newGeneration]);
-      setCurrentGenerationIndex(generationHistory.length);
-      
-      // Refresh profile to update token balance
-      onTokensUpdate();
-      
-      toast({
-        title: "Карточки созданы!",
-        description: "Ваши карточки готовы к скачиванию",
-      });
     } catch (error: any) {
+      console.error('Generation error:', error);
       toast({
         title: "Ошибка генерации",
-        description: error.message || "Не удалось создать карточки",
+        description: error.message || "Произошла ошибка при создании задачи",
         variant: "destructive",
       });
-    } finally {
       setGenerating(false);
+      setProgress(0);
+      setCurrentStage(0);
+      setJobStatus('');
     }
   };
 
   const downloadAll = () => {
     toast({
       title: "Скачивание начато",
-      description: "Все изображения будут скачаны в ZIP архиве",
+      description: "Все изображения будут скачаны",
+    });
+    
+    generatedImages.forEach((image, index) => {
+      const link = document.createElement('a');
+      link.href = image.url;
+      link.download = `${productName}_${image.stage}_${index + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
   };
 
   const downloadSingle = (index: number) => {
+    const image = generatedImages[index];
+    if (!image) return;
+    
     const link = document.createElement('a');
-    link.href = generatedImages[index];
-    link.download = `card_${index + 1}_${CARD_STAGES[index]?.name}.jpg`;
+    link.href = image.url;
+    link.download = `${productName}_${image.stage}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
     toast({
       title: "Скачивание началось",
-      description: `Карточка "${CARD_STAGES[index]?.name}" скачивается`,
+      description: `Карточка "${image.stage}" скачивается`,
     });
   };
 
-  const regenerateSingle = async (index: number) => {
-    setRegeneratingIndex(index);
-    
-    try {
-      // Convert files to base64 for sending to API
-      const productImages = await Promise.all(
-        files.map(async (file) => {
-          const reader = new FileReader();
-          return new Promise<string>((resolve) => {
-            reader.onload = () => resolve(reader.result as string);
-            reader.readAsDataURL(file);
-          });
-        })
-      );
-
-      const { data, error } = await supabase.functions.invoke('regenerate-single-card', {
-        body: {
-          productName: productName,
-          category,
-          description,
-          userId: profile.id,
-          cardIndex: index,
-          cardType: CARD_STAGES[index]?.name,
-          productImages
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.error) {
-        throw new Error(data.error);
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
       }
-      
-      // Replace the image at specific index in current generation
-      const newHistory = [...generationHistory];
-      const currentGeneration = [...newHistory[currentGenerationIndex]];
-      currentGeneration[index] = data.regeneratedCard || currentGeneration[index];
-      newHistory[currentGenerationIndex] = currentGeneration;
-      setGenerationHistory(newHistory);
-      
-      // Refresh profile to update token balance
-      onTokensUpdate();
-      
-      toast({
-        title: "Карточка обновлена!",
-        description: `Карточка "${CARD_STAGES[index]?.name}" успешно перегенерирована`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Ошибка перегенерации",
-        description: error.message || "Не удалось перегенерировать карточку",
-        variant: "destructive",
-      });
-    } finally {
-      setRegeneratingIndex(null);
-    }
-  };
+    };
+  }, [pollingInterval]);
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
       <div>
         <h2 className="text-2xl sm:text-3xl font-semibold mb-2">Генерация карточек</h2>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Создайте профессиональные карточки для Wildberries
+          Создайте профессиональные карточки для Wildberries с помощью ИИ
         </p>
       </div>
 
@@ -243,80 +305,66 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             <div className="bg-muted p-2 rounded-lg">
               <Info className="h-4 w-4 text-purple-600" />
             </div>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Стоимость генерации</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Новая система генерации</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="bg-muted/30 border border-border/50 rounded-[8px] p-3 flex items-center gap-3">
-            <div className="bg-muted/70 p-2 rounded-lg">
-              <Images className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="flex-1">
-              <div className="font-medium text-sm text-muted-foreground">1 комплект карточек</div>
-              <div className="text-xs text-muted-foreground">6 изображений товара</div>
-            </div>
-            <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm text-muted-foreground">
-              6 токенов
+            <Zap className="h-4 w-4 text-purple-600 shrink-0" />
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              <p className="font-medium">Фоновая обработка + защита от лимитов</p>
+              <p>Генерация теперь происходит в фоне с автоматическими повторами при ошибках rate limit</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Guard Messages */}
-      {!canGenerate() && (
-        <Alert className="flex items-start justify-start text-left py-4 border-purple-200 bg-white">
-          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-purple-600" />
-          <AlertDescription className="ml-3 text-purple-700">{getGuardMessage()}</AlertDescription>
-        </Alert>
-      )}
-
       {/* File Upload */}
-      <Card className="bg-muted/30">
+      <Card>
         <CardHeader>
-          <CardTitle>Загрузка изображений</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Изображения товара
+          </CardTitle>
           <CardDescription>
-            Загрузите до 5 фотографий товара на белом фоне
+            Загрузите фотографии вашего товара (максимум 10 изображений)
           </CardDescription>
         </CardHeader>
         <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center justify-center w-full">
-            <label className="flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-gray-50 overflow-hidden">
-              <div className="flex flex-col items-center justify-center pt-2 pb-2 px-2">
-                <Upload className="w-6 h-6 sm:w-8 sm:h-8 mb-2 sm:mb-4 text-muted-foreground" />
-                <p className="mb-1 sm:mb-2 text-xs text-muted-foreground text-center">
-                  <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
-                </p>
-                <p className="text-xs text-muted-foreground text-center">PNG, JPG до 10MB каждый</p>
-              </div>
-              <Input
-                type="file"
-                className="hidden input-bordered"
-                multiple
-                accept="image/*"
-                onChange={handleFileUpload}
-              />
-            </label>
-          </div>
-
+          <div className="space-y-4">
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, JPEG (МАКС. 10MB)</p>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                />
+              </label>
+            </div>
+            
             {files.length > 0 && (
-              <div className="grid gap-2 sm:gap-4 grid-cols-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {files.map((file, index) => (
                   <div key={index} className="relative group">
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`Upload ${index + 1}`}
-                      className="w-full h-16 sm:h-24 object-cover rounded-lg border"
+                      className="w-full h-20 object-cover rounded-lg border"
                     />
-                    <Badge className="absolute -top-2 -left-2 bg-wb-purple">
-                      {index + 1}
-                    </Badge>
-                    {/* Remove button - always visible */}
                     <button
                       onClick={() => removeFile(index)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs"
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      ×
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
@@ -326,228 +374,154 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         </CardContent>
       </Card>
 
-      {/* Product Name */}
-      <Card className="bg-muted/30">
+      {/* Product Details */}
+      <Card>
         <CardHeader>
-          <CardTitle>Название товара</CardTitle>
+          <CardTitle>Информация о товаре</CardTitle>
           <CardDescription>
-            Введите точное название вашего товара
+            Укажите детали товара для генерации оптимальных карточек
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
             <Input
               id="productName"
-              placeholder="Например: Беспроводные наушники Apple AirPods Pro"
+              placeholder="Например: Спортивная куртка для зимнего бега"
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              className="border-2 border-border/60"
             />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Category Selection */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle>Категория товара</CardTitle>
-          <CardDescription>
-            Выберите категорию для лучшей генерации
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          
           <div className="space-y-2">
-            <Label htmlFor="category">Категория товара</Label>
+            <Label htmlFor="category">Категория</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="border-2 border-border/60">
+              <SelectTrigger>
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Электроника">Электроника</SelectItem>
                 <SelectItem value="Одежда">Одежда</SelectItem>
                 <SelectItem value="Обувь">Обувь</SelectItem>
                 <SelectItem value="Аксессуары">Аксессуары</SelectItem>
+                <SelectItem value="Электроника">Электроника</SelectItem>
                 <SelectItem value="Дом и сад">Дом и сад</SelectItem>
                 <SelectItem value="Красота и здоровье">Красота и здоровье</SelectItem>
                 <SelectItem value="Спорт и отдых">Спорт и отдых</SelectItem>
                 <SelectItem value="Детские товары">Детские товары</SelectItem>
                 <SelectItem value="Автотовары">Автотовары</SelectItem>
-                <SelectItem value="Канцелярия">Канцелярия</SelectItem>
-                <SelectItem value="Книги">Книги</SelectItem>
-                <SelectItem value="Игрушки">Игрушки</SelectItem>
-                <SelectItem value="Мебель">Мебель</SelectItem>
-                <SelectItem value="Бытовая техника">Бытовая техника</SelectItem>
-                <SelectItem value="Строительство">Строительство</SelectItem>
-                <SelectItem value="Продукты питания">Продукты питания</SelectItem>
-                <SelectItem value="Зоотовары">Зоотовары</SelectItem>
-                <SelectItem value="Хобби и творчество">Хобби и творчество</SelectItem>
+                <SelectItem value="Другое">Другое</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Product Description */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle>Описание товара</CardTitle>
-          <CardDescription>
-            Опишите товар, его преимущества и пожелания по дизайну карточек
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          
           <div className="space-y-2">
+            <Label htmlFor="description">Описание и преимущества</Label>
             <Textarea
               id="description"
-              placeholder="Опишите ваш товар: основные характеристики, преимущества, целевую аудиторию. Добавьте пожелания по стилю карточек, цветовой гамме, акцентам..."
+              placeholder="Опишите ключевые преимущества товара, материалы, особенности использования..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="input-bordered text-sm"
+              rows={4}
             />
-            <p className="text-xs text-muted-foreground">
-              Чем подробнее описание, тем лучше будут карточки
-            </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Generation Process */}
+      {/* Progress */}
       {generating && (
-        <Card>
+        <Card className="bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle>Генерация в процессе...</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Генерация карточек
+            </CardTitle>
             <CardDescription>
-              Этап {currentStage + 1} из {CARD_STAGES.length}: {CARD_STAGES[currentStage]?.name}
+              {jobStatus && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="w-3 h-3" />
+                  {jobStatus}
+                </div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <Progress value={progress} className="w-full" />
-              <p className="text-sm text-muted-foreground">
-                {CARD_STAGES[currentStage]?.description}
-              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Прогресс: {currentStage} из 6 карточек</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="w-full" />
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {CARD_STAGES.map((stage, index) => (
+                  <div
+                    key={index}
+                    className={`text-xs p-2 rounded border ${
+                      index < currentStage
+                        ? 'bg-primary/10 border-primary/20 text-primary'
+                        : index === currentStage
+                        ? 'bg-primary/5 border-primary/10 text-primary animate-pulse'
+                        : 'bg-muted/30 border-border text-muted-foreground'
+                    }`}
+                  >
+                    {stage.name}
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Generated Results */}
-      {generatedImages.length > 0 && !generating && (
+      {/* Generated Images */}
+      {generatedImages.length > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle>Готовые карточки</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Images className="w-4 h-4" />
+                  Готовые карточки ({generatedImages.length}/6)
+                </CardTitle>
                 <CardDescription>
-                  {generatedImages.length} карточек готовы к скачиванию
+                  Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
-              {generationHistory.length > 1 && (
-                <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-lg border order-last sm:order-none">
-                  <Button
-                    onClick={() => setCurrentGenerationIndex(Math.max(0, currentGenerationIndex - 1))}
-                    disabled={currentGenerationIndex === 0}
-                    size="sm"
-                    variant="outline"
-                    className="px-3 py-1 h-8"
-                  >
-                    ←
-                  </Button>
-                  <span className="text-sm font-medium px-2">
-                    {currentGenerationIndex + 1} / {generationHistory.length}
-                  </span>
-                  <Button
-                    onClick={() => setCurrentGenerationIndex(Math.min(generationHistory.length - 1, currentGenerationIndex + 1))}
-                    disabled={currentGenerationIndex === generationHistory.length - 1}
-                    size="sm"
-                    variant="outline"
-                    className="px-3 py-1 h-8"
-                  >
-                    →
-                  </Button>
-                </div>
-              )}
-              <Button onClick={downloadAll} className="bg-wb-purple hover:bg-wb-purple-dark" size="sm">
-                <Download className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Скачать все</span>
-                <span className="sm:hidden">Все</span>
+              <Button
+                onClick={downloadAll}
+                variant="outline"
+                className="shrink-0"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Скачать все
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {/* Desktop view */}
-            <div className="hidden sm:grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
-              {generatedImages.map((imageUrl, index) => (
-                <div key={index} className="relative group">
+            <div className="grid gap-4">
+              {generatedImages.map((image, index) => (
+                <div key={image.id} className="flex items-center gap-4 p-4 border rounded-lg bg-muted/30">
                   <img
-                    src={imageUrl}
+                    src={image.url}
                     alt={`Generated card ${index + 1}`}
-                    className="w-full aspect-[3/4] object-cover rounded-lg border"
+                    className="w-16 h-20 object-cover rounded-md border"
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-2">
-                     <Button size="sm" className="bg-wb-purple hover:bg-wb-purple-dark" onClick={() => downloadSingle(index)}>
-                       <Download className="w-4 h-4 mr-2" />
-                       Скачать
-                     </Button>
-                     <Button 
-                       size="sm" 
-                       variant="outline" 
-                       onClick={() => regenerateSingle(index)}
-                       disabled={regeneratingIndex === index}
-                       className="bg-white/20 text-white border-white/30 hover:bg-white/30 hover:border-white/50 disabled:bg-white/10"
-                     >
-                       {regeneratingIndex === index ? (
-                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                       ) : (
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                       )}
-                       Сгенерировать заново
-                     </Button>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-sm truncate">{image.stage}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {CARD_STAGES[image.stageIndex]?.description}
+                    </p>
                   </div>
-                  <Badge className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-wb-purple text-xs">
-                    {CARD_STAGES[index]?.name}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile view */}
-            <div className="sm:hidden space-y-4">
-              {generatedImages.map((imageUrl, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={imageUrl}
-                    alt={`Generated card ${index + 1}`}
-                    className="w-full aspect-[3/4] object-cover rounded-lg border"
-                  />
-                  <Badge className="absolute top-2 left-2 bg-wb-purple text-xs">
-                    {CARD_STAGES[index]?.name}
-                  </Badge>
-                   <div className="flex gap-2 mt-3">
-                     <Button 
-                       size="sm" 
-                       className="bg-wb-purple hover:bg-wb-purple-dark"
-                       onClick={() => downloadSingle(index)}
-                     >
-                       <Download className="w-4 h-4" />
-                     </Button>
-                     <Button 
-                       size="sm" 
-                       variant="outline" 
-                       className="flex-1"
-                       onClick={() => regenerateSingle(index)}
-                       disabled={regeneratingIndex === index}
-                     >
-                       {regeneratingIndex === index ? (
-                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                       ) : (
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                       )}
-                       Перегенерировать
-                     </Button>
-                   </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => downloadSingle(index)}
+                  >
+                    <Download className="w-3 h-3 mr-1" />
+                    Скачать
+                  </Button>
                 </div>
               ))}
             </div>
@@ -560,62 +534,38 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <CardContent className="pt-6">
           <Button 
             onClick={simulateGeneration}
-            disabled={!canGenerate() || generating}
-            className={generatedImages.length > 0 ? 
-              "w-full bg-wb-purple hover:bg-wb-purple-dark hidden sm:flex" : 
-              "w-full bg-wb-purple hover:bg-wb-purple-dark"
-            }
+            disabled={!canGenerate()}
+            className="w-full bg-wb-purple hover:bg-wb-purple-dark"
             size="lg"
           >
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                <span className="hidden sm:inline">Генерирую... (это может занять несколько минут)</span>
-                <span className="sm:hidden">Генерирую...</span>
+                <span className="hidden sm:inline">Генерация... (выполняется в фоне)</span>
+                <span className="sm:hidden">Генерация...</span>
               </>
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 <span className="hidden sm:inline">
-                  {generatedImages.length > 0 ? 'Сгенерировать еще варианты' : 'Сгенерировать карточки'}
+                  {generatedImages.length > 0 ? 'Сгенерировать новый комплект' : 'Сгенерировать карточки'}
                 </span>
                 <span className="sm:hidden">
-                  {generatedImages.length > 0 ? 'Еще варианты' : 'Генерация'}
+                  {generatedImages.length > 0 ? 'Новый комплект' : 'Генерация'}
                 </span>
               </>
             )}
           </Button>
           
-          {/* Mobile button for regenerate */}
-          {generatedImages.length > 0 && (
-            <Button 
-              onClick={simulateGeneration}
-              disabled={!canGenerate() || generating}
-              className="w-full bg-wb-purple hover:bg-wb-purple-dark sm:hidden mt-2"
-              size="lg"
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Генерирую...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Еще варианты
-                </>
-              )}
-            </Button>
-          )}
           <p className="text-center text-sm text-muted-foreground mt-3">
             Стоимость: <strong>6 токенов</strong> за комплект из 6 изображений
           </p>
           
-          {generatedImages.length > 0 && (
-            <Alert className="mt-4 border-wb-purple/20 bg-wb-purple/5">
-              <Zap className="h-4 w-4 text-wb-purple" />
-              <AlertDescription>
-                <strong>Перегенерация одного изображения = 1 токен</strong>
+          {!canGenerate() && !generating && (
+            <Alert className="mt-4 border-amber-200 bg-amber-50">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <strong>{getGuardMessage()}</strong>
               </AlertDescription>
             </Alert>
           )}
@@ -624,8 +574,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             <Alert className="mt-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Важно:</strong> Генерация карточек может занять несколько минут. 
-                Пожалуйста, не закрывайте страницу и не перезагружайте её.
+                <strong>Важно:</strong> Генерация выполняется в фоне. Вы можете закрыть эту страницу - 
+                уведомление о завершении придет автоматически.
               </AlertDescription>
             </Alert>
           )}

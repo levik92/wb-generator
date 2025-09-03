@@ -53,6 +53,122 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_jobs: {
+        Row: {
+          category: string
+          completed_at: string | null
+          completed_cards: number | null
+          created_at: string | null
+          description: string
+          error_message: string | null
+          id: string
+          product_images: Json | null
+          product_name: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["job_status"] | null
+          tokens_cost: number | null
+          total_cards: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          completed_at?: string | null
+          completed_cards?: number | null
+          created_at?: string | null
+          description: string
+          error_message?: string | null
+          id?: string
+          product_images?: Json | null
+          product_name: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_status"] | null
+          tokens_cost?: number | null
+          total_cards?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          completed_cards?: number | null
+          created_at?: string | null
+          description?: string
+          error_message?: string | null
+          id?: string
+          product_images?: Json | null
+          product_name?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_status"] | null
+          tokens_cost?: number | null
+          total_cards?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generation_tasks: {
+        Row: {
+          card_index: number
+          card_type: string
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          job_id: string
+          last_error: string | null
+          prompt: string | null
+          retry_after: number | null
+          retry_count: number | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["task_status"] | null
+          storage_path: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          card_index: number
+          card_type: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          job_id: string
+          last_error?: string | null
+          prompt?: string | null
+          retry_after?: number | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          storage_path?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          card_index?: number
+          card_type?: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          job_id?: string
+          last_error?: string | null
+          prompt?: string | null
+          retry_after?: number | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          storage_path?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_tasks_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generations: {
         Row: {
           category: string | null
@@ -511,9 +627,20 @@ export type Database = {
         Args: { tokens_amount: number; user_id_param: string }
         Returns: boolean
       }
+      update_job_progress: {
+        Args: { job_id_param: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
+      job_status: "pending" | "processing" | "completed" | "failed"
+      task_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "failed"
+        | "retrying"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -642,6 +769,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      job_status: ["pending", "processing", "completed", "failed"],
+      task_status: ["pending", "processing", "completed", "failed", "retrying"],
     },
   },
 } as const
