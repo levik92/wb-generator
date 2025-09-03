@@ -32,7 +32,8 @@ serve(async (req) => {
       category, 
       description, 
       userId, 
-      productImages = []
+      productImages = [],
+      selectedCards = [0, 1, 2, 3, 4, 5] // По умолчанию все карточки
     } = requestBody;
 
     // Validate input
@@ -62,7 +63,7 @@ serve(async (req) => {
       });
     }
 
-    const tokensRequired = 6;
+    const tokensRequired = selectedCards.length;
     if (profile.tokens_balance < tokensRequired) {
       return new Response(JSON.stringify({
         error: 'Insufficient tokens',
@@ -100,7 +101,7 @@ serve(async (req) => {
         description: description,
         product_images: productImages,
         status: 'pending',
-        total_cards: 6,
+        total_cards: selectedCards.length,
         tokens_cost: tokensRequired
       })
       .select()
@@ -124,11 +125,11 @@ serve(async (req) => {
       });
     }
 
-    // Create individual tasks for each card
-    const tasks = CARD_STAGES.map((stage, index) => ({
+    // Create individual tasks for selected cards only
+    const tasks = selectedCards.map((cardIndex) => ({
       job_id: job.id,
-      card_index: index,
-      card_type: stage.key,
+      card_index: cardIndex,
+      card_type: CARD_STAGES[cardIndex].key,
       status: 'pending'
     }));
 

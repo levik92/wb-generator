@@ -150,6 +150,41 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </p>
       </div>
 
+      {/* Support Block */}
+      <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-200/30">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+              <Headphones className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                Поддержка
+              </CardTitle>
+              <CardDescription className="text-blue-600/80">
+                Нужна помощь? Мы всегда готовы помочь!
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+            asChild
+          >
+            <a 
+              href="https://t.me/support_wbgen" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Написать в поддержку
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Профиль</CardTitle>

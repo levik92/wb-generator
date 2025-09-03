@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2 } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -40,6 +41,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedCards, setSelectedCards] = useState<number[]>([0]); // По умолчанию выбрана только главная
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
@@ -51,10 +53,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
-    if (uploadedFiles.length + files.length > 10) {
+    if (uploadedFiles.length + files.length > 3) {
       toast({
         title: "Слишком много файлов",
-        description: "Максимум 10 изображений",
+        description: "Максимум 3 изображения товара",
         variant: "destructive",
       });
       return;
@@ -67,22 +69,38 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
+    const tokensNeeded = selectedCards.length;
     return files.length > 0 && 
            productName.trim() && 
            category && 
            description.trim() && 
-           profile.tokens_balance >= 6 && 
+           selectedCards.length > 0 &&
+           profile.tokens_balance >= tokensNeeded && 
            !generating;
   };
 
   const getGuardMessage = () => {
+    const tokensNeeded = selectedCards.length;
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
     if (!productName.trim()) return "Введите название товара";
     if (!category) return "Выберите категорию товара";
     if (!description.trim()) return "Добавьте описание товара";
-    if (profile.tokens_balance < 6) return "Недостаточно токенов (нужно 6)";
+    if (selectedCards.length === 0) return "Выберите хотя бы один тип карточки";
+    if (profile.tokens_balance < tokensNeeded) return `Недостаточно токенов (нужно ${tokensNeeded})`;
     if (generating) return "Генерация уже выполняется";
     return null;
+  };
+
+  const handleCardToggle = (cardIndex: number) => {
+    setSelectedCards(prev => {
+      if (prev.includes(cardIndex)) {
+        // Не позволяем убрать все карточки
+        if (prev.length === 1) return prev;
+        return prev.filter(i => i !== cardIndex);
+      } else {
+        return [...prev, cardIndex].sort((a, b) => a - b);
+      }
+    });
   };
 
   const startJobPolling = (jobId: string) => {
@@ -117,7 +135,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           const failedTasks = job.generation_tasks?.filter((t: any) => t.status === 'failed') || [];
           const retryingTasks = job.generation_tasks?.filter((t: any) => t.status === 'retrying') || [];
           
-          const progressPercent = (completedTasks.length / job.total_cards) * 100;
+          const progressPercent = (completedTasks.length / selectedCards.length) * 100;
           
           setProgress(progressPercent);
           setCurrentStage(completedTasks.length);
@@ -209,7 +227,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           category,
           description,
           userId: profile.id,
-          productImages: productImagesData
+          productImages: productImagesData,
+          selectedCards: selectedCards
         }
       });
 
@@ -374,7 +393,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             Изображения товара
           </CardTitle>
           <CardDescription>
-            Загрузите фотографии вашего товара (максимум 10 изображений)
+            Загрузите фотографии вашего товара (максимум 3 изображения)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -386,7 +405,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   <p className="mb-2 text-sm text-muted-foreground">
                     <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
                   </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, JPEG (МАКС. 10MB)</p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, JPEG (МАКС. 3 изображения)</p>
                 </div>
                 <input
                   type="file"
@@ -474,6 +493,50 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         </CardContent>
       </Card>
 
+      {/* Card Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            Выбор карточек для генерации
+          </CardTitle>
+          <CardDescription>
+            Выберите какие типы карточек вам нужны. Стоимость: {selectedCards.length} {selectedCards.length === 1 ? 'токен' : selectedCards.length < 5 ? 'токена' : 'токенов'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {CARD_STAGES.map((stage, index) => (
+              <div 
+                key={index} 
+                className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                  selectedCards.includes(index) 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border hover:border-muted-foreground/50'
+                }`}
+                onClick={() => handleCardToggle(index)}
+              >
+                <div className="flex items-start gap-3">
+                  <Checkbox 
+                    checked={selectedCards.includes(index)}
+                    onChange={() => handleCardToggle(index)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm mb-1">{stage.name}</h4>
+                    <p className="text-xs text-muted-foreground">{stage.description}</p>
+                    {index === 0 && (
+                      <Badge variant="secondary" className="text-xs mt-2">
+                        Рекомендуется
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Progress */}
       {generating && (
         <Card className="bg-primary/5 border-primary/20">
@@ -495,7 +558,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Прогресс: {currentStage} из 6 карточек</span>
+                  <span>Прогресс: {currentStage} из {selectedCards.length} карточек</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
                 <Progress value={progress} className="w-full" />
@@ -530,7 +593,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Images className="w-4 h-4" />
-                  Готовые карточки ({generatedImages.length}/6)
+                  Готовые карточки ({generatedImages.length}/{selectedCards.length})
                 </CardTitle>
                 <CardDescription>
                   Ваши сгенерированные карточки готовы к скачиванию
@@ -595,7 +658,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               <>
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 <span className="hidden sm:inline">
-                  {generatedImages.length > 0 ? 'Сгенерировать новый комплект' : 'Сгенерировать карточки'}
+                  Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'карточку' : selectedCards.length < 5 ? 'карточки' : 'карточек'} ({selectedCards.length} {selectedCards.length === 1 ? 'токен' : selectedCards.length < 5 ? 'токена' : 'токенов'})
                 </span>
                 <span className="sm:hidden">
                   {generatedImages.length > 0 ? 'Новый комплект' : 'Генерация'}
@@ -605,7 +668,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </Button>
           
           <p className="text-center text-sm text-muted-foreground mt-3">
-            Стоимость: <strong>6 токенов</strong> за комплект из 6 изображений
+            Стоимость: <strong>{selectedCards.length} {selectedCards.length === 1 ? 'токен' : selectedCards.length < 5 ? 'токена' : 'токенов'}</strong> за {selectedCards.length} изображений
           </p>
           
           {!canGenerate() && !generating && (
@@ -619,10 +682,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           {generating && (
             <Alert className="mt-4">
-              <AlertCircle className="h-4 w-4" />
+              <Info className="h-4 w-4" />
               <AlertDescription>
-                <strong>Важно:</strong> Генерация выполняется в фоне. Вы можете закрыть эту страницу - 
-                уведомление о завершении придет автоматически.
+                Генерация выполняется в фоновом режиме. Вы можете закрыть эту страницу - 
+                результат сохранится в вашем аккаунте.
               </AlertDescription>
             </Alert>
           )}
