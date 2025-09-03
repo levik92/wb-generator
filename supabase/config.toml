@@ -24,13 +24,7 @@ pop3_port = 54326
 [functions.generate-description]
 verify_jwt = true
 
-[functions.generate-cards]
-verify_jwt = true
-
 [functions.regenerate-single-card]
-verify_jwt = true
-
-[functions.generate-product-cards]
 verify_jwt = true
 
 [functions.create-generation-job]

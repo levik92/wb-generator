@@ -348,10 +348,24 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
     }
 
     const imageData = await imageResponse.json();
-    const imageUrl = imageData.data[0].url;
 
-    // Download and upload to Supabase Storage
-    const imageBuffer = await fetch(imageUrl).then(r => r.arrayBuffer());
+    // For gpt-image-1, data comes as base64
+    let imageBuffer: ArrayBuffer;
+    if (imageData.data[0].b64_json) {
+      // Decode base64 to buffer
+      const base64Data = imageData.data[0].b64_json;
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      imageBuffer = bytes.buffer;
+    } else if (imageData.data[0].url) {
+      // Fallback for URL-based response
+      imageBuffer = await fetch(imageData.data[0].url).then(r => r.arrayBuffer());
+    } else {
+      throw new Error('No image data received from OpenAI');
+    }
     const fileName = `${job.id}/${task.card_index}_${task.card_type}.png`;
     
     const { error: uploadError } = await supabase.storage
