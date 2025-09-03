@@ -161,13 +161,11 @@ serve(async (req) => {
     }
 
     // Start background processing
-    EdgeRuntime.waitUntil(
-      supabase.functions.invoke('process-generation-tasks', {
-        body: { jobId: job.id }
-      }).catch(error => {
-        console.error('Failed to start background processing:', error);
-      })
-    );
+    supabase.functions.invoke('process-generation-tasks', {
+      body: { jobId: job.id }
+    }).catch(error => {
+      console.error('Failed to start background processing:', error);
+    });
 
     // Create notification
     await supabase

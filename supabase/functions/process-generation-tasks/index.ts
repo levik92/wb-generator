@@ -194,7 +194,9 @@ serve(async (req) => {
       .eq('id', jobId);
 
     // Process tasks in background
-    EdgeRuntime.waitUntil(processTasks(supabase, openAIApiKey, job));
+    processTasks(supabase, openAIApiKey, job).catch(error => {
+      console.error('Background processing error:', error);
+    });
 
     return new Response(JSON.stringify({
       success: true,
@@ -352,14 +354,25 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
     // For gpt-image-1, data comes as base64
     let imageBuffer: ArrayBuffer;
     if (imageData.data[0].b64_json) {
-      // Decode base64 to buffer
+      // Decode base64 to buffer using Deno's TextEncoder/Decoder
       const base64Data = imageData.data[0].b64_json;
-      const binaryString = atob(base64Data);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      // Remove data URL prefix if present
+      const cleanBase64 = base64Data.replace(/^data:image\/[a-z]+;base64,/, '');
+      
+      try {
+        // Use Deno's built-in base64 decoding
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        const binaryString = atob(cleanBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        imageBuffer = bytes.buffer;
+      } catch (decodeError) {
+        console.error('Base64 decode error:', decodeError);
+        throw new Error(`Failed to decode base64 image: ${decodeError.message}`);
       }
-      imageBuffer = bytes.buffer;
     } else if (imageData.data[0].url) {
       // Fallback for URL-based response
       imageBuffer = await fetch(imageData.data[0].url).then(r => r.arrayBuffer());
