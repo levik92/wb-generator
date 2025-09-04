@@ -163,13 +163,6 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         </CardContent>
       </Card>
 
-      {/* Guard Messages */}
-      {!canGenerate() && (
-        <Alert className="flex items-start justify-start text-left py-4 border-purple-200 bg-white">
-          <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-purple-600" />
-          <AlertDescription className="ml-3 text-purple-700">{getGuardMessage()}</AlertDescription>
-        </Alert>
-      )}
 
       {/* Input Form */}
       <div className="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2">
@@ -282,6 +275,15 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
             <p className="text-center text-sm text-muted-foreground mt-3">
               Стоимость: <strong>1 токен</strong> за генерацию
             </p>
+            
+            {!canGenerate() && (
+              <Alert className="mt-4 border-amber-200 bg-amber-50">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800">
+                  <strong>{getGuardMessage()}</strong>
+                </AlertDescription>
+              </Alert>
+            )}
             
             {generating && (
               <Alert className="mt-4">

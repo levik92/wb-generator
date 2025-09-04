@@ -28,12 +28,12 @@ interface GenerateCardsProps {
 }
 
 const CARD_STAGES = [
-  { name: "Главная", key: "cover", description: "Главное фото товара" },
-  { name: "Образ жизни", key: "lifestyle", description: "Товар в использовании" },
-  { name: "Макро", key: "macro", description: "Макро-съемка деталей" },
-  { name: "До/После", key: "beforeAfter", description: "Сравнение результатов" },
-  { name: "Комплект", key: "bundle", description: "Товар в комплекте" },
-  { name: "Гарантия", key: "guarantee", description: "Гарантии и доверие" }
+  { name: "Главная", key: "cover", description: "Основная карточка товара на белом фоне с четким изображением продукта" },
+  { name: "Образ жизни", key: "lifestyle", description: "Товар в реальной обстановке использования, показывает как продукт интегрируется в жизнь" },
+  { name: "Макро", key: "macro", description: "Детальная съемка материалов, текстур и особенностей товара крупным планом" },
+  { name: "До/После", key: "beforeAfter", description: "Демонстрация результата использования товара в формате сравнения" },
+  { name: "Комплект", key: "bundle", description: "Показывает товар в составе комплекта или с дополнительными аксессуарами" },
+  { name: "Гарантия", key: "guarantee", description: "Карточка, подчеркивающая качество, надежность и гарантии производителя" }
 ];
 
 export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) => {
@@ -418,7 +418,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             Изображения товара
           </CardTitle>
           <CardDescription>
-            Загрузите качественные фотографии вашего товара с разных ракурсов. Лучше всего использовать изображения на белом фоне или в естественной обстановке (максимум 3 изображения)
+            Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения)
           </CardDescription>
         </CardHeader>
         <CardContent>
