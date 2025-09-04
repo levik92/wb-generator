@@ -329,7 +329,7 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
       .update({ prompt })
       .eq('id', task.id);
 
-    // Generate image with OpenAI
+    // Generate image with OpenAI DALL-E-3
     console.log(`Calling OpenAI API for task ${task.id}`);
     
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
@@ -343,7 +343,8 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
         prompt: prompt,
         n: 1,
         size: '1024x1792',
-        quality: 'hd'
+        quality: 'hd',
+        style: 'natural'
       }),
     });
 

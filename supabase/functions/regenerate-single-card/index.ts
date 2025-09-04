@@ -203,7 +203,7 @@ serve(async (req) => {
     const promptTemplate = CARD_PROMPTS[cardType];
     const prompt = promptTemplate(sanitizedProductName, sanitizedCategory, sanitizedDescription);
 
-    // Generate image with OpenAI
+    // Generate image with OpenAI DALL-E-3
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -215,7 +215,8 @@ serve(async (req) => {
         prompt: prompt,
         n: 1,
         size: '1024x1792',
-        quality: 'hd'
+        quality: 'hd',
+        style: 'natural'
       }),
     });
 
