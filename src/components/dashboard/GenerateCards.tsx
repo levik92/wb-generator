@@ -487,7 +487,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           <div className="space-y-2">
             <Label htmlFor="category">Категория</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
+              <SelectTrigger className="border-2 border-border/60">
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
               <SelectContent>
