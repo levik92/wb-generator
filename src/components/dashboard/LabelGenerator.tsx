@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import JsBarcode from 'jsbarcode';
 import QRCodeGenerator from 'qrcode';
 import WBLabelMaker from './WBLabelMaker';
+import WBLabelMakerAlt from './WBLabelMakerAlt';
 
 // Types based on the provided HTML/JS code
 interface LabelState {
@@ -464,293 +465,78 @@ export default function LabelGenerator() {
         </TabsContent>
 
         <TabsContent value="wb" className="space-y-4 sm:space-y-6">
-          <div dangerouslySetInnerHTML={{
-            __html: `
-<!-- WB Barcode Generator – compact fields + grey cards -->
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+          <WBLabelMakerAlt />
+        </TabsContent>
 
-<div id="wb-gen-box">
-  <div class="wb-grid">
-    <!-- LEFT: form -->
-    <div class="wb-card wb-form">
-      <label class="wb-label req">Штрих-код (Code-128)*</label>
-      <input id="f_code_wb" class="wb-input" placeholder="Введите штрихкод" value="ABC-abc-1234"/>
-      
-      <label class="wb-label">Наименование</label>
-      <input id="f_title_wb" class="wb-input" placeholder="Введите наименование товара"/>
-      
-      <label class="wb-label">Артикул</label>
-      <input id="f_sku_wb" class="wb-input" placeholder="Введите артикул товара"/>
-      
-      <label class="wb-label">Формат печати</label>
-      <div class="wb-select-wrap">
-        <select id="f_format_wb" class="wb-select">
-          <option value="a4" selected>A4 (лист)</option>
-          <option value="58x40">58×40 мм (термоэтикетка)</option>
-        </select>
-        <span class="wb-select-arrow">▾</span>
-      </div>
-      
-      <div class="wb-row">
-        <div class="wb-range">
-          <div class="wb-range-top">
-            <span>Толщина штрихов</span><span id="val_width_wb">3</span>
-          </div>
-          <input id="r_width_wb" type="range" min="1" max="5" step="1" value="3" />
-        </div>
-        <div class="wb-range">
-          <div class="wb-range-top">
-            <span>Высота штрих-кода</span><span id="val_hpct_wb">45%</span>
-          </div>
-          <input id="r_hpct_wb" type="range" min="20" max="80" step="1" value="45" />
-        </div>
-      </div>
-      
-      <button id="btn_download_wb" class="wb-btn wb-primary">
-        <svg class="wb-btn-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7,10 12,15 17,10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Скачать PNG
-      </button>
-      
-      <p class="wb-note">Для термопринтера выбирайте 58×40 мм и печатайте без масштабирования (Actual size).</p>
-    </div>
-    
-    <!-- RIGHT: preview -->
-    <div class="wb-card wb-preview">
-      <div class="wb-prev-head">
-        <div class="wb-prev-title">Превью макета</div>
-        <div id="badge_wb" class="wb-badge">A4</div>
-      </div>
-      <div class="wb-prev-stage">
-        <div class="wb-stage-in">
-          <canvas id="preview_wb" aria-label="Предпросмотр"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  /* base / palette */
-  #wb-gen-box, #wb-gen-box *{box-sizing:border-box}
-  #wb-gen-box{
-    --bg:#ffffff;           /* фон блока */
-    --card:#f5f6f8;         /* светло-серые подложки */
-    --line:#e3e6ea;
-    --muted:#7e8a8a;
-    --text:#222;
-    --green:#20a04b; --green-h:#199243;
-    --radius:14px; --shadow:0 8px 28px rgba(0,0,0,.06);
-    font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
-    background:var(--bg); padding:0; border-radius:var(--radius);
-  }
-  
-  /* layout */
-  #wb-gen-box .wb-grid{display:grid;grid-template-columns:minmax(320px,520px) 1fr;gap:18px}
-  #wb-gen-box .wb-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden}
-  
-  /* compact fields */
-  #wb-gen-box .wb-input,#wb-gen-box .wb-select,#wb-gen-box .wb-btn{width:100%;max-width:520px} /* ограничение ширины */
-  #wb-gen-box .wb-input,#wb-gen-box .wb-select{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;outline:none;background:#fff}
-  #wb-gen-box .wb-input:focus,#wb-gen-box .wb-select:focus{border-color:#cfd7d6;box-shadow:0 0 0 2px rgba(32,160,75,.07)}
-  #wb-gen-box .wb-label{display:block;font-weight:600;margin:10px 2px 6px}
-  #wb-gen-box .wb-label.req::after{content:" *";color:#d33}
-  #wb-gen-box .wb-select-wrap{position:relative;max-width:520px}
-  #wb-gen-box .wb-select{appearance:none}
-  #wb-gen-box .wb-select-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)}
-  #wb-gen-box .wb-btn{margin-top:14px;display:inline-flex;gap:8px;align-items:center;justify-content:center;border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.15s}
-  #wb-gen-box .wb-primary{background:var(--green);color:#fff}#wb-gen-box .wb-primary:hover{background:var(--green-h)}
-  #wb-gen-box .wb-btn-ico{font-size:16px}
-  #wb-gen-box .wb-note{margin:10px 2px 0;color:var(--muted);font-size:13px}
-  #wb-gen-box .wb-row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px;max-width:520px}
-  
-  /* ranges */
-  #wb-gen-box .wb-range{display:flex;flex-direction:column;gap:8px}
-  #wb-gen-box .wb-range-top{display:flex;justify-content:space-between;align-items:center;font-weight:600}
-  #wb-gen-box .wb-range input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;width:100%}
-  #wb-gen-box .wb-range input[type=range]:focus{outline:none}
-  #wb-gen-box .wb-range input[type=range]::-webkit-slider-runnable-track{height:8px;background:#eef2f1;border-radius:999px;border:1px solid var(--line)}
-  #wb-gen-box .wb-range input[type=range]::-moz-range-track{height:8px;background:#eef2f1;border-radius:999px;border:1px solid var(--line)}
-  #wb-gen-box .wb-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-  #wb-gen-box .wb-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-  #wb-gen-box .wb-range input[type=range]::-moz-range-progress{height:8px;background:rgba(32,160,75,.25);border-radius:999px}
-  
-  /* preview */
-  #wb-gen-box .wb-preview{display:flex;flex-direction:column;gap:14px}
-  #wb-gen-box .wb-prev-head{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 0}
-  #wb-gen-box .wb-prev-title{font-weight:700;font-size:20px}
-  #wb-gen-box .wb-badge{font-weight:700;font-size:12px;color:#6c757d;border:1px solid var(--line);padding:4px 8px;border-radius:999px;background:#fff}
-  #wb-gen-box .wb-prev-stage{flex:1;border:1px dashed #dcdedd;border-radius:12px;padding:14px;background:var(--card);min-height:360px}
-  #wb-gen-box .wb-stage-in{background:#fff;border-radius:10px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:auto}
-  #wb-gen-box #preview_wb{display:block;max-width:100%;height:auto}
-  
-  /* responsive */
-  @media (max-width:980px){
-    #wb-gen-box .wb-grid{grid-template-columns:1fr}
-    #wb-gen-box .wb-input,#wb-gen-box .wb-select,#wb-gen-box .wb-btn,#wb-gen-box .wb-row,#wb-gen-box .wb-select-wrap{max-width:100%} /* по мобиле на всю ширину карточки */
-    #wb-gen-box .wb-prev-stage{min-height:420px}
-  }
-</style>
-
-<script>
-(function(){
-  const $ = (s,scope=document)=>scope.querySelector(s);
-  
-  const elCode=$('#f_code_wb'), elTitle=$('#f_title_wb'), elSku=$('#f_sku_wb'),
-        elFormat=$('#f_format_wb'), elPrev=$('#preview_wb'), elBadge=$('#badge_wb'),
-        rWidth=$('#r_width_wb'), rHPct=$('#r_hpct_wb'),
-        vWidth=$('#val_width_wb'), vHPct=$('#val_hpct_wb'),
-        btnDownload=$('#btn_download_wb');
-  
-  const PRESETS = {
-    a4:   { w_mm:210, h_mm:297, dpi:300, badge:'A4',
-            margins_mm:{top:15,left:15,right:15,bottom:25},
-            titlePx:36, skuPx:28 },
-    '58x40': { w_mm:58, h_mm:40, dpi:203, badge:'58×40',
-               margins_mm:{top:3,left:3,right:3,bottom:6},
-               titlePx:16, skuPx:13 }
-  };
-  const mm2px = (mm, dpi)=> Math.round(mm/25.4*dpi);
-  
-  function render(){
-    vWidth.textContent = rWidth.value;
-    vHPct.textContent  = rHPct.value + '%';
-    
-    const fmt = PRESETS[elFormat.value];
-    elBadge.textContent = fmt.badge;
-    
-    const W = mm2px(fmt.w_mm, fmt.dpi);
-    const H = mm2px(fmt.h_mm, fmt.dpi);
-    
-    const off = document.createElement('canvas');
-    off.width=W; off.height=H;
-    const ctx = off.getContext('2d');
-    
-    ctx.fillStyle='#ffffff';
-    ctx.fillRect(0,0,W,H);
-    
-    const ML=mm2px(fmt.margins_mm.left, fmt.dpi);
-    const MR=mm2px(fmt.margins_mm.right, fmt.dpi);
-    const MT=mm2px(fmt.margins_mm.top, fmt.dpi);
-    const MB=mm2px(fmt.margins_mm.bottom, fmt.dpi);
-    const innerW = W-ML-MR;
-    const usableH = H-MT-MB;
-    
-    // title measure
-    let titleLines=[], titleH=0, skuH=0;
-    if(elTitle.value.trim()){
-      ctx.font = \`700 \${fmt.titlePx}px Montserrat, Arial, sans-serif\`;
-      const lineH = Math.round(fmt.titlePx*1.25);
-      const words = elTitle.value.trim().split(/\\s+/);
-      let line='';
-      for (let w of words){
-        const t = line? (line+' '+w) : w;
-        if(ctx.measureText(t).width > innerW && line){ titleLines.push(line); line=w; }
-        else line=t;
-      }
-      if(line) titleLines.push(line);
-      titleH = lineH*titleLines.length + Math.round(lineH*0.4);
-    }
-    if(elSku.value.trim()){ skuH = Math.round(fmt.skuPx*1.2); }
-    
-    const barHeight = Math.max(60, Math.round(usableH * (Number(rHPct.value)/100)));
-    const barLineW  = Number(rWidth.value);
-    
-    const bCanvas = document.createElement('canvas');
-    bCanvas.width  = innerW;
-    bCanvas.height = barHeight;
-    
-    try{
-      JsBarcode(bCanvas, elCode.value.trim() || ' ', {
-        format:'CODE128',
-        width: barLineW,
-        height: Math.max(60, barHeight-60),
-        margin: 10,
-        displayValue: true,
-        /* не задаём font — JsBarcode оставит дефолтный для подписи */
-        fontSize: Math.max(18, Math.round(barHeight*0.13)),
-        textMargin: 8,
-        lineColor:"#000"
-      });
-    }catch(e){
-      ctx.fillStyle='#b00020';
-      ctx.font = \`700 \${fmt.skuPx}px Montserrat, Arial, sans-serif\`;
-      ctx.textAlign='center';
-      ctx.fillText('Ошибка: ' + e.message, ML+innerW/2, MT + fmt.skuPx*1.2);
-    }
-    
-    // Центровка всего блока по вертикали в границах печати
-    const totalH = titleH + skuH + barHeight;
-    let y = MT + Math.max(0, Math.floor((usableH - totalH)/2));
-    
-    // draw title
-    if(titleLines.length){
-      ctx.fillStyle='#111';
-      ctx.font = \`700 \${fmt.titlePx}px Montserrat, Arial, sans-serif\`;
-      ctx.textAlign='center';
-      const lineH = Math.round(fmt.titlePx*1.25);
-      const cx = ML + innerW/2;
-      titleLines.forEach((ln,i)=> ctx.fillText(ln, cx, y + lineH*(i+1)) );
-      y += lineH*titleLines.length + Math.round(lineH*0.4);
-    }
-    
-    // draw SKU
-    if(elSku.value.trim()){
-      ctx.fillStyle='#333';
-      ctx.font = \`600 \${fmt.skuPx}px Montserrat, Arial, sans-serif\`;
-      ctx.textAlign='center';
-      ctx.fillText(elSku.value.trim(), ML+innerW/2, y + fmt.skuPx*1.2);
-      y += skuH;
-    }
-    
-    // barcode centered horizontally
-    const bx = ML + Math.round((innerW - bCanvas.width)/2);
-    ctx.drawImage(bCanvas, bx, y);
-    
-    // preview scale
-    const box = document.querySelector('#wb-gen-box .wb-stage-in');
-    if (box) {
-      const boxRect = box.getBoundingClientRect();
-      const scale = Math.min(boxRect.width / W, boxRect.height / H, 1) || 1;
-      elPrev.width = Math.round(W*scale);
-      elPrev.height= Math.round(H*scale);
-      const pctx = elPrev.getContext('2d');
-      pctx.imageSmoothingEnabled = true;
-      pctx.imageSmoothingQuality = 'high';
-      pctx.clearRect(0,0,elPrev.width, elPrev.height);
-      pctx.drawImage(off, 0,0, elPrev.width, elPrev.height);
-      
-      elPrev.__fullImage = off;
-    }
-  }
-  
-  function downloadPNG(){
-    const full = elPrev.__fullImage;
-    if(!full) return;
-    const a = document.createElement('a');
-    const fmt = document.querySelector('#f_format_wb').value === 'a4' ? 'A4' : '58x40';
-    a.download = \`barcode_wb_\${fmt}.png\`;
-    a.href = full.toDataURL('image/png', 1.0);
-    a.click();
-  }
-  
-  ['input','change'].forEach(ev=>{
-    ['#f_code_wb','#f_title_wb','#f_sku_wb','#f_format_wb','#r_width_wb','#r_hpct_wb']
-      .map(s=>document.querySelector(s)).forEach(el=> el.addEventListener(ev, render));
-    window.addEventListener('resize', render);
-  });
-  document.querySelector('#btn_download_wb').addEventListener('click', downloadPNG);
-  
-  render();
-})();
-</script>
-            `
-          }} />
+        <TabsContent value="qr" className="space-y-4 sm:space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold">Генератор QR-кодов</CardTitle>
+              <CardDescription>Создавайте QR-коды для любых данных</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="qr-text">Текст или URL</Label>
+                <Textarea
+                  id="qr-text"
+                  placeholder="Введите текст, URL или любые данные для QR-кода..."
+                  value={qrText}
+                  onChange={(e) => setQrText(e.target.value)}
+                  className="min-h-20"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Размер QR-кода: {qrSize[0]}px</Label>
+                  <Slider
+                    value={qrSize}
+                    onValueChange={setQrSize}
+                    max={500}
+                    min={100}
+                    step={50}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div>
+                  <Label>Формат файла</Label>
+                  <Select value={qrFormat} onValueChange={setQrFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PNG">PNG</SelectItem>
+                      <SelectItem value="JPG">JPG</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button onClick={generateQR} className="flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  Сгенерировать QR-код
+                </Button>
+                
+                {qrPreview && (
+                  <Button onClick={downloadQR} variant="outline" className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    Скачать
+                  </Button>
+                )}
+              </div>
+              
+              {qrPreview && (
+                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                  <h3 className="font-medium mb-2">Превью QR-кода:</h3>
+                  <div className="flex justify-center">
+                    <img src={qrPreview} alt="Generated QR Code" className="border" />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
