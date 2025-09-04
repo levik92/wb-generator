@@ -53,6 +53,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
+    
+    // Validate file count
     if (uploadedFiles.length + files.length > 3) {
       toast({
         title: "Слишком много файлов",
@@ -61,6 +63,33 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       });
       return;
     }
+    
+    // Validate file sizes (max 10MB each)
+    const maxSizeBytes = 10 * 1024 * 1024;
+    const oversizedFiles = uploadedFiles.filter(file => file.size > maxSizeBytes);
+    
+    if (oversizedFiles.length > 0) {
+      toast({
+        title: "Файлы слишком большие",
+        description: "Максимальный размер файла: 10 МБ",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate file types
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const invalidFiles = uploadedFiles.filter(file => !allowedTypes.includes(file.type));
+    
+    if (invalidFiles.length > 0) {
+      toast({
+        title: "Неподдерживаемый формат",
+        description: "Поддерживаются только JPG, PNG и WebP файлы",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setFiles(prev => [...prev, ...uploadedFiles]);
   };
 
@@ -104,6 +133,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const startJobPolling = (jobId: string) => {
+    // Clean up existing polling
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+    
     setCurrentJobId(jobId);
     
     const pollJob = async () => {
@@ -166,58 +201,55 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             setGeneratedImages(images);
           }
 
-          // Check if job is completed
-          if (job.status === 'completed') {
+          // Check if job is completed or failed
+          if (job.status === 'completed' || job.status === 'failed') {
             setGenerating(false);
-            toast({
-              title: "Генерация завершена!",
-              description: "Все карточки готовы для скачивания",
-            });
             
-            // Save to history
-            try {
-              await supabase.from('generations').insert({
-                user_id: profile.id,
-                generation_type: 'cards',
-                input_data: {
-                  productName,
-                  category,
-                  description,
-                  selectedCards: selectedCards.map(index => CARD_STAGES[index].name)
-                },
-                output_data: {
-                  images: completedTasks.map((task: any) => ({
-                    url: task.image_url,
-                    type: task.card_type,
-                    stage: CARD_STAGES[task.card_index]?.name
-                  }))
-                },
-                tokens_used: selectedCards.length,
-                status: 'completed'
+            if (job.status === 'completed') {
+              toast({
+                title: "Генерация завершена!",
+                description: "Все карточки готовы для скачивания",
               });
-            } catch (error) {
-              console.error('Error saving to history:', error);
+              
+              // Save to history
+              try {
+                await supabase.from('generations').insert({
+                  user_id: profile.id,
+                  generation_type: 'cards',
+                  input_data: {
+                    productName,
+                    category,
+                    description,
+                    selectedCards: selectedCards.map(index => CARD_STAGES[index].name)
+                  },
+                  output_data: {
+                    images: completedTasks.map((task: any) => ({
+                      url: task.image_url,
+                      type: task.card_type,
+                      stage: CARD_STAGES[task.card_index]?.name
+                    }))
+                  },
+                  tokens_used: selectedCards.length,
+                  status: 'completed'
+                });
+              } catch (error) {
+                console.error('Error saving to history:', error);
+              }
+            } else {
+              toast({
+                title: "Ошибка генерации",
+                description: job.error_message || "Генерация не удалась",
+                variant: "destructive",
+              });
             }
             
+            // Clean up polling
             if (pollingInterval) {
               clearInterval(pollingInterval);
               setPollingInterval(null);
             }
             setCurrentJobId(null);
             onTokensUpdate?.();
-          } else if (job.status === 'failed') {
-            setGenerating(false);
-            toast({
-              title: "Ошибка генерации",
-              description: job.error_message || "Генерация не удалась",
-              variant: "destructive",
-            });
-            
-            if (pollingInterval) {
-              clearInterval(pollingInterval);
-              setPollingInterval(null);
-            }
-            setCurrentJobId(null);
           }
         }
       } catch (error) {
@@ -325,11 +357,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     });
   };
 
-  // Cleanup polling on unmount
+  // Cleanup polling on unmount and job completion
   useEffect(() => {
     return () => {
       if (pollingInterval) {
         clearInterval(pollingInterval);
+        setPollingInterval(null);
       }
     };
   }, [pollingInterval]);
@@ -350,11 +383,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         },
         (payload) => {
           console.log('Job update:', payload);
-          // Trigger polling to get updated data with tasks
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
+          // Only restart polling if we don't already have one running
+          if (!pollingInterval) {
+            startJobPolling(currentJobId);
           }
-          startJobPolling(currentJobId);
         }
       )
       .on(
@@ -367,11 +399,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         },
         (payload) => {
           console.log('Task update:', payload);
-          // Trigger polling to get updated data
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
+          // Only restart polling if we don't already have one running
+          if (!pollingInterval) {
+            startJobPolling(currentJobId);
           }
-          startJobPolling(currentJobId);
         }
       )
       .subscribe();
@@ -379,7 +410,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentJobId, pollingInterval]);
+  }, [currentJobId]); // Removed pollingInterval dependency to prevent unnecessary re-subscriptions
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">

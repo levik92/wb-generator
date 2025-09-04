@@ -277,20 +277,8 @@ serve(async (req) => {
       .from('generated-cards')
       .getPublicUrl(fileName);
 
-    // Log the generation
-    await supabase
-      .from('generation_logs')
-      .insert({
-        user_id: userId,
-        product_name: sanitizedProductName,
-        category: sanitizedCategory,
-        description: sanitizedDescription,
-        card_type: cardType,
-        image_url: publicUrl,
-        tokens_spent: 1,
-        generation_type: 'regenerate'
-      });
-
+    // Log the generation - удалено, так как таблицы generation_logs не существует
+    
     // Create notification
     await supabase
       .from('notifications')

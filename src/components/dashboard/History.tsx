@@ -91,22 +91,62 @@ export const History = ({ profile }: HistoryProps) => {
     }
   };
 
-  const downloadGeneration = (generation: Generation) => {
+  const downloadGeneration = async (generation: Generation) => {
     if (generation.generation_type === 'cards') {
-      // Create mock ZIP file download
-      const link = document.createElement('a');
-      link.href = 'data:application/zip;base64,UEsDBAoAAAAAAKRGBjMAAAAAAAAAAAAAAAAJAAAAY2FyZHMuemlwUEsBAhQACgAAAAAAkEYGMwAAAAAAAAAAAAAAAAkAAAAIACAAAAAAAAAAQAAAAAAAAABjYXJkcy56aXBVVAkAA3qHEFl6hxBZdXgLAAEE9QEAAAQUAAAAUEsFBgAAAAABAAEANgAAADIAAAAAAA==';
-      link.download = `cards_${generation.id.slice(0, 8)}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({
-        title: "Скачивание началось",
-        description: "ZIP архив с карточками скачивается",
-      });
+      // Download actual generated images
+      if (generation.output_data?.images && Array.isArray(generation.output_data.images)) {
+        const images = generation.output_data.images;
+        
+        if (images.length === 0) {
+          toast({
+            title: "Нет изображений",
+            description: "В этой генерации нет сохраненных изображений",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Download each image
+        for (let i = 0; i < images.length; i++) {
+          const image = images[i];
+          if (image.url) {
+            try {
+              const response = await fetch(image.url);
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `${generation.input_data?.productName || 'card'}_${image.stage || image.type || (i+1)}.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              window.URL.revokeObjectURL(url);
+              
+              // Small delay between downloads
+              if (i < images.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+            } catch (error) {
+              console.error('Error downloading image:', error);
+            }
+          }
+        }
+        
+        toast({
+          title: "Скачивание завершено",
+          description: `Скачано ${images.length} изображений`,
+        });
+      } else {
+        toast({
+          title: "Ошибка скачивания",
+          description: "Не удалось найти изображения для скачивания",
+          variant: "destructive",
+        });
+      }
     } else {
-      // Create text file download
+      // Download description as text file
       const element = document.createElement('a');
       const file = new Blob([generation.output_data?.description || 'Описание товара'], { type: 'text/plain' });
       element.href = URL.createObjectURL(file);

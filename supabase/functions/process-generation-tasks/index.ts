@@ -184,8 +184,11 @@ serve(async (req) => {
 async function processTasks(supabase: any, openAIApiKey: string, job: any) {
   try {
     console.log(`Starting background processing for job ${job.id}`);
+    
+    const maxProcessingTime = 30 * 60 * 1000; // 30 minutes maximum
+    const startTime = Date.now();
 
-    while (true) {
+    while (Date.now() - startTime < maxProcessingTime) {
       // Get ready tasks
       const now = Math.floor(Date.now() / 1000);
       const { data: tasks, error: tasksError } = await supabase
@@ -203,7 +206,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       }
 
       if (!tasks || tasks.length === 0) {
-        // Check if all tasks are completed
+        // Check if all tasks are completed or failed
         const { data: allTasks, error: allTasksError } = await supabase
           .from('generation_tasks')
           .select('status')
@@ -217,24 +220,43 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
         const pendingTasks = allTasks?.filter(t => 
           t.status === 'pending' || t.status === 'processing' || t.status === 'retrying'
         );
+        
+        const completedTasks = allTasks?.filter(t => t.status === 'completed');
+        const failedTasks = allTasks?.filter(t => t.status === 'failed');
 
         if (!pendingTasks || pendingTasks.length === 0) {
           console.log(`All tasks completed for job ${job.id}`);
+          
+          // Determine final job status
+          const finalStatus = failedTasks && failedTasks.length > 0 && completedTasks && completedTasks.length === 0 ? 'failed' : 'completed';
           
           // Update job status
           await supabase
             .from('generation_jobs')
             .update({ 
-              status: 'completed',
-              completed_at: new Date().toISOString()
+              status: finalStatus,
+              completed_at: new Date().toISOString(),
+              error_message: finalStatus === 'failed' ? 'Some tasks failed' : null
             })
             .eq('id', job.id);
+          
+          // Send completion notification
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: job.user_id,
+              title: finalStatus === 'completed' ? 'Генерация завершена' : 'Генерация завершена с ошибками',
+              message: finalStatus === 'completed' 
+                ? `Генерация "${job.product_name}" успешно завершена. Все карточки готовы.`
+                : `Генерация "${job.product_name}" завершена. Некоторые карточки могли не сгенерироваться.`,
+              type: finalStatus === 'completed' ? 'success' : 'warning'
+            });
           
           break;
         }
 
-        // Wait before checking again
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // Wait before checking again (but not too long to prevent timeout)
+        await new Promise(resolve => setTimeout(resolve, 3000));
         continue;
       }
 
@@ -243,12 +265,38 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       // Process tasks concurrently
       const taskPromises = tasks.map(task => processTask(supabase, openAIApiKey, job, task));
       await Promise.allSettled(taskPromises);
+      
+      // Small delay between batches to prevent overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // Check if we hit the time limit
+    if (Date.now() - startTime >= maxProcessingTime) {
+      console.error(`Processing timeout for job ${job.id}`);
+      await supabase
+        .from('generation_jobs')
+        .update({ 
+          status: 'failed',
+          error_message: 'Processing timeout',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', job.id);
     }
 
     console.log(`Background processing completed for job ${job.id}`);
 
   } catch (error) {
     console.error(`Error in background processing for job ${job.id}:`, error);
+    
+    // Mark job as failed
+    await supabase
+      .from('generation_jobs')
+      .update({ 
+        status: 'failed',
+        error_message: error.message || 'Unknown processing error',
+        completed_at: new Date().toISOString()
+      })
+      .eq('id', job.id);
   }
 }
 
