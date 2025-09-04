@@ -193,12 +193,12 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-wb-purple/10">
                 <User className="mr-2 h-4 w-4" />
                 <span>Профиль</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onSignOut}>
+              <DropdownMenuItem onClick={onSignOut} className="hover:bg-wb-purple/10">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Выйти</span>
               </DropdownMenuItem>
