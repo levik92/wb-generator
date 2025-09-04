@@ -75,27 +75,6 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
 
       setGeneratedText(data.description);
       
-      // Save to history
-      try {
-        await supabase.from('generations').insert({
-          user_id: profile.id,
-          generation_type: 'description',
-          input_data: {
-            productName,
-            category,
-            competitors: competitors,
-            keywords: keywordsList
-          },
-          output_data: {
-            description: data.description
-          },
-          tokens_used: 1,
-          status: 'completed'
-        });
-      } catch (error) {
-        console.error('Error saving to history:', error);
-      }
-      
       // Refresh profile to update token balance
       onTokensUpdate();
       

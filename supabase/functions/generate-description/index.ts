@@ -79,18 +79,19 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check and spend tokens
-    const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
-      user_id_param: userId,
-      tokens_amount: 1
-    });
+    // Check if user has enough tokens before processing
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('tokens_balance')
+      .eq('id', userId)
+      .single();
 
-    if (tokenError) {
-      console.error('Token spending error:', tokenError);
-      throw new Error('Ошибка при списании токенов');
+    if (profileError) {
+      console.error('Error checking user balance:', profileError);
+      throw new Error('Ошибка при проверке баланса токенов');
     }
 
-    if (!tokenResult) {
+    if (!profileData || profileData.tokens_balance < 1) {
       return new Response(JSON.stringify({ 
         error: 'Недостаточно токенов для генерации' 
       }), {
@@ -156,13 +157,6 @@ serve(async (req) => {
       const errorData = await response.json().catch(() => null);
       console.error('OpenAI API error:', response.status, errorData);
       
-      // Refund tokens on API error
-      await supabase.rpc('refund_tokens', {
-        user_id_param: userId,
-        tokens_amount: 1,
-        reason_text: 'Ошибка OpenAI API при генерации описания'
-      });
-
       if (response.status === 429) {
         throw new Error('Слишком много запросов к OpenAI API. Попробуйте через несколько минут.');
       } else if (response.status === 400 && errorData?.error?.code === 'billing_hard_limit_reached') {
@@ -174,6 +168,18 @@ serve(async (req) => {
 
     const data = await response.json();
     const generatedDescription = data.choices[0].message.content;
+
+    // Only spend tokens after successful generation
+    const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
+      user_id_param: userId,
+      tokens_amount: 1
+    });
+
+    if (tokenError) {
+      console.error('Token spending error after successful generation:', tokenError);
+      // Still return the description even if token spending fails
+      console.warn('Generated description successfully but failed to spend tokens');
+    }
 
     // Save generation to database
     const { error: saveError } = await supabase
