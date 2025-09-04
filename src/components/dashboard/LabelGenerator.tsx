@@ -504,7 +504,12 @@ export default function LabelGenerator() {
       </div>
 
       <button id="btn_download" class="wb-btn wb-primary">
-        <span class="wb-btn-ico">⬇</span> Скачать PNG
+        <svg class="wb-btn-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7,10 12,15 17,10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Скачать PNG
       </button>
 
       <p class="wb-note">Для термопринтера выбирайте 58×40 мм и печатайте без масштабирования (Actual size).</p>
@@ -703,17 +708,20 @@ export default function LabelGenerator() {
     ctx.drawImage(bCanvas, bx, y);
 
     // preview scale
-    const box = document.querySelector('.wb-stage-in').getBoundingClientRect();
-    const scale = Math.min(box.width / W, box.height / H, 1) || 1;
-    elPrev.width = Math.round(W*scale);
-    elPrev.height= Math.round(H*scale);
-    const pctx = elPrev.getContext('2d');
-    pctx.imageSmoothingEnabled = true;
-    pctx.imageSmoothingQuality = 'high';
-    pctx.clearRect(0,0,elPrev.width, elPrev.height);
-    pctx.drawImage(off, 0,0, elPrev.width, elPrev.height);
-
-    elPrev.__fullImage = off;
+    const box = document.querySelector('#wb-gen .wb-stage-in');
+    if (box) {
+      const boxRect = box.getBoundingClientRect();
+      const scale = Math.min(boxRect.width / W, boxRect.height / H, 1) || 1;
+      elPrev.width = Math.round(W*scale);
+      elPrev.height= Math.round(H*scale);
+      const pctx = elPrev.getContext('2d');
+      pctx.imageSmoothingEnabled = true;
+      pctx.imageSmoothingQuality = 'high';
+      pctx.clearRect(0,0,elPrev.width, elPrev.height);
+      pctx.drawImage(off, 0,0, elPrev.width, elPrev.height);
+      
+      elPrev.__fullImage = off;
+    }
   }
 
   function downloadPNG(){
@@ -786,7 +794,12 @@ export default function LabelGenerator() {
       </div>
       
       <button id="btn_download_wb" class="wb-btn wb-primary">
-        <span class="wb-btn-ico">⬇</span> Скачать PNG
+        <svg class="wb-btn-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7,10 12,15 17,10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Скачать PNG
       </button>
       
       <p class="wb-note">Для термопринтера выбирайте 58×40 мм и печатайте без масштабирования (Actual size).</p>
@@ -985,17 +998,20 @@ export default function LabelGenerator() {
     ctx.drawImage(bCanvas, bx, y);
     
     // preview scale
-    const box = document.querySelector('#wb-gen-box .wb-stage-in').getBoundingClientRect();
-    const scale = Math.min(box.width / W, box.height / H, 1) || 1;
-    elPrev.width = Math.round(W*scale);
-    elPrev.height= Math.round(H*scale);
-    const pctx = elPrev.getContext('2d');
-    pctx.imageSmoothingEnabled = true;
-    pctx.imageSmoothingQuality = 'high';
-    pctx.clearRect(0,0,elPrev.width, elPrev.height);
-    pctx.drawImage(off, 0,0, elPrev.width, elPrev.height);
-    
-    elPrev.__fullImage = off;
+    const box = document.querySelector('#wb-gen-box .wb-stage-in');
+    if (box) {
+      const boxRect = box.getBoundingClientRect();
+      const scale = Math.min(boxRect.width / W, boxRect.height / H, 1) || 1;
+      elPrev.width = Math.round(W*scale);
+      elPrev.height= Math.round(H*scale);
+      const pctx = elPrev.getContext('2d');
+      pctx.imageSmoothingEnabled = true;
+      pctx.imageSmoothingQuality = 'high';
+      pctx.clearRect(0,0,elPrev.width, elPrev.height);
+      pctx.drawImage(off, 0,0, elPrev.width, elPrev.height);
+      
+      elPrev.__fullImage = off;
+    }
   }
   
   function downloadPNG(){
