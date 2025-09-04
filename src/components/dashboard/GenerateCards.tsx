@@ -701,7 +701,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           {!canGenerate() && !generating && (
             <Alert className="mt-4 border-amber-200 bg-amber-50">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertCircle className="h-4 w-4 text-amber-800" />
               <AlertDescription className="text-amber-800">
                 <strong>{getGuardMessage()}</strong>
               </AlertDescription>
