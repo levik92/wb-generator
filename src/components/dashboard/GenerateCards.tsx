@@ -174,6 +174,31 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               description: "Все карточки готовы для скачивания",
             });
             
+            // Save to history
+            try {
+              await supabase.from('generations').insert({
+                user_id: profile.id,
+                generation_type: 'cards',
+                input_data: {
+                  productName,
+                  category,
+                  description,
+                  selectedCards: selectedCards.map(index => CARD_STAGES[index].name)
+                },
+                output_data: {
+                  images: completedTasks.map((task: any) => ({
+                    url: task.image_url,
+                    type: task.card_type,
+                    stage: CARD_STAGES[task.card_index]?.name
+                  }))
+                },
+                tokens_used: selectedCards.length,
+                status: 'completed'
+              });
+            } catch (error) {
+              console.error('Error saving to history:', error);
+            }
+            
             if (pollingInterval) {
               clearInterval(pollingInterval);
               setPollingInterval(null);
@@ -379,21 +404,21 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             <Zap className="h-4 w-4 text-purple-600 shrink-0" />
             <div className="text-xs sm:text-sm text-muted-foreground">
               <p className="font-medium">Фоновая обработка + защита от лимитов</p>
-              <p>Генерация теперь происходит в фоне с автоматическими повторами при ошибках rate limit</p>
+              <p>Генерация теперь происходит в фоне, если вы закрыли страницу во время генерации, то результат будет на странице "История".</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* File Upload */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="w-4 h-4" />
             Изображения товара
           </CardTitle>
           <CardDescription>
-            Загрузите фотографии вашего товара (максимум 3 изображения)
+            Загрузите качественные фотографии вашего товара с разных ракурсов. Лучше всего использовать изображения на белом фоне или в естественной обстановке (максимум 3 изображения)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -441,7 +466,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </Card>
 
       {/* Product Details */}
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle>Информация о товаре</CardTitle>
           <CardDescription>
@@ -466,16 +491,24 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="Электроника">Электроника</SelectItem>
                 <SelectItem value="Одежда">Одежда</SelectItem>
                 <SelectItem value="Обувь">Обувь</SelectItem>
                 <SelectItem value="Аксессуары">Аксессуары</SelectItem>
-                <SelectItem value="Электроника">Электроника</SelectItem>
                 <SelectItem value="Дом и сад">Дом и сад</SelectItem>
                 <SelectItem value="Красота и здоровье">Красота и здоровье</SelectItem>
                 <SelectItem value="Спорт и отдых">Спорт и отдых</SelectItem>
                 <SelectItem value="Детские товары">Детские товары</SelectItem>
                 <SelectItem value="Автотовары">Автотовары</SelectItem>
-                <SelectItem value="Другое">Другое</SelectItem>
+                <SelectItem value="Канцелярия">Канцелярия</SelectItem>
+                <SelectItem value="Книги">Книги</SelectItem>
+                <SelectItem value="Игрушки">Игрушки</SelectItem>
+                <SelectItem value="Мебель">Мебель</SelectItem>
+                <SelectItem value="Бытовая техника">Бытовая техника</SelectItem>
+                <SelectItem value="Строительство">Строительство</SelectItem>
+                <SelectItem value="Продукты питания">Продукты питания</SelectItem>
+                <SelectItem value="Зоотовары">Зоотовары</SelectItem>
+                <SelectItem value="Хобби и творчество">Хобби и творчество</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -497,11 +530,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4" />
+            <Images className="w-4 h-4" />
             Выбор карточек для генерации
           </CardTitle>
           <CardDescription>
-            Выберите какие типы карточек вам нужны. Стоимость: {selectedCards.length} {selectedCards.length === 1 ? 'токен' : selectedCards.length < 5 ? 'токена' : 'токенов'}
+            Выберите какие типы карточек вам нужны
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -582,7 +615,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       {/* Generated Images */}
       {generatedImages.length > 0 && (
-        <Card>
+        <Card className="bg-muted/30">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
