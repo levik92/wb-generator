@@ -1,267 +1,313 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from "recharts";
+import { 
+  Users, 
+  Activity, 
+  Coins, 
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Minus
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, TrendingUp, DollarSign, Gift } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
-interface RevenueData {
+interface ChartData {
   date: string;
-  revenue: number;
-  tokens_sold: number;
-  payments_count: number;
+  value: number;
 }
 
-export const AdminAnalyticsChart = () => {
-  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
-  const [period, setPeriod] = useState("7d");
+interface AnalyticsData {
+  period: string;
+  groupFormat: string;
+  charts: {
+    users: ChartData[];
+    generations: ChartData[];
+    tokens: ChartData[];
+    revenue: ChartData[];
+  };
+  totals: {
+    users: number;
+    generations: number;
+    tokens: number;
+    revenue: number;
+  };
+}
+
+interface AdminAnalyticsChartProps {
+  type: 'users' | 'generations' | 'tokens' | 'revenue';
+}
+
+const periods = [
+  { key: 'day', label: 'День', shortLabel: '24ч' },
+  { key: 'week', label: 'Неделя', shortLabel: '7д' },
+  { key: 'month', label: 'Месяц', shortLabel: '30д' },
+  { key: '3months', label: '3 месяца', shortLabel: '3м' },
+  { key: 'year', label: 'Год', shortLabel: '1г' }
+];
+
+const chartConfig = {
+  users: {
+    title: 'Пользователи',
+    icon: Users,
+    color: '#8b5cf6',
+    gradient: 'url(#purpleGradient)',
+    formatValue: (value: number) => value.toLocaleString('ru-RU'),
+    formatTooltip: (value: number) => `${value} пользователей`
+  },
+  generations: {
+    title: 'Генерации',
+    icon: Activity,
+    color: '#a855f7',
+    gradient: 'url(#violetGradient)',
+    formatValue: (value: number) => value.toLocaleString('ru-RU'),
+    formatTooltip: (value: number) => `${value} генераций`
+  },
+  tokens: {
+    title: 'Потрачено токенов',
+    icon: Coins,
+    color: '#9333ea',
+    gradient: 'url(#purpleTokenGradient)',
+    formatValue: (value: number) => value.toLocaleString('ru-RU'),
+    formatTooltip: (value: number) => `${value} токенов`
+  },
+  revenue: {
+    title: 'Доход',
+    icon: DollarSign,
+    color: '#7c3aed',
+    gradient: 'url(#purpleRevenueGradient)',
+    formatValue: (value: number) => `${value.toLocaleString('ru-RU')}₽`,
+    formatTooltip: (value: number) => `${value.toLocaleString('ru-RU')}₽`
+  }
+};
+
+export function AdminAnalyticsChart({ type }: AdminAnalyticsChartProps) {
+  const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const config = chartConfig[type];
+  const Icon = config.icon;
 
   useEffect(() => {
-    loadRevenueData();
-  }, [period]);
+    loadAnalytics();
+  }, [selectedPeriod]);
 
-  const loadRevenueData = async () => {
+  const loadAnalytics = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      
-      // Calculate date range based on period
-      const endDate = new Date();
-      const startDate = new Date();
-      
-      switch (period) {
-        case '7d':
-          startDate.setDate(startDate.getDate() - 7);
-          break;
-        case '30d':
-          startDate.setDate(startDate.getDate() - 30);
-          break;
-        case '90d':
-          startDate.setDate(startDate.getDate() - 90);
-          break;
-        case '1y':
-          startDate.setFullYear(startDate.getFullYear() - 1);
-          break;
-      }
-
-      // Get payment data
-      const { data: payments, error } = await supabase
-        .from('payments')
-        .select('created_at, amount, tokens_amount, status')
-        .eq('status', 'succeeded')
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString())
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-
-      // Group by date
-      const groupedData: { [key: string]: RevenueData } = {};
-      
-      // Initialize all dates in range with 0 values
-      const currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
-        const dateKey = currentDate.toISOString().split('T')[0];
-        groupedData[dateKey] = {
-          date: dateKey,
-          revenue: 0,
-          tokens_sold: 0,
-          payments_count: 0
-        };
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
-      // Fill with actual data
-      payments?.forEach(payment => {
-        const dateKey = payment.created_at.split('T')[0];
-        if (groupedData[dateKey]) {
-          groupedData[dateKey].revenue += parseFloat(payment.amount.toString());
-          groupedData[dateKey].tokens_sold += payment.tokens_amount;
-          groupedData[dateKey].payments_count += 1;
-        }
+      const { data: result, error } = await supabase.functions.invoke('admin-analytics', {
+        body: { period: selectedPeriod }
       });
 
-      const result = Object.values(groupedData).map(item => ({
-        ...item,
-        revenue: Math.round(item.revenue * 100) / 100, // Round to 2 decimal places
-        date: new Date(item.date).toLocaleDateString('ru-RU', { 
-          day: '2-digit', 
-          month: '2-digit' 
-        })
-      }));
-
-      setRevenueData(result);
+      if (error) throw error;
+      setData(result);
     } catch (error) {
-      console.error('Error loading revenue data:', error);
+      console.error('Error loading analytics:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить аналитику",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const totalRevenue = revenueData.reduce((sum, item) => sum + item.revenue, 0);
-  const totalTokens = revenueData.reduce((sum, item) => sum + item.tokens_sold, 0);
-  const totalPayments = revenueData.reduce((sum, item) => sum + item.payments_count, 0);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'RUB',
-      minimumFractionDigits: 0
-    }).format(value);
+  const formatXAxisDate = (dateStr: string, groupFormat: string) => {
+    const date = new Date(dateStr);
+    
+    switch (groupFormat) {
+      case 'hour':
+        return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      case 'day':
+        return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+      case 'week':
+        return `${date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}`;
+      case 'month':
+        return date.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' });
+      default:
+        return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+    }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-2xl font-bold">Аналитика доходов</h3>
-          <p className="text-muted-foreground">
-            Статистика доходов и продаж токенов
+  const calculateTrend = () => {
+    if (!data?.charts[type] || data.charts[type].length < 2) return { trend: 'neutral', percentage: 0 };
+    
+    const chartData = data.charts[type];
+    const firstHalf = chartData.slice(0, Math.floor(chartData.length / 2));
+    const secondHalf = chartData.slice(Math.floor(chartData.length / 2));
+    
+    const firstAvg = firstHalf.reduce((sum, item) => sum + item.value, 0) / firstHalf.length;
+    const secondAvg = secondHalf.reduce((sum, item) => sum + item.value, 0) / secondHalf.length;
+    
+    if (firstAvg === 0) return { trend: 'neutral', percentage: 0 };
+    
+    const percentage = ((secondAvg - firstAvg) / firstAvg) * 100;
+    
+    if (Math.abs(percentage) < 5) return { trend: 'neutral', percentage: 0 };
+    
+    return {
+      trend: percentage > 0 ? 'up' : 'down',
+      percentage: Math.abs(percentage)
+    };
+  };
+
+  const trend = calculateTrend();
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-3 shadow-lg">
+          <p className="text-sm font-medium text-foreground">
+            {formatXAxisDate(label, data?.groupFormat || 'day')}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {config.formatTooltip(payload[0].value)}
           </p>
         </div>
-        
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">7 дней</SelectItem>
-            <SelectItem value="30d">30 дней</SelectItem>
-            <SelectItem value="90d">90 дней</SelectItem>
-            <SelectItem value="1y">1 год</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      );
+    }
+    return null;
+  };
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Общий доход</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(totalRevenue)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              За выбранный период
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Продано токенов</CardTitle>
-            <Gift className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {totalTokens.toLocaleString('ru-RU')}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Общее количество
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Количество платежей</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
-              {totalPayments}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Успешных транзакций
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Revenue Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>График доходов</CardTitle>
-          <CardDescription>
-            Динамика доходов по дням в рублях
-          </CardDescription>
+  if (loading) {
+    return (
+      <Card className="animate-fade-in">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Icon className="h-4 w-4" />
+            {config.title}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="h-80 flex items-center justify-center">
-              <p className="text-muted-foreground">Загрузка данных...</p>
+          <div className="flex items-center justify-center h-[200px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="animate-fade-in">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">{config.title}</CardTitle>
+        </div>
+        <div className="flex gap-1">
+          {periods.map((period) => (
+            <Button
+              key={period.key}
+              variant={selectedPeriod === period.key ? "default" : "ghost"}
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => setSelectedPeriod(period.key)}
+            >
+              {period.shortLabel}
+            </Button>
+          ))}
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          {/* Total Value */}
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">
+              {data ? config.formatValue(data.totals[type]) : '---'}
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
+            {trend.trend !== 'neutral' && (
+              <Badge 
+                variant="outline" 
+                className={`gap-1 ${
+                  trend.trend === 'up' 
+                    ? 'text-green-600 border-green-200 bg-green-50' 
+                    : 'text-red-600 border-red-200 bg-red-50'
+                }`}
+              >
+                {trend.trend === 'up' ? (
+                  <TrendingUp className="h-3 w-3" />
+                ) : (
+                  <TrendingDown className="h-3 w-3" />
+                )}
+                {trend.percentage.toFixed(1)}%
+              </Badge>
+            )}
+          </div>
+
+          {/* Chart */}
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data?.charts[type] || []}>
+                <defs>
+                  <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="violetGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="purpleTokenGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#9333ea" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="purpleRevenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis 
                   dataKey="date" 
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => formatXAxisDate(value, data?.groupFormat || 'day')}
+                  interval="preserveStartEnd"
                 />
                 <YAxis 
-                  tickFormatter={formatCurrency}
+                  axisLine={false}
+                  tickLine={false}
                   tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => value.toLocaleString('ru-RU')}
                 />
-                <Tooltip 
-                  formatter={(value: number) => [formatCurrency(value), 'Доход']}
-                  labelFormatter={(label) => `Дата: ${label}`}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#10b981" 
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={config.color}
+                  fillOpacity={1}
+                  fill={config.gradient}
                   strokeWidth={2}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
+          </div>
 
-      {/* Tokens Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>График продаж токенов</CardTitle>
-          <CardDescription>
-            Количество проданных токенов по дням
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="h-80 flex items-center justify-center">
-              <p className="text-muted-foreground">Загрузка данных...</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip 
-                  formatter={(value: number) => [value.toLocaleString('ru-RU'), 'Токенов']}
-                  labelFormatter={(label) => `Дата: ${label}`}
-                />
-                <Bar 
-                  dataKey="tokens_sold" 
-                  fill="#3b82f6" 
-                  radius={[2, 2, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          {/* Period Description */}
+          <p className="text-xs text-muted-foreground text-center">
+            {periods.find(p => p.key === selectedPeriod)?.label}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
-};
+}

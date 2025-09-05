@@ -202,4 +202,20 @@ select {
   .token-hover:hover {
     @apply bg-wb-purple/10 backdrop-blur-sm;
   }
+
+  /* Fade in animation for charts */
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

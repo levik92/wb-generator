@@ -160,7 +160,12 @@ export default function AdminAnalytics() {
           </Card>
 
           {/* Beautiful Analytics Charts */}
-          <AdminAnalyticsChart />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <AdminAnalyticsChart type="users" />
+            <AdminAnalyticsChart type="generations" />
+            <AdminAnalyticsChart type="tokens" />
+            <AdminAnalyticsChart type="revenue" />
+          </div>
         </TabsContent>
 
         <TabsContent value="security" className="space-y-8">
