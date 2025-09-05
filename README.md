@@ -1,58 +1,52 @@
-# Welcome to your Lovable project
+# WB Генератор
 
-## Project info
+Профессиональный генератор карточек товаров для Wildberries с использованием искусственного интеллекта.
 
-**URL**: https://lovable.dev/projects/d9241ce5-eddd-4ea3-ad28-def66ece5aed
+## Описание проекта
 
-## How can I edit this code?
+WB Генератор - это веб-приложение для автоматического создания продающих карточек товаров размером 960×1280 пикселей и SEO-оптимизированных описаний для маркетплейса Wildberries.
 
-There are several ways of editing your application.
+## Локальная разработка
 
-**Use Lovable**
+Для работы с проектом локально выполните следующие шаги:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d9241ce5-eddd-4ea3-ad28-def66ece5aed) and start prompting.
+Требования: Node.js и npm - [установка с помощью nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Инструкции по установке:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Шаг 1: Клонировать репозиторий
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Шаг 2: Перейти в папку проекта
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Шаг 3: Установить зависимости
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Шаг 4: Запустить сервер разработки
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Редактирование проекта
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+**Редактирование файла напрямую в GitHub**
 
-**Use GitHub Codespaces**
+- Перейдите к нужному файлу
+- Нажмите кнопку "Edit" (значок карандаша) в верхнем правом углу
+- Внесите изменения и зафиксируйте их
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+**Использование GitHub Codespaces**
 
-## What technologies are used for this project?
+- Перейдите на главную страницу репозитория
+- Нажмите кнопку "Code" (зеленая кнопка) в верхнем правом углу
+- Выберите вкладку "Codespaces"
+- Нажмите "New codespace" для запуска новой среды
+- Редактируйте файлы напрямую в Codespace
 
-This project is built with:
+## Технологии
+
+Проект создан с использованием:
 
 - Vite
 - TypeScript
@@ -60,14 +54,14 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Развертывание проекта
 
-Simply open [Lovable](https://lovable.dev/projects/d9241ce5-eddd-4ea3-ad28-def66ece5aed) and click on Share -> Publish.
+Проект готов к развертыванию на любой современной платформе для хостинга React-приложений.
 
-## Can I connect a custom domain to my Lovable project?
+## Функциональность
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Генерация карточек товаров с использованием DALL-E 3
+- Создание SEO-описаний с помощью OpenAI GPT
+- Система токенов для оплаты генераций
+- Панель администратора для управления пользователями
+- Интеграция с платежной системой YooKassa
