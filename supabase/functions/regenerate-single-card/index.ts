@@ -143,7 +143,8 @@ serve(async (req) => {
       });
     }
 
-    if (!cardType || typeof cardType !== 'string' || !CARD_PROMPTS[cardType]) {
+    const validCardTypes = ['cover', 'lifestyle', 'macro', 'beforeAfter', 'bundle', 'guarantee'];
+    if (!cardType || typeof cardType !== 'string' || !validCardTypes.includes(cardType)) {
       return new Response(JSON.stringify({ error: 'Invalid card type' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -199,9 +200,8 @@ serve(async (req) => {
       });
     }
 
-    // Generate prompt
-    const promptTemplate = CARD_PROMPTS[cardType];
-    const prompt = promptTemplate(sanitizedProductName, sanitizedCategory, sanitizedDescription);
+    // Generate prompt from database
+    const prompt = await getPromptTemplate(supabase, cardType, sanitizedProductName, sanitizedCategory, sanitizedDescription);
 
     // Generate image with OpenAI DALL-E-3
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {

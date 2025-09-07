@@ -100,41 +100,33 @@ serve(async (req) => {
       });
     }
 
+    // Get prompt template from database
+    const { data: promptData, error: promptError } = await supabase
+      .from('ai_prompts')
+      .select('prompt_template')
+      .eq('prompt_type', 'description')
+      .single();
+
+    if (promptError) {
+      console.error('Error fetching prompt template:', promptError);
+      throw new Error('Ошибка получения шаблона промта');
+    }
+
     // Build the prompt with sanitized data
     const competitorText = sanitizedCompetitors.length > 0 
-      ? `\n• Ссылки на конкурентов: ${sanitizedCompetitors.join(', ')}`
+      ? sanitizedCompetitors.join(', ')
       : '';
 
     const keywordText = sanitizedKeywords.length > 0 
-      ? `\n• Ключевые слова: ${sanitizedKeywords.join(', ')}`
+      ? sanitizedKeywords.join(', ')
       : '';
     
-    const prompt = `Ты — SEO-копирайтер и маркетплейс-эксперт. 
-Твоя цель — создать лучшее описание товара для маркетплейса (WB, Ozon), которое поможет карточке выйти в топ поисковой выдачи и увеличить продажи. 
-
-Входные данные:
-• Название товара: ${sanitizedProductName}
-• Категория: ${sanitizedCategory}${competitorText}${keywordText}
-
-Порядок действий:
-1. Если есть ссылки на конкурентов - проанализируй их описания и собери ключевые слова.
-2. Определи ключевые слова и словосочетания, которые конкуренты используют для продвижения.
-3. Объедини их со списком ключевых слов пользователя.
-Каждое ключевое слово и словосочетание должно быть использовано строго в том виде, как оно задано (все формы, склонения, порядок слов считаются отдельными ключами).
-4. На основе объединённого списка составь уникальное, продающее и SEO-оптимизированное описание товара ${sanitizedProductName} в категории ${sanitizedCategory}.
-5. Сделай так, чтобы описание выглядело максимально привлекательным для покупателей и при этом содержало все ключи, встроенные естественно.
-
-Требования к описанию:
-- Длина текста до 1800 символов (с пробелами).
-- Текст уникальный, не копировать конкурента.
-- Все ключевые слова (от конкурентов и пользователя) должны быть включены хотя бы один раз, без пропусков.
-- Ключи распределить равномерно, чтобы не было «переспама».
-- Акцент на преимуществах, выгодах, пользе и ценности товара.
-- Тон: профессиональный, убедительный, коммерческий.
-- Цель текста — вывести товар в топ выдачи по ключам и убедить покупателя оформить заказ.
-- Запрещены смайлики, эмодзи и любые декоративные символы.
-- Запрещено любое форматирование: отступы, абзацы, жирный, курсив, маркированные списки.
-- На выходе выдать только готовое описание, без комментариев.`;
+    // Replace placeholders in the prompt template
+    let prompt = promptData.prompt_template;
+    prompt = prompt.replace(/{productName}/g, sanitizedProductName);
+    prompt = prompt.replace(/{category}/g, sanitizedCategory);
+    prompt = prompt.replace(/{competitors}/g, competitorText);
+    prompt = prompt.replace(/{keywords}/g, keywordText);
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

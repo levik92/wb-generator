@@ -7,86 +7,26 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const CARD_PROMPTS = {
-  cover: (productName: string, category: string, benefits: string) => 
-    `Create a professional product card cover image for e-commerce marketplace.
+// Function to get prompt from database and replace placeholders
+async function getPromptTemplate(supabase: any, promptType: string, productName: string, category: string, benefits: string) {
+  const { data: promptData, error: promptError } = await supabase
+    .from('ai_prompts')
+    .select('prompt_template')
+    .eq('prompt_type', promptType)
+    .single();
 
-Product: ${productName}
-Category: ${category}
-Benefits: ${benefits}
+  if (promptError) {
+    throw new Error(`Failed to fetch prompt template for ${promptType}: ${promptError.message}`);
+  }
 
-Requirements:
-- Show the product fully, centered, and clear
-- Vertical format 1024x1536 pixels
-- High quality, photorealistic commercial style
-- Clean background that highlights the product
-- Professional lighting
-- One optional benefit headline if relevant`,
+  // Replace placeholders in the prompt template
+  let prompt = promptData.prompt_template;
+  prompt = prompt.replace(/{productName}/g, productName);
+  prompt = prompt.replace(/{category}/g, category);
+  prompt = prompt.replace(/{benefits}/g, benefits);
 
-  lifestyle: (productName: string, category: string, benefits: string) =>
-    `Create a lifestyle product shot showing the item in natural use context.
-
-Product: ${productName} 
-Category: ${category}
-Benefits: ${benefits}
-
-Requirements:
-- Vertical format 1024x1536 pixels
-- Product as main focus in realistic environment
-- Natural lighting and authentic atmosphere
-- Shows practical application of the product`,
-
-  macro: (productName: string, category: string, benefits: string) =>
-    `Create a macro detail shot emphasizing product quality and craftsmanship.
-
-Product: ${productName}
-Category: ${category} 
-Benefits: ${benefits}
-
-Requirements:
-- Vertical format 1024x1536 pixels
-- Close-up showing important details
-- Sharp foreground, soft background blur
-- Emphasize materials and quality`,
-
-  beforeAfter: (productName: string, category: string, benefits: string) =>
-    `Create a before/after comparison showing product benefits.
-
-Product: ${productName}
-Category: ${category}
-Benefits: ${benefits}
-
-Requirements:
-- Vertical format 1024x1536 pixels
-- Split composition showing clear contrast
-- Minimal text labels "BEFORE" and "AFTER"`,
-
-  bundle: (productName: string, category: string, benefits: string) =>
-    `Create a product bundle shot with complementary accessories.
-
-Product: ${productName}
-Category: ${category}
-Benefits: ${benefits}
-
-Requirements:
-- Vertical format 1024x1536 pixels
-- Harmonious composition with accessories
-- Studio lighting
-- Main product prominently featured`,
-
-  guarantee: (productName: string, category: string, benefits: string) =>
-    `Create a trust-building product shot emphasizing quality and reliability.
-
-Product: ${productName}
-Category: ${category}
-Benefits: ${benefits}
-
-Requirements:
-- Vertical format 1024x1536 pixels
-- Clean background with quality indicators
-- Professional presentation
-- Trust-building elements`
-};
+  return prompt;
+}
 
 const MAX_CONCURRENT_TASKS = 2;
 const MAX_RETRY_COUNT = 3;
@@ -313,13 +253,8 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
       })
       .eq('id', task.id);
 
-    // Generate prompt
-    const promptTemplate = CARD_PROMPTS[task.card_type];
-    if (!promptTemplate) {
-      throw new Error(`Unknown card type: ${task.card_type}`);
-    }
-
-    const prompt = promptTemplate(job.product_name, job.category, job.description);
+    // Generate prompt from database
+    const prompt = await getPromptTemplate(supabase, task.card_type, job.product_name, job.category, job.description);
     
     console.log(`Generated prompt for task ${task.id}: ${prompt.substring(0, 100)}...`);
 

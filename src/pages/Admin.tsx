@@ -28,6 +28,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { AdminAnalyticsChart } from "@/components/dashboard/AdminAnalyticsChart";
+import { PromptManager } from "@/components/dashboard/PromptManager";
 
 interface User {
   id: string;
@@ -343,9 +344,10 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Обзор</TabsTrigger>
             <TabsTrigger value="users">Пользователи</TabsTrigger>
+            <TabsTrigger value="prompts">Промты</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -570,6 +572,10 @@ export default function Admin() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="prompts" className="space-y-6">
+            <PromptManager />
           </TabsContent>
         </Tabs>
 
