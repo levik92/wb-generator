@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { toast } from "@/hooks/use-toast";
 import { Pencil, Save, X } from "lucide-react";
 
@@ -15,43 +15,39 @@ interface Prompt {
   updated_at: string;
 }
 
-const PROMPT_TYPES = [
-  { 
-    id: 'description', 
-    name: 'Генерация описаний', 
-    description: 'Промт для создания описаний товаров с текстовыми данными' 
-  },
-  { 
-    id: 'cover', 
-    name: 'Обложка карточки', 
-    description: 'Промт для создания основной обложки товара' 
-  },
-  { 
-    id: 'lifestyle', 
-    name: 'Лайфстайл фото', 
-    description: 'Промт для создания фото товара в использовании' 
-  },
-  { 
-    id: 'macro', 
-    name: 'Макро съемка', 
-    description: 'Промт для детальной съемки товара' 
-  },
-  { 
-    id: 'beforeAfter', 
-    name: 'До/После', 
-    description: 'Промт для сравнительных фото "до и после"' 
-  },
-  { 
-    id: 'bundle', 
-    name: 'Комплект товаров', 
-    description: 'Промт для фото товара с аксессуарами' 
-  },
-  { 
-    id: 'guarantee', 
-    name: 'Гарантия качества', 
-    description: 'Промт для фото товара с акцентом на качество' 
-  }
-];
+const getPromptDisplayName = (type: string): { name: string; description: string } => {
+  const promptNames: Record<string, { name: string; description: string }> = {
+    'description': { 
+      name: 'Генерация описаний', 
+      description: 'Описания товаров с текстовыми данными' 
+    },
+    'cover': { 
+      name: 'Обложка карточки', 
+      description: 'Основная обложка товара' 
+    },
+    'lifestyle': { 
+      name: 'Лайфстайл фото', 
+      description: 'Фото товара в использовании' 
+    },
+    'macro': { 
+      name: 'Макро съемка', 
+      description: 'Детальная съемка товара' 
+    },
+    'beforeAfter': { 
+      name: 'До/После', 
+      description: 'Сравнительные фото "до и после"' 
+    },
+    'bundle': { 
+      name: 'Комплект товаров', 
+      description: 'Фото товара с аксессуарами' 
+    },
+    'guarantee': { 
+      name: 'Гарантия качества', 
+      description: 'Фото товара с акцентом на качество' 
+    }
+  };
+  return promptNames[type] || { name: type, description: 'Неизвестный тип промта' };
+};
 
 export function PromptManager() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -137,10 +133,6 @@ export function PromptManager() {
     }
   };
 
-  const getPromptByType = (type: string) => {
-    return prompts.find(p => p.prompt_type === type);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -161,94 +153,78 @@ export function PromptManager() {
         </div>
       </div>
 
-      <Tabs defaultValue="description" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
-          {PROMPT_TYPES.map((type) => (
-            <TabsTrigger key={type.id} value={type.id} className="text-xs">
-              {type.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {PROMPT_TYPES.map((type) => {
-          const prompt = getPromptByType(type.id);
-          const isEditing = editingPrompt === prompt?.id;
+      <div className="space-y-4">
+        {prompts.map((prompt) => {
+          const { name, description } = getPromptDisplayName(prompt.prompt_type);
+          const isEditing = editingPrompt === prompt.id;
 
           return (
-            <TabsContent key={type.id} value={type.id}>
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>{type.name}</CardTitle>
-                      <CardDescription>{type.description}</CardDescription>
-                    </div>
-                    {prompt && !isEditing && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => startEdit(prompt)}
-                        className="gap-2"
-                      >
-                        <Pencil className="h-4 w-4" />
-                        Редактировать
-                      </Button>
-                    )}
+            <Card key={prompt.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">{name}</CardTitle>
+                    <CardDescription className="text-sm">{description}</CardDescription>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {prompt ? (
-                    <div className="space-y-4">
-                      {isEditing ? (
-                        <>
-                          <Textarea
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="min-h-[300px] font-mono text-sm"
-                            placeholder="Введите промт..."
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => savePrompt(prompt.id)}
-                              disabled={saving}
-                              className="gap-2"
-                            >
-                              <Save className="h-4 w-4" />
-                              {saving ? "Сохранение..." : "Сохранить"}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={cancelEdit}
-                              disabled={saving}
-                              className="gap-2"
-                            >
-                              <X className="h-4 w-4" />
-                              Отмена
-                            </Button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="bg-muted p-4 rounded-lg">
-                          <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
-                            {prompt.prompt_template}
-                          </pre>
-                        </div>
-                      )}
-                      <div className="text-xs text-muted-foreground">
-                        Последнее обновление: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
+                  {!isEditing && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => startEdit(prompt)}
+                      className="gap-2 bg-muted hover:bg-muted/80"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Редактировать
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {isEditing ? (
+                    <>
+                      <Textarea
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="min-h-[300px] font-mono text-sm"
+                        placeholder="Введите промт..."
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => savePrompt(prompt.id)}
+                          disabled={saving}
+                          className="gap-2"
+                        >
+                          <Save className="h-4 w-4" />
+                          {saving ? "Сохранение..." : "Сохранить"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={cancelEdit}
+                          disabled={saving}
+                          className="gap-2"
+                        >
+                          <X className="h-4 w-4" />
+                          Отмена
+                        </Button>
                       </div>
-                    </div>
+                    </>
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">Промт не найден</p>
+                    <div className="bg-muted p-4 rounded-lg">
+                      <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
+                        {prompt.prompt_template}
+                      </pre>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  <div className="text-xs text-muted-foreground">
+                    Последнее обновление: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           );
         })}
-      </Tabs>
+      </div>
     </div>
   );
 }
