@@ -33,8 +33,6 @@ const MAX_RETRY_COUNT = 3;
 const RETRY_BASE_DELAY = 60;
 
 serve(async (req) => {
-  console.log(`Process generation tasks called: ${req.method}`);
-  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }

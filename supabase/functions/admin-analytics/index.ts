@@ -19,8 +19,6 @@ serve(async (req) => {
     )
 
     const { period } = await req.json()
-    
-    console.log(`Getting analytics for period: ${period}`)
 
     // Определяем временные рамки
     const now = new Date()
@@ -171,8 +169,6 @@ serve(async (req) => {
       .eq('status', 'succeeded')
 
     const totalRevenue = allRevenueData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
-
-    console.log(`Analytics completed. Users: ${usersChart.length}, Generations: ${generationsChart.length}`)
 
     return new Response(
       JSON.stringify({

@@ -252,9 +252,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             onTokensUpdate?.();
           }
         }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
+        } catch (error) {
+          // Log error but continue polling
+        }
     };
 
     // Poll immediately and then every 5 seconds
@@ -357,15 +357,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     });
   };
 
-  // Cleanup polling on unmount and job completion
+  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
       if (pollingInterval) {
         clearInterval(pollingInterval);
-        setPollingInterval(null);
       }
     };
-  }, [pollingInterval]);
+  }, []);
 
   // Setup realtime subscription for job updates
   useEffect(() => {
@@ -382,8 +381,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           filter: `id=eq.${currentJobId}`
         },
         (payload) => {
-          console.log('Job update:', payload);
-          // Only restart polling if we don't already have one running
+          // Restart polling for job updates
           if (!pollingInterval) {
             startJobPolling(currentJobId);
           }
@@ -398,8 +396,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           filter: `job_id=eq.${currentJobId}`
         },
         (payload) => {
-          console.log('Task update:', payload);
-          // Only restart polling if we don't already have one running
+          // Restart polling for task updates
           if (!pollingInterval) {
             startJobPolling(currentJobId);
           }
