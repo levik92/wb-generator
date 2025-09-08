@@ -180,7 +180,7 @@ export function PromptManager() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <CardTitle className="text-lg">{name}</CardTitle>
-                          <Badge variant={category === 'Описание' ? 'default' : 'secondary'}>
+                          <Badge variant="secondary">
                             {category}
                           </Badge>
                         </div>
@@ -192,7 +192,7 @@ export function PromptManager() {
                         variant="secondary"
                         size="sm"
                         onClick={() => startEdit(prompt)}
-                        className="gap-2 bg-muted hover:bg-muted/70 transition-colors"
+                        className="gap-2 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
                       >
                         <Pencil className="h-4 w-4" />
                         Редактировать
