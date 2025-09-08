@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { toast } from "@/hooks/use-toast";
 import { Pencil, Save, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Prompt {
   id: string;
@@ -15,38 +16,45 @@ interface Prompt {
   updated_at: string;
 }
 
-const getPromptDisplayName = (type: string): { name: string; description: string } => {
-  const promptNames: Record<string, { name: string; description: string }> = {
+const getPromptDisplayName = (type: string): { name: string; description: string; category: string } => {
+  const promptNames: Record<string, { name: string; description: string; category: string }> = {
     'description': { 
       name: 'Генерация описаний', 
-      description: 'Описания товаров с текстовыми данными' 
+      description: 'Описания товаров с текстовыми данными',
+      category: 'Описание'
     },
     'cover': { 
       name: 'Обложка карточки', 
-      description: 'Основная обложка товара' 
+      description: 'Основная обложка товара',
+      category: 'Изображение'
     },
     'lifestyle': { 
       name: 'Лайфстайл фото', 
-      description: 'Фото товара в использовании' 
+      description: 'Фото товара в использовании',
+      category: 'Изображение'
     },
     'macro': { 
       name: 'Макро съемка', 
-      description: 'Детальная съемка товара' 
+      description: 'Детальная съемка товара',
+      category: 'Изображение'
     },
     'beforeAfter': { 
       name: 'До/После', 
-      description: 'Сравнительные фото "до и после"' 
+      description: 'Сравнительные фото "до и после"',
+      category: 'Изображение'
     },
     'bundle': { 
       name: 'Комплект товаров', 
-      description: 'Фото товара с аксессуарами' 
+      description: 'Фото товара с аксессуарами',
+      category: 'Изображение'
     },
     'guarantee': { 
       name: 'Гарантия качества', 
-      description: 'Фото товара с акцентом на качество' 
+      description: 'Фото товара с акцентом на качество',
+      category: 'Изображение'
     }
   };
-  return promptNames[type] || { name: type, description: 'Неизвестный тип промта' };
+  return promptNames[type] || { name: type, description: 'Неизвестный тип промта', category: 'Неизвестно' };
 };
 
 export function PromptManager() {
@@ -154,31 +162,44 @@ export function PromptManager() {
       </div>
 
       <div className="space-y-4">
-        {prompts.map((prompt) => {
-          const { name, description } = getPromptDisplayName(prompt.prompt_type);
-          const isEditing = editingPrompt === prompt.id;
+        {/* Sort prompts: description first, then image prompts */}
+        {[...prompts]
+          .sort((a, b) => {
+            const order = ['description', 'cover', 'lifestyle', 'macro', 'beforeAfter', 'bundle', 'guarantee'];
+            return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
+          })
+          .map((prompt) => {
+            const { name, description, category } = getPromptDisplayName(prompt.prompt_type);
+            const isEditing = editingPrompt === prompt.id;
 
-          return (
-            <Card key={prompt.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{name}</CardTitle>
-                    <CardDescription className="text-sm">{description}</CardDescription>
+            return (
+              <Card key={prompt.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <CardTitle className="text-lg">{name}</CardTitle>
+                          <Badge variant={category === 'Описание' ? 'default' : 'secondary'}>
+                            {category}
+                          </Badge>
+                        </div>
+                        <CardDescription className="text-sm">{description}</CardDescription>
+                      </div>
+                    </div>
+                    {!isEditing && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => startEdit(prompt)}
+                        className="gap-2 bg-muted hover:bg-muted/70 transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Редактировать
+                      </Button>
+                    )}
                   </div>
-                  {!isEditing && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => startEdit(prompt)}
-                      className="gap-2 bg-muted hover:bg-muted/80"
-                    >
-                      <Pencil className="h-4 w-4" />
-                      Редактировать
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
+                </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {isEditing ? (
