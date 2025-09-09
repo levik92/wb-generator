@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { AdminAnalyticsChart } from "@/components/dashboard/AdminAnalyticsChart";
 import { PromptManager } from "@/components/dashboard/PromptManager";
+import { DataExportDialog } from "@/components/dashboard/DataExportDialog";
 
 interface User {
   id: string;
@@ -286,27 +287,6 @@ export default function Admin() {
     navigate('/');
   };
 
-  const exportStats = () => {
-    if (!stats) return;
-    
-    const data = {
-      export_date: new Date().toISOString(),
-      statistics: stats,
-      users_summary: {
-        total_users: users.length,
-        active_users: users.filter(u => !u.is_blocked).length,
-        wb_connected_users: users.filter(u => u.wb_connected).length
-      }
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `admin-stats-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -332,10 +312,12 @@ export default function Admin() {
             <p className="text-muted-foreground mt-1">Управление системой WB Генератор</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={exportStats} variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              Экспорт
-            </Button>
+            <DataExportDialog>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Экспорт данных
+              </Button>
+            </DataExportDialog>
             <Button onClick={handleSignOut} variant="destructive" className="gap-2">
               <LogOut className="h-4 w-4" />
               Выйти
