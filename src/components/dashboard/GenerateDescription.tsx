@@ -255,7 +255,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               Стоимость: <strong>10 токенов</strong> за генерацию описания
             </p>
             <p className="text-center text-xs text-muted-foreground">
-              10 токенов = 1 изображение карточки
+              10 токенов за описание = стоимости 1 изображения карточки
             </p>
             
             {!canGenerate() && (

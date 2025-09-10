@@ -100,9 +100,9 @@ export default function Balance() {
                 <div className="font-medium text-sm">1 описание товара</div>
                 <div className="text-xs text-muted-foreground">Генерация описания</div>
               </div>
-              <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
-                1 токен
-              </div>
+               <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
+                 10 токенов
+               </div>
             </div>
             <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
               <div className="bg-muted p-2 rounded-lg">
@@ -127,8 +127,8 @@ export default function Balance() {
         </TabsList>
         
         <TabsContent value="pricing" id="pricing-section" className="space-y-6">
-          <PromoCodeInput onPromoApplied={setAppliedPromo} />
           <Pricing appliedPromo={appliedPromo} />
+          <PromoCodeInput onPromoApplied={setAppliedPromo} />
         </TabsContent>
         
         <TabsContent value="history">
