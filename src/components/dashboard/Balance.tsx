@@ -101,7 +101,7 @@ export default function Balance() {
                 <div className="text-xs text-muted-foreground">Генерация описания</div>
               </div>
                <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
-                 10 токенов
+                 1 токен
                </div>
             </div>
             <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
