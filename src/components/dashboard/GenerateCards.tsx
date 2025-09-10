@@ -453,12 +453,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           <div className="space-y-4">
             <div className="flex items-center justify-center w-full">
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
                   <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
+                  <p className="mb-2 text-sm text-muted-foreground text-center">
                     <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
                   </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, JPEG (МАКС. 3 изображения)</p>
+                  <p className="text-xs text-muted-foreground text-center">PNG, JPG, JPEG (МАКС. 3 изображения)</p>
                 </div>
                 <input
                   type="file"
