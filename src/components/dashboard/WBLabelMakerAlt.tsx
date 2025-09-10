@@ -321,7 +321,7 @@ export default function WBLabelMakerAlt() {
           </div>
 
           <button className="wb-btn wb-primary" onClick={handleDownload}>
-            <span className="wb-btn-ico">⬇</span> Скачать PNG
+            <span className="wb-btn-ico">📥</span> Скачать PNG
           </button>
 
           <p className="wb-note">
