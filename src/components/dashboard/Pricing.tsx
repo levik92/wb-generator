@@ -6,7 +6,22 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-export default function Pricing() {
+interface PromoCodeInfo {
+  id: string;
+  code: string;
+  type: 'discount' | 'tokens';
+  value: number;
+  max_uses: number | null;
+  current_uses: number;
+  valid_until: string | null;
+  is_active: boolean;
+}
+
+interface PricingProps {
+  appliedPromo?: PromoCodeInfo | null;
+}
+
+export default function Pricing({ appliedPromo }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handlePayment = async (packageName: string, amount: number, tokens: number) => {
@@ -23,8 +38,25 @@ export default function Pricing() {
         return;
       }
 
+      // Calculate final amount and tokens with promo
+      let finalAmount = amount;
+      let finalTokens = tokens;
+
+      if (appliedPromo) {
+        if (appliedPromo.type === 'discount') {
+          finalAmount = Math.round(amount * (1 - appliedPromo.value / 100));
+        } else if (appliedPromo.type === 'tokens') {
+          finalTokens = tokens + appliedPromo.value;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: { packageName, amount, tokens }
+        body: { 
+          packageName, 
+          amount: finalAmount, 
+          tokens: finalTokens,
+          promoCode: appliedPromo?.code
+        }
       });
 
       if (error) {
@@ -119,8 +151,23 @@ export default function Pricing() {
                 <Badge className="w-fit mb-2">Популярный</Badge>
               )}
               <CardTitle>{plan.name}</CardTitle>
-              <div className="text-3xl font-bold">{plan.price}₽</div>
-              <CardDescription>{plan.tokens} токенов</CardDescription>
+              <div className="text-3xl font-bold">
+                {appliedPromo?.type === 'discount' 
+                  ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` 
+                  : `${plan.price}₽`
+                }
+                {appliedPromo?.type === 'discount' && (
+                  <span className="text-lg text-muted-foreground line-through ml-2">
+                    {plan.price}₽
+                  </span>
+                )}
+              </div>
+              <CardDescription>
+                {appliedPromo?.type === 'tokens' 
+                  ? `${plan.tokens + appliedPromo.value} токенов (+${appliedPromo.value} бонусных)`
+                  : `${plan.tokens} токенов`
+                }
+              </CardDescription>
               <div className="text-sm text-muted-foreground mt-2">
                 <strong>{(plan.price / plan.tokens).toFixed(2)}₽</strong> за токен
               </div>

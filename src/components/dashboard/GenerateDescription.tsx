@@ -37,7 +37,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   const { toast } = useToast();
 
   const canGenerate = () => {
-    return productName && category && competitor1 && keywords && profile.tokens_balance >= 1;
+    return productName && category && competitor1 && keywords && profile.tokens_balance >= 10;
   };
 
   const getGuardMessage = () => {
@@ -45,7 +45,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
     if (!category) return "Выберите категорию товара";
     if (!competitor1) return "Добавьте хотя бы одну ссылку на конкурента";
     if (!keywords) return "Добавьте ключевые слова";
-    if (profile.tokens_balance < 1) return "Недостаточно токенов (нужен 1)";
+    if (profile.tokens_balance < 10) return "Недостаточно токенов (нужно 10)";
     return null;
   };
 
@@ -136,7 +136,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               <div className="text-xs text-muted-foreground">Генерация описания</div>
             </div>
             <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm text-muted-foreground">
-              1 токен
+              10 токенов
             </div>
           </div>
         </CardContent>
@@ -252,7 +252,10 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground mt-3">
-              Стоимость: <strong>1 токен</strong> за генерацию
+              Стоимость: <strong>10 токенов</strong> за генерацию описания
+            </p>
+            <p className="text-center text-xs text-muted-foreground">
+              10 токенов = 1 изображение карточки
             </p>
             
             {!canGenerate() && (

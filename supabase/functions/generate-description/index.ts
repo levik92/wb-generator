@@ -91,9 +91,9 @@ serve(async (req) => {
       throw new Error('Ошибка при проверке баланса токенов');
     }
 
-    if (!profileData || profileData.tokens_balance < 1) {
+    if (!profileData || profileData.tokens_balance < 10) {
       return new Response(JSON.stringify({ 
-        error: 'Недостаточно токенов для генерации' 
+        error: 'Недостаточно токенов для генерации. Нужно 10 токенов.' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -164,7 +164,7 @@ serve(async (req) => {
     // Only spend tokens after successful generation
     const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
       user_id_param: userId,
-      tokens_amount: 1
+      tokens_amount: 10
     });
 
     if (tokenError) {
@@ -188,7 +188,7 @@ serve(async (req) => {
         output_data: {
           description: generatedDescription
         },
-        tokens_used: 1,
+        tokens_used: 10,
         status: 'completed',
         product_name: sanitizedProductName,
         category: sanitizedCategory,

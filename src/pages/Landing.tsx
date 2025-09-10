@@ -61,7 +61,7 @@ const Landing = () => {
           </div>
           
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-in px-4">
-            <span className="text-gradient">Создавайте продающие карточки для Wildberries за пару минут без дизайнера</span>
+            <span className="text-gradient">Создавайте продающие карточки</span> <span className="text-black">для Wildberries за пару минут без дизайнера</span>
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed px-4">

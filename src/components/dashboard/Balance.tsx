@@ -6,10 +6,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coins, FileText, Images } from "lucide-react";
 import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
+import { PromoCodeInput } from "./PromoCodeInput";
+
+interface PromoCodeInfo {
+  id: string;
+  code: string;
+  type: 'discount' | 'tokens';
+  value: number;
+  max_uses: number | null;
+  current_uses: number;
+  valid_until: string | null;
+  is_active: boolean;
+}
 
 export default function Balance() {
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [appliedPromo, setAppliedPromo] = useState<PromoCodeInfo | null>(null);
 
   useEffect(() => {
     loadBalance();
@@ -73,7 +86,7 @@ export default function Balance() {
         </div>
       </div>
 
-      <Card>
+      <Card className="bg-muted/30">
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Стоимость генерации</CardTitle>
         </CardHeader>
@@ -113,8 +126,9 @@ export default function Balance() {
           <TabsTrigger value="history">История пополнений</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pricing" id="pricing-section">
-          <Pricing />
+        <TabsContent value="pricing" id="pricing-section" className="space-y-6">
+          <PromoCodeInput onPromoApplied={setAppliedPromo} />
+          <Pricing appliedPromo={appliedPromo} />
         </TabsContent>
         
         <TabsContent value="history">

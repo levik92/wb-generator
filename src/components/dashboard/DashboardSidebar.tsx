@@ -89,7 +89,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64'} bg-card border-r border-border flex flex-col transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-card border-r border-border flex flex-col transition-all duration-300`}>
       {/* Logo */}
       <div className={`p-6 ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="flex items-center justify-between">
@@ -97,14 +97,14 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            {!isCollapsed && <span className="text-lg font-semibold">WB Генератор</span>}
+            {!isCollapsed && <span className="text-base font-semibold">WB Генератор</span>}
           </div>
           {/* Collapse Toggle - visible only on desktop */}
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex h-8 w-8 p-0"
+            className="hidden lg:flex h-8 w-8 p-0 bg-muted/50 hover:bg-muted"
           >
             {isCollapsed ? (
               <ChevronRight className="w-4 h-4" />
