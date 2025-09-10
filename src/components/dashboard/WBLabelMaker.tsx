@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Download } from "lucide-react";
 import JsBarcode from "jsbarcode";
 
 export default function WBLabelMaker() {
@@ -344,7 +345,7 @@ export default function WBLabelMaker() {
           </div>
 
           <button className="wb-btn wb-primary" onClick={handleDownload}>
-            <span className="wb-btn-ico">📥</span> Скачать PNG
+            <Download className="wb-btn-ico" size={16} /> Скачать PNG
           </button>
 
           <p className="wb-note">
