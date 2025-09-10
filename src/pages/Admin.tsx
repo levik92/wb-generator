@@ -30,6 +30,7 @@ import {
 import { AdminAnalyticsChart } from "@/components/dashboard/AdminAnalyticsChart";
 import { PromptManager } from "@/components/dashboard/PromptManager";
 import { DataExportDialog } from "@/components/dashboard/DataExportDialog";
+import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
 
 interface User {
   id: string;
@@ -332,60 +333,63 @@ export default function Admin() {
             <TabsTrigger value="prompts">Промты</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Analytics Charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <AdminAnalyticsChart type="users" />
-              <AdminAnalyticsChart type="generations" />
-              <AdminAnalyticsChart type="tokens" />
-              <AdminAnalyticsChart type="revenue" />
-            </div>
+            <TabsContent value="overview" className="space-y-6">
+              {/* Analytics Charts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <AdminAnalyticsChart type="users" />
+                <AdminAnalyticsChart type="generations" />
+                <AdminAnalyticsChart type="tokens" />
+                <AdminAnalyticsChart type="revenue" />
+              </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Активные пользователи</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600">
-                    {users.filter(u => !u.is_blocked).length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {((users.filter(u => !u.is_blocked).length / users.length) * 100).toFixed(1)}% от общего числа
-                  </p>
-                </CardContent>
-              </Card>
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Активные пользователи</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-600">
+                      {users.filter(u => !u.is_blocked).length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {((users.filter(u => !u.is_blocked).length / users.length) * 100).toFixed(1)}% от общего числа
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Подключений WB</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-blue-600">
-                    {users.filter(u => u.wb_connected).length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {((users.filter(u => u.wb_connected).length / users.length) * 100).toFixed(1)}% пользователей
-                  </p>
-                </CardContent>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Подключений WB</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-blue-600">
+                      {users.filter(u => u.wb_connected).length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {((users.filter(u => u.wb_connected).length / users.length) * 100).toFixed(1)}% пользователей
+                    </p>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Заблокированные</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-red-600">
-                    {users.filter(u => u.is_blocked).length}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Требуют внимания
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Заблокированные</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-red-600">
+                      {users.filter(u => u.is_blocked).length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Требуют внимания
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Promo Codes Management */}
+              <PromoCodeManager />
+            </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
             {/* Search */}

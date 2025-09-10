@@ -98,7 +98,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    const tokensNeeded = selectedCards.length;
+    const tokensNeeded = selectedCards.length * 10; // 10 токенов за карточку
     return files.length > 0 && 
            productName.trim() && 
            category && 
@@ -109,7 +109,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const getGuardMessage = () => {
-    const tokensNeeded = selectedCards.length;
+    const tokensNeeded = selectedCards.length * 10; // 10 токенов за карточку
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
     if (!productName.trim()) return "Введите название товара";
     if (!category) return "Выберите категорию товара";
@@ -229,7 +229,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       stage: CARD_STAGES[task.card_index]?.name
                     }))
                   },
-                  tokens_used: selectedCards.length,
+                  tokens_used: selectedCards.length * 10, // 10 токенов за изображение
                   status: 'completed'
                 });
               } catch (error) {
@@ -542,10 +542,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Описание и преимущества</Label>
+            <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea
               id="description"
-              placeholder="Опишите ключевые преимущества товара, материалы, особенности использования..."
+              placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}

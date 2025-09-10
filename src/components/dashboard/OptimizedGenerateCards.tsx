@@ -282,12 +282,12 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Описание и преимущества</Label>
+            <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Опишите ключевые особенности, преимущества и характеристики товара..."
+              placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..."
               className="min-h-[100px]"
               disabled={isGenerating}
             />

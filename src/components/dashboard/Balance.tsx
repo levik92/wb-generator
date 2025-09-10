@@ -96,11 +96,11 @@ export default function Balance() {
                 <Images className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <div className="font-medium text-sm">1 комплект карточек</div>
-                <div className="text-xs text-muted-foreground">6 изображений товара</div>
+                <div className="font-medium text-sm">1 изображение карточки</div>
+                <div className="text-xs text-muted-foreground">Генерация или перегенерация</div>
               </div>
               <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
-                6 токенов
+                10 токенов
               </div>
             </div>
           </div>

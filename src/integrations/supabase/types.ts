@@ -418,6 +418,77 @@ export type Database = {
           },
         ]
       }
+      promocode_uses: {
+        Row: {
+          id: string
+          promocode_id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          promocode_id: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          promocode_id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promocode_uses_promocode_id_fkey"
+            columns: ["promocode_id"]
+            isOneToOne: false
+            referencedRelation: "promocodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promocodes: {
+        Row: {
+          code: string
+          created_at: string | null
+          current_uses: number | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          type: string
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          current_uses?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          type: string
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          current_uses?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          type?: string
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string

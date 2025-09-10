@@ -14,9 +14,9 @@ interface PaymentRequest {
 }
 
 const PACKAGES = {
-  'Стартовый': { price: 499, tokens: 40 },
-  'Профи': { price: 1499, tokens: 130 },
-  'Бизнес': { price: 5999, tokens: 550 }
+  'Стартовый': { price: 990, tokens: 80 },
+  'Профи': { price: 2990, tokens: 250 },
+  'Бизнес': { price: 9990, tokens: 850 }
 };
 
 serve(async (req) => {
