@@ -714,7 +714,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               <>
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 <span className="hidden sm:inline">
-                  Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'карточку' : selectedCards.length < 5 ? 'карточки' : 'карточек'} ({selectedCards.length} {selectedCards.length === 1 ? 'токен' : selectedCards.length < 5 ? 'токена' : 'токенов'})
+                  Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'карточку' : selectedCards.length < 5 ? 'карточки' : 'карточек'} ({selectedCards.length * 10} {selectedCards.length * 10 === 1 ? 'токен' : (selectedCards.length * 10) % 10 >= 2 && (selectedCards.length * 10) % 10 <= 4 && ((selectedCards.length * 10) % 100 < 10 || (selectedCards.length * 10) % 100 >= 20) ? 'токена' : 'токенов'})
                 </span>
                 <span className="sm:hidden">
                   {generatedImages.length > 0 ? 'Новый комплект' : 'Генерация'}
@@ -724,7 +724,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </Button>
           
           <p className="text-center text-sm text-muted-foreground mt-3">
-            Стоимость: <strong>{selectedCards.length} {selectedCards.length === 1 ? 'токен' : selectedCards.length < 5 ? 'токена' : 'токенов'}</strong> за {selectedCards.length} изображений
+            Стоимость: <strong>{selectedCards.length * 10} {selectedCards.length * 10 === 1 ? 'токен' : (selectedCards.length * 10) % 10 >= 2 && (selectedCards.length * 10) % 10 <= 4 && ((selectedCards.length * 10) % 100 < 10 || (selectedCards.length * 10) % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
           </p>
           
           {!canGenerate() && !generating && (
