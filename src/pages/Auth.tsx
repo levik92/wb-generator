@@ -38,14 +38,46 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // First check if email already exists
+      const { data: emailCheckData, error: emailCheckError } = await supabase.functions.invoke('check-email-exists', {
+        body: { email }
+      });
+
+      if (emailCheckError) {
+        console.error('Error checking email:', emailCheckError);
+        throw new Error('Ошибка проверки email');
+      }
+
+      // If email exists, show message to use login tab
+      if (emailCheckData.exists) {
+        toast({
+          title: "Аккаунт уже существует",
+          description: "Аккаунт с таким email уже зарегистрирован в системе. Пожалуйста, войдите через вкладку 'Вход'.",
+          variant: "destructive",
+          duration: 8000,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // If email doesn't exist, proceed with signup
       const redirectUrl = `${window.location.origin}/dashboard`;
+      
+      const signupOptions: any = {
+        emailRedirectTo: redirectUrl
+      };
+
+      // Add referral code if present
+      if (referralCode) {
+        signupOptions.data = {
+          referral_code: referralCode
+        };
+      }
       
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: redirectUrl
-        }
+        options: signupOptions
       });
 
       if (error) {
