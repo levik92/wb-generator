@@ -93,7 +93,7 @@ serve(async (req) => {
 
     if (!profileData || profileData.tokens_balance < 1) {
       return new Response(JSON.stringify({ 
-        error: 'Недостаточно токенов для генерации. Нужно 1 токен.' 
+        error: 'Недостаточно токенов для генерации. Нужен 1 токен.' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

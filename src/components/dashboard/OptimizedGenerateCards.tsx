@@ -219,7 +219,8 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${productName}-${cardType}.png`;
+      const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
+      link.download = `${safeProductName}-${cardType}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -382,12 +383,17 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
                       <img
                         src={imageUrl}
                         alt={`Generated card ${index + 1}`}
-                        className="w-full h-48 object-cover rounded-md border"
+                        className="w-full h-48 object-cover rounded-md border cursor-pointer"
+                        onClick={() => window.open(imageUrl, '_blank')}
+                        title="Кликните чтобы открыть в новом окне"
                       />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
                         <Button
                           size="sm"
-                          onClick={() => downloadCard(imageUrl, `card-${index + 1}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadCard(imageUrl, `card-${index + 1}`);
+                          }}
                           className="bg-white text-black hover:bg-gray-100"
                         >
                           <Download className="w-4 h-4 mr-2" />

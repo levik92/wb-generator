@@ -117,7 +117,8 @@ export const History = ({ profile }: HistoryProps) => {
               
               const link = document.createElement('a');
               link.href = url;
-              link.download = `${generation.input_data?.productName || 'card'}_${image.stage || image.type || (i+1)}.png`;
+              const safeProductName = (generation.input_data?.productName || 'card').replace(/[^a-z0-9_-]/gi, '');
+              link.download = `${safeProductName}_${image.stage || image.type || (i+1)}.png`;
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);

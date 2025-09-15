@@ -280,7 +280,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileName = `${profile.id}/${Date.now()}_${i}_${file.name}`;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${profile.id}/${Date.now()}_${i}.${fileExt}`;
         
         setJobStatus(`Загрузка изображения ${i + 1} из ${files.length}...`);
         
@@ -301,7 +302,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
         productImagesData.push({
           url: publicUrl,
-          name: file.name
+          name: `image_${i + 1}.${fileExt}`
         });
       }
 
@@ -363,7 +364,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     generatedImages.forEach((image, index) => {
       const link = document.createElement('a');
       link.href = image.url;
-      link.download = `${productName}_${image.stage}_${index + 1}.png`;
+      const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
+      link.download = `${safeProductName}_${image.stage}_${index + 1}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -376,7 +378,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     const link = document.createElement('a');
     link.href = image.url;
-    link.download = `${productName}_${image.stage}.png`;
+    const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
+    link.download = `${safeProductName}_${image.stage}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -776,7 +779,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                             <img
                               src={image.url}
                               alt={`Generated card ${index + 1} - Fullscreen`}
-                              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                              className="max-w-full max-h-[80vh] object-contain rounded-lg cursor-pointer"
+                              onClick={() => window.open(image.url, '_blank')}
+                              title="Кликните чтобы открыть в новом окне"
                             />
                           </div>
                         </DialogContent>
@@ -794,7 +799,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => regenerateCard(image, index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          regenerateCard(image, index);
+                        }}
                         disabled={isRegenerating}
                       >
                         {isRegenerating ? (
@@ -808,7 +816,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => downloadSingle(index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadSingle(index);
+                        }}
                       >
                         <Download className="w-3 h-3 mr-1" />
                         Скачать
