@@ -53,6 +53,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
   const [completionNotificationShown, setCompletionNotificationShown] = useState<Set<string>>(new Set());
+  const [lastCompletedCount, setLastCompletedCount] = useState<number>(0);
   const { toast } = useToast();
 
   // Cleanup polling on unmount
@@ -194,6 +195,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           setProgress(progressPercent);
           setCurrentStage(completedTasks.length);
+          
+          // Update completed count for notification logic
+          setLastCompletedCount(completedTasks.length);
 
           // Set job status for display
           if (job.status === 'processing') {
@@ -230,17 +234,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           if (shouldStopPolling) {
             setGenerating(false);
             
-            // Show completion notification only once when ALL cards are done
-            if (allCompleted && !completionNotificationShown.has(jobId)) {
+            // Show completion notification only when completed count INCREASES to total
+            if (allCompleted && completedTasks.length > lastCompletedCount && completedTasks.length === totalCards) {
               const cardWord = totalCards === 1 ? 'карточка' : 
                                totalCards < 5 ? 'карточки' : 'карточек';
               toast({
                 title: "Генерация завершена!",
                 description: `Все ${totalCards} ${cardWord} готовы для скачивания`,
               });
-              
-              // Mark notification as shown for this job
-              setCompletionNotificationShown(prev => new Set([...prev, jobId]));
               
               // Save to history
               try {
@@ -299,6 +300,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setGeneratedImages([]); // Clear previous images first
     setCompletionNotificationShown(new Set()); // Clear previous notifications
     setCurrentJobId(null); // Clear previous job ID
+    setLastCompletedCount(0); // Reset completed count
     
     if (!canGenerate()) return;
 
