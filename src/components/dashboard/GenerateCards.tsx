@@ -355,39 +355,59 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     }
   };
 
-  const downloadAll = () => {
+  const downloadAll = async () => {
     toast({
       title: "Скачивание начато",
       description: "Все изображения будут скачаны",
     });
     
-    generatedImages.forEach((image, index) => {
-      const link = document.createElement('a');
-      link.href = image.url;
-      const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
-      link.download = `${safeProductName}_${image.stage}_${index + 1}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
+    for (let index = 0; index < generatedImages.length; index++) {
+      try {
+        await downloadSingle(index);
+        // Small delay between downloads to prevent overwhelming the browser
+        if (index < generatedImages.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } catch (error) {
+        console.error(`Failed to download image ${index}:`, error);
+      }
+    }
   };
 
-  const downloadSingle = (index: number) => {
+  const downloadSingle = async (index: number) => {
     const image = generatedImages[index];
     if (!image) return;
     
-    const link = document.createElement('a');
-    link.href = image.url;
-    const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
-    link.download = `${safeProductName}_${image.stage}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Скачивание началось",
-      description: `Карточка "${image.stage}" скачивается`,
-    });
+    try {
+      // Fetch the image as blob to ensure proper download
+      const response = await fetch(image.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
+      link.download = `${safeProductName}_${image.stage}.png`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Скачивание началось",
+        description: `Карточка "${image.stage}" скачивается`,
+      });
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast({
+        title: "Ошибка скачивания",
+        description: "Не удалось скачать изображение",
+        variant: "destructive",
+      });
+    }
   };
 
   const regenerateCard = async (image: any, index: number) => {
@@ -816,9 +836,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          downloadSingle(index);
+                          await downloadSingle(index);
                         }}
                       >
                         <Download className="w-3 h-3 mr-1" />
