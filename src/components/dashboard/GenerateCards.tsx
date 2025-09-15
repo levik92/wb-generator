@@ -287,6 +287,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
     setCompletionNotificationShown(new Set()); // Clear previous notifications
+    setGeneratedImages([]); // Clear previous images
+    setCurrentJobId(null); // Clear previous job ID
 
     try {
       // Upload files to Supabase Storage first
