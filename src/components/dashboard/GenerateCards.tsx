@@ -163,12 +163,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     const pollJob = async () => {
       try {
-        // Stop polling only if job changed (not if generating state changed)
-        if (currentJobId !== jobId) {
-          console.log('Stopping polling - job changed');
-          return;
-        }
-
         const { data: job, error } = await supabase
           .from('generation_jobs')
           .select(`
