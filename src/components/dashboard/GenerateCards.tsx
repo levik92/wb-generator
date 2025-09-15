@@ -272,13 +272,40 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setJobStatus('Создание задачи генерации...');
 
     try {
-      const productImagesData = files.map(file => ({
-        url: URL.createObjectURL(file),
-        name: file.name
-      }));
+      // Upload files to Supabase Storage first
+      const productImagesData = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileName = `${profile.id}/${Date.now()}_${i}_${file.name}`;
+        
+        setJobStatus(`Загрузка изображения ${i + 1} из ${files.length}...`);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file, {
+            upsert: true
+          });
+
+        if (uploadError) {
+          throw new Error(`Ошибка загрузки изображения: ${uploadError.message}`);
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(fileName);
+
+        productImagesData.push({
+          url: publicUrl,
+          name: file.name
+        });
+      }
+
+      setJobStatus('Создание задачи генерации...');
 
       // Create generation job
-      const { data, error } = await supabase.functions.invoke('create-generation-job', {
+      const { data, error } = await supabase.functions.invoke('create-generation-job-v2', {
         body: {
           productName,
           category,
