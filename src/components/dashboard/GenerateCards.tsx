@@ -163,6 +163,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     const pollJob = async () => {
       try {
+        // Stop polling only if job changed (not if generating state changed)
+        if (currentJobId !== jobId) {
+          console.log('Stopping polling - job changed');
+          return;
+        }
+
         const { data: job, error } = await supabase
           .from('generation_jobs')
           .select(`
@@ -225,15 +231,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           const totalCards = selectedCards.length;
           const allCompleted = completedTasks.length === totalCards;
           const hasFailures = failedTasks.length > 0;
+          const shouldStopPolling = allCompleted || job.status === 'failed' || job.status === 'completed';
           
-          if (allCompleted || job.status === 'failed') {
+          if (shouldStopPolling) {
             setGenerating(false);
             
             // Show completion notification only once when ALL cards are done
             if (allCompleted && !completionNotificationShown.has(jobId)) {
+              const cardWord = totalCards === 1 ? 'карточка' : 
+                               totalCards < 5 ? 'карточки' : 'карточек';
               toast({
                 title: "Генерация завершена!",
-                description: `Все карточки готовы для скачивания`,
+                description: `Все ${totalCards} ${cardWord} готовы для скачивания`,
               });
               
               // Mark notification as shown for this job
