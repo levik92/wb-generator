@@ -64,6 +64,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     };
   }, [pollingInterval]);
 
+  // Clear images when generating starts
+  useEffect(() => {
+    if (generating) {
+      setGeneratedImages([]);
+    }
+  }, [generating]);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
     
@@ -214,14 +221,19 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             setGeneratedImages(images);
           }
 
-          // Check if job is completed or failed
-          if (job.status === 'completed' || job.status === 'failed') {
+          // Check if ALL cards are completed (not just job status)
+          const totalCards = selectedCards.length;
+          const allCompleted = completedTasks.length === totalCards;
+          const hasFailures = failedTasks.length > 0;
+          
+          if (allCompleted || job.status === 'failed') {
             setGenerating(false);
             
-            if (job.status === 'completed' && !completionNotificationShown.has(jobId)) {
+            // Show completion notification only once when ALL cards are done
+            if (allCompleted && !completionNotificationShown.has(jobId)) {
               toast({
                 title: "Генерация завершена!",
-                description: "Все карточки готовы для скачивания",
+                description: `Все карточки готовы для скачивания`,
               });
               
               // Mark notification as shown for this job
@@ -251,15 +263,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               } catch (error) {
                 console.error('Error saving to history:', error);
               }
-            } else {
+            } else if (job.status === 'failed') {
               toast({
-                title: "Ошибка генерации",
+                title: "Ошибка генерации", 
                 description: job.error_message || "Генерация не удалась",
                 variant: "destructive",
               });
             }
             
-            // Clean up polling
+            // Clean up polling only when completely done
             if (pollingInterval) {
               clearInterval(pollingInterval);
               setPollingInterval(null);
@@ -280,15 +292,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const simulateGeneration = async () => {
+    // Clear previous state immediately
+    setGeneratedImages([]); // Clear previous images first
+    setCompletionNotificationShown(new Set()); // Clear previous notifications
+    setCurrentJobId(null); // Clear previous job ID
+    
     if (!canGenerate()) return;
 
     setGenerating(true);
     setProgress(0);
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
-    setCompletionNotificationShown(new Set()); // Clear previous notifications
-    setGeneratedImages([]); // Clear previous images
-    setCurrentJobId(null); // Clear previous job ID
 
     try {
       // Upload files to Supabase Storage first
