@@ -53,6 +53,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
   const [completionNotificationShown, setCompletionNotificationShown] = useState(false);
+  const [jobCompleted, setJobCompleted] = useState(false);
   const { toast } = useToast();
 
   // Cleanup polling on unmount
@@ -158,10 +159,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     const pollJob = async () => {
       try {
-        if (completionNotificationShown) {
-          console.log('Stopping poll - already completed');
-          return;
-        }
+          if (jobCompleted) {
+            console.log('Stopping poll - job already completed');
+            return;
+          }
         
         const { data: job, error } = await supabase
           .from('generation_jobs')
@@ -229,6 +230,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           if (shouldStopPolling) {
             setGenerating(false);
+            setJobCompleted(true); // Mark job as completed (success or fail)
             
             // Show completion notification only once
             if (allCompleted && !completionNotificationShown) {
@@ -295,6 +297,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     // Clear previous state immediately
     setGeneratedImages([]); // Clear previous images first
     setCompletionNotificationShown(false); // Clear notification flag
+    setJobCompleted(false); // Reset completion flag
     setCurrentJobId(null); // Clear previous job ID
     
     if (!canGenerate()) return;
