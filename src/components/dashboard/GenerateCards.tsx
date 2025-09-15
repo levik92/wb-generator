@@ -52,7 +52,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [jobStatus, setJobStatus] = useState<string>('');
   const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
+  const [completionNotificationShown, setCompletionNotificationShown] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
@@ -208,11 +218,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           if (job.status === 'completed' || job.status === 'failed') {
             setGenerating(false);
             
-            if (job.status === 'completed') {
+            if (job.status === 'completed' && !completionNotificationShown.has(jobId)) {
               toast({
                 title: "Генерация завершена!",
                 description: "Все карточки готовы для скачивания",
               });
+              
+              // Mark notification as shown for this job
+              setCompletionNotificationShown(prev => new Set([...prev, jobId]));
               
               // Save to history
               try {
@@ -273,6 +286,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setProgress(0);
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
+    setCompletionNotificationShown(new Set()); // Clear previous notifications
 
     try {
       // Upload files to Supabase Storage first
