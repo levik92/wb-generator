@@ -9,9 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2 } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -49,6 +50,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [jobStatus, setJobStatus] = useState<string>('');
+  const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
+  const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -384,6 +387,56 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     });
   };
 
+  const regenerateCard = async (image: any, index: number) => {
+    const cardKey = `${image.id}_${index}`;
+    setRegeneratingCards(prev => new Set([...prev, cardKey]));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('regenerate-single-card', {
+        body: {
+          productName: productName,
+          category: category,
+          description: description,
+          userId: profile.id,
+          cardIndex: index,
+          cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover'
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.imageUrl) {
+        // Update the generated image with new URL
+        setGeneratedImages(prev => prev.map((img, i) => 
+          i === index ? { ...img, url: data.imageUrl } : img
+        ));
+        
+        toast({
+          title: "Перегенерация завершена",
+          description: `Карточка "${image.stage}" перегенерирована`,
+        });
+        
+        // Update tokens balance
+        onTokensUpdate();
+      } else {
+        throw new Error(data?.error || 'Неизвестная ошибка');
+      }
+    } catch (error: any) {
+      console.error('Error regenerating card:', error);
+      toast({
+        title: "Ошибка перегенерации",
+        description: error.message || 'Произошла ошибка при перегенерации',
+        variant: "destructive",
+      });
+    } finally {
+      setRegeneratingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cardKey);
+        return newSet;
+      });
+    }
+  };
+
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
@@ -694,29 +747,76 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              {generatedImages.map((image, index) => (
-                <div key={image.id} className="flex items-center gap-4 p-4 border rounded-lg bg-muted/30">
-                  <img
-                    src={image.url}
-                    alt={`Generated card ${index + 1}`}
-                    className="w-16 h-20 object-cover rounded-md border"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm truncate">{image.stage}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {CARD_STAGES[image.stageIndex]?.description}
-                    </p>
+              {generatedImages.map((image, index) => {
+                const cardKey = `${image.id}_${index}`;
+                const isRegenerating = regeneratingCards.has(cardKey);
+                
+                return (
+                  <div key={image.id} className="flex items-center gap-4 p-4 border rounded-lg bg-muted/30">
+                    <div className="relative group">
+                      <img
+                        src={image.url}
+                        alt={`Generated card ${index + 1}`}
+                        className="w-16 h-20 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover:brightness-75"
+                      />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md">
+                        <Eye className="w-5 h-5 text-white" />
+                      </div>
+                      {/* Dialog trigger (invisible but covers the image) */}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div 
+                            className="absolute inset-0 cursor-pointer"
+                            onClick={() => setFullscreenImage(image)}
+                          />
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] p-2">
+                          <div className="flex items-center justify-center">
+                            <img
+                              src={image.url}
+                              alt={`Generated card ${index + 1} - Fullscreen`}
+                              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm truncate">{image.stage}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {CARD_STAGES[image.stageIndex]?.description}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => regenerateCard(image, index)}
+                        disabled={isRegenerating}
+                      >
+                        {isRegenerating ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                        )}
+                        {isRegenerating ? 'Перегенерация...' : 'Перегенерировать'}
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadSingle(index)}
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        Скачать
+                      </Button>
+                    </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => downloadSingle(index)}
-                  >
-                    <Download className="w-3 h-3 mr-1" />
-                    Скачать
-                  </Button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
