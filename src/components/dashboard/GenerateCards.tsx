@@ -64,7 +64,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     };
   }, [pollingInterval]);
 
-  // Clear images when generating starts
+
   useEffect(() => {
     if (generating) {
       setGeneratedImages([]);
@@ -73,8 +73,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
-    
-    // Validate file count
+
     if (uploadedFiles.length + files.length > 3) {
       toast({
         title: "Слишком много файлов",
@@ -83,8 +82,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       });
       return;
     }
-    
-    // Validate file sizes (max 10MB each)
+
     const maxSizeBytes = 10 * 1024 * 1024;
     const oversizedFiles = uploadedFiles.filter(file => file.size > maxSizeBytes);
     
@@ -97,7 +95,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       return;
     }
     
-    // Validate file types
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     const invalidFiles = uploadedFiles.filter(file => !allowedTypes.includes(file.type));
     
@@ -118,7 +115,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    const tokensNeeded = selectedCards.length * 10; // 10 токенов за карточку
+    const tokensNeeded = selectedCards.length * 10;
     return files.length > 0 && 
            productName.trim() && 
            category && 
@@ -129,7 +126,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const getGuardMessage = () => {
-    const tokensNeeded = selectedCards.length * 10; // 10 токенов за карточку
+    const tokensNeeded = selectedCards.length * 10;
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
     if (!productName.trim()) return "Введите название товара";
     if (!category) return "Выберите категорию товара";
@@ -143,7 +140,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const handleCardToggle = (cardIndex: number) => {
     setSelectedCards(prev => {
       if (prev.includes(cardIndex)) {
-        // Не позволяем убрать все карточки
         if (prev.length === 1) return prev;
         return prev.filter(i => i !== cardIndex);
       } else {
@@ -153,7 +149,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const startJobPolling = (jobId: string) => {
-    // Clean up existing polling
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
@@ -163,6 +158,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     const pollJob = async () => {
       try {
+        if (completionNotificationShown) {
+          console.log('Stopping poll - already completed');
+          return;
+        }
+        
         const { data: job, error } = await supabase
           .from('generation_jobs')
           .select(`
@@ -277,6 +277,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             }
             setCurrentJobId(null);
             onTokensUpdate?.();
+            return
           }
         }
         } catch (error) {
