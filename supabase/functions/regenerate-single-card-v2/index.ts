@@ -208,7 +208,7 @@ serve(async (req) => {
 
     // Download and upload to Supabase Storage
     const imageBuffer = await fetch(imageUrl).then(r => r.arrayBuffer());
-    const fileName = `regenerated/${userId}/${Date.now()}_${cardType}.png`;
+    const fileName = `${userId}/regenerated/${Date.now()}_${cardType}.png`;
     
     const { error: uploadError } = await supabase.storage
       .from('generated-cards')

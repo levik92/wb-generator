@@ -448,14 +448,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setRegeneratingCards(prev => new Set([...prev, cardKey]));
     
     try {
-      const { data, error } = await supabase.functions.invoke('regenerate-single-card', {
+      const { data, error } = await supabase.functions.invoke('regenerate-single-card-v2', {
         body: {
           productName: productName,
           category: category,
           description: description,
           userId: profile.id,
-          cardIndex: index,
-          cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover'
+          cardIndex: image.stageIndex,
+          cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
+          sourceImageUrl: image.url
         }
       });
 

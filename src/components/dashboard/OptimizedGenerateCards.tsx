@@ -170,25 +170,30 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('generated-cards')
-          .upload(`user-uploads/${fileName}`, file);
+          .from('product-images')
+          .upload(`${profile.id}/${fileName}`, file);
 
         if (uploadError) throw uploadError;
 
         const { data: urlData } = supabase.storage
-          .from('generated-cards')
+          .from('product-images')
           .getPublicUrl(uploadData.path);
 
         imageUrls.push(urlData.publicUrl);
       }
 
       // Create generation job
-      const { data, error } = await supabase.functions.invoke('create-generation-job', {
+      const { data, error } = await supabase.functions.invoke('create-generation-job-v2', {
         body: {
           productName,
           category,
           description,
-          imageUrls
+          userId: profile.id,
+          productImages: imageUrls.map((url, index) => ({
+            url: url,
+            name: `image_${index + 1}.png`
+          })),
+          selectedCards: [0, 1, 2, 3, 4, 5] // Все карточки
         }
       });
 

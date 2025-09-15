@@ -30,10 +30,22 @@ verify_jwt = true
 [functions.regenerate-single-card]
 verify_jwt = true
 
+[functions.regenerate-single-card-v2]
+verify_jwt = true
+
 [functions.create-generation-job]
 verify_jwt = true
 
+[functions.create-generation-job-v2]
+verify_jwt = true
+
 [functions.process-generation-tasks]
+verify_jwt = false
+
+[functions.process-generation-tasks-v2]
+verify_jwt = false
+
+[functions.process-openai-task]
 verify_jwt = false
 
 [functions.send-welcome-email]

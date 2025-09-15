@@ -29,6 +29,23 @@ serve(async (req)=>{
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { taskId, sourceImageUrl, prompt } = await req.json();
     console.log(`Processing OpenAI task ${taskId}`);
+    
+    // Get task and job info for proper file path
+    const { data: taskData, error: taskError } = await supabase
+      .from('generation_tasks')
+      .select(`
+        *,
+        generation_jobs!inner(
+          id,
+          user_id
+        )
+      `)
+      .eq('id', taskId)
+      .single();
+    
+    if (taskError || !taskData) {
+      throw new Error(`Task not found: ${taskError?.message || 'Unknown error'}`);
+    }
     // Download source image
     const sourceImageResponse = await fetch(sourceImageUrl);
     if (!sourceImageResponse.ok) {
@@ -108,7 +125,7 @@ serve(async (req)=>{
     } else {
       throw new Error(`No image data found in response: ${JSON.stringify(imageResult)}`);
     }
-    const fileName = `generated/${taskId}_${Date.now()}.png`;
+    const fileName = `${taskData.generation_jobs.user_id}/${taskData.generation_jobs.id}/${taskData.card_index}_${taskData.card_type}.png`;
     const { error: uploadError } = await supabase.storage.from('generated-cards').upload(fileName, imageBuffer, {
       contentType: 'image/png',
       upsert: true
