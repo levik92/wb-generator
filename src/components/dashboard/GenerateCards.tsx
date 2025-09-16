@@ -559,17 +559,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="bg-muted p-2 rounded-lg">
-              <Info className="h-4 w-4 text-purple-600" />
+              <Info className="h-4 w-4 text-amber-600" />
             </div>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Новая система генерации</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Бета-версия сервиса</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <div className="bg-muted/30 border border-border/50 rounded-[8px] p-3 flex items-center gap-3">
-            <Zap className="h-4 w-4 text-purple-600 shrink-0" />
+            <Zap className="h-4 w-4 text-amber-600 shrink-0" />
             <div className="text-xs sm:text-sm text-muted-foreground">
-              <p className="font-medium">Фоновая обработка + защита от лимитов</p>
-              <p>Генерация теперь происходит в фоне, если вы закрыли страницу во время генерации, то результат будет на странице "История".</p>
+              <p className="font-medium">Тестирование и улучшение функционала</p>
+              <p>Сервис находится в стадии активной разработки. Возможны временные сбои и ошибки. Мы работаем над устранением всех проблем для улучшения вашего опыта.</p>
             </div>
           </div>
         </CardContent>
