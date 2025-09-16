@@ -555,7 +555,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         </p>
       </div>
 
-      <Card className="bg-muted/30 border border-muted">
+      <Card className="bg-yellow-50 border border-yellow-100">
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="bg-muted p-2 rounded-lg">
@@ -565,7 +565,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-yellow-100 border border-yellow-300 rounded-[8px] p-3 flex items-center gap-3">
+          <div className="bg-yellow-200 border border-yellow-400 rounded-[8px] p-3 flex items-center gap-3">
             <Zap className="h-4 w-4 text-amber-600 shrink-0" />
             <div className="text-xs sm:text-sm text-muted-foreground">
               <p className="font-medium">Тестирование и улучшение функционала</p>
