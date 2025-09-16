@@ -726,6 +726,10 @@ export type Database = {
         Args: { job_id_param: string }
         Returns: undefined
       }
+      use_promocode: {
+        Args: { code_param: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"
