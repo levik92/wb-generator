@@ -196,18 +196,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           return;
         }
         if (job) {
-          // Если job завершён - ГЛОБАЛЬНАЯ ОСТАНОВКА
-          if (job.status === 'completed' || job.status === 'failed') {
-            console.log(`Job ${jobId} is ${job.status}, STOPPING GLOBAL POLLING`);
-            if (globalPollingInterval) {
-              clearInterval(globalPollingInterval);
-              globalPollingInterval = null;
-            }
-            currentPollingJobId = null;
-            setJobCompleted(true);
-            return;
-          }
-          
           const completedTasks = job.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
           const processingTasks = job.generation_tasks?.filter((t: any) => t.status === 'processing') || [];
           const failedTasks = job.generation_tasks?.filter((t: any) => t.status === 'failed') || [];
@@ -300,7 +288,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               });
             }
             
-            // ГЛОБАЛЬНАЯ ОЧИСТКА при завершении
+            // ГЛОБАЛЬНАЯ ОСТАНОВКА ПОСЛЕ обработки результата
+            console.log(`Job ${jobId} is ${job.status}, STOPPING GLOBAL POLLING after processing`);
             if (globalPollingInterval) {
               clearInterval(globalPollingInterval);
               globalPollingInterval = null;
