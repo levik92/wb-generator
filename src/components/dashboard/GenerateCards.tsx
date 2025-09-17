@@ -162,10 +162,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     const pollJob = async () => {
       try {
-          if (jobCompleted) {
-            console.log('Stopping poll - job already completed');
-            return;
-          }
         
         const { data: job, error } = await supabase
           .from('generation_jobs')
@@ -189,6 +185,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         }
 
         if (job) {
+          // Check if job is already completed - stop polling immediately
+          if (job.status === 'completed' || job.status === 'failed') {
+            console.log(`Job ${jobId} already ${job.status}, stopping polling`);
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+            setJobCompleted(true);
+            return;
+          }
+          
           const completedTasks = job.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
           const processingTasks = job.generation_tasks?.filter((t: any) => t.status === 'processing') || [];
           const failedTasks = job.generation_tasks?.filter((t: any) => t.status === 'failed') || [];
