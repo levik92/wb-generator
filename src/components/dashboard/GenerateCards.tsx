@@ -232,8 +232,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             setGenerating(false);
             setJobCompleted(true); // Mark job as completed (success or fail)
             
-            // Show completion notification only once
-            if (allCompleted && !completionNotificationShown) {
+            // Show completion notification only once - check both flag and job transition
+            const jobJustCompleted = job.status === 'completed' && !completionNotificationShown;
+            if (allCompleted && jobJustCompleted) {
               setCompletionNotificationShown(true);
               toast({
                 title: "Генерация завершена!",
@@ -544,7 +545,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentJobId]); // Removed pollingInterval dependency to prevent unnecessary re-subscriptions
+  }, [currentJobId]);
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">

@@ -168,6 +168,12 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
         if (!pendingTasks || pendingTasks.length === 0) {
           console.log(`All tasks completed for job ${job.id}`);
           
+          // Check if job is already completed to avoid duplicate notifications
+          if (job.status === 'completed' || job.status === 'failed') {
+            console.log(`Job ${job.id} already completed, skipping notification`);
+            break;
+          }
+          
           // Determine final job status
           const finalStatus = failedTasks && failedTasks.length > 0 && completedTasks && completedTasks.length === 0 ? 'failed' : 'completed';
           
