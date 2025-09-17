@@ -109,8 +109,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Наушники - Электроника</h3>
               <BeforeAfterSlider
-                beforeImage="/lovable-uploads/4fc1d149-23bc-42ba-8a35-f732f142a15d.png"
-                afterImage="/lovable-uploads/headphones-after.png"
+                beforeImage="/lovable-uploads/1-1.png"
+                afterImage="/lovable-uploads/1-2.png"
                 alt="карточки наушников"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -122,8 +122,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Платье - Мода</h3>
               <BeforeAfterSlider
-                beforeImage="/lovable-uploads/e81af743-5bce-4a03-8419-1ccfe55207e2.png"
-                afterImage="/lovable-uploads/women-after.png"
+                beforeImage="/lovable-uploads/2-1.jpg"
+                afterImage="/lovable-uploads/2-2.png"
                 alt="карточки платья"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -135,8 +135,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Шампунь - Красота</h3>
               <BeforeAfterSlider
-                beforeImage="/lovable-uploads/bd25566b-5310-4b3e-9566-1ae44adbfd96.png"
-                afterImage="/lovable-uploads/syoss-after.png"
+                beforeImage="/lovable-uploads/4-1.webp"
+                afterImage="/lovable-uploads/4-2.png"
                 alt="карточки шампуня"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
@@ -148,8 +148,8 @@ const Landing = () => {
             <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
               <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Йога-коврик - Спорт</h3>
               <BeforeAfterSlider
-                beforeImage="/lovable-uploads/1b4f8059-c780-42d1-b232-8937986d71c7.png"
-                afterImage="/lovable-uploads/yoga-after.png"
+                beforeImage="/lovable-uploads/3-1.webp"
+                afterImage="/lovable-uploads/3-2.png"
                 alt="карточки йога-коврика"
               />
               <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
