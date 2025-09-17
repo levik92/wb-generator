@@ -54,6 +54,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
   const [completionNotificationShown, setCompletionNotificationShown] = useState(false);
   const [jobCompleted, setJobCompleted] = useState(false);
+  const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Cleanup polling on unmount
@@ -150,11 +151,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const startJobPolling = (jobId: string) => {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      setPollingInterval(null);
+    // Prevent duplicate polling for the same job
+    if (pollingInterval || currentJobId === jobId) {
+      console.log(`Polling already active for job ${jobId}, skipping`);
+      return;
     }
     
+    console.log(`Starting polling for job ${jobId}`);
     setCurrentJobId(jobId);
     
     const pollJob = async () => {
@@ -232,8 +235,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             setGenerating(false);
             setJobCompleted(true); // Mark job as completed (success or fail)
             
-            // Show completion notification only once - check both flag and job transition
-            const jobJustCompleted = job.status === 'completed' && !completionNotificationShown;
+            // Show completion notification only on status transition (not on repeated polls)
+            const jobStatusChanged = previousJobStatus !== job.status;
+            const jobJustCompleted = job.status === 'completed' && jobStatusChanged && !completionNotificationShown;
+            
+            // Update previous status for next comparison
+            setPreviousJobStatus(job.status);
+            
             if (allCompleted && jobJustCompleted) {
               setCompletionNotificationShown(true);
               toast({
@@ -300,6 +308,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setCompletionNotificationShown(false); // Clear notification flag
     setJobCompleted(false); // Reset completion flag
     setCurrentJobId(null); // Clear previous job ID
+    setPreviousJobStatus(null); // Reset status tracking
     
     if (!canGenerate()) return;
 
