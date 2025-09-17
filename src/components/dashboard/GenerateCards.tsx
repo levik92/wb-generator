@@ -152,9 +152,22 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const startJobPolling = (jobId: string) => {
+    // FORCE CLEAR ALL EXISTING INTERVALS - nuclear option
+    if (pollingIntervalRef.current) {
+      console.log('Force clearing existing interval');
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    
+    // Also clear any lingering state intervals
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+    
     // Prevent duplicate polling for the same job
-    if (pollingIntervalRef.current || currentJobId === jobId) {
-      console.log(`Polling already active for job ${jobId}, skipping`);
+    if (currentJobId === jobId) {
+      console.log(`Job ${jobId} already being polled, skipping`);
       return;
     }
     
@@ -189,13 +202,22 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         if (job) {
           // Check if job is already completed - stop polling immediately
           if (job.status === 'completed' || job.status === 'failed') {
-            console.log(`Job ${jobId} already ${job.status}, stopping polling`);
+            console.log(`Job ${jobId} already ${job.status}, FORCE STOPPING ALL POLLING`);
+            
+            // NUCLEAR OPTION - clear everything
             if (pollingIntervalRef.current) {
+              console.log('Clearing pollingIntervalRef');
               clearInterval(pollingIntervalRef.current);
               pollingIntervalRef.current = null;
+            }
+            if (pollingInterval) {
+              console.log('Clearing pollingInterval state');
+              clearInterval(pollingInterval);
               setPollingInterval(null);
             }
+            
             setJobCompleted(true);
+            setCurrentJobId(null);
             return;
           }
           
