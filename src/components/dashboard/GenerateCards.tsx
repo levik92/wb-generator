@@ -49,6 +49,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [jobStatus, setJobStatus] = useState<string>('');
   const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
@@ -152,7 +153,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
   const startJobPolling = (jobId: string) => {
     // Prevent duplicate polling for the same job
-    if (pollingInterval || currentJobId === jobId) {
+    if (pollingIntervalRef.current || currentJobId === jobId) {
       console.log(`Polling already active for job ${jobId}, skipping`);
       return;
     }
@@ -189,8 +190,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           // Check if job is already completed - stop polling immediately
           if (job.status === 'completed' || job.status === 'failed') {
             console.log(`Job ${jobId} already ${job.status}, stopping polling`);
-            if (pollingInterval) {
-              clearInterval(pollingInterval);
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
               setPollingInterval(null);
             }
             setJobCompleted(true);
@@ -290,8 +292,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             }
             
             // Clean up polling only when completely done
-            if (pollingInterval) {
-              clearInterval(pollingInterval);
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current);
+              pollingIntervalRef.current = null;
               setPollingInterval(null);
             }
             setCurrentJobId(null);
@@ -307,6 +310,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     // Poll immediately and then every 5 seconds
     pollJob();
     const interval = setInterval(pollJob, 5000);
+    pollingIntervalRef.current = interval;
     setPollingInterval(interval);
   };
 
@@ -515,8 +519,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
     };
   }, []);
