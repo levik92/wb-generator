@@ -14,7 +14,7 @@ export const BeforeAfterSlider = ({ beforeImage, afterImage, alt }: BeforeAfterS
   };
 
   return (
-    <div className="relative w-full aspect-[3/4] max-w-md mx-auto overflow-hidden rounded-lg shadow-lg">
+    <div className="relative w-full aspect-[3/4] max-w-md mx-auto overflow-hidden rounded-2xl shadow-lg">
       {/* Before Image (Background) */}
       <div className="absolute inset-0">
         <img
