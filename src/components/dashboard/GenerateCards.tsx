@@ -513,48 +513,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     };
   }, []);
 
-  // Setup realtime subscription for job updates
-  useEffect(() => {
-    if (!currentJobId) return;
-
-    const channel = supabase
-      .channel(`job-${currentJobId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'generation_jobs',
-          filter: `id=eq.${currentJobId}`
-        },
-        (payload) => {
-          // Restart polling for job updates
-          if (!pollingInterval) {
-            startJobPolling(currentJobId);
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'generation_tasks',
-          filter: `job_id=eq.${currentJobId}`
-        },
-        (payload) => {
-          // Restart polling for task updates
-          if (!pollingInterval) {
-            startJobPolling(currentJobId);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentJobId]);
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
