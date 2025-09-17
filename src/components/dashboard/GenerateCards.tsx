@@ -49,7 +49,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [generatedImages, setGeneratedImages] = useState<any[]>([]);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [jobStatus, setJobStatus] = useState<string>('');
   const [fullscreenImage, setFullscreenImage] = useState<any | null>(null);
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
@@ -152,26 +151,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const startJobPolling = (jobId: string) => {
-    // FORCE CLEAR ALL EXISTING INTERVALS - nuclear option
-    if (pollingIntervalRef.current) {
-      console.log('Force clearing existing interval');
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-    
-    // Also clear any lingering state intervals
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
     }
     
-    // Prevent duplicate polling for the same job
-    if (currentJobId === jobId) {
-      console.log(`Job ${jobId} already being polled, skipping`);
-      return;
-    }
-    
-    console.log(`Starting polling for job ${jobId}`);
     setCurrentJobId(jobId);
     
     const pollJob = async () => {
@@ -197,29 +181,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           console.error('Polling error:', error);
           return;
         }
-        console.log('Job:', job);
-        console.log('Job status:', job.status);
         if (job) {
-          // Check if job is already completed - stop polling immediately
-          if (job.status === 'completed' || job.status === 'failed') {
-            console.log(`Job ${jobId} already ${job.status}, FORCE STOPPING ALL POLLING`);
-            
-            // NUCLEAR OPTION - clear everything
-            if (pollingIntervalRef.current) {
-              console.log('Clearing pollingIntervalRef');
-              clearInterval(pollingIntervalRef.current);
-              pollingIntervalRef.current = null;
-            }
-            if (pollingInterval) {
-              console.log('Clearing pollingInterval state');
-              clearInterval(pollingInterval);
-              setPollingInterval(null);
-            }
-            
-            setJobCompleted(true);
-            setCurrentJobId(null);
-            return;
-          }
           
           const completedTasks = job.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
           const processingTasks = job.generation_tasks?.filter((t: any) => t.status === 'processing') || [];
@@ -314,9 +276,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             }
             
             // Clean up polling only when completely done
-            if (pollingIntervalRef.current) {
-              clearInterval(pollingIntervalRef.current);
-              pollingIntervalRef.current = null;
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
               setPollingInterval(null);
             }
             setCurrentJobId(null);
@@ -332,7 +293,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     // Poll immediately and then every 5 seconds
     pollJob();
     const interval = setInterval(pollJob, 5000);
-    pollingIntervalRef.current = interval;
     setPollingInterval(interval);
   };
 
@@ -541,9 +501,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
       }
     };
   }, []);
