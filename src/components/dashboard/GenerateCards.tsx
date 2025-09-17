@@ -565,11 +565,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-yellow-200 border border-yellow-400 rounded-[8px] p-3 flex items-center gap-3">
+          <div className="bg-yellow-100 border border-yellow-300 rounded-[8px] p-3 flex items-center gap-3">
             <Zap className="h-4 w-4 text-amber-600 shrink-0" />
             <div className="text-xs sm:text-sm text-muted-foreground">
-              <p className="font-medium">Тестирование и улучшение функционала</p>
-              <p>Сервис находится в стадии активной разработки. Возможны временные сбои и ошибки. Мы работаем над устранением всех проблем для улучшения вашего опыта.</p>
+              <p className="font-medium">Ранний доступ</p>
+              <p>Сервис находиться в раннем доступе. Все функционирует, но изредка могут возникать ошибки. Мы ежедневно работает над его улучшением и видим все возникающие ошибки. Если что-то не сработало, просто подождите и вернитесь к генерации позже.</p>
             </div>
           </div>
         </CardContent>
