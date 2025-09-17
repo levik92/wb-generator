@@ -183,7 +183,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           console.error('Polling error:', error);
           return;
         }
-
+        console.log('Job:', job);
+        console.log('Job status:', job.status);
         if (job) {
           // Check if job is already completed - stop polling immediately
           if (job.status === 'completed' || job.status === 'failed') {

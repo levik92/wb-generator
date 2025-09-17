@@ -60,6 +60,7 @@ serve(async (req)=>{
     // Call OpenAI
     const formData = new FormData();
     formData.append('image', sourceImageBlob, 'source.png');
+    formData.append('quality', 'low');
     formData.append('model', 'gpt-image-1');
     formData.append('prompt', prompt);
     formData.append('n', '1');
