@@ -37,6 +37,10 @@ const CARD_STAGES = [
   { name: "Гарантия", key: "guarantee", description: "Карточка, подчеркивающая качество, надежность и гарантии производителя" }
 ];
 
+// Global polling control - только один polling в любой момент времени
+let globalPollingInterval: NodeJS.Timeout | null = null;
+let currentPollingJobId: string | null = null;
+
 export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [productName, setProductName] = useState("");
@@ -151,11 +155,21 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const startJobPolling = (jobId: string) => {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      setPollingInterval(null);
+    // СТОП ВСЕМ POLLING'АМ - глобальная очистка
+    if (globalPollingInterval) {
+      console.log('Clearing global polling interval');
+      clearInterval(globalPollingInterval);
+      globalPollingInterval = null;
     }
     
+    // Если тот же job уже polling - не запускаем повторно
+    if (currentPollingJobId === jobId) {
+      console.log(`Job ${jobId} already being polled globally, skipping`);
+      return;
+    }
+    
+    console.log(`Starting global polling for job ${jobId}`);
+    currentPollingJobId = jobId;
     setCurrentJobId(jobId);
     
     const pollJob = async () => {
@@ -182,6 +196,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           return;
         }
         if (job) {
+          // Если job завершён - ГЛОБАЛЬНАЯ ОСТАНОВКА
+          if (job.status === 'completed' || job.status === 'failed') {
+            console.log(`Job ${jobId} is ${job.status}, STOPPING GLOBAL POLLING`);
+            if (globalPollingInterval) {
+              clearInterval(globalPollingInterval);
+              globalPollingInterval = null;
+            }
+            currentPollingJobId = null;
+            setJobCompleted(true);
+            return;
+          }
           
           const completedTasks = job.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
           const processingTasks = job.generation_tasks?.filter((t: any) => t.status === 'processing') || [];
@@ -275,11 +300,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               });
             }
             
-            // Clean up polling only when completely done
-            if (pollingInterval) {
-              clearInterval(pollingInterval);
-              setPollingInterval(null);
+            // ГЛОБАЛЬНАЯ ОЧИСТКА при завершении
+            if (globalPollingInterval) {
+              clearInterval(globalPollingInterval);
+              globalPollingInterval = null;
             }
+            currentPollingJobId = null;
             setCurrentJobId(null);
             onTokensUpdate?.();
             return
@@ -292,8 +318,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
     // Poll immediately and then every 5 seconds
     pollJob();
-    const interval = setInterval(pollJob, 5000);
-    setPollingInterval(interval);
+    globalPollingInterval = setInterval(pollJob, 5000);
+    setPollingInterval(globalPollingInterval);
   };
 
   const simulateGeneration = async () => {
@@ -501,9 +527,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
+      if (globalPollingInterval) {
+        clearInterval(globalPollingInterval);
+        globalPollingInterval = null;
       }
+      currentPollingJobId = null;
     };
   }, []);
 
