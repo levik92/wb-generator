@@ -69,12 +69,12 @@ const chartConfig = {
     formatTooltip: (value: number) => `${value} пользователей`
   },
   generations: {
-    title: 'Генерации',
+    title: 'Запросы к AI',
     icon: Activity,
     color: '#a855f7',
     gradient: 'url(#violetGradient)',
     formatValue: (value: number) => value.toLocaleString('ru-RU'),
-    formatTooltip: (value: number) => `${value} генераций`
+    formatTooltip: (value: number) => `${value} запросов к AI`
   },
   tokens: {
     title: 'Потрачено токенов',
