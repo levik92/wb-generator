@@ -13,14 +13,19 @@ async function getPromptTemplate(supabase: any, promptType: string, productName:
     .from('ai_prompts')
     .select('prompt_template')
     .eq('prompt_type', promptType)
-    .single();
+    .order('created_at', { ascending: false })
+    .limit(1);
 
   if (promptError) {
     throw new Error(`Failed to fetch prompt template for ${promptType}: ${promptError.message}`);
   }
 
+  if (!promptData || promptData.length === 0) {
+    throw new Error(`No prompt template found for type: ${promptType}`);
+  }
+
   // Replace placeholders in the prompt template
-  let prompt = promptData.prompt_template;
+  let prompt = promptData[0].prompt_template;
   prompt = prompt.replace(/{productName}/g, productName);
   prompt = prompt.replace(/{category}/g, category);
   prompt = prompt.replace(/{benefits}/g, benefits);
