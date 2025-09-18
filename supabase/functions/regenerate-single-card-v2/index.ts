@@ -126,10 +126,10 @@ serve(async (req) => {
       .eq('id', userId)
       .single();
 
-    if (profileError || !profile || profile.tokens_balance < 10) {
+    if (profileError || !profile || profile.tokens_balance < 5) {
       return new Response(JSON.stringify({
         error: 'Insufficient tokens',
-        required: 10,
+        required: 5,
         available: profile?.tokens_balance || 0
       }), {
         status: 402,
@@ -140,7 +140,7 @@ serve(async (req) => {
     // Spend token
     const { error: spendError } = await supabase.rpc('spend_tokens', {
       user_id_param: userId,
-      tokens_amount: 10
+      tokens_amount: 5
     });
 
     if (spendError) {
@@ -155,112 +155,113 @@ serve(async (req) => {
     // Generate prompt from database
     const prompt = await getPromptTemplate(supabase, cardType, sanitizedProductName, sanitizedCategory, sanitizedDescription);
 
-    // Download the source image
-    console.log(`Downloading source image: ${sourceImageUrl}`);
-    const sourceImageResponse = await fetch(sourceImageUrl);
-    if (!sourceImageResponse.ok) {
-      throw new Error(`Failed to download source image: ${sourceImageResponse.statusText}`);
-    }
-    
-    const sourceImageBuffer = await sourceImageResponse.arrayBuffer();
-    const sourceImageBlob = new Blob([sourceImageBuffer], { type: 'image/png' });
+    // Create a temporary job for this single regeneration
+    const { data: tempJob, error: jobError } = await supabase
+      .from('generation_jobs')
+      .insert({
+        user_id: userId,
+        product_name: sanitizedProductName,
+        category: sanitizedCategory,
+        description: sanitizedDescription,
+        product_images: [sourceImageUrl], // Add source image for process-openai-task
+        status: 'processing',
+        total_cards: 1,
+        tokens_cost: 5
+      })
+      .select()
+      .single();
 
-    // Edit image with OpenAI DALL-E-2
-    console.log(`Calling OpenAI image edit API`);
+    if (jobError) {
+      console.error('Job creation error:', jobError);
+      
+      // Refund token on failure
+      await supabase.rpc('refund_tokens', {
+        user_id_param: userId,
+        tokens_amount: 5,
+        reason_text: 'Возврат за ошибку создания задачи'
+      });
+      
+      throw new Error(`Failed to create job: ${jobError.message}`);
+    }
+
+    // Create a generation task for this regeneration
+    const { data: task, error: taskError } = await supabase
+      .from('generation_tasks')
+      .insert({
+        job_id: tempJob.id,
+        card_type: cardType,
+        card_index: cardIndex,
+        status: 'pending',
+        prompt: prompt
+      })
+      .select()
+      .single();
+
+    if (taskError) {
+      console.error('Task creation error:', taskError);
+      
+      // Refund token on failure
+      await supabase.rpc('refund_tokens', {
+        user_id_param: userId,
+        tokens_amount: 5,
+        reason_text: 'Возврат за ошибку создания задачи'
+      });
+      
+      throw new Error(`Failed to create task: ${taskError.message}`);
+    }
+
+    // Delegate to process-openai-task for actual processing
+    console.log(`Delegating regeneration to process-openai-task for task ${task.id}`);
     
-    const formData = new FormData();
-    formData.append('image', sourceImageBlob, 'source.png');
-    formData.append('prompt', prompt);
-    formData.append('model', 'gpt-image-1');
-    formData.append('moderation', 'low');
-    formData.append('quality', 'high');
-    formData.append('n', '1');
-    formData.append('size', '1024x1536');
-    
-    const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-      },
-      body: formData,
+    const { error: invokeError } = await supabase.functions.invoke('process-openai-task', {
+      body: {
+        taskId: task.id,
+        sourceImageUrl: sourceImageUrl,
+        prompt: prompt
+      }
     });
 
-    if (!imageResponse.ok) {
-      const errorText = await imageResponse.text();
-      console.error('OpenAI API error:', errorText);
+    if (invokeError) {
+      console.error('Failed to invoke process-openai-task:', invokeError);
+      
+      // Mark task as failed
+      await supabase
+        .from('generation_tasks')
+        .update({ 
+          status: 'failed',
+          last_error: invokeError.message,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', task.id);
       
       // Refund token on failure
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
-        tokens_amount: 10,
-        reason_text: 'Возврат за неудачную генерацию'
-      });
-
-      throw new Error(`OpenAI API error: ${errorText}`);
-    }
-
-    const imageData = await imageResponse.json();
-    
-    if (!imageData.data || !imageData.data[0] || !imageData.data[0].url) {
-      // Refund token on failure
-      await supabase.rpc('refund_tokens', {
-        user_id_param: userId,
-        tokens_amount: 10,
-        reason_text: 'Возврат за неудачную генерацию'
+        tokens_amount: 5,
+        reason_text: 'Возврат за ошибку обработки'
       });
       
-      throw new Error('Invalid OpenAI response');
+      throw new Error(`Processing failed: ${invokeError.message}`);
     }
 
-    const imageUrl = imageData.data[0].url;
-
-    // Download and upload to Supabase Storage
-    const imageBuffer = await fetch(imageUrl).then(r => r.arrayBuffer());
-    const fileName = `${userId}/regenerated/${Date.now()}_${cardType}.png`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('generated-cards')
-      .upload(fileName, imageBuffer, {
-        contentType: 'image/png',
-        upsert: true
-      });
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      
-      // Refund token on failure
-      await supabase.rpc('refund_tokens', {
-        user_id_param: userId,
-        tokens_amount: 10,
-        reason_text: 'Возврат за неудачную загрузку'
-      });
-      
-      throw new Error(`Upload error: ${uploadError.message}`);
-    }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('generated-cards')
-      .getPublicUrl(fileName);
-
-    // Log the generation - удалено, так как таблицы generation_logs не существует
-    
-    // Create notification
+    // Create notification about start
     await supabase
       .from('notifications')
       .insert({
         user_id: userId,
-        title: 'Карточка перегенерирована',
-        message: `Карточка "${cardType}" для товара "${sanitizedProductName}" успешно перегенерирована.`,
-        type: 'success'
+        title: 'Перегенерация запущена',
+        message: `Перегенерация карточки "${cardType}" для товара "${sanitizedProductName}" началась. Результат будет готов через несколько минут.`,
+        type: 'info'
       });
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Карточка ${cardType} перегенерирована`,
-      imageUrl: publicUrl,
+      message: `Перегенерация карточки ${cardType} запущена`,
+      taskId: task.id,
+      jobId: tempJob.id,
       cardIndex: cardIndex,
-      cardType: cardType
+      cardType: cardType,
+      status: 'processing'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
