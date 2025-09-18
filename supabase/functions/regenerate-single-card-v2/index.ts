@@ -210,39 +210,18 @@ serve(async (req) => {
       throw new Error(`Failed to create task: ${taskError.message}`);
     }
 
-    // Delegate to process-openai-task for actual processing
+    // Delegate to process-openai-task for actual processing (fire and forget)
     console.log(`Delegating regeneration to process-openai-task for task ${task.id}`);
     
-    const { error: invokeError } = await supabase.functions.invoke('process-openai-task', {
+    supabase.functions.invoke('process-openai-task', {
       body: {
         taskId: task.id,
         sourceImageUrl: sourceImageUrl,
         prompt: prompt
       }
+    }).catch(error => {
+      console.error(`Failed to invoke process-openai-task for ${task.id}:`, error);
     });
-
-    if (invokeError) {
-      console.error('Failed to invoke process-openai-task:', invokeError);
-      
-      // Mark task as failed
-      await supabase
-        .from('generation_tasks')
-        .update({ 
-          status: 'failed',
-          last_error: invokeError.message,
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', task.id);
-      
-      // Refund token on failure
-      await supabase.rpc('refund_tokens', {
-        user_id_param: userId,
-        tokens_amount: 5,
-        reason_text: 'Возврат за ошибку обработки'
-      });
-      
-      throw new Error(`Processing failed: ${invokeError.message}`);
-    }
 
     // Create notification about start
     await supabase

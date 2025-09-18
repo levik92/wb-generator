@@ -481,19 +481,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       if (error) throw error;
 
-      if (data?.success && data?.imageUrl) {
-        // Update the generated image with new URL
-        setGeneratedImages(prev => prev.map((img, i) => 
-          i === index ? { ...img, url: data.imageUrl } : img
-        ));
-        
+      if (data?.success && data?.taskId && data?.jobId) {
         toast({
-          title: "Перегенерация завершена",
-          description: `Карточка "${image.stage}" перегенерирована`,
+          title: "Перегенерация запущена",
+          description: `Карточка "${image.stage}" поставлена в очередь на перегенерацию`,
         });
         
-        // Update tokens balance
+        // Update tokens balance immediately
         onTokensUpdate();
+        
+        // Start polling for this specific regeneration task
+        pollRegenerationTask(data.taskId, index, cardKey);
+        
       } else {
         throw new Error(data?.error || 'Неизвестная ошибка');
       }
@@ -504,13 +503,90 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         description: error.message || 'Произошла ошибка при перегенерации',
         variant: "destructive",
       });
-    } finally {
+      
+      // Remove from regenerating set on error
       setRegeneratingCards(prev => {
         const newSet = new Set(prev);
         newSet.delete(cardKey);
         return newSet;
       });
     }
+  };
+
+  const pollRegenerationTask = async (taskId: string, imageIndex: number, cardKey: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data: task, error } = await supabase
+          .from('generation_tasks')
+          .select('*')
+          .eq('id', taskId)
+          .single();
+
+        if (error) {
+          console.error('Error polling regeneration task:', error);
+          clearInterval(pollInterval);
+          setRegeneratingCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardKey);
+            return newSet;
+          });
+          return;
+        }
+
+        if (task.status === 'completed' && task.image_url) {
+          // Update the generated image with new URL
+          setGeneratedImages(prev => prev.map((img, i) => 
+            i === imageIndex ? { ...img, url: task.image_url } : img
+          ));
+          
+          toast({
+            title: "Перегенерация завершена",
+            description: `Карточка успешно перегенерирована`,
+          });
+          
+          clearInterval(pollInterval);
+          setRegeneratingCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardKey);
+            return newSet;
+          });
+          
+        } else if (task.status === 'failed') {
+          toast({
+            title: "Ошибка перегенерации",
+            description: task.last_error || 'Перегенерация не удалась',
+            variant: "destructive",
+          });
+          
+          clearInterval(pollInterval);
+          setRegeneratingCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardKey);
+            return newSet;
+          });
+        }
+        // If status is 'pending' or 'processing', continue polling
+        
+      } catch (error) {
+        console.error('Error polling regeneration task:', error);
+        clearInterval(pollInterval);
+        setRegeneratingCards(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(cardKey);
+          return newSet;
+        });
+      }
+    }, 3000); // Poll every 3 seconds for regeneration
+
+    // Cleanup after 5 minutes max
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      setRegeneratingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cardKey);
+        return newSet;
+      });
+    }, 5 * 60 * 1000);
   };
 
   // Cleanup polling on unmount
