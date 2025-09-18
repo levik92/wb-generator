@@ -166,6 +166,9 @@ serve(async (req) => {
     const formData = new FormData();
     formData.append('image', sourceImageBlob, 'source.png');
     formData.append('prompt', prompt);
+    formData.append('model', 'gpt-image-1');
+    formData.append('moderation', 'low');
+    formData.append('quality', 'high');
     formData.append('n', '1');
     formData.append('size', '1024x1536');
     
