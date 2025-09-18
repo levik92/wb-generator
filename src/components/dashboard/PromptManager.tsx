@@ -19,38 +19,38 @@ interface Prompt {
 const getPromptDisplayName = (type: string): { name: string; description: string; category: string } => {
   const promptNames: Record<string, { name: string; description: string; category: string }> = {
     'description': { 
-      name: 'Генерация описаний', 
+      name: 'Описание товара', 
       description: 'Описания товаров с текстовыми данными',
       category: 'Описание'
     },
     'cover': { 
-      name: 'Обложка карточки', 
-      description: 'Основная обложка товара',
+      name: 'Главная', 
+      description: 'Главное фото товара с описанием ключевых преимуществ для повышения CTR',
       category: 'Изображение'
     },
     'lifestyle': { 
-      name: 'Лайфстайл фото', 
-      description: 'Фото товара в использовании',
+      name: 'Товар в использовании + руководство по использованию', 
+      description: 'Демонстрация товара в процессе использования с инструкциями и рекомендациями',
       category: 'Изображение'
     },
     'macro': { 
-      name: 'Макро съемка', 
-      description: 'Детальная съемка товара',
+      name: 'Макро с составом или характеристиками', 
+      description: 'Детальная съемка с указанием состава, характеристик или материалов товара',
       category: 'Изображение'
     },
     'beforeAfter': { 
-      name: 'До/После', 
-      description: 'Сравнительные фото "до и после"',
+      name: 'Сравнение с другими товарами', 
+      description: 'Сравнительные фото товара с конкурентами',
       category: 'Изображение'
     },
     'bundle': { 
-      name: 'Комплект товаров', 
-      description: 'Фото товара с аксессуарами',
+      name: 'Фото товара без инфографики', 
+      description: 'Чистое фото товара на нейтральном фоне без текстовых элементов',
       category: 'Изображение'
     },
     'guarantee': { 
-      name: 'Гарантия качества', 
-      description: 'Фото товара с акцентом на качество',
+      name: 'Свойства и преимущества', 
+      description: 'Карточка с описанием ключевых свойств и преимуществ товара',
       category: 'Изображение'
     }
   };
@@ -165,7 +165,7 @@ export function PromptManager() {
         {/* Sort prompts: description first, then image prompts */}
         {[...prompts]
           .sort((a, b) => {
-            const order = ['description', 'cover', 'lifestyle', 'macro', 'beforeAfter', 'bundle', 'guarantee'];
+            const order = ['description', 'cover', 'guarantee', 'macro', 'lifestyle', 'beforeAfter', 'bundle'];
             return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
           })
           .map((prompt) => {
