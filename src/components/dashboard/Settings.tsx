@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones } from "lucide-react";
+import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2 } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -30,7 +30,111 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updating, setUpdating] = useState(false);
+  
+  // Wildberries API key management
+  const [wbApiKey, setWbApiKey] = useState("");
+  const [maskedWbKey, setMaskedWbKey] = useState<string | null>(null);
+  const [showWbApiKey, setShowWbApiKey] = useState(false);
+  const [hasWbKey, setHasWbKey] = useState(false);
+  
   const { toast } = useToast();
+
+  // Load Wildberries API key status on component mount
+  useEffect(() => {
+    loadWbApiKeyStatus();
+  }, []);
+
+  const loadWbApiKeyStatus = async () => {
+    try {
+      // Check if user has active WB API key
+      const { data: hasKey, error: hasKeyError } = await supabase
+        .rpc('has_active_api_key', { provider_name: 'wildberries' });
+
+      if (hasKeyError) throw hasKeyError;
+
+      setHasWbKey(hasKey || false);
+
+      if (hasKey) {
+        // Get masked version for display
+        const { data: masked, error: maskedError } = await supabase
+          .rpc('get_user_api_key_masked', { provider_name: 'wildberries' });
+
+        if (maskedError) throw maskedError;
+        setMaskedWbKey(masked);
+      }
+    } catch (error: any) {
+      console.error('Error loading WB API key status:', error);
+    }
+  };
+
+  const saveWbApiKey = async () => {
+    if (!wbApiKey.trim()) {
+      toast({
+        title: "Ошибка",
+        description: "Введите API ключ Wildberries",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('store_user_api_key', {
+          provider_name: 'wildberries',
+          api_key: wbApiKey.trim()
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "API ключ сохранен",
+        description: "Wildberries API ключ успешно добавлен",
+      });
+
+      setWbApiKey("");
+      setShowWbApiKey(false);
+      await loadWbApiKeyStatus();
+      onUpdate(); // Refresh profile to update wb_connected status
+    } catch (error: any) {
+      toast({
+        title: "Ошибка",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const removeWbApiKey = async () => {
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('user_api_keys')
+        .update({ is_active: false })
+        .eq('provider', 'wildberries')
+        .eq('user_id', profile.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "API ключ удален",
+        description: "Wildberries API ключ был удален",
+      });
+
+      await loadWbApiKeyStatus();
+      onUpdate(); // Refresh profile to update wb_connected status
+    } catch (error: any) {
+      toast({
+        title: "Ошибка",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const updateProfile = async () => {
     if (!fullName.trim()) return;
@@ -293,20 +397,89 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
 
       <Card className="bg-muted/30">
         <CardHeader>
-          <CardTitle>Wildberries</CardTitle>
-          <CardDescription>Подключение к личному кабинету</CardDescription>
+          <CardTitle>Wildberries API</CardTitle>
+          <CardDescription>Безопасное хранение API ключа для интеграции</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <span>Статус подключения</span>
-            <Badge variant="secondary">
-              В разработке
+            <Badge variant={hasWbKey ? "default" : "secondary"}>
+              {hasWbKey ? "Подключен" : "Не подключен"}
             </Badge>
           </div>
-          <Button disabled className="w-full bg-muted text-muted-foreground cursor-not-allowed">
-            <LinkIcon className="w-4 h-4 mr-2" />
-            Скоро
-          </Button>
+
+          {hasWbKey ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Текущий API ключ</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    value={maskedWbKey || ""}
+                    disabled
+                    className="input-bordered font-mono text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowWbApiKey(!showWbApiKey)}
+                  className="flex-1"
+                >
+                  {showWbApiKey ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+                  {showWbApiKey ? "Скрыть форму" : "Изменить ключ"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={removeWbApiKey}
+                  disabled={updating}
+                  size="sm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Добавьте API ключ для интеграции с Wildberries
+              </p>
+              <Button
+                onClick={() => setShowWbApiKey(true)}
+                className="w-full"
+              >
+                <LinkIcon className="w-4 h-4 mr-2" />
+                Добавить API ключ
+              </Button>
+            </div>
+          )}
+
+          {showWbApiKey && (
+            <div className="space-y-4 p-4 border rounded-lg bg-background/50">
+              <div className="space-y-2">
+                <Label>Wildberries API ключ</Label>
+                <div className="flex space-x-2">
+                  <Input
+                    type="password"
+                    placeholder="Введите API ключ Wildberries"
+                    value={wbApiKey}
+                    onChange={(e) => setWbApiKey(e.target.value)}
+                    className="input-bordered"
+                  />
+                  <Button 
+                    onClick={saveWbApiKey}
+                    disabled={updating || !wbApiKey.trim()}
+                    size="sm"
+                  >
+                    <Save className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                API ключ будет зашифрован и сохранен безопасно
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

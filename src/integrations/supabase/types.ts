@@ -379,7 +379,6 @@ export type Database = {
           referred_by: string | null
           tokens_balance: number
           updated_at: string
-          wb_api_key: string | null
           wb_connected: boolean
         }
         Insert: {
@@ -392,7 +391,6 @@ export type Database = {
           referred_by?: string | null
           tokens_balance?: number
           updated_at?: string
-          wb_api_key?: string | null
           wb_connected?: boolean
         }
         Update: {
@@ -405,7 +403,6 @@ export type Database = {
           referred_by?: string | null
           tokens_balance?: number
           updated_at?: string
-          wb_api_key?: string | null
           wb_connected?: boolean
         }
         Relationships: [
@@ -634,6 +631,42 @@ export type Database = {
           },
         ]
       }
+      user_api_keys: {
+        Row: {
+          created_at: string
+          encrypted_key: string
+          id: string
+          is_active: boolean
+          key_hash: string
+          last_used_at: string | null
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_key: string
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          last_used_at?: string | null
+          provider: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_key?: string
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          last_used_at?: string | null
+          provider?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -674,6 +707,14 @@ export type Database = {
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_user_api_key_masked: {
+        Args: { provider_name: string }
+        Returns: string
+      }
+      has_active_api_key: {
+        Args: { provider_name: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -720,6 +761,10 @@ export type Database = {
       }
       spend_tokens: {
         Args: { tokens_amount: number; user_id_param: string }
+        Returns: boolean
+      }
+      store_user_api_key: {
+        Args: { api_key: string; provider_name: string }
         Returns: boolean
       }
       update_job_progress: {

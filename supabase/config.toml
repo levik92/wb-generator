@@ -56,3 +56,6 @@ verify_jwt = true
 
 [functions.yookassa-webhook]
 verify_jwt = false
+
+[functions.get-user-api-key]
+verify_jwt = true
