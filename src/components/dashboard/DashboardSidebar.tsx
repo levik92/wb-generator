@@ -99,7 +99,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -116,7 +116,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden lg:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>

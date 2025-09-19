@@ -206,12 +206,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           setProgress(progressPercent);
           setCurrentStage(completedTasks.length);
 
-          // Set job status for display
+              // Set job status for display with selected cards info
           if (job.status === 'processing') {
             if (retryingTasks.length > 0) {
               setJobStatus(`Обработка... (${retryingTasks.length} задач ожидают повтора)`);
             } else if (processingTasks.length > 0) {
-              setJobStatus(`Генерация... (${processingTasks.length} активных)`);
+              const processingCardName = processingTasks[0] ? CARD_STAGES[processingTasks[0].card_index]?.name : 'карточку';
+              setJobStatus(`Генерируется: ${processingCardName}`);
             } else {
               setJobStatus('Обработка...');
             }
@@ -803,6 +804,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 text-sm flex items-center gap-2">
+                <Info className="w-4 h-4" />
+                Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
+              </p>
+              <p className="text-xs text-blue-600 mt-1 opacity-75">
+                WB Генератор может совершать ошибки. Перегенерируйте фото при необходимости.
+              </p>
+            </div>
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
