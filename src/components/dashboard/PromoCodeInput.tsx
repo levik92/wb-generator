@@ -52,9 +52,9 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
       const { data: promo, error: promoError } = await supabase
         .from('promocodes')
         .select('id, code, type, value, max_uses, current_uses, valid_until, is_active')
-        .eq('code', promoCode.toUpperCase())
+        .eq('code', promoCode.trim().toUpperCase())
         .eq('is_active', true)
-        .maybeSingle();
+        .single();
 
       if (promoError) throw promoError;
 

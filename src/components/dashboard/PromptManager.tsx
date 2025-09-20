@@ -20,37 +20,37 @@ const getPromptDisplayName = (type: string): { name: string; description: string
   const promptNames: Record<string, { name: string; description: string; category: string }> = {
     'description': { 
       name: 'Описание товара', 
-      description: 'Описания товаров с текстовыми данными',
+      description: 'Промт для генерации описаний товаров с текстовыми данными',
       category: 'Описание'
     },
     'cover': { 
-      name: 'Главная', 
-      description: 'Главное фото товара с описанием ключевых преимуществ для повышения CTR',
+      name: 'Главная карточка', 
+      description: 'Промт для главного фото товара с описанием ключевых преимуществ для повышения CTR',
       category: 'Изображение'
     },
-    'lifestyle': { 
-      name: 'Товар в использовании + руководство по использованию', 
-      description: 'Демонстрация товара в процессе использования с инструкциями и рекомендациями',
+    'features': { 
+      name: 'Свойства и преимущества', 
+      description: 'Промт для карточки с описанием ключевых свойств и преимуществ товара',
       category: 'Изображение'
     },
     'macro': { 
       name: 'Макро с составом или характеристиками', 
-      description: 'Детальная съемка с указанием состава, характеристик или материалов товара',
+      description: 'Промт для детальной съемки с указанием состава, характеристик или материалов товара',
       category: 'Изображение'
     },
-    'beforeAfter': { 
+    'usage': { 
+      name: 'Товар в использовании + руководство', 
+      description: 'Промт для демонстрации товара в процессе использования с инструкциями и рекомендациями',
+      category: 'Изображение'
+    },
+    'comparison': { 
       name: 'Сравнение с другими товарами', 
-      description: 'Сравнительные фото товара с конкурентами',
+      description: 'Промт для карточки сравнения данного товара с аналогами или конкурентами',
       category: 'Изображение'
     },
-    'bundle': { 
+    'clean': { 
       name: 'Фото товара без инфографики', 
-      description: 'Чистое фото товара на нейтральном фоне без текстовых элементов',
-      category: 'Изображение'
-    },
-    'guarantee': { 
-      name: 'Свойства и преимущества', 
-      description: 'Карточка с описанием ключевых свойств и преимуществ товара',
+      description: 'Промт для чистого фото товара без дополнительных графических элементов и текста',
       category: 'Изображение'
     }
   };
@@ -165,7 +165,7 @@ export function PromptManager() {
         {/* Sort prompts: description first, then image prompts */}
         {[...prompts]
           .sort((a, b) => {
-            const order = ['description', 'cover', 'guarantee', 'macro', 'lifestyle', 'beforeAfter', 'bundle'];
+            const order = ['description', 'cover', 'features', 'macro', 'usage', 'comparison', 'clean'];
             return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
           })
           .map((prompt) => {

@@ -804,15 +804,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <p className="text-blue-800 text-sm flex items-center gap-2">
-                <Info className="w-4 h-4" />
-                Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
-              </p>
-              <p className="text-xs text-blue-600 mt-1 opacity-75">
-                WB Генератор может совершать ошибки. Перегенерируйте фото при необходимости.
-              </p>
-            </div>
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -823,20 +814,26 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {CARD_STAGES.map((stage, index) => (
-                  <div
-                    key={index}
-                    className={`text-xs p-2 rounded border ${
-                      index < currentStage
-                        ? 'bg-primary/10 border-primary/20 text-primary'
-                        : index === currentStage
-                        ? 'bg-primary/5 border-primary/10 text-primary animate-pulse'
-                        : 'bg-muted/30 border-border text-muted-foreground'
-                    }`}
-                  >
-                    {stage.name}
-                  </div>
-                ))}
+                {selectedCards.map((cardIndex) => {
+                  const stage = CARD_STAGES[cardIndex];
+                  const completedCount = Math.min(currentStage, selectedCards.length);
+                  const currentCardPosition = selectedCards.indexOf(cardIndex);
+                  
+                  return (
+                    <div
+                      key={cardIndex}
+                      className={`text-xs p-2 rounded border ${
+                        currentCardPosition < completedCount
+                          ? 'bg-primary/10 border-primary/20 text-primary'
+                          : currentCardPosition === completedCount
+                          ? 'bg-primary/5 border-primary/10 text-primary animate-pulse'
+                          : 'bg-muted/30 border-border text-muted-foreground'
+                      }`}
+                    >
+                      {stage.name}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </CardContent>
@@ -994,13 +991,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           )}
           
           {generating && (
-            <Alert className="mt-4">
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Генерация выполняется в фоновом режиме. Вы можете закрыть эту страницу - 
-                результат сохранится в вашем аккаунте.
-              </AlertDescription>
-            </Alert>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+              <p className="text-blue-800 text-sm flex items-center gap-2">
+                <Info className="w-4 h-4" />
+                Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
+              </p>
+              <p className="text-xs text-blue-600 mt-1 opacity-75">
+                WB Генератор может совершать ошибки. Перегенерируйте фото при необходимости.
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

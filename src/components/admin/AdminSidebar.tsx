@@ -73,7 +73,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                 <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-semibold">Админ-панель</span>
+                <span className="text-sm font-semibold">WB Генератор</span>
               </div>
               <Button 
                 variant="ghost" 
