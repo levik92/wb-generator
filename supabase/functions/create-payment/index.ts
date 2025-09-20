@@ -138,7 +138,9 @@ const body: PaymentRequest = await req.json();
           user_id: user.id,
           package_name: body.packageName,
           tokens_amount: finalTokens.toString(),
-          promo: appliedPromo
+          promo_code: appliedPromo?.code || '',
+          promo_type: appliedPromo?.type || '',
+          promo_value: appliedPromo?.value?.toString() || ''
         }
       })
     });
