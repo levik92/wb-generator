@@ -9,8 +9,9 @@ const corsHeaders = {
 
 interface PaymentRequest {
   packageName: string;
-  amount: number;
-  tokens: number;
+  amount?: number;
+  tokens?: number;
+  promoCode?: string;
 }
 
 const PACKAGES = {
@@ -55,15 +56,46 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const { packageName, amount, tokens }: PaymentRequest = await req.json();
+const body: PaymentRequest = await req.json();
     
-    // Validate package
-    const packageInfo = PACKAGES[packageName as keyof typeof PACKAGES];
-    if (!packageInfo || packageInfo.price !== amount || packageInfo.tokens !== tokens) {
-      throw new Error("Invalid package information");
+    const packageInfo = PACKAGES[body.packageName as keyof typeof PACKAGES];
+    if (!packageInfo) {
+      throw new Error("Invalid package");
     }
 
-    console.log(`Creating payment for user ${user.id}, package: ${packageName}, amount: ${amount}`);
+    // Compute final price/tokens with optional promo
+    let finalAmount = packageInfo.price;
+    let finalTokens = packageInfo.tokens;
+    let appliedPromo: any = null;
+
+    if (body.promoCode) {
+      const { data: promo, error: promoError } = await supabaseServiceRole
+        .from('promocodes')
+        .select('id, code, type, value, max_uses, current_uses, valid_until, is_active')
+        .eq('code', body.promoCode.trim().toUpperCase())
+        .eq('is_active', true)
+        .maybeSingle();
+      if (promoError) {
+        throw new Error('Promo validation failed');
+      }
+      if (!promo) {
+        throw new Error('Invalid promo code');
+      }
+      if (promo.valid_until && new Date(promo.valid_until) < new Date()) {
+        throw new Error('Promo code expired');
+      }
+      if (promo.max_uses && promo.current_uses >= promo.max_uses) {
+        throw new Error('Promo code usage limit reached');
+      }
+      if (promo.type === 'discount') {
+        finalAmount = Math.round(packageInfo.price * (1 - (promo.value / 100)));
+      } else if (promo.type === 'tokens') {
+        finalTokens = packageInfo.tokens + promo.value;
+      }
+      appliedPromo = { id: promo.id, code: promo.code, type: promo.type, value: promo.value };
+    }
+
+    console.log(`Creating payment for user ${user.id}, package: ${body.packageName}, amount: ${finalAmount}`);
 
     // Create payment in ЮKassa
     const yookassaResponse = await fetch('https://api.yookassa.ru/v3/payments', {
@@ -75,7 +107,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         amount: {
-          value: amount.toFixed(2),
+          value: finalAmount.toFixed(2),
           currency: 'RUB'
         },
         confirmation: {
@@ -83,17 +115,17 @@ serve(async (req) => {
           return_url: `${req.headers.get("origin")}/dashboard?payment=success`
         },
         capture: true,
-        description: `Пополнение баланса: ${packageName} (${tokens} токенов)`,
+        description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
         receipt: {
           customer: {
             email: user.email
           },
           items: [
             {
-              description: `Токены для WB Генератор: ${packageName}`,
+              description: `Токены для WB Генератор: ${body.packageName}`,
               quantity: "1.00",
               amount: {
-                value: amount.toFixed(2),
+                value: finalAmount.toFixed(2),
                 currency: 'RUB'
               },
               vat_code: 1,
@@ -104,8 +136,9 @@ serve(async (req) => {
         },
         metadata: {
           user_id: user.id,
-          package_name: packageName,
-          tokens_amount: tokens.toString()
+          package_name: body.packageName,
+          tokens_amount: finalTokens.toString(),
+          promo: appliedPromo
         }
       })
     });
@@ -125,12 +158,12 @@ serve(async (req) => {
       .insert({
         user_id: user.id,
         yookassa_payment_id: yookassaData.id,
-        amount: amount,
+        amount: finalAmount,
         currency: 'RUB',
         status: 'pending',
-        tokens_amount: tokens,
-        package_name: packageName,
-        metadata: yookassaData
+        tokens_amount: finalTokens,
+        package_name: body.packageName,
+        metadata: { ...yookassaData, promo: appliedPromo }
       });
 
     if (insertError) {
@@ -142,10 +175,10 @@ serve(async (req) => {
     await supabaseServiceRole.rpc('log_security_event', {
       user_id_param: user.id,
       event_type_param: 'payment_created',
-      event_description_param: `Payment created for package: ${packageName}, amount: ${amount} RUB`,
+      event_description_param: `Payment created for package: ${body.packageName}, amount: ${finalAmount} RUB`,
       ip_address_param: clientIP,
       user_agent_param: userAgent,
-      metadata_param: { payment_id: yookassaData.id, package_name: packageName }
+      metadata_param: { payment_id: yookassaData.id, package_name: body.packageName, promo: appliedPromo }
     });
 
     return new Response(JSON.stringify({ 
