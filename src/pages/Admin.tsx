@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { 
   LogOut,
-  Download
+  Download,
+  Loader2
 } from "lucide-react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminMobileMenu } from "@/components/admin/AdminMobileMenu";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { PromptManager } from "@/components/dashboard/PromptManager";
@@ -135,11 +137,8 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-lg">Загрузка админ-панели...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-wb-purple" />
       </div>
     );
   }
@@ -161,25 +160,34 @@ export default function Admin() {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <div>
-            <h1 className="text-2xl font-bold">Админ-панель</h1>
-            <p className="text-muted-foreground">Управление системой WB Генератор</p>
+          <div className="flex items-center gap-4">
+            {/* Mobile Menu */}
+            {isMobile && (
+              <AdminMobileMenu 
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+              />
+            )}
+            <div>
+              <h1 className="text-2xl font-bold">Админ-панель</h1>
+              <p className="text-muted-foreground">Управление системой WB Генератор</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <DataExportDialog>
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                Экспорт данных
+                {!isMobile && "Экспорт данных"}
               </Button>
             </DataExportDialog>
             <Button onClick={handleSignOut} variant="destructive" className="gap-2">
               <LogOut className="h-4 w-4" />
-              Выйти
+              {!isMobile && "Выйти"}
             </Button>
           </div>
         </div>
         
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 md:p-6 p-4">
           {renderContent()}
         </main>
         
