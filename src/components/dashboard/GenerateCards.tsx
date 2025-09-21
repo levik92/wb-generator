@@ -991,15 +991,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           )}
           
           {generating && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-              <p className="text-blue-800 text-sm flex items-center gap-2">
-                <Info className="w-4 h-4" />
-                Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
-              </p>
-              <p className="text-xs text-blue-600 mt-1 opacity-75">
+            <>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <p className="text-blue-800 text-sm flex items-center gap-2">
+                  <Info className="w-4 h-4" />
+                  Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground/60 mt-2 text-center">
                 WB Генератор может совершать ошибки. Перегенерируйте фото при необходимости.
               </p>
-            </div>
+            </>
           )}
         </CardContent>
       </Card>
