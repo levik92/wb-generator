@@ -992,7 +992,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           {generating && (
             <>
-              <div className="bg-muted/30 border border-muted-foreground/20 rounded-lg p-4 mt-4">
+              <div className="bg-muted/50 border border-muted-foreground/20 rounded-lg p-4 mt-4">
                 <p className="text-muted-foreground text-sm flex items-center gap-2">
                   <Info className="w-5 h-5" />
                   Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
