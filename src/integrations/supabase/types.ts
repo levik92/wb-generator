@@ -708,6 +708,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_api_key_decrypted: {
+        Args: { provider_name: string; user_id_param: string }
+        Returns: string
+      }
       get_user_api_key_masked: {
         Args: { provider_name: string }
         Returns: string
@@ -764,6 +768,10 @@ export type Database = {
         Returns: boolean
       }
       store_user_api_key: {
+        Args: { api_key: string; provider_name: string }
+        Returns: boolean
+      }
+      store_user_api_key_secure: {
         Args: { api_key: string; provider_name: string }
         Returns: boolean
       }

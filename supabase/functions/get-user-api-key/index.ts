@@ -44,37 +44,39 @@ serve(async (req) => {
       throw new Error('Provider is required')
     }
 
-    // Get the API key for the user and provider
-    const { data, error } = await supabaseClient
-      .from('user_api_keys')
-      .select('encrypted_key, last_used_at')
-      .eq('user_id', user.id)
-      .eq('provider', provider)
-      .eq('is_active', true)
-      .single()
+    // Get the decrypted API key using the secure function
+    const { data: decryptedKey, error } = await supabaseClient
+      .rpc('get_user_api_key_decrypted', {
+        user_id_param: user.id,
+        provider_name: provider
+      })
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return new Response(
-          JSON.stringify({ 
-            error: 'API key not found for this provider',
-            hasKey: false 
-          }),
-          { 
-            status: 404, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-      throw error
+      console.error('Error getting decrypted API key:', error)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to retrieve API key',
+          hasKey: false 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
-    // Update last_used_at timestamp for audit purposes
-    await supabaseClient
-      .from('user_api_keys')
-      .update({ last_used_at: new Date().toISOString() })
-      .eq('user_id', user.id)
-      .eq('provider', provider)
+    if (!decryptedKey) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'API key not found for this provider',
+          hasKey: false 
+        }),
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
     // Log security event for API key access
     await supabaseClient.rpc('log_security_event', {
@@ -86,9 +88,9 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        apiKey: data.encrypted_key, // In production, this would be decrypted
+        apiKey: decryptedKey, // Now properly decrypted using secure function
         hasKey: true,
-        lastUsed: data.last_used_at
+        lastUsed: new Date().toISOString() // Last used timestamp is updated by the function
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

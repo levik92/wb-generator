@@ -80,7 +80,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
     setUpdating(true);
     try {
       const { data, error } = await supabase
-        .rpc('store_user_api_key', {
+        .rpc('store_user_api_key_secure', {
           provider_name: 'wildberries',
           api_key: wbApiKey.trim()
         });
