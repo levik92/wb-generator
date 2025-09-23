@@ -147,28 +147,32 @@ serve(async (req) => {
     const tokensChart = groupData(tokensData || [], 'created_at', 'amount')
     const revenueChart = groupData(paymentsData || [], 'created_at', 'amount')
 
-    // Получаем общую статистику
+    // Получаем статистику за выбранный период
     const { count: totalUsers } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
+      .gte('created_at', startDate.toISOString())
 
     const { count: totalGenerations } = await supabase
       .from('generations')
       .select('*', { count: 'exact', head: true })
+      .gte('created_at', startDate.toISOString())
 
-    const { data: allTokensData } = await supabase
+    const { data: periodTokensData } = await supabase
       .from('token_transactions')
       .select('amount')
       .eq('transaction_type', 'generation')
+      .gte('created_at', startDate.toISOString())
 
-    const totalTokensSpent = allTokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
+    const totalTokensSpent = periodTokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
 
-    const { data: allRevenueData } = await supabase
+    const { data: periodRevenueData } = await supabase
       .from('payments')
       .select('amount')
       .eq('status', 'succeeded')
+      .gte('created_at', startDate.toISOString())
 
-    const totalRevenue = allRevenueData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+    const totalRevenue = periodRevenueData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
     return new Response(
       JSON.stringify({
