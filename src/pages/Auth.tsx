@@ -39,6 +39,7 @@ const Auth = () => {
 
     try {
       // First check if email already exists
+      console.log('Starting signup with referral code:', referralCode);
       const { data: emailCheckData, error: emailCheckError } = await supabase.functions.invoke('check-email-exists', {
         body: { email }
       });
@@ -75,6 +76,7 @@ const Auth = () => {
         };
       }
       
+      console.log('Signup options:', signupOptions);
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -82,11 +84,13 @@ const Auth = () => {
       });
 
       if (error) {
+        console.error('Signup error:', error);
         // Log failed signup attempt
         await logLoginAttempt(email, false, error.message);
         throw error;
       }
 
+      console.log('Signup successful');
       // Log successful signup
       await logLoginAttempt(email, true);
 
