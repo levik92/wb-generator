@@ -60,13 +60,14 @@ serve(async (req)=>{
     // Call OpenAI
     const formData = new FormData();
     formData.append('image', sourceImageBlob, 'source.png');
-    formData.append('quality', 'high');
-    formData.append('moderation', 'low');
     formData.append('model', 'gpt-image-1');
     formData.append('prompt', prompt);
     formData.append('n', '1');
     formData.append('size', '1024x1536');
-    console.log(`Calling OpenAI for task ${taskId}`);
+    formData.append('output_format', 'png');
+    formData.append('quality', 'high');
+    formData.append('moderation', 'low');
+    console.log(`Calling OpenAI for task ${taskId} with prompt: ${prompt.substring(0, 100)}...`);
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
       headers: {
@@ -82,14 +83,16 @@ serve(async (req)=>{
       // Handle rate limiting with retry logic
       if (imageResponse.status === 429) {
         const retryAfter = parseInt(imageResponse.headers.get('retry-after') || '60');
+        const currentRetryCount = (await supabase.from('generation_tasks').select('retry_count').eq('id', taskId).single()).data?.retry_count || 0;
         await supabase.from('generation_tasks').update({
           status: 'retrying',
-          retry_count: (await supabase.from('generation_tasks').select('retry_count').eq('id', taskId).single()).data?.retry_count + 1 || 1,
+          retry_count: currentRetryCount + 1,
           retry_after: Math.floor(Date.now() / 1000) + retryAfter,
           last_error: 'Rate limit exceeded'
         }).eq('id', taskId);
       } else {
         // Mark task as failed for other errors
+        console.error(`OpenAI API failed for task ${taskId}:`, errorText);
         await supabase.from('generation_tasks').update({
           status: 'failed',
           last_error: `OpenAI error: ${errorText}`,

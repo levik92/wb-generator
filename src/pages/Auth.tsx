@@ -69,6 +69,7 @@ const Auth = () => {
 
       // Add referral code if present
       if (referralCode) {
+        console.log('Adding referral code to signup:', referralCode);
         signupOptions.data = {
           referral_code: referralCode
         };
