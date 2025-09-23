@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MobileMenu } from "@/components/dashboard/MobileMenu";
@@ -16,7 +25,7 @@ import { Settings } from "@/components/dashboard/Settings";
 import LabelGenerator from "@/components/dashboard/LabelGenerator";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import Footer from "@/components/Footer";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -178,7 +187,40 @@ const Dashboard = () => {
             </div>
             <span className="text-base sm:text-lg font-semibold">WB Генератор</span>
           </div>
-          <div className="w-10" /> {/* Spacer for centering */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-wb-purple text-white">
+                    <UserIcon className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 bg-background border shadow-lg" align="end" forceMount>
+              <div className="flex flex-col space-y-1 p-2">
+                <p className="text-sm font-medium leading-none">
+                  {profile.full_name || 'Пользователь'}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {profile.email}
+                </p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => setActiveTab('settings')}
+                className="hover:bg-wb-purple/10"
+              >
+                <UserIconName className="mr-2 h-4 w-4" />
+                <span>Настройки</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="hover:bg-wb-purple/10">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Выйти</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         {/* Desktop Header */}
