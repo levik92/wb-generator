@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, UserIcon, Bell, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Profile {
   id: string;
@@ -37,6 +38,7 @@ interface DashboardHeaderProps {
 export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchNotifications();
@@ -106,8 +108,9 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <DropdownMenu>
+          {/* Notifications - Hide on mobile */}
+          {!isMobile && (
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-wb-purple/10">
                 <Bell className="h-5 w-5 text-foreground" />
@@ -172,13 +175,14 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
+              <Button variant="ghost" className={`relative rounded-full ${isMobile ? 'h-8 w-8' : 'h-10 w-10'}`}>
+                <Avatar className={isMobile ? 'h-8 w-8' : 'h-10 w-10'}>
                   <AvatarFallback className="bg-wb-purple text-white">
-                    <UserIcon className="h-5 w-5" />
+                    <UserIcon className={isMobile ? 'h-4 w-4' : 'h-5 w-5'} />
                   </AvatarFallback>
                 </Avatar>
               </Button>

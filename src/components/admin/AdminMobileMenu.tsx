@@ -18,7 +18,7 @@ interface AdminMobileMenuProps {
 }
 
 export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps) => {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   
   const menuItems = [
     {
@@ -52,11 +52,11 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
 
   const handleTabChange = (tabId: string) => {
     onTabChange(tabId);
-    setOpen(false); // Close menu after selection
+    setIsOpen(false);
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button 
           variant="outline" 
