@@ -12,6 +12,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminMobileMenu } from "@/components/admin/AdminMobileMenu";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminUsers } from "@/components/admin/AdminUsers";
+import AdminNews from "@/components/admin/AdminNews";
 import { PromptManager } from "@/components/dashboard/PromptManager";
 import { DataExportDialog } from "@/components/dashboard/DataExportDialog";
 import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
@@ -124,12 +125,7 @@ export default function Admin() {
       case 'promocodes':
         return <PromoCodeManager />;
       case 'news':
-        return (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-semibold mb-2">Раздел "Новости" в разработке</h3>
-            <p className="text-muted-foreground">Скоро здесь появится возможность управления новостями</p>
-          </div>
-        );
+        return <AdminNews />;
       default:
         return <AdminAnalytics users={users} />;
     }

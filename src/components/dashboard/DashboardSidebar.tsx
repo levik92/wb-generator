@@ -12,7 +12,9 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
-  Tags
+  Tags,
+  Newspaper,
+  BookOpen
 } from "lucide-react";
 import { useState } from "react";
 
@@ -36,7 +38,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   
   const menuItems = [
     {
-      id: 'cards',
+      id: 'generate',
       label: 'Генерация карточек',
       icon: Image,
     },
@@ -46,11 +48,21 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: FileText,
     },
     {
-      id: 'labels',
+      id: 'barcode',
       label: 'Генератор этикеток',
       icon: Tags,
       badge: 'FREE',
       badgeColor: 'bg-green-500'
+    },
+    {
+      id: 'news',
+      label: 'Новости',
+      icon: Newspaper,
+    },
+    {
+      id: 'learning',
+      label: 'Обучение',
+      icon: BookOpen,
     },
     {
       id: 'history',
@@ -58,7 +70,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: History,
     },
     {
-      id: 'pricing',
+      id: 'balance',
       label: 'Баланс',
       icon: CreditCard,
     },
@@ -66,20 +78,6 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'referrals',
       label: 'Рефералы',
       icon: Users,
-    },
-    {
-      id: 'ai-questions',
-      label: 'AI Ответы на вопросы',
-      icon: FileText,
-      disabled: true,
-      badge: 'Скоро'
-    },
-    {
-      id: 'ai-reviews',
-      label: 'AI Ответы на отзывы',
-      icon: FileText,
-      disabled: true,
-      badge: 'Скоро'
     },
     {
       id: 'settings',
@@ -132,7 +130,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             <Button 
               size="sm" 
               className="w-8 h-8 p-0 bg-wb-purple hover:bg-wb-purple/80"
-              onClick={() => onTabChange('pricing')}
+                onClick={() => onTabChange('balance')}
             >
               <Plus className="w-4 h-4" />
             </Button>
@@ -148,7 +146,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             <Button 
               size="sm" 
               className="w-full bg-wb-purple hover:bg-wb-purple/80"
-              onClick={() => onTabChange('pricing')}
+              onClick={() => onTabChange('balance')}
             >
               <Plus className="w-4 h-4 mr-2" />
               Пополнить
@@ -172,21 +170,21 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} ${
                     isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
-                  } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => !item.disabled && onTabChange(item.id)}
-                  disabled={item.disabled}
+                  } ${(item as any).disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !(item as any).disabled && onTabChange(item.id)}
+                  disabled={(item as any).disabled}
                   title={isCollapsed ? item.label : undefined}
                 >
                   <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-3' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                 </Button>
-                {item.badge && !isCollapsed && (
+                {(item as any).badge && !isCollapsed && (
                   <Badge 
                     className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 min-w-0 ${
-                      item.badgeColor || 'bg-muted text-muted-foreground'
+                      (item as any).badgeColor || 'bg-muted text-muted-foreground'
                     } border-0 rounded-md shadow-sm z-10 pointer-events-none`}
                   >
-                    {item.badge}
+                    {(item as any).badge}
                   </Badge>
                 )}
               </li>

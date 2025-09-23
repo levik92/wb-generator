@@ -16,14 +16,16 @@ import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MobileMenu } from "@/components/dashboard/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { GenerateCards } from "@/components/dashboard/GenerateCards";
+import { OptimizedGenerateCards } from "@/components/dashboard/OptimizedGenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
 import { History } from "@/components/dashboard/History";
-import Balance from "@/components/dashboard/Balance";
+import Pricing from "@/components/dashboard/Pricing";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
-import LabelGenerator from "@/components/dashboard/LabelGenerator";
+import WBLabelMaker from "@/components/dashboard/WBLabelMaker";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
+import News from "@/pages/News";
+import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
 
@@ -36,13 +38,13 @@ interface Profile {
   referral_code: string;
 }
 
-type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications';
+type ActiveTab = 'generate' | 'description' | 'history' | 'balance' | 'referrals' | 'settings' | 'notifications' | 'barcode' | 'news' | 'learning';
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('generate');
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -141,24 +143,28 @@ const Dashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'cards':
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+      case 'generate':
+        return <OptimizedGenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
-      case 'notifications':
-        return <NotificationCenter profile={profile} />;
-      case 'labels':
-        return <LabelGenerator />;
+      case 'barcode':
+        return <WBLabelMaker />;
+      case 'news':
+        return <News />;
+      case 'learning':
+        return <Learning />;
       case 'history':
         return <History profile={profile} />;
-      case 'pricing':
-        return <Balance />;
+      case 'balance':
+        return <Pricing />;
       case 'referrals':
         return <Referrals profile={profile} />;
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
+      case 'notifications':
+        return <NotificationCenter profile={profile} />;
       default:
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+        return <OptimizedGenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
     }
   };
 
