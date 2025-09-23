@@ -103,10 +103,17 @@ serve(async (req) => {
       .update({ status: 'processing', started_at: new Date().toISOString() })
       .eq('id', jobId);
 
-    // Process tasks in background
-    processTasks(supabase, openAIApiKey, job).catch(error => {
-      console.error('Background processing error:', error);
-    });
+    // Process tasks in background with proper task handling
+    const backgroundProcessing = processTasks(supabase, openAIApiKey, job);
+    
+    // Use EdgeRuntime.waitUntil to prevent early drop
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      EdgeRuntime.waitUntil(backgroundProcessing);
+    } else {
+      backgroundProcessing.catch(error => {
+        console.error('Background processing error:', error);
+      });
+    }
 
     return new Response(JSON.stringify({
       success: true,
@@ -301,15 +308,36 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
     // Delegate to separate async function instead of processing here
     console.log(`Delegating OpenAI processing for task ${task.id}`);
     
-    supabase.functions.invoke('process-openai-task', {
-      body: {
-        taskId: task.id,
-        sourceImageUrl: sourceImageUrl,
-        prompt: prompt
+    const openaiTask = async () => {
+      try {
+        await supabase.functions.invoke('process-openai-task', {
+          body: {
+            taskId: task.id,
+            sourceImageUrl: sourceImageUrl,
+            prompt: prompt
+          }
+        });
+        console.log(`Successfully delegated task ${task.id} to OpenAI processing`);
+      } catch (error) {
+        console.error(`Failed to invoke process-openai-task for ${task.id}:`, error);
+        // Mark task as failed if delegation fails
+        await supabase
+          .from('generation_tasks')
+          .update({ 
+            status: 'failed',
+            last_error: `Failed to delegate to OpenAI processor: ${error.message}`,
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', task.id);
       }
-    }).catch(error => {
-      console.error(`Failed to invoke process-openai-task for ${task.id}:`, error);
-    });
+    };
+    
+    // Use background task handling
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      EdgeRuntime.waitUntil(openaiTask());
+    } else {
+      openaiTask();
+    }
 
     console.log(`Task ${task.id} delegated to async processing`);
     return; // Exit early

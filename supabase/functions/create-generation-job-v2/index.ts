@@ -170,12 +170,27 @@ serve(async (req) => {
       });
     }
 
-    // Start background processing
-    supabase.functions.invoke('process-generation-tasks-v2', {
-      body: { jobId: job.id }
-    }).catch(error => {
-      console.error('Failed to start background processing:', error);
-    });
+    // Start background processing using proper background task handling
+    const backgroundTask = async () => {
+      try {
+        await supabase.functions.invoke('process-generation-tasks-v2', {
+          body: { jobId: job.id }
+        });
+        console.log(`Background processing started successfully for job ${job.id}`);
+      } catch (error) {
+        console.error('Failed to start background processing:', error);
+      }
+    };
+    
+    // Use EdgeRuntime.waitUntil to ensure the function doesn't drop prematurely
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      EdgeRuntime.waitUntil(backgroundTask());
+    } else {
+      // Fallback for environments without EdgeRuntime.waitUntil
+      backgroundTask().catch(error => {
+        console.error('Background task error:', error);
+      });
+    }
 
     // Create notification
     await supabase
