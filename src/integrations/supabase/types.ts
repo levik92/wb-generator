@@ -41,7 +41,7 @@ export type Database = {
       audit_logs: {
         Row: {
           action_type: string
-          admin_user_id: string
+          admin_user_id: string | null
           created_at: string
           id: string
           ip_address: unknown | null
@@ -53,7 +53,7 @@ export type Database = {
         }
         Insert: {
           action_type: string
-          admin_user_id: string
+          admin_user_id?: string | null
           created_at?: string
           id?: string
           ip_address?: unknown | null
@@ -65,7 +65,7 @@ export type Database = {
         }
         Update: {
           action_type?: string
-          admin_user_id?: string
+          admin_user_id?: string | null
           created_at?: string
           id?: string
           ip_address?: unknown | null
