@@ -412,7 +412,11 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
             <p className="text-muted-foreground mb-4">
               Функция интеграции с Wildberries находится в разработке
             </p>
-            <Button variant="outline" disabled className="w-full">
+            <Button 
+              variant="outline" 
+              disabled 
+              className="w-full bg-muted text-muted-foreground border-muted hover:bg-muted hover:text-muted-foreground cursor-not-allowed"
+            >
               В разработке
             </Button>
           </div>
