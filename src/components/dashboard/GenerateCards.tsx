@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye } from "lucide-react";
+import JSZip from 'jszip';
 
 interface Profile {
   id: string;
@@ -59,6 +60,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [completionNotificationShown, setCompletionNotificationShown] = useState(false);
   const [jobCompleted, setJobCompleted] = useState(false);
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
+  const [downloadingAll, setDownloadingAll] = useState(false);
   const { toast } = useToast();
 
   // Cleanup polling on unmount
@@ -409,21 +411,60 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const downloadAll = async () => {
-    toast({
-      title: "Скачивание начато",
-      description: "Все изображения будут скачаны",
-    });
+    if (downloadingAll || generatedImages.length === 0) return;
     
-    for (let index = 0; index < generatedImages.length; index++) {
-      try {
-        await downloadSingle(index);
-        // Small delay between downloads to prevent overwhelming the browser
-        if (index < generatedImages.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+    setDownloadingAll(true);
+    
+    try {
+      const zip = new JSZip();
+      const safeProductName = (productName || 'cards').replace(/[^a-z0-9_-]/gi, '');
+      
+      toast({
+        title: "Создание архива",
+        description: "Подготавливаем ZIP-архив с изображениями...",
+      });
+      
+      // Add each image to ZIP
+      for (let index = 0; index < generatedImages.length; index++) {
+        const image = generatedImages[index];
+        if (image.url) {
+          try {
+            const response = await fetch(image.url);
+            const blob = await response.blob();
+            const fileName = `${safeProductName}_${image.stage.replace(/[^a-z0-9_-]/gi, '_')}_${index + 1}.png`;
+            zip.file(fileName, blob);
+          } catch (error) {
+            console.error(`Failed to fetch image ${index}:`, error);
+          }
         }
-      } catch (error) {
-        console.error(`Failed to download image ${index}:`, error);
       }
+      
+      // Generate ZIP and download
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeProductName}_all_cards.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Скачивание завершено",
+        description: `ZIP-архив с ${generatedImages.length} изображениями готов`,
+      });
+    } catch (error) {
+      console.error('Error creating ZIP archive:', error);
+      toast({
+        title: "Ошибка создания архива",
+        description: "Не удалось создать ZIP-архив. Попробуйте скачать изображения по одному.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloadingAll(false);
     }
   };
 
@@ -860,9 +901,20 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 variant="outline"
                 className="shrink-0 w-full sm:w-auto"
                 size="sm"
+                disabled={downloadingAll}
               >
-                <Download className="w-4 h-4 mr-2" />
-                Скачать все
+                {downloadingAll ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <span className="hidden sm:inline">Создаю ZIP...</span>
+                    <span className="sm:hidden">Создаю...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Скачать все
+                  </>
+                )}
               </Button>
             </div>
           </CardHeader>
