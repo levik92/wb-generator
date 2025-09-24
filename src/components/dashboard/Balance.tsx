@@ -110,10 +110,22 @@ export default function Balance() {
               </div>
               <div className="flex-1">
                 <div className="font-medium text-sm">1 изображение карточки</div>
-                <div className="text-xs text-muted-foreground">Генерация или перегенерация</div>
+                <div className="text-xs text-muted-foreground">Генерация</div>
               </div>
               <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
                 10 токенов
+              </div>
+            </div>
+            <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
+              <div className="bg-muted p-2 rounded-lg">
+                <Images className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-sm">1 перегенерация изображения</div>
+                <div className="text-xs text-muted-foreground">Повторная генерация существующего изображения</div>
+              </div>
+              <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
+                5 токенов
               </div>
             </div>
           </div>
