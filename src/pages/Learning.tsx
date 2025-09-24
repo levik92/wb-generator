@@ -79,23 +79,25 @@ const Learning = () => {
       </div>
 
       {/* Telegram Group Promo */}
-      <Card className="border-wb-purple/20 bg-gradient-to-r from-wb-purple/5 to-transparent">
+      <Card className="bg-gradient-to-br from-[#0088cc]/10 via-[#0088cc]/5 to-[#00a3e0]/10 border-[#0088cc]/30">
         <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-[#0088cc] rounded-2xl flex items-center justify-center shadow-lg">
-                <MessageCircle className="w-8 h-8 text-white" />
+              <div className="bg-gradient-to-br from-[#0088cc] to-[#006ba8] p-4 rounded-xl shadow-lg">
+                <MessageCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-1">Подписывайтесь на нашу группу в Telegram</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg font-semibold mb-1 bg-gradient-to-r from-[#0088cc] to-[#006ba8] bg-clip-text text-transparent">
+                  Подписывайтесь на нашу группу в Telegram
+                </h3>
+                <p className="text-sm text-[#0088cc]/80">
                   Получайте последние новости, обновления и полезные советы по работе с сервисом
                 </p>
               </div>
             </div>
             <Button 
               onClick={handleTelegramClick}
-              className="bg-[#0088cc] hover:bg-[#006ba8] text-white gap-2 shadow-lg"
+              className="bg-gradient-to-r from-[#0088cc] to-[#006ba8] hover:from-[#006ba8] hover:to-[#0088cc] text-white gap-2 shadow-lg transition-all duration-300"
             >
               <ExternalLink className="w-4 h-4" />
               Присоединиться
