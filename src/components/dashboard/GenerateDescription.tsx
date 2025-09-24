@@ -220,9 +220,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               <Label htmlFor="keywords">Ключевые слова</Label>
               <Textarea
                 id="keywords"
-                placeholder="ключ1, ключ2, ключ3
-товар, продукт, качество
-бренд, материал, характеристики"
+                placeholder="Введите ключевые слова через запятую в формате: Ключ1, ключ2, ключ3 и т.д."
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
                 className="input-bordered min-h-[80px] resize-none"
