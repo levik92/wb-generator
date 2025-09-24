@@ -15,8 +15,7 @@ const Footer = () => {
               <span className="text-xl font-semibold">WB Генератор</span>
             </div>
             <p className="text-muted-foreground text-sm max-w-md">
-              Создавайте профессиональные изображения и описания для карточек товара с помощью AI. 
-              Загружайте сразу в кабинет WB.
+              Все инструменты для продавцов WB в одном месте: генерация фото, SEO-описаний и штрихкодов с AI и пр.
             </p>
           </div>
 
