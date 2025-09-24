@@ -127,7 +127,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                     variant="ghost" 
                     size="sm" 
                     onClick={markAllAsRead}
-                    className="text-xs h-auto p-1 hover:bg-wb-purple text-foreground hover:text-white"
+                    className="text-xs h-auto p-1 hover:bg-wb-purple/20 text-foreground hover:text-wb-purple"
                   >
                     Прочитать все
                   </Button>
@@ -141,7 +141,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                 notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
-                    className={`p-3 cursor-pointer border-b last:border-b-0 bg-muted/30 hover:bg-wb-purple/20 ${
+                    className={`p-3 cursor-pointer border-b last:border-b-0 bg-gray-50 hover:bg-wb-purple/20 ${
                       !notification.read ? 'bg-wb-purple/10' : ''
                     }`}
                     onClick={() => markAsRead(notification.id)}
