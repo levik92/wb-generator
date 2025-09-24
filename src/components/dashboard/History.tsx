@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import JSZip from 'jszip';
 
@@ -38,6 +38,7 @@ export const History = ({ profile }: HistoryProps) => {
   const [filter, setFilter] = useState<'all' | 'cards' | 'description'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const ITEMS_PER_PAGE = 20;
@@ -93,24 +94,28 @@ export const History = ({ profile }: HistoryProps) => {
   };
 
   const downloadGeneration = async (generation: Generation) => {
-    const zip = new JSZip();
-    const safeProductName = (generation.input_data?.productName || 'generation').replace(/[^a-z0-9_-]/gi, '');
+    if (downloadingIds.has(generation.id)) return;
     
-    if (generation.generation_type === 'cards') {
-      // Add images to ZIP
-      if (generation.output_data?.images && Array.isArray(generation.output_data.images)) {
-        const images = generation.output_data.images;
-        
-        if (images.length === 0) {
-          toast({
-            title: "Нет изображений",
-            description: "В этой генерации нет сохраненных изображений",
-            variant: "destructive",
-          });
-          return;
-        }
+    setDownloadingIds(prev => new Set(prev).add(generation.id));
+    
+    try {
+      const zip = new JSZip();
+      const safeProductName = (generation.input_data?.productName || 'generation').replace(/[^a-z0-9_-]/gi, '');
+      
+      if (generation.generation_type === 'cards') {
+        // Add images to ZIP
+        if (generation.output_data?.images && Array.isArray(generation.output_data.images)) {
+          const images = generation.output_data.images;
+          
+          if (images.length === 0) {
+            toast({
+              title: "Нет изображений",
+              description: "В этой генерации нет сохраненных изображений",
+              variant: "destructive",
+            });
+            return;
+          }
 
-        try {
           // Add each image to ZIP
           for (let i = 0; i < images.length; i++) {
             const image = images[i];
@@ -121,29 +126,20 @@ export const History = ({ profile }: HistoryProps) => {
               zip.file(fileName, blob);
             }
           }
-        } catch (error) {
+        } else {
           toast({
-            title: "Ошибка создания архива",
-            description: "Не удалось добавить изображения в архив",
+            title: "Ошибка скачивания",
+            description: "Не удалось найти изображения для скачивания",
             variant: "destructive",
           });
           return;
         }
       } else {
-        toast({
-          title: "Ошибка скачивания",
-          description: "Не удалось найти изображения для скачивания",
-          variant: "destructive",
-        });
-        return;
+        // Add description text file to ZIP
+        const description = generation.output_data?.description || 'Описание товара';
+        zip.file(`${safeProductName}_description.txt`, description);
       }
-    } else {
-      // Add description text file to ZIP
-      const description = generation.output_data?.description || 'Описание товара';
-      zip.file(`${safeProductName}_description.txt`, description);
-    }
 
-    try {
       // Generate ZIP and download
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const url = window.URL.createObjectURL(zipBlob);
@@ -166,6 +162,12 @@ export const History = ({ profile }: HistoryProps) => {
         title: "Ошибка создания архива",
         description: "Не удалось создать ZIP-архив",
         variant: "destructive",
+      });
+    } finally {
+      setDownloadingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(generation.id);
+        return newSet;
       });
     }
   };
@@ -309,10 +311,20 @@ export const History = ({ profile }: HistoryProps) => {
                     <Button 
                       onClick={() => downloadGeneration(generation)}
                       size="sm"
-                      className="bg-wb-purple hover:bg-wb-purple-dark text-white"
+                      disabled={downloadingIds.has(generation.id)}
+                      className="bg-wb-purple hover:bg-wb-purple-dark text-white disabled:opacity-50"
                     >
-                      <Download className="w-4 h-4 mr-2" />
-                      Скачать
+                      {downloadingIds.has(generation.id) ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Создаю ZIP
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4 mr-2" />
+                          Скачать
+                        </>
+                      )}
                     </Button>
                     <Button 
                       onClick={() => deleteGeneration(generation.id)}
