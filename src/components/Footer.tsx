@@ -51,12 +51,12 @@ const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="https://wbgen.ru" 
+                  href="https://t.me/wbgen_official" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  wbgen.ru
+                  Telegram-группа
                 </a>
               </li>
             </ul>
