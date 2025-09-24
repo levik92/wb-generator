@@ -112,7 +112,7 @@ const Learning = () => {
         
         <div className="grid gap-6">
           {videoLessons.map((lesson, index) => (
-            <Card key={lesson.id} className="overflow-hidden bg-gray-50 border-2">
+            <Card key={lesson.id} className="overflow-hidden bg-gray-50 border">
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-wb-purple/10 rounded-lg flex items-center justify-center shrink-0 mt-1">
@@ -152,7 +152,7 @@ const Learning = () => {
           <h3 className="text-2xl font-semibold">Часто задаваемые вопросы</h3>
         </div>
         
-        <Accordion type="single" collapsible className="w-full bg-gray-50 border-2 rounded-lg p-4">
+        <Accordion type="single" collapsible className="w-full">
           {faqItems.map((item, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
               <AccordionTrigger className="text-left">
