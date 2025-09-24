@@ -218,12 +218,15 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
 
             <div className="space-y-2">
               <Label htmlFor="keywords">Ключевые слова</Label>
-              <Input
+              <Textarea
                 id="keywords"
-                placeholder="ключ1, ключ2, ключ3"
+                placeholder="ключ1, ключ2, ключ3
+товар, продукт, качество
+бренд, материал, характеристики"
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value)}
-                className="input-bordered"
+                className="input-bordered min-h-[80px] resize-none"
+                rows={3}
               />
               <p className="text-xs text-muted-foreground">
                 Разделяйте запятыми (необязательное поле)
