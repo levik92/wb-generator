@@ -18,11 +18,22 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [activeTab, setActiveTab] = useState("signin");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
+  const tabParam = searchParams.get('tab');
+
+  useEffect(() => {
+    if (tabParam === 'reset-password') {
+      setActiveTab('new-password');
+    }
+  }, [tabParam]);
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
     if (password.length < 8) {
@@ -188,6 +199,89 @@ const Auth = () => {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?tab=reset-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Письмо отправлено!",
+        description: "Проверьте почту и следуйте инструкциям для восстановления пароля.",
+        duration: 8000,
+      });
+      
+      setActiveTab("signin");
+    } catch (error: any) {
+      toast({
+        title: "Ошибка",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate password complexity
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Ошибка",
+        description: passwordValidation.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if passwords match
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: "Ошибка",
+        description: "Пароли не совпадают. Проверьте правильность ввода.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Пароль обновлен!",
+        description: "Ваш пароль успешно изменен. Теперь вы можете войти с новым паролем.",
+      });
+      
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Ошибка",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -225,7 +319,7 @@ const Auth = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Вход</TabsTrigger>
                 <TabsTrigger value="signup">Регистрация</TabsTrigger>
@@ -267,6 +361,119 @@ const Auth = () => {
                       </>
                     ) : (
                       "Войти"
+                    )}
+                  </Button>
+                  
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("reset")}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Забыли пароль?
+                    </button>
+                  </div>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="reset">
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Восстановление пароля</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Введите email для получения ссылки на восстановление пароля
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-wb-purple hover:bg-wb-purple-dark"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Отправка...
+                      </>
+                    ) : (
+                      "Отправить ссылку"
+                    )}
+                  </Button>
+                  
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("signin")}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Вернуться ко входу
+                    </button>
+                  </div>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="new-password">
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold">Установка нового пароля</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Введите новый пароль для вашего аккаунта
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">Новый пароль</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-new-password">Подтвердите новый пароль</Label>
+                    <Input
+                      id="confirm-new-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-wb-purple hover:bg-wb-purple-dark"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Обновление...
+                      </>
+                    ) : (
+                      "Обновить пароль"
                     )}
                   </Button>
                 </form>
@@ -359,7 +566,10 @@ const Auth = () => {
             <Separator className="my-4" />
             
             <div className="text-center text-xs text-muted-foreground">
-              Уже есть аккаунт? Переключитесь на вкладку "Вход"
+              {activeTab === 'signup' && "Уже есть аккаунт? Переключитесь на вкладку \"Вход\""}
+              {activeTab === 'signin' && "Нет аккаунта? Переключитесь на вкладку \"Регистрация\""}
+              {activeTab === 'reset' && "Вспомнили пароль? Вернитесь ко входу"}
+              {activeTab === 'new-password' && "После смены пароля вы автоматически войдете в систему"}
             </div>
           </CardContent>
         </Card>
