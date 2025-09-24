@@ -254,9 +254,6 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
             <p className="text-center text-sm text-muted-foreground mt-3">
               Стоимость: <strong>1 токен</strong> за генерацию описания
             </p>
-            <p className="text-center text-xs text-muted-foreground">
-              1 токен за описание = выгодная стоимость для вашего бизнеса
-            </p>
             
             {!canGenerate() && (
               <Alert className="mt-4 border-amber-200 bg-amber-50">
