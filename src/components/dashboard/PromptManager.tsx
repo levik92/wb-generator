@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Save, X } from "lucide-react";
+import { Pencil, Save, X, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Prompt {
@@ -63,6 +63,7 @@ export function PromptManager() {
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     loadPrompts();
@@ -141,6 +142,37 @@ export function PromptManager() {
     }
   };
 
+  const deletePrompt = async (promptId: string, promptType: string) => {
+    const confirmDelete = window.confirm(`Вы уверены, что хотите удалить промт "${getPromptDisplayName(promptType).name}"?`);
+    if (!confirmDelete) return;
+
+    setDeleting(promptId);
+    try {
+      const { error } = await supabase
+        .from('ai_prompts')
+        .delete()
+        .eq('id', promptId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Успешно",
+        description: "Промт удален",
+      });
+
+      await loadPrompts();
+    } catch (error) {
+      console.error('Error deleting prompt:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить промт",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -188,15 +220,29 @@ export function PromptManager() {
                       </div>
                     </div>
                     {!isEditing && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => startEdit(prompt)}
-                        className="gap-2 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        <Pencil className="h-4 w-4" />
-                        Редактировать
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => startEdit(prompt)}
+                          className="gap-2 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                          <Pencil className="h-4 w-4" />
+                          Редактировать
+                        </Button>
+                        {['features', 'usage', 'comparison', 'clean'].includes(prompt.prompt_type) && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => deletePrompt(prompt.id, prompt.prompt_type)}
+                            disabled={deleting === prompt.id}
+                            className="gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            {deleting === prompt.id ? "Удаление..." : "Удалить"}
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </CardHeader>
