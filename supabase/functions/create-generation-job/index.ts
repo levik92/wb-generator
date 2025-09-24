@@ -63,7 +63,7 @@ serve(async (req) => {
       });
     }
 
-    const tokensRequired = selectedCards.length;
+    const tokensRequired = selectedCards.length * 10;
     if (profile.tokens_balance < tokensRequired) {
       return new Response(JSON.stringify({
         error: 'Insufficient tokens',
