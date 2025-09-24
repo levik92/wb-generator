@@ -40,6 +40,7 @@ const News = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [readNewsIds, setReadNewsIds] = useState<Set<string>>(new Set());
+  const [expandedNewsIds, setExpandedNewsIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -118,6 +119,18 @@ const News = () => {
     } catch (error: any) {
       console.error('Error marking news as read:', error);
     }
+  };
+
+  const toggleExpanded = (newsId: string) => {
+    setExpandedNewsIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(newsId)) {
+        newSet.delete(newsId);
+      } else {
+        newSet.add(newsId);
+      }
+      return newSet;
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -210,9 +223,32 @@ const News = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                      {item.content}
-                    </p>
+                    {(() => {
+                      const isExpanded = expandedNewsIds.has(item.id);
+                      const shouldTruncate = item.content.length > 150;
+                      const displayContent = shouldTruncate && !isExpanded 
+                        ? item.content.substring(0, 150) + '...'
+                        : item.content;
+                      
+                      return (
+                        <div>
+                          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                            {displayContent}
+                          </p>
+                          {shouldTruncate && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleExpanded(item.id);
+                              }}
+                              className="text-wb-purple hover:text-wb-purple/80 text-sm font-medium mt-2 transition-colors"
+                            >
+                              {isExpanded ? 'Свернуть' : 'Читать полностью'}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               );
