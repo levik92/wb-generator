@@ -15,6 +15,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -23,6 +24,25 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
 
+  const validatePassword = (password: string): { isValid: boolean; message?: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: "Пароль должен содержать минимум 8 символов" };
+    }
+    
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    
+    if (!hasUppercase || !hasLowercase || !hasNumbers) {
+      return { 
+        isValid: false, 
+        message: "Пароль должен содержать заглавные и строчные буквы, а также цифры" 
+      };
+    }
+    
+    return { isValid: true };
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -30,6 +50,27 @@ const Auth = () => {
       toast({
         title: "Ошибка регистрации",
         description: "Необходимо согласиться с договором оферты и политикой конфиденциальности.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate password complexity
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      toast({
+        title: "Ошибка регистрации",
+        description: passwordValidation.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      toast({
+        title: "Ошибка регистрации",
+        description: "Пароли не совпадают. Проверьте правильность ввода.",
         variant: "destructive",
       });
       return;
@@ -244,21 +285,37 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Пароль</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Минимум 6 символов
-                    </p>
-                  </div>
+                   <div className="space-y-2">
+                     <Label htmlFor="signup-password">Пароль</Label>
+                     <Input
+                       id="signup-password"
+                       type="password"
+                       placeholder="••••••••"
+                       value={password}
+                       onChange={(e) => setPassword(e.target.value)}
+                       required
+                       minLength={8}
+                     />
+                     <p className="text-xs text-muted-foreground">
+                       Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
+                     </p>
+                   </div>
+                   
+                   <div className="space-y-2">
+                     <Label htmlFor="signup-confirm-password">Подтвердите пароль</Label>
+                     <Input
+                       id="signup-confirm-password"
+                       type="password"
+                       placeholder="••••••••"
+                       value={confirmPassword}
+                       onChange={(e) => setConfirmPassword(e.target.value)}
+                       required
+                       minLength={8}
+                     />
+                     <p className="text-xs text-muted-foreground">
+                       Повторите пароль для подтверждения
+                     </p>
+                   </div>
                   
                   <div className="flex items-center space-x-2">
                     <Checkbox 
