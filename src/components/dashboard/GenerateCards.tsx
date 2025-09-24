@@ -982,9 +982,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </p>
           
           {!canGenerate() && !generating && (
-            <Alert className="mt-4 bg-muted/30 border-muted-foreground/20 rounded-xl">
-              <Info className="h-4 w-4 text-muted-foreground" />
-              <AlertDescription className="text-muted-foreground font-medium">
+            <Alert className="mt-4 bg-amber-50 border-amber-200 rounded-xl">
+              <Info className="h-4 w-4 text-amber-700" />
+              <AlertDescription className="text-amber-800 font-medium">
                 <strong>{getGuardMessage()}</strong>
               </AlertDescription>
             </Alert>
