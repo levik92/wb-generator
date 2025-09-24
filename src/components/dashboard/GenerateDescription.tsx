@@ -37,14 +37,10 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   const { toast } = useToast();
 
   const canGenerate = () => {
-    return productName && category && competitor1 && keywords && profile.tokens_balance >= 1;
+    return profile.tokens_balance >= 1;
   };
 
   const getGuardMessage = () => {
-    if (!productName) return "Введите название товара";
-    if (!category) return "Выберите категорию товара";
-    if (!competitor1) return "Добавьте хотя бы одну ссылку на конкурента";
-    if (!keywords) return "Добавьте ключевые слова";
     if (profile.tokens_balance < 1) return "Недостаточно токенов (нужно 1)";
     return null;
   };
@@ -197,7 +193,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               <Label>Ссылки на конкурентов</Label>
               <div className="space-y-2">
                 <Input
-                  placeholder="Ссылка на конкурента 1 (обязательно)"
+                  placeholder="Ссылка на конкурента 1 (по желанию)"
                   value={competitor1}
                   onChange={(e) => setCompetitor1(e.target.value)}
                   className="input-bordered"
@@ -216,7 +212,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Вставьте ссылки на похожие товары с WB для лучшего анализа
+                Все ссылки необязательны. Вставьте ссылки на похожие товары с WB для лучшего анализа
               </p>
             </div>
 
@@ -230,7 +226,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 className="input-bordered"
               />
               <p className="text-xs text-muted-foreground">
-                Разделяйте запятыми
+                Разделяйте запятыми (необязательное поле)
               </p>
             </div>
 
