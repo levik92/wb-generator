@@ -225,7 +225,7 @@ export default function WBLabelMaker() {
   #wb-gen, #wb-gen *{box-sizing:border-box}
   #wb-gen{
     --bg:#ffffff; --card:#f5f6f8; --line:#e3e6ea; --muted:#7e8a8a; --text:#222;
-    --green:#20a04b; --green-h:#199243; --radius:14px; --shadow:0 8px 28px rgba(0,0,0,.06);
+    --green:#10b981; --green-h:#059669; --radius:14px; --shadow:0 8px 28px rgba(0,0,0,.06);
     font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     color:var(--text); background:var(--bg); padding:0; border-radius:var(--radius);
   }
@@ -255,7 +255,7 @@ export default function WBLabelMaker() {
   .wb-range input[type=range]::-moz-range-track{height:8px;background:#eef2f1;border-radius:999px;border:1px solid var(--line)}
   .wb-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .wb-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-  .wb-range input[type=range]::-moz-range-progress{height:8px;background:rgba(32,160,75,.25);border-radius:999px}
+  .wb-range input[type=range]::-moz-range-progress{height:8px;background:rgba(16,185,129,.3);border-radius:999px}
 
   .wb-preview{display:flex;flex-direction:column;gap:14px}
   .wb-prev-head{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 0}
