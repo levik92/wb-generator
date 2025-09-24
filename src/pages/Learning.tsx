@@ -83,8 +83,8 @@ const Learning = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-6 h-6 text-wb-purple" />
+              <div className="w-16 h-16 bg-[#0088cc] rounded-2xl flex items-center justify-center shadow-lg">
+                <MessageCircle className="w-8 h-8 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-1">Подписывайтесь на нашу группу в Telegram</h3>
@@ -95,7 +95,7 @@ const Learning = () => {
             </div>
             <Button 
               onClick={handleTelegramClick}
-              className="bg-wb-purple hover:bg-wb-purple/80 text-white gap-2"
+              className="bg-[#0088cc] hover:bg-[#006ba8] text-white gap-2 shadow-lg"
             >
               <ExternalLink className="w-4 h-4" />
               Присоединиться
