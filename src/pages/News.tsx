@@ -199,6 +199,12 @@ const News = () => {
                   onClick={() => markAsRead(item.id)}
                 >
                   <CardHeader>
+                    {/* Mobile: Date above tags */}
+                    <div className="flex md:hidden items-center gap-2 text-sm text-muted-foreground mb-3">
+                      <Clock className="w-4 h-4" />
+                      {formatDate(item.published_at)}
+                    </div>
+                    
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -216,7 +222,8 @@ const News = () => {
                         </div>
                         <CardTitle className="text-lg leading-tight">{item.title}</CardTitle>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
+                      {/* Desktop: Date on the right */}
+                      <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground shrink-0">
                         <Clock className="w-4 h-4" />
                         {formatDate(item.published_at)}
                       </div>
