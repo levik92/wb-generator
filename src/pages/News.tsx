@@ -177,9 +177,9 @@ export default function News() {
 
           {news.length === 0 && (
             <div className="text-center py-12">
-              <Newspaper className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Новостей пока нет</h3>
-              <p className="text-muted-foreground">
+              <Newspaper className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+              <h3 className="text-base font-medium mb-1 text-muted-foreground/70">Новостей пока нет</h3>
+              <p className="text-sm text-muted-foreground/60">
                 Здесь будут появляться последние обновления и важная информация о сервисе
               </p>
             </div>

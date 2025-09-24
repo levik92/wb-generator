@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Coins, FileText, Images } from "lucide-react";
 import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
@@ -53,17 +54,13 @@ export default function Balance() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-semibold mb-2">Баланс токенов</h1>
+      </div>
+
       <div className="bg-gradient-to-br from-wb-purple/5 via-wb-purple/10 to-wb-purple-dark/15 border border-wb-purple/20 rounded-xl p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent pointer-events-none" />
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-wb-purple/20 to-wb-purple-dark/20 p-3 rounded-lg shadow-lg">
-                <Coins className="h-6 w-6 text-wb-purple" />
-              </div>
-              <h2 className="text-xl font-semibold bg-gradient-to-r from-wb-purple to-wb-purple-dark bg-clip-text text-transparent">Баланс токенов</h2>
-            </div>
-          </div>
           <div className="flex items-center justify-between">
             <div>
               <div className="text-4xl font-bold bg-gradient-to-r from-wb-purple to-wb-purple-dark bg-clip-text text-transparent mb-2">{balance}</div>
@@ -86,35 +83,31 @@ export default function Balance() {
         </div>
       </div>
 
-      <Card className="bg-muted/30">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Стоимость генерации</CardTitle>
+          <CardTitle>Стоимость генерации</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
-              <div className="bg-muted p-2 rounded-lg">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium text-sm">1 описание товара</div>
+                  <div className="text-xs text-muted-foreground">Генерация описания</div>
+                </div>
               </div>
-              <div className="flex-1">
-                <div className="font-medium text-sm">1 описание товара</div>
-                <div className="text-xs text-muted-foreground">Генерация описания</div>
-              </div>
-               <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
-                 1 токен
-               </div>
+              <Badge variant="secondary">1 токен</Badge>
             </div>
-            <div className="bg-muted/30 border border-border rounded-[10px] p-4 flex items-center gap-3">
-              <div className="bg-muted p-2 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-3">
                 <Images className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium text-sm">1 изображение карточки</div>
+                  <div className="text-xs text-muted-foreground">Генерация или перегенерация</div>
+                </div>
               </div>
-              <div className="flex-1">
-                <div className="font-medium text-sm">1 изображение карточки</div>
-                <div className="text-xs text-muted-foreground">Генерация или перегенерация</div>
-              </div>
-              <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm">
-                10 токенов
-              </div>
+              <Badge variant="secondary">10 токенов</Badge>
             </div>
           </div>
         </CardContent>

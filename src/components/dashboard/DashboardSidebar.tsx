@@ -55,16 +55,6 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       badgeColor: 'bg-green-500'
     },
     {
-      id: 'news',
-      label: 'Новости',
-      icon: Newspaper,
-    },
-    {
-      id: 'learning',
-      label: 'Обучение',
-      icon: BookOpen,
-    },
-    {
       id: 'history',
       label: 'История',
       icon: History,
@@ -75,9 +65,19 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: CreditCard,
     },
     {
+      id: 'news',
+      label: 'Новости',
+      icon: Newspaper,
+    },
+    {
       id: 'referrals',
       label: 'Рефералы',
       icon: Users,
+    },
+    {
+      id: 'learning',
+      label: 'Обучение',
+      icon: BookOpen,
     },
     {
       id: 'settings',

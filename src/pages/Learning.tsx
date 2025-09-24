@@ -100,24 +100,22 @@ export default function Learning() {
         {/* Telegram Group Promo */}
         <Card className="mb-8 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-blue-900">Подписывайтесь на нашу группу в Telegram</h3>
-                  <p className="text-blue-700">Получайте последние новости, советы и поддержку от нашего сообщества</p>
-                </div>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <MessageCircle className="w-6 h-6 text-white" />
               </div>
-              <Button 
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-                onClick={() => window.open('https://t.me/wbgen_official/', '_blank')}
-              >
-                Присоединиться
-                <ExternalLink className="w-4 h-4 ml-2" />
-              </Button>
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900">Подписывайтесь на нашу группу в Telegram</h3>
+                <p className="text-blue-700">Получайте последние новости, советы и поддержку от нашего сообщества</p>
+              </div>
             </div>
+            <Button 
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={() => window.open('https://t.me/wbgen_official/', '_blank')}
+            >
+              Присоединиться
+              <ExternalLink className="w-4 h-4 ml-2" />
+            </Button>
           </CardContent>
         </Card>
 
