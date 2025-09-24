@@ -711,7 +711,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`Upload ${index + 1}`}
-                      className="w-full h-20 object-cover rounded-lg border"
+                      className="w-full aspect-square object-cover rounded-lg border"
                     />
                     <button
                       onClick={() => removeFile(index)}
