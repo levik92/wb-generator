@@ -17,10 +17,9 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MobileMenu } from "@/components/dashboard/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { OptimizedGenerateCards } from "@/components/dashboard/OptimizedGenerateCards";
-import { GenerateCards } from "@/components/dashboard/GenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
 import { History } from "@/components/dashboard/History";
-import Balance from "@/components/dashboard/Balance";
+import Pricing from "@/components/dashboard/Pricing";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
 import WBLabelMaker from "@/components/dashboard/WBLabelMaker";
@@ -145,7 +144,7 @@ const Dashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'generate':
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+        return <OptimizedGenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'barcode':
@@ -157,7 +156,7 @@ const Dashboard = () => {
       case 'history':
         return <History profile={profile} />;
       case 'balance':
-        return <Balance />;
+        return <Pricing />;
       case 'referrals':
         return <Referrals profile={profile} />;
       case 'settings':
@@ -165,7 +164,7 @@ const Dashboard = () => {
       case 'notifications':
         return <NotificationCenter profile={profile} />;
       default:
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+        return <OptimizedGenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
     }
   };
 
