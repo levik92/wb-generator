@@ -36,7 +36,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   
   const menuItems = [
     {
-      id: 'generate',
+      id: 'cards',
       label: 'Генерация карточек',
       icon: Image,
     },
@@ -46,7 +46,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: FileText,
     },
     {
-      id: 'barcode',
+      id: 'labels',
       label: 'Генератор этикеток',
       icon: Tags,
       badge: 'FREE',
@@ -58,7 +58,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: History,
     },
     {
-      id: 'balance',
+      id: 'pricing',
       label: 'Баланс',
       icon: CreditCard,
     },
@@ -66,6 +66,20 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'referrals',
       label: 'Рефералы',
       icon: Users,
+    },
+    {
+      id: 'ai-questions',
+      label: 'AI Ответы на вопросы',
+      icon: FileText,
+      disabled: true,
+      badge: 'Скоро'
+    },
+    {
+      id: 'ai-reviews',
+      label: 'AI Ответы на отзывы',
+      icon: FileText,
+      disabled: true,
+      badge: 'Скоро'
     },
     {
       id: 'settings',
@@ -118,7 +132,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             <Button 
               size="sm" 
               className="w-8 h-8 p-0 bg-wb-purple hover:bg-wb-purple/80"
-                onClick={() => onTabChange('balance')}
+              onClick={() => onTabChange('pricing')}
             >
               <Plus className="w-4 h-4" />
             </Button>
@@ -134,7 +148,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             <Button 
               size="sm" 
               className="w-full bg-wb-purple hover:bg-wb-purple/80"
-              onClick={() => onTabChange('balance')}
+              onClick={() => onTabChange('pricing')}
             >
               <Plus className="w-4 h-4 mr-2" />
               Пополнить
@@ -158,21 +172,21 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} ${
                     isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
-                  } ${(item as any).disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => !(item as any).disabled && onTabChange(item.id)}
-                  disabled={(item as any).disabled}
+                  } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => !item.disabled && onTabChange(item.id)}
+                  disabled={item.disabled}
                   title={isCollapsed ? item.label : undefined}
                 >
                   <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-3' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                 </Button>
-                {(item as any).badge && !isCollapsed && (
+                {item.badge && !isCollapsed && (
                   <Badge 
                     className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 min-w-0 ${
-                      (item as any).badgeColor || 'bg-muted text-muted-foreground'
+                      item.badgeColor || 'bg-muted text-muted-foreground'
                     } border-0 rounded-md shadow-sm z-10 pointer-events-none`}
                   >
-                    {(item as any).badge}
+                    {item.badge}
                   </Badge>
                 )}
               </li>

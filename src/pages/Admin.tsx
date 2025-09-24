@@ -36,7 +36,7 @@ interface UserStats {
   total_revenue: number;
 }
 
-type ActiveTab = 'analytics' | 'users' | 'prompts' | 'promocodes';
+type ActiveTab = 'analytics' | 'users' | 'prompts' | 'promocodes' | 'news';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -123,6 +123,13 @@ export default function Admin() {
         return <PromptManager />;
       case 'promocodes':
         return <PromoCodeManager />;
+      case 'news':
+        return (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-semibold mb-2">Раздел "Новости" в разработке</h3>
+            <p className="text-muted-foreground">Скоро здесь появится возможность управления новостями</p>
+          </div>
+        );
       default:
         return <AdminAnalytics users={users} />;
     }

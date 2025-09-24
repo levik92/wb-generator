@@ -16,13 +16,13 @@ import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MobileMenu } from "@/components/dashboard/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { OptimizedGenerateCards } from "@/components/dashboard/OptimizedGenerateCards";
+import { GenerateCards } from "@/components/dashboard/GenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
 import { History } from "@/components/dashboard/History";
-import Pricing from "@/components/dashboard/Pricing";
+import Balance from "@/components/dashboard/Balance";
 import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
-import WBLabelMaker from "@/components/dashboard/WBLabelMaker";
+import LabelGenerator from "@/components/dashboard/LabelGenerator";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import Footer from "@/components/Footer";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
@@ -36,13 +36,13 @@ interface Profile {
   referral_code: string;
 }
 
-type ActiveTab = 'generate' | 'description' | 'history' | 'balance' | 'referrals' | 'settings' | 'notifications' | 'barcode';
+type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications';
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('generate');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -141,24 +141,24 @@ const Dashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'generate':
-        return <OptimizedGenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+      case 'cards':
+        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
-      case 'barcode':
-        return <WBLabelMaker />;
+      case 'notifications':
+        return <NotificationCenter profile={profile} />;
+      case 'labels':
+        return <LabelGenerator />;
       case 'history':
         return <History profile={profile} />;
-      case 'balance':
-        return <Pricing />;
+      case 'pricing':
+        return <Balance />;
       case 'referrals':
         return <Referrals profile={profile} />;
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
-      case 'notifications':
-        return <NotificationCenter profile={profile} />;
       default:
-        return <OptimizedGenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
     }
   };
 
