@@ -46,8 +46,6 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'news',
       label: 'Новости',
       icon: Megaphone,
-      badge: 'Скоро',
-      disabled: true
     }
   ];
 
@@ -103,21 +101,13 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} ${
                     isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
-                  } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => !item.disabled && onTabChange(item.id)}
-                  disabled={item.disabled}
+                  }`}
+                  onClick={() => onTabChange(item.id)}
                   title={isCollapsed ? item.label : undefined}
                 >
                   <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-3' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                 </Button>
-                {item.badge && !isCollapsed && (
-                  <Badge 
-                    className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 min-w-0 bg-muted text-muted-foreground border-0 rounded-md shadow-sm z-10 pointer-events-none`}
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
               </li>
             );
           })}

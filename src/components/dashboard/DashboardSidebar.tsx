@@ -12,9 +12,12 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
-  Tags
+  Tags,
+  Newspaper,
+  GraduationCap
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Profile {
   id: string;
@@ -33,6 +36,42 @@ interface DashboardSidebarProps {
 
 export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hasUnreadNews, setHasUnreadNews] = useState(false);
+
+  // Check for unread news
+  useState(() => {
+    const checkUnreadNews = async () => {
+      try {
+        // This is a simplified check - in real implementation you'd check against read status
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        //@ts-ignore - Table types not updated yet
+        const { data: newsData } = await supabase
+          .from('news')
+          .select('id, published_at')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false })
+          .limit(5);
+
+        if (newsData && newsData.length > 0) {
+          //@ts-ignore - Table types not updated yet
+          const { data: readData } = await supabase
+            .from('news_read_status')
+            .select('news_id')
+            .eq('user_id', user.id);
+
+          const readIds = new Set(readData?.map(r => r.news_id) || []);
+          const hasUnread = newsData.some(news => !readIds.has(news.id));
+          setHasUnreadNews(hasUnread);
+        }
+      } catch (error) {
+        console.error('Error checking unread news:', error);
+      }
+    };
+
+    checkUnreadNews();
+  });
   
   const menuItems = [
     {
@@ -63,9 +102,21 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: CreditCard,
     },
     {
+      id: 'news',
+      label: 'Новости',
+      icon: Newspaper,
+      badge: hasUnreadNews ? 'Новое' : undefined,
+      badgeColor: hasUnreadNews ? 'bg-wb-purple text-white' : undefined
+    },
+    {
       id: 'referrals',
       label: 'Рефералы',
       icon: Users,
+    },
+    {
+      id: 'learning',
+      label: 'Обучение',
+      icon: GraduationCap,
     },
     {
       id: 'ai-questions',

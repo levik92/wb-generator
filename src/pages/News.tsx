@@ -52,6 +52,7 @@ const News = () => {
       setLoading(true);
       
       // Get total count
+      //@ts-ignore - Table types not updated yet
       const { count } = await supabase
         .from('news')
         .select('*', { count: 'exact', head: true })
@@ -60,6 +61,7 @@ const News = () => {
       setTotalPages(Math.ceil((count || 0) / NEWS_PER_PAGE));
 
       // Get news for current page
+      //@ts-ignore - Table types not updated yet
       const { data, error } = await supabase
         .from('news')
         .select('*')
@@ -83,6 +85,7 @@ const News = () => {
 
   const loadReadNews = async () => {
     try {
+      //@ts-ignore - Table types not updated yet
       const { data, error } = await supabase
         .from('news_read_status')
         .select('news_id')
@@ -103,6 +106,7 @@ const News = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
+      //@ts-ignore - Table types not updated yet
       const { error } = await supabase
         .from('news_read_status')
         .insert({

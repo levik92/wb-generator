@@ -24,6 +24,8 @@ import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
 import LabelGenerator from "@/components/dashboard/LabelGenerator";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
+import News from "@/pages/News";
+import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
 
@@ -36,7 +38,7 @@ interface Profile {
   referral_code: string;
 }
 
-type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications';
+type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications' | 'news' | 'learning';
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -155,6 +157,10 @@ const Dashboard = () => {
         return <Balance />;
       case 'referrals':
         return <Referrals profile={profile} />;
+      case 'news':
+        return <News />;
+      case 'learning':
+        return <Learning />;
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
       default:

@@ -43,6 +43,8 @@ const getNotificationIcon = (type: string) => {
       return <Mail className="w-4 h-4" />;
     case 'password_changed':
       return <Key className="w-4 h-4" />;
+    case 'news':
+      return <FileText className="w-4 h-4" />;
     default:
       return <Bell className="w-4 h-4" />;
   }
@@ -61,6 +63,8 @@ const getNotificationColor = (type: string) => {
     case 'email_changed':
     case 'password_changed':
       return 'bg-yellow-100 text-yellow-600 border-yellow-200';
+    case 'news':
+      return 'bg-wb-purple/10 text-wb-purple border-wb-purple/20';
     default:
       return 'bg-gray-100 text-gray-600 border-gray-200';
   }
