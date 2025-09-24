@@ -495,14 +495,14 @@ export default function LabelGenerator() {
                     max={500}
                     min={100}
                     step={50}
-                    className="mt-2"
+                    className="mt-2 [&_[role=slider]]:bg-green-500 [&_[role=slider]]:border-green-600 [&>span>span]:bg-green-500"
                   />
                 </div>
                 
                 <div>
                   <Label>Формат файла</Label>
                   <Select value={qrFormat} onValueChange={setQrFormat}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-2">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -514,7 +514,7 @@ export default function LabelGenerator() {
               </div>
               
               <div className="flex gap-2">
-                <Button onClick={generateQR} className="flex items-center gap-2">
+                <Button onClick={generateQR} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
                   <QrCode className="h-4 w-4" />
                   Сгенерировать QR-код
                 </Button>
