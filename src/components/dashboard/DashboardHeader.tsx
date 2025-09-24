@@ -141,7 +141,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                 notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
-                    className={`p-3 cursor-pointer border-b last:border-b-0 bg-gray-50 hover:bg-wb-purple/20 ${
+                    className={`p-3 cursor-pointer border-b last:border-b-0 bg-gray-50 hover:bg-wb-purple/20 hover:[&_*]:text-white ${
                       !notification.read ? 'bg-wb-purple/10' : ''
                     }`}
                     onClick={() => markAsRead(notification.id)}
