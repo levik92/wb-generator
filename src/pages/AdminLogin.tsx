@@ -104,6 +104,7 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                placeholder="Введите пароль администратора"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
@@ -112,13 +113,12 @@ export default function AdminLogin() {
           </form>
           
           <div className="mt-4 text-center">
-            <Button 
-              variant="ghost" 
+            <button
               onClick={() => navigate('/')}
-              className="text-sm"
+              className="text-sm text-foreground hover:text-wb-purple transition-colors duration-200 bg-transparent border-none cursor-pointer"
             >
               Вернуться на главную
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
