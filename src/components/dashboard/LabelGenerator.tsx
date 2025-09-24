@@ -469,7 +469,7 @@ export default function LabelGenerator() {
         </TabsContent>
 
         <TabsContent value="qr" className="space-y-4 sm:space-y-6">
-          <Card className="bg-gray-50 border-2">
+          <Card className="bg-gray-50 border">
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Генератор QR-кодов</CardTitle>
               <CardDescription>Создавайте QR-коды для любых данных</CardDescription>
