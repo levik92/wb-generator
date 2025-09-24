@@ -338,8 +338,8 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
             ) : (
               <div className="h-64 flex items-center justify-center text-muted-foreground">
                 <div className="text-center">
-                  <FileText className="w-12 h-12 mx-auto mb-4" />
-                  <p>Описание появится после генерации</p>
+                  <FileText className="w-8 h-8 mx-auto mb-3" />
+                  <p className="text-sm">Описание появится после генерации</p>
                 </div>
               </div>
             )}
