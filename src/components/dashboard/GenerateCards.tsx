@@ -759,11 +759,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {CARD_STAGES.map((stage, index) => (
               <div 
                 key={index} 
-                className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                className={`border rounded-lg p-3 sm:p-4 cursor-pointer transition-all ${
                   selectedCards.includes(index) 
                     ? 'border-primary bg-primary/5' 
                     : 'border-border hover:border-muted-foreground/50'
@@ -774,10 +774,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   <Checkbox 
                     checked={selectedCards.includes(index)}
                     onChange={() => handleCardToggle(index)}
+                    className="mt-0.5"
                   />
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm mb-1">{stage.name}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{stage.description}</p>
+                    <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
                   </div>
                 </div>
               </div>
@@ -844,39 +845,40 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       {generatedImages.length > 0 && (
         <Card className="bg-muted/30">
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Images className="w-4 h-4" />
-                  Готовые карточки ({generatedImages.length}/{selectedCards.length})
+            <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Images className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Готовые карточки ({generatedImages.length}/{selectedCards.length})</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
               <Button
                 onClick={downloadAll}
                 variant="outline"
-                className="shrink-0"
+                className="shrink-0 w-full sm:w-auto"
+                size="sm"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Скачать все
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
+          <CardContent className="px-3 sm:px-6">
+            <div className="grid gap-3 sm:gap-4">
               {generatedImages.map((image, index) => {
                 const cardKey = `${image.id}_${index}`;
                 const isRegenerating = regeneratingCards.has(cardKey);
                 
                 return (
-                  <div key={image.id} className="flex items-center gap-4 p-4 border rounded-lg bg-muted/30">
-                    <div className="relative group">
+                  <div key={image.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg bg-muted/30">
+                    <div className="relative group shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
                       <img
                         src={image.url}
                         alt={`Generated card ${index + 1}`}
-                        className="w-16 h-20 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover:brightness-75"
+                        className="w-20 h-24 sm:w-16 sm:h-20 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover:brightness-75"
                       />
                       {/* Hover overlay */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md">
@@ -890,7 +892,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                             onClick={() => setFullscreenImage(image)}
                           />
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] p-2">
+                        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] p-2">
                           <div className="flex items-center justify-center">
                             <img
                               src={image.url}
@@ -904,14 +906,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       </Dialog>
                     </div>
                     
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm truncate">{image.stage}</h3>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex-1 min-w-0 w-full sm:w-auto">
+                      <h3 className="font-medium text-sm sm:text-base text-center sm:text-left truncate">{image.stage}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 sm:line-clamp-1 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
                       </p>
                     </div>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                       <Button
                         size="sm"
                         variant="outline"
@@ -920,13 +922,21 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           regenerateCard(image, index);
                         }}
                         disabled={isRegenerating}
+                        className="w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3"
                       >
                         {isRegenerating ? (
-                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          <>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            <span className="hidden sm:inline">Перегенерация...</span>
+                            <span className="sm:hidden">Обновление...</span>
+                          </>
                         ) : (
-                          <RefreshCw className="w-3 h-3 mr-1" />
+                          <>
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            <span className="hidden sm:inline">Перегенерировать</span>
+                            <span className="sm:hidden">Обновить</span>
+                          </>
                         )}
-                        {isRegenerating ? 'Перегенерация...' : 'Перегенерировать'}
                       </Button>
                       
                       <Button
@@ -936,6 +946,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           e.stopPropagation();
                           await downloadSingle(index);
                         }}
+                        className="w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3"
                       >
                         <Download className="w-3 h-3 mr-1" />
                         Скачать
@@ -951,11 +962,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       {/* Generate Button */}
       <Card className="bg-muted/30">
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
           <Button 
             onClick={simulateGeneration}
             disabled={!canGenerate()}
-            className="w-full bg-wb-purple hover:bg-wb-purple-dark"
+            className="w-full bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base"
             size="lg"
           >
             {generating ? (
@@ -977,14 +988,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             )}
           </Button>
           
-          <p className="text-center text-sm text-muted-foreground mt-3">
+          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3 px-2">
             Стоимость: <strong>{selectedCards.length * 10} {selectedCards.length * 10 === 1 ? 'токен' : (selectedCards.length * 10) % 10 >= 2 && (selectedCards.length * 10) % 10 <= 4 && ((selectedCards.length * 10) % 100 < 10 || (selectedCards.length * 10) % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
           </p>
           
           {!canGenerate() && !generating && (
             <Alert className="mt-4 bg-amber-50 border-amber-200 rounded-xl">
               <Info className="h-4 w-4 text-amber-700" />
-              <AlertDescription className="text-amber-800 font-medium">
+              <AlertDescription className="text-amber-800 font-medium text-xs sm:text-sm">
                 <strong>{getGuardMessage()}</strong>
               </AlertDescription>
             </Alert>
@@ -992,13 +1003,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           {generating && (
             <>
-              <div className="bg-muted/50 border border-muted-foreground/20 rounded-lg p-4 mt-4">
-                <p className="text-muted-foreground text-sm flex items-center gap-2">
-                  <Info className="w-5 h-5" />
-                  Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
+              <div className="bg-muted/50 border border-muted-foreground/20 rounded-lg p-3 sm:p-4 mt-4">
+                <p className="text-muted-foreground text-xs sm:text-sm flex items-start sm:items-center gap-2">
+                  <Info className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 sm:mt-0" />
+                  <span className="leading-relaxed">
+                    Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
+                  </span>
                 </p>
               </div>
-              <p className="text-xs text-muted-foreground/60 mt-2 text-center">
+              <p className="text-xs text-muted-foreground/60 mt-2 text-center px-2 leading-relaxed">
                 WB Генератор может совершать ошибки. Перегенерируйте фото при необходимости.
               </p>
             </>
