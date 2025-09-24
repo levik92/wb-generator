@@ -258,9 +258,9 @@ export const History = ({ profile }: HistoryProps) => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-4" />
-              <p>
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="w-8 h-8 mx-auto mb-3" />
+              <p className="text-sm">
                 {filter === 'all' 
                   ? "Начните генерацию, чтобы увидеть историю здесь"
                   : `Создайте ${filter === 'cards' ? 'карточки' : 'описания'}, чтобы увидеть их здесь`
