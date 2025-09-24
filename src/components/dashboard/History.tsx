@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import JSZip from 'jszip';
 
 interface Generation {
   id: string;
@@ -92,8 +93,11 @@ export const History = ({ profile }: HistoryProps) => {
   };
 
   const downloadGeneration = async (generation: Generation) => {
+    const zip = new JSZip();
+    const safeProductName = (generation.input_data?.productName || 'generation').replace(/[^a-z0-9_-]/gi, '');
+    
     if (generation.generation_type === 'cards') {
-      // Download actual generated images
+      // Add images to ZIP
       if (generation.output_data?.images && Array.isArray(generation.output_data.images)) {
         const images = generation.output_data.images;
         
@@ -106,59 +110,62 @@ export const History = ({ profile }: HistoryProps) => {
           return;
         }
 
-        // Download each image
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i];
-          if (image.url) {
-            try {
+        try {
+          // Add each image to ZIP
+          for (let i = 0; i < images.length; i++) {
+            const image = images[i];
+            if (image.url) {
               const response = await fetch(image.url);
               const blob = await response.blob();
-              const url = window.URL.createObjectURL(blob);
-              
-              const link = document.createElement('a');
-              link.href = url;
-              const safeProductName = (generation.input_data?.productName || 'card').replace(/[^a-z0-9_-]/gi, '');
-              link.download = `${safeProductName}_${image.stage || image.type || (i+1)}.png`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              
-              window.URL.revokeObjectURL(url);
-              
-              // Small delay between downloads
-              if (i < images.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-              }
-            } catch (error) {
-              console.error('Error downloading image:', error);
+              const fileName = `${safeProductName}_${image.stage || image.type || (i+1)}.png`;
+              zip.file(fileName, blob);
             }
           }
+        } catch (error) {
+          toast({
+            title: "Ошибка создания архива",
+            description: "Не удалось добавить изображения в архив",
+            variant: "destructive",
+          });
+          return;
         }
-        
-        toast({
-          title: "Скачивание завершено",
-          description: `Скачано ${images.length} изображений`,
-        });
       } else {
         toast({
           title: "Ошибка скачивания",
           description: "Не удалось найти изображения для скачивания",
           variant: "destructive",
         });
+        return;
       }
     } else {
-      // Download description as text file
-      const element = document.createElement('a');
-      const file = new Blob([generation.output_data?.description || 'Описание товара'], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = `description_${generation.id.slice(0, 8)}.txt`;
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
+      // Add description text file to ZIP
+      const description = generation.output_data?.description || 'Описание товара';
+      zip.file(`${safeProductName}_description.txt`, description);
+    }
+
+    try {
+      // Generate ZIP and download
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeProductName}_${generation.generation_type}_${generation.id.slice(0, 8)}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
       
       toast({
-        title: "Скачивание началось", 
-        description: "Текстовый файл с описанием скачивается",
+        title: "Скачивание завершено",
+        description: `ZIP-архив успешно скачан`,
+      });
+    } catch (error) {
+      toast({
+        title: "Ошибка создания архива",
+        description: "Не удалось создать ZIP-архив",
+        variant: "destructive",
       });
     }
   };
