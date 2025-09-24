@@ -44,6 +44,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasUnreadNews, setHasUnreadNews] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -89,6 +90,9 @@ const Dashboard = () => {
 
       if (error) throw error;
       setProfile(data);
+      
+      // Check for unread news after loading profile
+      await checkUnreadNews(userId);
     } catch (error: any) {
       toast({
         title: "Ошибка загрузки профиля",
@@ -97,6 +101,31 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkUnreadNews = async (userId: string) => {
+    try {
+      // Use any type to bypass TypeScript checks for news table
+      const { data: newsData } = await (supabase as any)
+        .from('news')
+        .select('id, published_at')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(5);
+
+      if (newsData && newsData.length > 0) {
+        const { data: readData } = await (supabase as any)
+          .from('news_read_status')
+          .select('news_id')
+          .eq('user_id', userId);
+
+        const readIds = new Set((readData as any)?.map((r: any) => r.news_id) || []);
+        const hasUnread = (newsData as any).some((news: any) => !readIds.has(news.id));
+        setHasUnreadNews(hasUnread);
+      }
+    } catch (error) {
+      console.error('Error checking unread news:', error);
     }
   };
 
@@ -186,6 +215,7 @@ const Dashboard = () => {
             activeTab={activeTab}
             onTabChange={handleTabChange}
             profile={profile}
+            hasUnreadNews={hasUnreadNews}
           />
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">

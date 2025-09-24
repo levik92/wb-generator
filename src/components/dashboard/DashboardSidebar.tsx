@@ -118,15 +118,8 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: GraduationCap,
     },
     {
-      id: 'ai-questions',
-      label: 'AI Ответы на вопросы',
-      icon: FileText,
-      disabled: true,
-      badge: 'Скоро'
-    },
-    {
-      id: 'ai-reviews',
-      label: 'AI Ответы на отзывы',
+      id: 'ai-answers',
+      label: 'AI Ответы',
       icon: FileText,
       disabled: true,
       badge: 'Скоро'

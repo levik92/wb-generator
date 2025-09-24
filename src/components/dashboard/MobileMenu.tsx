@@ -2,7 +2,19 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, Zap, CreditCard, FileText, History, DollarSign, Users, Settings } from "lucide-react";
+import { 
+  Menu, 
+  Zap, 
+  Image, 
+  FileText, 
+  History, 
+  CreditCard, 
+  Users, 
+  Settings,
+  Tags,
+  Newspaper,
+  GraduationCap
+} from "lucide-react";
 
 interface Profile {
   id: string;
@@ -17,19 +29,69 @@ interface MobileMenuProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   profile: Profile;
+  hasUnreadNews?: boolean;
 }
 
-export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps) => {
+export const MobileMenu = ({ activeTab, onTabChange, profile, hasUnreadNews = false }: MobileMenuProps) => {
   const [open, setOpen] = useState(false);
   
   const menuItems = [
-    { id: 'cards', label: 'Генерация карточек', icon: CreditCard },
-    { id: 'description', label: 'Генерация описаний', icon: FileText },
-    { id: 'labels', label: 'Генератор этикеток', icon: FileText, badge: 'FREE', badgeColor: 'bg-green-500' },
-    { id: 'history', label: 'История', icon: History },
-    { id: 'pricing', label: 'Баланс', icon: DollarSign },
-    { id: 'referrals', label: 'Рефералы', icon: Users },
-    { id: 'settings', label: 'Настройки', icon: Settings },
+    {
+      id: 'cards',
+      label: 'Генерация карточек',
+      icon: Image,
+    },
+    {
+      id: 'description',
+      label: 'Генерация описаний',
+      icon: FileText,
+    },
+    {
+      id: 'labels',
+      label: 'Генератор этикеток',
+      icon: Tags,
+      badge: 'FREE',
+      badgeColor: 'bg-green-500'
+    },
+    {
+      id: 'history',
+      label: 'История',
+      icon: History,
+    },
+    {
+      id: 'pricing',
+      label: 'Баланс',
+      icon: CreditCard,
+    },
+    {
+      id: 'news',
+      label: 'Новости',
+      icon: Newspaper,
+      badge: hasUnreadNews ? 'Новое' : undefined,
+      badgeColor: hasUnreadNews ? 'bg-wb-purple text-white' : undefined
+    },
+    {
+      id: 'referrals',
+      label: 'Рефералы',
+      icon: Users,
+    },
+    {
+      id: 'learning',
+      label: 'Обучение',
+      icon: GraduationCap,
+    },
+    {
+      id: 'ai-answers',
+      label: 'AI Ответы',
+      icon: FileText,
+      disabled: true,
+      badge: 'Скоро'
+    },
+    {
+      id: 'settings',
+      label: 'Настройки',
+      icon: Settings,
+    },
   ];
 
   const handleTabChange = (tabId: string) => {
@@ -90,18 +152,21 @@ export const MobileMenu = ({ activeTab, onTabChange, profile }: MobileMenuProps)
                       variant={isActive ? "secondary" : "ghost"}
                       className={`w-full justify-start text-left ${
                         isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
-                      }`}
-                      onClick={() => handleTabChange(item.id)}
+                      } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => !item.disabled && handleTabChange(item.id)}
+                      disabled={item.disabled}
                     >
                       <Icon className="w-4 h-4 mr-3" />
                       {item.label}
                     </Button>
                     {item.badge && (
-                      <div className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 rounded text-white ${
-                        item.badgeColor || 'bg-muted'
-                      } border-0 shadow-sm z-10 pointer-events-none`}>
+                      <Badge 
+                        className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 min-w-0 ${
+                          item.badgeColor || 'bg-muted text-muted-foreground'
+                        } border-0 rounded-md shadow-sm z-10 pointer-events-none`}
+                      >
                         {item.badge}
-                      </div>
+                      </Badge>
                     )}
                   </div>
                 );
