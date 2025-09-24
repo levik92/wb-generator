@@ -38,19 +38,24 @@ const getPromptDisplayName = (type: string): { name: string; description: string
       description: 'Промт для детальной съемки с указанием состава, характеристик или материалов товара',
       category: 'Изображение'
     },
-    'usage': { 
+    'beforeAfter': { 
       name: 'Товар в использовании', 
       description: 'Промт для демонстрации товара в процессе использования',
       category: 'Изображение'
     },
-    'comparison': { 
-      name: 'Сравнение', 
-      description: 'Промт для карточки сравнения данного товара с аналогами или конкурентами',
+    'bundle': { 
+      name: 'Сравнение с конкурентом', 
+      description: 'Промт для карточки сравнения данного товара с конкурентами',
       category: 'Изображение'
     },
-    'clean': { 
+    'guarantee': { 
       name: 'Фото без инфографики', 
       description: 'Промт для чистого фото товара без дополнительных графических элементов и текста',
+      category: 'Изображение'
+    },
+    'lifestyle': { 
+      name: 'Свойства и преимущества', 
+      description: 'Промт для фото с описанием свойств и преимуществ товара',
       category: 'Изображение'
     }
   };
@@ -197,7 +202,7 @@ export function PromptManager() {
         {/* Sort prompts: description first, then image prompts */}
         {[...prompts]
           .sort((a, b) => {
-            const order = ['description', 'cover', 'features', 'macro', 'usage', 'comparison', 'clean'];
+            const order = ['description', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'];
             return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
           })
           .map((prompt) => {
@@ -230,7 +235,7 @@ export function PromptManager() {
                           <Pencil className="h-4 w-4" />
                           Редактировать
                         </Button>
-                        {['features', 'usage', 'comparison', 'clean'].includes(prompt.prompt_type) && (
+                        {['features', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'].includes(prompt.prompt_type) && (
                           <Button
                             variant="destructive"
                             size="sm"
