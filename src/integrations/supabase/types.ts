@@ -252,6 +252,68 @@ export type Database = {
           },
         ]
       }
+      news: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean
+          published_at: string | null
+          tag: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          tag: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          tag?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      news_read_status: {
+        Row: {
+          id: string
+          news_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          news_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          news_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_read_status_news_id_fkey"
+            columns: ["news_id"]
+            isOneToOne: false
+            referencedRelation: "news"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -707,6 +769,14 @@ export type Database = {
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_public_profile_info: {
+        Args: { profile_id: string }
+        Returns: {
+          created_at: string
+          full_name: string
+          id: string
+        }[]
       }
       get_user_api_key_decrypted: {
         Args: { provider_name: string; user_id_param: string }
