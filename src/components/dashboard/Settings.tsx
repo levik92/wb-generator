@@ -28,6 +28,25 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
   const [newEmail, setNewEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  const validatePassword = (password: string): { isValid: boolean; message?: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: "Пароль должен содержать минимум 8 символов" };
+    }
+    
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    
+    if (!hasUppercase || !hasLowercase || !hasNumbers) {
+      return { 
+        isValid: false, 
+        message: "Пароль должен содержать заглавные и строчные буквы, а также цифры" 
+      };
+    }
+    
+    return { isValid: true };
+  };
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updating, setUpdating] = useState(false);
   
@@ -201,19 +220,21 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    // Validate password complexity
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
       toast({
         title: "Ошибка",
-        description: "Пароли не совпадают",
+        description: passwordValidation.message,
         variant: "destructive",
       });
       return;
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword !== confirmPassword) {
       toast({
         title: "Ошибка",
-        description: "Пароль должен содержать минимум 6 символов",
+        description: "Пароли не совпадают",
         variant: "destructive",
       });
       return;
@@ -368,11 +389,15 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
             <Label>Новый пароль</Label>
             <Input
               type="password"
-              placeholder="Минимум 6 символов"
+              placeholder="••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="input-bordered"
+              minLength={8}
             />
+            <p className="text-xs text-muted-foreground">
+              Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Подтвердите пароль</Label>
