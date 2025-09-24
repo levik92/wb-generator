@@ -239,7 +239,8 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               {generating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Генерирую... (это может занять несколько минут)
+                  <span className="hidden sm:inline">Генерирую... (это может занять несколько минут)</span>
+                  <span className="sm:hidden">Генерирую...</span>
                 </>
               ) : (
                 <>
