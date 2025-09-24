@@ -256,7 +256,7 @@ export const AdminNews = () => {
               Создать новость
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl mx-2">
             <DialogHeader>
               <DialogTitle>
                 {editingNews ? 'Редактировать новость' : 'Создать новость'}
@@ -329,10 +329,10 @@ export const AdminNews = () => {
         ) : (
           news.map((item) => (
             <Card key={item.id} className={item.is_published ? '' : 'border-orange-200 bg-orange-50/30'}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                       <Badge className={tagColors[item.tag] || 'bg-gray-100 text-gray-800'}>
                         {item.tag}
                       </Badge>
@@ -348,40 +348,53 @@ export const AdminNews = () => {
                         </Badge>
                       )}
                     </div>
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
-                      <Clock className="w-4 h-4" />
-                      Создано: {formatDate(item.created_at)}
+                    <CardTitle className="text-base lg:text-lg break-words">{item.title}</CardTitle>
+                    <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 text-xs">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Создано: {formatDate(item.created_at)}
+                      </span>
                       {item.published_at && (
-                        <span className="ml-2">
+                        <span className="hidden sm:inline">
                           • Опубликовано: {formatDate(item.published_at)}
+                        </span>
+                      )}
+                      {item.published_at && (
+                        <span className="sm:hidden">
+                          Опубликовано: {formatDate(item.published_at)}
                         </span>
                       )}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 lg:gap-2 shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => openEditDialog(item)}
+                      className="h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3 h-3 lg:w-4 lg:h-4" />
+                      <span className="hidden lg:inline ml-1">Изменить</span>
                     </Button>
                     <Button
                       variant={item.is_published ? "outline" : "default"}
                       size="sm"
                       onClick={() => publishNews(item.id, !item.is_published)}
-                      className={!item.is_published ? "bg-green-600 hover:bg-green-700" : ""}
+                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3 ${!item.is_published ? "bg-green-600 hover:bg-green-700" : ""}`}
                     >
-                      {item.is_published ? <EyeOff className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                      {item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
+                      <span className="hidden lg:inline ml-1">
+                        {item.is_published ? "Скрыть" : "Опубликовать"}
+                      </span>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 className="w-4 h-4" />
+                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3">
+                          <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
+                          <span className="hidden lg:inline ml-1">Удалить</span>
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="mx-2">
                         <AlertDialogHeader>
                           <AlertDialogTitle>Удалить новость?</AlertDialogTitle>
                           <AlertDialogDescription>
@@ -402,8 +415,8 @@ export const AdminNews = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3">
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3 break-words">
                   {item.content}
                 </p>
               </CardContent>

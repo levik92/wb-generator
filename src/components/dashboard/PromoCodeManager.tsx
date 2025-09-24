@@ -289,71 +289,73 @@ export const PromoCodeManager = () => {
           </Dialog>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Код</TableHead>
-                <TableHead>Тип</TableHead>
-                <TableHead>Значение</TableHead>
-                <TableHead>Использовано</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действует до</TableHead>
-                <TableHead>Действия</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {promoCodes.map((promo) => (
-                <TableRow key={promo.id}>
-                  <TableCell className="font-mono">{promo.code}</TableCell>
-                  <TableCell>
-                    <Badge variant={promo.type === 'tokens' ? 'default' : 'secondary'}>
-                      {promo.type === 'tokens' ? 'Токены' : 'Скидка'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {promo.value}{promo.type === 'tokens' ? ' токенов' : '%'}
-                  </TableCell>
-                  <TableCell>
-                    {promo.current_uses} / {promo.max_uses || '∞'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={promo.is_active ? 'default' : 'secondary'}
-                      className="cursor-pointer"
-                      onClick={() => toggleActive(promo.id, promo.is_active)}
-                    >
-                      {promo.is_active ? 'Активен' : 'Неактивен'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU') : 'Без ограничений'}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(promo)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(promo.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <CardContent className="p-4">
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[100px]">Код</TableHead>
+                  <TableHead className="min-w-[80px]">Тип</TableHead>
+                  <TableHead className="min-w-[80px]">Значение</TableHead>
+                  <TableHead className="min-w-[100px] hidden sm:table-cell">Использовано</TableHead>
+                  <TableHead className="min-w-[80px]">Статус</TableHead>
+                  <TableHead className="min-w-[120px] hidden md:table-cell">Действует до</TableHead>
+                  <TableHead className="min-w-[100px]">Действия</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
+              </TableHeader>
+              <TableBody>
+                {promoCodes.map((promo) => (
+                  <TableRow key={promo.id}>
+                    <TableCell className="font-mono text-sm">{promo.code}</TableCell>
+                    <TableCell>
+                      <Badge variant={promo.type === 'tokens' ? 'default' : 'secondary'} className="text-xs">
+                        {promo.type === 'tokens' ? 'Токены' : 'Скидка'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {promo.value}{promo.type === 'tokens' ? ' токенов' : '%'}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-sm">
+                      {promo.current_uses} / {promo.max_uses || '∞'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={promo.is_active ? 'default' : 'secondary'}
+                        className="cursor-pointer text-xs"
+                        onClick={() => toggleActive(promo.id, promo.is_active)}
+                      >
+                        {promo.is_active ? 'Активен' : 'Неактивен'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-sm">
+                      {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU') : 'Без ограничений'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(promo)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(promo.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
     </Card>
   );
 };

@@ -188,17 +188,17 @@ export function PromptManager() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 overflow-x-hidden">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Управление промтами</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-xl md:text-2xl font-bold">Управление промтами</h2>
+          <p className="text-muted-foreground mt-1 text-sm">
             Редактирование промтов для генерации описаний и карточек товаров
           </p>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {/* Sort prompts: description first, then image prompts */}
         {[...prompts]
           .sort((a, b) => {
@@ -210,30 +210,30 @@ export function PromptManager() {
             const isEditing = editingPrompt === prompt.id;
 
             return (
-              <Card key={prompt.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <CardTitle className="text-lg">{name}</CardTitle>
-                          <Badge variant="secondary">
+              <Card key={prompt.id} className="overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <CardTitle className="text-base lg:text-lg break-words">{name}</CardTitle>
+                          <Badge variant="secondary" className="text-xs">
                             {category}
                           </Badge>
                         </div>
-                        <CardDescription className="text-sm">{description}</CardDescription>
+                        <CardDescription className="text-sm break-words">{description}</CardDescription>
                       </div>
                     </div>
                     {!isEditing && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-1 lg:gap-2 shrink-0">
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={() => startEdit(prompt)}
-                          className="gap-2 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                          className="gap-2 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
                         >
-                          <Pencil className="h-4 w-4" />
-                          Редактировать
+                          <Pencil className="h-3 w-3 lg:h-4 lg:w-4" />
+                          <span className="hidden lg:inline">Редактировать</span>
                         </Button>
                         {['features', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'].includes(prompt.prompt_type) && (
                           <Button
@@ -241,31 +241,33 @@ export function PromptManager() {
                             size="sm"
                             onClick={() => deletePrompt(prompt.id, prompt.prompt_type)}
                             disabled={deleting === prompt.id}
-                            className="gap-2"
+                            className="gap-2 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
                           >
-                            <Trash2 className="h-4 w-4" />
-                            {deleting === prompt.id ? "Удаление..." : "Удалить"}
+                            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4" />
+                            <span className="hidden lg:inline">
+                              {deleting === prompt.id ? "Удаление..." : "Удалить"}
+                            </span>
                           </Button>
                         )}
                       </div>
                     )}
                   </div>
                 </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="space-y-4">
                   {isEditing ? (
                     <>
                       <Textarea
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="min-h-[300px] font-mono text-sm"
+                        className="min-h-[250px] lg:min-h-[300px] font-mono text-sm resize-none"
                         placeholder="Введите промт..."
                       />
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Button
                           onClick={() => savePrompt(prompt.id)}
                           disabled={saving}
-                          className="gap-2"
+                          className="gap-2 flex-1 sm:flex-none"
                         >
                           <Save className="h-4 w-4" />
                           {saving ? "Сохранение..." : "Сохранить"}
@@ -274,7 +276,7 @@ export function PromptManager() {
                           variant="outline"
                           onClick={cancelEdit}
                           disabled={saving}
-                          className="gap-2"
+                          className="gap-2 flex-1 sm:flex-none"
                         >
                           <X className="h-4 w-4" />
                           Отмена
@@ -282,8 +284,8 @@ export function PromptManager() {
                       </div>
                     </>
                   ) : (
-                    <div className="bg-muted p-4 rounded-lg">
-                      <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
+                    <div className="bg-muted p-3 lg:p-4 rounded-lg overflow-x-auto">
+                      <pre className="whitespace-pre-wrap text-xs lg:text-sm text-muted-foreground break-words">
                         {prompt.prompt_template}
                       </pre>
                     </div>

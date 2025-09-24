@@ -21,7 +21,7 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
   return (
     <div className="space-y-6">
       {/* Analytics Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <AdminAnalyticsChart type="users" />
         <AdminAnalyticsChart type="generations" />
         <AdminAnalyticsChart type="tokens" />
@@ -29,7 +29,7 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Активные пользователи</CardTitle>

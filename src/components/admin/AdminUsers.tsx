@@ -198,49 +198,49 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
             Просмотр и управление всеми пользователями системы
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
+        <CardContent className="p-4">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Имя</TableHead>
-                  <TableHead>Токены</TableHead>
-                  <TableHead>WB</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Дата регистрации</TableHead>
-                  <TableHead>Действия</TableHead>
+                  <TableHead className="min-w-[200px]">Email</TableHead>
+                  <TableHead className="min-w-[120px]">Имя</TableHead>
+                  <TableHead className="min-w-[80px]">Токены</TableHead>
+                  <TableHead className="min-w-[100px] hidden sm:table-cell">WB</TableHead>
+                  <TableHead className="min-w-[100px]">Статус</TableHead>
+                  <TableHead className="min-w-[120px] hidden md:table-cell">Дата регистрации</TableHead>
+                  <TableHead className="min-w-[120px]">Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium cursor-pointer hover:text-primary" 
+                    <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[200px] truncate" 
                       onClick={() => {
                         setSelectedUser(user);
                         loadUserDetails(user);
                       }}>
                       {user.email}
                     </TableCell>
-                    <TableCell>{user.full_name || 'Не указано'}</TableCell>
+                    <TableCell className="max-w-[120px] truncate">{user.full_name || 'Не указано'}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{user.tokens_balance}</Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={user.wb_connected ? "default" : "secondary"}>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge variant={user.wb_connected ? "default" : "secondary"} className="text-xs">
                         {user.wb_connected ? 'Подключен' : 'Не подключен'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.is_blocked ? "destructive" : "default"}>
+                      <Badge variant={user.is_blocked ? "destructive" : "default"} className="text-xs">
                         {user.is_blocked ? 'Заблокирован' : 'Активен'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell text-sm">
                       {new Date(user.created_at).toLocaleDateString('ru-RU')}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <Button
                           variant="outline"
                           size="sm"
@@ -248,8 +248,9 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                             setSelectedUser(user);
                             loadUserDetails(user);
                           }}
+                          className="h-8 w-8 p-0"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3 w-3" />
                         </Button>
                         
                         <Dialog>
@@ -261,14 +262,15 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                                 setEditingUser(user);
                                 setNewTokenBalance(user.tokens_balance.toString());
                               }}
+                              className="h-8 w-8 p-0"
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil className="h-3 w-3" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-w-sm">
                             <DialogHeader>
-                              <DialogTitle>Изменить баланс токенов</DialogTitle>
-                              <DialogDescription>
+                              <DialogTitle className="text-lg">Изменить баланс токенов</DialogTitle>
+                              <DialogDescription className="text-sm">
                                 Пользователь: {editingUser?.email}
                               </DialogDescription>
                             </DialogHeader>
@@ -294,11 +296,12 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                           variant={user.is_blocked ? "default" : "destructive"}
                           size="sm"
                           onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                          className="h-8 w-8 p-0"
                         >
                           {user.is_blocked ? (
-                            <UserCheck className="h-4 w-4" />
+                            <UserCheck className="h-3 w-3" />
                           ) : (
-                            <Ban className="h-4 w-4" />
+                            <Ban className="h-3 w-3" />
                           )}
                         </Button>
                       </div>
@@ -311,11 +314,11 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2">
+              <div className="text-sm text-muted-foreground order-2 sm:order-1">
                 Показано {startIndex + 1}-{Math.min(endIndex, filteredUsers.length)} из {filteredUsers.length}
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 order-1 sm:order-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -323,9 +326,9 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                   disabled={currentPage === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Назад
+                  <span className="hidden sm:inline ml-1">Назад</span>
                 </Button>
-                <span className="text-sm">
+                <span className="text-sm px-2">
                   {currentPage} из {totalPages}
                 </span>
                 <Button
@@ -334,7 +337,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                 >
-                  Вперед
+                  <span className="hidden sm:inline mr-1">Вперед</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -345,10 +348,10 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
 
       {/* User Details Modal */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2">
           <DialogHeader>
             <DialogTitle>Детали пользователя</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="break-all">
               {selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
@@ -360,27 +363,27 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
           ) : userDetails && (
             <div className="space-y-6">
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="text-lg font-semibold text-green-800">
+                  <div className="text-base lg:text-lg font-semibold text-green-800">
                     {userDetails.totalPaid}₽
                   </div>
                   <div className="text-xs text-green-600">Всего оплачено</div>
                 </div>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-lg font-semibold text-blue-800">
+                  <div className="text-base lg:text-lg font-semibold text-blue-800">
                     {userDetails.tokensSpent}
                   </div>
                   <div className="text-xs text-blue-600">Потрачено токенов</div>
                 </div>
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                  <div className="text-lg font-semibold text-purple-800">
+                  <div className="text-base lg:text-lg font-semibold text-purple-800">
                     {userDetails.generationsCount}
                   </div>
                   <div className="text-xs text-purple-600">Генераций</div>
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                  <div className="text-lg font-semibold text-orange-800">
+                  <div className="text-base lg:text-lg font-semibold text-orange-800">
                     {userDetails.referralsCount}
                   </div>
                   <div className="text-xs text-orange-600">Рефералов</div>
@@ -390,61 +393,65 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
               {/* Tabs or sections for different data */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">История платежей</h3>
-                <div className="max-h-48 overflow-y-auto border rounded">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Дата</TableHead>
-                        <TableHead>Сумма</TableHead>
-                        <TableHead>Токены</TableHead>
-                        <TableHead>Статус</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {userDetails.paymentHistory.map((payment: any) => (
-                        <TableRow key={payment.id}>
-                          <TableCell className="text-xs">
-                            {new Date(payment.created_at).toLocaleDateString('ru-RU')}
-                          </TableCell>
-                          <TableCell>{payment.amount}₽</TableCell>
-                          <TableCell>{payment.tokens_amount}</TableCell>
-                          <TableCell>
-                            <Badge variant="default">{payment.status}</Badge>
-                          </TableCell>
+                <div className="max-h-48 overflow-auto border rounded">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[100px]">Дата</TableHead>
+                          <TableHead className="min-w-[80px]">Сумма</TableHead>
+                          <TableHead className="min-w-[80px]">Токены</TableHead>
+                          <TableHead className="min-w-[80px]">Статус</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {userDetails.paymentHistory.map((payment: any) => (
+                          <TableRow key={payment.id}>
+                            <TableCell className="text-xs">
+                              {new Date(payment.created_at).toLocaleDateString('ru-RU')}
+                            </TableCell>
+                            <TableCell>{payment.amount}₽</TableCell>
+                            <TableCell>{payment.tokens_amount}</TableCell>
+                            <TableCell>
+                              <Badge variant="default" className="text-xs">{payment.status}</Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Рефералы</h3>
-                <div className="max-h-48 overflow-y-auto border rounded">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Email реферала</TableHead>
-                        <TableHead>Дата</TableHead>
-                        <TableHead>Награда</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {userDetails.referrals.map((referral: any) => (
-                        <TableRow key={referral.id}>
-                          <TableCell>{referral.referred?.email}</TableCell>
-                          <TableCell className="text-xs">
-                            {new Date(referral.created_at).toLocaleDateString('ru-RU')}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {referral.tokens_awarded} токенов
-                            </Badge>
-                          </TableCell>
+                <div className="max-h-48 overflow-auto border rounded">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[150px]">Email реферала</TableHead>
+                          <TableHead className="min-w-[100px]">Дата</TableHead>
+                          <TableHead className="min-w-[80px]">Награда</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {userDetails.referrals.map((referral: any) => (
+                          <TableRow key={referral.id}>
+                             <TableCell className="truncate max-w-[150px]">{referral.referred?.email}</TableCell>
+                            <TableCell className="text-xs">
+                              {new Date(referral.created_at).toLocaleDateString('ru-RU')}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary" className="text-xs">
+                                {referral.tokens_awarded} токенов
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
             </div>

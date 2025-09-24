@@ -155,8 +155,8 @@ export default function Admin() {
       
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between p-4 border-b overflow-x-hidden">
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
             {/* Mobile Menu */}
             {isMobile && (
               <AdminMobileMenu 
@@ -164,26 +164,26 @@ export default function Admin() {
                 onTabChange={handleTabChange}
               />
             )}
-            <div>
-              <h1 className="text-2xl font-bold">Админ-панель</h1>
-              <p className="text-muted-foreground">Управление системой WB Генератор</p>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl md:text-2xl font-bold truncate">Админ-панель</h1>
+              <p className="text-muted-foreground text-sm hidden sm:block">Управление системой WB Генератор</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 md:gap-2 shrink-0">
             <DataExportDialog>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-2">
                 <Download className="h-4 w-4" />
                 {!isMobile && "Экспорт данных"}
               </Button>
             </DataExportDialog>
-            <Button onClick={handleSignOut} variant="destructive" className="gap-2">
+            <Button onClick={handleSignOut} variant="destructive" size={isMobile ? "sm" : "default"} className="gap-2">
               <LogOut className="h-4 w-4" />
               {!isMobile && "Выйти"}
             </Button>
           </div>
         </div>
         
-        <main className="flex-1 p-6 md:p-6 p-4">
+        <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
           {renderContent()}
         </main>
         
