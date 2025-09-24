@@ -52,8 +52,7 @@ const News = () => {
       setLoading(true);
       
       // Get total count
-      //@ts-ignore - Table types not updated yet
-      const { count } = await supabase
+      const { count } = await (supabase as any)
         .from('news')
         .select('*', { count: 'exact', head: true })
         .eq('is_published', true);
@@ -61,8 +60,7 @@ const News = () => {
       setTotalPages(Math.ceil((count || 0) / NEWS_PER_PAGE));
 
       // Get news for current page
-      //@ts-ignore - Table types not updated yet
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('news')
         .select('*')
         .eq('is_published', true)
@@ -85,15 +83,14 @@ const News = () => {
 
   const loadReadNews = async () => {
     try {
-      //@ts-ignore - Table types not updated yet
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('news_read_status')
         .select('news_id')
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
 
       if (error) throw error;
 
-      setReadNewsIds(new Set(data?.map(item => item.news_id) || []));
+      setReadNewsIds(new Set(data?.map((item: any) => item.news_id) || []));
     } catch (error: any) {
       console.error('Error loading read news:', error);
     }
@@ -106,8 +103,7 @@ const News = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
-      //@ts-ignore - Table types not updated yet
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('news_read_status')
         .insert({
           news_id: newsId,

@@ -39,15 +39,15 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
 
   // Check for unread news
-  useState(() => {
+  useEffect(() => {
     const checkUnreadNews = async () => {
       try {
         // This is a simplified check - in real implementation you'd check against read status
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        //@ts-ignore - Table types not updated yet
-        const { data: newsData } = await supabase
+        // Use any type to bypass TypeScript checks for news table
+        const { data: newsData } = await (supabase as any)
           .from('news')
           .select('id, published_at')
           .eq('is_published', true)
@@ -55,14 +55,13 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
           .limit(5);
 
         if (newsData && newsData.length > 0) {
-          //@ts-ignore - Table types not updated yet
-          const { data: readData } = await supabase
+          const { data: readData } = await (supabase as any)
             .from('news_read_status')
             .select('news_id')
             .eq('user_id', user.id);
 
-          const readIds = new Set(readData?.map(r => r.news_id) || []);
-          const hasUnread = newsData.some(news => !readIds.has(news.id));
+          const readIds = new Set((readData as any)?.map((r: any) => r.news_id) || []);
+          const hasUnread = (newsData as any).some((news: any) => !readIds.has(news.id));
           setHasUnreadNews(hasUnread);
         }
       } catch (error) {
@@ -71,7 +70,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
     };
 
     checkUnreadNews();
-  });
+  }, []);
   
   const menuItems = [
     {
