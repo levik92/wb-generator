@@ -232,16 +232,22 @@ const News = () => {
                       
                       return (
                         <div>
-                          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                            {displayContent}
-                          </p>
+                          <div 
+                            className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                              isExpanded ? 'max-h-none opacity-100' : shouldTruncate ? 'max-h-20 opacity-90' : 'max-h-none opacity-100'
+                            }`}
+                          >
+                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                              {displayContent}
+                            </p>
+                          </div>
                           {shouldTruncate && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleExpanded(item.id);
                               }}
-                              className="text-wb-purple hover:text-wb-purple/80 text-sm font-medium mt-2 transition-colors"
+                              className="text-wb-purple hover:text-wb-purple/80 text-sm font-medium mt-3 transition-all duration-200 hover:translate-x-1"
                             >
                               {isExpanded ? 'Свернуть' : 'Читать полностью'}
                             </button>
