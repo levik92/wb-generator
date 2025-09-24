@@ -79,25 +79,25 @@ const Learning = () => {
       </div>
 
       {/* Telegram Group Promo */}
-      <Card className="bg-gradient-to-br from-[#0088cc]/10 via-[#0088cc]/5 to-[#00a3e0]/10 border-[#0088cc]/30">
+      <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-200/30">
         <CardContent className="p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-[#0088cc] to-[#006ba8] p-4 rounded-xl shadow-lg">
-                <MessageCircle className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                <MessageCircle className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-1 bg-gradient-to-r from-[#0088cc] to-[#006ba8] bg-clip-text text-transparent">
+                <h3 className="text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent font-semibold">
                   Подписывайтесь на нашу группу в Telegram
                 </h3>
-                <p className="text-sm text-[#0088cc]/80">
+                <p className="text-blue-600/80 text-sm">
                   Получайте последние новости, обновления и полезные советы по работе с сервисом
                 </p>
               </div>
             </div>
             <Button 
               onClick={handleTelegramClick}
-              className="bg-gradient-to-r from-[#0088cc] to-[#006ba8] hover:from-[#006ba8] hover:to-[#0088cc] text-white gap-2 shadow-lg transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300"
             >
               <ExternalLink className="w-4 h-4" />
               Присоединиться
