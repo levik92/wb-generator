@@ -6,7 +6,6 @@ import {
   Users, 
   FileText, 
   Gift,
-  Newspaper,
   Zap,
   ChevronLeft,
   ChevronRight
@@ -41,11 +40,6 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'promocodes',
       label: 'Промокоды',
       icon: Gift,
-    },
-    {
-      id: 'news',
-      label: 'Новости',
-      icon: Newspaper
     }
   ];
 

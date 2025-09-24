@@ -24,8 +24,6 @@ import { Referrals } from "@/components/dashboard/Referrals";
 import { Settings } from "@/components/dashboard/Settings";
 import WBLabelMaker from "@/components/dashboard/WBLabelMaker";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
-import News from "@/pages/News";
-import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
 
@@ -38,7 +36,7 @@ interface Profile {
   referral_code: string;
 }
 
-type ActiveTab = 'generate' | 'description' | 'history' | 'balance' | 'referrals' | 'settings' | 'notifications' | 'barcode' | 'news' | 'learning';
+type ActiveTab = 'generate' | 'description' | 'history' | 'balance' | 'referrals' | 'settings' | 'notifications' | 'barcode';
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -149,10 +147,6 @@ const Dashboard = () => {
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'barcode':
         return <WBLabelMaker />;
-      case 'news':
-        return <News />;
-      case 'learning':
-        return <Learning />;
       case 'history':
         return <History profile={profile} />;
       case 'balance':
