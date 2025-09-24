@@ -180,8 +180,8 @@ const News = () => {
               return (
                 <Card
                   key={item.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    !isRead ? 'bg-muted/30 border-wb-purple/20' : 'bg-muted/10'
+                  className={`cursor-pointer transition-all hover:shadow-md bg-muted/50 ${
+                    !isRead ? 'border-wb-purple/20' : ''
                   }`}
                   onClick={() => markAsRead(item.id)}
                 >
