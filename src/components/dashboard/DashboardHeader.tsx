@@ -33,9 +33,10 @@ interface Notification {
 interface DashboardHeaderProps {
   profile: Profile;
   onSignOut: () => void;
+  onNavigateToSettings: () => void;
 }
 
-export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ profile, onSignOut, onNavigateToSettings }: DashboardHeaderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const isMobile = useIsMobile();
@@ -197,7 +198,7 @@ export const DashboardHeader = ({ profile, onSignOut }: DashboardHeaderProps) =>
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover:bg-wb-purple/10">
+              <DropdownMenuItem className="hover:bg-wb-purple/10" onClick={onNavigateToSettings}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Профиль</span>
               </DropdownMenuItem>

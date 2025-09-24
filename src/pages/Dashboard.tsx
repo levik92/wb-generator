@@ -262,8 +262,9 @@ const Dashboard = () => {
         {/* Desktop Header */}
         {!isMobile && (
           <DashboardHeader 
-            profile={profile}
+            profile={profile} 
             onSignOut={handleSignOut}
+            onNavigateToSettings={() => setActiveTab('settings')}
           />
         )}
         
