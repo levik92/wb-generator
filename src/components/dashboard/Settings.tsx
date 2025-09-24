@@ -395,91 +395,27 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/30">
+      <Card className="bg-muted/30 relative">
         <CardHeader>
-          <CardTitle>Wildberries API</CardTitle>
-          <CardDescription>Безопасное хранение API ключа для интеграции</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <span>Статус подключения</span>
-            <Badge variant={hasWbKey ? "default" : "secondary"}>
-              {hasWbKey ? "Подключен" : "Не подключен"}
+            <div>
+              <CardTitle>Wildberries API</CardTitle>
+              <CardDescription>Безопасное хранение API ключа для интеграции</CardDescription>
+            </div>
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+              Скоро
             </Badge>
           </div>
-
-          {hasWbKey ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Текущий API ключ</Label>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={maskedWbKey || ""}
-                    disabled
-                    className="input-bordered font-mono text-sm"
-                  />
-                </div>
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowWbApiKey(!showWbApiKey)}
-                  className="flex-1"
-                >
-                  {showWbApiKey ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-                  {showWbApiKey ? "Скрыть форму" : "Изменить ключ"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={removeWbApiKey}
-                  disabled={updating}
-                  size="sm"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Добавьте API ключ для интеграции с Wildberries
-              </p>
-              <Button
-                onClick={() => setShowWbApiKey(true)}
-                className="w-full"
-              >
-                <LinkIcon className="w-4 h-4 mr-2" />
-                Добавить API ключ
-              </Button>
-            </div>
-          )}
-
-          {showWbApiKey && (
-            <div className="space-y-4 p-4 border rounded-lg bg-background/50">
-              <div className="space-y-2">
-                <Label>Wildberries API ключ</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="password"
-                    placeholder="Введите API ключ Wildberries"
-                    value={wbApiKey}
-                    onChange={(e) => setWbApiKey(e.target.value)}
-                    className="input-bordered"
-                  />
-                  <Button 
-                    onClick={saveWbApiKey}
-                    disabled={updating || !wbApiKey.trim()}
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                API ключ будет зашифрован и сохранен безопасно
-              </p>
-            </div>
-          )}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-4">
+              Функция интеграции с Wildberries находится в разработке
+            </p>
+            <Button variant="outline" disabled className="w-full">
+              В разработке
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
