@@ -320,10 +320,12 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Вход</TabsTrigger>
-                <TabsTrigger value="signup">Регистрация</TabsTrigger>
-              </TabsList>
+              {activeTab !== 'new-password' && activeTab !== 'reset' && (
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Вход</TabsTrigger>
+                  <TabsTrigger value="signup">Регистрация</TabsTrigger>
+                </TabsList>
+              )}
               
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
