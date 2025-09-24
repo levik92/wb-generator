@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
@@ -11,6 +11,7 @@ interface AuthRedirectProps {
 export const AuthRedirect = ({ children }: AuthRedirectProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // Check current session
@@ -39,8 +40,12 @@ export const AuthRedirect = ({ children }: AuthRedirectProps) => {
   }
 
   // If user is authenticated, redirect to dashboard
+  // BUT: don't redirect if user is on password reset flow
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    const isPasswordReset = searchParams.get('tab') === 'reset-password';
+    if (!isPasswordReset) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;
