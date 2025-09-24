@@ -46,7 +46,7 @@ export const CookieConsent = () => {
             variant="ghost"
             size="icon"
             onClick={handleClose}
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-foreground hover:text-background transition-all duration-200"
           >
             <X className="h-4 w-4" />
           </Button>
