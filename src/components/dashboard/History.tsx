@@ -30,9 +30,11 @@ interface Profile {
 
 interface HistoryProps {
   profile: Profile;
+  shouldRefresh?: boolean;
+  onRefreshComplete?: () => void;
 }
 
-export const History = ({ profile }: HistoryProps) => {
+export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryProps & { shouldRefresh?: boolean; onRefreshComplete?: () => void }) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'cards' | 'description'>('all');
@@ -46,6 +48,15 @@ export const History = ({ profile }: HistoryProps) => {
   useEffect(() => {
     loadHistory();
   }, [currentPage, filter]);
+
+  // Handle external refresh requests
+  useEffect(() => {
+    if (shouldRefresh) {
+      loadHistory().then(() => {
+        onRefreshComplete?.();
+      });
+    }
+  }, [shouldRefresh]);
 
   const loadHistory = async () => {
     try {

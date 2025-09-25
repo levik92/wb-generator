@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+import { useActiveJobs } from "@/hooks/useActiveJobs";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -46,9 +47,13 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
+  const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  
+  // Use active jobs hook
+  const { hasCompletedJobs, resetCompletedJobsFlag } = useActiveJobs(profile?.id || '');
 
   useEffect(() => {
     // Check for existing session
@@ -158,6 +163,18 @@ const Dashboard = () => {
     setActiveTab(tab as ActiveTab);
   };
 
+  // Handle completed jobs - refresh history when needed
+  useEffect(() => {
+    if (hasCompletedJobs) {
+      setShouldRefreshHistory(true);
+    }
+  }, [hasCompletedJobs]);
+
+  const handleHistoryRefreshComplete = () => {
+    setShouldRefreshHistory(false);
+    resetCompletedJobsFlag();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -181,7 +198,7 @@ const Dashboard = () => {
       case 'labels':
         return <LabelGenerator />;
       case 'history':
-        return <History profile={profile} />;
+        return <History profile={profile} shouldRefresh={shouldRefreshHistory} onRefreshComplete={handleHistoryRefreshComplete} />;
       case 'pricing':
         return <Balance />;
       case 'referrals':
