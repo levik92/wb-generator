@@ -10,16 +10,6 @@ const corsHeaders = {
 
 // Function to verify YooKassa webhook signature
 async function verifyWebhookSignature(requestBody: string, signature: string | null): Promise<boolean> {
-  // For now, skip signature verification to allow webhooks to work
-  // YooKassa signature verification can be complex and may need specific setup
-  console.log('Webhook signature check skipped for now');
-  
-  // Log what signatures we received for debugging
-  console.log('Received signature:', signature);
-  
-  return true; // Temporarily allow all webhooks
-  
-  /* Original signature verification code - keeping for future implementation
   if (!signature) {
     console.log('No signature provided in webhook');
     return false;
@@ -47,13 +37,24 @@ async function verifyWebhookSignature(requestBody: string, signature: string | n
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
 
-    // Compare signatures safely
-    return signature.toLowerCase() === expectedSignatureHex.toLowerCase();
+    // Compare signatures safely using constant-time comparison
+    const providedSig = signature.toLowerCase().replace(/^sha256=/, '');
+    const expectedSig = expectedSignatureHex.toLowerCase();
+    
+    if (providedSig.length !== expectedSig.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < providedSig.length; i++) {
+      result |= providedSig.charCodeAt(i) ^ expectedSig.charCodeAt(i);
+    }
+    
+    return result === 0;
   } catch (error) {
     console.error('Error verifying webhook signature:', error);
     return false;
   }
-  */
 }
 
 serve(async (req) => {
