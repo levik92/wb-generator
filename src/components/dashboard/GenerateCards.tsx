@@ -847,6 +847,13 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <Alert className="bg-amber-50 border-amber-200">
+                <Info className="h-4 w-4 text-amber-700" />
+                <AlertDescription className="text-amber-800 font-medium text-sm">
+                  ⚠️ Не закрывайте данное окно до завершения генерации!
+                </AlertDescription>
+              </Alert>
+              
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Прогресс: {currentStage} из {selectedCards.length} карточек</span>
@@ -1024,8 +1031,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             {generating ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                <span className="hidden sm:inline">Генерация... (выполняется в фоне)</span>
-                <span className="sm:hidden">Генерация...</span>
+                <span className="hidden sm:inline">Генерация... Не закрывайте данное окно!</span>
+                <span className="sm:hidden">Не закрывайте окно!</span>
               </>
             ) : (
               <>
