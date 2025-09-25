@@ -136,7 +136,7 @@ serve(async (req) => {
     }
 
     // Create individual tasks for selected cards only
-    const tasks = selectedCards.map((cardIndex) => ({
+    const tasks = selectedCards.map((cardIndex: number) => ({
       job_id: job.id,
       card_index: cardIndex,
       card_type: CARD_STAGES[cardIndex].key,
@@ -182,15 +182,10 @@ serve(async (req) => {
       }
     };
     
-    // Use EdgeRuntime.waitUntil to ensure the function doesn't drop prematurely
-    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-      EdgeRuntime.waitUntil(backgroundTask());
-    } else {
-      // Fallback for environments without EdgeRuntime.waitUntil
-      backgroundTask().catch(error => {
-        console.error('Background task error:', error);
-      });
-    }
+    // Start background task (no waitUntil needed in standard edge functions)
+    backgroundTask().catch(error => {
+      console.error('Background task error:', error);
+    });
 
     // Create notification
     await supabase

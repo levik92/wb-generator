@@ -126,7 +126,7 @@ serve(async (req) => {
     }
 
     // Create individual tasks for selected cards only
-    const tasks = selectedCards.map((cardIndex) => ({
+    const tasks = selectedCards.map((cardIndex: number) => ({
       job_id: job.id,
       card_index: cardIndex,
       card_type: CARD_STAGES[cardIndex].key,

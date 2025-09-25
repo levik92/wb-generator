@@ -88,6 +88,32 @@ Requirements:
 - Trust-building elements`
 };
 
+// Function to get prompt template and replace placeholders
+async function getPromptTemplate(supabase: any, promptType: string, productName: string, category: string, benefits: string): Promise<string> {
+  const { data: promptData, error: promptError } = await supabase
+    .from('ai_prompts')
+    .select('prompt_template')
+    .eq('prompt_type', promptType)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (promptError) {
+    throw new Error(`Failed to fetch prompt template for ${promptType}: ${promptError.message}`);
+  }
+
+  if (!promptData || promptData.length === 0) {
+    throw new Error(`No prompt template found for type: ${promptType}`);
+  }
+
+  // Replace placeholders in the prompt template
+  let prompt = promptData[0].prompt_template;
+  prompt = prompt.replace(/{productName}/g, productName);
+  prompt = prompt.replace(/{category}/g, category);
+  prompt = prompt.replace(/{benefits}/g, benefits);
+
+  return prompt;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });

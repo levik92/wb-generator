@@ -160,7 +160,7 @@ serve(async (req)=>{
   } catch (error) {
     console.error('Error processing OpenAI task:', error);
     return new Response(JSON.stringify({
-      error: error.message || 'Processing error'
+      error: error instanceof Error ? error.message : 'Processing error'
     }), {
       status: 500,
       headers: {

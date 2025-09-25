@@ -206,16 +206,16 @@ const body: PaymentRequest = await req.json();
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
         event_type_param: 'payment_error',
-        event_description_param: `Payment creation failed: ${error.message}`,
+        event_description_param: `Payment creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         ip_address_param: clientIP,
         user_agent_param: userAgent,
-        metadata_param: { error: error.message }
+        metadata_param: { error: error instanceof Error ? error.message : 'Unknown error' }
       });
     } catch (logError) {
       console.error('Failed to log security event:', logError);
     }
     
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

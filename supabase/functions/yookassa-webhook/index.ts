@@ -196,16 +196,16 @@ serve(async (req) => {
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
         event_type_param: 'webhook_processing_error',
-        event_description_param: `Webhook processing failed: ${error.message}`,
+        event_description_param: `Webhook processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         ip_address_param: req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For'),
         user_agent_param: req.headers.get('User-Agent'),
-        metadata_param: { error: error.message, timestamp: new Date().toISOString() }
+        metadata_param: { error: error instanceof Error ? error.message : 'Unknown error', timestamp: new Date().toISOString() }
       });
     } catch (logError) {
       console.error('Failed to log webhook error:', logError);
     }
     
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

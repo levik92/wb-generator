@@ -106,14 +106,10 @@ serve(async (req) => {
     // Process tasks in background with proper task handling
     const backgroundProcessing = processTasks(supabase, openAIApiKey, job);
     
-    // Use EdgeRuntime.waitUntil to prevent early drop
-    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-      EdgeRuntime.waitUntil(backgroundProcessing);
-    } else {
-      backgroundProcessing.catch(error => {
-        console.error('Background processing error:', error);
-      });
-    }
+    // Start background processing (no waitUntil needed in standard edge functions)
+    backgroundProcessing.catch(error => {
+      console.error('Background processing error:', error);
+    });
 
     return new Response(JSON.stringify({
       success: true,
@@ -170,12 +166,12 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
           break;
         }
 
-        const pendingTasks = allTasks?.filter(t => 
+        const pendingTasks = allTasks?.filter((t: any) => 
           t.status === 'pending' || t.status === 'processing' || t.status === 'retrying'
         );
         
-        const completedTasks = allTasks?.filter(t => t.status === 'completed');
-        const failedTasks = allTasks?.filter(t => t.status === 'failed');
+        const completedTasks = allTasks?.filter((t: any) => t.status === 'completed');
+        const failedTasks = allTasks?.filter((t: any) => t.status === 'failed');
 
         if (!pendingTasks || pendingTasks.length === 0) {
           console.log(`All tasks completed for job ${job.id}`);
@@ -222,7 +218,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       console.log(`Processing ${tasks.length} tasks for job ${job.id}`);
 
       // Process tasks concurrently
-      const taskPromises = tasks.map(task => processTask(supabase, openAIApiKey, job, task));
+      const taskPromises = tasks.map((task: any) => processTask(supabase, openAIApiKey, job, task));
       await Promise.allSettled(taskPromises);
       
       // Small delay between batches to prevent overwhelming the API
@@ -252,7 +248,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       .from('generation_jobs')
       .update({ 
         status: 'failed',
-        error_message: error.message || 'Unknown processing error',
+        error_message: error instanceof Error ? error.message : 'Unknown processing error',
         completed_at: new Date().toISOString()
       })
       .eq('id', job.id);
@@ -325,19 +321,15 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
           .from('generation_tasks')
           .update({ 
             status: 'failed',
-            last_error: `Failed to delegate to OpenAI processor: ${error.message}`,
+            last_error: `Failed to delegate to OpenAI processor: ${error instanceof Error ? error.message : 'Unknown error'}`,
             completed_at: new Date().toISOString()
           })
           .eq('id', task.id);
       }
     };
     
-    // Use background task handling
-    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-      EdgeRuntime.waitUntil(openaiTask());
-    } else {
-      openaiTask();
-    }
+    // Start background task (no waitUntil needed in standard edge functions)
+    openaiTask();
 
     console.log(`Task ${task.id} delegated to async processing`);
     return; // Exit early

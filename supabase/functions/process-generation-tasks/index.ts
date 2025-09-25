@@ -155,12 +155,12 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
           break;
         }
 
-        const pendingTasks = allTasks?.filter(t => 
+        const pendingTasks = allTasks?.filter((t: any) => 
           t.status === 'pending' || t.status === 'processing' || t.status === 'retrying'
         );
         
-        const completedTasks = allTasks?.filter(t => t.status === 'completed');
-        const failedTasks = allTasks?.filter(t => t.status === 'failed');
+        const completedTasks = allTasks?.filter((t: any) => t.status === 'completed');
+        const failedTasks = allTasks?.filter((t: any) => t.status === 'failed');
 
         if (!pendingTasks || pendingTasks.length === 0) {
           console.log(`All tasks completed for job ${job.id}`);
@@ -251,7 +251,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       console.log(`Processing ${tasks.length} tasks for job ${job.id}`);
 
       // Process tasks concurrently
-      const taskPromises = tasks.map(task => processTask(supabase, openAIApiKey, job, task));
+      const taskPromises = tasks.map((task: any) => processTask(supabase, openAIApiKey, job, task));
       await Promise.allSettled(taskPromises);
       
       // Small delay between batches to prevent overwhelming the API
@@ -281,7 +281,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
       .from('generation_jobs')
       .update({ 
         status: 'failed',
-        error_message: error.message || 'Unknown processing error',
+        error_message: error instanceof Error ? error.message : 'Unknown processing error',
         completed_at: new Date().toISOString()
       })
       .eq('id', job.id);

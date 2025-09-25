@@ -209,7 +209,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-description function:', error);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Произошла ошибка при генерации описания' 
+      error: error instanceof Error ? error.message : 'Произошла ошибка при генерации описания' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
