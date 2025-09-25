@@ -58,6 +58,16 @@ const Footer = () => {
                   Telegram-группа
                 </a>
               </li>
+              <li>
+                <a 
+                  href="https://t.me/wbgen_support/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Поддержка
+                </a>
+              </li>
             </ul>
           </div>
         </div>
