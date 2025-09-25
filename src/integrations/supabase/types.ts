@@ -766,9 +766,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_payment: {
+        Args: { payment_user_id: string }
+        Returns: boolean
+      }
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_payment_summary: {
+        Args: { payment_ids: string[] }
+        Returns: {
+          amount_masked: string
+          created_at: string
+          id: string
+          package_name: string
+          status: string
+          user_id: string
+        }[]
       }
       get_public_profile_info: {
         Args: { profile_id: string }
