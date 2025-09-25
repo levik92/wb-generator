@@ -190,6 +190,56 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
               type: finalStatus === 'completed' ? 'success' : 'warning'
             });
           
+          // Save completed generation to history (server-side) to ensure availability after page reload
+          if (finalStatus === 'completed') {
+            try {
+              // Avoid duplicates: check if a generation with this job_id already exists
+              const { data: existing } = await supabase
+                .from('generations')
+                .select('id')
+                .eq('user_id', job.user_id)
+                .eq('generation_type', 'cards')
+                .contains('input_data', { job_id: job.id })
+                .limit(1);
+
+              if (!existing || existing.length === 0) {
+                // Collect completed task images
+                const { data: completedTasks } = await supabase
+                  .from('generation_tasks')
+                  .select('card_index, card_type, image_url')
+                  .eq('job_id', job.id)
+                  .eq('status', 'completed')
+                  .order('card_index');
+
+                const images = (completedTasks || []).map((t: any) => ({
+                  url: t.image_url,
+                  type: t.card_type,
+                  stage: `card_${(t.card_index ?? 0) + 1}`
+                }));
+
+                await supabase
+                  .from('generations')
+                  .insert({
+                    user_id: job.user_id,
+                    generation_type: 'cards',
+                    input_data: {
+                      job_id: job.id,
+                      productName: job.product_name,
+                      category: job.category,
+                      description: job.description
+                    },
+                    output_data: { images },
+                    tokens_used: job.tokens_cost || images.length || 0,
+                    status: 'completed',
+                    product_name: job.product_name,
+                    category: job.category
+                  });
+              }
+            } catch (e) {
+              console.error('Failed to save generation history server-side:', e);
+            }
+          }
+          
           break;
         }
 
