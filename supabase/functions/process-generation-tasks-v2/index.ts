@@ -206,6 +206,61 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
                 : `Генерация "${job.product_name}" завершена. Некоторые карточки могли не сгенерироваться.`,
               type: finalStatus === 'completed' ? 'success' : 'warning'
             });
+
+          // Persist completed generation to history so it appears after reloads
+          if (finalStatus === 'completed') {
+            try {
+              // Avoid duplicates for the same job
+              const { data: existing } = await supabase
+                .from('generations')
+                .select('id')
+                .eq('user_id', job.user_id)
+                .eq('generation_type', 'cards')
+                .contains('input_data', { job_id: job.id })
+                .limit(1);
+
+              if (!existing || existing.length === 0) {
+                const { data: taskDetails } = await supabase
+                  .from('generation_tasks')
+                  .select('card_index, card_type, image_url, storage_path, status')
+                  .eq('job_id', job.id);
+
+                const outputs = (taskDetails || [])
+                  .filter((td: any) => td.status === 'completed' && td.image_url)
+                  .map((td: any) => ({
+                    index: td.card_index ?? 0,
+                    type: td.card_type,
+                    image_url: td.image_url,
+                    storage_path: td.storage_path,
+                    stage: `card_${(td.card_index ?? 0) + 1}`
+                  }));
+
+                await supabase
+                  .from('generations')
+                  .insert({
+                    user_id: job.user_id,
+                    generation_type: 'cards',
+                    input_data: {
+                      job_id: job.id,
+                      productName: job.product_name,
+                      category: job.category,
+                      description: job.description
+                    },
+                    output_data: {
+                      images: outputs
+                    },
+                    tokens_used: job.tokens_cost || (outputs?.length || 0),
+                    status: 'completed',
+                    product_name: job.product_name,
+                    category: job.category
+                  });
+              } else {
+                console.log(`Generation record already exists for job ${job.id}, skipping insert`);
+              }
+            } catch (e) {
+              console.error('Failed to save generation history for job', job.id, e);
+            }
+          }
           
           break;
         }
