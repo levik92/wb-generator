@@ -126,8 +126,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     const tokensNeeded = selectedCards.length * 10;
     return files.length > 0 && 
            productName.trim() && 
+           productName.trim().length <= 150 &&
            category && 
            description.trim() && 
+           description.trim().length <= 600 &&
            selectedCards.length > 0 &&
            profile.tokens_balance >= tokensNeeded && 
            !generating;
@@ -137,8 +139,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     const tokensNeeded = selectedCards.length * 10;
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
     if (!productName.trim()) return "Введите название товара";
+    if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
+    if (productName.trim().length < 3) return "Название товара должно содержать минимум 3 символа";
     if (!category) return "Выберите категорию товара";
     if (!description.trim()) return "Добавьте описание товара";
+    if (description.trim().length > 600) return "Описание должно быть не более 600 символов";
+    if (description.trim().length < 10) return "Описание должно содержать минимум 10 символов";
     if (selectedCards.length === 0) return "Выберите хотя бы один тип карточки";
     if (profile.tokens_balance < tokensNeeded) return `Недостаточно токенов (нужно ${tokensNeeded})`;
     if (generating) return "Генерация уже выполняется";
@@ -742,8 +748,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               id="productName"
               placeholder="Например: Спортивная куртка для зимнего бега"
               value={productName}
-              onChange={(e) => setProductName(e.target.value)}
+              onChange={(e) => setProductName(e.target.value.slice(0, 150))}
+              maxLength={150}
             />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{productName.length}/150 символов</span>
+              {productName.length > 140 && (
+                <span className="text-warning">Осталось символов: {150 - productName.length}</span>
+              )}
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -781,9 +794,16 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               id="description"
               placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 600))}
               rows={4}
+              maxLength={600}
             />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{description.length}/600 символов</span>
+              {description.length > 570 && (
+                <span className="text-warning">Осталось символов: {600 - description.length}</span>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
