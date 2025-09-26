@@ -76,53 +76,90 @@ export default function PaymentHistory() {
   }
 
   return (
-    <Card>
+    <Card className="w-full overflow-hidden">
       <CardHeader>
         <CardTitle>История пополнений</CardTitle>
         <CardDescription>
           Все ваши пополнения баланса токенов
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0 sm:p-6">
         {payments.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className="text-center text-muted-foreground py-8 px-6">
             У вас пока нет пополнений
           </p>
         ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Тариф</TableHead>
-                  <TableHead>Сумма</TableHead>
-                  <TableHead>Токены</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Дата</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="font-medium">
-                      {payment.package_name}
-                    </TableCell>
-                    <TableCell>{payment.amount}₽</TableCell>
-                    <TableCell>{payment.tokens_amount}</TableCell>
-                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                    <TableCell>
-                      {new Date(payment.created_at).toLocaleDateString('ru-RU', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </TableCell>
+          <>
+            {/* Mobile and Tablet Card Layout */}
+            <div className="block lg:hidden space-y-3 p-4">
+              {payments.map((payment) => (
+                <div key={payment.id} className="bg-muted/30 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="font-medium text-sm">{payment.package_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(payment.created_at).toLocaleDateString('ru-RU', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                    {getStatusBadge(payment.status)}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="text-muted-foreground text-xs">Сумма</div>
+                      <div className="font-medium">{payment.amount}₽</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground text-xs">Токены</div>
+                      <div className="font-medium">{payment.tokens_amount}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden lg:block rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Тариф</TableHead>
+                    <TableHead>Сумма</TableHead>
+                    <TableHead>Токены</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Дата</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {payments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="font-medium">
+                        {payment.package_name}
+                      </TableCell>
+                      <TableCell>{payment.amount}₽</TableCell>
+                      <TableCell>{payment.tokens_amount}</TableCell>
+                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                      <TableCell>
+                        {new Date(payment.created_at).toLocaleDateString('ru-RU', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
