@@ -918,14 +918,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="grid gap-3 sm:gap-4">
+          <CardContent className="px-2 sm:px-4 lg:px-6">
+            <div className="grid gap-2 sm:gap-3">
               {generatedImages.map((image, index) => {
                 const cardKey = `${image.id}_${index}`;
                 const isRegenerating = regeneratingCards.has(cardKey);
                 
                 return (
-                  <div key={image.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg bg-muted/30">
+                  <div key={image.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-3 lg:p-4 border rounded-lg bg-muted/30">
                     <div className="relative group shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
                       <img
                         src={image.url}

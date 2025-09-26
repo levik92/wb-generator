@@ -370,7 +370,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
               {currentJob.status === 'completed' ? 'Генерация завершена!' : 'Создаем ваши карточки...'}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-2 sm:px-4 lg:px-6">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Прогресс</span>
@@ -382,7 +382,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
             {currentJob.status === 'completed' && Array.isArray(currentJob.product_images) && currentJob.product_images.length > 0 && (
               <div className="space-y-4">
                 <h4 className="font-medium">Готовые карточки:</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                   {(currentJob.product_images as string[]).map((imageUrl, index) => (
                     <div key={index} className="relative group">
                       <img
