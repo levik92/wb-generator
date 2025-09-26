@@ -285,56 +285,62 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
           {filteredGenerations.map((generation) => (
             <Card key={generation.id} className="hover:shadow-md transition-shadow bg-muted/30 w-full overflow-hidden">
               <CardContent className="p-3 sm:p-4 lg:p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 flex-shrink-0">
+                <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
+                  {/* Main content */}
+                  <div className="flex items-start space-x-3 min-w-0 flex-1">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 flex-shrink-0">
                       {generation.generation_type === 'cards' ? (
-                        <Image className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                        <Image className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600" />
                       ) : (
-                        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600" />
                       )}
                     </div>
                     
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-sm sm:text-base truncate">
+                      {/* Title and status */}
+                      <div className="flex items-start sm:items-center gap-2 mb-2">
+                        <h3 className="font-medium text-sm sm:text-base leading-tight">
                           {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
                         </h3>
-                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="self-start sm:self-auto">
+                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
                           {generation.status === 'completed' ? 'Готово' : 'В процессе'}
                         </Badge>
                       </div>
                       
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="truncate">{formatDate(generation.created_at)}</span>
+                      {/* Details */}
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3 flex-shrink-0" />
+                          <span>{formatDate(generation.created_at)}</span>
                         </div>
-                        <span className="hidden md:inline">{generation.tokens_used} токенов</span>
-                        {generation.input_data?.productName && (
-                          <span className="truncate text-xs sm:text-sm">• {generation.input_data.productName}</span>
-                        )}
+                        
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span>{generation.tokens_used} токенов</span>
+                          {generation.input_data?.productName && (
+                            <span className="truncate">• {generation.input_data.productName}</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2 flex-shrink-0">
+                  {/* Action buttons */}
+                  <div className="flex gap-2 w-full sm:w-auto sm:flex-shrink-0">
                     <Button 
                       onClick={() => downloadGeneration(generation)}
                       size="sm"
                       disabled={downloadingIds.has(generation.id)}
-                      className="bg-wb-purple hover:bg-wb-purple-dark text-white disabled:opacity-50 text-xs sm:text-sm px-2 sm:px-3"
+                      className="bg-wb-purple hover:bg-wb-purple-dark text-white disabled:opacity-50 flex-1 sm:flex-initial min-w-0"
                     >
                       {downloadingIds.has(generation.id) ? (
                         <>
-                          <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 animate-spin" />
-                          <span className="hidden sm:inline">Создаю ZIP</span>
-                          <span className="sm:hidden">ZIP</span>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin flex-shrink-0" />
+                          <span className="truncate">Создаю ZIP</span>
                         </>
                       ) : (
                         <>
-                          <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                          <span className="hidden sm:inline">Скачать</span>
+                          <Download className="w-3 h-3 mr-1 flex-shrink-0" />
+                          <span className="truncate">Скачать</span>
                         </>
                       )}
                     </Button>
@@ -342,10 +348,9 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
                       onClick={() => deleteGeneration(generation.id)}
                       size="sm"
                       variant="outline"
-                      className="border-red-200 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 text-xs sm:text-sm px-2 sm:px-3"
+                      className="border-red-200 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 flex-shrink-0 px-3"
                     >
-                      <span className="hidden sm:inline">Удалить</span>
-                      <span className="sm:hidden">×</span>
+                      Удалить
                     </Button>
                   </div>
                 </div>
