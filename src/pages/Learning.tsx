@@ -15,7 +15,7 @@ const videoLessons = [
     id: 'cards',
     title: 'Как работать с генерацией карточек',
     description: 'Изучите процесс создания карточек товаров с помощью ИИ',
-    embedCode: 'Видео будет добавлено позже'
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/0cxw1JdVWSehbpVZ14QTZP" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
   },
   {
     id: 'descriptions',
@@ -33,7 +33,7 @@ const videoLessons = [
     id: 'overview',
     title: 'Обзор сервиса',
     description: 'Полный обзор всех возможностей WB Генератор',
-    embedCode: 'Видео будет добавлено позже'
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/eFQT3SQABzjexyqfK1i7qk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
   }
 ];
 
