@@ -233,19 +233,19 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
   }
 
   return (
-    <div className="space-y-6 px-2 sm:px-0 max-w-full overflow-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-semibold mb-2">История генераций</h2>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-2 truncate">История генераций</h2>
           <p className="text-sm text-muted-foreground">
             Все ваши созданные карточки и описания
           </p>
         </div>
         
-        <div className="flex items-center space-x-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-muted-foreground" />
+        <div className="flex items-center space-x-2 w-full sm:w-auto lg:w-auto flex-shrink-0">
+          <Filter className="w-4 h-4 text-muted-foreground hidden sm:block" />
           <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-full sm:w-40">
+            <SelectTrigger className="w-full sm:w-40 lg:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -281,59 +281,60 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {filteredGenerations.map((generation) => (
-            <Card key={generation.id} className="hover:shadow-md transition-shadow bg-muted/30">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200">
+            <Card key={generation.id} className="hover:shadow-md transition-shadow bg-muted/30 w-full overflow-hidden">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 flex-shrink-0">
                       {generation.generation_type === 'cards' ? (
-                        <Image className="w-6 h-6 text-purple-600" />
+                        <Image className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                       ) : (
-                        <FileText className="w-6 h-6 text-purple-600" />
+                        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                       )}
                     </div>
                     
-                    <div>
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="font-semibold">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-sm sm:text-base truncate">
                           {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
                         </h3>
-                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'}>
+                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="self-start sm:self-auto">
                           {generation.status === 'completed' ? 'Готово' : 'В процессе'}
                         </Badge>
                       </div>
                       
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{formatDate(generation.created_at)}</span>
+                          <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="truncate">{formatDate(generation.created_at)}</span>
                         </div>
-                        <span className="hidden sm:inline">{generation.tokens_used} токенов</span>
+                        <span className="hidden md:inline">{generation.tokens_used} токенов</span>
                         {generation.input_data?.productName && (
-                          <span>• {generation.input_data.productName}</span>
+                          <span className="truncate text-xs sm:text-sm">• {generation.input_data.productName}</span>
                         )}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
                     <Button 
                       onClick={() => downloadGeneration(generation)}
                       size="sm"
                       disabled={downloadingIds.has(generation.id)}
-                      className="bg-wb-purple hover:bg-wb-purple-dark text-white disabled:opacity-50"
+                      className="bg-wb-purple hover:bg-wb-purple-dark text-white disabled:opacity-50 text-xs sm:text-sm px-2 sm:px-3"
                     >
                       {downloadingIds.has(generation.id) ? (
                         <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Создаю ZIP
+                          <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 animate-spin" />
+                          <span className="hidden sm:inline">Создаю ZIP</span>
+                          <span className="sm:hidden">ZIP</span>
                         </>
                       ) : (
                         <>
-                          <Download className="w-4 h-4 mr-2" />
-                          Скачать
+                          <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">Скачать</span>
                         </>
                       )}
                     </Button>
@@ -341,9 +342,10 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
                       onClick={() => deleteGeneration(generation.id)}
                       size="sm"
                       variant="outline"
-                      className="border-red-200 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500"
+                      className="border-red-200 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 text-xs sm:text-sm px-2 sm:px-3"
                     >
-                      Удалить
+                      <span className="hidden sm:inline">Удалить</span>
+                      <span className="sm:hidden">×</span>
                     </Button>
                   </div>
                 </div>
@@ -355,20 +357,22 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2 mt-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-4 sm:mt-6 px-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
+            className="w-full sm:w-auto"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Назад
           </Button>
           
-          <div className="flex items-center space-x-1">
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+          <div className="flex items-center space-x-1 overflow-x-auto max-w-full">
+            {Array.from({ length: Math.min(window.innerWidth < 640 ? 3 : 5, totalPages) }, (_, i) => {
+              const maxButtons = window.innerWidth < 640 ? 3 : 5;
+              const pageNum = Math.max(1, Math.min(totalPages - maxButtons + 1, currentPage - Math.floor(maxButtons / 2))) + i;
               if (pageNum > totalPages) return null;
               
               return (
@@ -377,7 +381,7 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
                   variant={currentPage === pageNum ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCurrentPage(pageNum)}
-                  className={currentPage === pageNum ? "bg-wb-purple hover:bg-wb-purple/80" : ""}
+                  className={`min-w-[32px] sm:min-w-[40px] ${currentPage === pageNum ? "bg-wb-purple hover:bg-wb-purple/80" : ""}`}
                 >
                   {pageNum}
                 </Button>
@@ -390,9 +394,10 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
             size="sm"
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
+            className="w-full sm:w-auto"
           >
             Вперед
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
           </Button>
         </div>
       )}
