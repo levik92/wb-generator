@@ -61,6 +61,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [jobCompleted, setJobCompleted] = useState(false);
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const { toast } = useToast();
 
   // Cleanup polling on unmount
@@ -79,16 +80,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     }
   }, [generating]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFiles = Array.from(event.target.files || []);
-
+  const validateAndAddFiles = (uploadedFiles: File[]) => {
     if (uploadedFiles.length + files.length > 3) {
       toast({
         title: "Слишком много файлов",
         description: "Максимум 3 изображения товара",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const maxSizeBytes = 10 * 1024 * 1024;
@@ -100,7 +99,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         description: "Максимальный размер файла: 10 МБ",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -112,10 +111,54 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         description: "Поддерживаются только JPG, PNG и WebP файлы",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     
     setFiles(prev => [...prev, ...uploadedFiles]);
+    return true;
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFiles = Array.from(event.target.files || []);
+    validateAndAddFiles(uploadedFiles);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const imageFiles = droppedFiles.filter(file => file.type.startsWith('image/'));
+    
+    if (imageFiles.length === 0) {
+      toast({
+        title: "Неподдерживаемые файлы",
+        description: "Можно загружать только изображения",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    validateAndAddFiles(imageFiles);
   };
 
   const removeFile = (index: number) => {
@@ -692,13 +735,25 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
+              <label 
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                  isDragOver 
+                    ? 'border-primary bg-primary/10 hover:bg-primary/20' 
+                    : 'border-border bg-muted/30 hover:bg-muted/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                  <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground text-center">
+                  <Upload className={`w-8 h-8 mb-4 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className={`mb-2 text-sm text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                     <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
                   </p>
-                  <p className="text-xs text-muted-foreground text-center">PNG, JPG, JPEG (МАКС. 3 изображения)</p>
+                  <p className={`text-xs text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    PNG, JPG, JPEG (МАКС. 3 изображения)
+                  </p>
                 </div>
                 <input
                   type="file"
