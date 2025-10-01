@@ -62,12 +62,16 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
   const { toast } = useToast();
 
-  // Check for active jobs on component mount
+  // Check for active jobs on component mount (only once)
   useEffect(() => {
-    checkForActiveJobs();
-  }, [profile.id]);
+    if (!hasCheckedJobs) {
+      checkForActiveJobs();
+      setHasCheckedJobs(true);
+    }
+  }, [profile.id, hasCheckedJobs]);
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -122,10 +126,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           setGeneratedImages(images);
           setJobCompleted(true);
           
-          // Show a subtle notification that completed work was found
+          // Show completion notification
           toast({
-            title: "Найдена завершенная генерация",
-            description: `Обнаружены готовые карточки для "${latestJob.product_name}"`,
+            title: "Генерация завершена!",
+            description: `Все карточки готовы для скачивания`,
           });
         }
       } else if (latestJob && latestJob.status === 'processing') {
