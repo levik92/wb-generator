@@ -466,7 +466,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     
     try {
       const zip = new JSZip();
-      const safeProductName = (productName || 'cards').replace(/[^a-z0-9_-]/gi, '');
+      const safeProductName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       
       toast({
         title: "Создание архива",
@@ -480,7 +480,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           try {
             const response = await fetch(image.url);
             const blob = await response.blob();
-            const fileName = `${safeProductName}_${image.stage.replace(/[^a-z0-9_-]/gi, '_')}_${index + 1}.png`;
+            const safeStageName = image.stage.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+            const fileName = `${safeProductName}_${safeStageName}_${index + 1}.png`;
             zip.file(fileName, blob);
           } catch (error) {
             console.error(`Failed to fetch image ${index}:`, error);
@@ -529,8 +530,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       
       const link = document.createElement('a');
       link.href = url;
-      const safeProductName = productName.replace(/[^a-z0-9_-]/gi, '');
-      link.download = `${safeProductName}_${image.stage}.png`;
+      const safeProductName = productName.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+      // Use original Russian stage name, only replace problematic characters for file system
+      const safeStageName = image.stage.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+      link.download = `${safeProductName}_${safeStageName}.png`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
