@@ -202,15 +202,15 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
               user_id: job.user_id,
               title: finalStatus === 'completed' ? 'Генерация завершена' : 'Генерация завершена с ошибками',
               message: finalStatus === 'completed' 
-                ? `Генерация "${job.product_name}" успешно завершена. Все карточки готовы.`
-                : `Генерация "${job.product_name}" завершена. Некоторые карточки могли не сгенерироваться.`,
+                ? `Генерация "${job.product_name}" успешно завершена. Все карточки готовы для скачивания.`
+                : `Генерация "${job.product_name}" завершена с ошибками. Проверьте результаты.`,
               type: finalStatus === 'completed' ? 'success' : 'warning'
             });
 
-          // Persist completed generation to history so it appears after reloads
+          // ВАЖНО: Сохраняем в историю на сервере, чтобы работало даже если клиент офлайн
           if (finalStatus === 'completed') {
             try {
-              // Avoid duplicates for the same job
+              // Проверяем что такой записи еще нет
               const { data: existing } = await supabase
                 .from('generations')
                 .select('id')
@@ -231,8 +231,7 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
                     index: td.card_index ?? 0,
                     type: td.card_type,
                     image_url: td.image_url,
-                    storage_path: td.storage_path,
-                    stage: `card_${(td.card_index ?? 0) + 1}`
+                    storage_path: td.storage_path
                   }));
 
                 await supabase
@@ -249,16 +248,19 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
                     output_data: {
                       images: outputs
                     },
-                    tokens_used: job.tokens_cost || (outputs?.length || 0),
+                    tokens_used: job.tokens_cost || (outputs?.length || 0) * 10,
                     status: 'completed',
                     product_name: job.product_name,
                     category: job.category
                   });
+                
+                console.log(`✅ Saved generation to history for job ${job.id}`);
               } else {
-                console.log(`Generation record already exists for job ${job.id}, skipping insert`);
+                console.log(`Generation history already exists for job ${job.id}`);
               }
             } catch (e) {
               console.error('Failed to save generation history for job', job.id, e);
+              // Не падаем, просто логируем
             }
           }
           

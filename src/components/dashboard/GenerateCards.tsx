@@ -64,6 +64,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [isDragOver, setIsDragOver] = useState(false);
   const { toast } = useToast();
 
+  // Check for active jobs on component mount
+  useEffect(() => {
+    checkForActiveJobs();
+  }, [profile.id]);
+
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
@@ -72,6 +77,65 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       }
     };
   }, [pollingInterval]);
+
+  const checkForActiveJobs = async () => {
+    try {
+      // Check for any recent jobs that might have completed while user was offline
+      const { data: recentJobs, error } = await supabase
+        .from('generation_jobs')
+        .select(`
+          *,
+          generation_tasks (
+            id,
+            card_index,
+            card_type,
+            status,
+            image_url,
+            storage_path
+          )
+        `)
+        .eq('user_id', profile.id)
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking for active jobs:', error);
+        return;
+      }
+
+      const latestJob = recentJobs?.[0];
+      if (latestJob && latestJob.status === 'completed') {
+        const completedTasks = latestJob.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
+        
+        if (completedTasks.length > 0) {
+          // Show completed images from the latest job
+          const images = completedTasks
+            .sort((a: any, b: any) => a.card_index - b.card_index)
+            .map((task: any) => ({
+              id: task.id,
+              url: task.image_url,
+              stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+              stageIndex: task.card_index
+            }));
+          
+          setGeneratedImages(images);
+          setJobCompleted(true);
+          
+          // Show a subtle notification that completed work was found
+          toast({
+            title: "Найдена завершенная генерация",
+            description: `Обнаружены готовые карточки для "${latestJob.product_name}"`,
+          });
+        }
+      } else if (latestJob && latestJob.status === 'processing') {
+        // Resume polling for active job
+        startJobPolling(latestJob.id);
+      }
+    } catch (error) {
+      console.error('Error checking for active jobs:', error);
+    }
+  };
 
 
   useEffect(() => {
@@ -308,30 +372,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 description: `Все карточки готовы для скачивания`,
               });
               
-              // Save to history
-              try {
-                await supabase.from('generations').insert({
-                  user_id: profile.id,
-                  generation_type: 'cards',
-                  input_data: {
-                    productName,
-                    category,
-                    description,
-                    selectedCards: selectedCards.map(index => CARD_STAGES[index].name)
-                  },
-                  output_data: {
-                    images: completedTasks.map((task: any) => ({
-                      url: task.image_url,
-                      type: task.card_type,
-                      stage: CARD_STAGES[task.card_index]?.name
-                    }))
-                  },
-                  tokens_used: selectedCards.length * 10, // 10 токенов за изображение
-                  status: 'completed'
-                });
-              } catch (error) {
-                console.error('Error saving to history:', error);
-              }
+              // Note: History persistence is now handled automatically by database triggers
+              // when the job status changes to completed. This ensures it works even when
+              // the client is offline or disconnects during generation.
+              
             } else if (job.status === 'failed') {
               toast({
                 title: "Ошибка генерации", 

@@ -185,15 +185,15 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
               user_id: job.user_id,
               title: finalStatus === 'completed' ? 'Генерация завершена' : 'Генерация завершена с ошибками',
               message: finalStatus === 'completed' 
-                ? `Генерация "${job.product_name}" успешно завершена. Все карточки готовы.`
-                : `Генерация "${job.product_name}" завершена. Некоторые карточки могли не сгенерироваться.`,
+                ? `Генерация "${job.product_name}" успешно завершена. Все карточки готовы для скачивания.`
+                : `Генерация "${job.product_name}" завершена с ошибками. Проверьте результаты.`,
               type: finalStatus === 'completed' ? 'success' : 'warning'
             });
-          
-          // Save completed generation to history (server-side) to ensure availability after page reload
+
+          // ВАЖНО: Сохраняем в историю на сервере, чтобы работало даже если клиент офлайн
           if (finalStatus === 'completed') {
             try {
-              // Avoid duplicates: check if a generation with this job_id already exists
+              // Проверяем что такой записи еще нет
               const { data: existing } = await supabase
                 .from('generations')
                 .select('id')
@@ -203,19 +203,19 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
                 .limit(1);
 
               if (!existing || existing.length === 0) {
-                // Collect completed task images
-                const { data: completedTasks } = await supabase
+                const { data: taskDetails } = await supabase
                   .from('generation_tasks')
-                  .select('card_index, card_type, image_url')
-                  .eq('job_id', job.id)
-                  .eq('status', 'completed')
-                  .order('card_index');
+                  .select('card_index, card_type, image_url, storage_path, status')
+                  .eq('job_id', job.id);
 
-                const images = (completedTasks || []).map((t: any) => ({
-                  url: t.image_url,
-                  type: t.card_type,
-                  stage: `card_${(t.card_index ?? 0) + 1}`
-                }));
+                const outputs = (taskDetails || [])
+                  .filter((td: any) => td.status === 'completed' && td.image_url)
+                  .map((td: any) => ({
+                    index: td.card_index ?? 0,
+                    type: td.card_type,
+                    image_url: td.image_url,
+                    storage_path: td.storage_path
+                  }));
 
                 await supabase
                   .from('generations')
@@ -228,15 +228,22 @@ async function processTasks(supabase: any, openAIApiKey: string, job: any) {
                       category: job.category,
                       description: job.description
                     },
-                    output_data: { images },
-                    tokens_used: job.tokens_cost || images.length || 0,
+                    output_data: {
+                      images: outputs
+                    },
+                    tokens_used: job.tokens_cost || (outputs?.length || 0) * 10,
                     status: 'completed',
                     product_name: job.product_name,
                     category: job.category
                   });
+                
+                console.log(`✅ Saved generation to history for job ${job.id}`);
+              } else {
+                console.log(`Generation history already exists for job ${job.id}`);
               }
             } catch (e) {
-              console.error('Failed to save generation history server-side:', e);
+              console.error('Failed to save generation history for job', job.id, e);
+              // Не падаем, просто логируем
             }
           }
           
