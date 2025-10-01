@@ -111,7 +111,8 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
     
     try {
       const zip = new JSZip();
-      const safeProductName = (generation.input_data?.productName || 'generation').replace(/[^a-z0-9_-]/gi, '');
+      // Use original product name for individual files, only replace problematic characters
+      const safeProductName = (generation.input_data?.productName || 'generation').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       
       if (generation.generation_type === 'cards') {
         // Add images to ZIP
@@ -133,7 +134,9 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
             if (image.url) {
               const response = await fetch(image.url);
               const blob = await response.blob();
-              const fileName = `${safeProductName}_${image.stage || image.type || (i+1)}.png`;
+              // Use original stage name, only replace problematic characters for file system
+              const safeStageName = (image.stage || image.type || `card_${i+1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+              const fileName = `${safeProductName}_${safeStageName}.png`;
               zip.file(fileName, blob);
             }
           }
@@ -157,7 +160,9 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${safeProductName}_${generation.generation_type}_${generation.id.slice(0, 8)}.zip`;
+      // Use original product name for ZIP archive
+      const safeZipName = (generation.input_data?.productName || 'generation').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+      link.download = `${safeZipName}_${generation.generation_type === 'cards' ? 'карточки' : 'описание'}.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

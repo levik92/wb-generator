@@ -495,7 +495,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${safeProductName}_all_cards.zip`;
+      const safeZipName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+      link.download = `${safeZipName}_all_cards.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
