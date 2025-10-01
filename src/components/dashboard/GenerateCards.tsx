@@ -126,19 +126,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           setGeneratedImages(images);
           setJobCompleted(true);
           
-          // Показываем уведомление только если еще не показывали для этой генерации
-          const notificationKey = `job_notified_${latestJob.id}`;
-          const alreadyNotified = localStorage.getItem(notificationKey);
-          
-          if (!alreadyNotified) {
-            toast({
-              title: "Генерация завершена!",
-              description: `Все карточки готовы для скачивания`,
-            });
-            
-            // Сохраняем что уже показали уведомление для этой генерации
-            localStorage.setItem(notificationKey, 'true');
-          }
+          // Уведомление уже создано database trigger'ом в таблице notifications,
+          // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
       } else if (latestJob && latestJob.status === 'processing') {
         // Resume polling for active job
@@ -379,14 +368,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             
             if (allCompleted && jobJustCompleted) {
               setCompletionNotificationShown(true);
+              
+              // Note: Уведомления и история теперь создаются автоматически database trigger'ом
+              // когда job status меняется на 'completed'. Это работает даже если клиент офлайн.
+              // Клиентское уведомление показываем только для лучшего UX когда пользователь онлайн.
               toast({
                 title: "Генерация завершена!",
                 description: `Все карточки готовы для скачивания`,
               });
-              
-              // Note: History persistence is now handled automatically by database triggers
-              // when the job status changes to completed. This ensures it works even when
-              // the client is offline or disconnects during generation.
               
             } else if (job.status === 'failed') {
               toast({
