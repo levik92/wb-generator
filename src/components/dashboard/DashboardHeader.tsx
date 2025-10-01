@@ -142,7 +142,7 @@ export const DashboardHeader = ({ profile, onSignOut, onNavigateToSettings }: Da
                 notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
-                    className={`p-3 cursor-pointer border-b last:border-b-0 bg-gray-50 hover:bg-wb-purple hover:[&_*]:text-white ${
+                    className={`group p-3 cursor-pointer border-b last:border-b-0 bg-gray-50 hover:bg-wb-purple ${
                       !notification.read ? 'bg-wb-purple/10' : ''
                     }`}
                     onClick={() => markAsRead(notification.id)}
@@ -152,13 +152,13 @@ export const DashboardHeader = ({ profile, onSignOut, onNavigateToSettings }: Da
                         {getNotificationIcon(notification.type)}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate text-foreground">
+                        <p className="font-medium text-sm truncate text-foreground group-hover:text-white">
                           {notification.title}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground group-hover:text-white mt-1">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground group-hover:text-white mt-1">
                           {new Date(notification.created_at).toLocaleDateString('ru-RU', {
                             day: '2-digit',
                             month: '2-digit',
@@ -168,7 +168,7 @@ export const DashboardHeader = ({ profile, onSignOut, onNavigateToSettings }: Da
                         </p>
                       </div>
                       {!notification.read && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
+                        <div className="w-2 h-2 bg-blue-500 group-hover:bg-white rounded-full flex-shrink-0 mt-2"></div>
                       )}
                     </div>
                   </DropdownMenuItem>
