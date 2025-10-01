@@ -126,11 +126,19 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           setGeneratedImages(images);
           setJobCompleted(true);
           
-          // Show completion notification
-          toast({
-            title: "Генерация завершена!",
-            description: `Все карточки готовы для скачивания`,
-          });
+          // Показываем уведомление только если еще не показывали для этой генерации
+          const notificationKey = `job_notified_${latestJob.id}`;
+          const alreadyNotified = localStorage.getItem(notificationKey);
+          
+          if (!alreadyNotified) {
+            toast({
+              title: "Генерация завершена!",
+              description: `Все карточки готовы для скачивания`,
+            });
+            
+            // Сохраняем что уже показали уведомление для этой генерации
+            localStorage.setItem(notificationKey, 'true');
+          }
         }
       } else if (latestJob && latestJob.status === 'processing') {
         // Resume polling for active job
