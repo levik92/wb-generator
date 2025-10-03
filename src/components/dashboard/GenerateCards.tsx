@@ -63,6 +63,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number>(0);
+  const [smoothProgress, setSmoothProgress] = useState(0);
   const { toast } = useToast();
 
   // Check for active jobs on component mount (only once)
@@ -288,6 +290,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
     
+    // Расчет времени: ~3-4 минуты на карточку
+    const estimatedMinutesPerCard = 3.5;
+    const totalEstimatedMinutes = selectedCards.length * estimatedMinutesPerCard;
+    setEstimatedTimeRemaining(totalEstimatedMinutes * 60); // в секундах
+    
     const pollJob = async () => {
       try {
         
@@ -321,6 +328,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           setProgress(progressPercent);
           setCurrentStage(completedTasks.length);
+          
+          // Обновляем расчетное время
+          const remainingCards = selectedCards.length - completedTasks.length;
+          const estimatedMinutesPerCard = 3.5;
+          setEstimatedTimeRemaining(remainingCards * estimatedMinutesPerCard * 60);
 
               // Set job status for display with selected cards info
           if (job.status === 'processing') {
@@ -729,6 +741,37 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     }, 5 * 60 * 1000);
   };
 
+  // Smooth progress bar animation
+  useEffect(() => {
+    if (!generating || currentStage >= selectedCards.length) {
+      setSmoothProgress(progress);
+      return;
+    }
+    
+    // Плавное движение прогресс-бара между реальными обновлениями
+    const targetProgress = progress;
+    const interval = setInterval(() => {
+      setSmoothProgress(prev => {
+        if (prev >= targetProgress) return targetProgress;
+        // Медленное увеличение (0.1% каждые 100ms = 1% за секунду)
+        return Math.min(prev + 0.1, targetProgress);
+      });
+    }, 100);
+    
+    return () => clearInterval(interval);
+  }, [progress, generating, currentStage, selectedCards.length]);
+
+  // Countdown timer for estimated time
+  useEffect(() => {
+    if (!generating || estimatedTimeRemaining <= 0) return;
+    
+    const interval = setInterval(() => {
+      setEstimatedTimeRemaining(prev => Math.max(0, prev - 1));
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [generating, estimatedTimeRemaining]);
+
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
@@ -974,9 +1017,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Прогресс: {currentStage} из {selectedCards.length} карточек</span>
-                  <span>{Math.round(progress)}%</span>
+                  <span>{Math.round(smoothProgress)}%</span>
                 </div>
-                <Progress value={progress} className="w-full" />
+                <Progress value={smoothProgress} className="w-full" />
+                {estimatedTimeRemaining > 0 && (
+                  <div className="text-xs text-muted-foreground text-center">
+                    Расчетное время: ~{Math.ceil(estimatedTimeRemaining / 60)} мин
+                  </div>
+                )}
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
