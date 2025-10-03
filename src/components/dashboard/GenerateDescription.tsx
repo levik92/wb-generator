@@ -37,10 +37,18 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   const { toast } = useToast();
 
   const canGenerate = () => {
-    return profile.tokens_balance >= 1;
+    return productName.trim() && 
+           productName.trim().length <= 150 && 
+           productName.trim().length >= 3 &&
+           keywords.trim().length <= 1200 &&
+           profile.tokens_balance >= 1;
   };
 
   const getGuardMessage = () => {
+    if (!productName.trim()) return "Введите название товара";
+    if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
+    if (productName.trim().length < 3) return "Название товара должно содержать минимум 3 символа";
+    if (keywords.trim().length > 1200) return "Ключевые слова должны быть не более 1200 символов";
     if (profile.tokens_balance < 1) return "Недостаточно токенов (нужно 1)";
     return null;
   };
@@ -155,9 +163,16 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 id="productName"
                 placeholder="Например: Беспроводные наушники AirPods"
                 value={productName}
-                onChange={(e) => setProductName(e.target.value)}
+                onChange={(e) => setProductName(e.target.value.slice(0, 150))}
+                maxLength={150}
                 className="input-bordered"
               />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{productName.length}/150 символов</span>
+                {productName.length > 140 && (
+                  <span className="text-warning">Осталось символов: {150 - productName.length}</span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -222,13 +237,20 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 id="keywords"
                 placeholder="Введите ключевые слова через запятую в формате: Ключ1, ключ2, ключ3 и т.д."
                 value={keywords}
-                onChange={(e) => setKeywords(e.target.value)}
+                onChange={(e) => setKeywords(e.target.value.slice(0, 1200))}
+                maxLength={1200}
                 className="input-bordered min-h-[80px] resize-none"
                 rows={3}
               />
-              <p className="text-xs text-muted-foreground">
-                Разделяйте запятыми (необязательное поле)
-              </p>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Разделяйте запятыми (необязательное поле)</span>
+                <span>{keywords.length}/1200 символов</span>
+              </div>
+              {keywords.length > 1140 && (
+                <div className="text-xs text-warning">
+                  Осталось символов: {1200 - keywords.length}
+                </div>
+              )}
             </div>
 
             <Button 
