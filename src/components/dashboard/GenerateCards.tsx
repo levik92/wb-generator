@@ -1182,7 +1182,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 );
               })}
             </div>
-            <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t text-xs text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 mt-4 pt-4 text-xs text-muted-foreground">
               <Info className="w-3 h-3" />
               <span>Перегенерация одного изображения: 5 токенов</span>
             </div>
