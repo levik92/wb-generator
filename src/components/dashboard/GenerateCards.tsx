@@ -1066,11 +1066,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   <Images className="w-4 h-4 shrink-0" />
                   <span className="truncate">Готовые карточки ({generatedImages.length}/{selectedCards.length})</span>
                 </CardTitle>
-                <CardDescription className="text-sm space-y-1">
-                  <div>Ваши сгенерированные карточки готовы к скачиванию</div>
-                  <div className="text-xs text-muted-foreground">
-                    💡 Перегенерация одного изображения: 5 токенов
-                  </div>
+                <CardDescription className="text-sm">
+                  Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
               <Button
@@ -1184,6 +1181,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   </div>
                 );
               })}
+            </div>
+            <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t text-xs text-muted-foreground">
+              <Info className="w-3 h-3" />
+              <span>Перегенерация одного изображения: 5 токенов</span>
             </div>
           </CardContent>
         </Card>
