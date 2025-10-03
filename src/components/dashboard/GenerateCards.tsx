@@ -290,10 +290,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
     
-    // Расчет времени: ~3-4 минуты на карточку
-    const estimatedMinutesPerCard = 3.5;
-    const totalEstimatedMinutes = selectedCards.length * estimatedMinutesPerCard;
-    setEstimatedTimeRemaining(totalEstimatedMinutes * 60); // в секундах
+    // Расчет времени: ~40 секунд на карточку
+    const estimatedSecondsPerCard = 40;
+    const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
+    setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
     
     const pollJob = async () => {
       try {
@@ -331,8 +331,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           // Обновляем расчетное время
           const remainingCards = selectedCards.length - completedTasks.length;
-          const estimatedMinutesPerCard = 3.5;
-          setEstimatedTimeRemaining(remainingCards * estimatedMinutesPerCard * 60);
+          const estimatedSecondsPerCard = 40;
+          setEstimatedTimeRemaining(remainingCards * estimatedSecondsPerCard);
 
               // Set job status for display with selected cards info
           if (job.status === 'processing') {
@@ -1022,7 +1022,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 <Progress value={smoothProgress} className="w-full" />
                 {estimatedTimeRemaining > 0 && (
                   <div className="text-xs text-muted-foreground text-center">
-                    Расчетное время: ~{Math.ceil(estimatedTimeRemaining / 60)} мин
+                    {estimatedTimeRemaining >= 60 
+                      ? `Расчетное время: ~${Math.ceil(estimatedTimeRemaining / 60)} мин` 
+                      : `Расчетное время: ~${estimatedTimeRemaining} сек`}
                   </div>
                 )}
               </div>
