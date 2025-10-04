@@ -70,10 +70,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const { toast } = useToast();
 
   const WAITING_MESSAGES = [
-    "Еще чуть-чуть",
-    "Добавляем мелкие детали",
-    "Причесываем и шлифуем",
-    "Почти готово, немного терпения"
+    "Еще чуть-чуть...",
+    "Добавляем мелкие детали...",
+    "Причесываем и шлифуем...",
+    "Почти готово, немного терпения..."
   ];
 
   // Check for active jobs on component mount (only once)
@@ -299,8 +299,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
     
-    // Расчет времени: 35 секунд на изображение
-    const estimatedSecondsPerCard = 35;
+    // Расчет времени: 40 секунд на изображение
+    const estimatedSecondsPerCard = 40;
     const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
     setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
     setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
@@ -797,8 +797,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     }
     
     const interval = setInterval(() => {
-      setWaitingMessageIndex(prev => (prev + 1) % WAITING_MESSAGES.length);
-    }, 7000);
+      setWaitingMessageIndex(prev => {
+        // Останавливаемся на последней фразе, не зацикливаем
+        if (prev >= WAITING_MESSAGES.length - 1) {
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 10000);
     
     return () => clearInterval(interval);
   }, [generating, estimatedTimeRemaining]);
