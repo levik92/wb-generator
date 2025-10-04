@@ -1105,18 +1105,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             </div>
           </CardHeader>
           <CardContent className="px-2 sm:px-4 lg:px-6">
-            <div className="grid gap-2 sm:gap-3">
+            <div className="grid gap-2 sm:gap-3 w-full">
               {generatedImages.map((image, index) => {
                 const cardKey = `${image.id}_${index}`;
                 const isRegenerating = regeneratingCards.has(cardKey);
                 
                 return (
-                  <div key={image.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-2 sm:p-3 lg:p-4 border rounded-lg bg-muted/30">
+                  <div key={image.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden">
                     <div className="relative group shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
                       <img
                         src={image.url}
                         alt={`Generated card ${index + 1}`}
-                        className="w-20 h-24 sm:w-16 sm:h-20 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover:brightness-75"
+                        className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover:brightness-75"
                       />
                       {/* Hover overlay */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md">
@@ -1144,14 +1144,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       </Dialog>
                     </div>
                     
-                    <div className="flex-1 min-w-0 w-full sm:w-auto">
+                    <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
                       <h3 className="font-medium text-sm sm:text-base text-center sm:text-left truncate">{image.stage}</h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 sm:line-clamp-1 mt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
                       </p>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                    <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
                       <Button
                         size="sm"
                         variant="outline"
@@ -1160,19 +1160,19 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           regenerateCard(image, index);
                         }}
                         disabled={isRegenerating}
-                        className="w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3"
+                        className="w-full xs:w-auto sm:w-auto text-xs px-2 whitespace-nowrap"
                       >
                         {isRegenerating ? (
                           <>
                             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            <span className="hidden sm:inline">Перегенерация...</span>
-                            <span className="sm:hidden">Обновление...</span>
+                            <span className="hidden xs:inline">Перегенерация...</span>
+                            <span className="xs:hidden">Обновление...</span>
                           </>
                         ) : (
                           <>
                             <RefreshCw className="w-3 h-3 mr-1" />
-                            <span className="hidden sm:inline">Перегенерировать</span>
-                            <span className="sm:hidden">Обновить</span>
+                            <span className="hidden xs:inline">Перегенерировать</span>
+                            <span className="xs:hidden">Обновить</span>
                           </>
                         )}
                       </Button>
@@ -1184,7 +1184,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           e.stopPropagation();
                           await downloadSingle(index);
                         }}
-                        className="w-full sm:w-auto text-xs sm:text-sm px-2 sm:px-3"
+                        className="w-full xs:w-auto sm:w-auto text-xs px-2 whitespace-nowrap"
                       >
                         <Download className="w-3 h-3 mr-1" />
                         Скачать
