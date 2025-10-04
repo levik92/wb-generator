@@ -66,7 +66,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number>(0);
   const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
   const [smoothProgress, setSmoothProgress] = useState(0);
+  const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
   const { toast } = useToast();
+
+  const WAITING_MESSAGES = [
+    "Еще чуть-чуть",
+    "Добавляем мелкие детали",
+    "Причесываем и шлифуем",
+    "Почти готово, немного терпения"
+  ];
 
   // Check for active jobs on component mount (only once)
   useEffect(() => {
@@ -291,11 +299,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
     
-    // Расчет времени: 30 секунд на изображение
-    const estimatedSecondsPerCard = 30;
+    // Расчет времени: 35 секунд на изображение
+    const estimatedSecondsPerCard = 35;
     const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
     setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
     setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
+    setWaitingMessageIndex(0); // Сбрасываем индекс сообщений
     
     const pollJob = async () => {
       try {
@@ -780,6 +789,20 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     return () => clearInterval(interval);
   }, [generating, estimatedTimeRemaining]);
 
+  // Cycle through waiting messages after timer ends
+  useEffect(() => {
+    if (!generating || estimatedTimeRemaining > 0) {
+      setWaitingMessageIndex(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setWaitingMessageIndex(prev => (prev + 1) % WAITING_MESSAGES.length);
+    }, 7000);
+    
+    return () => clearInterval(interval);
+  }, [generating, estimatedTimeRemaining]);
+
   // Cleanup polling on unmount
   useEffect(() => {
     return () => {
@@ -1035,7 +1058,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                         ? `Расчетное время: ~${Math.ceil(estimatedTimeRemaining / 60)} мин` 
                         : `Расчетное время: ~${estimatedTimeRemaining} сек`
                     ) : (
-                      'Еще чуть-чуть...'
+                      WAITING_MESSAGES[waitingMessageIndex]
                     )}
                   </div>
                 )}
