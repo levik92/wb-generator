@@ -64,6 +64,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [isDragOver, setIsDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number>(0);
+  const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
   const [smoothProgress, setSmoothProgress] = useState(0);
   const { toast } = useToast();
 
@@ -290,10 +291,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
     
-    // Расчет времени: ~40 секунд на карточку
-    const estimatedSecondsPerCard = 40;
+    // Расчет времени: 30 секунд на изображение
+    const estimatedSecondsPerCard = 30;
     const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
     setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
+    setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
     
     const pollJob = async () => {
       try {
@@ -328,11 +330,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           setProgress(progressPercent);
           setCurrentStage(completedTasks.length);
-          
-          // Обновляем расчетное время
-          const remainingCards = selectedCards.length - completedTasks.length;
-          const estimatedSecondsPerCard = 40;
-          setEstimatedTimeRemaining(remainingCards * estimatedSecondsPerCard);
 
               // Set job status for display with selected cards info
           if (job.status === 'processing') {
@@ -741,25 +738,36 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     }, 5 * 60 * 1000);
   };
 
-  // Smooth progress bar animation
+  // Smooth progress bar animation based on time or completed tasks
   useEffect(() => {
     if (!generating || currentStage >= selectedCards.length) {
       setSmoothProgress(progress);
       return;
     }
     
-    // Плавное движение прогресс-бара между реальными обновлениями
-    const targetProgress = progress;
     const interval = setInterval(() => {
       setSmoothProgress(prev => {
-        if (prev >= targetProgress) return targetProgress;
-        // Медленное увеличение (0.1% каждые 100ms = 1% за секунду)
-        return Math.min(prev + 0.1, targetProgress);
+        // Прогресс на основе реальных завершенных карточек
+        const realProgress = progress;
+        
+        // Прогресс на основе времени (если время установлено)
+        const timeProgress = totalEstimatedTime > 0 
+          ? ((totalEstimatedTime - estimatedTimeRemaining) / totalEstimatedTime) * 100
+          : 0;
+        
+        // Используем максимум из двух прогрессов, но не больше 95% если не все завершено
+        const targetProgress = Math.max(realProgress, timeProgress);
+        const maxProgress = currentStage >= selectedCards.length ? 100 : 95;
+        const limitedTarget = Math.min(targetProgress, maxProgress);
+        
+        if (prev >= limitedTarget) return limitedTarget;
+        // Плавное увеличение
+        return Math.min(prev + 0.2, limitedTarget);
       });
     }, 100);
     
     return () => clearInterval(interval);
-  }, [progress, generating, currentStage, selectedCards.length]);
+  }, [progress, generating, currentStage, selectedCards.length, estimatedTimeRemaining, totalEstimatedTime]);
 
   // Countdown timer for estimated time
   useEffect(() => {
@@ -1020,11 +1028,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   <span>{Math.round(smoothProgress)}%</span>
                 </div>
                 <Progress value={smoothProgress} className="w-full" />
-                {estimatedTimeRemaining > 0 && (
+                {generating && (
                   <div className="text-xs text-muted-foreground text-center">
-                    {estimatedTimeRemaining >= 60 
-                      ? `Расчетное время: ~${Math.ceil(estimatedTimeRemaining / 60)} мин` 
-                      : `Расчетное время: ~${estimatedTimeRemaining} сек`}
+                    {estimatedTimeRemaining > 0 ? (
+                      estimatedTimeRemaining >= 60 
+                        ? `Расчетное время: ~${Math.ceil(estimatedTimeRemaining / 60)} мин` 
+                        : `Расчетное время: ~${estimatedTimeRemaining} сек`
+                    ) : (
+                      'Еще чуть-чуть...'
+                    )}
                   </div>
                 )}
               </div>
