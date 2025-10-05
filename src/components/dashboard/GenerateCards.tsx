@@ -1193,13 +1193,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                       >
                         {isRegenerating ? (
                           <>
-                            <Loader2 className="w-3 h-3 mr-1 flex-shrink-0 animate-spin" />
-                            <span className="truncate">Перегенерация...</span>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            <span className="hidden xs:inline">Перегенерация...</span>
+                            <span className="xs:hidden">Обновление...</span>
                           </>
                         ) : (
                           <>
-                            <RefreshCw className="w-3 h-3 mr-1 flex-shrink-0" />
-                            <span className="truncate">Перегенерировать</span>
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            <span className="hidden xs:inline">Перегенерировать</span>
+                            <span className="xs:hidden">Обновить</span>
                           </>
                         )}
                       </Button>
@@ -1276,7 +1278,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 <p className="text-muted-foreground text-xs sm:text-sm flex items-start sm:items-center gap-2">
                   <Info className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 sm:mt-0" />
                   <span className="leading-relaxed">
-                    Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно. Перегенерация 1 изображения: 5 токенов.
+                    Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно.
                   </span>
                 </p>
               </div>
