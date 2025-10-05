@@ -131,11 +131,11 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
           // Add each image to ZIP
           for (let i = 0; i < images.length; i++) {
             const image = images[i];
-            if (image.url) {
-              const response = await fetch(image.url);
+            if (image.image_url) {
+              const response = await fetch(image.image_url);
               const blob = await response.blob();
-              // Use original stage name, only replace problematic characters for file system
-              const safeStageName = (image.stage || image.type || `card_${i+1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+              // Use original type name, only replace problematic characters for file system
+              const safeStageName = (image.type || `card_${i+1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
               const fileName = `${safeProductName}_${safeStageName}.png`;
               zip.file(fileName, blob);
             }
