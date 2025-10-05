@@ -1249,9 +1249,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                <span className="hidden sm:inline">
-                  Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'карточку' : selectedCards.length < 5 ? 'карточки' : 'карточек'} ({selectedCards.length * 10} {selectedCards.length * 10 === 1 ? 'токен' : (selectedCards.length * 10) % 10 >= 2 && (selectedCards.length * 10) % 10 <= 4 && ((selectedCards.length * 10) % 100 < 10 || (selectedCards.length * 10) % 100 >= 20) ? 'токена' : 'токенов'})
-                </span>
+              <span className="hidden sm:inline">
+                Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
+              </span>
                 <span className="sm:hidden">
                   {generatedImages.length > 0 ? 'Новый комплект' : 'Генерация'}
                 </span>
