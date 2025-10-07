@@ -188,12 +188,12 @@
     transition: var(--transition-base);
   }
 
-/* Standardized borders for all inputs - 2px gray */
+/* Standardized borders for all inputs - 1px gray */
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
 textarea, 
 select,
 button[role="combobox"] {
-  border-width: 2px !important;
+  border-width: 1px !important;
   border-style: solid !important;
   border-color: hsl(var(--gray-300)) !important;
   font-size: 0.875rem;
