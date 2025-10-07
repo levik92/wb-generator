@@ -192,7 +192,17 @@
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
 textarea, 
 select {
-  @apply border-2 border-border/60 text-sm !important;
+  border: 2px solid hsl(var(--border) / 0.6);
+  font-size: 0.875rem;
+  transition: border-color 0.3s ease;
+}
+
+/* Focus state - purple border */
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):focus, 
+textarea:focus, 
+select:focus {
+  outline: none;
+  border-color: hsl(var(--wb-purple));
 }
 
 /* Mobile button text size adjustments */
