@@ -188,21 +188,28 @@
     transition: var(--transition-base);
   }
 
-/* Default input styling with borders */
+/* Standardized borders for all inputs - 2px gray */
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
 textarea, 
-select {
-  border: 2px solid hsl(var(--border) / 0.6);
+select,
+button[role="combobox"] {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: hsl(var(--gray-300)) !important;
   font-size: 0.875rem;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease !important;
 }
 
-/* Focus state - purple border */
+/* Focus state - purple border for all inputs */
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):focus, 
 textarea:focus, 
-select:focus {
-  outline: none;
-  border-color: hsl(var(--wb-purple));
+select:focus,
+button[role="combobox"]:focus,
+[data-state="open"] > button[role="combobox"] {
+  outline: none !important;
+  border-color: hsl(var(--wb-purple)) !important;
+  box-shadow: none !important;
+  ring: none !important;
 }
 
 /* Mobile button text size adjustments */
