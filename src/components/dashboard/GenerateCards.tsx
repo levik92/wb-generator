@@ -1194,14 +1194,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                         {isRegenerating ? (
                           <>
                             <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            <span className="hidden xs:inline">Перегенерация...</span>
-                            <span className="xs:hidden">Обновление...</span>
+                            <span>Перегенерация...</span>
                           </>
                         ) : (
                           <>
                             <RefreshCw className="w-3 h-3 mr-1" />
-                            <span className="hidden xs:inline">Перегенерировать</span>
-                            <span className="xs:hidden">Обновить</span>
+                            <span>Перегенерировать</span>
                           </>
                         )}
                       </Button>
