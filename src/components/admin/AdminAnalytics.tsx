@@ -1,5 +1,4 @@
 import { AdminAnalyticsChart } from "@/components/dashboard/AdminAnalyticsChart";
-import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface User {
@@ -72,9 +71,6 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
           </CardContent>
         </Card>
       </div>
-
-      {/* Promo Codes Management */}
-      <PromoCodeManager />
     </div>
   );
 }
