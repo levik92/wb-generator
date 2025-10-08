@@ -175,8 +175,8 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
   return (
     <div className="space-y-6">
       {/* Search */}
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             placeholder="Поиск по email..."
@@ -185,7 +185,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
             className="pl-10"
           />
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
           Найдено: {filteredUsers.length} из {users.length}
         </div>
       </div>
@@ -198,49 +198,49 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
             Просмотр и управление всеми пользователями системы
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-2 md:p-4">
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[200px]">Email</TableHead>
-                  <TableHead className="min-w-[120px]">Имя</TableHead>
-                  <TableHead className="min-w-[80px]">Токены</TableHead>
-                  <TableHead className="min-w-[100px] hidden sm:table-cell">WB</TableHead>
-                  <TableHead className="min-w-[100px]">Статус</TableHead>
-                  <TableHead className="min-w-[120px] hidden md:table-cell">Дата регистрации</TableHead>
-                  <TableHead className="min-w-[120px]">Действия</TableHead>
+                  <TableHead className="min-w-[180px]">Email</TableHead>
+                  <TableHead className="min-w-[100px] hidden lg:table-cell">Имя</TableHead>
+                  <TableHead className="min-w-[70px]">Токены</TableHead>
+                  <TableHead className="min-w-[90px] hidden md:table-cell">WB</TableHead>
+                  <TableHead className="min-w-[80px]">Статус</TableHead>
+                  <TableHead className="min-w-[110px] hidden lg:table-cell">Дата регистрации</TableHead>
+                  <TableHead className="min-w-[100px]">Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[200px] truncate" 
+                    <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[180px] truncate text-xs md:text-sm" 
                       onClick={() => {
                         setSelectedUser(user);
                         loadUserDetails(user);
                       }}>
                       {user.email}
                     </TableCell>
-                    <TableCell className="max-w-[120px] truncate">{user.full_name || 'Не указано'}</TableCell>
+                    <TableCell className="max-w-[100px] truncate text-xs hidden lg:table-cell">{user.full_name || 'Не указано'}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{user.tokens_balance}</Badge>
+                      <Badge variant="secondary" className="text-xs">{user.tokens_balance}</Badge>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">
+                    <TableCell className="hidden md:table-cell">
                       <Badge variant={user.wb_connected ? "default" : "secondary"} className="text-xs">
-                        {user.wb_connected ? 'Подключен' : 'Не подключен'}
+                        {user.wb_connected ? 'Да' : 'Нет'}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={user.is_blocked ? "destructive" : "default"} className="text-xs">
-                        {user.is_blocked ? 'Заблокирован' : 'Активен'}
+                        {user.is_blocked ? 'Блок' : 'Актив'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell text-sm">
+                    <TableCell className="hidden lg:table-cell text-xs">
                       {new Date(user.created_at).toLocaleDateString('ru-RU')}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
+                      <div className="flex gap-0.5 md:gap-1">
                         <Button
                           variant="outline"
                           size="sm"
@@ -248,7 +248,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                             setSelectedUser(user);
                             loadUserDetails(user);
                           }}
-                          className="h-8 w-8 p-0"
+                          className="h-7 w-7 md:h-8 md:w-8 p-0"
                         >
                           <Eye className="h-3 w-3" />
                         </Button>
@@ -262,15 +262,15 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                                 setEditingUser(user);
                                 setNewTokenBalance(user.tokens_balance.toString());
                               }}
-                              className="h-8 w-8 p-0"
+                              className="h-7 w-7 md:h-8 md:w-8 p-0"
                             >
                               <Pencil className="h-3 w-3" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-sm">
+                          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-2">
                             <DialogHeader>
-                              <DialogTitle className="text-lg">Изменить баланс токенов</DialogTitle>
-                              <DialogDescription className="text-sm">
+                              <DialogTitle className="text-base md:text-lg">Изменить баланс токенов</DialogTitle>
+                              <DialogDescription className="text-xs md:text-sm break-all">
                                 Пользователь: {editingUser?.email}
                               </DialogDescription>
                             </DialogHeader>
@@ -296,7 +296,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                           variant={user.is_blocked ? "default" : "destructive"}
                           size="sm"
                           onClick={() => toggleUserBlock(user.id, user.is_blocked)}
-                          className="h-8 w-8 p-0"
+                          className="h-7 w-7 md:h-8 md:w-8 p-0"
                         >
                           {user.is_blocked ? (
                             <UserCheck className="h-3 w-3" />
@@ -314,31 +314,33 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-2">
-              <div className="text-sm text-muted-foreground order-2 sm:order-1">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-3 md:mt-4 gap-2 px-2">
+              <div className="text-xs md:text-sm text-muted-foreground order-2 sm:order-1">
                 Показано {startIndex + 1}-{Math.min(endIndex, filteredUsers.length)} из {filteredUsers.length}
               </div>
-              <div className="flex items-center space-x-2 order-1 sm:order-2">
+              <div className="flex items-center gap-1 md:gap-2 order-1 sm:order-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
+                  className="h-8"
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-1">Назад</span>
+                  <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden md:inline ml-1">Назад</span>
                 </Button>
-                <span className="text-sm px-2">
-                  {currentPage} из {totalPages}
+                <span className="text-xs md:text-sm px-1 md:px-2 whitespace-nowrap">
+                  {currentPage} / {totalPages}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
+                  className="h-8"
                 >
-                  <span className="hidden sm:inline mr-1">Вперед</span>
-                  <ChevronRight className="h-4 w-4" />
+                  <span className="hidden md:inline mr-1">Вперед</span>
+                  <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
               </div>
             </div>
@@ -348,10 +350,10 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
 
       {/* User Details Modal */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2">
+        <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] lg:max-w-4xl max-h-[90vh] overflow-y-auto mx-2">
           <DialogHeader>
-            <DialogTitle>Детали пользователя</DialogTitle>
-            <DialogDescription className="break-all">
+            <DialogTitle className="text-base md:text-lg">Детали пользователя</DialogTitle>
+            <DialogDescription className="break-all text-xs md:text-sm">
               {selectedUser?.email}
             </DialogDescription>
           </DialogHeader>

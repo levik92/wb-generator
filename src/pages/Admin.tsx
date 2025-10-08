@@ -155,8 +155,8 @@ export default function Admin() {
       
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b overflow-x-hidden">
-          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b">
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
             {/* Mobile Menu */}
             {isMobile && (
               <AdminMobileMenu 
@@ -164,27 +164,29 @@ export default function Admin() {
                 onTabChange={handleTabChange}
               />
             )}
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl font-bold truncate">Админ-панель</h1>
-              <p className="text-muted-foreground text-sm hidden sm:block">Управление системой WB Генератор</p>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <h1 className="text-lg md:text-xl lg:text-2xl font-bold truncate">Админ-панель</h1>
+              <p className="text-muted-foreground text-xs md:text-sm hidden sm:block truncate">Управление системой WB Генератор</p>
             </div>
           </div>
-          <div className="flex gap-1 md:gap-2 shrink-0">
+          <div className="flex gap-1 md:gap-2 shrink-0 ml-2">
             <DataExportDialog>
-              <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-2">
-                <Download className="h-4 w-4" />
-                {!isMobile && "Экспорт данных"}
+              <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
+                <Download className="h-3 w-3 md:h-4 md:w-4" />
+                {!isMobile && <span className="hidden lg:inline">Экспорт данных</span>}
               </Button>
             </DataExportDialog>
-            <Button onClick={handleSignOut} variant="destructive" size={isMobile ? "sm" : "default"} className="gap-2">
-              <LogOut className="h-4 w-4" />
-              {!isMobile && "Выйти"}
+            <Button onClick={handleSignOut} variant="destructive" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
+              <LogOut className="h-3 w-3 md:h-4 md:w-4" />
+              {!isMobile && <span className="hidden lg:inline">Выйти</span>}
             </Button>
           </div>
         </div>
         
-        <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
-          {renderContent()}
+        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-hidden">
+          <div className="max-w-full overflow-x-hidden">
+            {renderContent()}
+          </div>
         </main>
         
         <Footer />

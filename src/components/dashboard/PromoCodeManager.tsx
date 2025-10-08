@@ -197,24 +197,24 @@ export const PromoCodeManager = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-lg">
+            <div className="bg-primary/10 p-2 rounded-lg shrink-0">
               <Tag className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <CardTitle>Промокоды</CardTitle>
-              <CardDescription>Управление промокодами для пользователей</CardDescription>
+            <div className="min-w-0">
+              <CardTitle className="text-base md:text-lg">Промокоды</CardTitle>
+              <CardDescription className="text-xs md:text-sm">Управление промокодами для пользователей</CardDescription>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={resetForm}>
+              <Button onClick={resetForm} size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Создать промокод
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-2">
               <DialogHeader>
                 <DialogTitle>
                   {editingPromo ? 'Редактировать промокод' : 'Создать промокод'}
@@ -289,33 +289,33 @@ export const PromoCodeManager = () => {
           </Dialog>
         </div>
       </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-2 md:p-4">
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[100px]">Код</TableHead>
-                  <TableHead className="min-w-[80px]">Тип</TableHead>
+                  <TableHead className="min-w-[90px]">Код</TableHead>
+                  <TableHead className="min-w-[70px]">Тип</TableHead>
                   <TableHead className="min-w-[80px]">Значение</TableHead>
-                  <TableHead className="min-w-[100px] hidden sm:table-cell">Использовано</TableHead>
-                  <TableHead className="min-w-[80px]">Статус</TableHead>
-                  <TableHead className="min-w-[120px] hidden md:table-cell">Действует до</TableHead>
-                  <TableHead className="min-w-[100px]">Действия</TableHead>
+                  <TableHead className="min-w-[90px] hidden md:table-cell">Использовано</TableHead>
+                  <TableHead className="min-w-[70px]">Статус</TableHead>
+                  <TableHead className="min-w-[110px] hidden lg:table-cell">Действует до</TableHead>
+                  <TableHead className="min-w-[90px]">Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {promoCodes.map((promo) => (
                   <TableRow key={promo.id}>
-                    <TableCell className="font-mono text-sm">{promo.code}</TableCell>
+                    <TableCell className="font-mono text-xs md:text-sm">{promo.code}</TableCell>
                     <TableCell>
                       <Badge variant={promo.type === 'tokens' ? 'default' : 'secondary'} className="text-xs">
-                        {promo.type === 'tokens' ? 'Токены' : 'Скидка'}
+                        {promo.type === 'tokens' ? 'Ток' : 'Скид'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm">
-                      {promo.value}{promo.type === 'tokens' ? ' токенов' : '%'}
+                    <TableCell className="text-xs md:text-sm">
+                      {promo.value}{promo.type === 'tokens' ? '' : '%'}
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell text-sm">
+                    <TableCell className="hidden md:table-cell text-xs">
                       {promo.current_uses} / {promo.max_uses || '∞'}
                     </TableCell>
                     <TableCell>
@@ -324,19 +324,19 @@ export const PromoCodeManager = () => {
                         className="cursor-pointer text-xs"
                         onClick={() => toggleActive(promo.id, promo.is_active)}
                       >
-                        {promo.is_active ? 'Активен' : 'Неактивен'}
+                        {promo.is_active ? 'Да' : 'Нет'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell text-sm">
-                      {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU') : 'Без ограничений'}
+                    <TableCell className="hidden lg:table-cell text-xs">
+                      {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '∞'}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
+                      <div className="flex gap-0.5 md:gap-1">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(promo)}
-                          className="h-8 w-8 p-0"
+                          className="h-7 w-7 md:h-8 md:w-8 p-0"
                         >
                           <Edit className="h-3 w-3" />
                         </Button>
@@ -344,7 +344,7 @@ export const PromoCodeManager = () => {
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDelete(promo.id)}
-                          className="h-8 w-8 p-0"
+                          className="h-7 w-7 md:h-8 md:w-8 p-0"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

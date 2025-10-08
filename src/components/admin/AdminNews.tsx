@@ -240,23 +240,23 @@ export const AdminNews = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Управление новостями</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl md:text-2xl font-bold">Управление новостями</h2>
+          <p className="text-muted-foreground text-xs md:text-sm">
             Создавайте и публикуйте новости для пользователей
           </p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreateDialog} className="gap-2">
+            <Button onClick={openCreateDialog} size="sm" className="gap-2 w-full sm:w-auto">
               <Plus className="w-4 h-4" />
               Создать новость
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl mx-2">
+          <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-2xl mx-2">
             <DialogHeader>
               <DialogTitle>
                 {editingNews ? 'Редактировать новость' : 'Создать новость'}
