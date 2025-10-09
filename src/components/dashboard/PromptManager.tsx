@@ -227,10 +227,10 @@ export function PromptManager() {
                     {!isEditing && (
                       <div className="flex gap-1 lg:gap-2 shrink-0">
                         <Button
-                          variant="secondary"
+                          variant="outline"
                           size="sm"
                           onClick={() => startEdit(prompt)}
-                          className="gap-2 bg-muted hover:bg-primary hover:text-primary-foreground transition-colors h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
+                          className="gap-2 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
                         >
                           <Pencil className="h-3 w-3 lg:h-4 lg:w-4" />
                           <span className="hidden lg:inline">Редактировать</span>
