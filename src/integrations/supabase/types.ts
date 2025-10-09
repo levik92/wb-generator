@@ -38,6 +38,56 @@ export type Database = {
         }
         Relationships: []
       }
+      api_key_access_audit: {
+        Row: {
+          access_type: string
+          accessed_by: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          key_id: string
+          metadata: Json | null
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          access_type: string
+          accessed_by?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          key_id: string
+          metadata?: Json | null
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          access_type?: string
+          accessed_by?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          key_id?: string
+          metadata?: Json | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_key_access_audit_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "user_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action_type: string
@@ -695,33 +745,42 @@ export type Database = {
       }
       user_api_keys: {
         Row: {
+          access_count: number | null
           created_at: string
           encrypted_key: string
+          expires_at: string | null
           id: string
           is_active: boolean
           key_hash: string
+          key_version: number | null
           last_used_at: string | null
           provider: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          access_count?: number | null
           created_at?: string
           encrypted_key: string
+          expires_at?: string | null
           id?: string
           is_active?: boolean
           key_hash: string
+          key_version?: number | null
           last_used_at?: string | null
           provider: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          access_count?: number | null
           created_at?: string
           encrypted_key?: string
+          expires_at?: string | null
           id?: string
           is_active?: boolean
           key_hash?: string
+          key_version?: number | null
           last_used_at?: string | null
           provider?: string
           updated_at?: string
@@ -859,6 +918,10 @@ export type Database = {
       store_user_api_key_secure: {
         Args: { api_key: string; provider_name: string }
         Returns: boolean
+      }
+      track_api_key_access: {
+        Args: { key_id: string }
+        Returns: undefined
       }
       update_job_progress: {
         Args: { job_id_param: string }
