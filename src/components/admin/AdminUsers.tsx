@@ -75,18 +75,37 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
   const loadUserDetails = async (user: User) => {
     setDetailsLoading(true);
     try {
-      const [paymentsRes, tokensRes, generationsRes, referralsRes] = await Promise.all([
+      // Get referrals without the join (avoid RLS issues)
+      const referralsRes = await supabase
+        .from('referrals')
+        .select('*')
+        .eq('referrer_id', user.id);
+
+      // For each referral, get the email using the secure function
+      const referralsWithEmails = await Promise.all(
+        (referralsRes.data || []).map(async (ref) => {
+          const { data: refData } = await supabase.rpc('admin_get_profile', {
+            target_user_id: ref.referred_id,
+            access_reason: 'View referral details'
+          });
+          return {
+            ...ref,
+            referred: { email: refData?.[0]?.email || 'Unknown' }
+          };
+        })
+      );
+
+      const [paymentsRes, tokensRes, generationsRes] = await Promise.all([
         supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
-        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
-        supabase.from('referrals').select('*, referred:profiles!referred_id(email)').eq('referrer_id', user.id)
+        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10)
       ]);
 
       const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
       const generationsCount = generationsRes.data?.length || 0;
-      const referralsCount = referralsRes.data?.length || 0;
-      const referralsEarnings = referralsRes.data?.reduce((sum, r) => sum + (r.tokens_awarded || 0), 0) || 0;
+      const referralsCount = referralsWithEmails.length;
+      const referralsEarnings = referralsWithEmails.reduce((sum, r) => sum + (r.tokens_awarded || 0), 0);
 
       setUserDetails({
         totalPaid,
@@ -96,10 +115,15 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
         referralsEarnings,
         recentGenerations: generationsRes.data || [],
         paymentHistory: paymentsRes.data || [],
-        referrals: referralsRes.data || []
+        referrals: referralsWithEmails
       });
     } catch (error) {
       console.error('Error loading user details:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить детали пользователя",
+        variant: "destructive",
+      });
     } finally {
       setDetailsLoading(false);
     }

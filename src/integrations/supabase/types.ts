@@ -885,6 +885,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_all_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_blocked: boolean
+          referral_code: string
+          referred_by: string
+          tokens_balance: number
+          updated_at: string
+          wb_connected: boolean
+        }[]
+      }
       admin_get_profile: {
         Args: { access_reason?: string; target_user_id: string }
         Returns: {

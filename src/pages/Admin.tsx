@@ -88,10 +88,8 @@ export default function Admin() {
   };
 
   const loadUsers = async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Use the secure admin function to get all users
+    const { data, error } = await supabase.rpc('admin_get_all_users');
 
     if (error) {
       console.error('Error loading users:', error);
