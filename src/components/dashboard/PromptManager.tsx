@@ -225,26 +225,26 @@ export function PromptManager() {
                       </div>
                     </div>
                     {!isEditing && (
-                      <div className="flex gap-1 lg:gap-2 shrink-0">
+                      <div className="flex gap-2 shrink-0">
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="default"
                           onClick={() => startEdit(prompt)}
-                          className="gap-2 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
+                          className="gap-2"
                         >
-                          <Pencil className="h-3 w-3 lg:h-4 lg:w-4" />
-                          <span className="hidden lg:inline">Редактировать</span>
+                          <Pencil className="h-4 w-4" />
+                          <span>Редактировать</span>
                         </Button>
                         {['features', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'].includes(prompt.prompt_type) && (
                           <Button
                             variant="destructive"
-                            size="sm"
+                            size="default"
                             onClick={() => deletePrompt(prompt.id, prompt.prompt_type)}
                             disabled={deleting === prompt.id}
-                            className="gap-2 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
+                            className="gap-2"
                           >
-                            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4" />
-                            <span className="hidden lg:inline">
+                            <Trash2 className="h-4 w-4" />
+                            <span>
                               {deleting === prompt.id ? "Удаление..." : "Удалить"}
                             </span>
                           </Button>
