@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_profile_access_rate_limit: {
+        Row: {
+          access_count: number | null
+          admin_user_id: string
+          created_at: string | null
+          id: string
+          window_start: string | null
+        }
+        Insert: {
+          access_count?: number | null
+          admin_user_id: string
+          created_at?: string | null
+          id?: string
+          window_start?: string | null
+        }
+        Update: {
+          access_count?: number | null
+          admin_user_id?: string
+          created_at?: string | null
+          id?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       ai_prompts: {
         Row: {
           created_at: string
@@ -480,6 +504,42 @@ export type Database = {
           },
         ]
       }
+      profile_access_audit: {
+        Row: {
+          access_reason: string | null
+          access_type: string
+          accessed_by: string
+          accessed_profile_id: string
+          created_at: string | null
+          fields_accessed: string[] | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+        }
+        Insert: {
+          access_reason?: string | null
+          access_type: string
+          accessed_by: string
+          accessed_profile_id: string
+          created_at?: string | null
+          fields_accessed?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+        }
+        Update: {
+          access_reason?: string | null
+          access_type?: string
+          accessed_by?: string
+          accessed_profile_id?: string
+          created_at?: string | null
+          fields_accessed?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -825,8 +885,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_profile: {
+        Args: { access_reason?: string; target_user_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_blocked: boolean
+          referral_code: string
+          tokens_balance: number
+          wb_connected: boolean
+        }[]
+      }
       can_access_payment: {
         Args: { payment_user_id: string }
+        Returns: boolean
+      }
+      check_admin_profile_access_rate: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       generate_referral_code: {
