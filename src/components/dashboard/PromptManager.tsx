@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Save, X, Trash2 } from "lucide-react";
+import { Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface Prompt {
@@ -225,31 +225,15 @@ export function PromptManager() {
                       </div>
                     </div>
                     {!isEditing && (
-                      <div className="flex gap-2 shrink-0">
-                        <Button
-                          variant="outline"
-                          size="default"
-                          onClick={() => startEdit(prompt)}
-                          className="gap-2"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span>Редактировать</span>
-                        </Button>
-                        {['features', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'].includes(prompt.prompt_type) && (
-                          <Button
-                            variant="destructive"
-                            size="default"
-                            onClick={() => deletePrompt(prompt.id, prompt.prompt_type)}
-                            disabled={deleting === prompt.id}
-                            className="gap-2"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span>
-                              {deleting === prompt.id ? "Удаление..." : "Удалить"}
-                            </span>
-                          </Button>
-                        )}
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => startEdit(prompt)}
+                        className="gap-2"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span>Редактировать</span>
+                      </Button>
                     )}
                   </div>
                 </CardHeader>
