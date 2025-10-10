@@ -87,7 +87,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'labels',
       label: 'Генератор этикеток',
       icon: Tags,
-      badge: 'FREE',
+      badge: 'Free',
       badgeColor: 'bg-green-500'
     },
     {
