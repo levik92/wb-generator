@@ -28,6 +28,7 @@ import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import News from "@/pages/News";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
+import { TutorialDialog } from "@/components/dashboard/TutorialDialog";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
 
 interface Profile {
@@ -37,6 +38,7 @@ interface Profile {
   tokens_balance: number;
   wb_connected: boolean;
   referral_code: string;
+  login_count: number;
 }
 
 type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications' | 'news' | 'learning';
@@ -94,6 +96,19 @@ const Dashboard = () => {
         .single();
 
       if (error) throw error;
+      
+      // Инкрементируем login_count при каждом входе
+      const currentLoginCount = data.login_count || 0;
+      if (currentLoginCount < 3) {
+        await supabase
+          .from('profiles')
+          .update({ login_count: currentLoginCount + 1 })
+          .eq('id', userId);
+        
+        // Обновляем данные профиля с новым значением
+        data.login_count = currentLoginCount + 1;
+      }
+      
       setProfile(data);
       
       // Check for unread news after loading profile
@@ -216,6 +231,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {profile && (
+        <TutorialDialog userId={profile.id} loginCount={profile.login_count || 0} />
+      )}
+      
       {/* Desktop Sidebar */}
       {!isMobile && (
         <DashboardSidebar 

@@ -547,6 +547,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_blocked: boolean
+          login_count: number
           referral_code: string | null
           referred_by: string | null
           tokens_balance: number
@@ -559,6 +560,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_blocked?: boolean
+          login_count?: number
           referral_code?: string | null
           referred_by?: string | null
           tokens_balance?: number
@@ -571,6 +573,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_blocked?: boolean
+          login_count?: number
           referral_code?: string | null
           referred_by?: string | null
           tokens_balance?: number
