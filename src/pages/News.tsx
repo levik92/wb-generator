@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Newspaper, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Newspaper, Clock, ChevronLeft, ChevronRight, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -121,6 +121,49 @@ const News = () => {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) return;
+
+      // Получаем все ID новостей, которые еще не прочитаны
+      const unreadNewsIds = news
+        .map(item => item.id)
+        .filter(id => !readNewsIds.has(id));
+
+      if (unreadNewsIds.length === 0) return;
+
+      // Создаем записи для всех непрочитанных новостей
+      const insertData = unreadNewsIds.map(newsId => ({
+        news_id: newsId,
+        user_id: user.data.user!.id
+      }));
+
+      const { error } = await (supabase as any)
+        .from('news_read_status')
+        .insert(insertData);
+
+      if (error && error.code !== '23505') { // Ignore duplicate key errors
+        throw error;
+      }
+
+      // Обновляем состояние - добавляем все ID в set
+      setReadNewsIds(prev => new Set([...prev, ...unreadNewsIds]));
+
+      toast({
+        title: "Готово",
+        description: "Все новости отмечены как прочитанные",
+      });
+    } catch (error: any) {
+      console.error('Error marking all news as read:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось отметить новости как прочитанные",
+        variant: "destructive",
+      });
+    }
+  };
+
   const toggleExpanded = (newsId: string) => {
     setExpandedNewsIds(prev => {
       const newSet = new Set(prev);
@@ -164,11 +207,24 @@ const News = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Новости</h2>
-        <p className="text-muted-foreground">
-          Последние обновления и важная информация о сервисе
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">Новости</h2>
+          <p className="text-muted-foreground">
+            Последние обновления и важная информация о сервисе
+          </p>
+        </div>
+        {news.length > 0 && (
+          <Button
+            onClick={markAllAsRead}
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+          >
+            <CheckCheck className="w-4 h-4 mr-2" />
+            Прочитать все
+          </Button>
+        )}
       </div>
 
       {news.length === 0 ? (
@@ -208,7 +264,7 @@ const News = () => {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <Badge className={tagColors[item.tag] || 'bg-gray-100 text-gray-800 border-gray-200'}>
+                          <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800 border-gray-200'} pointer-events-none`}>
                             {item.tag}
                           </Badge>
                           {isNew && !isRead && (
