@@ -276,7 +276,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
             </p>
             
             {!canGenerate() && (
-              <Alert className="mt-4 border-amber-200 bg-amber-50 [&>svg]:!text-amber-800 [&>svg+div]:translate-y-0 items-center">
+              <Alert className="mt-4 border-amber-200 bg-amber-50 [&>svg]:!text-amber-800 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-amber-800">
                   <strong>{getGuardMessage()}</strong>
