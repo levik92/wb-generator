@@ -232,7 +232,11 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background flex">
       {profile && (
-        <TutorialDialog userId={profile.id} loginCount={profile.login_count || 0} />
+        <TutorialDialog 
+          userId={profile.id} 
+          loginCount={profile.login_count || 0}
+          onNavigateToLearning={() => handleTabChange('learning')}
+        />
       )}
       
       {/* Desktop Sidebar */}

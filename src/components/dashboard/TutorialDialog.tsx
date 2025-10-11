@@ -7,18 +7,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { BookOpen, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface TutorialDialogProps {
   userId: string;
   loginCount: number;
+  onNavigateToLearning: () => void;
 }
 
-export const TutorialDialog = ({ userId, loginCount }: TutorialDialogProps) => {
+export const TutorialDialog = ({ userId, loginCount, onNavigateToLearning }: TutorialDialogProps) => {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Показываем диалог только при первом и втором входе
@@ -27,12 +25,12 @@ export const TutorialDialog = ({ userId, loginCount }: TutorialDialogProps) => {
     }
   }, [loginCount]);
 
-  const handleGoToLearning = async () => {
+  const handleGoToLearning = () => {
     setOpen(false);
-    navigate("/learning");
+    onNavigateToLearning();
   };
 
-  const handleClose = async () => {
+  const handleClose = () => {
     setOpen(false);
   };
 
@@ -59,7 +57,7 @@ export const TutorialDialog = ({ userId, loginCount }: TutorialDialogProps) => {
         <div className="flex flex-col gap-3 mt-6">
           <Button
             onClick={handleGoToLearning}
-            className="w-full relative overflow-hidden group"
+            className="w-full relative overflow-hidden group border-0 ring-0 outline-none"
             size="lg"
           >
             <span className="relative z-10 flex items-center gap-2">
@@ -72,7 +70,7 @@ export const TutorialDialog = ({ userId, loginCount }: TutorialDialogProps) => {
           <Button
             onClick={handleClose}
             variant="ghost"
-            className="w-full"
+            className="w-full hover:bg-muted hover:text-foreground"
           >
             Напомнить позже
           </Button>
