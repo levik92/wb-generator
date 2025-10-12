@@ -124,6 +124,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         const completedTasks = latestJob.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
         
         if (completedTasks.length > 0) {
+          // Restore job data for regeneration
+          setCurrentJobId(latestJob.id);
+          setProductName(latestJob.product_name || '');
+          setCategory(latestJob.category || '');
+          setDescription(latestJob.description || '');
+          
           // Show completed images from the latest job
           const images = completedTasks
             .sort((a: any, b: any) => a.card_index - b.card_index)
@@ -131,7 +137,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               id: task.id,
               url: task.image_url,
               stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-              stageIndex: task.card_index
+              stageIndex: task.card_index,
+              cardType: task.card_type
             }));
           
           setGeneratedImages(images);
@@ -141,6 +148,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
       } else if (latestJob && latestJob.status === 'processing') {
+        // Restore job data for active generation
+        setCurrentJobId(latestJob.id);
+        setProductName(latestJob.product_name || '');
+        setCategory(latestJob.category || '');
+        setDescription(latestJob.description || '');
+        
         // Resume polling for active job
         startJobPolling(latestJob.id);
       }
