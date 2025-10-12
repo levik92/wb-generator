@@ -130,10 +130,10 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
   };
 
   const toggleUserBlock = async (userId: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ is_blocked: !currentStatus })
-      .eq('id', userId);
+    const { data, error } = await supabase.rpc('admin_toggle_user_block', {
+      target_user_id: userId,
+      block_status: !currentStatus
+    });
 
     if (error) {
       toast({
@@ -163,10 +163,11 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
       return;
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ tokens_balance: newBalance })
-      .eq('id', editingUser.id);
+    const { data, error } = await supabase.rpc('admin_update_user_tokens', {
+      target_user_id: editingUser.id,
+      new_balance: newBalance,
+      reason: 'Корректировка баланса администратором'
+    });
 
     if (error) {
       toast({
@@ -175,16 +176,6 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
         variant: "destructive",
       });
     } else {
-      const difference = newBalance - editingUser.tokens_balance;
-      await supabase
-        .from('token_transactions')
-        .insert({
-          user_id: editingUser.id,
-          amount: difference,
-          transaction_type: difference > 0 ? 'admin_bonus' : 'admin_adjustment',
-          description: `Корректировка баланса администратором: ${difference > 0 ? '+' : ''}${difference} токенов`
-        });
-
       toast({
         title: "Успешно",
         description: "Баланс токенов обновлен",

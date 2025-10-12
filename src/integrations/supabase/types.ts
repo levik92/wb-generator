@@ -916,6 +916,14 @@ export type Database = {
           wb_connected: boolean
         }[]
       }
+      admin_toggle_user_block: {
+        Args: { block_status: boolean; target_user_id: string }
+        Returns: boolean
+      }
+      admin_update_user_tokens: {
+        Args: { new_balance: number; reason?: string; target_user_id: string }
+        Returns: boolean
+      }
       can_access_payment: {
         Args: { payment_user_id: string }
         Returns: boolean
