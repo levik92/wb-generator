@@ -23,6 +23,7 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState("signin");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showTermsError, setShowTermsError] = useState(false);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
@@ -59,6 +60,7 @@ const Auth = () => {
     e.preventDefault();
     
     if (!agreeToTerms) {
+      setShowTermsError(true);
       toast({
         title: "Ошибка регистрации",
         description: "Необходимо согласиться с договором оферты и политикой конфиденциальности.",
@@ -284,6 +286,17 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    // Check if on signup tab and terms not agreed
+    if (activeTab === 'signup' && !agreeToTerms) {
+      setShowTermsError(true);
+      toast({
+        title: "Необходимо согласие",
+        description: "Для регистрации необходимо согласиться с договором оферты и политикой конфиденциальности.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const redirectUrl = `${window.location.origin}/dashboard`;
@@ -292,8 +305,8 @@ const Auth = () => {
         redirectTo: redirectUrl
       };
 
-      // Add referral code if present
-      if (referralCode) {
+      // Add referral code if present (only for signup)
+      if (activeTab === 'signup' && referralCode) {
         options.options = {
           data: {
             referral_code: referralCode
@@ -583,22 +596,26 @@ const Auth = () => {
                      </p>
                    </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-start space-x-2">
                     <Checkbox 
                       id="agree-terms"
                       checked={agreeToTerms}
-                      onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
+                      onCheckedChange={(checked) => {
+                        setAgreeToTerms(checked === true);
+                        if (checked) setShowTermsError(false);
+                      }}
+                      className={showTermsError && !agreeToTerms ? "border-2 border-destructive" : ""}
                     />
                     <label
                       htmlFor="agree-terms"
-                      className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
                       Я соглашаюсь с{" "}
-                      <Link to="/terms" className="text-wb-purple hover:underline">
+                      <Link to="/terms" className="text-wb-purple hover:underline" onClick={(e) => e.stopPropagation()}>
                         договором оферты
                       </Link>{" "}
                       и{" "}
-                      <Link to="/privacy" className="text-wb-purple hover:underline">
+                      <Link to="/privacy" className="text-wb-purple hover:underline" onClick={(e) => e.stopPropagation()}>
                         политикой конфиденциальности
                       </Link>
                     </label>
@@ -607,7 +624,7 @@ const Auth = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading || !agreeToTerms}
+                    disabled={loading}
                   >
                     {loading ? (
                       <>
@@ -633,7 +650,7 @@ const Auth = () => {
                     variant="outline"
                     className="w-full"
                     onClick={handleGoogleSignIn}
-                    disabled={loading || !agreeToTerms}
+                    disabled={loading}
                   >
                     <FcGoogle className="w-5 h-5 mr-2" />
                     Зарегистрироваться через Google
