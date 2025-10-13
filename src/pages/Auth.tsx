@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSecurityLogger } from "@/hooks/useSecurityLogger";
 import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 const Auth = () => {
@@ -282,6 +283,42 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      const redirectUrl = `${window.location.origin}/dashboard`;
+      
+      const options: any = {
+        redirectTo: redirectUrl
+      };
+
+      // Add referral code if present
+      if (referralCode) {
+        options.options = {
+          data: {
+            referral_code: referralCode
+          }
+        };
+      }
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        ...options
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      toast({
+        title: "Ошибка",
+        description: error.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -375,6 +412,26 @@ const Auth = () => {
                       Забыли пароль?
                     </button>
                   </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">или</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleGoogleSignIn}
+                    disabled={loading}
+                  >
+                    <FcGoogle className="w-5 h-5 mr-2" />
+                    Войти через Google
+                  </Button>
                 </form>
               </TabsContent>
               
@@ -560,6 +617,26 @@ const Auth = () => {
                     ) : (
                       "Создать аккаунт"
                     )}
+                  </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">или</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleGoogleSignIn}
+                    disabled={loading || !agreeToTerms}
+                  >
+                    <FcGoogle className="w-5 h-5 mr-2" />
+                    Зарегистрироваться через Google
                   </Button>
                 </form>
               </TabsContent>
