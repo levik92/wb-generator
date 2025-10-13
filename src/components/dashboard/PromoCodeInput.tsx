@@ -150,8 +150,8 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
             </div>
 
             {error && (
-              <Alert className="border-red-200 bg-red-50">
-                <XCircle className="h-4 w-4 text-red-600" />
+              <Alert className="border-red-200 bg-red-50 flex items-center [&>svg]:static [&>svg]:translate-y-0 [&>svg]:mr-3 [&>svg]:text-red-600 [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+                <XCircle className="h-4 w-4 flex-shrink-0" />
                 <AlertDescription className="text-red-800">
                   {error}
                 </AlertDescription>
