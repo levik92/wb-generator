@@ -67,6 +67,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
   const [smoothProgress, setSmoothProgress] = useState(0);
   const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
+  const [showCompletedCards, setShowCompletedCards] = useState(true);
+  const [undoCloseTimeout, setUndoCloseTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const WAITING_MESSAGES = [
@@ -90,8 +92,11 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       if (pollingInterval) {
         clearInterval(pollingInterval);
       }
+      if (undoCloseTimeout) {
+        clearTimeout(undoCloseTimeout);
+      }
     };
-  }, [pollingInterval]);
+  }, [pollingInterval, undoCloseTimeout]);
 
   const checkForActiveJobs = async () => {
     try {
@@ -593,6 +598,50 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     } finally {
       setDownloadingAll(false);
     }
+  };
+
+  const handleCloseCompletedCards = () => {
+    // Clear any existing timeout
+    if (undoCloseTimeout) {
+      clearTimeout(undoCloseTimeout);
+    }
+
+    let dismissed = false;
+    
+    const { dismiss } = toast({
+      title: "Закрываем блок результатов",
+      description: "Результат сохранится на странице истории. Перегенерация этих карточек будет недоступна.",
+      action: (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            dismissed = true;
+            dismiss();
+            if (undoCloseTimeout) {
+              clearTimeout(undoCloseTimeout);
+              setUndoCloseTimeout(null);
+            }
+          }}
+        >
+          Отменить
+        </Button>
+      ),
+      duration: 5000,
+    });
+
+    const timeout = setTimeout(() => {
+      if (!dismissed) {
+        setShowCompletedCards(false);
+        setProductName("");
+        setCategory("");
+        setDescription("");
+        setFiles([]);
+        setUndoCloseTimeout(null);
+      }
+    }, 5000);
+
+    setUndoCloseTimeout(timeout);
   };
 
   const downloadSingle = async (index: number) => {
@@ -1111,8 +1160,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       )}
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && (
-        <Card className="bg-muted/30">
+      {generatedImages.length > 0 && showCompletedCards && (
+        <Card className="bg-wb-purple/5 border-wb-purple">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -1124,26 +1173,36 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
-              <Button
-                onClick={downloadAll}
-                variant="outline"
-                className="shrink-0 w-full sm:w-auto"
-                size="sm"
-                disabled={downloadingAll}
-              >
-                {downloadingAll ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    <span className="hidden sm:inline">Создаю ZIP...</span>
-                    <span className="sm:hidden">Создаю...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4 mr-2" />
-                    Скачать все
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={downloadAll}
+                  variant="outline"
+                  className="shrink-0 w-full sm:w-auto"
+                  size="sm"
+                  disabled={downloadingAll}
+                >
+                  {downloadingAll ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <span className="hidden sm:inline">Создаю ZIP...</span>
+                      <span className="sm:hidden">Создаю...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Скачать все
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleCloseCompletedCards}
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="px-2 sm:px-4 lg:px-6">
