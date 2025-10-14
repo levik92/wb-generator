@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { useSecurityLogger } from "@/hooks/useSecurityLogger";
 import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -24,12 +25,17 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showTermsError, setShowTermsError] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref');
   const tabParam = searchParams.get('tab');
+  
+  // hCaptcha site key from Supabase project settings
+  const HCAPTCHA_SITE_KEY = "e5f5d7d1-8e7f-4f7a-9b5a-3c5e5f5d7d1a"; // Replace with your actual site key
 
   useEffect(() => {
     if (tabParam === 'reset-password') {
@@ -64,6 +70,16 @@ const Auth = () => {
       toast({
         title: "Ошибка регистрации",
         description: "Необходимо согласиться с договором оферты и политикой конфиденциальности.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check captcha
+    if (!captchaToken) {
+      toast({
+        title: "Ошибка регистрации",
+        description: "Пожалуйста, подтвердите, что вы не робот.",
         variant: "destructive",
       });
       return;
@@ -120,7 +136,8 @@ const Auth = () => {
       const redirectUrl = `${window.location.origin}/dashboard`;
       
       const signupOptions: any = {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        captchaToken: captchaToken
       };
 
       // Add referral code if present
@@ -137,6 +154,10 @@ const Auth = () => {
         password,
         options: signupOptions
       });
+      
+      // Reset captcha after attempt
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
 
       if (error) {
         console.error('Signup error:', error);
@@ -167,13 +188,31 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check captcha
+    if (!captchaToken) {
+      toast({
+        title: "Ошибка входа",
+        description: "Пожалуйста, подтвердите, что вы не робот.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          captchaToken: captchaToken
+        }
       });
+      
+      // Reset captcha after attempt
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
 
       if (error) {
         // Log failed login attempt
@@ -401,6 +440,16 @@ const Auth = () => {
                       required
                     />
                   </div>
+                  
+                  <div className="flex justify-center">
+                    <HCaptcha
+                      sitekey={HCAPTCHA_SITE_KEY}
+                      onVerify={(token) => setCaptchaToken(token)}
+                      onExpire={() => setCaptchaToken(null)}
+                      ref={captchaRef}
+                    />
+                  </div>
+                  
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
@@ -619,6 +668,15 @@ const Auth = () => {
                         политикой конфиденциальности
                       </Link>
                     </label>
+                  </div>
+                  
+                  <div className="flex justify-center">
+                    <HCaptcha
+                      sitekey={HCAPTCHA_SITE_KEY}
+                      onVerify={(token) => setCaptchaToken(token)}
+                      onExpire={() => setCaptchaToken(null)}
+                      ref={captchaRef}
+                    />
                   </div>
                   
                   <Button 
