@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon, X } from "lucide-react";
+import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -36,12 +36,10 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentJob, setCurrentJob] = useState<JobStatus | null>(null);
   const [progress, setProgress] = useState(0);
-  const [showCompletedCards, setShowCompletedCards] = useState(true);
   const { toast } = useToast();
   
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef(false);
-  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Optimized polling with exponential backoff
   const pollJobStatus = useCallback(async (jobId: string) => {
@@ -69,7 +67,6 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
         if (data.status === 'completed' || data.status === 'failed') {
           isPollingRef.current = false;
           setIsGenerating(false);
-          setShowCompletedCards(true);
           onTokensUpdate();
           
           if (data.status === 'completed') {
@@ -109,9 +106,6 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
     return () => {
       if (pollingRef.current) {
         clearTimeout(pollingRef.current);
-      }
-      if (undoTimeoutRef.current) {
-        clearTimeout(undoTimeoutRef.current);
       }
       isPollingRef.current = false;
     };
@@ -221,47 +215,6 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
         variant: "destructive",
       });
     }
-  };
-
-  const handleCloseCompletedCards = () => {
-    let canUndo = true;
-
-    const { dismiss } = toast({
-      title: "Блок будет скрыт",
-      description: "Результат сохранится в разделе История. Перегенерация этих карточек будет недоступна.",
-      action: (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => {
-            canUndo = false;
-            if (undoTimeoutRef.current) {
-              clearTimeout(undoTimeoutRef.current);
-              undoTimeoutRef.current = null;
-            }
-            dismiss();
-            toast({
-              title: "Отменено",
-              description: "Блок остался открытым",
-            });
-          }}
-        >
-          Отменить
-        </Button>
-      ),
-      duration: 5000,
-    });
-
-    undoTimeoutRef.current = setTimeout(() => {
-      if (canUndo) {
-        setShowCompletedCards(false);
-        setProductName("");
-        setCategory("");
-        setDescription("");
-        setFiles([]);
-      }
-      undoTimeoutRef.current = null;
-    }, 5000);
   };
 
   const downloadCard = async (imageUrl: string, cardType: string) => {
@@ -410,27 +363,12 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
 
       {/* Progress Section */}
       {currentJob && (
-        <Card className={currentJob.status === 'completed' ? 'bg-wb-purple/5 border-wb-purple' : ''}>
+        <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Прогресс генерации</CardTitle>
-                <CardDescription>
-                  {currentJob.status === 'completed' ? 'Генерация завершена!' : 'Создаем ваши карточки...'}
-                </CardDescription>
-              </div>
-              {currentJob.status === 'completed' && showCompletedCards && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCloseCompletedCards}
-                  className="h-8 w-8 hover:bg-destructive/10"
-                  title="Закрыть блок"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <CardTitle>Прогресс генерации</CardTitle>
+            <CardDescription>
+              {currentJob.status === 'completed' ? 'Генерация завершена!' : 'Создаем ваши карточки...'}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 px-2 sm:px-4 lg:px-6">
             <div className="space-y-2">
@@ -441,7 +379,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
               <Progress value={progress} className="w-full" />
             </div>
 
-            {currentJob.status === 'completed' && showCompletedCards && Array.isArray(currentJob.product_images) && currentJob.product_images.length > 0 && (
+            {currentJob.status === 'completed' && Array.isArray(currentJob.product_images) && currentJob.product_images.length > 0 && (
               <div className="space-y-4">
                 <h4 className="font-medium">Готовые карточки:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
