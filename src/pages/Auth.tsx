@@ -45,7 +45,7 @@ const Auth = () => {
     // Site key для hCaptcha - получите его из настроек Supabase
     // Authentication > Attack Protection > Bot and Abuse Protection
     // Замените на ваш реальный site key
-    const siteKey = "ES_702d49d4dacd424583f48501dd2e24de"; // Замените на ваш site key
+    const siteKey = "d15aeff4-fff0-4da6-b948-86f26ab65ffa"; // Замените на ваш site key
     setCaptchaSiteKey(siteKey);
   }, []);
 
