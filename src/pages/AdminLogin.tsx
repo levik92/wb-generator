@@ -22,13 +22,13 @@ export default function AdminLogin() {
     // Site key для hCaptcha - получите его из настроек Supabase
     // Authentication > Attack Protection > Bot and Abuse Protection
     // Замените на ваш реальный site key
-    const siteKey = "10000000-ffff-ffff-ffff-000000000001"; // Замените на ваш site key
+    const siteKey = "ES_702d49d4dacd424583f48501dd2e24de"; // Замените на ваш site key
     setCaptchaSiteKey(siteKey);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка входа",
@@ -37,7 +37,7 @@ export default function AdminLogin() {
       });
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -45,11 +45,11 @@ export default function AdminLogin() {
       if (captchaToken) {
         authOptions.captchaToken = captchaToken;
       }
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        ...(Object.keys(authOptions).length > 0 ? { options: authOptions } : {})
+        ...(Object.keys(authOptions).length > 0 ? { options: authOptions } : {}),
       });
 
       if (error) {
@@ -64,10 +64,10 @@ export default function AdminLogin() {
       if (data.user) {
         // Check if user is admin
         const { data: userRoles, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .eq('role', 'admin')
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .eq("role", "admin")
           .single();
 
         if (roleError || !userRoles) {
@@ -86,10 +86,10 @@ export default function AdminLogin() {
         });
         setCaptchaToken(null);
         captchaRef.current?.resetCaptcha();
-        navigate('/admin');
+        navigate("/admin");
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       toast({
         title: "Ошибка",
         description: "Произошла ошибка при входе",
@@ -102,7 +102,6 @@ export default function AdminLogin() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -111,9 +110,7 @@ export default function AdminLogin() {
             <Shield className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl">Вход в админ-панель</CardTitle>
-          <CardDescription>
-            Введите учетные данные администратора
-          </CardDescription>
+          <CardDescription>Введите учетные данные администратора</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -139,7 +136,7 @@ export default function AdminLogin() {
                 placeholder="Введите пароль администратора"
               />
             </div>
-            
+
             {captchaSiteKey && (
               <div className="flex justify-center">
                 <HCaptcha
@@ -150,15 +147,15 @@ export default function AdminLogin() {
                 />
               </div>
             )}
-            
+
             <Button type="submit" className="w-full" disabled={loading || (captchaSiteKey && !captchaToken)}>
               {loading ? "Вход..." : "Войти"}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="text-sm text-foreground hover:text-wb-purple transition-colors duration-200 bg-transparent border-none cursor-pointer"
             >
               Вернуться на главную
