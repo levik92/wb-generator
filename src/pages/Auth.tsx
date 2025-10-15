@@ -42,19 +42,11 @@ const Auth = () => {
   }, [tabParam]);
 
   useEffect(() => {
-    // Получаем site key для hCaptcha из Supabase
-    const fetchCaptchaSiteKey = async () => {
-      try {
-        const response = await fetch(`https://xguiyabpngjkavyosbza.supabase.co/auth/v1/settings`);
-        const data = await response.json();
-        if (data.external?.hcaptcha?.site_key) {
-          setCaptchaSiteKey(data.external.hcaptcha.site_key);
-        }
-      } catch (error) {
-        console.error('Error fetching captcha site key:', error);
-      }
-    };
-    fetchCaptchaSiteKey();
+    // Site key для hCaptcha - получите его из настроек Supabase
+    // Authentication > Attack Protection > Bot and Abuse Protection
+    // Замените на ваш реальный site key
+    const siteKey = "10000000-ffff-ffff-ffff-000000000001"; // Замените на ваш site key
+    setCaptchaSiteKey(siteKey);
   }, []);
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
@@ -89,7 +81,7 @@ const Auth = () => {
       return;
     }
 
-    if (!captchaToken) {
+    if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка регистрации",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -149,9 +141,13 @@ const Auth = () => {
       const redirectUrl = `${window.location.origin}/dashboard`;
       
       const signupOptions: any = {
-        emailRedirectTo: redirectUrl,
-        captchaToken: captchaToken
+        emailRedirectTo: redirectUrl
       };
+      
+      // Добавляем captcha token если он есть
+      if (captchaToken) {
+        signupOptions.captchaToken = captchaToken;
+      }
 
       // Add referral code if present
       if (referralCode) {
@@ -204,7 +200,7 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!captchaToken) {
+    if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка входа",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -216,12 +212,15 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      const authOptions: any = {};
+      if (captchaToken) {
+        authOptions.captchaToken = captchaToken;
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          captchaToken: captchaToken
-        }
+        ...(Object.keys(authOptions).length > 0 ? { options: authOptions } : {})
       });
 
       if (error) {
@@ -260,7 +259,7 @@ const Auth = () => {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!captchaToken) {
+    if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -272,10 +271,15 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?tab=reset-password`,
-        captchaToken: captchaToken
-      });
+      const resetOptions: any = {
+        redirectTo: `${window.location.origin}/auth?tab=reset-password`
+      };
+      
+      if (captchaToken) {
+        resetOptions.captchaToken = captchaToken;
+      }
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, resetOptions);
 
       if (error) {
         throw error;
@@ -488,7 +492,7 @@ const Auth = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading || !captchaToken}
+                    disabled={loading || (captchaSiteKey && !captchaToken)}
                   >
                     {loading ? (
                       <>
@@ -567,7 +571,7 @@ const Auth = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading || !captchaToken}
+                    disabled={loading || (captchaSiteKey && !captchaToken)}
                   >
                     {loading ? (
                       <>
@@ -730,7 +734,7 @@ const Auth = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading || !captchaToken}
+                    disabled={loading || (captchaSiteKey && !captchaToken)}
                   >
                     {loading ? (
                       <>

@@ -19,25 +19,17 @@ export default function AdminLogin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Получаем site key для hCaptcha из Supabase
-    const fetchCaptchaSiteKey = async () => {
-      try {
-        const response = await fetch(`https://xguiyabpngjkavyosbza.supabase.co/auth/v1/settings`);
-        const data = await response.json();
-        if (data.external?.hcaptcha?.site_key) {
-          setCaptchaSiteKey(data.external.hcaptcha.site_key);
-        }
-      } catch (error) {
-        console.error('Error fetching captcha site key:', error);
-      }
-    };
-    fetchCaptchaSiteKey();
+    // Site key для hCaptcha - получите его из настроек Supabase
+    // Authentication > Attack Protection > Bot and Abuse Protection
+    // Замените на ваш реальный site key
+    const siteKey = "10000000-ffff-ffff-ffff-000000000001"; // Замените на ваш site key
+    setCaptchaSiteKey(siteKey);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!captchaToken) {
+    if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка входа",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -49,12 +41,15 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      const authOptions: any = {};
+      if (captchaToken) {
+        authOptions.captchaToken = captchaToken;
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          captchaToken: captchaToken
-        }
+        ...(Object.keys(authOptions).length > 0 ? { options: authOptions } : {})
       });
 
       if (error) {
@@ -156,7 +151,7 @@ export default function AdminLogin() {
               </div>
             )}
             
-            <Button type="submit" className="w-full" disabled={loading || !captchaToken}>
+            <Button type="submit" className="w-full" disabled={loading || (captchaSiteKey && !captchaToken)}>
               {loading ? "Вход..." : "Войти"}
             </Button>
           </form>
