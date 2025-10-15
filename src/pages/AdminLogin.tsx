@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,21 +7,54 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Shield } from "lucide-react";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Получаем site key для hCaptcha из Supabase
+    const fetchCaptchaSiteKey = async () => {
+      try {
+        const response = await fetch(`https://xguiyabpngjkavyosbza.supabase.co/auth/v1/settings`);
+        const data = await response.json();
+        if (data.external?.hcaptcha?.site_key) {
+          setCaptchaSiteKey(data.external.hcaptcha.site_key);
+        }
+      } catch (error) {
+        console.error('Error fetching captcha site key:', error);
+      }
+    };
+    fetchCaptchaSiteKey();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      toast({
+        title: "Ошибка входа",
+        description: "Пожалуйста, пройдите проверку капчи.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          captchaToken: captchaToken
+        }
       });
 
       if (error) {
@@ -56,6 +89,8 @@ export default function AdminLogin() {
           title: "Успешный вход",
           description: "Добро пожаловать в админ-панель",
         });
+        setCaptchaToken(null);
+        captchaRef.current?.resetCaptcha();
         navigate('/admin');
       }
     } catch (error) {
@@ -65,6 +100,8 @@ export default function AdminLogin() {
         description: "Произошла ошибка при входе",
         variant: "destructive",
       });
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
     }
@@ -107,7 +144,19 @@ export default function AdminLogin() {
                 placeholder="Введите пароль администратора"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            
+            {captchaSiteKey && (
+              <div className="flex justify-center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={captchaSiteKey}
+                  onVerify={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+              </div>
+            )}
+            
+            <Button type="submit" className="w-full" disabled={loading || !captchaToken}>
               {loading ? "Вход..." : "Войти"}
             </Button>
           </form>

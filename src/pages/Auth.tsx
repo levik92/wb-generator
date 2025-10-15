@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { useSecurityLogger } from "@/hooks/useSecurityLogger";
 import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -24,6 +25,9 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showTermsError, setShowTermsError] = useState(false);
+  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
@@ -36,6 +40,22 @@ const Auth = () => {
       setActiveTab('new-password');
     }
   }, [tabParam]);
+
+  useEffect(() => {
+    // Получаем site key для hCaptcha из Supabase
+    const fetchCaptchaSiteKey = async () => {
+      try {
+        const response = await fetch(`https://xguiyabpngjkavyosbza.supabase.co/auth/v1/settings`);
+        const data = await response.json();
+        if (data.external?.hcaptcha?.site_key) {
+          setCaptchaSiteKey(data.external.hcaptcha.site_key);
+        }
+      } catch (error) {
+        console.error('Error fetching captcha site key:', error);
+      }
+    };
+    fetchCaptchaSiteKey();
+  }, []);
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
     if (password.length < 8) {
@@ -64,6 +84,15 @@ const Auth = () => {
       toast({
         title: "Ошибка регистрации",
         description: "Необходимо согласиться с договором оферты и политикой конфиденциальности.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!captchaToken) {
+      toast({
+        title: "Ошибка регистрации",
+        description: "Пожалуйста, пройдите проверку капчи.",
         variant: "destructive",
       });
       return;
@@ -120,7 +149,8 @@ const Auth = () => {
       const redirectUrl = `${window.location.origin}/dashboard`;
       
       const signupOptions: any = {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        captchaToken: captchaToken
       };
 
       // Add referral code if present
@@ -154,12 +184,18 @@ const Auth = () => {
         description: "Перейдите в свою почту и подтвердите email (проверьте папку спам). После подтверждения войдите через вкладку 'Вход'.",
         duration: 10000,
       });
+      // Сброс капчи после успешной регистрации
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
     } catch (error: any) {
       toast({
         title: "Ошибка регистрации",
         description: error.message,
         variant: "destructive",
       });
+      // Сброс капчи после ошибки
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
     }
@@ -167,12 +203,25 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      toast({
+        title: "Ошибка входа",
+        description: "Пожалуйста, пройдите проверку капчи.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          captchaToken: captchaToken
+        }
       });
 
       if (error) {
@@ -189,6 +238,9 @@ const Auth = () => {
           title: "Добро пожаловать!",
           description: "Вы успешно вошли в систему.",
         });
+        // Сброс капчи после успешного входа
+        setCaptchaToken(null);
+        captchaRef.current?.resetCaptcha();
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -197,6 +249,9 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      // Сброс капчи после ошибки
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
     }
@@ -204,11 +259,22 @@ const Auth = () => {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!captchaToken) {
+      toast({
+        title: "Ошибка",
+        description: "Пожалуйста, пройдите проверку капчи.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/auth?tab=reset-password`,
+        captchaToken: captchaToken
       });
 
       if (error) {
@@ -221,6 +287,9 @@ const Auth = () => {
         duration: 8000,
       });
       
+      // Сброс капчи после успешной отправки
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
       setActiveTab("signin");
     } catch (error: any) {
       toast({
@@ -228,6 +297,9 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      // Сброс капчи после ошибки
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
     }
@@ -401,10 +473,22 @@ const Auth = () => {
                       required
                     />
                   </div>
+                  
+                  {captchaSiteKey && (
+                    <div className="flex justify-center">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey={captchaSiteKey}
+                        onVerify={(token) => setCaptchaToken(token)}
+                        onExpire={() => setCaptchaToken(null)}
+                      />
+                    </div>
+                  )}
+                  
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading}
+                    disabled={loading || !captchaToken}
                   >
                     {loading ? (
                       <>
@@ -469,10 +553,21 @@ const Auth = () => {
                     />
                   </div>
                   
+                  {captchaSiteKey && (
+                    <div className="flex justify-center">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey={captchaSiteKey}
+                        onVerify={(token) => setCaptchaToken(token)}
+                        onExpire={() => setCaptchaToken(null)}
+                      />
+                    </div>
+                  )}
+                  
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading}
+                    disabled={loading || !captchaToken}
                   >
                     {loading ? (
                       <>
@@ -621,10 +716,21 @@ const Auth = () => {
                     </label>
                   </div>
                   
+                  {captchaSiteKey && (
+                    <div className="flex justify-center">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey={captchaSiteKey}
+                        onVerify={(token) => setCaptchaToken(token)}
+                        onExpire={() => setCaptchaToken(null)}
+                      />
+                    </div>
+                  )}
+                   
                   <Button 
                     type="submit" 
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading}
+                    disabled={loading || !captchaToken}
                   >
                     {loading ? (
                       <>
