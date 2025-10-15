@@ -32,12 +32,12 @@ const Auth = () => {
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const referralCode = searchParams.get('ref');
-  const tabParam = searchParams.get('tab');
+  const referralCode = searchParams.get("ref");
+  const tabParam = searchParams.get("tab");
 
   useEffect(() => {
-    if (tabParam === 'reset-password') {
-      setActiveTab('new-password');
+    if (tabParam === "reset-password") {
+      setActiveTab("new-password");
     }
   }, [tabParam]);
 
@@ -45,7 +45,7 @@ const Auth = () => {
     // Site key для hCaptcha - получите его из настроек Supabase
     // Authentication > Attack Protection > Bot and Abuse Protection
     // Замените на ваш реальный site key
-    const siteKey = "10000000-ffff-ffff-ffff-000000000001"; // Замените на ваш site key
+    const siteKey = "ES_702d49d4dacd424583f48501dd2e24de"; // Замените на ваш site key
     setCaptchaSiteKey(siteKey);
   }, []);
 
@@ -53,24 +53,24 @@ const Auth = () => {
     if (password.length < 8) {
       return { isValid: false, message: "Пароль должен содержать минимум 8 символов" };
     }
-    
+
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
-    
+
     if (!hasUppercase || !hasLowercase || !hasNumbers) {
-      return { 
-        isValid: false, 
-        message: "Пароль должен содержать заглавные и строчные буквы, а также цифры" 
+      return {
+        isValid: false,
+        message: "Пароль должен содержать заглавные и строчные буквы, а также цифры",
       };
     }
-    
+
     return { isValid: true };
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!agreeToTerms) {
       setShowTermsError(true);
       toast({
@@ -110,19 +110,19 @@ const Auth = () => {
       });
       return;
     }
-    
+
     setLoading(true);
 
     try {
       // First check if email already exists
-      console.log('Starting signup with referral code:', referralCode);
-      const { data: emailCheckData, error: emailCheckError } = await supabase.functions.invoke('check-email-exists', {
-        body: { email }
+      console.log("Starting signup with referral code:", referralCode);
+      const { data: emailCheckData, error: emailCheckError } = await supabase.functions.invoke("check-email-exists", {
+        body: { email },
       });
 
       if (emailCheckError) {
-        console.error('Error checking email:', emailCheckError);
-        throw new Error('Ошибка проверки email');
+        console.error("Error checking email:", emailCheckError);
+        throw new Error("Ошибка проверки email");
       }
 
       // If email exists, show message to use login tab
@@ -139,11 +139,11 @@ const Auth = () => {
 
       // If email doesn't exist, proceed with signup
       const redirectUrl = `${window.location.origin}/dashboard`;
-      
+
       const signupOptions: any = {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
       };
-      
+
       // Добавляем captcha token если он есть
       if (captchaToken) {
         signupOptions.captchaToken = captchaToken;
@@ -151,33 +151,34 @@ const Auth = () => {
 
       // Add referral code if present
       if (referralCode) {
-        console.log('Adding referral code to signup:', referralCode);
+        console.log("Adding referral code to signup:", referralCode);
         signupOptions.data = {
-          referral_code: referralCode
+          referral_code: referralCode,
         };
       }
-      
-      console.log('Signup options:', signupOptions);
+
+      console.log("Signup options:", signupOptions);
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: signupOptions
+        options: signupOptions,
       });
 
       if (error) {
-        console.error('Signup error:', error);
+        console.error("Signup error:", error);
         // Log failed signup attempt
         await logLoginAttempt(email, false, error.message);
         throw error;
       }
 
-      console.log('Signup successful');
+      console.log("Signup successful");
       // Log successful signup
       await logLoginAttempt(email, true);
 
       toast({
         title: "Аккаунт создан! 📧",
-        description: "Перейдите в свою почту и подтвердите email (проверьте папку спам). После подтверждения войдите через вкладку 'Вход'.",
+        description:
+          "Перейдите в свою почту и подтвердите email (проверьте папку спам). После подтверждения войдите через вкладку 'Вход'.",
         duration: 10000,
       });
       // Сброс капчи после успешной регистрации
@@ -199,7 +200,7 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка входа",
@@ -208,7 +209,7 @@ const Auth = () => {
       });
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -216,11 +217,11 @@ const Auth = () => {
       if (captchaToken) {
         authOptions.captchaToken = captchaToken;
       }
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        ...(Object.keys(authOptions).length > 0 ? { options: authOptions } : {})
+        ...(Object.keys(authOptions).length > 0 ? { options: authOptions } : {}),
       });
 
       if (error) {
@@ -232,7 +233,7 @@ const Auth = () => {
       if (data.user) {
         // Log successful login
         await logLoginAttempt(email, true);
-        
+
         toast({
           title: "Добро пожаловать!",
           description: "Вы успешно вошли в систему.",
@@ -258,7 +259,7 @@ const Auth = () => {
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (captchaSiteKey && !captchaToken) {
       toast({
         title: "Ошибка",
@@ -267,18 +268,18 @@ const Auth = () => {
       });
       return;
     }
-    
+
     setLoading(true);
 
     try {
       const resetOptions: any = {
-        redirectTo: `${window.location.origin}/auth?tab=reset-password`
+        redirectTo: `${window.location.origin}/auth?tab=reset-password`,
       };
-      
+
       if (captchaToken) {
         resetOptions.captchaToken = captchaToken;
       }
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, resetOptions);
 
       if (error) {
@@ -290,7 +291,7 @@ const Auth = () => {
         description: "Проверьте почту и следуйте инструкциям для восстановления пароля.",
         duration: 8000,
       });
-      
+
       // Сброс капчи после успешной отправки
       setCaptchaToken(null);
       captchaRef.current?.resetCaptcha();
@@ -311,7 +312,7 @@ const Auth = () => {
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate password complexity
     const passwordValidation = validatePassword(newPassword);
     if (!passwordValidation.isValid) {
@@ -332,12 +333,12 @@ const Auth = () => {
       });
       return;
     }
-    
+
     setLoading(true);
 
     try {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword
+        password: newPassword,
       });
 
       if (error) {
@@ -348,7 +349,7 @@ const Auth = () => {
         title: "Пароль обновлен!",
         description: "Ваш пароль успешно изменен. Теперь вы можете войти с новым паролем.",
       });
-      
+
       navigate("/dashboard");
     } catch (error: any) {
       toast({
@@ -363,7 +364,7 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     // Check if on signup tab and terms not agreed
-    if (activeTab === 'signup' && !agreeToTerms) {
+    if (activeTab === "signup" && !agreeToTerms) {
       setShowTermsError(true);
       toast({
         title: "Необходимо согласие",
@@ -376,23 +377,23 @@ const Auth = () => {
     try {
       setLoading(true);
       const redirectUrl = `${window.location.origin}/dashboard`;
-      
+
       const options: any = {
-        redirectTo: redirectUrl
+        redirectTo: redirectUrl,
       };
 
       // Add referral code if present (only for signup)
-      if (activeTab === 'signup' && referralCode) {
+      if (activeTab === "signup" && referralCode) {
         options.options = {
           data: {
-            referral_code: referralCode
-          }
+            referral_code: referralCode,
+          },
         };
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        ...options
+        provider: "google",
+        ...options,
       });
 
       if (error) {
@@ -417,18 +418,16 @@ const Auth = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             На главную
           </Link>
-          
+
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-semibold">WB Генератор</span>
           </div>
-          
+
           <h1 className="text-2xl font-bold">Добро пожаловать</h1>
-          <p className="text-muted-foreground">
-            Войдите или создайте аккаунт для начала работы
-          </p>
+          <p className="text-muted-foreground">Войдите или создайте аккаунт для начала работы</p>
         </div>
 
         <Card>
@@ -446,13 +445,13 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              {activeTab !== 'new-password' && activeTab !== 'reset' && (
+              {activeTab !== "new-password" && activeTab !== "reset" && (
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="signin">Вход</TabsTrigger>
                   <TabsTrigger value="signup">Регистрация</TabsTrigger>
                 </TabsList>
               )}
-              
+
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
@@ -477,7 +476,7 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  
+
                   {captchaSiteKey && (
                     <div className="flex justify-center">
                       <HCaptcha
@@ -488,9 +487,9 @@ const Auth = () => {
                       />
                     </div>
                   )}
-                  
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
                     disabled={loading || (captchaSiteKey && !captchaToken)}
                   >
@@ -503,7 +502,7 @@ const Auth = () => {
                       "Войти"
                     )}
                   </Button>
-                  
+
                   <div className="text-center">
                     <button
                       type="button"
@@ -535,7 +534,7 @@ const Auth = () => {
                   </Button>
                 </form>
               </TabsContent>
-              
+
               <TabsContent value="reset">
                 <form onSubmit={handlePasswordReset} className="space-y-4">
                   <div className="text-center mb-4">
@@ -544,7 +543,7 @@ const Auth = () => {
                       Введите email для получения ссылки на восстановление пароля
                     </p>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="reset-email">Email</Label>
                     <Input
@@ -556,7 +555,7 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  
+
                   {captchaSiteKey && (
                     <div className="flex justify-center">
                       <HCaptcha
@@ -567,9 +566,9 @@ const Auth = () => {
                       />
                     </div>
                   )}
-                  
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
                     disabled={loading || (captchaSiteKey && !captchaToken)}
                   >
@@ -582,7 +581,7 @@ const Auth = () => {
                       "Отправить ссылку"
                     )}
                   </Button>
-                  
+
                   <div className="text-center">
                     <button
                       type="button"
@@ -594,16 +593,14 @@ const Auth = () => {
                   </div>
                 </form>
               </TabsContent>
-              
+
               <TabsContent value="new-password">
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <div className="text-center mb-4">
                     <h3 className="text-lg font-semibold">Установка нового пароля</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Введите новый пароль для вашего аккаунта
-                    </p>
+                    <p className="text-sm text-muted-foreground">Введите новый пароль для вашего аккаунта</p>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="new-password">Новый пароль</Label>
                     <Input
@@ -619,7 +616,7 @@ const Auth = () => {
                       Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
                     </p>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="confirm-new-password">Подтвердите новый пароль</Label>
                     <Input
@@ -632,12 +629,8 @@ const Auth = () => {
                       minLength={8}
                     />
                   </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-wb-purple hover:bg-wb-purple-dark"
-                    disabled={loading}
-                  >
+
+                  <Button type="submit" className="w-full bg-wb-purple hover:bg-wb-purple-dark" disabled={loading}>
                     {loading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -649,7 +642,7 @@ const Auth = () => {
                   </Button>
                 </form>
               </TabsContent>
-              
+
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
@@ -663,40 +656,38 @@ const Auth = () => {
                       required
                     />
                   </div>
-                   <div className="space-y-2">
-                     <Label htmlFor="signup-password">Пароль</Label>
-                     <Input
-                       id="signup-password"
-                       type="password"
-                       placeholder="••••••••"
-                       value={password}
-                       onChange={(e) => setPassword(e.target.value)}
-                       required
-                       minLength={8}
-                     />
-                     <p className="text-xs text-muted-foreground">
-                       Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
-                     </p>
-                   </div>
-                   
-                   <div className="space-y-2">
-                     <Label htmlFor="signup-confirm-password">Подтвердите пароль</Label>
-                     <Input
-                       id="signup-confirm-password"
-                       type="password"
-                       placeholder="••••••••"
-                       value={confirmPassword}
-                       onChange={(e) => setConfirmPassword(e.target.value)}
-                       required
-                       minLength={8}
-                     />
-                     <p className="text-xs text-muted-foreground">
-                       Повторите пароль для подтверждения
-                     </p>
-                   </div>
-                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Пароль</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm-password">Подтвердите пароль</Label>
+                    <Input
+                      id="signup-confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                    <p className="text-xs text-muted-foreground">Повторите пароль для подтверждения</p>
+                  </div>
+
                   <div className="flex items-start space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="agree-terms"
                       checked={agreeToTerms}
                       onCheckedChange={(checked) => {
@@ -714,12 +705,16 @@ const Auth = () => {
                         договором оферты
                       </Link>{" "}
                       и{" "}
-                      <Link to="/privacy" className="text-wb-purple hover:underline" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        to="/privacy"
+                        className="text-wb-purple hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         политикой конфиденциальности
                       </Link>
                     </label>
                   </div>
-                  
+
                   {captchaSiteKey && (
                     <div className="flex justify-center">
                       <HCaptcha
@@ -730,9 +725,9 @@ const Auth = () => {
                       />
                     </div>
                   )}
-                   
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full bg-wb-purple hover:bg-wb-purple-dark"
                     disabled={loading || (captchaSiteKey && !captchaToken)}
                   >
@@ -770,12 +765,12 @@ const Auth = () => {
             </Tabs>
 
             <Separator className="my-4" />
-            
+
             <div className="text-center text-xs text-muted-foreground">
-              {activeTab === 'signup' && "Уже есть аккаунт? Переключитесь на вкладку \"Вход\""}
-              {activeTab === 'signin' && "Нет аккаунта? Переключитесь на вкладку \"Регистрация\""}
-              {activeTab === 'reset' && "Вспомнили пароль? Вернитесь ко входу"}
-              {activeTab === 'new-password' && "После смены пароля вы автоматически войдете в систему"}
+              {activeTab === "signup" && 'Уже есть аккаунт? Переключитесь на вкладку "Вход"'}
+              {activeTab === "signin" && 'Нет аккаунта? Переключитесь на вкладку "Регистрация"'}
+              {activeTab === "reset" && "Вспомнили пароль? Вернитесь ко входу"}
+              {activeTab === "new-password" && "После смены пароля вы автоматически войдете в систему"}
             </div>
           </CardContent>
         </Card>
