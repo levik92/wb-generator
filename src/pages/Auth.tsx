@@ -49,6 +49,12 @@ const Auth = () => {
     setCaptchaSiteKey(siteKey);
   }, []);
 
+  // Сбрасываем captcha token при смене вкладки
+  useEffect(() => {
+    setCaptchaToken(null);
+    captchaRef.current?.resetCaptcha();
+  }, [activeTab]);
+
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
     if (password.length < 8) {
       return { isValid: false, message: "Пароль должен содержать минимум 8 символов" };
