@@ -6,76 +6,80 @@ import { ExternalLink, Play, MessageCircle, HelpCircle } from "lucide-react";
 
 const videoLessons = [
   {
-    id: 'registration',
-    title: 'Регистрация на сервисе и обзор',
-    description: 'Узнайте, как зарегистрироваться и начать работу с WB Генератор',
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/o4YjCa9hxRutSYxHNaEHZv" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+    id: "registration",
+    title: "Регистрация на сервисе и обзор",
+    description: "Узнайте, как зарегистрироваться и начать работу с WB Генератор",
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/o4YjCa9hxRutSYxHNaEHZv" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
   },
   {
-    id: 'cards',
-    title: 'Как работать с генерацией карточек',
-    description: 'Изучите процесс создания карточек товаров с помощью ИИ',
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/0cxw1JdVWSehbpVZ14QTZP" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+    id: "cards",
+    title: "Как работать с генерацией карточек",
+    description: "Изучите процесс создания карточек товаров с помощью ИИ",
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/0cxw1JdVWSehbpVZ14QTZP" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
   },
   {
-    id: 'descriptions',
-    title: 'Как работать с генерацией описаний',
-    description: 'Научитесь создавать продающие описания для ваших товаров',
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/8dxZ3uWTBxGYoXUP1wD6Zq" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+    id: "descriptions",
+    title: "Как работать с генерацией описаний",
+    description: "Научитесь создавать продающие описания для ваших товаров",
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/8dxZ3uWTBxGYoXUP1wD6Zq" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
   },
   {
-    id: 'barcodes',
-    title: 'Как работать с генерацией штрих-кодов',
-    description: 'Создавайте штрих-коды и этикетки для ваших товаров',
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/kyZHWqtTVUX3EMTGGpm1gG" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+    id: "barcodes",
+    title: "Как работать с генерацией штрих-кодов",
+    description: "Создавайте штрих-коды и этикетки для ваших товаров",
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/kyZHWqtTVUX3EMTGGpm1gG" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
   },
   {
-    id: 'overview',
-    title: 'Обзор сервиса',
-    description: 'Полный обзор всех возможностей WB Генератор',
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/eFQT3SQABzjexyqfK1i7qk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
-  }
+    id: "overview",
+    title: "Обзор сервиса",
+    description: "Полный обзор всех возможностей WB Генератор",
+    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/eFQT3SQABzjexyqfK1i7qk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
+  },
 ];
 
 const faqItems = [
   {
     question: "Как получить токены для генерации?",
-    answer: "Токены можно получить несколькими способами: при регистрации вы получаете 25 бесплатных токенов, можете пополнить баланс в разделе 'Баланс', пригласить друзей по реферальной программе или использовать промокоды."
+    answer:
+      "Токены можно получить несколькими способами: при регистрации вы получаете 25 бесплатных токенов, можете пополнить баланс в разделе 'Баланс', пригласить друзей по реферальной программе или использовать промокоды.",
   },
   {
     question: "Сколько токенов нужно для генерации карточки?",
-    answer: "Для генерации одной карточки требуется 10 токенов. В стандартном наборе генерируется 6 карточек, что стоит 60 токенов."
+    answer:
+      "Для генерации одной карточки требуется 10 токенов. В стандартном наборе генерируется 6 карточек, что стоит 60 токенов.",
   },
   {
     question: "Можно ли редактировать сгенерированные карточки?",
-    answer: "Да, после генерации вы можете скачать карточки и отредактировать их в любом графическом редакторе. Также можете перегенерировать отдельные карточки, если результат не устраивает."
+    answer:
+      "Да, после генерации вы можете скачать карточки и отредактировать их в любом графическом редакторе. Также можете перегенерировать отдельные карточки, если результат не устраивает.",
   },
   {
     question: "Как работает реферальная программа?",
-    answer: "За каждого приглашенного друга, который совершит первую покупку токенов, вы получаете 20 бонусных токенов. Ваш реферальный код можно найти в разделе 'Рефералы'."
+    answer:
+      "За каждого приглашенного друга, который совершит первую покупку токенов, вы получаете 20 бонусных токенов. Ваш реферальный код можно найти в разделе 'Рефералы'.",
   },
   {
     question: "Какие форматы изображений поддерживаются?",
-    answer: "Сервис поддерживает загрузку изображений в форматах JPG, PNG и WebP. Рекомендуется использовать изображения высокого качества для лучшего результата генерации."
+    answer:
+      "Сервис поддерживает загрузку изображений в форматах JPG, PNG и WebP. Рекомендуется использовать изображения высокого качества для лучшего результата генерации.",
   },
   {
     question: "Как получить поддержку?",
-    answer: "Если у вас возникли вопросы или проблемы, вы можете обратиться к нам через Telegram @wb_generator_support или написать на почту support@wbgenerator.ru"
-  }
+    answer:
+      "Если у вас возникли вопросы или проблемы, вы можете обратиться к нам через Telegram @wbgen_support или написать на почту info@wbgen.ru",
+  },
 ];
 
 const Learning = () => {
   const handleTelegramClick = () => {
-    window.open('https://t.me/wbgen_official/', '_blank');
+    window.open("https://t.me/wbgen_official/", "_blank");
   };
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-3xl font-bold mb-2">Обучение</h2>
-        <p className="text-muted-foreground">
-          Изучите все возможности WB Генератор с помощью наших видеоуроков
-        </p>
+        <p className="text-muted-foreground">Изучите все возможности WB Генератор с помощью наших видеоуроков</p>
       </div>
 
       {/* Telegram Group Promo */}
@@ -95,7 +99,7 @@ const Learning = () => {
                 </p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={handleTelegramClick}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300"
             >
@@ -109,7 +113,7 @@ const Learning = () => {
       {/* Video Lessons */}
       <div className="space-y-6">
         <h3 className="text-2xl font-semibold">Видеоуроки</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {videoLessons.map((lesson, index) => (
             <Card key={lesson.id} className="overflow-hidden bg-gray-50 border">
@@ -127,8 +131,8 @@ const Learning = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {lesson.embedCode.includes('<div') ? (
-                  <div 
+                {lesson.embedCode.includes("<div") ? (
+                  <div
                     className="rounded-lg overflow-hidden bg-black/5"
                     dangerouslySetInnerHTML={{ __html: lesson.embedCode }}
                   />
@@ -151,16 +155,12 @@ const Learning = () => {
           <HelpCircle className="w-6 h-6 text-wb-purple" />
           <h3 className="text-2xl font-semibold">Часто задаваемые вопросы</h3>
         </div>
-        
+
         <Accordion type="single" collapsible className="w-full">
           {faqItems.map((item, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
-                {item.answer}
-              </AccordionContent>
+              <AccordionTrigger className="text-left">{item.question}</AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed">{item.answer}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
