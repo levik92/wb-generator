@@ -933,7 +933,27 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       {/* Product Details */}
       <Card className="bg-muted/30">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+          {/* Mobile clear button - above title */}
+          <div className="flex justify-end mb-2 sm:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setFiles([]);
+                setProductName("");
+                setCategory("");
+                setDescription("");
+                setSelectedCards([0]);
+              }}
+              className="w-auto"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Очистить
+            </Button>
+          </div>
+          
+          {/* Desktop/Tablet layout */}
+          <div className="hidden sm:flex sm:items-start sm:justify-between gap-2">
             <div className="flex-1">
               <CardTitle>Информация о товаре</CardTitle>
               <CardDescription>
@@ -953,8 +973,16 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               className="shrink-0"
             >
               <X className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline">Очистить</span>
+              Очистить
             </Button>
+          </div>
+          
+          {/* Mobile title - below clear button */}
+          <div className="sm:hidden">
+            <CardTitle>Информация о товаре</CardTitle>
+            <CardDescription>
+              Укажите детали товара для генерации оптимальных карточек
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
