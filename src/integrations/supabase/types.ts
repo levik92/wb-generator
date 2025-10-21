@@ -421,6 +421,191 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_commissions: {
+        Row: {
+          commission_amount: number
+          commission_rate: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          partner_id: string
+          payment_amount: number
+          payment_id: string
+          referral_id: string
+          status: string
+        }
+        Insert: {
+          commission_amount: number
+          commission_rate: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          partner_id: string
+          payment_amount: number
+          payment_id: string
+          referral_id: string
+          status?: string
+        }
+        Update: {
+          commission_amount?: number
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          partner_id?: string
+          payment_amount?: number
+          payment_id?: string
+          referral_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "partner_referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_profiles: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          current_balance: number
+          id: string
+          invited_clients_count: number
+          partner_code: string
+          status: string
+          total_earned: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          current_balance?: number
+          id?: string
+          invited_clients_count?: number
+          partner_code: string
+          status?: string
+          total_earned?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          current_balance?: number
+          id?: string
+          invited_clients_count?: number
+          partner_code?: string
+          status?: string
+          total_earned?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      partner_referrals: {
+        Row: {
+          first_payment_at: string | null
+          id: string
+          partner_id: string
+          referred_user_id: string
+          registered_at: string
+          status: string
+          total_commission: number
+          total_payments: number
+        }
+        Insert: {
+          first_payment_at?: string | null
+          id?: string
+          partner_id: string
+          referred_user_id: string
+          registered_at?: string
+          status?: string
+          total_commission?: number
+          total_payments?: number
+        }
+        Update: {
+          first_payment_at?: string | null
+          id?: string
+          partner_id?: string
+          referred_user_id?: string
+          registered_at?: string
+          status?: string
+          total_commission?: number
+          total_payments?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_referrals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_withdrawals: {
+        Row: {
+          amount: number
+          id: string
+          notes: string | null
+          partner_id: string
+          payment_details: Json | null
+          payment_method: string | null
+          processed_at: string | null
+          requested_at: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          id?: string
+          notes?: string | null
+          partner_id: string
+          payment_details?: Json | null
+          payment_method?: string | null
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          notes?: string | null
+          partner_id?: string
+          payment_details?: Json | null
+          payment_method?: string | null
+          processed_at?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_withdrawals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_packages: {
         Row: {
           created_at: string
@@ -931,6 +1116,10 @@ export type Database = {
       check_admin_profile_access_rate: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      generate_partner_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_referral_code: {
         Args: Record<PropertyKey, never>

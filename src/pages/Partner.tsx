@@ -1,0 +1,395 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+
+interface PartnerProfile {
+  id: string;
+  partner_code: string;
+  status: string;
+  commission_rate: number;
+  total_earned: number;
+  current_balance: number;
+  invited_clients_count: number;
+}
+
+interface PartnerReferral {
+  id: string;
+  referred_user_id: string;
+  registered_at: string;
+  first_payment_at: string | null;
+  total_payments: number;
+  total_commission: number;
+  status: string;
+  profiles?: {
+    email: string;
+    full_name: string | null;
+  };
+}
+
+interface PartnerCommission {
+  id: string;
+  commission_amount: number;
+  payment_amount: number;
+  created_at: string;
+  status: string;
+}
+
+const Partner = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [partner, setPartner] = useState<PartnerProfile | null>(null);
+  const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
+  const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
+
+  useEffect(() => {
+    loadPartnerData();
+  }, []);
+
+  const loadPartnerData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/auth");
+        return;
+      }
+
+      // Загрузка профиля партнера
+      const { data: partnerData, error: partnerError } = await supabase
+        .from("partner_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (partnerError && partnerError.code !== "PGRST116") {
+        throw partnerError;
+      }
+
+      // Если партнера нет, создаем
+      if (!partnerData) {
+        const { data: codeData } = await supabase.rpc("generate_partner_code");
+        const { data: newPartner, error: createError } = await supabase
+          .from("partner_profiles")
+          .insert({
+            user_id: user.id,
+            partner_code: codeData,
+            status: "inactive"
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        setPartner(newPartner);
+      } else {
+        setPartner(partnerData);
+
+        // Загрузка рефералов
+        const { data: referralsData } = await supabase
+          .from("partner_referrals")
+          .select(`
+            *,
+            profiles:referred_user_id (email, full_name)
+          `)
+          .eq("partner_id", partnerData.id)
+          .order("registered_at", { ascending: false });
+
+        if (referralsData) setReferrals(referralsData as any);
+
+        // Загрузка комиссий
+        const { data: commissionsData } = await supabase
+          .from("partner_commissions")
+          .select("*")
+          .eq("partner_id", partnerData.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        if (commissionsData) setCommissions(commissionsData);
+      }
+    } catch (error) {
+      console.error("Error loading partner data:", error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить данные партнера",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyPartnerLink = () => {
+    const link = `${window.location.origin}/auth?partner=${partner?.partner_code}`;
+    navigator.clipboard.writeText(link);
+    toast({
+      title: "Скопировано",
+      description: "Партнерская ссылка скопирована в буфер обмена"
+    });
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
+  // График данных по дням
+  const chartData = commissions
+    .slice(0, 30)
+    .reverse()
+    .map((comm) => ({
+      date: new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }),
+      amount: parseFloat(comm.commission_amount.toString())
+    }));
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/dashboard")}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-semibold">Партнерская программа</h1>
+                <p className="text-sm text-muted-foreground">Зарабатывайте с каждым привлеченным клиентом</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Текущий баланс
+              </CardTitle>
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{partner?.current_balance || 0} ₽</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Всего заработано
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{partner?.total_earned || 0} ₽</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Приглашенные клиенты
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{partner?.invited_clients_count || 0}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Program Info */}
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <CardTitle>Базовый</CardTitle>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm text-muted-foreground">Статус партнера:</span>
+                  <Badge variant={partner?.status === "active" ? "default" : "secondary"}>
+                    {partner?.status === "active" ? "Активный" : "Не активный"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h3 className="text-2xl font-bold">{partner?.commission_rate}% в течение 12 месяцев</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                за каждый платеж клиента, приглашенного по реферальной ссылке
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
+                className="flex-1 bg-transparent border-none outline-none text-sm"
+              />
+              <Button size="icon" variant="ghost" onClick={copyPartnerLink}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {partner?.status === "inactive" && (
+              <div className="flex items-start gap-2 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-800">
+                  Партнерский статус станет активным после первого привлеченного платежа.
+                </p>
+              </div>
+            )}
+
+            <p className="text-sm text-muted-foreground">
+              Распространяя реферальную ссылку вы соглашаетесь с условиями:{" "}
+              <a
+                href="/partner-agreement"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Оферты партнерской реферальной программы
+              </a>
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Tabs: Graph & Referrals */}
+        <Tabs defaultValue="graph" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="graph">График выплат</TabsTrigger>
+            <TabsTrigger value="referrals">Рефералы</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="graph" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Динамика комиссий</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="hsl(var(--primary))"
+                        fillOpacity={1}
+                        fill="url(#colorAmount)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    Нет данных для отображения
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="referrals" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Приглашенные клиенты</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {referrals.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Имя</TableHead>
+                          <TableHead>Дата регистрации</TableHead>
+                          <TableHead>Сумма платежей</TableHead>
+                          <TableHead>Ваша комиссия</TableHead>
+                          <TableHead>Статус</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {referrals.map((ref) => (
+                          <TableRow key={ref.id}>
+                            <TableCell>{ref.profiles?.email || "—"}</TableCell>
+                            <TableCell>{ref.profiles?.full_name || "—"}</TableCell>
+                            <TableCell>
+                              {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
+                            </TableCell>
+                            <TableCell>{ref.total_payments} ₽</TableCell>
+                            <TableCell className="font-semibold">{ref.total_commission} ₽</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  ref.status === "active"
+                                    ? "default"
+                                    : ref.status === "registered"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                              >
+                                {ref.status === "active"
+                                  ? "Активен"
+                                  : ref.status === "registered"
+                                  ? "Зарегистрирован"
+                                  : "Неактивен"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Пока нет приглашенных клиентов</p>
+                    <p className="text-sm mt-2">Поделитесь своей партнерской ссылкой</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+};
+
+export default Partner;

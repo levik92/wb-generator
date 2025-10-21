@@ -33,6 +33,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get("ref");
+  const partnerCode = searchParams.get("partner");
   const tabParam = searchParams.get("tab");
 
   useEffect(() => {
@@ -160,6 +161,15 @@ const Auth = () => {
         console.log("Adding referral code to signup:", referralCode);
         signupOptions.data = {
           referral_code: referralCode,
+        };
+      }
+
+      // Add partner code if present
+      if (partnerCode) {
+        console.log("Adding partner code to signup:", partnerCode);
+        signupOptions.data = {
+          ...signupOptions.data,
+          partner_code: partnerCode,
         };
       }
 
@@ -397,6 +407,16 @@ const Auth = () => {
         };
       }
 
+      // Add partner code if present (only for signup)
+      if (activeTab === "signup" && partnerCode) {
+        options.options = {
+          data: {
+            ...options.options?.data,
+            partner_code: partnerCode,
+          },
+        };
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         ...options,
@@ -443,6 +463,11 @@ const Auth = () => {
                 <>
                   <Gift className="w-4 h-4 inline mr-2" />
                   🎉 35 токенов при регистрации (25 + 10 по реферальной программе)
+                </>
+              ) : partnerCode ? (
+                <>
+                  <Gift className="w-4 h-4 inline mr-2" />
+                  🎉 25 токенов при регистрации по партнерской ссылке
                 </>
               ) : (
                 "🎉 25 токенов бесплатно при регистрации"

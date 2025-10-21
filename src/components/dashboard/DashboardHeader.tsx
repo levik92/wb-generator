@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, UserIcon, Bell, Check, X } from "lucide-react";
+import { LogOut, User, UserIcon, Bell, Check, X, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -201,6 +201,10 @@ export const DashboardHeader = ({ profile, onSignOut, onNavigateToSettings }: Da
               <DropdownMenuItem className="hover:bg-wb-purple/10" onClick={onNavigateToSettings}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Профиль</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-wb-purple/10" onClick={() => window.location.href = '/partner'}>
+                <Users className="mr-2 h-4 w-4" />
+                <span>Партнерам</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onSignOut} className="hover:bg-wb-purple/10">

@@ -33,6 +33,11 @@ const Footer = () => {
                   Договор оферты
                 </Link>
               </li>
+              <li>
+                <Link to="/partner" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Партнерам
+                </Link>
+              </li>
             </ul>
           </div>
 
