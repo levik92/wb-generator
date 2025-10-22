@@ -281,14 +281,14 @@ const Partner = () => {
             )}
 
             <p className="text-sm text-muted-foreground">
-              Распространяя реферальную ссылку вы соглашаетесь с условиями:{" "}
+              Распространяя партнерскую ссылку вы соглашаетесь с условиями{" "}
               <a
                 href="/partner-agreement"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                Оферты партнерской реферальной программы
+                Оферты партнерской программы
               </a>
             </p>
           </CardContent>
