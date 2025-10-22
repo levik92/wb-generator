@@ -185,7 +185,8 @@ const Partner = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="flex-1 bg-gray-50 dark:bg-gray-900/30">
+        <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
@@ -398,6 +399,7 @@ const Partner = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </main>
     </div>
   );
