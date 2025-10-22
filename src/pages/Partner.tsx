@@ -247,14 +247,14 @@ const Partner = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-background to-muted border-2 border-primary/20 shadow-sm hover:border-primary/40 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
               <input
                 type="text"
                 readOnly
                 value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
-                className="flex-1 bg-transparent border-none outline-none text-sm font-medium"
+                className="flex-1 bg-transparent border-none outline-none text-sm"
               />
-              <Button size="icon" variant="ghost" onClick={copyPartnerLink} className="hover:bg-primary/10 hover:text-primary transition-colors">
+              <Button size="icon" variant="ghost" onClick={copyPartnerLink}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
