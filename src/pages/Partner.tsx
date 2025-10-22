@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle } from "lucide-react";
+import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 interface PartnerProfile {
   id: string;
@@ -247,16 +248,26 @@ const Partner = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
-              <input
-                type="text"
-                readOnly
-                value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
-                className="flex-1 bg-transparent border-none outline-none text-sm"
-              />
-              <Button size="icon" variant="ghost" onClick={copyPartnerLink}>
-                <Copy className="h-4 w-4" />
-              </Button>
+            <div className="bg-muted/30 border border-muted rounded-[12px] p-6 shadow-sm">
+              <h3 className="font-medium mb-4 text-foreground flex items-center gap-2">
+                <Link2 className="h-4 w-4" />
+                Ваша партнерская ссылка:
+              </h3>
+              <div className="flex gap-2">
+                <Input
+                  value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
+                  readOnly
+                  className="flex-1 bg-background/80"
+                />
+                <Button
+                  onClick={copyPartnerLink}
+                  variant="outline"
+                  className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Копировать
+                </Button>
+              </div>
             </div>
 
             {partner?.status === "inactive" && (
