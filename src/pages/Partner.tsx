@@ -185,11 +185,11 @@ const Partner = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 bg-gray-50 dark:bg-gray-900/30">
+      <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
+          <Card className="bg-muted/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Текущий баланс
@@ -201,7 +201,7 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-muted/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Всего заработано
@@ -213,7 +213,7 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-muted/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Приглашенные клиенты
@@ -227,7 +227,7 @@ const Partner = () => {
         </div>
 
         {/* Program Info */}
-        <Card>
+        <Card className="bg-muted/30">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -302,7 +302,7 @@ const Partner = () => {
           </TabsList>
 
           <TabsContent value="graph" className="space-y-4">
-            <Card>
+            <Card className="bg-muted/30">
               <CardHeader>
                 <CardTitle>Динамика комиссий</CardTitle>
               </CardHeader>
@@ -338,7 +338,7 @@ const Partner = () => {
           </TabsContent>
 
           <TabsContent value="referrals" className="space-y-4">
-            <Card>
+            <Card className="bg-muted/30">
               <CardHeader>
                 <CardTitle>Приглашенные клиенты</CardTitle>
               </CardHeader>
