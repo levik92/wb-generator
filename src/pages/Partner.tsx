@@ -4,12 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle, Link2 } from "lucide-react";
+import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 
 interface PartnerProfile {
   id: string;
@@ -57,7 +56,9 @@ const Partner = () => {
 
   const loadPartnerData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         navigate("/auth");
         return;
@@ -82,7 +83,7 @@ const Partner = () => {
           .insert({
             user_id: user.id,
             partner_code: codeData,
-            status: "inactive"
+            status: "inactive",
           })
           .select()
           .single();
@@ -95,10 +96,12 @@ const Partner = () => {
         // Загрузка рефералов
         const { data: referralsData } = await supabase
           .from("partner_referrals")
-          .select(`
+          .select(
+            `
             *,
             profiles:referred_user_id (email, full_name)
-          `)
+          `,
+          )
           .eq("partner_id", partnerData.id)
           .order("registered_at", { ascending: false });
 
@@ -119,7 +122,7 @@ const Partner = () => {
       toast({
         title: "Ошибка",
         description: "Не удалось загрузить данные партнера",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -131,7 +134,7 @@ const Partner = () => {
     navigator.clipboard.writeText(link);
     toast({
       title: "Скопировано",
-      description: "Партнерская ссылка скопирована в буфер обмена"
+      description: "Партнерская ссылка скопирована в буфер обмена",
     });
   };
 
@@ -146,7 +149,7 @@ const Partner = () => {
     .reverse()
     .map((comm) => ({
       date: new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }),
-      amount: parseFloat(comm.commission_amount.toString())
+      amount: parseFloat(comm.commission_amount.toString()),
     }));
 
   if (loading) {
@@ -164,12 +167,7 @@ const Partner = () => {
         <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/dashboard")}
-                className="shrink-0"
-              >
+              <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="shrink-0">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -185,15 +183,12 @@ const Partner = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
-        <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-muted/30">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Текущий баланс
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Текущий баланс</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -201,11 +196,9 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/30">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Всего заработано
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Всего заработано</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -213,11 +206,9 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/30">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Приглашенные клиенты
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Приглашенные клиенты</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -227,7 +218,7 @@ const Partner = () => {
         </div>
 
         {/* Program Info */}
-        <Card className="bg-muted/30">
+        <Card>
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -249,26 +240,16 @@ const Partner = () => {
               </p>
             </div>
 
-            <div className="bg-muted/30 border border-muted rounded-[12px] p-6 shadow-sm">
-              <h3 className="font-medium mb-4 text-foreground flex items-center gap-2">
-                <Link2 className="h-4 w-4" />
-                Ваша партнерская ссылка:
-              </h3>
-              <div className="flex gap-2">
-                <Input
-                  value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
-                  readOnly
-                  className="flex-1 bg-background/80"
-                />
-                <Button
-                  onClick={copyPartnerLink}
-                  variant="outline"
-                  className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Копировать
-                </Button>
-              </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
+                className="flex-1 bg-transparent border-none outline-none text-sm"
+              />
+              <Button size="icon" variant="ghost" onClick={copyPartnerLink}>
+                <Copy className="h-4 w-4" />
+              </Button>
             </div>
 
             {partner?.status === "inactive" && (
@@ -281,14 +262,14 @@ const Partner = () => {
             )}
 
             <p className="text-sm text-muted-foreground">
-              Распространяя реферальную ссылку вы соглашаетесь с условиями:{" "}
+              Распространяя партнерскую ссылку вы соглашаетесь с условиями:{" "}
               <a
                 href="/partner-agreement"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                Оферты партнерской реферальной программы
+                Оферты партнерской программы
               </a>
             </p>
           </CardContent>
@@ -302,7 +283,7 @@ const Partner = () => {
           </TabsList>
 
           <TabsContent value="graph" className="space-y-4">
-            <Card className="bg-muted/30">
+            <Card>
               <CardHeader>
                 <CardTitle>Динамика комиссий</CardTitle>
               </CardHeader>
@@ -338,7 +319,7 @@ const Partner = () => {
           </TabsContent>
 
           <TabsContent value="referrals" className="space-y-4">
-            <Card className="bg-muted/30">
+            <Card>
               <CardHeader>
                 <CardTitle>Приглашенные клиенты</CardTitle>
               </CardHeader>
@@ -361,9 +342,7 @@ const Partner = () => {
                           <TableRow key={ref.id}>
                             <TableCell>{ref.profiles?.email || "—"}</TableCell>
                             <TableCell>{ref.profiles?.full_name || "—"}</TableCell>
-                            <TableCell>
-                              {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
-                            </TableCell>
+                            <TableCell>{new Date(ref.registered_at).toLocaleDateString("ru-RU")}</TableCell>
                             <TableCell>{ref.total_payments} ₽</TableCell>
                             <TableCell className="font-semibold">{ref.total_commission} ₽</TableCell>
                             <TableCell>
@@ -372,15 +351,15 @@ const Partner = () => {
                                   ref.status === "active"
                                     ? "default"
                                     : ref.status === "registered"
-                                    ? "secondary"
-                                    : "outline"
+                                      ? "secondary"
+                                      : "outline"
                                 }
                               >
                                 {ref.status === "active"
                                   ? "Активен"
                                   : ref.status === "registered"
-                                  ? "Зарегистрирован"
-                                  : "Неактивен"}
+                                    ? "Зарегистрирован"
+                                    : "Неактивен"}
                               </Badge>
                             </TableCell>
                           </TableRow>
@@ -399,7 +378,6 @@ const Partner = () => {
             </Card>
           </TabsContent>
         </Tabs>
-        </div>
       </main>
     </div>
   );
