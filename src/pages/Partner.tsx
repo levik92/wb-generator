@@ -252,23 +252,49 @@ const Partner = () => {
         {/* Charts with Date Range */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
                   <CardTitle className="text-base font-medium">Всего заработано</CardTitle>
                 </div>
-                <Select value={earningsDateRange} onValueChange={setEarningsDateRange}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 дней</SelectItem>
-                    <SelectItem value="30">30 дней</SelectItem>
-                    <SelectItem value="90">90 дней</SelectItem>
-                    <SelectItem value="365">Год</SelectItem>
-                  </SelectContent>
-                </Select>
+              </div>
+              <div className="flex items-end justify-between">
+                <div className="text-4xl font-bold">{partner?.total_earned || 0}</div>
+                <div className="flex gap-1">
+                  <Button
+                    variant={earningsDateRange === "7" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setEarningsDateRange("7")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    7д
+                  </Button>
+                  <Button
+                    variant={earningsDateRange === "30" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setEarningsDateRange("30")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    30д
+                  </Button>
+                  <Button
+                    variant={earningsDateRange === "90" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setEarningsDateRange("90")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    3м
+                  </Button>
+                  <Button
+                    variant={earningsDateRange === "365" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setEarningsDateRange("365")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    1г
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -287,11 +313,15 @@ const Partner = () => {
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={11}
                       tickMargin={8}
+                      axisLine={false}
+                      tickLine={false}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={11}
                       tickMargin={8}
+                      axisLine={false}
+                      tickLine={false}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -319,23 +349,49 @@ const Partner = () => {
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-chart-2" />
+                  <Users className="h-5 w-5 text-muted-foreground" />
                   <CardTitle className="text-base font-medium">Приглашенные клиенты</CardTitle>
                 </div>
-                <Select value={clientsDateRange} onValueChange={setClientsDateRange}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 дней</SelectItem>
-                    <SelectItem value="30">30 дней</SelectItem>
-                    <SelectItem value="90">90 дней</SelectItem>
-                    <SelectItem value="365">Год</SelectItem>
-                  </SelectContent>
-                </Select>
+              </div>
+              <div className="flex items-end justify-between">
+                <div className="text-4xl font-bold">{partner?.invited_clients_count || 0}</div>
+                <div className="flex gap-1">
+                  <Button
+                    variant={clientsDateRange === "7" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setClientsDateRange("7")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    7д
+                  </Button>
+                  <Button
+                    variant={clientsDateRange === "30" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setClientsDateRange("30")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    30д
+                  </Button>
+                  <Button
+                    variant={clientsDateRange === "90" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setClientsDateRange("90")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    3м
+                  </Button>
+                  <Button
+                    variant={clientsDateRange === "365" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setClientsDateRange("365")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    1г
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -354,11 +410,15 @@ const Partner = () => {
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={11}
                       tickMargin={8}
+                      axisLine={false}
+                      tickLine={false}
                     />
                     <YAxis 
                       stroke="hsl(var(--muted-foreground))" 
                       fontSize={11}
                       tickMargin={8}
+                      axisLine={false}
+                      tickLine={false}
                     />
                     <Tooltip 
                       contentStyle={{
