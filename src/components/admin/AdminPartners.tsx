@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PartnerData {
   id: string;
@@ -25,6 +26,7 @@ interface PartnerData {
 
 export const AdminPartners = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [partners, setPartners] = useState<PartnerData[]>([]);
   const [selectedPartner, setSelectedPartner] = useState<PartnerData | null>(null);
@@ -204,65 +206,120 @@ export const AdminPartners = () => {
           <CardTitle>Активные партнеры</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Код</TableHead>
-                  <TableHead>Клиентов</TableHead>
-                  <TableHead>Заработано</TableHead>
-                  <TableHead>Баланс</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {partners.map((partner) => (
-                  <TableRow key={partner.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {partner.has_pending_withdrawal && (
-                          <AlertCircle className="h-4 w-4 text-orange-500" />
-                        )}
-                        {partner.user_email}
+          {isMobile ? (
+            <div className="space-y-4">
+              {partners.map((partner) => (
+                <Card key={partner.id} className="bg-muted/30">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          {partner.has_pending_withdrawal && (
+                            <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />
+                          )}
+                          <p className="font-medium text-sm truncate">{partner.user_email}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Код: {partner.partner_code}</p>
                       </div>
-                    </TableCell>
-                    <TableCell>{partner.partner_code}</TableCell>
-                    <TableCell>{partner.invited_clients_count}</TableCell>
-                    <TableCell>{partner.total_earned.toLocaleString()} ₽</TableCell>
-                    <TableCell className="font-semibold">
-                      {partner.current_balance.toLocaleString()} ₽
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={partner.has_pending_withdrawal ? "destructive" : "default"}>
-                        {partner.has_pending_withdrawal
-                          ? `Запрос ${partner.pending_amount?.toLocaleString()} ₽`
-                          : "Активен"}
+                      <Badge variant={partner.has_pending_withdrawal ? "destructive" : "default"} className="shrink-0">
+                        {partner.has_pending_withdrawal ? "Запрос" : "Активен"}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => loadPartnerDetails(partner)}
-                      >
-                        Детали
-                      </Button>
-                    </TableCell>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Клиентов</p>
+                        <p className="font-semibold">{partner.invited_clients_count}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Заработано</p>
+                        <p className="font-semibold">{partner.total_earned.toLocaleString()} ₽</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Баланс</p>
+                        <p className="font-semibold text-primary">{partner.current_balance.toLocaleString()} ₽</p>
+                      </div>
+                      {partner.has_pending_withdrawal && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">К выплате</p>
+                          <p className="font-semibold text-orange-600">{partner.pending_amount?.toLocaleString()} ₽</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => loadPartnerDetails(partner)}
+                    >
+                      Подробнее
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Код</TableHead>
+                    <TableHead>Клиентов</TableHead>
+                    <TableHead>Заработано</TableHead>
+                    <TableHead>Баланс</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Действия</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {partners.map((partner) => (
+                    <TableRow key={partner.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {partner.has_pending_withdrawal && (
+                            <AlertCircle className="h-4 w-4 text-orange-500" />
+                          )}
+                          {partner.user_email}
+                        </div>
+                      </TableCell>
+                      <TableCell>{partner.partner_code}</TableCell>
+                      <TableCell>{partner.invited_clients_count}</TableCell>
+                      <TableCell>{partner.total_earned.toLocaleString()} ₽</TableCell>
+                      <TableCell className="font-semibold">
+                        {partner.current_balance.toLocaleString()} ₽
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={partner.has_pending_withdrawal ? "destructive" : "default"}>
+                          {partner.has_pending_withdrawal
+                            ? `Запрос ${partner.pending_amount?.toLocaleString()} ₽`
+                            : "Активен"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => loadPartnerDetails(partner)}
+                        >
+                          Детали
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Partner Details Dialog */}
       <Dialog open={!!selectedPartner} onOpenChange={() => setSelectedPartner(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">
               Партнер: {selectedPartner?.user_email}
             </DialogTitle>
           </DialogHeader>
@@ -274,78 +331,128 @@ export const AdminPartners = () => {
           ) : (
             <div className="space-y-6">
               {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Клиентов</p>
-                  <p className="text-2xl font-bold">{selectedPartner?.invited_clients_count}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Клиентов</p>
+                  <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.invited_clients_count}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Заработано</p>
-                  <p className="text-2xl font-bold">{selectedPartner?.total_earned.toLocaleString()} ₽</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Заработано</p>
+                  <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.total_earned.toLocaleString()} ₽</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Баланс</p>
-                  <p className="text-2xl font-bold">{selectedPartner?.current_balance.toLocaleString()} ₽</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Баланс</p>
+                  <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.current_balance.toLocaleString()} ₽</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Ставка</p>
-                  <p className="text-2xl font-bold">{selectedPartner?.commission_rate}%</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Ставка</p>
+                  <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.commission_rate}%</p>
                 </div>
               </div>
 
               {/* Withdrawals */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">История выплат</h3>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Дата запроса</TableHead>
-                      <TableHead>Сумма</TableHead>
-                      <TableHead>Статус</TableHead>
-                      <TableHead>Действия</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <h3 className="text-base sm:text-lg font-semibold mb-4">История выплат</h3>
+                {isMobile ? (
+                  <div className="space-y-3">
                     {withdrawals.map((withdrawal) => (
-                      <TableRow key={withdrawal.id}>
-                        <TableCell>
-                          {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU")}
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {withdrawal.amount.toLocaleString()} ₽
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              withdrawal.status === "completed"
-                                ? "default"
+                      <Card key={withdrawal.id} className="bg-muted/30">
+                        <CardContent className="p-3 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Дата запроса</p>
+                              <p className="text-sm font-medium">
+                                {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU")}
+                              </p>
+                            </div>
+                            <Badge
+                              variant={
+                                withdrawal.status === "completed"
+                                  ? "default"
+                                  : withdrawal.status === "processing"
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {withdrawal.status === "completed"
+                                ? "Выплачено"
                                 : withdrawal.status === "processing"
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {withdrawal.status === "completed"
-                              ? "Выплачено"
-                              : withdrawal.status === "processing"
-                              ? "В обработке"
-                              : "Ожидает"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
+                                ? "В обработке"
+                                : "Ожидает"}
+                            </Badge>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Сумма</p>
+                            <p className="text-lg font-bold">{withdrawal.amount.toLocaleString()} ₽</p>
+                          </div>
                           {withdrawal.status === "processing" && (
                             <Button
                               size="sm"
+                              className="w-full"
                               onClick={() => handleApproveWithdrawal(withdrawal.id)}
                             >
                               <Check className="h-4 w-4 mr-2" />
                               Подтвердить
                             </Button>
                           )}
-                        </TableCell>
-                      </TableRow>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Дата запроса</TableHead>
+                          <TableHead>Сумма</TableHead>
+                          <TableHead>Статус</TableHead>
+                          <TableHead>Действия</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {withdrawals.map((withdrawal) => (
+                          <TableRow key={withdrawal.id}>
+                            <TableCell>
+                              {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU")}
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              {withdrawal.amount.toLocaleString()} ₽
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  withdrawal.status === "completed"
+                                    ? "default"
+                                    : withdrawal.status === "processing"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                              >
+                                {withdrawal.status === "completed"
+                                  ? "Выплачено"
+                                  : withdrawal.status === "processing"
+                                  ? "В обработке"
+                                  : "Ожидает"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {withdrawal.status === "processing" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApproveWithdrawal(withdrawal.id)}
+                                >
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Подтвердить
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </div>
             </div>
           )}
