@@ -13,7 +13,8 @@ import {
   Settings,
   Tags,
   Newspaper,
-  GraduationCap
+  GraduationCap,
+  Video
 } from "lucide-react";
 
 interface Profile {
@@ -81,9 +82,9 @@ export const MobileMenu = ({ activeTab, onTabChange, profile, hasUnreadNews = fa
       icon: GraduationCap,
     },
     {
-      id: 'ai-answers',
-      label: 'AI Ответы',
-      icon: FileText,
+      id: 'video-cards',
+      label: 'Видео для карточек',
+      icon: Video,
       disabled: true,
       badge: 'Скоро'
     },

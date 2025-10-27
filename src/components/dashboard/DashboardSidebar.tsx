@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Tags,
   Newspaper,
-  GraduationCap
+  GraduationCap,
+  Video
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,9 +119,9 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       icon: GraduationCap,
     },
     {
-      id: 'ai-answers',
-      label: 'AI Ответы',
-      icon: FileText,
+      id: 'video-cards',
+      label: 'Видео для карточек',
+      icon: Video,
       disabled: true,
       badge: 'Скоро'
     },
