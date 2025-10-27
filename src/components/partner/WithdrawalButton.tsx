@@ -80,7 +80,7 @@ export const WithdrawalButton = ({
         onClick={handleWithdraw}
         disabled={!canWithdraw || loading}
         size="sm"
-        className="order-1 sm:order-2 sm:ml-auto"
+        className="w-full sm:w-auto sm:ml-auto"
       >
         Вывести средства
       </Button>

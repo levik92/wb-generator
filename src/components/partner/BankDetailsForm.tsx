@@ -205,7 +205,7 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
         </CardContent>
       </Card>
 
-      <div className="bg-blue-50 rounded-lg p-6 flex items-center gap-4">
+      <div className="bg-blue-50 rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-shrink-0">
           <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center">
             <ExternalLink className="h-6 w-6 text-white" />
@@ -213,18 +213,19 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-blue-900 mb-1">
-            Подписывайтесь на нашу группу в Telegram
+            Есть вопросы?
           </h3>
           <p className="text-sm text-blue-700">
-            Получайте последние новости, обновления и полезные советы по работе с сервисом
+            Напишите в поддержку, поможем вам
           </p>
         </div>
         <Button
           onClick={() => window.open("https://t.me/your_support_bot", "_blank")}
-          className="bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0"
+          className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto flex-shrink-0"
+          size="sm"
         >
           <ExternalLink className="h-4 w-4 mr-2" />
-          Присоединиться
+          Написать
         </Button>
       </div>
     </div>
