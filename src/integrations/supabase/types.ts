@@ -69,7 +69,7 @@ export type Database = {
           created_at: string | null
           error_message: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           key_id: string
           metadata: Json | null
           success: boolean
@@ -82,7 +82,7 @@ export type Database = {
           created_at?: string | null
           error_message?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           key_id: string
           metadata?: Json | null
           success?: boolean
@@ -95,7 +95,7 @@ export type Database = {
           created_at?: string | null
           error_message?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           key_id?: string
           metadata?: Json | null
           success?: boolean
@@ -118,7 +118,7 @@ export type Database = {
           admin_user_id: string | null
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           resource_id: string | null
@@ -130,7 +130,7 @@ export type Database = {
           admin_user_id?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           resource_id?: string | null
@@ -142,7 +142,7 @@ export type Database = {
           admin_user_id?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           resource_id?: string | null
@@ -421,6 +421,47 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_bank_details: {
+        Row: {
+          bank_name: string
+          card_number: string
+          created_at: string
+          full_name: string
+          id: string
+          partner_id: string
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          bank_name: string
+          card_number: string
+          created_at?: string
+          full_name: string
+          id?: string
+          partner_id: string
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          bank_name?: string
+          card_number?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          partner_id?: string
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_bank_details_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: true
+            referencedRelation: "partner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_commissions: {
         Row: {
           commission_amount: number
@@ -565,6 +606,7 @@ export type Database = {
       partner_withdrawals: {
         Row: {
           amount: number
+          bank_details_snapshot: Json | null
           id: string
           notes: string | null
           partner_id: string
@@ -576,6 +618,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          bank_details_snapshot?: Json | null
           id?: string
           notes?: string | null
           partner_id: string
@@ -587,6 +630,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          bank_details_snapshot?: Json | null
           id?: string
           notes?: string | null
           partner_id?: string
@@ -698,7 +742,7 @@ export type Database = {
           created_at: string | null
           fields_accessed: string[] | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
         }
         Insert: {
@@ -709,7 +753,7 @@ export type Database = {
           created_at?: string | null
           fields_accessed?: string[] | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
         }
         Update: {
@@ -720,7 +764,7 @@ export type Database = {
           created_at?: string | null
           fields_accessed?: string[] | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
         }
         Relationships: []
@@ -929,7 +973,7 @@ export type Database = {
           event_description: string
           event_type: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           user_agent: string | null
           user_id: string | null
@@ -939,7 +983,7 @@ export type Database = {
           event_description: string
           event_type: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           user_agent?: string | null
           user_id?: string | null
@@ -949,7 +993,7 @@ export type Database = {
           event_description?: string
           event_type?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           user_agent?: string | null
           user_id?: string | null
@@ -1074,7 +1118,7 @@ export type Database = {
     }
     Functions: {
       admin_get_all_users: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
@@ -1113,18 +1157,9 @@ export type Database = {
         Args: { payment_user_id: string }
         Returns: boolean
       }
-      check_admin_profile_access_rate: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      generate_partner_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      check_admin_profile_access_rate: { Args: never; Returns: boolean }
+      generate_partner_code: { Args: never; Returns: string }
+      generate_referral_code: { Args: never; Returns: string }
       get_payment_summary: {
         Args: { payment_ids: string[] }
         Returns: {
@@ -1152,10 +1187,7 @@ export type Database = {
         Args: { provider_name: string }
         Returns: string
       }
-      has_active_api_key: {
-        Args: { provider_name: string }
-        Returns: boolean
-      }
+      has_active_api_key: { Args: { provider_name: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1211,18 +1243,12 @@ export type Database = {
         Args: { api_key: string; provider_name: string }
         Returns: boolean
       }
-      track_api_key_access: {
-        Args: { key_id: string }
-        Returns: undefined
-      }
+      track_api_key_access: { Args: { key_id: string }; Returns: undefined }
       update_job_progress: {
         Args: { job_id_param: string }
         Returns: undefined
       }
-      use_promocode: {
-        Args: { code_param: string }
-        Returns: Json
-      }
+      use_promocode: { Args: { code_param: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user"

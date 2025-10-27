@@ -9,7 +9,8 @@ import {
   Users, 
   FileText, 
   Gift, 
-  Megaphone 
+  Megaphone,
+  Handshake
 } from "lucide-react";
 
 interface AdminMobileMenuProps {
@@ -30,6 +31,13 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
       id: 'users',
       label: 'Пользователи',
       icon: Users,
+    },
+    {
+      id: 'partners',
+      label: 'Партнеры',
+      icon: Handshake,
+      isLink: true,
+      path: '/admin/partners'
     },
     {
       id: 'prompts',
@@ -94,6 +102,22 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
+                
+                if (item.isLink && item.path) {
+                  return (
+                    <div key={item.id} className="relative">
+                      <a href={item.path} onClick={() => setIsOpen(false)}>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-left"
+                        >
+                          <Icon className="w-4 h-4 mr-3" />
+                          {item.label}
+                        </Button>
+                      </a>
+                    </div>
+                  );
+                }
                 
                 return (
                   <div key={item.id} className="relative">

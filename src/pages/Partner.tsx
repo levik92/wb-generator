@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Bar, BarChart, CartesianGrid, Legend } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BankDetailsForm } from "@/components/partner/BankDetailsForm";
+import { WithdrawalButton } from "@/components/partner/WithdrawalButton";
 
 interface PartnerProfile {
   id: string;
@@ -50,6 +53,9 @@ const Partner = () => {
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
   const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
+  const [hasBankDetails, setHasBankDetails] = useState(false);
+  const [dateRange, setDateRange] = useState("30"); // days
+  const [statsDateRange, setStatsDateRange] = useState("30");
 
   useEffect(() => {
     loadPartnerData();
@@ -140,14 +146,48 @@ const Partner = () => {
     navigate("/");
   };
 
-  // График данных по дням
-  const chartData = commissions
-    .slice(0, 30)
+  // График данных по дням для комиссий
+  const getFilteredCommissions = (days: number) => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    return commissions.filter(c => new Date(c.created_at) >= cutoffDate);
+  };
+
+  const commissionsChartData = getFilteredCommissions(parseInt(dateRange))
     .reverse()
     .map((comm) => ({
       date: new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }),
       amount: parseFloat(comm.commission_amount.toString())
     }));
+
+  // График заработка по дням
+  const getEarningsChartData = (days: number) => {
+    const filtered = getFilteredCommissions(days);
+    const grouped: { [key: string]: number } = {};
+    
+    filtered.forEach(comm => {
+      const date = new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
+      grouped[date] = (grouped[date] || 0) + parseFloat(comm.commission_amount.toString());
+    });
+
+    return Object.entries(grouped).map(([date, amount]) => ({ date, amount }));
+  };
+
+  // График рефералов по дням
+  const getReferralsChartData = (days: number) => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    const filtered = referrals.filter(r => new Date(r.registered_at) >= cutoffDate);
+    
+    const grouped: { [key: string]: number } = {};
+    
+    filtered.forEach(ref => {
+      const date = new Date(ref.registered_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
+      grouped[date] = (grouped[date] || 0) + 1;
+    });
+
+    return Object.entries(grouped).map(([date, count]) => ({ date, count }));
+  };
 
   if (loading) {
     return (
@@ -187,19 +227,29 @@ const Partner = () => {
       {/* Main Content */}
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Balance Card - Full Width */}
+        <Card className="bg-muted/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Текущий баланс
+            </CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-4xl font-bold">{partner?.current_balance || 0} ₽</div>
+            {partner && (
+              <WithdrawalButton
+                balance={partner.current_balance}
+                partnerId={partner.id}
+                hasBankDetails={hasBankDetails}
+                onSuccess={loadPartnerData}
+              />
+            )}
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-muted/30">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Текущий баланс
-              </CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{partner?.current_balance || 0} ₽</div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <Card className="bg-muted/30">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -294,28 +344,118 @@ const Partner = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs: Graph & Referrals */}
-        <Tabs defaultValue="graph" className="space-y-4">
+        {/* Charts with Date Range */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="bg-muted/30">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Всего заработано</CardTitle>
+                <Select value={statsDateRange} onValueChange={setStatsDateRange}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 дней</SelectItem>
+                    <SelectItem value="30">30 дней</SelectItem>
+                    <SelectItem value="90">90 дней</SelectItem>
+                    <SelectItem value="365">Год</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getEarningsChartData(parseInt(statsDateRange)).length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={getEarningsChartData(parseInt(statsDateRange))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="amount" fill="hsl(var(--primary))" name="Заработано (₽)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Нет данных для отображения
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-muted/30">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Приглашенные клиенты</CardTitle>
+                <Select value={statsDateRange} onValueChange={setStatsDateRange}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 дней</SelectItem>
+                    <SelectItem value="30">30 дней</SelectItem>
+                    <SelectItem value="90">90 дней</SelectItem>
+                    <SelectItem value="365">Год</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getReferralsChartData(parseInt(statsDateRange)).length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={getReferralsChartData(parseInt(statsDateRange))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="hsl(var(--chart-2))" name="Новые клиенты" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Нет данных для отображения
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs: Commissions & Referrals */}
+        <Tabs defaultValue="commissions" className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="graph">График выплат</TabsTrigger>
+            <TabsTrigger value="commissions">История комиссий</TabsTrigger>
             <TabsTrigger value="referrals">Рефералы</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="graph" className="space-y-4">
+          <TabsContent value="commissions" className="space-y-4">
             <Card className="bg-muted/30">
               <CardHeader>
-                <CardTitle>Динамика комиссий</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Динамика комиссий</CardTitle>
+                  <Select value={dateRange} onValueChange={setDateRange}>
+                    <SelectTrigger className="w-[130px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7">7 дней</SelectItem>
+                      <SelectItem value="30">30 дней</SelectItem>
+                      <SelectItem value="90">90 дней</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardHeader>
               <CardContent>
-                {chartData.length > 0 ? (
+                {commissionsChartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={chartData}>
+                    <AreaChart data={commissionsChartData}>
                       <defs>
                         <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
                           <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                         </linearGradient>
                       </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
                       <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                       <Tooltip />
@@ -399,6 +539,9 @@ const Partner = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Bank Details */}
+        {partner && <BankDetailsForm partnerId={partner.id} />}
         </div>
       </main>
     </div>
