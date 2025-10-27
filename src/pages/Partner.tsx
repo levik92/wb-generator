@@ -269,7 +269,7 @@ const Partner = () => {
                 </div>
               </div>
               <div className="flex items-end justify-between">
-                <div className="text-4xl font-bold">{partner?.total_earned || 0}</div>
+                <div className="text-4xl font-bold">{partner?.total_earned || 0} ₽</div>
                 <div className="flex gap-1">
                   <Button
                     variant={earningsDateRange === "7" ? "default" : "ghost"}
