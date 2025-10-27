@@ -79,8 +79,7 @@ export const WithdrawalButton = ({
       <Button
         onClick={handleWithdraw}
         disabled={!canWithdraw || loading}
-        className="w-full"
-        size="lg"
+        size="sm"
       >
         Вывести средства
       </Button>

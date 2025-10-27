@@ -236,16 +236,18 @@ const Partner = () => {
             </CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-4xl font-bold">{partner?.current_balance || 0} ₽</div>
-            {partner && (
-              <WithdrawalButton
-                balance={partner.current_balance}
-                partnerId={partner.id}
-                hasBankDetails={hasBankDetails}
-                onSuccess={loadPartnerData}
-              />
-            )}
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-4xl font-bold">{partner?.current_balance || 0} ₽</div>
+              {partner && (
+                <WithdrawalButton
+                  balance={partner.current_balance}
+                  partnerId={partner.id}
+                  hasBankDetails={hasBankDetails}
+                  onSuccess={loadPartnerData}
+                />
+              )}
+            </div>
           </CardContent>
         </Card>
 
