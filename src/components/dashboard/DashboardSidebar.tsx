@@ -221,7 +221,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                   disabled={item.disabled}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-3' : ''}`} />
+                  <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-2' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
                 </Button>
                 {item.badge && !isCollapsed && (

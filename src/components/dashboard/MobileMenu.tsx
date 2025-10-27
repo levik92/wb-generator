@@ -157,7 +157,7 @@ export const MobileMenu = ({ activeTab, onTabChange, profile, hasUnreadNews = fa
                       onClick={() => !item.disabled && handleTabChange(item.id)}
                       disabled={item.disabled}
                     >
-                      <Icon className="w-4 h-4 mr-3" />
+                      <Icon className="w-4 h-4 mr-2" />
                       {item.label}
                     </Button>
                     {item.badge && (
