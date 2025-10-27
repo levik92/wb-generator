@@ -220,7 +220,7 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
           </p>
         </div>
         <Button
-          onClick={() => window.open("https://t.me/your_support_bot", "_blank")}
+          onClick={() => window.open("https://t.me/wbgen_support", "_blank")}
           className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto flex-shrink-0"
           size="sm"
         >
