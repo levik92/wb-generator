@@ -248,34 +248,6 @@ const Partner = () => {
           </CardContent>
         </Card>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <Card className="bg-muted/30">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Всего заработано
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{partner?.total_earned || 0} ₽</div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-muted/30">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Приглашенные клиенты
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{partner?.invited_clients_count || 0}</div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Program Info */}
         <Card className="bg-muted/30">
           <CardHeader>
