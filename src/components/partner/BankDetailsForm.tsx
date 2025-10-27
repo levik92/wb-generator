@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit2, Save, ExternalLink } from "lucide-react";
+import { Edit2, Save, ExternalLink, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -208,7 +208,7 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
       <div className="bg-blue-50 rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-shrink-0">
           <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center">
-            <ExternalLink className="h-6 w-6 text-white" />
+            <MessageCircle className="h-6 w-6 text-white" />
           </div>
         </div>
         <div className="flex-1">
