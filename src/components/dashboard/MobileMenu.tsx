@@ -110,7 +110,7 @@ export const MobileMenu = ({ activeTab, onTabChange, profile, hasUnreadNews = fa
           <Menu className="h-5 w-5 text-wb-purple" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 p-0 bg-muted">
+      <SheetContent side="left" className="w-80 p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b">

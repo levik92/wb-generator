@@ -132,7 +132,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-muted border-r border-border flex flex-col transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-card border-r border-border flex flex-col transition-all duration-300`}>
       {/* Logo / Collapse Toggle */}
       <div className={`p-6 ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden md:flex h-8 w-8 p-0 bg-secondary hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -159,7 +159,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden md:flex h-8 w-8 p-0 bg-secondary hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -240,14 +240,14 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
 
       {/* WB Connection Status */}
       <div className={`p-4 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-secondary/80 opacity-60`}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-gray-100/50 border border-gray-200/50 opacity-60`}>
           {!isCollapsed && (
             <>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Wildberries</p>
                 <p className="text-xs text-gray-500">В разработке</p>
               </div>
-              <span className="text-xs bg-card px-2 py-1 rounded text-gray-600">Скоро</span>
+              <span className="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600">Скоро</span>
             </>
           )}
           {isCollapsed && (
