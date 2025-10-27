@@ -240,18 +240,18 @@ const Partner = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="text-4xl font-bold">{partner?.current_balance || 0} ₽</div>
               {partner && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-full">
+                  {partner.current_balance < 5000 && (
+                    <p className="text-xs text-muted-foreground order-2 sm:order-1">
+                      Минимальная сумма для вывода: 5 000 ₽
+                    </p>
+                  )}
                   <WithdrawalButton
                     balance={partner.current_balance}
                     partnerId={partner.id}
                     hasBankDetails={hasBankDetails}
                     onSuccess={loadPartnerData}
                   />
-                  {partner.current_balance < 5000 && (
-                    <p className="text-xs text-muted-foreground">
-                      Минимальная сумма для вывода: 5 000 ₽
-                    </p>
-                  )}
                 </div>
               )}
             </div>
