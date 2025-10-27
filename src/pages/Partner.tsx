@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BankDetailsForm } from "@/components/partner/BankDetailsForm";
 import { WithdrawalButton } from "@/components/partner/WithdrawalButton";
+import Footer from "@/components/Footer";
 
 interface PartnerProfile {
   id: string;
@@ -646,6 +647,7 @@ const Partner = () => {
         {partner && <BankDetailsForm partnerId={partner.id} />}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
