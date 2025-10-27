@@ -37,8 +37,6 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'partners',
       label: 'Партнеры',
       icon: Handshake,
-      isLink: true,
-      path: '/admin/partners'
     },
     {
       id: 'prompts',
@@ -102,23 +100,6 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
-            
-            if (item.isLink && item.path) {
-              return (
-                <li key={item.id} className="relative">
-                  <a href={item.path}>
-                    <Button
-                      variant="ghost"
-                      className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'}`}
-                      title={isCollapsed ? item.label : undefined}
-                    >
-                      <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-3' : ''}`} />
-                      {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
-                    </Button>
-                  </a>
-                </li>
-              );
-            }
             
             return (
               <li key={item.id} className="relative">

@@ -10,7 +10,6 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
-import AdminPartners from "./pages/AdminPartners";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -46,11 +45,6 @@ const App = () => (
           <Route path="/admin" element={
             <ProtectedRoute>
               <Admin />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/partners" element={
-            <ProtectedRoute>
-              <AdminPartners />
             </ProtectedRoute>
           } />
           <Route path="/admin-login" element={<AdminLogin />} />

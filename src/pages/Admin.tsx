@@ -16,6 +16,7 @@ import { PromptManager } from "@/components/dashboard/PromptManager";
 import { DataExportDialog } from "@/components/dashboard/DataExportDialog";
 import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
 import { AdminNews } from "@/components/admin/AdminNews";
+import { AdminPartners } from "@/components/admin/AdminPartners";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 
@@ -37,7 +38,7 @@ interface UserStats {
   total_revenue: number;
 }
 
-type ActiveTab = 'analytics' | 'users' | 'prompts' | 'promocodes' | 'news';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'promocodes' | 'news';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -118,6 +119,8 @@ export default function Admin() {
         return <AdminAnalytics users={users} />;
       case 'users':
         return <AdminUsers users={users} onUsersUpdate={loadUsers} />;
+      case 'partners':
+        return <AdminPartners />;
       case 'prompts':
         return <PromptManager />;
       case 'promocodes':
