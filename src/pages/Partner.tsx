@@ -274,8 +274,14 @@ const Partner = () => {
             <CardContent>
               {getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getEarningsChartData(parseInt(earningsDateRange))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <AreaChart data={getEarningsChartData(parseInt(earningsDateRange))}>
+                    <defs>
+                      <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                     <XAxis 
                       dataKey="date" 
                       stroke="hsl(var(--muted-foreground))" 
@@ -294,13 +300,15 @@ const Partner = () => {
                         borderRadius: "6px"
                       }}
                     />
-                    <Bar 
-                      dataKey="amount" 
-                      fill="hsl(var(--primary))" 
-                      radius={[4, 4, 0, 0]}
-                      name="Заработано (₽)" 
+                    <Area
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#earningsGradient)"
                     />
-                  </BarChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
@@ -333,8 +341,14 @@ const Partner = () => {
             <CardContent>
               {getReferralsChartData(parseInt(clientsDateRange)).length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getReferralsChartData(parseInt(clientsDateRange))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <AreaChart data={getReferralsChartData(parseInt(clientsDateRange))}>
+                    <defs>
+                      <linearGradient id="clientsGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                     <XAxis 
                       dataKey="date" 
                       stroke="hsl(var(--muted-foreground))" 
@@ -353,13 +367,15 @@ const Partner = () => {
                         borderRadius: "6px"
                       }}
                     />
-                    <Bar 
-                      dataKey="count" 
-                      fill="hsl(var(--chart-2))" 
-                      radius={[4, 4, 0, 0]}
-                      name="Новые клиенты" 
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      stroke="hsl(var(--chart-2))"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#clientsGradient)"
                     />
-                  </BarChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
