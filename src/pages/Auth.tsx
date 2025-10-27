@@ -393,14 +393,15 @@ const Auth = () => {
     try {
       setLoading(true);
       
-      // Save referral and partner codes to sessionStorage for OAuth flow
-      if (activeTab === "signup") {
-        if (referralCode) {
-          sessionStorage.setItem('pending_referral_code', referralCode);
-        }
-        if (partnerCode) {
-          sessionStorage.setItem('pending_partner_code', partnerCode);
-        }
+      // Always save referral and partner codes to sessionStorage if they exist in URL
+      // This ensures they work for both new signups and existing users clicking partner links
+      if (referralCode) {
+        sessionStorage.setItem('pending_referral_code', referralCode);
+        console.log('Saved referral code to sessionStorage:', referralCode);
+      }
+      if (partnerCode) {
+        sessionStorage.setItem('pending_partner_code', partnerCode);
+        console.log('Saved partner code to sessionStorage:', partnerCode);
       }
       
       const redirectUrl = `${window.location.origin}/dashboard`;
