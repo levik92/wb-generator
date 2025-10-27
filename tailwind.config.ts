@@ -24,6 +24,7 @@ export default {
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
+				'input-border': 'hsl(var(--input-border))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
@@ -92,7 +93,7 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius-lg)',
 				md: 'var(--radius)',
-				sm: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)',
 				xl: 'var(--radius-xl)'
 			},
 			boxShadow: {
