@@ -242,7 +242,7 @@ const Partner = () => {
               {partner && (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
                   {partner.current_balance < 5000 && (
-                    <p className="text-xs text-muted-foreground sm:order-1">
+                    <p className="text-xs text-muted-foreground sm:order-2">
                       Минимальная сумма для вывода: 5 000 ₽
                     </p>
                   )}
