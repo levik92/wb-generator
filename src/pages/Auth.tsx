@@ -392,34 +392,28 @@ const Auth = () => {
 
     try {
       setLoading(true);
+      
+      // Save referral and partner codes to sessionStorage for OAuth flow
+      if (activeTab === "signup") {
+        if (referralCode) {
+          sessionStorage.setItem('pending_referral_code', referralCode);
+        }
+        if (partnerCode) {
+          sessionStorage.setItem('pending_partner_code', partnerCode);
+        }
+      }
+      
       const redirectUrl = `${window.location.origin}/dashboard`;
-
-      const options: any = {
-        redirectTo: redirectUrl,
-      };
-
-      // Add referral code if present (only for signup)
-      if (activeTab === "signup" && referralCode) {
-        options.options = {
-          data: {
-            referral_code: referralCode,
-          },
-        };
-      }
-
-      // Add partner code if present (only for signup)
-      if (activeTab === "signup" && partnerCode) {
-        options.options = {
-          data: {
-            ...options.options?.data,
-            partner_code: partnerCode,
-          },
-        };
-      }
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        ...options,
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
       });
 
       if (error) {
