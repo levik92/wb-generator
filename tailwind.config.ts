@@ -90,10 +90,12 @@ export default {
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius-lg)',
-				md: 'var(--radius)',
-				sm: 'calc(var(--radius) - 2px)',
-				xl: 'var(--radius-xl)'
+				lg: 'var(--radius-lg)',      // 20px
+				md: 'var(--radius)',          // 16px
+				sm: 'calc(var(--radius) - 4px)', // 12px
+				xl: 'var(--radius-xl)',       // 24px
+				'2xl': '28px',
+				'3xl': '32px'
 			},
 			boxShadow: {
 				sm: 'var(--shadow-sm)',
