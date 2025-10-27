@@ -345,11 +345,11 @@ const Partner = () => {
         </Card>
 
         {/* Charts with Date Range */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="bg-muted/30">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Всего заработано</CardTitle>
+                <CardTitle className="text-base font-medium">Всего заработано</CardTitle>
                 <Select value={statsDateRange} onValueChange={setStatsDateRange}>
                   <SelectTrigger className="w-[130px]">
                     <SelectValue />
@@ -367,26 +367,45 @@ const Partner = () => {
               {getEarningsChartData(parseInt(statsDateRange)).length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={getEarningsChartData(parseInt(statsDateRange))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="amount" fill="hsl(var(--primary))" name="Заработано (₽)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "6px"
+                      }}
+                    />
+                    <Bar 
+                      dataKey="amount" 
+                      fill="hsl(var(--primary))" 
+                      radius={[4, 4, 0, 0]}
+                      name="Заработано (₽)" 
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
                   Нет данных для отображения
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/30">
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Приглашенные клиенты</CardTitle>
+                <CardTitle className="text-base font-medium">Приглашенные клиенты</CardTitle>
                 <Select value={statsDateRange} onValueChange={setStatsDateRange}>
                   <SelectTrigger className="w-[130px]">
                     <SelectValue />
@@ -404,16 +423,35 @@ const Partner = () => {
               {getReferralsChartData(parseInt(statsDateRange)).length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={getReferralsChartData(parseInt(statsDateRange))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="hsl(var(--chart-2))" name="Новые клиенты" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "6px"
+                      }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="hsl(var(--chart-2))" 
+                      radius={[4, 4, 0, 0]}
+                      name="Новые клиенты" 
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
                   Нет данных для отображения
                 </div>
               )}
