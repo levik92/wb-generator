@@ -76,21 +76,14 @@ export const WithdrawalButton = ({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-        {!canWithdraw && (
-          <p className="text-xs text-muted-foreground order-2 sm:order-1">
-            Минимальная сумма для вывода: {minWithdrawal.toLocaleString()} ₽
-          </p>
-        )}
-        <Button
-          onClick={handleWithdraw}
-          disabled={!canWithdraw || loading}
-          size="sm"
-          className="order-1 sm:order-2 sm:ml-auto"
-        >
-          Вывести средства
-        </Button>
-      </div>
+      <Button
+        onClick={handleWithdraw}
+        disabled={!canWithdraw || loading}
+        size="sm"
+        className="order-1 sm:order-2 sm:ml-auto"
+      >
+        Вывести средства
+      </Button>
 
       <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
         <AlertDialogContent>

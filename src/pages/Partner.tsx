@@ -237,15 +237,22 @@ const Partner = () => {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-4xl font-bold">{partner?.current_balance || 0} ₽</div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="text-4xl font-bold order-1">{partner?.current_balance || 0} ₽</div>
               {partner && (
-                <WithdrawalButton
-                  balance={partner.current_balance}
-                  partnerId={partner.id}
-                  hasBankDetails={hasBankDetails}
-                  onSuccess={loadPartnerData}
-                />
+                <div className="order-2 sm:order-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  {partner.current_balance < 5000 && (
+                    <p className="text-xs text-muted-foreground order-2 sm:order-1">
+                      Минимальная сумма для вывода: 5 000 ₽
+                    </p>
+                  )}
+                  <WithdrawalButton
+                    balance={partner.current_balance}
+                    partnerId={partner.id}
+                    hasBankDetails={hasBankDetails}
+                    onSuccess={loadPartnerData}
+                  />
+                </div>
               )}
             </div>
           </CardContent>
