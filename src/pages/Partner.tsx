@@ -55,7 +55,8 @@ const Partner = () => {
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
   const [hasBankDetails, setHasBankDetails] = useState(false);
   const [dateRange, setDateRange] = useState("30"); // days
-  const [statsDateRange, setStatsDateRange] = useState("30");
+  const [earningsDateRange, setEarningsDateRange] = useState("30");
+  const [clientsDateRange, setClientsDateRange] = useState("30");
 
   useEffect(() => {
     loadPartnerData();
@@ -248,6 +249,127 @@ const Partner = () => {
           </CardContent>
         </Card>
 
+        {/* Charts with Date Range */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-base font-medium">Всего заработано</CardTitle>
+                </div>
+                <Select value={earningsDateRange} onValueChange={setEarningsDateRange}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 дней</SelectItem>
+                    <SelectItem value="30">30 дней</SelectItem>
+                    <SelectItem value="90">90 дней</SelectItem>
+                    <SelectItem value="365">Год</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={getEarningsChartData(parseInt(earningsDateRange))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "6px"
+                      }}
+                    />
+                    <Bar 
+                      dataKey="amount" 
+                      fill="hsl(var(--primary))" 
+                      radius={[4, 4, 0, 0]}
+                      name="Заработано (₽)" 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
+                  Нет данных для отображения
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-chart-2" />
+                  <CardTitle className="text-base font-medium">Приглашенные клиенты</CardTitle>
+                </div>
+                <Select value={clientsDateRange} onValueChange={setClientsDateRange}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 дней</SelectItem>
+                    <SelectItem value="30">30 дней</SelectItem>
+                    <SelectItem value="90">90 дней</SelectItem>
+                    <SelectItem value="365">Год</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getReferralsChartData(parseInt(clientsDateRange)).length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={getReferralsChartData(parseInt(clientsDateRange))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))" 
+                      fontSize={11}
+                      tickMargin={8}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--popover))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "6px"
+                      }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      fill="hsl(var(--chart-2))" 
+                      radius={[4, 4, 0, 0]}
+                      name="Новые клиенты" 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
+                  Нет данных для отображения
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Program Info */}
         <Card className="bg-muted/30">
           <CardHeader>
@@ -315,121 +437,6 @@ const Partner = () => {
             </p>
           </CardContent>
         </Card>
-
-        {/* Charts with Date Range */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-medium">Всего заработано</CardTitle>
-                <Select value={statsDateRange} onValueChange={setStatsDateRange}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 дней</SelectItem>
-                    <SelectItem value="30">30 дней</SelectItem>
-                    <SelectItem value="90">90 дней</SelectItem>
-                    <SelectItem value="365">Год</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {getEarningsChartData(parseInt(statsDateRange)).length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getEarningsChartData(parseInt(statsDateRange))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "6px"
-                      }}
-                    />
-                    <Bar 
-                      dataKey="amount" 
-                      fill="hsl(var(--primary))" 
-                      radius={[4, 4, 0, 0]}
-                      name="Заработано (₽)" 
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
-                  Нет данных для отображения
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-medium">Приглашенные клиенты</CardTitle>
-                <Select value={statsDateRange} onValueChange={setStatsDateRange}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 дней</SelectItem>
-                    <SelectItem value="30">30 дней</SelectItem>
-                    <SelectItem value="90">90 дней</SelectItem>
-                    <SelectItem value="365">Год</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {getReferralsChartData(parseInt(statsDateRange)).length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getReferralsChartData(parseInt(statsDateRange))}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "6px"
-                      }}
-                    />
-                    <Bar 
-                      dataKey="count" 
-                      fill="hsl(var(--chart-2))" 
-                      radius={[4, 4, 0, 0]}
-                      name="Новые клиенты" 
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
-                  Нет данных для отображения
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Tabs: Commissions & Referrals */}
         <Tabs defaultValue="commissions" className="space-y-4">
