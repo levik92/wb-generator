@@ -240,14 +240,14 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
 
       {/* WB Connection Status */}
       <div className={`p-4 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-secondary border border-gray-200/50 opacity-60`}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-secondary/80 opacity-60`}>
           {!isCollapsed && (
             <>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Wildberries</p>
                 <p className="text-xs text-gray-500">В разработке</p>
               </div>
-              <span className="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600">Скоро</span>
+              <span className="text-xs bg-card px-2 py-1 rounded text-gray-600">Скоро</span>
             </>
           )}
           {isCollapsed && (
