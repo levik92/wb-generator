@@ -132,7 +132,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} bg-secondary border-r border-border flex flex-col transition-all duration-300`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} border-r border-border flex flex-col transition-all duration-300`} style={{ backgroundColor: '#fcfcfc' }}>
       {/* Logo / Collapse Toggle */}
       <div className={`p-6 ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="flex items-center justify-between">
