@@ -137,45 +137,64 @@ const Dashboard = () => {
         console.log('Processing pending referral code:', pendingReferralCode);
         
         // Find referrer by code
-        const { data: referrerData } = await supabase
+        const { data: referrerData, error: referrerError } = await supabase
           .from('profiles')
           .select('id')
           .eq('referral_code', pendingReferralCode)
           .single();
         
-        if (referrerData) {
-          // Update profile with referrer
-          await supabase
-            .from('profiles')
-            .update({ 
-              referred_by: referrerData.id,
-              tokens_balance: profileData.tokens_balance + 10
-            })
-            .eq('id', userId);
-          
-          // Create referral record
-          await supabase
-            .from('referrals')
-            .insert({
-              referrer_id: referrerData.id,
-              referred_id: userId,
-              status: 'pending'
-            });
-          
-          // Add token transaction
-          await supabase
-            .from('token_transactions')
-            .insert({
-              user_id: userId,
-              amount: 10,
-              transaction_type: 'referral_bonus',
-              description: 'Бонус за регистрацию по реферальной ссылке'
-            });
-          
-          toast({
-            title: "Реферальный бонус начислен! 🎉",
-            description: "Вы получили дополнительные 10 токенов",
-          });
+        if (referrerError) {
+          console.error('Error finding referrer:', referrerError);
+        } else if (referrerData) {
+          // Check that user is not trying to refer themselves
+          if (referrerData.id === userId) {
+            console.log('User trying to use own referral link, skipping');
+          } else {
+            // Update profile with referrer
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ 
+                referred_by: referrerData.id,
+                tokens_balance: profileData.tokens_balance + 10
+              })
+              .eq('id', userId);
+            
+            if (updateError) {
+              console.error('Error updating profile with referrer:', updateError);
+            } else {
+              // Create referral record
+              const { error: referralError } = await supabase
+                .from('referrals')
+                .insert({
+                  referrer_id: referrerData.id,
+                  referred_id: userId,
+                  status: 'pending'
+                });
+              
+              if (referralError) {
+                console.error('Error creating referral record:', referralError);
+              }
+              
+              // Add token transaction
+              const { error: transactionError } = await supabase
+                .from('token_transactions')
+                .insert({
+                  user_id: userId,
+                  amount: 10,
+                  transaction_type: 'referral_bonus',
+                  description: 'Бонус за регистрацию по реферальной ссылке'
+                });
+              
+              if (transactionError) {
+                console.error('Error creating token transaction:', transactionError);
+              } else {
+                toast({
+                  title: "Реферальный бонус начислен! 🎉",
+                  description: "Вы получили дополнительные 10 токенов",
+                });
+              }
+            }
+          }
         }
         
         sessionStorage.removeItem('pending_referral_code');
@@ -186,14 +205,17 @@ const Dashboard = () => {
         console.log('Processing pending partner code:', pendingPartnerCode);
         
         // Call edge function to process partner signup
-        const { error } = await supabase.functions.invoke('process-partner-signup', {
+        const { data, error } = await supabase.functions.invoke('process-partner-signup', {
           body: {
             user_id: userId,
             partner_code: pendingPartnerCode
           }
         });
         
-        if (!error) {
+        if (error) {
+          console.error('Error processing partner signup:', error);
+        } else {
+          console.log('Partner signup processed successfully:', data);
           toast({
             title: "Добро пожаловать! 🎉",
             description: "Вы зарегистрированы по партнерской ссылке",

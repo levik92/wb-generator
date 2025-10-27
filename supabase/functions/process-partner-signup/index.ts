@@ -35,13 +35,44 @@ serve(async (req) => {
     // Находим партнера по коду
     const { data: partnerProfile, error: partnerError } = await supabaseServiceRole
       .from('partner_profiles')
-      .select('id')
+      .select('id, user_id')
       .eq('partner_code', partner_code)
       .single();
 
     if (partnerError || !partnerProfile) {
       console.error('Partner not found:', partnerError);
       throw new Error('Invalid partner code');
+    }
+
+    // Проверяем, что пользователь не регистрируется сам по своей же ссылке
+    if (partnerProfile.user_id === user_id) {
+      console.log('User trying to use own partner link, skipping');
+      return new Response(
+        JSON.stringify({ success: true, message: 'Cannot refer yourself' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      );
+    }
+
+    // Проверяем, не был ли пользователь уже привлечен этим партнером
+    const { data: existingReferral } = await supabaseServiceRole
+      .from('partner_referrals')
+      .select('id')
+      .eq('partner_id', partnerProfile.id)
+      .eq('referred_user_id', user_id)
+      .single();
+
+    if (existingReferral) {
+      console.log('Referral already exists, skipping');
+      return new Response(
+        JSON.stringify({ success: true, message: 'Referral already exists' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      );
     }
 
     // Создаем запись о партнерском реферале
@@ -59,15 +90,23 @@ serve(async (req) => {
     }
 
     // Увеличиваем счетчик приглашенных клиентов
-    const { error: updateError } = await supabaseServiceRole
+    const { data: currentProfile, error: fetchError } = await supabaseServiceRole
       .from('partner_profiles')
-      .update({ 
-        invited_clients_count: supabaseServiceRole.sql`invited_clients_count + 1`
-      })
-      .eq('id', partnerProfile.id);
+      .select('invited_clients_count')
+      .eq('id', partnerProfile.id)
+      .single();
 
-    if (updateError) {
-      console.error('Error updating partner stats:', updateError);
+    if (!fetchError && currentProfile) {
+      const { error: updateError } = await supabaseServiceRole
+        .from('partner_profiles')
+        .update({ 
+          invited_clients_count: (currentProfile.invited_clients_count || 0) + 1
+        })
+        .eq('id', partnerProfile.id);
+
+      if (updateError) {
+        console.error('Error updating partner stats:', updateError);
+      }
     }
 
     console.log('Partner signup processed successfully');
