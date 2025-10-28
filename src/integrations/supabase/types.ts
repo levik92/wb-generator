@@ -1153,6 +1153,10 @@ export type Database = {
         Args: { new_balance: number; reason?: string; target_user_id: string }
         Returns: boolean
       }
+      apply_partner_commissions_to_existing_payments: {
+        Args: never
+        Returns: undefined
+      }
       can_access_payment: {
         Args: { payment_user_id: string }
         Returns: boolean
