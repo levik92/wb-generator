@@ -99,13 +99,10 @@ const Partner = () => {
       } else {
         setPartner(partnerData);
 
-        // Загрузка рефералов
+        // Загрузка рефералов (без join, чтобы избежать ошибки 400 из-за отсутствия FK)
         const { data: referralsData, error: referralsError } = await supabase
           .from("partner_referrals")
-          .select(`
-            *,
-            profiles:referred_user_id(email, full_name)
-          `)
+          .select("*")
           .eq("partner_id", partnerData.id)
           .order("registered_at", { ascending: false });
 
