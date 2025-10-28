@@ -102,7 +102,10 @@ const Partner = () => {
         // Загрузка рефералов
         const { data: referralsData, error: referralsError } = await supabase
           .from("partner_referrals")
-          .select("*")
+          .select(`
+            *,
+            profiles:referred_user_id(email, full_name)
+          `)
           .eq("partner_id", partnerData.id)
           .order("registered_at", { ascending: false });
 
@@ -585,8 +588,8 @@ const Partner = () => {
                         <TableCell>
                           {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
                         </TableCell>
-                        <TableCell>{ref.total_payments} ₽</TableCell>
-                        <TableCell className="font-semibold">{ref.total_commission} ₽</TableCell>
+                        <TableCell>{Number(ref.total_payments || 0).toLocaleString('ru-RU')} ₽</TableCell>
+                        <TableCell className="font-semibold">{Number(ref.total_commission || 0).toLocaleString('ru-RU')} ₽</TableCell>
                         <TableCell>
                           <Badge
                             variant={
