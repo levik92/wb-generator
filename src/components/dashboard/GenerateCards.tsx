@@ -847,77 +847,44 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-background border-primary/20">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr,280px] gap-4 sm:gap-6 items-center">
-            {/* Left side: Title, Description and Benefits */}
-            <div className="space-y-3 sm:space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Карточки, которые продают — за 3 минуты
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  WB GEN оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня. Всё автоматически — просто загрузи фото.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium">Экономия до 10 000 ₽</p>
-                    <p className="text-[10px] text-muted-foreground">на каждой карточке</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium">Результат за 3 минуты</p>
-                    <p className="text-[10px] text-muted-foreground">вместо 3 дней</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Gift className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium">Бесплатные 25 токенов</p>
-                    <p className="text-[10px] text-muted-foreground">для теста</p>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Карточки, которые продают — за 3 минуты
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                WB Генератор оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня. Всё автоматически — просто загрузи фото.
+              </p>
             </div>
 
-            {/* Right side: Before/After Example */}
-            <div className="rounded-lg border border-primary/20 overflow-hidden bg-background/40 p-3">
-              <p className="text-[10px] font-medium text-center mb-2 text-muted-foreground">Пример результата</p>
-              <div className="flex items-center justify-center gap-2">
-                <div className="relative flex-1">
-                  <img 
-                    src={exampleBefore1}
-                    alt="До обработки"
-                    className="w-full h-24 sm:h-28 object-cover rounded border border-border"
-                  />
-                  <div className="absolute bottom-1 left-1 bg-background/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-medium">
-                    До
-                  </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
-                
-                <ArrowRight className="w-4 h-4 shrink-0 text-primary" />
-                
-                <div className="relative flex-1">
-                  <img 
-                    src={exampleAfter1}
-                    alt="После обработки"
-                    className="w-full h-24 sm:h-28 object-cover rounded border border-primary/30"
-                  />
-                  <div className="absolute bottom-1 left-1 bg-primary/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-medium text-primary-foreground">
-                    После
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Экономия до 10 000 ₽</p>
+                  <p className="text-[10px] text-muted-foreground">на каждой карточке</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Результат за 3 минуты</p>
+                  <p className="text-[10px] text-muted-foreground">вместо 3 дней</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Gift className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Бесплатные 25 токенов</p>
+                  <p className="text-[10px] text-muted-foreground">для теста</p>
                 </div>
               </div>
             </div>
