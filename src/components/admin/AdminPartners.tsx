@@ -51,10 +51,7 @@ export const AdminPartners = () => {
       // Load partners with active status
       const { data: partnersData, error } = await supabase
         .from("partner_profiles")
-        .select(`
-          *,
-          profiles:user_id(email)
-        `)
+        .select("*")
         .eq("status", "active")
         .order("total_earned", { ascending: false });
 
@@ -66,11 +63,28 @@ export const AdminPartners = () => {
         .select("partner_id, amount, status")
         .in("status", ["pending", "processing"]);
 
+      // Load profiles separately
+      const userIds = partnersData?.map(p => p.user_id).filter(Boolean) || [];
+      let profilesMap: Record<string, { email: string }> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, email")
+          .in("id", userIds);
+        
+        if (profilesData) {
+          profilesMap = Object.fromEntries(
+            profilesData.map(p => [p.id, { email: p.email }])
+          );
+        }
+      }
+
       const partnersWithWithdrawals = partnersData?.map((p: any) => {
         const pendingWithdrawal = withdrawalsData?.find(w => w.partner_id === p.id);
         return {
           ...p,
-          user_email: p.profiles?.email,
+          user_email: profilesMap[p.user_id]?.email,
           has_pending_withdrawal: !!pendingWithdrawal,
           pending_amount: pendingWithdrawal?.amount
         };
