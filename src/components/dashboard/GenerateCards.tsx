@@ -12,9 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight } from "lucide-react";
 import JSZip from 'jszip';
-import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 
@@ -847,58 +846,80 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       </div>
 
       <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-background border-primary/20">
-        <CardContent className="pt-6 space-y-6">
-          <div className="text-center space-y-3">
-            <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Карточки, которые продают — за 3 минуты
-            </h3>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              WB GEN оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня.
-              <br className="hidden sm:block" />
-              <span className="font-medium">Всё автоматически — просто загрузи фото.</span>
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-primary" />
+        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,280px] gap-4 sm:gap-6 items-center">
+            {/* Left side: Title, Description and Benefits */}
+            <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  Карточки, которые продают — за 3 минуты
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  WB GEN оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня. Всё автоматически — просто загрузи фото.
+                </p>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Экономия до 10 000 ₽</p>
-                <p className="text-xs text-muted-foreground">на каждой карточке</p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium">Экономия до 10 000 ₽</p>
+                    <p className="text-[10px] text-muted-foreground">на каждой карточке</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium">Результат за 3 минуты</p>
+                    <p className="text-[10px] text-muted-foreground">вместо 3 дней</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Gift className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium">Бесплатные 25 токенов</p>
+                    <p className="text-[10px] text-muted-foreground">для теста</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary" />
+            {/* Right side: Before/After Example */}
+            <div className="rounded-lg border border-primary/20 overflow-hidden bg-background/40 p-3">
+              <p className="text-[10px] font-medium text-center mb-2 text-muted-foreground">Пример результата</p>
+              <div className="flex items-center justify-center gap-2">
+                <div className="relative flex-1">
+                  <img 
+                    src={exampleBefore1}
+                    alt="До обработки"
+                    className="w-full h-24 sm:h-28 object-cover rounded border border-border"
+                  />
+                  <div className="absolute bottom-1 left-1 bg-background/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-medium">
+                    До
+                  </div>
+                </div>
+                
+                <ArrowRight className="w-4 h-4 shrink-0 text-primary" />
+                
+                <div className="relative flex-1">
+                  <img 
+                    src={exampleAfter1}
+                    alt="После обработки"
+                    className="w-full h-24 sm:h-28 object-cover rounded border border-primary/30"
+                  />
+                  <div className="absolute bottom-1 left-1 bg-primary/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-medium text-primary-foreground">
+                    После
+                  </div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Результат за 3 минуты</p>
-                <p className="text-xs text-muted-foreground">вместо 3 дней</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Gift className="w-5 h-5 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium">Бесплатные 25 токенов</p>
-                <p className="text-xs text-muted-foreground">для теста</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-primary/20 overflow-hidden bg-background/40 p-3 sm:p-4">
-            <p className="text-xs sm:text-sm font-medium text-center mb-3 text-muted-foreground">Пример результата</p>
-            <div className="max-w-sm mx-auto">
-              <BeforeAfterSlider 
-                beforeImage={exampleBefore1}
-                afterImage={exampleAfter1}
-                alt="Пример до и после обработки"
-              />
             </div>
           </div>
         </CardContent>
