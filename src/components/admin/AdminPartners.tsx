@@ -24,6 +24,14 @@ interface PartnerData {
   user_email?: string;
 }
 
+const maskEmail = (email: string | undefined): string => {
+  if (!email) return "—";
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return email;
+  const maskedLocal = local.charAt(0) + '***';
+  return `${maskedLocal}@${domain}`;
+};
+
 export const AdminPartners = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -217,7 +225,7 @@ export const AdminPartners = () => {
                           {partner.has_pending_withdrawal && (
                             <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />
                           )}
-                          <p className="font-medium text-sm truncate">{partner.user_email}</p>
+                          <p className="font-medium text-sm truncate">{maskEmail(partner.user_email)}</p>
                         </div>
                         <p className="text-xs text-muted-foreground">Код: {partner.partner_code}</p>
                       </div>
@@ -281,7 +289,7 @@ export const AdminPartners = () => {
                           {partner.has_pending_withdrawal && (
                             <AlertCircle className="h-4 w-4 text-orange-500" />
                           )}
-                          {partner.user_email}
+                          {maskEmail(partner.user_email)}
                         </div>
                       </TableCell>
                       <TableCell>{partner.partner_code}</TableCell>
@@ -320,7 +328,7 @@ export const AdminPartners = () => {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">
-              Партнер: {selectedPartner?.user_email}
+              Партнер: {maskEmail(selectedPartner?.user_email)}
             </DialogTitle>
           </DialogHeader>
 
