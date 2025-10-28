@@ -33,6 +33,8 @@ interface PartnerReferral {
   total_payments: number;
   total_commission: number;
   status: string;
+  masked_email?: string;
+  full_name?: string | null;
   profiles?: {
     email: string;
     full_name: string | null;
@@ -99,20 +101,32 @@ const Partner = () => {
       } else {
         setPartner(partnerData);
 
-        // Загрузка рефералов с данными профилей
+        // Загрузка рефералов без join
         const { data: referralsData, error: referralsError } = await supabase
           .from("partner_referrals")
-          .select(`
-            *,
-            profiles!partner_referrals_referred_user_id_fkey(email, full_name)
-          `)
+          .select("*")
           .eq("partner_id", partnerData.id)
           .order("registered_at", { ascending: false });
 
         if (referralsError) {
           console.error("Error loading partner referrals:", referralsError);
         }
-        if (referralsData) setReferrals(referralsData as any);
+
+        // Попытка обогатить данными из edge-функции (masked_email, full_name)
+        try {
+          const { data: enriched, error: enrichError } = await supabase.functions.invoke('get-partner-referrals', {
+            body: { partnerId: partnerData.id }
+          });
+          if (!enrichError && enriched?.referrals) {
+            setReferrals(enriched.referrals as any);
+          } else {
+            // если функция недоступна, показываем базовые данные
+            if (referralsData) setReferrals(referralsData as any);
+          }
+        } catch (e) {
+          console.warn('Edge function get-partner-referrals failed, fallback to basic data');
+          if (referralsData) setReferrals(referralsData as any);
+        }
 
         // Загрузка комиссий
         const { data: commissionsData } = await supabase
@@ -578,7 +592,7 @@ const Partner = () => {
                     {referrals.map((ref) => (
                       <TableRow key={ref.id}>
                         <TableCell>
-                          {ref.profiles?.full_name || (ref.profiles?.email ? (() => {
+                          {ref.full_name || ref.masked_email || (ref.profiles?.email ? (() => {
                             const email = ref.profiles.email;
                             const [local, domain] = email.split('@');
                             const maskedLocal = local.charAt(0) + '***';
