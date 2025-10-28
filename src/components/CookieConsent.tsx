@@ -3,24 +3,31 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
 
-export const CookieConsent = () => {
-  const [isVisible, setIsVisible] = useState(false);
+const CONSENT_KEY = 'wb-gen-cookie-consent';
 
-  useEffect(() => {
-    const consent = localStorage.getItem('cookie-consent');
-    if (!consent) {
-      setIsVisible(true);
-    }
-  }, []);
+export const CookieConsent = () => {
+  // Проверяем localStorage сразу при инициализации состояния
+  const [isVisible, setIsVisible] = useState(() => {
+    const consent = localStorage.getItem(CONSENT_KEY);
+    return !consent; // Показываем только если нет сохраненного согласия
+  });
 
   const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
-    setIsVisible(false);
+    try {
+      localStorage.setItem(CONSENT_KEY, 'accepted');
+      setIsVisible(false);
+    } catch (error) {
+      console.error('Failed to save cookie consent:', error);
+    }
   };
 
   const handleClose = () => {
-    localStorage.setItem('cookie-consent', 'declined');
-    setIsVisible(false);
+    try {
+      localStorage.setItem(CONSENT_KEY, 'declined');
+      setIsVisible(false);
+    } catch (error) {
+      console.error('Failed to save cookie consent:', error);
+    }
   };
 
   if (!isVisible) return null;
