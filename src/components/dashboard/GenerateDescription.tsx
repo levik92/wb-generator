@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, FileText, Loader2, AlertCircle, Copy, Download } from "lucide-react";
+import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Clock } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -121,26 +121,27 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         </p>
       </div>
 
-      <Card className="bg-muted/30 border border-muted">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="bg-muted p-2 rounded-lg">
-              <Info className="h-4 w-4 text-purple-600" />
+      <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-background border-primary/20">
+        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Умный текст, который продаёт
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Забудь про скучные шаблоны. Генератор описаний от WB Генератор подбирает стиль, ключевые слова и эмоциональные акценты так, чтобы карточка выглядела профессионально и попадала в поиск Wildberries.
+              </p>
             </div>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Стоимость генерации</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-muted/30 border border-border/50 rounded-[8px] p-3 flex items-center gap-3">
-            <div className="bg-muted/70 p-2 rounded-lg">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <div className="flex-1">
-              <div className="font-medium text-sm text-muted-foreground">1 описание товара</div>
-              <div className="text-xs text-muted-foreground">Генерация описания</div>
-            </div>
-            <div className="bg-background border px-3 py-1 rounded-lg font-medium text-sm text-muted-foreground">
-              1 токен
+
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium leading-relaxed">
+                  CTR и конверсия растут — время на описание сокращается до 30 секунд
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
