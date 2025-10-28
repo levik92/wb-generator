@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Bar, BarChart, CartesianGrid, Legend } from "recharts";
@@ -55,7 +55,6 @@ const Partner = () => {
   const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
   const [hasBankDetails, setHasBankDetails] = useState(false);
-  const [dateRange, setDateRange] = useState("30"); // days
   const [earningsDateRange, setEarningsDateRange] = useState("30");
   const [clientsDateRange, setClientsDateRange] = useState("30");
 
@@ -155,24 +154,30 @@ const Partner = () => {
     return commissions.filter(c => new Date(c.created_at) >= cutoffDate);
   };
 
-  const commissionsChartData = getFilteredCommissions(parseInt(dateRange))
-    .reverse()
-    .map((comm) => ({
-      date: new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }),
-      amount: parseFloat(comm.commission_amount.toString())
-    }));
-
   // График заработка по дням
   const getEarningsChartData = (days: number) => {
     const filtered = getFilteredCommissions(days);
     const grouped: { [key: string]: number } = {};
     
+    // Создаем массив всех дат в периоде
+    const dates: string[] = [];
+    const now = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      dates.push(date.toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }));
+      grouped[dates[dates.length - 1]] = 0;
+    }
+    
+    // Заполняем данные
     filtered.forEach(comm => {
       const date = new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
-      grouped[date] = (grouped[date] || 0) + parseFloat(comm.commission_amount.toString());
+      if (grouped.hasOwnProperty(date)) {
+        grouped[date] += parseFloat(comm.commission_amount.toString());
+      }
     });
 
-    return Object.entries(grouped).map(([date, amount]) => ({ date, amount }));
+    return dates.map(date => ({ date, amount: grouped[date] }));
   };
 
   // График рефералов по дням
@@ -183,12 +188,25 @@ const Partner = () => {
     
     const grouped: { [key: string]: number } = {};
     
+    // Создаем массив всех дат в периоде
+    const dates: string[] = [];
+    const now = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      dates.push(date.toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }));
+      grouped[dates[dates.length - 1]] = 0;
+    }
+    
+    // Заполняем данные
     filtered.forEach(ref => {
       const date = new Date(ref.registered_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
-      grouped[date] = (grouped[date] || 0) + 1;
+      if (grouped.hasOwnProperty(date)) {
+        grouped[date] += 1;
+      }
     });
 
-    return Object.entries(grouped).map(([date, count]) => ({ date, count }));
+    return dates.map(date => ({ date, count: grouped[date] }));
   };
 
   if (loading) {
@@ -261,7 +279,7 @@ const Partner = () => {
 
         {/* Charts with Date Range */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
+          <Card className="bg-muted/30">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -358,7 +376,7 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-muted/30">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -524,124 +542,66 @@ const Partner = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs: Commissions & Referrals */}
-        <Tabs defaultValue="commissions" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="commissions">История комиссий</TabsTrigger>
-            <TabsTrigger value="referrals">Рефералы</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="commissions" className="space-y-4">
-            <Card className="bg-muted/30">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Динамика комиссий</CardTitle>
-                  <Select value={dateRange} onValueChange={setDateRange}>
-                    <SelectTrigger className="w-[130px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="7">7 дней</SelectItem>
-                      <SelectItem value="30">30 дней</SelectItem>
-                      <SelectItem value="90">90 дней</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {commissionsChartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={commissionsChartData}>
-                      <defs>
-                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip />
-                      <Area
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="hsl(var(--primary))"
-                        fillOpacity={1}
-                        fill="url(#colorAmount)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    Нет данных для отображения
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="referrals" className="space-y-4">
-            <Card className="bg-muted/30">
-              <CardHeader>
-                <CardTitle>Приглашенные клиенты</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {referrals.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Имя</TableHead>
-                          <TableHead>Дата регистрации</TableHead>
-                          <TableHead>Сумма платежей</TableHead>
-                          <TableHead>Ваша комиссия</TableHead>
-                          <TableHead>Статус</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {referrals.map((ref) => (
-                          <TableRow key={ref.id}>
-                            <TableCell>{ref.profiles?.email || "—"}</TableCell>
-                            <TableCell>{ref.profiles?.full_name || "—"}</TableCell>
-                            <TableCell>
-                              {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
-                            </TableCell>
-                            <TableCell>{ref.total_payments} ₽</TableCell>
-                            <TableCell className="font-semibold">{ref.total_commission} ₽</TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={
-                                  ref.status === "active"
-                                    ? "default"
-                                    : ref.status === "registered"
-                                    ? "secondary"
-                                    : "outline"
-                                }
-                              >
-                                {ref.status === "active"
-                                  ? "Активен"
-                                  : ref.status === "registered"
-                                  ? "Зарегистрирован"
-                                  : "Неактивен"}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <div className="py-12 text-center text-muted-foreground">
-                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Пока нет приглашенных клиентов</p>
-                    <p className="text-sm mt-2">Поделитесь своей партнерской ссылкой</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        {/* Referrals List */}
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle>Приглашенные клиенты</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {referrals.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Имя</TableHead>
+                      <TableHead>Дата регистрации</TableHead>
+                      <TableHead>Сумма платежей</TableHead>
+                      <TableHead>Ваша комиссия</TableHead>
+                      <TableHead>Статус</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {referrals.map((ref) => (
+                      <TableRow key={ref.id}>
+                        <TableCell>{ref.profiles?.email || "—"}</TableCell>
+                        <TableCell>{ref.profiles?.full_name || "—"}</TableCell>
+                        <TableCell>
+                          {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
+                        </TableCell>
+                        <TableCell>{ref.total_payments} ₽</TableCell>
+                        <TableCell className="font-semibold">{ref.total_commission} ₽</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              ref.status === "active"
+                                ? "default"
+                                : ref.status === "registered"
+                                ? "secondary"
+                                : "outline"
+                            }
+                          >
+                            {ref.status === "active"
+                              ? "Активен"
+                              : ref.status === "registered"
+                              ? "Зарегистрирован"
+                              : "Неактивен"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="py-12 text-center text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Пока нет приглашенных клиентов</p>
+                <p className="text-sm mt-2">Поделитесь своей партнерской ссылкой</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Bank Details */}
         {partner && <BankDetailsForm partnerId={partner.id} />}
