@@ -177,7 +177,7 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
                   variant="ghost" 
                   size="sm" 
                   onClick={clearPromo}
-                  className="text-green-700 hover:text-green-900"
+                  className="text-green-700 hover:bg-green-800 hover:text-white transition-colors"
                 >
                   Отменить
                 </Button>
