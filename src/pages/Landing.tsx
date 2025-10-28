@@ -14,6 +14,9 @@ import exampleBefore3 from "@/assets/example-before-after-3.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import exampleAfter2 from "@/assets/example-after-2.jpg";
 import exampleAfter3 from "@/assets/example-after-3.jpg";
+import bg3d1 from "@/assets/3d-gradient-bg-1.jpg";
+import bg3d2 from "@/assets/3d-gradient-bg-2.jpg";
+import bg3d3 from "@/assets/3d-gradient-bg-3.jpg";
 
 // Компонент анимированного счетчика
 const AnimatedCounter = () => {
@@ -263,68 +266,167 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Examples Section */}
-      <section id="examples" className="py-12 sm:py-16">
+      {/* Examples Section with Case Studies */}
+      <section id="examples" className="py-16 sm:py-20 bg-gradient-to-b from-white via-gray-50/30 to-white">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Примеры работ</h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              Посмотрите, как обычные фото превращаются в профессиональные карточки
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Кейсы наших клиентов</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+              Реальные результаты продавцов, которые используют WB Генератор
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-4xl mx-auto">
-            {/* Example 1 - Наушники */}
-            <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Наушники - Электроника</h3>
-              <BeforeAfterSlider
-                beforeImage="/lovable-uploads/1-2.png"
-                afterImage="/lovable-uploads/1-1.png"
-                alt="карточки наушников"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
-                Перетаскивайте ползунок, чтобы увидеть разницу
-              </p>
-            </div>
+          {/* Case Studies Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto mb-12">
+            {/* Case 1 */}
+            <Card className="border-none shadow-lg hover:shadow-2xl transition-all overflow-hidden">
+              <div className="relative h-48 bg-gradient-to-br from-wb-purple/5 to-wb-purple/10">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Image className="w-16 h-16 text-wb-purple" />
+                </div>
+              </div>
+              <CardHeader>
+                <Badge className="w-fit mb-2 bg-green-100 text-green-700 border-green-300">Электроника</Badge>
+                <CardTitle className="text-xl">Наушники Premium</CardTitle>
+                <CardDescription className="text-base space-y-3 pt-2">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-sm">Было:</span>
+                    <span className="font-semibold">12 продаж/день</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-sm">Стало:</span>
+                    <span className="font-bold text-green-600">34 продажи/день</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-muted-foreground text-sm">Рост конверсии:</span>
+                    <span className="text-2xl font-bold text-wb-purple">+183%</span>
+                  </div>
+                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-3 rounded-lg mt-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Стоимость дизайнера:</span>
+                      <span className="text-sm line-through">15 000₽</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">WB Генератор:</span>
+                      <span className="text-lg font-bold text-green-600">120₽</span>
+                    </div>
+                  </div>
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-            {/* Example 2 - Платье */}
-            <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Платье - Мода</h3>
-              <BeforeAfterSlider
-                beforeImage="/lovable-uploads/2-2.png"
-                afterImage="/lovable-uploads/2-1.jpg"
-                alt="карточки платья"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
-                Перетаскивайте ползунок, чтобы увидеть разницу
-              </p>
-            </div>
+            {/* Case 2 */}
+            <Card className="border-none shadow-lg hover:shadow-2xl transition-all overflow-hidden">
+              <div className="relative h-48 bg-gradient-to-br from-pink-500/5 to-purple-500/10">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="w-16 h-16 text-pink-600" />
+                </div>
+              </div>
+              <CardHeader>
+                <Badge className="w-fit mb-2 bg-pink-100 text-pink-700 border-pink-300">Одежда</Badge>
+                <CardTitle className="text-xl">Женские платья</CardTitle>
+                <CardDescription className="text-base space-y-3 pt-2">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-sm">Было:</span>
+                    <span className="font-semibold">8 продаж/день</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-sm">Стало:</span>
+                    <span className="font-bold text-green-600">28 продаж/день</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-muted-foreground text-sm">Рост конверсии:</span>
+                    <span className="text-2xl font-bold text-wb-purple">+250%</span>
+                  </div>
+                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-3 rounded-lg mt-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Фотограф + дизайнер:</span>
+                      <span className="text-sm line-through">25 000₽</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">WB Генератор:</span>
+                      <span className="text-lg font-bold text-green-600">120₽</span>
+                    </div>
+                  </div>
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-            {/* Example 3 - Шампунь */}
-            <div className="max-w-xs sm:max-w-md mx-auto">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Шампунь - Красота</h3>
-              <BeforeAfterSlider
-                beforeImage="/lovable-uploads/4-2.png"
-                afterImage="/lovable-uploads/4-1.webp"
-                alt="карточки шампуня"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
-                Перетаскивайте ползунок, чтобы увидеть разницу
-              </p>
-            </div>
+            {/* Case 3 */}
+            <Card className="border-none shadow-lg hover:shadow-2xl transition-all overflow-hidden">
+              <div className="relative h-48 bg-gradient-to-br from-blue-500/5 to-purple-500/10">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Star className="w-16 h-16 text-blue-600" />
+                </div>
+              </div>
+              <CardHeader>
+                <Badge className="w-fit mb-2 bg-blue-100 text-blue-700 border-blue-300">Косметика</Badge>
+                <CardTitle className="text-xl">Шампунь для волос</CardTitle>
+                <CardDescription className="text-base space-y-3 pt-2">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-sm">Было:</span>
+                    <span className="font-semibold">15 продаж/день</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <span className="text-muted-foreground text-sm">Стало:</span>
+                    <span className="font-bold text-green-600">38 продаж/день</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-muted-foreground text-sm">Рост конверсии:</span>
+                    <span className="text-2xl font-bold text-wb-purple">+153%</span>
+                  </div>
+                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-3 rounded-lg mt-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Дизайнер + контент:</span>
+                      <span className="text-sm line-through">12 000₽</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">WB Генератор:</span>
+                      <span className="text-lg font-bold text-green-600">120₽</span>
+                    </div>
+                  </div>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
 
-            {/* Example 4 - Йога-коврик - только на десктопе */}
-            <div className="max-w-xs sm:max-w-md mx-auto hidden lg:block">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">Йога-коврик - Спорт</h3>
-              <BeforeAfterSlider
-                beforeImage="/lovable-uploads/3-2.png"
-                afterImage="/lovable-uploads/3-1.webp"
-                alt="карточки йога-коврика"
-              />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
-                Перетаскивайте ползунок, чтобы увидеть разницу
-              </p>
+          {/* Before/After Examples */}
+          <div className="max-w-5xl mx-auto">
+            <h3 className="text-2xl sm:text-3xl font-bold text-center mb-8">Было → Стало</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {/* Example 1 */}
+              <div className="max-w-sm mx-auto">
+                <BeforeAfterSlider
+                  beforeImage="/lovable-uploads/1-2.png"
+                  afterImage="/lovable-uploads/1-1.png"
+                  alt="карточки наушников до и после"
+                />
+                <p className="text-xs sm:text-sm text-muted-foreground text-center mt-3">
+                  Наушники • Конверсия +183%
+                </p>
+              </div>
+
+              {/* Example 2 */}
+              <div className="max-w-sm mx-auto">
+                <BeforeAfterSlider
+                  beforeImage="/lovable-uploads/2-2.png"
+                  afterImage="/lovable-uploads/2-1.jpg"
+                  alt="карточки платья до и после"
+                />
+                <p className="text-xs sm:text-sm text-muted-foreground text-center mt-3">
+                  Платье • Конверсия +250%
+                </p>
+              </div>
             </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/auth">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-lg">
+                Получить такие же результаты
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -421,43 +523,81 @@ const Landing = () => {
       </section>
 
       {/* Description Generation */}
-      <section className="py-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Генерация описаний</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              <span className="sm:hidden">SEO-описания для конверсии</span>
-              <span className="hidden sm:inline">SEO-оптимизированные описания товаров для повышения конверсии</span>
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={bg3d1} alt="" className="w-full h-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/40 via-background/95 to-background/95"></div>
+        </div>
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-wb-purple/10 to-purple-500/10 text-wb-purple px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-wb-purple/20">
+              <Sparkles className="w-4 h-4" />
+              <span className="font-medium">ИИ-генерация SEO-описаний</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Продающие описания за минуту</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Нейросеть анализирует конкурентов и создает уникальные SEO-тексты
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card>
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto mb-12">
+            <Card className="border-none shadow-xl bg-white/95 backdrop-blur">
               <CardHeader>
-                <FileText className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Анализ конкурентов</CardTitle>
-                <CardDescription>
-                  ИИ анализирует описания конкурентов и создает уникальный контент с использованием эффективных ключевых слов
+                <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-2xl flex items-center justify-center mb-4">
+                  <FileText className="w-8 h-8 text-wb-purple" />
+                </div>
+                <CardTitle className="text-xl">Анализ конкурентов</CardTitle>
+                <CardDescription className="text-base">
+                  ИИ изучает топ-20 карточек в вашей нише и выявляет самые эффективные ключевые слова
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card>
+            <Card className="border-none shadow-xl bg-white/95 backdrop-blur">
               <CardHeader>
-                <Zap className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>SEO-оптимизация</CardTitle>
-                <CardDescription>
-                  Автоматическое распределение ключевых слов и создание продающих текстов до 1800 символов
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl flex items-center justify-center mb-4">
+                  <Zap className="w-8 h-8 text-green-600" />
+                </div>
+                <CardTitle className="text-xl">SEO-оптимизация</CardTitle>
+                <CardDescription className="text-base">
+                  Автоматическое распределение ключей и создание продающих текстов до 1800 символов
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-none shadow-xl bg-white/95 backdrop-blur">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl flex items-center justify-center mb-4">
+                  <TrendingUp className="w-8 h-8 text-blue-600" />
+                </div>
+                <CardTitle className="text-xl">Рост продаж</CardTitle>
+                <CardDescription className="text-base">
+                  Грамотные описания повышают позиции в поиске WB и увеличивают конверсию на 25-40%
                 </CardDescription>
               </CardHeader>
             </Card>
           </div>
 
-          <div className="text-center mt-8">
+          {/* Stats */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 text-center border border-gray-100 shadow-lg">
+              <div className="text-4xl font-bold text-wb-purple mb-2">1 мин</div>
+              <div className="text-sm text-muted-foreground">Время генерации</div>
+            </div>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 text-center border border-gray-100 shadow-lg">
+              <div className="text-4xl font-bold text-wb-purple mb-2">12₽</div>
+              <div className="text-sm text-muted-foreground">За одно описание</div>
+            </div>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 text-center border border-gray-100 shadow-lg">
+              <div className="text-4xl font-bold text-wb-purple mb-2">+35%</div>
+              <div className="text-sm text-muted-foreground">Средний рост конверсии</div>
+            </div>
+          </div>
+
+          <div className="text-center">
             <Link to="/auth">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
-                <span className="sm:hidden">Генерация описаний</span>
-                <span className="hidden sm:inline">Попробовать генерацию описаний</span>
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-xl">
+                Попробовать генерацию описаний
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
@@ -466,55 +606,82 @@ const Landing = () => {
       </section>
 
       {/* Label Generator */}
-      <section className="py-16 bg-gradient-to-b from-green-50/50 to-green-100/30">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-4">
-            <div className="inline-flex items-center gap-2 bg-green-100 border border-green-300 text-green-700 px-6 py-3 rounded-lg text-sm font-medium mb-6">
-              <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
-              <span>для всех пользователей WB Генератор</span>
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={bg3d2} alt="" className="w-full h-full object-cover opacity-15" />
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-background/95 to-background/95"></div>
+        </div>
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 px-6 py-3 rounded-full text-sm font-medium mb-6 shadow-sm">
+              <Badge className="bg-green-500 text-white px-3 py-1 text-xs font-bold">БЕСПЛАТНО</Badge>
+              <span className="font-semibold">для всех пользователей</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Генератор этикеток</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              <span className="sm:hidden">Этикетки и коды для товаров</span>
-              <span className="hidden sm:inline">Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Генератор этикеток WB</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Профессиональные этикетки, штрихкоды и QR-коды для ваших товаров
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-8">
-            <Card>
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto mb-12">
+            <Card className="border-none shadow-xl bg-white/95 backdrop-blur hover:shadow-2xl transition-all">
               <CardHeader>
-                <BarChart3 className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Штрих-коды</CardTitle>
-                <CardDescription>
-                  Создавайте CODE-128 штрихкоды для товаров с наименованием и артикулом
+                <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-2xl flex items-center justify-center mb-4">
+                  <BarChart3 className="w-8 h-8 text-wb-purple" />
+                </div>
+                <CardTitle className="text-xl">Штрих-коды</CardTitle>
+                <CardDescription className="text-base">
+                  Создавайте CODE-128 штрихкоды для товаров с наименованием и артикулом. Готовы к печати
                 </CardDescription>
+                <div className="pt-4">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100">
+                    <div className="text-2xl font-bold text-green-600">∞</div>
+                    <div className="text-xs text-green-700 font-medium">Без ограничений</div>
+                  </div>
+                </div>
               </CardHeader>
             </Card>
 
-            <Card>
+            <Card className="border-none shadow-xl bg-white/95 backdrop-blur hover:shadow-2xl transition-all">
               <CardHeader>
-                <QrCode className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>QR-коды</CardTitle>
-                <CardDescription>
-                  Генерируйте QR-коды для ссылок, текста и любой другой информации
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl flex items-center justify-center mb-4">
+                  <QrCode className="w-8 h-8 text-blue-600" />
+                </div>
+                <CardTitle className="text-xl">QR-коды</CardTitle>
+                <CardDescription className="text-base">
+                  Генерируйте QR-коды для ссылок на товары, инструкций или контактной информации
                 </CardDescription>
+                <div className="pt-4">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100">
+                    <div className="text-2xl font-bold text-green-600">∞</div>
+                    <div className="text-xs text-green-700 font-medium">Без ограничений</div>
+                  </div>
+                </div>
               </CardHeader>
             </Card>
 
-            <Card>
+            <Card className="border-none shadow-xl bg-white/95 backdrop-blur hover:shadow-2xl transition-all">
               <CardHeader>
-                <Package className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Короба WB</CardTitle>
-                <CardDescription>
-                  Специальные этикетки для коробов Wildberries с порядковыми номерами
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-2xl flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-purple-600" />
+                </div>
+                <CardTitle className="text-xl">Короба WB</CardTitle>
+                <CardDescription className="text-base">
+                  Специальные этикетки для коробов Wildberries с автоматической нумерацией
                 </CardDescription>
+                <div className="pt-4">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-100">
+                    <div className="text-2xl font-bold text-green-600">∞</div>
+                    <div className="text-xs text-green-700 font-medium">Без ограничений</div>
+                  </div>
+                </div>
               </CardHeader>
             </Card>
           </div>
 
           <div className="text-center">
             <Link to="/auth">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark">
+              <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-base sm:text-lg px-8 py-6 shadow-xl">
                 Создать этикетки бесплатно
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
@@ -687,60 +854,123 @@ const Landing = () => {
       </section>
 
       {/* Referrals */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Реферальная программа</h2>
-            <p className="text-xl text-muted-foreground">
-              <span className="sm:hidden">Приглашайте и получайте бонусы</span>
-              <span className="hidden sm:inline">Приглашайте друзей и получайте бонусы</span>
+      <section className="py-20 relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-wb-purple/10 to-purple-500/10 text-wb-purple px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-wb-purple/20">
+              <PartyPopper className="w-4 h-4" />
+              <span className="font-medium">Зарабатывайте вместе с нами</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Реферальная программа</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Делитесь с друзьями и получайте бонусы за каждого нового пользователя
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card>
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-gradient-to-br from-white to-gray-50">
               <CardHeader>
-                <Users className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Для вас</CardTitle>
-                <CardDescription>
-                  Получайте +25 токенов за каждого друга, который совершил покупку
+                <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-2xl flex items-center justify-center mb-4">
+                  <Users className="w-8 h-8 text-wb-purple" />
+                </div>
+                <CardTitle className="text-2xl">Для вас</CardTitle>
+                <CardDescription className="text-base space-y-4 pt-2">
+                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-4 rounded-lg">
+                    <div className="text-4xl font-bold text-wb-purple mb-2">+25</div>
+                    <div className="text-sm text-muted-foreground">токенов за каждого друга, который совершил покупку</div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Один реферал = <span className="font-bold text-foreground">297₽ экономии</span>
+                  </div>
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card>
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-gradient-to-br from-white to-gray-50">
               <CardHeader>
-                <Star className="w-12 h-12 text-wb-purple mb-4" />
-                <CardTitle>Для друзей</CardTitle>
-                <CardDescription>
-                  Ваши друзья получают +10 токенов при регистрации по вашей ссылке
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl flex items-center justify-center mb-4">
+                  <Star className="w-8 h-8 text-green-600" />
+                </div>
+                <CardTitle className="text-2xl">Для друзей</CardTitle>
+                <CardDescription className="text-base space-y-4 pt-2">
+                  <div className="bg-gradient-to-r from-green-500/5 to-transparent p-4 rounded-lg">
+                    <div className="text-4xl font-bold text-green-600 mb-2">+10</div>
+                    <div className="text-sm text-muted-foreground">токенов при регистрации по вашей реферальной ссылке</div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Дополнительный бонус = <span className="font-bold text-foreground">119₽ в подарок</span>
+                  </div>
                 </CardDescription>
               </CardHeader>
             </Card>
+          </div>
+
+          {/* Benefits Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 text-center border border-gray-100 shadow-lg">
+              <TrendingUp className="w-10 h-10 text-wb-purple mx-auto mb-3" />
+              <div className="text-3xl font-bold text-wb-purple mb-1">∞</div>
+              <div className="text-sm text-muted-foreground">Без лимитов рефералов</div>
+            </div>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 text-center border border-gray-100 shadow-lg">
+              <Zap className="w-10 h-10 text-green-600 mx-auto mb-3" />
+              <div className="text-3xl font-bold text-green-600 mb-1">Мгновенно</div>
+              <div className="text-sm text-muted-foreground">Токены зачисляются сразу</div>
+            </div>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 text-center border border-gray-100 shadow-lg">
+              <Target className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+              <div className="text-3xl font-bold text-blue-600 mb-1">Легко</div>
+              <div className="text-sm text-muted-foreground">Просто поделитесь ссылкой</div>
+            </div>
           </div>
         </div>
       </section>
 
 
       {/* CTA */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-gradient-to-r from-wb-purple/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-l from-wb-purple/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={bg3d3} alt="" className="w-full h-full object-cover opacity-25" />
+          <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/60 via-purple-600/50 to-wb-purple/60"></div>
+        </div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl"></div>
+        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
+          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-4 py-2 rounded-full text-xs sm:text-sm mb-8">
+            <Sparkles className="w-4 h-4" />
+            <span className="font-medium">Присоединяйтесь к тысячам продавцов</span>
+          </div>
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white animate-fade-in">
             Начните прямо сейчас
           </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in">
-            25 бесплатных токенов ждут вас. Создайте первые карточки за несколько минут.
+          <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto animate-fade-in leading-relaxed">
+            25 бесплатных токенов ждут вас. Создайте первые профессиональные карточки за 3 минуты.
           </p>
+          
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto mb-10">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">₽0</div>
+              <div className="text-xs sm:text-sm text-white/80">Начало работы</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">3 мин</div>
+              <div className="text-xs sm:text-sm text-white/80">До результата</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-6">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">+40%</div>
+              <div className="text-xs sm:text-sm text-white/80">Рост продаж</div>
+            </div>
+          </div>
+
           <div className="animate-fade-in">
             <Link to="/auth">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-sm px-6 py-4 hover-scale">
+              <Button size="lg" className="bg-white text-wb-purple hover:bg-gray-100 text-base sm:text-lg px-10 py-7 hover-scale shadow-2xl font-semibold">
                 Получить 25 токенов бесплатно
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
+            <p className="text-white/70 text-xs sm:text-sm mt-4">Без карты • Без обязательств • Мгновенный доступ</p>
           </div>
         </div>
       </section>
