@@ -145,7 +145,7 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row w-full overflow-hidden">
       {/* Desktop Sidebar */}
       {!isMobile && (
         <AdminSidebar 
@@ -154,9 +154,9 @@ export default function Admin() {
         />
       )}
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 md:p-4 border-b">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b shrink-0">
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
             {/* Mobile Menu */}
             {isMobile && (
@@ -174,7 +174,7 @@ export default function Admin() {
             <DataExportDialog>
               <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
                 <Download className="h-3 w-3 md:h-4 md:w-4" />
-                {!isMobile && <span className="hidden lg:inline">Экспорт данных</span>}
+                {!isMobile && <span className="hidden lg:inline">Экспорт</span>}
               </Button>
             </DataExportDialog>
             <Button onClick={handleSignOut} variant="destructive" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
@@ -184,8 +184,8 @@ export default function Admin() {
           </div>
         </div>
         
-        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-hidden">
-          <div className="max-w-full overflow-x-hidden">
+        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden overflow-y-auto">
+          <div className="w-full max-w-full">
             {renderContent()}
           </div>
         </main>

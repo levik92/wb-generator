@@ -56,9 +56,9 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border flex flex-col transition-all duration-300`} style={{ backgroundColor: '#fcfcfc' }}>
+    <div className={`${isCollapsed ? 'w-16 md:w-20' : 'w-64'} shrink-0 border-r border-border flex flex-col transition-all duration-300 hidden md:flex`} style={{ backgroundColor: '#fcfcfc' }}>
       {/* Logo / Collapse Toggle */}
-      <div className={`p-6 ${isCollapsed ? 'p-4' : 'p-6'}`}>
+      <div className={`${isCollapsed ? 'p-2' : 'p-6'} shrink-0`}>
         <div className="flex items-center justify-between">
           {isCollapsed ? (
             <div className="flex justify-center w-full">
@@ -66,7 +66,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -74,16 +74,16 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
           ) : (
             <>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center shrink-0">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-semibold">WB Генератор</span>
+                <span className="text-sm font-semibold truncate">WB Генератор</span>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground shrink-0"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -95,7 +95,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       <Separator />
 
       {/* Navigation */}
-      <nav className={`flex-1 p-4 ${isCollapsed ? 'p-2' : 'p-4'}`}>
+      <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2' : 'p-4'}`}>
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -111,8 +111,8 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                   onClick={() => onTabChange(item.id)}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-3' : ''}`} />
-                  {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
+                  <Icon className={`w-4 h-4 shrink-0 ${!isCollapsed ? 'mr-3' : ''}`} />
+                  {!isCollapsed && <span className="flex-1 text-left truncate">{item.label}</span>}
                 </Button>
               </li>
             );
