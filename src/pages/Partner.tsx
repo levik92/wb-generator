@@ -100,15 +100,15 @@ const Partner = () => {
         setPartner(partnerData);
 
         // Загрузка рефералов
-        const { data: referralsData } = await supabase
+        const { data: referralsData, error: referralsError } = await supabase
           .from("partner_referrals")
-          .select(`
-            *,
-            profiles:referred_user_id (email, full_name)
-          `)
+          .select("*")
           .eq("partner_id", partnerData.id)
           .order("registered_at", { ascending: false });
 
+        if (referralsError) {
+          console.error("Error loading partner referrals:", referralsError);
+        }
         if (referralsData) setReferrals(referralsData as any);
 
         // Загрузка комиссий
@@ -350,6 +350,7 @@ const Partner = () => {
                       tickMargin={8}
                       axisLine={false}
                       tickLine={false}
+                      domain={[0, 'dataMax']}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -357,12 +358,16 @@ const Partner = () => {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "6px"
                       }}
+                      formatter={(value: any) => [`${Number(value).toFixed(2)} ₽`, 'Сумма']}
+                      labelFormatter={(label: any) => `Дата: ${label}`}
                     />
                     <Area
                       type="monotone"
                       dataKey="amount"
                       stroke="hsl(var(--primary))"
                       strokeWidth={2}
+                      dot={{ r: 2 }}
+                      activeDot={{ r: 4 }}
                       fillOpacity={1}
                       fill="url(#earningsGradient)"
                     />
@@ -447,6 +452,8 @@ const Partner = () => {
                       tickMargin={8}
                       axisLine={false}
                       tickLine={false}
+                      allowDecimals={false}
+                      domain={[0, 'dataMax + 1']}
                     />
                     <Tooltip 
                       contentStyle={{
@@ -454,12 +461,16 @@ const Partner = () => {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "6px"
                       }}
+                      formatter={(value: any) => [value, 'Пользователи']}
+                      labelFormatter={(label: any) => `Дата: ${label}`}
                     />
                     <Area
                       type="monotone"
                       dataKey="count"
                       stroke="hsl(var(--chart-2))"
                       strokeWidth={2}
+                      dot={{ r: 2 }}
+                      activeDot={{ r: 4 }}
                       fillOpacity={1}
                       fill="url(#clientsGradient)"
                     />
@@ -553,8 +564,7 @@ const Partner = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Имя</TableHead>
+                      <TableHead>Пользователь</TableHead>
                       <TableHead>Дата регистрации</TableHead>
                       <TableHead>Сумма платежей</TableHead>
                       <TableHead>Ваша комиссия</TableHead>
@@ -564,8 +574,9 @@ const Partner = () => {
                   <TableBody>
                     {referrals.map((ref) => (
                       <TableRow key={ref.id}>
-                        <TableCell>{ref.profiles?.email || "—"}</TableCell>
-                        <TableCell>{ref.profiles?.full_name || "—"}</TableCell>
+                        <TableCell>
+                          {ref.profiles?.full_name || ref.profiles?.email || `ID: ${ref.referred_user_id.slice(0, 8)}…`}
+                        </TableCell>
                         <TableCell>
                           {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
                         </TableCell>
