@@ -130,23 +130,39 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
   };
 
   const toggleUserBlock = async (userId: string, currentStatus: boolean) => {
-    const { data, error } = await supabase.rpc('admin_toggle_user_block', {
-      target_user_id: userId,
-      block_status: !currentStatus
-    });
-
-    if (error) {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось изменить статус пользователя",
-        variant: "destructive",
+    try {
+      const { data, error } = await supabase.rpc('admin_toggle_user_block', {
+        target_user_id: userId,
+        block_status: !currentStatus
       });
-    } else {
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Успешно",
         description: `Пользователь ${!currentStatus ? 'заблокирован' : 'разблокирован'}`,
       });
-      onUsersUpdate();
+      
+      // Give database time to update and force refresh
+      setTimeout(async () => {
+        await onUsersUpdate();
+        // Force re-render by updating the local state
+        const updatedUsers = users.map(u => 
+          u.id === userId ? { ...u, is_blocked: !currentStatus } : u
+        );
+        setFilteredUsers(updatedUsers.filter(user => 
+          user.email.toLowerCase().includes(searchEmail.toLowerCase())
+        ));
+      }, 300);
+    } catch (error: any) {
+      console.error('Error toggling user block:', error);
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось изменить статус пользователя",
+        variant: "destructive",
+      });
     }
   };
 
