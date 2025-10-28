@@ -17,6 +17,8 @@ import exampleAfter3 from "@/assets/example-after-3.jpg";
 import bg3d1 from "@/assets/3d-gradient-bg-1.jpg";
 import bg3d2 from "@/assets/3d-gradient-bg-2.jpg";
 import bg3d3 from "@/assets/3d-gradient-bg-3.jpg";
+import ecommerce3d1 from "@/assets/3d-ecommerce-1.jpg";
+import ecommerce3d2 from "@/assets/3d-ecommerce-2.jpg";
 
 // Компонент анимированного счетчика
 const AnimatedCounter = () => {
@@ -160,21 +162,54 @@ const Landing = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 hover:bg-gray-50 w-full sm:w-auto" onClick={scrollToExamples}>
+              <Button variant="outline" size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 hover:bg-gray-50 hover:text-wb-purple w-full sm:w-auto" onClick={scrollToExamples}>
                 Примеры работ
               </Button>
             </div>
           </div>
 
-          {/* Dashboard Preview Image */}
+          {/* Before/After Example with Angled Photos */}
           <div className="mb-8 px-4">
             <div className="relative w-full max-w-5xl mx-auto">
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none z-10"></div>
-              <img 
-                src="/lovable-uploads/5030ec29-2f6f-4436-9d03-bafcfc526692.png" 
-                alt="Интерфейс WB Генератор"
-                className="w-full rounded-2xl shadow-2xl"
-              />
+              <div className="text-center mb-4">
+                <Badge className="bg-green-100 text-green-700 border-green-300 text-sm px-4 py-2">
+                  Пример генерации в сервисе
+                </Badge>
+              </div>
+              <div className="flex items-center justify-center gap-4 sm:gap-8">
+                {/* Before Image */}
+                <div className="relative transform -rotate-3 transition-transform hover:rotate-0">
+                  <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
+                    <img 
+                      src="/lovable-uploads/1-1.png" 
+                      alt="До генерации"
+                      className="w-32 sm:w-48 md:w-64 h-auto rounded-lg"
+                    />
+                    <div className="text-center mt-2 text-xs sm:text-sm font-medium text-muted-foreground">
+                      До
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Arrow */}
+                <div className="flex-shrink-0">
+                  <ArrowRight className="w-6 h-6 sm:w-10 sm:h-10 text-wb-purple" />
+                </div>
+                
+                {/* After Image */}
+                <div className="relative transform rotate-3 transition-transform hover:rotate-0">
+                  <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
+                    <img 
+                      src="/lovable-uploads/1-2.png" 
+                      alt="После генерации"
+                      className="w-32 sm:w-48 md:w-64 h-auto rounded-lg"
+                    />
+                    <div className="text-center mt-2 text-xs sm:text-sm font-medium text-green-600 font-bold">
+                      После
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -266,158 +301,182 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Examples Section with Case Studies */}
-      <section id="examples" className="py-16 sm:py-20 bg-gradient-to-b from-white via-gray-50/30 to-white">
+      {/* Examples Section - Before/After Gallery */}
+      <section id="examples" className="py-16 sm:py-20 bg-gray-100">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Кейсы наших клиентов</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Примеры генераций</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Реальные результаты продавцов, которые используют WB Генератор
+              Реальные результаты работы нейросети
             </p>
           </div>
 
-          {/* Case Studies Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto mb-12">
-            {/* Case 1 */}
-            <Card className="border-none shadow-lg hover:shadow-2xl transition-all overflow-hidden">
-              <div className="relative h-48 bg-gradient-to-br from-wb-purple/5 to-wb-purple/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Image className="w-16 h-16 text-wb-purple" />
+          {/* Before/After Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-12">
+            {/* Example 1 */}
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  {/* Before */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                      <img 
+                        src="/lovable-uploads/1-1.png" 
+                        alt="До"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
+                        До
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex-shrink-0">
+                    <ArrowRight className="w-6 h-6 text-wb-purple" />
+                  </div>
+                  
+                  {/* After */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
+                      <img 
+                        src="/lovable-uploads/1-2.png" 
+                        alt="После"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
+                        После
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <CardHeader>
-                <Badge className="w-fit mb-2 bg-green-100 text-green-700 border-green-300">Электроника</Badge>
-                <CardTitle className="text-xl">Наушники Premium</CardTitle>
-                <CardDescription className="text-base space-y-3 pt-2">
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground text-sm">Было:</span>
-                    <span className="font-semibold">12 продаж/день</span>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Категория:</span>
+                    <Badge className="bg-purple-100 text-purple-700">Электроника</Badge>
                   </div>
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground text-sm">Стало:</span>
-                    <span className="font-bold text-green-600">34 продажи/день</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Рост конверсии:</span>
+                    <span className="text-lg font-bold text-green-600">+183%</span>
                   </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-muted-foreground text-sm">Рост конверсии:</span>
-                    <span className="text-2xl font-bold text-wb-purple">+183%</span>
+                  <div className="flex items-center justify-between text-sm pt-2 border-t">
+                    <span className="text-muted-foreground">Стоимость:</span>
+                    <span className="font-bold text-wb-purple">120₽</span>
                   </div>
-                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-3 rounded-lg mt-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Стоимость дизайнера:</span>
-                      <span className="text-sm line-through">15 000₽</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">WB Генератор:</span>
-                      <span className="text-lg font-bold text-green-600">120₽</span>
-                    </div>
-                  </div>
-                </CardDescription>
-              </CardHeader>
+                </div>
+              </CardContent>
             </Card>
 
-            {/* Case 2 */}
-            <Card className="border-none shadow-lg hover:shadow-2xl transition-all overflow-hidden">
-              <div className="relative h-48 bg-gradient-to-br from-pink-500/5 to-purple-500/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="w-16 h-16 text-pink-600" />
+            {/* Example 2 */}
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  {/* Before */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                      <img 
+                        src="/lovable-uploads/2-1.jpg" 
+                        alt="До"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
+                        До
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex-shrink-0">
+                    <ArrowRight className="w-6 h-6 text-wb-purple" />
+                  </div>
+                  
+                  {/* After */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
+                      <img 
+                        src="/lovable-uploads/2-2.png" 
+                        alt="После"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
+                        После
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <CardHeader>
-                <Badge className="w-fit mb-2 bg-pink-100 text-pink-700 border-pink-300">Одежда</Badge>
-                <CardTitle className="text-xl">Женские платья</CardTitle>
-                <CardDescription className="text-base space-y-3 pt-2">
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground text-sm">Было:</span>
-                    <span className="font-semibold">8 продаж/день</span>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Категория:</span>
+                    <Badge className="bg-pink-100 text-pink-700">Одежда</Badge>
                   </div>
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground text-sm">Стало:</span>
-                    <span className="font-bold text-green-600">28 продаж/день</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Рост конверсии:</span>
+                    <span className="text-lg font-bold text-green-600">+250%</span>
                   </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-muted-foreground text-sm">Рост конверсии:</span>
-                    <span className="text-2xl font-bold text-wb-purple">+250%</span>
+                  <div className="flex items-center justify-between text-sm pt-2 border-t">
+                    <span className="text-muted-foreground">Стоимость:</span>
+                    <span className="font-bold text-wb-purple">120₽</span>
                   </div>
-                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-3 rounded-lg mt-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Фотограф + дизайнер:</span>
-                      <span className="text-sm line-through">25 000₽</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">WB Генератор:</span>
-                      <span className="text-lg font-bold text-green-600">120₽</span>
-                    </div>
-                  </div>
-                </CardDescription>
-              </CardHeader>
+                </div>
+              </CardContent>
             </Card>
 
-            {/* Case 3 */}
-            <Card className="border-none shadow-lg hover:shadow-2xl transition-all overflow-hidden">
-              <div className="relative h-48 bg-gradient-to-br from-blue-500/5 to-purple-500/10">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Star className="w-16 h-16 text-blue-600" />
+            {/* Example 3 */}
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  {/* Before */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                      <img 
+                        src="/lovable-uploads/3-1.webp" 
+                        alt="До"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
+                        До
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex-shrink-0">
+                    <ArrowRight className="w-6 h-6 text-wb-purple" />
+                  </div>
+                  
+                  {/* After */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
+                      <img 
+                        src="/lovable-uploads/3-2.png" 
+                        alt="После"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
+                        После
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <CardHeader>
-                <Badge className="w-fit mb-2 bg-blue-100 text-blue-700 border-blue-300">Косметика</Badge>
-                <CardTitle className="text-xl">Шампунь для волос</CardTitle>
-                <CardDescription className="text-base space-y-3 pt-2">
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground text-sm">Было:</span>
-                    <span className="font-semibold">15 продаж/день</span>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Категория:</span>
+                    <Badge className="bg-blue-100 text-blue-700">Красота</Badge>
                   </div>
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <span className="text-muted-foreground text-sm">Стало:</span>
-                    <span className="font-bold text-green-600">38 продаж/день</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Рост конверсии:</span>
+                    <span className="text-lg font-bold text-green-600">+153%</span>
                   </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-muted-foreground text-sm">Рост конверсии:</span>
-                    <span className="text-2xl font-bold text-wb-purple">+153%</span>
+                  <div className="flex items-center justify-between text-sm pt-2 border-t">
+                    <span className="text-muted-foreground">Стоимость:</span>
+                    <span className="font-bold text-wb-purple">120₽</span>
                   </div>
-                  <div className="bg-gradient-to-r from-wb-purple/5 to-transparent p-3 rounded-lg mt-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Дизайнер + контент:</span>
-                      <span className="text-sm line-through">12 000₽</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">WB Генератор:</span>
-                      <span className="text-lg font-bold text-green-600">120₽</span>
-                    </div>
-                  </div>
-                </CardDescription>
-              </CardHeader>
+                </div>
+              </CardContent>
             </Card>
-          </div>
-
-          {/* Before/After Examples */}
-          <div className="max-w-5xl mx-auto">
-            <h3 className="text-2xl sm:text-3xl font-bold text-center mb-8">Было → Стало</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              {/* Example 1 */}
-              <div className="max-w-sm mx-auto">
-                <BeforeAfterSlider
-                  beforeImage="/lovable-uploads/1-2.png"
-                  afterImage="/lovable-uploads/1-1.png"
-                  alt="карточки наушников до и после"
-                />
-                <p className="text-xs sm:text-sm text-muted-foreground text-center mt-3">
-                  Наушники • Конверсия +183%
-                </p>
-              </div>
-
-              {/* Example 2 */}
-              <div className="max-w-sm mx-auto">
-                <BeforeAfterSlider
-                  beforeImage="/lovable-uploads/2-2.png"
-                  afterImage="/lovable-uploads/2-1.jpg"
-                  alt="карточки платья до и после"
-                />
-                <p className="text-xs sm:text-sm text-muted-foreground text-center mt-3">
-                  Платье • Конверсия +250%
-                </p>
-              </div>
-            </div>
           </div>
 
           <div className="text-center mt-12">
@@ -691,22 +750,28 @@ const Landing = () => {
       </section>
 
       {/* Pricing */}
-      <section className="py-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Прозрачные тарифы</h2>
-            <p className="text-xl text-muted-foreground">
+      <section className="py-16 sm:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50/50 to-white"></div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-green-200">
+              <Sparkles className="w-4 h-4" />
+              <span className="font-medium">Без скрытых платежей</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Прозрачные тарифы</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
               <span className="sm:hidden">Платите за генерацию</span>
-              <span className="hidden sm:inline">Платите только за то, что генерируете</span>
+              <span className="hidden sm:inline">Платите только за то, что генерируете. Без абонентской платы.</span>
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle>Стартовый</CardTitle>
-                <div className="text-3xl font-bold">990₽</div>
-                <CardDescription>80 токенов</CardDescription>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-wb-purple/10 to-transparent rounded-bl-[100px]"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl">Стартовый</CardTitle>
+                <div className="text-4xl font-bold text-foreground mt-2">990₽</div>
+                <CardDescription className="text-base">80 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>12,38₽</strong> за токен
                 </div>
@@ -750,11 +815,17 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Профи</CardTitle>
-                <div className="text-3xl font-bold">2 990₽</div>
-                <CardDescription>250 токенов</CardDescription>
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500"></div>
+              <div className="absolute -top-3 right-4">
+                <Badge className="bg-gradient-to-r from-wb-purple to-purple-600 text-white border-none px-4 py-1 text-xs font-bold shadow-lg">
+                  ПОПУЛЯРНЫЙ
+                </Badge>
+              </div>
+              <CardHeader className="relative pt-8">
+                <CardTitle className="text-2xl">Профи</CardTitle>
+                <div className="text-4xl font-bold text-foreground mt-2">2 990₽</div>
+                <CardDescription className="text-base">250 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>11,96₽</strong> за токен
                 </div>
@@ -798,11 +869,12 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Бизнес</CardTitle>
-                <div className="text-3xl font-bold">9 990₽</div>
-                <CardDescription>850 токенов</CardDescription>
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-gradient-to-br from-white via-wb-purple/5 to-purple-50 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-bl-[100px]"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl">Бизнес</CardTitle>
+                <div className="text-4xl font-bold text-foreground mt-2">9 990₽</div>
+                <CardDescription className="text-base">850 токенов</CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>11,75₽</strong> за токен
                 </div>
@@ -930,13 +1002,20 @@ const Landing = () => {
       {/* CTA */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={bg3d3} alt="" className="w-full h-full object-cover opacity-25" />
-          <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/60 via-purple-600/50 to-wb-purple/60"></div>
+          <img src={bg3d3} alt="" className="w-full h-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/80 via-purple-600/80 to-wb-purple/90"></div>
+          <div className="absolute top-10 right-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl"></div>
+          {/* 3D Images */}
+          <div className="absolute top-20 left-10 w-48 h-48 opacity-30 hidden lg:block">
+            <img src={ecommerce3d1} alt="" className="w-full h-full object-contain animate-float" />
+          </div>
+          <div className="absolute bottom-20 right-10 w-56 h-56 opacity-30 hidden lg:block">
+            <img src={ecommerce3d2} alt="" className="w-full h-full object-contain animate-float-delayed" />
+          </div>
         </div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl"></div>
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-4 py-2 rounded-full text-xs sm:text-sm mb-8">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 rounded-full text-xs sm:text-sm mb-8">
             <Sparkles className="w-4 h-4" />
             <span className="font-medium">Присоединяйтесь к тысячам продавцов</span>
           </div>
