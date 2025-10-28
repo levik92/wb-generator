@@ -182,7 +182,7 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="full_name">ФИО (как на карте)</Label>
+            <Label htmlFor="full_name">ФИО</Label>
             <Input
               id="full_name"
               placeholder="Иванов Иван Иванович"

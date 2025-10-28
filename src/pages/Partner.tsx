@@ -575,7 +575,12 @@ const Partner = () => {
                     {referrals.map((ref) => (
                       <TableRow key={ref.id}>
                         <TableCell>
-                          {ref.profiles?.full_name || ref.profiles?.email || `ID: ${ref.referred_user_id.slice(0, 8)}…`}
+                          {ref.profiles?.full_name || (ref.profiles?.email ? (() => {
+                            const email = ref.profiles.email;
+                            const [local, domain] = email.split('@');
+                            const maskedLocal = local.charAt(0) + '***';
+                            return `${maskedLocal}@${domain}`;
+                          })() : `ID: ${ref.referred_user_id.slice(0, 8)}…`)}
                         </TableCell>
                         <TableCell>
                           {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
