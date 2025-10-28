@@ -408,7 +408,7 @@ export default function LabelGenerator() {
         </div>
         <div className="bg-green-100 border border-green-300 rounded-lg p-3 max-w-sm">
           <div className="flex items-center gap-2">
-            <Badge className="bg-green-500 text-white px-2 py-1 text-xs">БЕСПЛАТНО</Badge>
+            <Badge className="bg-green-500 text-white px-2 py-1 text-xs hover:bg-green-500 focus:outline-none focus:ring-0 pointer-events-none">БЕСПЛАТНО</Badge>
             <span className="text-green-700 text-sm font-medium">для всех пользователей WB Генератор</span>
           </div>
         </div>
