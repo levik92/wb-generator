@@ -19,6 +19,8 @@ import bg3d2 from "@/assets/3d-gradient-bg-2.jpg";
 import bg3d3 from "@/assets/3d-gradient-bg-3.jpg";
 import ecommerce3d1 from "@/assets/3d-ecommerce-1.jpg";
 import ecommerce3d2 from "@/assets/3d-ecommerce-2.jpg";
+import aiTech3d from "@/assets/3d-ai-tech.png";
+import lightning3d from "@/assets/3d-lightning.png";
 
 // Компонент анимированного счетчика
 const AnimatedCounter = () => {
@@ -113,7 +115,7 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative pt-16 sm:pt-24 pb-16 sm:pb-20 animate-fade-in overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/3 via-transparent to-wb-purple/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/80 via-white to-gray-100/50"></div>
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-8 border border-green-200 shadow-sm">
@@ -172,7 +174,7 @@ const Landing = () => {
           <div className="mb-8 px-4">
             <div className="relative w-full max-w-5xl mx-auto">
               <div className="text-center mb-4">
-                <Badge className="bg-green-100 text-green-700 border-green-300 text-sm px-4 py-2">
+                <Badge variant="secondary" className="bg-gray-200 text-gray-600 border-none text-sm px-4 py-2 hover:bg-gray-200 hover:text-gray-600">
                   Пример генерации в сервисе
                 </Badge>
               </div>
@@ -307,12 +309,12 @@ const Landing = () => {
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Примеры генераций</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Реальные результаты работы нейросети
+              Реальные результаты клиентов WB Генератор
             </p>
           </div>
 
           {/* Before/After Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto mb-12">
             {/* Example 1 */}
             <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
               <CardContent className="p-6">
@@ -360,9 +362,18 @@ const Landing = () => {
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+183%</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm pt-2 border-t">
-                    <span className="text-muted-foreground">Стоимость:</span>
-                    <span className="font-bold text-wb-purple">120₽</span>
+                  <div className="pt-2 border-t space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">WB Генератор:</span>
+                      <span className="font-bold text-wb-purple">120₽</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Дизайнер:</span>
+                      <span className="line-through text-gray-400">15 000₽</span>
+                    </div>
+                    <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
+                      Экономия 14 880₽
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -415,9 +426,18 @@ const Landing = () => {
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+250%</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm pt-2 border-t">
-                    <span className="text-muted-foreground">Стоимость:</span>
-                    <span className="font-bold text-wb-purple">120₽</span>
+                  <div className="pt-2 border-t space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">WB Генератор:</span>
+                      <span className="font-bold text-wb-purple">120₽</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Фотограф:</span>
+                      <span className="line-through text-gray-400">8 000₽</span>
+                    </div>
+                    <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
+                      Экономия 7 880₽
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -470,9 +490,82 @@ const Landing = () => {
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+153%</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm pt-2 border-t">
-                    <span className="text-muted-foreground">Стоимость:</span>
-                    <span className="font-bold text-wb-purple">120₽</span>
+                  <div className="pt-2 border-t space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">WB Генератор:</span>
+                      <span className="font-bold text-wb-purple">120₽</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Дизайнер:</span>
+                      <span className="line-through text-gray-400">12 000₽</span>
+                    </div>
+                    <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
+                      Экономия 11 880₽
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Example 4 */}
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  {/* Before */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                      <img 
+                        src="/lovable-uploads/4-1.webp" 
+                        alt="До"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
+                        До
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Arrow */}
+                  <div className="flex-shrink-0">
+                    <ArrowRight className="w-6 h-6 text-wb-purple" />
+                  </div>
+                  
+                  {/* After */}
+                  <div className="flex-1">
+                    <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
+                      <img 
+                        src="/lovable-uploads/4-2.png" 
+                        alt="После"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
+                        После
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Категория:</span>
+                    <Badge className="bg-orange-100 text-orange-700">Товары для дома</Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Рост конверсии:</span>
+                    <span className="text-lg font-bold text-green-600">+197%</span>
+                  </div>
+                  <div className="pt-2 border-t space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">WB Генератор:</span>
+                      <span className="font-bold text-wb-purple">120₽</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Дизайнер:</span>
+                      <span className="line-through text-gray-400">10 000₽</span>
+                    </div>
+                    <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
+                      Экономия 9 880₽
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -481,9 +574,9 @@ const Landing = () => {
 
           <div className="text-center mt-12">
             <Link to="/auth">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-lg">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base md:text-lg px-6 sm:px-8 py-5 sm:py-6 shadow-lg">
                 Получить такие же результаты
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
           </div>
@@ -754,7 +847,7 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50/50 to-white"></div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-green-200">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-wb-purple/10 to-purple-500/10 text-wb-purple px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-wb-purple/20">
               <Sparkles className="w-4 h-4" />
               <span className="font-medium">Без скрытых платежей</span>
             </div>
@@ -815,9 +908,9 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden relative">
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-visible relative">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500"></div>
-              <div className="absolute -top-3 right-4">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                 <Badge className="bg-gradient-to-r from-wb-purple to-purple-600 text-white border-none px-4 py-1 text-xs font-bold shadow-lg">
                   ПОПУЛЯРНЫЙ
                 </Badge>
@@ -929,7 +1022,7 @@ const Landing = () => {
       <section className="py-20 relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-wb-purple/10 to-purple-500/10 text-wb-purple px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-wb-purple/20">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-green-200">
               <PartyPopper className="w-4 h-4" />
               <span className="font-medium">Зарабатывайте вместе с нами</span>
             </div>
@@ -1007,11 +1100,11 @@ const Landing = () => {
           <div className="absolute top-10 right-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl"></div>
           {/* 3D Images */}
-          <div className="absolute top-20 left-10 w-48 h-48 opacity-30 hidden lg:block">
-            <img src={ecommerce3d1} alt="" className="w-full h-full object-contain animate-float" />
+          <div className="absolute top-20 left-10 w-48 h-48 opacity-40 hidden lg:block transform -rotate-12">
+            <img src={aiTech3d} alt="" className="w-full h-full object-contain animate-float" />
           </div>
-          <div className="absolute bottom-20 right-10 w-56 h-56 opacity-30 hidden lg:block">
-            <img src={ecommerce3d2} alt="" className="w-full h-full object-contain animate-float-delayed" />
+          <div className="absolute bottom-20 right-10 w-56 h-56 opacity-40 hidden lg:block transform rotate-12">
+            <img src={lightning3d} alt="" className="w-full h-full object-contain animate-float-delayed" />
           </div>
         </div>
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
@@ -1044,9 +1137,9 @@ const Landing = () => {
 
           <div className="animate-fade-in">
             <Link to="/auth">
-              <Button size="lg" className="bg-white text-wb-purple hover:bg-gray-100 text-base sm:text-lg px-10 py-7 hover-scale shadow-2xl font-semibold">
+              <Button size="lg" className="bg-white text-wb-purple hover:bg-gray-100 text-sm sm:text-base md:text-lg px-6 sm:px-10 py-5 sm:py-7 hover-scale shadow-2xl font-semibold">
                 Получить 25 токенов бесплатно
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
             <p className="text-white/70 text-xs sm:text-sm mt-4">Без карты • Без обязательств • Мгновенный доступ</p>
