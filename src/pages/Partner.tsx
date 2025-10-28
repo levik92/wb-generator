@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +54,7 @@ const Partner = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [chartsLoading, setChartsLoading] = useState(true);
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
   const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
@@ -147,6 +149,8 @@ const Partner = () => {
       });
     } finally {
       setLoading(false);
+      // Simulate chart loading delay for better UX
+      setTimeout(() => setChartsLoading(false), 500);
     }
   };
 
@@ -305,13 +309,18 @@ const Partner = () => {
                 </div>
               </div>
               <div className="flex items-end justify-between">
-                <div className="text-4xl font-bold">{partner?.total_earned || 0} ₽</div>
+                {chartsLoading ? (
+                  <Skeleton className="h-12 w-32" />
+                ) : (
+                  <div className="text-4xl font-bold">{partner?.total_earned || 0} ₽</div>
+                )}
                 <div className="flex gap-1">
                   <Button
                     variant={earningsDateRange === "7" ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setEarningsDateRange("7")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     7д
                   </Button>
@@ -320,6 +329,7 @@ const Partner = () => {
                     size="sm"
                     onClick={() => setEarningsDateRange("30")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     30д
                   </Button>
@@ -328,6 +338,7 @@ const Partner = () => {
                     size="sm"
                     onClick={() => setEarningsDateRange("90")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     3м
                   </Button>
@@ -336,6 +347,7 @@ const Partner = () => {
                     size="sm"
                     onClick={() => setEarningsDateRange("365")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     1г
                   </Button>
@@ -343,7 +355,11 @@ const Partner = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? (
+              {chartsLoading ? (
+                <div className="flex items-center justify-center h-[300px]">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={getEarningsChartData(parseInt(earningsDateRange))}>
                     <defs>
@@ -405,13 +421,18 @@ const Partner = () => {
                 </div>
               </div>
               <div className="flex items-end justify-between">
-                <div className="text-4xl font-bold">{partner?.invited_clients_count || 0}</div>
+                {chartsLoading ? (
+                  <Skeleton className="h-12 w-24" />
+                ) : (
+                  <div className="text-4xl font-bold">{partner?.invited_clients_count || 0}</div>
+                )}
                 <div className="flex gap-1">
                   <Button
                     variant={clientsDateRange === "7" ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setClientsDateRange("7")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     7д
                   </Button>
@@ -420,6 +441,7 @@ const Partner = () => {
                     size="sm"
                     onClick={() => setClientsDateRange("30")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     30д
                   </Button>
@@ -428,6 +450,7 @@ const Partner = () => {
                     size="sm"
                     onClick={() => setClientsDateRange("90")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     3м
                   </Button>
@@ -436,6 +459,7 @@ const Partner = () => {
                     size="sm"
                     onClick={() => setClientsDateRange("365")}
                     className="h-8 px-3 text-xs"
+                    disabled={chartsLoading}
                   >
                     1г
                   </Button>
@@ -443,7 +467,11 @@ const Partner = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {getReferralsChartData(parseInt(clientsDateRange)).length > 0 ? (
+              {chartsLoading ? (
+                <div className="flex items-center justify-center h-[300px]">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : getReferralsChartData(parseInt(clientsDateRange)).length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={getReferralsChartData(parseInt(clientsDateRange))}>
                     <defs>
