@@ -116,6 +116,9 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="relative pt-16 sm:pt-24 pb-16 sm:pb-20 animate-fade-in overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50/80 via-white to-gray-100/50"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-transparent to-transparent"></div>
+        {/* Decorative sphere moved from pricing */}
+        <div className="absolute top-20 right-10 w-48 h-48 bg-gradient-to-br from-wb-purple/10 to-transparent rounded-full blur-3xl"></div>
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-8 border border-green-200 shadow-sm">
@@ -124,7 +127,8 @@ const Landing = () => {
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight px-4">
-              Карточки для&nbsp;WB<br className="hidden sm:block" /> 
+              Карточки для <span className="whitespace-nowrap">WB <br className="sm:hidden" /></span>
+              <span className="hidden sm:inline"><br /></span>
               <span className="text-gradient">за 3 минуты</span>
             </h1>
             
@@ -174,16 +178,16 @@ const Landing = () => {
           <div className="mb-8 px-4">
             <div className="relative w-full max-w-5xl mx-auto">
               <div className="text-center mb-4">
-                <Badge variant="secondary" className="bg-gray-200 text-gray-600 border-none text-sm px-4 py-2 hover:bg-gray-200 hover:text-gray-600">
+                <Badge variant="secondary" className="bg-gray-100/50 text-gray-600 border-none text-sm px-4 py-2 hover:bg-gray-100/50 hover:text-gray-600 cursor-default">
                   Пример генерации в сервисе
                 </Badge>
               </div>
-              <div className="flex items-center justify-center gap-4 sm:gap-8">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
                 {/* Before Image */}
-                <div className="relative transform -rotate-3 transition-transform hover:rotate-0">
+                <div className="relative transform sm:-rotate-3 transition-transform hover:rotate-0">
                   <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
                     <img 
-                      src="/lovable-uploads/1-1.png" 
+                      src="/lovable-uploads/clarins-before.jpeg" 
                       alt="До генерации"
                       className="w-32 sm:w-48 md:w-64 h-auto rounded-lg"
                     />
@@ -195,14 +199,19 @@ const Landing = () => {
                 
                 {/* Arrow */}
                 <div className="flex-shrink-0">
-                  <ArrowRight className="w-6 h-6 sm:w-10 sm:h-10 text-wb-purple" />
+                  <ArrowRight className="hidden sm:block w-6 h-6 sm:w-10 sm:h-10 text-wb-purple" />
+                  <div className="sm:hidden w-10 h-10 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-wb-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
                 </div>
                 
                 {/* After Image */}
-                <div className="relative transform rotate-3 transition-transform hover:rotate-0">
+                <div className="relative transform sm:rotate-3 transition-transform hover:rotate-0">
                   <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
                     <img 
-                      src="/lovable-uploads/1-2.png" 
+                      src="/lovable-uploads/clarins-after.png" 
                       alt="После генерации"
                       className="w-32 sm:w-48 md:w-64 h-auto rounded-lg"
                     />
@@ -314,7 +323,7 @@ const Landing = () => {
           </div>
 
           {/* Before/After Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-7xl mx-auto mb-12">
             {/* Example 1 */}
             <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
               <CardContent className="p-6">
@@ -361,6 +370,10 @@ const Landing = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+183%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm bg-blue-50 px-2 py-1 rounded">
+                    <span className="text-muted-foreground">Заказов в день:</span>
+                    <span className="font-bold text-blue-600">3 → 8</span>
                   </div>
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
@@ -426,6 +439,10 @@ const Landing = () => {
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+250%</span>
                   </div>
+                  <div className="flex items-center justify-between text-sm bg-blue-50 px-2 py-1 rounded">
+                    <span className="text-muted-foreground">Заказов в день:</span>
+                    <span className="font-bold text-blue-600">2 → 7</span>
+                  </div>
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">WB Генератор:</span>
@@ -490,6 +507,10 @@ const Landing = () => {
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+153%</span>
                   </div>
+                  <div className="flex items-center justify-between text-sm bg-blue-50 px-2 py-1 rounded">
+                    <span className="text-muted-foreground">Заказов в день:</span>
+                    <span className="font-bold text-blue-600">4 → 10</span>
+                  </div>
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">WB Генератор:</span>
@@ -553,6 +574,10 @@ const Landing = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Рост конверсии:</span>
                     <span className="text-lg font-bold text-green-600">+197%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm bg-blue-50 px-2 py-1 rounded">
+                    <span className="text-muted-foreground">Заказов в день:</span>
+                    <span className="font-bold text-blue-600">5 → 15</span>
                   </div>
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
@@ -678,7 +703,7 @@ const Landing = () => {
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0">
           <img src={bg3d1} alt="" className="w-full h-full object-cover opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/40 via-background/95 to-background/95"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/20 via-background/95 to-background/95"></div>
         </div>
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-12 sm:mb-16">
@@ -749,7 +774,8 @@ const Landing = () => {
           <div className="text-center">
             <Link to="/auth">
               <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-xl">
-                Попробовать генерацию описаний
+                <span className="hidden sm:inline">Попробовать генерацию описаний</span>
+                <span className="sm:hidden">Попробовать генерацию</span>
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
@@ -766,8 +792,8 @@ const Landing = () => {
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-700 px-6 py-3 rounded-full text-sm font-medium mb-6 shadow-sm">
-              <Badge className="bg-green-500 text-white px-3 py-1 text-xs font-bold">БЕСПЛАТНО</Badge>
-              <span className="font-semibold">для всех пользователей</span>
+              <Badge className="bg-green-500 text-white px-3 py-1 text-xs font-bold hover:bg-green-500">БЕСПЛАТНО</Badge>
+              <span className="font-semibold text-xs sm:text-sm">для всех пользователей</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Генератор этикеток WB</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -859,7 +885,7 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden">
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden rounded-t-lg">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-wb-purple/10 to-transparent rounded-bl-[100px]"></div>
               <CardHeader className="relative">
                 <CardTitle className="text-2xl">Стартовый</CardTitle>
@@ -908,8 +934,8 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-visible relative">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500"></div>
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-visible relative rounded-t-lg">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500 rounded-t-lg"></div>
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                 <Badge className="bg-gradient-to-r from-wb-purple to-purple-600 text-white border-none px-4 py-1 text-xs font-bold shadow-lg">
                   ПОПУЛЯРНЫЙ
@@ -962,8 +988,7 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-gradient-to-br from-white via-wb-purple/5 to-purple-50 overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-bl-[100px]"></div>
+            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-gradient-to-br from-white via-wb-purple/5 to-purple-50 overflow-hidden rounded-t-lg">
               <CardHeader className="relative">
                 <CardTitle className="text-2xl">Бизнес</CardTitle>
                 <div className="text-4xl font-bold text-foreground mt-2">9 990₽</div>
