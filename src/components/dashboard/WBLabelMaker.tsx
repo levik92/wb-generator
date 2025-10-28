@@ -249,14 +249,19 @@ export default function WBLabelMaker() {
 
   .wb-range{display:flex;flex-direction:column;gap:8px}
   .wb-range-top{display:flex;justify-content:space-between;align-items:center;font-weight:600}
-  .wb-range input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;width:100%}
-  .wb-range input[type=range]:focus{outline:none}
-  .wb-range input[type=range]::-webkit-slider-runnable-track{height:8px;background:#eef2f1;border-radius:999px;border:none}
-  .wb-range input[type=range]::-moz-range-track{height:8px;background:#eef2f1;border-radius:999px;border:none}
-  .wb-range input[type=range]:active::-webkit-slider-runnable-track{background:#eef2f1}
-  .wb-range input[type=range]:active::-moz-range-track{background:#eef2f1}
-  .wb-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-  .wb-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .wb-range input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;width:100%;border:none;outline:none}
+  .wb-range input[type=range]:focus{outline:none;border:none}
+  .wb-range input[type=range]:active{outline:none;border:none}
+  .wb-range input[type=range]::-webkit-slider-runnable-track{height:8px;background:#eef2f1;border-radius:999px;border:none;outline:none}
+  .wb-range input[type=range]::-moz-range-track{height:8px;background:#eef2f1;border-radius:999px;border:none;outline:none}
+  .wb-range input[type=range]:focus::-webkit-slider-runnable-track{border:none;outline:none}
+  .wb-range input[type=range]:focus::-moz-range-track{border:none;outline:none}
+  .wb-range input[type=range]:active::-webkit-slider-runnable-track{background:#eef2f1;border:none;outline:none}
+  .wb-range input[type=range]:active::-moz-range-track{background:#eef2f1;border:none;outline:none}
+  .wb-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15);outline:none}
+  .wb-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15);outline:none}
+  .wb-range input[type=range]:focus::-webkit-slider-thumb{outline:none}
+  .wb-range input[type=range]:focus::-moz-range-thumb{outline:none}
   .wb-range input[type=range]::-moz-range-progress{height:8px;background:rgba(32,160,75,.25);border-radius:999px}
 
   .wb-preview{display:flex;flex-direction:column;gap:14px}
