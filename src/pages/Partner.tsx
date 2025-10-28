@@ -57,8 +57,8 @@ const Partner = () => {
   const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
   const [hasBankDetails, setHasBankDetails] = useState(false);
-  const [earningsDateRange, setEarningsDateRange] = useState("30");
-  const [clientsDateRange, setClientsDateRange] = useState("30");
+  const [earningsDateRange, setEarningsDateRange] = useState("7");
+  const [clientsDateRange, setClientsDateRange] = useState("7");
 
   useEffect(() => {
     loadPartnerData();
