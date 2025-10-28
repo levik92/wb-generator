@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper, BarChart3, QrCode, Package } from "lucide-react";
+import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper, BarChart3, QrCode, Package, TrendingUp, Clock, Target, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import Footer from "@/components/Footer";
+import { useState, useEffect } from "react";
 import heroDemo from "@/assets/hero-demo.jpg";
 import dashboardDemo from "@/assets/dashboard-demo.png";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
@@ -13,6 +14,64 @@ import exampleBefore3 from "@/assets/example-before-after-3.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import exampleAfter2 from "@/assets/example-after-2.jpg";
 import exampleAfter3 from "@/assets/example-after-3.jpg";
+
+// Компонент анимированного счетчика
+const AnimatedCounter = () => {
+  const [count, setCount] = useState(0);
+  
+  // Функция для получения количества дней с 1 января 2025
+  const getDaysSinceStart = () => {
+    const startDate = new Date('2025-01-01');
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - startDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
+  // Генерация стабильного рандомного числа для дня (seed на основе даты)
+  const getDailyIncrement = () => {
+    const today = new Date().toISOString().split('T')[0];
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) {
+      hash = ((hash << 5) - hash) + today.charCodeAt(i);
+      hash = hash & hash;
+    }
+    const random = Math.abs(hash % 91) + 10; // 10-100
+    return random;
+  };
+  
+  // Вычисляем итоговое значение
+  const getTargetValue = () => {
+    const baseValue = 12973;
+    const days = getDaysSinceStart();
+    const dailyIncrement = getDailyIncrement();
+    return baseValue + (days * dailyIncrement);
+  };
+
+  useEffect(() => {
+    const targetValue = getTargetValue();
+    const duration = 2000; // 2 секунды
+    const steps = 60;
+    const increment = targetValue / steps;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        setCount(targetValue);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(increment * currentStep));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <span className="font-bold text-primary">{count.toLocaleString('ru-RU')}</span>
+  );
+};
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -48,48 +107,158 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 animate-fade-in overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/5 via-transparent to-wb-purple/10"></div>
-        <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 px-4 py-2 rounded-full text-xs mb-6 border border-gray-200 shadow-sm">
-            <img 
-              src="/lovable-uploads/1e3fc63c-a046-40b8-aede-2f40b6764d7a.png" 
-              alt="Празднично-коническая иконка" 
-              className="w-4 h-4"
-            />
-            <span className="font-medium">25 токенов бесплатно при регистрации</span>
-          </div>
-          
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-fade-in px-4">
-            <span className="text-gradient">Создавайте продающие карточки</span> <span className="text-black">для Wildberries за пару минут без дизайнера</span>
-          </h1>
-          
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed px-4">
-            AI-сервис для генерации дизайнерских изображений, SEO-описаний, штрихкодов, ответов на вопросы и отзывы.
-          </p>
+      <section className="relative pt-16 sm:pt-24 pb-16 sm:pb-20 animate-fade-in overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/3 via-transparent to-wb-purple/5"></div>
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-8 border border-green-200 shadow-sm">
+              <Sparkles className="w-4 h-4" />
+              <span className="font-medium">25 токенов бесплатно при регистрации</span>
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight px-4">
+              Карточки для&nbsp;WB<br className="hidden sm:block" /> 
+              <span className="text-gradient">за 3 минуты</span>
+            </h1>
+            
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
+              Генерируйте дизайнерские карточки, описания и этикетки с помощью ИИ. Без дизайнера и опыта.
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 sm:mb-16 px-4">
-            <Link to="/auth" className="w-full sm:w-auto">
-              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
-                Начать генерацию
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
+            {/* Stats Section - NEW */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-12 px-4">
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">
+                  <AnimatedCounter />
+                </div>
+                <div className="text-xs sm:text-sm text-muted-foreground">карточек создано</div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">3 мин</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">до результата</div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">98%</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">довольны результатом</div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">₽0</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">первая генерация</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 px-4">
+              <Link to="/auth" className="w-full sm:w-auto">
+                <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 w-full sm:w-auto shadow-lg hover:shadow-xl transition-all">
+                  Начать бесплатно
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 hover:bg-gray-50 w-full sm:w-auto" onClick={scrollToExamples}>
+                Примеры работ
               </Button>
-            </Link>
-            <Button variant="outline" size="lg" className="text-xs sm:text-lg px-4 sm:px-8 py-4 sm:py-6 hover:bg-wb-purple/20 hover:text-wb-purple-dark border-wb-purple/30" onClick={scrollToExamples}>
-              <span className="sm:hidden">Посмотреть примеры</span>
-              <span className="hidden sm:inline">Посмотреть примеры работ</span>
-            </Button>
+            </div>
           </div>
 
           {/* Dashboard Preview Image */}
-          <div className="mb-8 sm:mb-12 px-4">
-            <div className="relative w-full max-w-4xl mx-auto">
+          <div className="mb-8 px-4">
+            <div className="relative w-full max-w-5xl mx-auto">
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none z-10"></div>
               <img 
                 src="/lovable-uploads/5030ec29-2f6f-4436-9d03-bafcfc526692.png" 
-                alt="Интерфейс WB Генератор - панель для создания карточек товаров"
-                className="w-full rounded-lg"
+                alt="Интерфейс WB Генератор"
+                className="w-full rounded-2xl shadow-2xl"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section - NEW */}
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-gray-50/50 to-white">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Почему выбирают нас</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Профессиональный результат без команды дизайнеров
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            <Card className="border-none shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <div className="w-14 h-14 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-xl flex items-center justify-center mb-4">
+                  <Clock className="w-7 h-7 text-wb-purple" />
+                </div>
+                <CardTitle className="text-xl">Экономия времени</CardTitle>
+                <CardDescription className="text-base">
+                  <span className="font-semibold text-foreground">3 минуты</span> вместо <span className="line-through">3 дней</span> работы с дизайнером
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-none shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <div className="w-14 h-14 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-xl flex items-center justify-center mb-4">
+                  <TrendingUp className="w-7 h-7 text-green-600" />
+                </div>
+                <CardTitle className="text-xl">Экономия денег</CardTitle>
+                <CardDescription className="text-base">
+                  От <span className="font-semibold text-foreground">120₽</span> за карточку вместо <span className="line-through">5000-15000₽</span>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-none shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-xl flex items-center justify-center mb-4">
+                  <Target className="w-7 h-7 text-blue-600" />
+                </div>
+                <CardTitle className="text-xl">Рост конверсии</CardTitle>
+                <CardDescription className="text-base">
+                  Увеличение продаж до <span className="font-semibold text-foreground">40%</span> благодаря профессиональным карточкам
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-none shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl flex items-center justify-center mb-4">
+                  <Sparkles className="w-7 h-7 text-purple-600" />
+                </div>
+                <CardTitle className="text-xl">ИИ-технологии</CardTitle>
+                <CardDescription className="text-base">
+                  Используем новейшие нейросети для создания уникального контента
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-none shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-xl flex items-center justify-center mb-4">
+                  <Zap className="w-7 h-7 text-orange-600" />
+                </div>
+                <CardTitle className="text-xl">Мгновенный старт</CardTitle>
+                <CardDescription className="text-base">
+                  <span className="font-semibold text-foreground">25 бесплатных токенов</span> сразу после регистрации
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-none shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <div className="w-14 h-14 bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-xl flex items-center justify-center mb-4">
+                  <Users className="w-7 h-7 text-pink-600" />
+                </div>
+                <CardTitle className="text-xl">Поддержка 24/7</CardTitle>
+                <CardDescription className="text-base">
+                  Помогаем решить любые вопросы в любое время
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </section>
@@ -161,64 +330,92 @@ const Landing = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Как это работает</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              <span className="sm:hidden">Простые шаги создания</span>
-              <span className="hidden sm:inline">Три простых шага до готовых карточек товаров</span>
+      <section className="py-16 sm:py-20">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Как это работает</h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Четыре простых шага до профессиональных карточек
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Image className="w-6 h-6 text-wb-purple" />
-                </div>
-                <CardTitle className="text-base sm:text-lg">1. Загрузите фото</CardTitle>
-                <CardDescription>
-                  До 10 фотографий товара на белом фоне
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="relative">
+              <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
+                <CardHeader>
+                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    1
+                  </div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Image className="w-8 h-8 text-wb-purple" />
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl mb-2">Загрузите фото</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">
+                    До 3 фотографий товара. Подойдут даже простые снимки на телефон
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-6 h-6 text-wb-purple" />
-                </div>
-                <CardTitle className="text-base sm:text-lg">2. Опишите товар</CardTitle>
-                <CardDescription>
-                  Добавьте описание, преимущества и пожелания по дизайну
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="relative">
+              <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
+                <CardHeader>
+                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    2
+                  </div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl mb-2">Опишите товар</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">
+                    Расскажите о преимуществах и добавьте пожелания по дизайну
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-6 h-6 text-wb-purple" />
-                </div>
-                <CardTitle className="text-base sm:text-lg">3. ИИ создает карточки</CardTitle>
-                <CardDescription>
-                  6 этапов: hero, usage, инфографика, сравнение, детали, финал
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="relative">
+              <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
+                <CardHeader>
+                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    3
+                  </div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl mb-2">ИИ создает карточки</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">
+                    Нейросеть генерирует до 6 профессиональных карточек за 3 минуты
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-wb-purple/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-6 h-6 text-wb-purple" />
-                </div>
-                <CardTitle className="text-base sm:text-lg">4. Скачайте и загрузите</CardTitle>
-                <CardDescription>
-                  Скачайте готовые PNG и загрузите в свой кабинет WB
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="relative">
+              <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
+                <CardHeader>
+                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                    4
+                  </div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Check className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl mb-2">Скачайте результат</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">
+                    Получите готовые PNG и сразу загрузите в кабинет Wildberries
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/auth">
+              <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-lg">
+                Попробовать бесплатно
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
