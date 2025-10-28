@@ -12,8 +12,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift } from "lucide-react";
 import JSZip from 'jszip';
+import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import exampleBefore1 from "@/assets/example-before-after-1.jpg";
+import exampleAfter1 from "@/assets/example-after-1.jpg";
 
 interface Profile {
   id: string;
@@ -843,21 +846,59 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
         </p>
       </div>
 
-      <Card className="bg-yellow-50 border border-yellow-100">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="bg-yellow-100 p-2 rounded-lg">
-              <Info className="h-4 w-4 text-amber-600" />
-            </div>
-            <CardTitle className="text-sm font-medium text-muted-foreground">Бета-версия сервиса</CardTitle>
+      <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-background border-primary/20">
+        <CardContent className="pt-6 space-y-6">
+          <div className="text-center space-y-3">
+            <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Карточки, которые продают — за 3 минуты
+            </h3>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              WB GEN оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня.
+              <br className="hidden sm:block" />
+              <span className="font-medium">Всё автоматически — просто загрузи фото.</span>
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-yellow-100 border border-yellow-300 rounded-[8px] p-3 flex items-center gap-3">
-            <Zap className="h-4 w-4 text-amber-600 shrink-0" />
-            <div className="text-xs sm:text-sm text-muted-foreground">
-              <p className="font-medium">Ранний доступ</p>
-              <p>Сервис находиться в раннем доступе. Все функционирует, но изредка могут возникать ошибки. Мы ежедневно работает над его улучшением и видим все возникающие ошибки. Если что-то не сработало, просто подождите и вернитесь к генерации позже.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Экономия до 10 000 ₽</p>
+                <p className="text-xs text-muted-foreground">на каждой карточке</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Результат за 3 минуты</p>
+                <p className="text-xs text-muted-foreground">вместо 3 дней</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Gift className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">Бесплатные 25 токенов</p>
+                <p className="text-xs text-muted-foreground">для теста</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-primary/20 overflow-hidden bg-background/40 p-3 sm:p-4">
+            <p className="text-xs sm:text-sm font-medium text-center mb-3 text-muted-foreground">Пример результата</p>
+            <div className="max-w-sm mx-auto">
+              <BeforeAfterSlider 
+                beforeImage={exampleBefore1}
+                afterImage={exampleAfter1}
+                alt="Пример до и после обработки"
+              />
             </div>
           </div>
         </CardContent>
@@ -878,15 +919,17 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           <div className="space-y-4">
             <div className="flex items-center justify-center w-full">
               <label 
-                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
-                  isDragOver 
-                    ? 'border-primary bg-primary/10 hover:bg-primary/20' 
-                    : 'border-border bg-muted/30 hover:bg-muted/50'
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${
+                  generating 
+                    ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' 
+                    : isDragOver 
+                    ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' 
+                    : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'
                 }`}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+                onDragOver={generating ? undefined : handleDragOver}
+                onDragEnter={generating ? undefined : handleDragEnter}
+                onDragLeave={generating ? undefined : handleDragLeave}
+                onDrop={generating ? undefined : handleDrop}
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
                   <Upload className={`w-8 h-8 mb-4 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
@@ -903,6 +946,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                   multiple
                   accept="image/*"
                   onChange={handleFileUpload}
+                  disabled={generating}
                 />
               </label>
             </div>
@@ -919,6 +963,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                     <button
                       onClick={() => removeFile(index)}
                       className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      disabled={generating}
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -994,6 +1039,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               value={productName}
               onChange={(e) => setProductName(e.target.value.slice(0, 150))}
               maxLength={150}
+              disabled={generating}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{productName.length}/150 символов</span>
@@ -1005,8 +1051,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           
           <div className="space-y-2">
             <Label htmlFor="category">Категория</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="border-2 border-border/60">
+            <Select value={category} onValueChange={setCategory} disabled={generating}>
+              <SelectTrigger className="border-2 border-border/60" disabled={generating}>
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
               <SelectContent>
@@ -1041,6 +1087,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
               onChange={(e) => setDescription(e.target.value.slice(0, 600))}
               rows={4}
               maxLength={600}
+              disabled={generating}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{description.length}/600 символов</span>
@@ -1068,18 +1115,21 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             {CARD_STAGES.map((stage, index) => (
               <div 
                 key={index} 
-                className={`border rounded-lg p-3 sm:p-4 cursor-pointer transition-all ${
-                  selectedCards.includes(index) 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-muted-foreground/50'
+                className={`border rounded-lg p-3 sm:p-4 transition-all ${
+                  generating 
+                    ? 'opacity-60 cursor-not-allowed' 
+                    : selectedCards.includes(index) 
+                    ? 'border-primary bg-primary/5 cursor-pointer' 
+                    : 'border-border hover:border-muted-foreground/50 cursor-pointer'
                 }`}
-                onClick={() => handleCardToggle(index)}
+                onClick={generating ? undefined : () => handleCardToggle(index)}
               >
                 <div className="flex items-start gap-3">
                   <Checkbox 
                     checked={selectedCards.includes(index)}
                     onChange={() => handleCardToggle(index)}
                     className="mt-0.5"
+                    disabled={generating}
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
@@ -1331,19 +1381,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           )}
           
           {generating && (
-            <>
-              <div className="bg-muted/50 border border-muted-foreground/20 rounded-lg p-3 sm:p-4 mt-4">
-                <p className="text-muted-foreground text-xs sm:text-sm flex items-start sm:items-center gap-2">
-                  <Info className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 sm:mt-0" />
-                  <span className="leading-relaxed">
-                    Генерация происходит в фоне, но если вы хотите перегенерировать фото, не закрывайте данное окно.
-                  </span>
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground/60 mt-2 text-center px-2 leading-relaxed">
-                WB Генератор может совершать ошибки. Перегенерируйте фото при необходимости.
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4 mt-4">
+              <p className="text-muted-foreground text-xs sm:text-sm flex items-start sm:items-center gap-2">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 sm:mt-0 text-primary" />
+                <span className="leading-relaxed">
+                  Результат создает нейросеть. Хотите другой результат либо есть ошибки? Нажмите "перегенерировать" - это в 2 раза дешевле!
+                </span>
               </p>
-            </>
+            </div>
           )}
         </CardContent>
       </Card>
