@@ -1247,6 +1247,7 @@ export type Database = {
         Args: { api_key: string; provider_name: string }
         Returns: boolean
       }
+      sync_existing_referrals: { Args: never; Returns: undefined }
       track_api_key_access: { Args: { key_id: string }; Returns: undefined }
       update_job_progress: {
         Args: { job_id_param: string }
