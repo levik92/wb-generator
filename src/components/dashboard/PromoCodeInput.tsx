@@ -167,9 +167,9 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
                   <strong>Промокод активирован!</strong>
                   <div className="mt-1">
                     {validPromo.type === 'discount' ? (
-                      <>Скидка <Badge className="bg-green-600">{validPromo.value}%</Badge> будет применена при оплате</>
+                      <>Скидка <Badge className="bg-green-600 hover:bg-green-600">{validPromo.value}%</Badge> будет применена при оплате</>
                     ) : (
-                      <>Вы получите <Badge className="bg-green-600">+{validPromo.value}</Badge> бонусных токенов после оплаты</>
+                      <>Вы получите <Badge className="bg-green-600 hover:bg-green-600">+{validPromo.value}</Badge> бонусных токенов после оплаты</>
                     )}
                   </div>
                 </div>
