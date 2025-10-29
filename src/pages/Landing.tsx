@@ -117,9 +117,8 @@ const Landing = () => {
       <section className="relative pt-16 sm:pt-24 pb-16 sm:pb-20 animate-fade-in overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50/80 via-white to-gray-100/50"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/20 via-transparent to-transparent"></div>
-        {/* Decorative elements */}
-        <div className="absolute top-20 right-10 w-48 h-48 bg-gradient-to-br from-wb-purple/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute top-32 right-20 w-40 h-40 bg-gradient-to-br from-wb-purple/10 to-transparent rounded-bl-[120px]"></div>
+        {/* Decorative element */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-wb-purple/10 to-transparent rounded-bl-[200px]"></div>
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-8 border border-green-200 shadow-sm">
