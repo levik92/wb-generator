@@ -184,12 +184,12 @@ const Landing = () => {
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
                 {/* Before Image */}
-                <div className="relative transform sm:-rotate-3 transition-transform hover:rotate-0">
+                <div className="relative transform -rotate-6 sm:-rotate-3 transition-transform hover:rotate-0">
                   <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
                     <img 
                       src="/lovable-uploads/clarins-before.jpeg" 
                       alt="До генерации"
-                      className="w-32 sm:w-48 md:w-64 h-auto rounded-lg"
+                      className="w-56 sm:w-48 md:w-64 h-auto rounded-lg"
                     />
                     <div className="text-center mt-2 text-xs sm:text-sm font-medium text-muted-foreground">
                       До
@@ -208,12 +208,12 @@ const Landing = () => {
                 </div>
                 
                 {/* After Image */}
-                <div className="relative transform sm:rotate-3 transition-transform hover:rotate-0">
+                <div className="relative transform rotate-6 sm:rotate-3 transition-transform hover:rotate-0">
                   <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
                     <img 
                       src="/lovable-uploads/clarins-after.png" 
                       alt="После генерации"
-                      className="w-32 sm:w-48 md:w-64 h-auto rounded-lg"
+                      className="w-56 sm:w-48 md:w-64 h-auto rounded-lg"
                     />
                     <div className="text-center mt-2 text-xs sm:text-sm font-medium text-green-600 font-bold">
                       После
