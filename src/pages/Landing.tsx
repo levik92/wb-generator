@@ -99,12 +99,12 @@ const Landing = () => {
             <span className="text-sm sm:text-lg md:text-xl font-semibold">WB Генератор</span>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <Link to="/auth">
+            <Link to="/auth?tab=signin">
               <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-4">
                 Войти
               </Button>
             </Link>
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button size="sm" className="bg-wb-purple hover:bg-wb-purple-dark text-xs sm:text-sm px-2 sm:px-4">
                 Начать бесплатно
               </Button>
@@ -162,7 +162,7 @@ const Landing = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 px-4">
-              <Link to="/auth" className="w-full sm:w-auto">
+              <Link to="/auth?tab=signup" className="w-full sm:w-auto">
                 <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 w-full sm:w-auto shadow-lg hover:shadow-xl transition-all">
                   Начать бесплатно
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -598,7 +598,7 @@ const Landing = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base md:text-lg px-6 sm:px-8 py-5 sm:py-6 shadow-lg">
                 Получить такие же результаты
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
@@ -689,7 +689,7 @@ const Landing = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-lg">
                 Попробовать бесплатно
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -772,7 +772,7 @@ const Landing = () => {
           </div>
 
           <div className="text-center">
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button size="lg" className="bg-wb-purple hover:bg-wb-purple-dark text-base sm:text-lg px-8 py-6 shadow-xl">
                 <span className="hidden sm:inline">Попробовать генерацию описаний</span>
                 <span className="sm:hidden">Попробовать генерацию</span>
@@ -858,7 +858,7 @@ const Landing = () => {
           </div>
 
           <div className="text-center">
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-base sm:text-lg px-8 py-6 shadow-xl">
                 Создать этикетки бесплатно
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -1160,7 +1160,7 @@ const Landing = () => {
           </div>
 
           <div className="animate-fade-in">
-            <Link to="/auth">
+            <Link to="/auth?tab=signup">
               <Button size="lg" className="bg-white text-wb-purple hover:bg-gray-100 text-sm sm:text-base md:text-lg px-6 sm:px-10 py-5 sm:py-7 hover-scale shadow-2xl font-semibold">
                 Получить 25 токенов бесплатно
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />

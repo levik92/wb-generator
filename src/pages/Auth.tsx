@@ -39,6 +39,10 @@ const Auth = () => {
   useEffect(() => {
     if (tabParam === "reset-password") {
       setActiveTab("new-password");
+    } else if (tabParam === "signup") {
+      setActiveTab("signup");
+    } else if (tabParam === "signin") {
+      setActiveTab("signin");
     }
   }, [tabParam]);
 
