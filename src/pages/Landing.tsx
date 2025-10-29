@@ -622,7 +622,7 @@ const Landing = () => {
             <div className="relative">
               <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                  <div className="absolute -top-4 left-2 sm:-left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                     1
                   </div>
                   <div className="w-16 h-16 bg-gradient-to-br from-wb-purple/10 to-wb-purple/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -639,7 +639,7 @@ const Landing = () => {
             <div className="relative">
               <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                  <div className="absolute -top-4 left-2 sm:-left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                     2
                   </div>
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -656,7 +656,7 @@ const Landing = () => {
             <div className="relative">
               <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                  <div className="absolute -top-4 left-2 sm:-left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                     3
                   </div>
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -673,7 +673,7 @@ const Landing = () => {
             <div className="relative">
               <Card className="text-center h-full border-none shadow-md hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="absolute -top-4 -left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                  <div className="absolute -top-4 left-2 sm:-left-4 w-10 h-10 bg-wb-purple rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                     4
                   </div>
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
