@@ -7,8 +7,17 @@ import { Users, TrendingUp, CreditCard, DollarSign, AlertCircle, Check } from "l
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+interface BankDetails {
+  full_name: string;
+  phone_number: string;
+  bank_name: string;
+  card_number: string;
+}
 
 interface PartnerData {
   id: string;
@@ -22,15 +31,8 @@ interface PartnerData {
   has_pending_withdrawal: boolean;
   pending_amount?: number;
   user_email?: string;
+  bank_details?: BankDetails;
 }
-
-const maskEmail = (email: string | undefined): string => {
-  if (!email) return "—";
-  const [local, domain] = email.split('@');
-  if (!local || !domain) return email;
-  const maskedLocal = local.charAt(0) + '***';
-  return `${maskedLocal}@${domain}`;
-};
 
 export const AdminPartners = () => {
   const { toast } = useToast();
@@ -40,10 +42,29 @@ export const AdminPartners = () => {
   const [selectedPartner, setSelectedPartner] = useState<PartnerData | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [manualPaymentAmount, setManualPaymentAmount] = useState("");
+  const [totalPaidOut, setTotalPaidOut] = useState(0);
 
   useEffect(() => {
     loadPartners();
+    loadTotalPaidOut();
   }, []);
+
+  const loadTotalPaidOut = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("partner_withdrawals")
+        .select("amount")
+        .eq("status", "completed");
+
+      if (error) throw error;
+
+      const total = data?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+      setTotalPaidOut(total);
+    } catch (error) {
+      console.error("Error loading total paid out:", error);
+    }
+  };
 
   const loadPartners = async () => {
     try {
@@ -106,6 +127,7 @@ export const AdminPartners = () => {
   const loadPartnerDetails = async (partner: PartnerData) => {
     setSelectedPartner(partner);
     setDetailsLoading(true);
+    setManualPaymentAmount("");
 
     try {
       // Load withdrawals
@@ -115,7 +137,18 @@ export const AdminPartners = () => {
         .eq("partner_id", partner.id)
         .order("requested_at", { ascending: false });
 
+      // Load bank details
+      const { data: bankData } = await supabase
+        .from("partner_bank_details")
+        .select("*")
+        .eq("partner_id", partner.id)
+        .maybeSingle();
+
       setWithdrawals(withdrawalsData || []);
+      setSelectedPartner({
+        ...partner,
+        bank_details: bankData || undefined
+      });
     } catch (error) {
       console.error("Error loading partner details:", error);
     } finally {
@@ -141,11 +174,78 @@ export const AdminPartners = () => {
       });
 
       await loadPartners();
+      await loadTotalPaidOut();
       if (selectedPartner) {
         await loadPartnerDetails(selectedPartner);
       }
     } catch (error: any) {
       console.error("Error approving withdrawal:", error);
+      toast({
+        title: "Ошибка",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleManualPayment = async () => {
+    if (!selectedPartner || !manualPaymentAmount) {
+      toast({
+        title: "Ошибка",
+        description: "Укажите сумму выплаты",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const amount = parseFloat(manualPaymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: "Ошибка",
+        description: "Некорректная сумма",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create manual withdrawal record
+      const { error: insertError } = await supabase
+        .from("partner_withdrawals")
+        .insert({
+          partner_id: selectedPartner.id,
+          amount: amount,
+          status: "completed",
+          requested_at: new Date().toISOString(),
+          processed_at: new Date().toISOString(),
+          notes: "Ручная выплата администратором"
+        });
+
+      if (insertError) throw insertError;
+
+      // Deduct from partner balance
+      const { error: updateError } = await supabase
+        .from("partner_profiles")
+        .update({
+          current_balance: selectedPartner.current_balance - amount
+        })
+        .eq("id", selectedPartner.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Успешно",
+        description: `Выплата ${amount.toLocaleString()} ₽ зафиксирована`
+      });
+
+      setManualPaymentAmount("");
+      await loadPartners();
+      await loadTotalPaidOut();
+      if (selectedPartner) {
+        await loadPartnerDetails(selectedPartner);
+      }
+    } catch (error: any) {
+      console.error("Error processing manual payment:", error);
       toast({
         title: "Ошибка",
         description: error.message,
@@ -172,7 +272,7 @@ export const AdminPartners = () => {
   return (
     <div className="space-y-6">
       {/* Overall Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -214,10 +314,22 @@ export const AdminPartners = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Ожидают выплаты
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalStats.pendingWithdrawals}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Выплачено партнерам
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalPaidOut.toLocaleString()} ₽</div>
           </CardContent>
         </Card>
       </div>
@@ -239,7 +351,7 @@ export const AdminPartners = () => {
                           {partner.has_pending_withdrawal && (
                             <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />
                           )}
-                          <p className="font-medium text-sm truncate">{maskEmail(partner.user_email)}</p>
+                          <p className="font-medium text-sm truncate">{partner.user_email || "—"}</p>
                         </div>
                         <p className="text-xs text-muted-foreground">Код: {partner.partner_code}</p>
                       </div>
@@ -303,7 +415,7 @@ export const AdminPartners = () => {
                           {partner.has_pending_withdrawal && (
                             <AlertCircle className="h-4 w-4 text-orange-500" />
                           )}
-                          {maskEmail(partner.user_email)}
+                          {partner.user_email || "—"}
                         </div>
                       </TableCell>
                       <TableCell>{partner.partner_code}</TableCell>
@@ -342,7 +454,7 @@ export const AdminPartners = () => {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">
-              Партнер: {maskEmail(selectedPartner?.user_email)}
+              Партнер: {selectedPartner?.user_email || "—"}
             </DialogTitle>
           </DialogHeader>
 
@@ -371,6 +483,67 @@ export const AdminPartners = () => {
                   <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.commission_rate}%</p>
                 </div>
               </div>
+
+              {/* Bank Details */}
+              {selectedPartner?.bank_details && (
+                <Card className="bg-muted/30">
+                  <CardHeader>
+                    <CardTitle className="text-base">Банковские реквизиты</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">ФИО</p>
+                        <p className="font-medium">{selectedPartner.bank_details.full_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Телефон</p>
+                        <p className="font-medium">{selectedPartner.bank_details.phone_number}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Банк</p>
+                        <p className="font-medium">{selectedPartner.bank_details.bank_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Номер карты</p>
+                        <p className="font-medium font-mono">{selectedPartner.bank_details.card_number}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Manual Payment */}
+              <Card className="bg-primary/5 border-primary/20">
+                <CardHeader>
+                  <CardTitle className="text-base">Ручная выплата</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-amount">Сумма выплаты (₽)</Label>
+                    <Input
+                      id="payment-amount"
+                      type="number"
+                      placeholder="Введите сумму"
+                      value={manualPaymentAmount}
+                      onChange={(e) => setManualPaymentAmount(e.target.value)}
+                      min="0"
+                      step="100"
+                    />
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={handleManualPayment}
+                    disabled={!manualPaymentAmount || parseFloat(manualPaymentAmount) <= 0}
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Подтвердить выплату
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    После подтверждения сумма будет записана как выплаченная и вычтена из баланса партнера
+                  </p>
+                </CardContent>
+              </Card>
 
               {/* Withdrawals */}
               <div>
