@@ -624,8 +624,14 @@ const Partner = () => {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="clients">Приглашенные клиенты</TabsTrigger>
-                <TabsTrigger value="withdrawals">История выплат</TabsTrigger>
+                <TabsTrigger value="clients">
+                  <span className="sm:hidden">Клиенты</span>
+                  <span className="hidden sm:inline">Приглашенные клиенты</span>
+                </TabsTrigger>
+                <TabsTrigger value="withdrawals">
+                  <span className="sm:hidden">Выплаты</span>
+                  <span className="hidden sm:inline">История выплат</span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="clients" className="mt-6">
