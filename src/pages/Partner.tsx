@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BankDetailsForm } from "@/components/partner/BankDetailsForm";
 import { WithdrawalButton } from "@/components/partner/WithdrawalButton";
 import Footer from "@/components/Footer";
@@ -50,6 +51,16 @@ interface PartnerCommission {
   status: string;
 }
 
+interface PartnerWithdrawal {
+  id: string;
+  amount: number;
+  status: string;
+  requested_at: string;
+  processed_at: string | null;
+  payment_method: string | null;
+  notes: string | null;
+}
+
 const Partner = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -58,9 +69,11 @@ const Partner = () => {
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
   const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
+  const [withdrawals, setWithdrawals] = useState<PartnerWithdrawal[]>([]);
   const [hasBankDetails, setHasBankDetails] = useState(false);
   const [earningsDateRange, setEarningsDateRange] = useState("7");
   const [clientsDateRange, setClientsDateRange] = useState("7");
+  const [activeTab, setActiveTab] = useState("clients");
 
   useEffect(() => {
     loadPartnerData();
@@ -139,6 +152,15 @@ const Partner = () => {
           .limit(50);
 
         if (commissionsData) setCommissions(commissionsData);
+
+        // Загрузка выплат
+        const { data: withdrawalsData } = await supabase
+          .from("partner_withdrawals")
+          .select("*")
+          .eq("partner_id", partnerData.id)
+          .order("requested_at", { ascending: false });
+
+        if (withdrawalsData) setWithdrawals(withdrawalsData);
       }
     } catch (error) {
       console.error("Error loading partner data:", error);
@@ -594,69 +616,149 @@ const Partner = () => {
           </CardContent>
         </Card>
 
-        {/* Referrals List */}
+        {/* Referrals and Withdrawals Tabs */}
         <Card className="bg-muted/30">
           <CardHeader>
-            <CardTitle>Приглашенные клиенты</CardTitle>
+            <CardTitle>Партнерские данные</CardTitle>
           </CardHeader>
           <CardContent>
-            {referrals.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Пользователь</TableHead>
-                      <TableHead>Дата регистрации</TableHead>
-                      <TableHead>Сумма платежей</TableHead>
-                      <TableHead>Ваша комиссия</TableHead>
-                      <TableHead>Статус</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {referrals.map((ref) => (
-                      <TableRow key={ref.id}>
-                        <TableCell>
-                          {ref.full_name || ref.masked_email || (ref.profiles?.email ? (() => {
-                            const email = ref.profiles.email;
-                            const [local, domain] = email.split('@');
-                            const maskedLocal = local.charAt(0) + '***';
-                            return `${maskedLocal}@${domain}`;
-                          })() : `ID: ${ref.referred_user_id.slice(0, 8)}…`)}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
-                        </TableCell>
-                        <TableCell>{Number(ref.total_payments || 0).toLocaleString('ru-RU')} ₽</TableCell>
-                        <TableCell className="font-semibold">{Number(ref.total_commission || 0).toLocaleString('ru-RU')} ₽</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              ref.status === "active"
-                                ? "default"
-                                : ref.status === "registered"
-                                ? "secondary"
-                                : "outline"
-                            }
-                          >
-                            {ref.status === "active"
-                              ? "Активен"
-                              : ref.status === "registered"
-                              ? "Зарегистрирован"
-                              : "Неактивен"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="py-12 text-center text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Пока нет приглашенных клиентов</p>
-                <p className="text-sm mt-2">Поделитесь своей партнерской ссылкой</p>
-              </div>
-            )}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsTrigger value="clients">Приглашенные клиенты</TabsTrigger>
+                <TabsTrigger value="withdrawals">История выплат</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="clients" className="mt-6">
+                {referrals.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Пользователь</TableHead>
+                          <TableHead>Дата регистрации</TableHead>
+                          <TableHead>Сумма платежей</TableHead>
+                          <TableHead>Ваша комиссия</TableHead>
+                          <TableHead>Статус</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {referrals.map((ref) => (
+                          <TableRow key={ref.id}>
+                            <TableCell>
+                              {ref.full_name || ref.masked_email || (ref.profiles?.email ? (() => {
+                                const email = ref.profiles.email;
+                                const [local, domain] = email.split('@');
+                                const maskedLocal = local.charAt(0) + '***';
+                                return `${maskedLocal}@${domain}`;
+                              })() : `ID: ${ref.referred_user_id.slice(0, 8)}…`)}
+                            </TableCell>
+                            <TableCell>
+                              {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
+                            </TableCell>
+                            <TableCell>{Number(ref.total_payments || 0).toLocaleString('ru-RU')} ₽</TableCell>
+                            <TableCell className="font-semibold">{Number(ref.total_commission || 0).toLocaleString('ru-RU')} ₽</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  ref.status === "active"
+                                    ? "default"
+                                    : ref.status === "registered"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                              >
+                                {ref.status === "active"
+                                  ? "Активен"
+                                  : ref.status === "registered"
+                                  ? "Зарегистрирован"
+                                  : "Неактивен"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Пока нет приглашенных клиентов</p>
+                    <p className="text-sm mt-2">Поделитесь своей партнерской ссылкой</p>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="withdrawals" className="mt-6">
+                {withdrawals.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Дата запроса</TableHead>
+                          <TableHead>Сумма</TableHead>
+                          <TableHead>Статус</TableHead>
+                          <TableHead>Дата обработки</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {withdrawals.map((withdrawal) => (
+                          <TableRow key={withdrawal.id}>
+                            <TableCell>
+                              {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                              })}
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              {Number(withdrawal.amount).toLocaleString('ru-RU')} ₽
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
+                                  withdrawal.status === "completed"
+                                    ? "default"
+                                    : withdrawal.status === "processing"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                              >
+                                {withdrawal.status === "completed"
+                                  ? "Успешно проведено"
+                                  : withdrawal.status === "processing"
+                                  ? "В обработке"
+                                  : withdrawal.status === "pending"
+                                  ? "Ожидает"
+                                  : "Отклонено"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {withdrawal.processed_at
+                                ? new Date(withdrawal.processed_at).toLocaleDateString("ru-RU", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                  })
+                                : "—"}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground">
+                    <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Пока нет истории выплат</p>
+                    <p className="text-sm mt-2">Запросите выплату, когда накопите достаточный баланс</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
