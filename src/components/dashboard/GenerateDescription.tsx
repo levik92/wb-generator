@@ -40,6 +40,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
     return productName.trim() && 
            productName.trim().length <= 150 && 
            productName.trim().length >= 3 &&
+           category.trim() &&
            keywords.trim().length <= 1200 &&
            profile.tokens_balance >= 1;
   };
@@ -48,6 +49,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
     if (!productName.trim()) return "Введите название товара";
     if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
     if (productName.trim().length < 3) return "Название товара должно содержать минимум 3 символа";
+    if (!category.trim()) return "Выберите категорию товара";
     if (keywords.trim().length > 1200) return "Ключевые слова должны быть не более 1200 символов";
     if (profile.tokens_balance < 1) return "Недостаточно токенов (нужно 1)";
     return null;
