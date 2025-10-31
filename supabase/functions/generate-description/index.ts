@@ -69,9 +69,9 @@ serve(async (req) => {
       });
     }
     
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     // Initialize Supabase client
@@ -128,33 +128,32 @@ serve(async (req) => {
     prompt = prompt.replace(/{competitors}/g, competitorText);
     prompt = prompt.replace(/{keywords}/g, keywordText);
 
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call Lovable AI Gateway
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'user', content: prompt }
         ],
         max_tokens: 1000,
-        temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.error('OpenAI API error:', response.status, errorData);
+      console.error('Lovable AI Gateway error:', response.status, errorData);
       
       if (response.status === 429) {
-        throw new Error('Слишком много запросов к OpenAI API. Попробуйте через несколько минут.');
-      } else if (response.status === 400 && errorData?.error?.code === 'billing_hard_limit_reached') {
-        throw new Error('Достигнут лимит биллинга OpenAI API. Обратитесь в поддержку.');
+        throw new Error('Превышен лимит запросов. Попробуйте через несколько минут.');
+      } else if (response.status === 402) {
+        throw new Error('Недостаточно средств на балансе Lovable AI. Пополните баланс в настройках.');
       } else {
-        throw new Error(`Ошибка OpenAI API: ${response.status}. Попробуйте позже.`);
+        throw new Error(`Ошибка AI Gateway: ${response.status}. Попробуйте позже.`);
       }
     }
 
