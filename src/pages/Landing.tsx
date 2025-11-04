@@ -335,6 +335,8 @@ const Landing = () => {
                         src="/lovable-uploads/1-1.png" 
                         alt="До"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
@@ -354,6 +356,8 @@ const Landing = () => {
                         src="/lovable-uploads/1-2.png" 
                         alt="После"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
@@ -403,6 +407,8 @@ const Landing = () => {
                         src="/lovable-uploads/2-1.jpg" 
                         alt="До"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
@@ -422,6 +428,8 @@ const Landing = () => {
                         src="/lovable-uploads/2-2.png" 
                         alt="После"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
@@ -471,6 +479,8 @@ const Landing = () => {
                         src="/lovable-uploads/3-1.webp" 
                         alt="До"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
@@ -490,6 +500,8 @@ const Landing = () => {
                         src="/lovable-uploads/3-2.png" 
                         alt="После"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
@@ -539,6 +551,8 @@ const Landing = () => {
                         src="/lovable-uploads/4-1.webp" 
                         alt="До"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
@@ -558,6 +572,8 @@ const Landing = () => {
                         src="/lovable-uploads/4-2.png" 
                         alt="После"
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
@@ -702,7 +718,7 @@ const Landing = () => {
       {/* Description Generation */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={bg3d1} alt="" className="w-full h-full object-cover opacity-20" />
+          <img src={bg3d1} alt="" className="w-full h-full object-cover opacity-20" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/20 via-background/95 to-background/95"></div>
         </div>
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -786,7 +802,7 @@ const Landing = () => {
       {/* Label Generator */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={bg3d2} alt="" className="w-full h-full object-cover opacity-15" />
+          <img src={bg3d2} alt="" className="w-full h-full object-cover opacity-15" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-background/95 to-background/95"></div>
         </div>
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -1119,16 +1135,16 @@ const Landing = () => {
       {/* CTA */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={bg3d3} alt="" className="w-full h-full object-cover opacity-20" />
+          <img src={bg3d3} alt="" className="w-full h-full object-cover opacity-20" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-br from-wb-purple/80 via-purple-600/80 to-wb-purple/90"></div>
           <div className="absolute top-10 right-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl"></div>
           {/* 3D Images */}
           <div className="absolute top-20 left-10 w-48 h-48 opacity-40 hidden lg:block transform -rotate-12">
-            <img src={aiTech3d} alt="" className="w-full h-full object-contain animate-float" />
+            <img src={aiTech3d} alt="" className="w-full h-full object-contain animate-float" loading="lazy" decoding="async" />
           </div>
           <div className="absolute bottom-20 right-10 w-56 h-56 opacity-40 hidden lg:block transform rotate-12">
-            <img src={lightning3d} alt="" className="w-full h-full object-contain animate-float-delayed" />
+            <img src={lightning3d} alt="" className="w-full h-full object-contain animate-float-delayed" loading="lazy" decoding="async" />
           </div>
         </div>
         <div className="container mx-auto px-4 sm:px-6 text-center relative z-10">
