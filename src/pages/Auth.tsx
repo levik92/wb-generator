@@ -13,6 +13,7 @@ import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
+import YandexMetrika from "@/components/YandexMetrika";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -436,6 +437,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <YandexMetrika />
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">

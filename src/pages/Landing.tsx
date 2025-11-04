@@ -5,6 +5,7 @@ import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper, BarC
 import { Link, useNavigate } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import Footer from "@/components/Footer";
+import YandexMetrika from "@/components/YandexMetrika";
 import { useState, useEffect } from "react";
 import heroDemo from "@/assets/hero-demo.jpg";
 import dashboardDemo from "@/assets/dashboard-demo.png";
@@ -89,6 +90,7 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <YandexMetrika />
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
