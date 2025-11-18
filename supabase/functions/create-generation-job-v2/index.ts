@@ -29,7 +29,7 @@ serve(async (req) => {
     const requestBody = await req.json();
     const { 
       productName, 
-      category, 
+      category = '', 
       description, 
       userId, 
       productImages = [],
@@ -37,9 +37,9 @@ serve(async (req) => {
     } = requestBody;
 
     // Validate input
-    if (!productName || !category || !description || !userId) {
+    if (!productName || !description || !userId) {
       return new Response(JSON.stringify({
-        error: 'Missing required fields: productName, category, description, userId'
+        error: 'Missing required fields: productName, description, userId'
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

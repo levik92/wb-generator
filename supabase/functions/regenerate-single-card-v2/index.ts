@@ -51,18 +51,11 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const requestBody = await req.json();
-    const { productName, category, description, userId, cardIndex, cardType, sourceImageUrl } = requestBody;
+    const { productName, category = '', description, userId, cardIndex, cardType, sourceImageUrl } = requestBody;
 
     // Input validation
     if (!productName || typeof productName !== 'string' || productName.length > 100) {
       return new Response(JSON.stringify({ error: 'Invalid product name' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (!category || typeof category !== 'string' || category.length > 50) {
-      return new Response(JSON.stringify({ error: 'Invalid category' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
