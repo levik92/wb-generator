@@ -261,7 +261,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     return files.length > 0 && 
            productName.trim() && 
            productName.trim().length <= 150 &&
-           category && 
            description.trim() && 
            description.trim().length <= 600 &&
            selectedCards.length > 0 &&
@@ -275,7 +274,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     if (!productName.trim()) return "Введите название товара";
     if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
     if (productName.trim().length < 3) return "Название товара должно содержать минимум 3 символа";
-    if (!category) return "Выберите категорию товара";
     if (!description.trim()) return "Добавьте описание товара";
     if (description.trim().length > 600) return "Описание должно быть не более 600 символов";
     if (description.trim().length < 10) return "Описание должно содержать минимум 10 символов";
@@ -1035,35 +1033,6 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 <span className="text-warning">Осталось символов: {150 - productName.length}</span>
               )}
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="category">Категория</Label>
-            <Select value={category} onValueChange={setCategory} disabled={generating}>
-              <SelectTrigger className="border-2 border-border/60" disabled={generating}>
-                <SelectValue placeholder="Выберите категорию" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Электроника">Электроника</SelectItem>
-                <SelectItem value="Одежда">Одежда</SelectItem>
-                <SelectItem value="Обувь">Обувь</SelectItem>
-                <SelectItem value="Аксессуары">Аксессуары</SelectItem>
-                <SelectItem value="Дом и сад">Дом и сад</SelectItem>
-                <SelectItem value="Красота и здоровье">Красота и здоровье</SelectItem>
-                <SelectItem value="Спорт и отдых">Спорт и отдых</SelectItem>
-                <SelectItem value="Детские товары">Детские товары</SelectItem>
-                <SelectItem value="Автотовары">Автотовары</SelectItem>
-                <SelectItem value="Канцелярия">Канцелярия</SelectItem>
-                <SelectItem value="Книги">Книги</SelectItem>
-                <SelectItem value="Игрушки">Игрушки</SelectItem>
-                <SelectItem value="Мебель">Мебель</SelectItem>
-                <SelectItem value="Бытовая техника">Бытовая техника</SelectItem>
-                <SelectItem value="Строительство">Строительство</SelectItem>
-                <SelectItem value="Продукты питания">Продукты питания</SelectItem>
-                <SelectItem value="Зоотовары">Зоотовары</SelectItem>
-                <SelectItem value="Хобби и творчество">Хобби и творчество</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           
           <div className="space-y-2">

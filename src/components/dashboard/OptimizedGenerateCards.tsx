@@ -131,10 +131,10 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   };
 
   const handleGenerate = async () => {
-    if (!productName || !category || !description) {
+    if (!productName || !description) {
       toast({
         title: "Заполните все поля",
-        description: "Необходимо указать название, категорию и описание товара",
+        description: "Необходимо указать название и описание товара",
         variant: "destructive",
       });
       return;
@@ -264,27 +264,15 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="productName">Название товара</Label>
-              <Input
-                id="productName"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                placeholder="Например: Беспроводные наушники AirPods"
-                disabled={isGenerating}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Категория</Label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Например: Электроника"
-                disabled={isGenerating}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="productName">Название товара</Label>
+            <Input
+              id="productName"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
+              placeholder="Например: Беспроводные наушники AirPods"
+              disabled={isGenerating}
+            />
           </div>
           
           <div className="space-y-2">
