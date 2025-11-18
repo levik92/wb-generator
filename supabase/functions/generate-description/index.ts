@@ -14,18 +14,11 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { productName, category, competitors, keywords, userId } = requestBody;
+    const { productName, category = '', competitors, keywords, userId } = requestBody;
 
     // Input validation with expanded limits for more robust validation
     if (!productName || typeof productName !== 'string' || productName.length > 200) {
       return new Response(JSON.stringify({ error: 'Invalid product name (max 200 characters)' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (!category || typeof category !== 'string' || category.length > 100) {
-      return new Response(JSON.stringify({ error: 'Invalid category (max 100 characters)' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
