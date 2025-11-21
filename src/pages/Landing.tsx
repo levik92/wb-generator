@@ -27,33 +27,34 @@ import lightning3d from "@/assets/3d-lightning.png";
 const AnimatedCounter = () => {
   const [count, setCount] = useState(0);
   
-  // Функция для получения количества дней с 1 января 2025
-  const getDaysSinceStart = () => {
+  // Вычисляем итоговое значение с накопительным увеличением
+  const getTargetValue = () => {
+    const baseValue = 12120; // Стартовое значение
     const startDate = new Date('2025-01-01');
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-  
-  // Генерация стабильного рандомного числа для дня (seed на основе даты)
-  const getDailyIncrement = () => {
-    const today = new Date().toISOString().split('T')[0];
-    let hash = 0;
-    for (let i = 0; i < today.length; i++) {
-      hash = ((hash << 5) - hash) + today.charCodeAt(i);
-      hash = hash & hash;
+    
+    // Для каждого дня генерируем свой уникальный инкремент от 20 до 100
+    let totalIncrement = 0;
+    for (let day = 0; day < diffDays; day++) {
+      const dayDate = new Date(startDate);
+      dayDate.setDate(startDate.getDate() + day);
+      const dateStr = dayDate.toISOString().split('T')[0];
+      
+      // Генерируем стабильный hash для этой даты
+      let hash = 0;
+      for (let i = 0; i < dateStr.length; i++) {
+        hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+        hash = hash & hash;
+      }
+      
+      // Генерируем случайное число от 20 до 100 для этого дня
+      const dailyIncrement = Math.abs(hash % 81) + 20;
+      totalIncrement += dailyIncrement;
     }
-    const random = Math.abs(hash % 91) + 10; // 10-100
-    return random;
-  };
-  
-  // Вычисляем итоговое значение
-  const getTargetValue = () => {
-    const baseValue = 12973;
-    const days = getDaysSinceStart();
-    const dailyIncrement = getDailyIncrement();
-    return baseValue + (days * dailyIncrement);
+    
+    return baseValue + totalIncrement;
   };
 
   useEffect(() => {
