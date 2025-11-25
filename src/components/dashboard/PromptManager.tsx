@@ -432,7 +432,7 @@ export function PromptManager() {
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="google" className="gap-2">
-            Google
+            Gemini
             <Badge variant="secondary" className="text-xs">
               {prompts.filter(p => p.model_type === 'google').length}
             </Badge>
