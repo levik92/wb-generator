@@ -10,7 +10,8 @@ import {
   FileText, 
   Gift, 
   Megaphone,
-  Handshake
+  Handshake,
+  DollarSign
 } from "lucide-react";
 
 interface AdminMobileMenuProps {
@@ -46,6 +47,11 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
       id: 'promocodes',
       label: 'Промокоды',
       icon: Gift,
+    },
+    {
+      id: 'pricing',
+      label: 'Цены',
+      icon: DollarSign,
     },
     {
       id: 'news',
