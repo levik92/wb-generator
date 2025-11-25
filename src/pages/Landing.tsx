@@ -1,12 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Zap, Image, FileText, Users, Star, Check, PartyPopper, BarChart3, QrCode, Package, TrendingUp, Clock, Target, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import { Button } from "@/components/ui/button";
+import { PricingSection } from "@/components/landing/PricingSection";
 import Footer from "@/components/Footer";
 import YandexMetrika from "@/components/YandexMetrika";
-import { useState, useEffect } from "react";
 import heroDemo from "@/assets/hero-demo.jpg";
 import dashboardDemo from "@/assets/dashboard-demo.png";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
@@ -888,178 +889,7 @@ const Landing = () => {
       </section>
 
       {/* Pricing */}
-      <section className="py-16 sm:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50/50 to-white"></div>
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-wb-purple/10 to-purple-500/10 text-wb-purple px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-wb-purple/20">
-              <Sparkles className="w-4 h-4" />
-              <span className="font-medium">Без скрытых платежей</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Прозрачные тарифы</h2>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              <span className="sm:hidden">Платите за генерацию</span>
-              <span className="hidden sm:inline">Платите только за то, что генерируете. Без абонентской платы.</span>
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-hidden rounded-t-lg">
-              <CardHeader className="relative">
-                <CardTitle className="text-2xl">Стартовый</CardTitle>
-                <div className="text-4xl font-bold text-foreground mt-2">990₽</div>
-                <CardDescription className="text-base">80 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>12,38₽</strong> за токен
-                </div>
-                <div className="mt-3 space-y-2">
-                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
-                    1 описание = 12,38₽
-                  </div>
-                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
-                    1 изображение = 123,80₽
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 описание =</span>
-                    <span className="text-xs sm:text-sm font-medium">12,38₽</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 изображение карточки =</span>
-                    <span className="text-xs sm:text-sm font-medium">123,80₽</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">8 изображений карточек</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">80 описаний товаров</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Поддержка в чате</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark" onClick={() => navigate('/auth')}>
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-white overflow-visible relative rounded-t-lg">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500 rounded-t-lg"></div>
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                <Badge className="bg-gradient-to-r from-wb-purple to-purple-600 text-white border-none px-4 py-1 text-xs font-bold shadow-lg">
-                  ПОПУЛЯРНЫЙ
-                </Badge>
-              </div>
-              <CardHeader className="relative pt-8">
-                <CardTitle className="text-2xl">Профи</CardTitle>
-                <div className="text-4xl font-bold text-foreground mt-2">2 990₽</div>
-                <CardDescription className="text-base">250 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>11,96₽</strong> за токен
-                </div>
-                <div className="mt-3 space-y-2">
-                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
-                    1 описание = 11,96₽
-                  </div>
-                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
-                    1 изображение = 119,60₽
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 описание =</span>
-                    <span className="text-xs sm:text-sm font-medium">11,96₽</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 изображение карточки =</span>
-                    <span className="text-xs sm:text-sm font-medium">119,60₽</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">25 изображений карточек</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">250 описаний товаров</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Приоритетная поддержка</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark" onClick={() => navigate('/auth')}>
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-xl hover:shadow-2xl transition-all bg-gradient-to-br from-white via-wb-purple/5 to-purple-50 overflow-hidden rounded-t-lg">
-              <CardHeader className="relative">
-                <CardTitle className="text-2xl">Бизнес</CardTitle>
-                <div className="text-4xl font-bold text-foreground mt-2">9 990₽</div>
-                <CardDescription className="text-base">850 токенов</CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
-                  <strong>11,75₽</strong> за токен
-                </div>
-                <div className="mt-3 space-y-2">
-                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
-                    1 описание = 11,75₽
-                  </div>
-                  <div className="bg-wb-purple/10 text-wb-purple text-xs font-medium px-3 py-2 rounded-lg">
-                    1 изображение = 117,50₽
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 описание =</span>
-                    <span className="text-xs sm:text-sm font-medium">11,75₽</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-xs sm:text-sm">1 изображение карточки =</span>
-                    <span className="text-xs sm:text-sm font-medium">117,50₽</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">85 изображений карточек</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">850 описаний товаров</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">Персональный менеджер</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-wb-purple mr-2 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm">API доступ</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-wb-purple hover:bg-wb-purple-dark" onClick={() => navigate('/auth')}>
-                  Выбрать план
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+      <PricingSection />
 
       {/* Referrals */}
       <section className="py-20 relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">

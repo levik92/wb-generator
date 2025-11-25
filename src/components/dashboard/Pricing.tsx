@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { usePaymentPackages } from "@/hooks/usePaymentPackages";
+import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 
 interface PromoCodeInfo {
   id: string;
@@ -23,6 +25,12 @@ interface PricingProps {
 
 export default function Pricing({ appliedPromo }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const { data: packages, isLoading: packagesLoading } = usePaymentPackages();
+  const { data: generationPrices, isLoading: pricesLoading } = useGenerationPricing();
+
+  // Get pricing for calculations
+  const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
+  const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
 
   const handlePayment = async (packageName: string, amount: number, tokens: number) => {
     try {
@@ -85,54 +93,21 @@ export default function Pricing({ appliedPromo }: PricingProps) {
     }
   };
 
-  const plans = [
-    {
-      name: "Стартовый",
-      price: 990,
-      tokens: 80,
-      description: "Для начинающих",
-      features: [
-        "80 токенов (12,38₽ за токен)",
-        "8 изображений карточек товаров",
-        "80 описаний товаров",
-        "1 описание = 12,38₽",
-        "1 изображение карточки = 123,80₽",
-        "Поддержка в чате"
-      ],
-      popular: false,
-    },
-    {
-      name: "Профи",
-      price: 2990,
-      tokens: 250,
-      description: "Для активных продавцов",
-      features: [
-        "250 токенов (11,96₽ за токен)",
-        "25 изображений карточек товаров",
-        "250 описаний товаров",
-        "1 описание = 11,96₽",
-        "1 изображение карточки = 119,60₽",
-        "Приоритетная поддержка"
-      ],
-      popular: true,
-    },
-    {
-      name: "Бизнес",
-      price: 9990,
-      tokens: 850,
-      description: "Для крупного бизнеса",
-      features: [
-        "850 токенов (11,75₽ за токен)",
-        "85 изображений карточек товаров",
-        "850 описаний товаров",
-        "1 описание = 11,75₽",
-        "1 изображение карточки = 117,50₽",
-        "Персональный менеджер",
-        "API доступ"
-      ],
-      popular: false,
-    },
-  ];
+  if (packagesLoading || pricesLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!packages || packages.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Тарифные планы временно недоступны</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -144,61 +119,96 @@ export default function Pricing({ appliedPromo }: PricingProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {plans.map((plan) => (
-          <Card key={plan.name} className={plan.popular ? "border-primary" : ""}>
-            <CardHeader>
-              {plan.popular && (
-                <Badge className="w-fit mb-2">Популярный</Badge>
-              )}
-              <CardTitle>{plan.name}</CardTitle>
-              <div className="text-3xl font-bold">
-                {appliedPromo?.type === 'discount' 
-                  ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` 
-                  : `${plan.price}₽`
-                }
-                {appliedPromo?.type === 'discount' && (
-                  <span className="text-lg text-muted-foreground line-through ml-2">
-                    {plan.price}₽
-                  </span>
+        {packages.map((plan, index) => {
+          const isPopular = index === 1; // Mark middle plan as popular
+          const pricePerToken = plan.price / plan.tokens;
+          const photoCount = Math.floor(plan.tokens / photoPrice);
+          const descCount = Math.floor(plan.tokens / descriptionPrice);
+
+          return (
+            <Card key={plan.id} className={isPopular ? "border-primary" : ""}>
+              <CardHeader>
+                {isPopular && (
+                  <Badge className="w-fit mb-2">Популярный</Badge>
                 )}
-              </div>
-              <CardDescription>
-                {appliedPromo?.type === 'tokens' 
-                  ? `${plan.tokens + appliedPromo.value} токенов (+${appliedPromo.value} бонусных)`
-                  : `${plan.tokens} токенов`
-                }
-              </CardDescription>
-              <div className="text-sm text-muted-foreground mt-2">
-                <strong>{(plan.price / plan.tokens).toFixed(2)}₽</strong> за токен
-              </div>
-              <div className="mt-3 space-y-2">
-                <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
-                  1 описание = {(plan.price / plan.tokens * 1).toFixed(2)}₽
+                <CardTitle>{plan.name}</CardTitle>
+                <div className="text-3xl font-bold">
+                  {appliedPromo?.type === 'discount' 
+                    ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` 
+                    : `${plan.price}₽`
+                  }
+                  {appliedPromo?.type === 'discount' && (
+                    <span className="text-lg text-muted-foreground line-through ml-2">
+                      {plan.price}₽
+                    </span>
+                  )}
                 </div>
-                <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
-                  1 изображение = {(plan.price / plan.tokens * 10).toFixed(2)}₽
+                <CardDescription>
+                  {appliedPromo?.type === 'tokens' 
+                    ? `${plan.tokens + appliedPromo.value} токенов (+${appliedPromo.value} бонусных)`
+                    : `${plan.tokens} токенов`
+                  }
+                </CardDescription>
+                <div className="text-sm text-muted-foreground mt-2">
+                  <strong>{pricePerToken.toFixed(2)}₽</strong> за токен
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mb-6">
-                {plan.features.map((feature, index) => (
-                  <div key={index} className="flex items-center">
-                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
+                <div className="mt-3 space-y-2">
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
+                    1 описание = {(pricePerToken * descriptionPrice).toFixed(2)}₽
                   </div>
-                ))}
-              </div>
-              <Button 
-                className="w-full" 
-                onClick={() => handlePayment(plan.name, plan.price, plan.tokens)}
-                disabled={loading === plan.name}
-              >
-                {loading === plan.name ? "Создание платежа..." : "Выбрать план"}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
+                    1 изображение = {(pricePerToken * photoPrice).toFixed(2)}₽
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center">
+                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                    <span className="text-sm">{plan.tokens} токенов ({pricePerToken.toFixed(2)}₽ за токен)</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                    <span className="text-sm">{photoCount} изображений карточек товаров</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                    <span className="text-sm">{descCount} описаний товаров</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                    <span className="text-sm">Поддержка в чате</span>
+                  </div>
+                  {index === 2 && (
+                    <>
+                      <div className="flex items-center">
+                        <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                        <span className="text-sm">Персональный менеджер</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                        <span className="text-sm">API доступ</span>
+                      </div>
+                    </>
+                  )}
+                  {index === 1 && (
+                    <div className="flex items-center">
+                      <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                      <span className="text-sm">Приоритетная поддержка</span>
+                    </div>
+                  )}
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handlePayment(plan.name, plan.price, plan.tokens)}
+                  disabled={loading === plan.name}
+                >
+                  {loading === plan.name ? "Создание платежа..." : "Выбрать план"}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

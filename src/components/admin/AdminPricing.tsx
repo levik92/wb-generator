@@ -101,6 +101,9 @@ export function AdminPricing() {
         description: "Тариф обновлен",
       });
       
+      // Invalidate cache to refresh prices everywhere
+      queryClient.invalidateQueries({ queryKey: ['payment-packages'] });
+      
       await loadPackages();
     } catch (error) {
       console.error('Error updating package:', error);
@@ -134,6 +137,9 @@ export function AdminPricing() {
         description: "Тариф создан",
       });
       
+      // Invalidate cache to refresh prices everywhere
+      queryClient.invalidateQueries({ queryKey: ['payment-packages'] });
+      
       await loadPackages();
     } catch (error) {
       console.error('Error creating package:', error);
@@ -163,6 +169,9 @@ export function AdminPricing() {
         title: "Успешно",
         description: "Тариф удален",
       });
+      
+      // Invalidate cache to refresh prices everywhere
+      queryClient.invalidateQueries({ queryKey: ['payment-packages'] });
       
       await loadPackages();
     } catch (error) {
