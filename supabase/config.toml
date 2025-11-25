@@ -62,3 +62,18 @@ verify_jwt = true
 
 [functions.process-partner-signup]
 verify_jwt = false
+
+[functions.generate-description-banana]
+verify_jwt = true
+
+[functions.create-generation-job-banana]
+verify_jwt = true
+
+[functions.process-generation-tasks-banana]
+verify_jwt = false
+
+[functions.regenerate-single-card-banana]
+verify_jwt = true
+
+[functions.process-google-task]
+verify_jwt = false

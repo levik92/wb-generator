@@ -38,10 +38,32 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_model_settings: {
+        Row: {
+          active_model: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active_model: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          active_model?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ai_prompts: {
         Row: {
           created_at: string
           id: string
+          model_type: string | null
           prompt_template: string
           prompt_type: string
           updated_at: string
@@ -49,6 +71,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          model_type?: string | null
           prompt_template: string
           prompt_type: string
           updated_at?: string
@@ -56,6 +79,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          model_type?: string | null
           prompt_template?: string
           prompt_type?: string
           updated_at?: string
@@ -1192,6 +1216,7 @@ export type Database = {
       cleanup_old_generations: { Args: never; Returns: undefined }
       generate_partner_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
+      get_active_ai_model: { Args: never; Returns: string }
       get_payment_summary: {
         Args: { payment_ids: string[] }
         Returns: {
