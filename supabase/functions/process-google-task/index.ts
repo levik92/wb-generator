@@ -136,13 +136,13 @@ serve(async (req) => {
     const base64Data = generatedImageUrl.split(',')[1];
     const imageBlob = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
-    // Upload to Supabase Storage
-    const fileName = `${task.job_id}/${taskId}-${Date.now()}.png`;
+    // Upload to Supabase Storage (use same bucket as OpenAI: generated-cards)
+    const fileName = `${task.job.user_id}/${task.job_id}/${task.card_index}_${task.card_type}.png`;
     const { error: uploadError } = await supabase.storage
-      .from('generation-images')
+      .from('generated-cards')
       .upload(fileName, imageBlob, {
         contentType: 'image/png',
-        upsert: false,
+        upsert: true,
       });
 
     if (uploadError) {
@@ -152,7 +152,7 @@ serve(async (req) => {
 
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from('generation-images')
+      .from('generated-cards')
       .getPublicUrl(fileName);
 
     if (!urlData?.publicUrl) {
