@@ -80,6 +80,7 @@ export function PromptManager() {
   const [activeModel, setActiveModel] = useState<'openai' | 'google'>('openai');
   const [savingModel, setSavingModel] = useState(false);
   const [activeTab, setActiveTab] = useState<'openai' | 'google'>('openai');
+  const [seedingGemini, setSeedingGemini] = useState(false);
 
   useEffect(() => {
     loadPrompts();
@@ -114,10 +115,10 @@ export function PromptManager() {
         .select('active_model')
         .order('updated_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      if (data) {
+      if (data?.active_model) {
         setActiveModel(data.active_model as 'openai' | 'google');
         setActiveTab(data.active_model as 'openai' | 'google');
       }
@@ -126,6 +127,49 @@ export function PromptManager() {
     }
   };
 
+  const seedGeminiPrompts = async () => {
+    try {
+      setSeedingGemini(true);
+      const basePrompts = prompts.filter(p => !p.model_type || p.model_type === 'openai');
+
+      if (basePrompts.length === 0) {
+        toast({
+          title: 'Нет промтов OpenAI',
+          description: 'Сначала настройте промты для OpenAI, затем можно скопировать их для Gemini.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const insertData = basePrompts.map(p => ({
+        prompt_type: p.prompt_type,
+        prompt_template: p.prompt_template,
+        model_type: 'google',
+      }));
+
+      const { data, error } = await supabase
+        .from('ai_prompts')
+        .insert(insertData)
+        .select('*');
+
+      if (error) throw error;
+
+      setPrompts(prev => [...prev, ...(data as Prompt[])]);
+      toast({
+        title: 'Промты созданы',
+        description: 'Для Gemini скопированы промты из OpenAI. Теперь вы можете их редактировать.',
+      });
+    } catch (error) {
+      console.error('Error seeding Gemini prompts:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось создать промты для Gemini',
+        variant: 'destructive',
+      });
+    } finally {
+      setSeedingGemini(false);
+    }
+  };
   const saveActiveModel = async (model: 'openai' | 'google') => {
     setSavingModel(true);
     try {
@@ -263,6 +307,22 @@ export function PromptManager() {
   const renderPrompts = (modelType: 'openai' | 'google') => {
     const filteredPrompts = prompts.filter(p => p.model_type === modelType);
     
+    if (filteredPrompts.length === 0 && modelType === 'google') {
+      return (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground space-y-4">
+            <div>
+              <p>Нет промтов для модели Gemini</p>
+              <p className="text-sm mt-2">Вы можете скопировать текущие промты OpenAI и настроить их под Gemini.</p>
+            </div>
+            <Button onClick={seedGeminiPrompts} disabled={seedingGemini} className="mt-2">
+              {seedingGemini ? 'Создание промтов...' : 'Создать промты Gemini на основе OpenAI'}
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
     if (filteredPrompts.length === 0) {
       return (
         <Card>
