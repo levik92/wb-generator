@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import JSZip from 'jszip';
 
@@ -261,6 +262,13 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
           </Select>
         </div>
       </div>
+
+      <Alert className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
+        <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        <AlertDescription className="text-sm text-blue-900 dark:text-blue-200">
+          Данные генераций хранятся в течение <strong>1 месяца</strong> с момента создания. По истечении этого срока генерации будут автоматически удалены из истории.
+        </AlertDescription>
+      </Alert>
 
       {filteredGenerations.length === 0 ? (
         <Card>
