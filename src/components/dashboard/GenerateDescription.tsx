@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Clock } from "lucide-react";
+import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 
 interface Profile {
   id: string;
@@ -35,13 +36,15 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
   const { toast } = useToast();
+  const { price: descriptionPrice, isLoading: priceLoading } = useGenerationPrice('description_generation');
 
   const canGenerate = () => {
     return productName.trim() && 
            productName.trim().length <= 150 && 
            productName.trim().length >= 3 &&
            keywords.trim().length <= 1200 &&
-           profile.tokens_balance >= 1;
+           profile.tokens_balance >= descriptionPrice &&
+           !priceLoading;
   };
 
   const getGuardMessage = () => {
@@ -49,7 +52,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
     if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
     if (productName.trim().length < 3) return "Название товара должно содержать минимум 3 символа";
     if (keywords.trim().length > 1200) return "Ключевые слова должны быть не более 1200 символов";
-    if (profile.tokens_balance < 1) return "Недостаточно токенов (нужно 1)";
+    if (profile.tokens_balance < descriptionPrice) return `Недостаточно токенов (нужно ${descriptionPrice})`;
     return null;
   };
 
@@ -244,7 +247,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               )}
             </Button>
             <p className="text-center text-sm text-muted-foreground mt-3">
-              Стоимость: <strong>1 токен</strong> за генерацию описания
+              Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токен{descriptionPrice !== 1 ? 'ов' : ''}</strong> за генерацию описания
             </p>
             
             {!canGenerate() && (
