@@ -154,7 +154,7 @@ export function PromptManager() {
       setActiveModel(model);
       toast({
         title: "Успешно",
-        description: `Активная модель изменена на ${model === 'openai' ? 'OpenAI' : 'Google Gemini (Nanabanana Pro)'}`,
+        description: `Активная модель изменена на ${model === 'openai' ? 'OpenAI' : 'Gemini (Nanabanana Pro)'}`,
       });
     } catch (error) {
       console.error('Error saving active model:', error);
@@ -267,7 +267,7 @@ export function PromptManager() {
       return (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Google Gemini'}</p>
+            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Gemini'}</p>
             <p className="text-sm mt-2">Промты будут добавлены автоматически при первой генерации</p>
           </CardContent>
         </Card>
@@ -402,9 +402,9 @@ export function PromptManager() {
               <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 transition-colors">
                 <RadioGroupItem value="google" id="google" />
                 <Label htmlFor="google" className="flex-1 cursor-pointer">
-                  <div className="font-semibold">Nanabanana Pro (Google Gemini)</div>
+                  <div className="font-semibold">Nanabanana Pro (Gemini)</div>
                   <div className="text-sm text-muted-foreground">
-                    Использует google/gemini-2.5-flash для описаний и gemini-image для изображений
+                    Использует gemini-3-pro для описаний и gemini-3-pro-image для изображений
                   </div>
                 </Label>
                 {activeModel === 'google' && (
