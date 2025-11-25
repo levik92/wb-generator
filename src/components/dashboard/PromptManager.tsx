@@ -3,17 +3,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-
 import { toast } from "@/hooks/use-toast";
 import { Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface Prompt {
   id: string;
   prompt_type: string;
   prompt_template: string;
+  model_type: string;
   created_at: string;
   updated_at: string;
+}
+
+interface ModelSettings {
+  id: string;
+  active_model: 'openai' | 'google';
 }
 
 const getPromptDisplayName = (type: string): { name: string; description: string; category: string } => {
@@ -69,9 +77,13 @@ export function PromptManager() {
   const [editValue, setEditValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [activeModel, setActiveModel] = useState<'openai' | 'google'>('openai');
+  const [savingModel, setSavingModel] = useState(false);
+  const [activeTab, setActiveTab] = useState<'openai' | 'google'>('openai');
 
   useEffect(() => {
     loadPrompts();
+    loadActiveModel();
   }, []);
 
   const loadPrompts = async () => {
@@ -92,6 +104,67 @@ export function PromptManager() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadActiveModel = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ai_model_settings')
+        .select('active_model')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setActiveModel(data.active_model as 'openai' | 'google');
+        setActiveTab(data.active_model as 'openai' | 'google');
+      }
+    } catch (error) {
+      console.error('Error loading active model:', error);
+    }
+  };
+
+  const saveActiveModel = async (model: 'openai' | 'google') => {
+    setSavingModel(true);
+    try {
+      // Update the settings table (should only have one row)
+      const { data: existing } = await supabase
+        .from('ai_model_settings')
+        .select('id')
+        .limit(1)
+        .single();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('ai_model_settings')
+          .update({ active_model: model })
+          .eq('id', existing.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('ai_model_settings')
+          .insert({ active_model: model });
+
+        if (error) throw error;
+      }
+
+      setActiveModel(model);
+      toast({
+        title: "Успешно",
+        description: `Активная модель изменена на ${model === 'openai' ? 'OpenAI' : 'Google Gemini (Nanabanana Pro)'}`,
+      });
+    } catch (error) {
+      console.error('Error saving active model:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сохранить настройки модели",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingModel(false);
     }
   };
 
@@ -187,20 +260,23 @@ export function PromptManager() {
     );
   }
 
-  return (
-    <div className="space-y-4 md:space-y-6 overflow-x-hidden">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl md:text-2xl font-bold">Управление промтами</h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Редактирование промтов для генерации описаний и карточек товаров
-          </p>
-        </div>
-      </div>
+  const renderPrompts = (modelType: 'openai' | 'google') => {
+    const filteredPrompts = prompts.filter(p => p.model_type === modelType);
+    
+    if (filteredPrompts.length === 0) {
+      return (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Google Gemini'}</p>
+            <p className="text-sm mt-2">Промты будут добавлены автоматически при первой генерации</p>
+          </CardContent>
+        </Card>
+      );
+    }
 
+    return (
       <div className="space-y-3 md:space-y-4">
-        {/* Sort prompts: description first, then image prompts */}
-        {[...prompts]
+        {[...filteredPrompts]
           .sort((a, b) => {
             const order = ['description', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'];
             return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
@@ -280,9 +356,97 @@ export function PromptManager() {
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+            );
+          })}
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4 md:space-y-6 overflow-x-hidden">
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold">Управление промтами и моделями</h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Переключение между моделями генерации и редактирование промтов
+          </p>
+        </div>
+
+        {/* Model Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Активная модель генерации</CardTitle>
+            <CardDescription>
+              Выберите модель для генерации описаний и изображений. Изменение применяется ко всем новым генерациям.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RadioGroup
+              value={activeModel}
+              onValueChange={(value) => saveActiveModel(value as 'openai' | 'google')}
+              disabled={savingModel}
+              className="space-y-3"
+            >
+              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 transition-colors">
+                <RadioGroupItem value="openai" id="openai" />
+                <Label htmlFor="openai" className="flex-1 cursor-pointer">
+                  <div className="font-semibold">OpenAI (GPT)</div>
+                  <div className="text-sm text-muted-foreground">
+                    Версия 2.0 - использует модель gpt-image-1 для генерации изображений
+                  </div>
+                </Label>
+                {activeModel === 'openai' && (
+                  <Badge variant="default">Активна</Badge>
+                )}
+              </div>
+              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 transition-colors">
+                <RadioGroupItem value="google" id="google" />
+                <Label htmlFor="google" className="flex-1 cursor-pointer">
+                  <div className="font-semibold">Nanabanana Pro (Google Gemini)</div>
+                  <div className="text-sm text-muted-foreground">
+                    Использует google/gemini-2.5-flash для описаний и gemini-image для изображений
+                  </div>
+                </Label>
+                {activeModel === 'google' && (
+                  <Badge variant="default">Активна</Badge>
+                )}
+              </div>
+            </RadioGroup>
+            {savingModel && (
+              <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                Сохранение настроек...
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Prompts Tabs */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'openai' | 'google')}>
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="openai" className="gap-2">
+            OpenAI
+            <Badge variant="secondary" className="text-xs">
+              {prompts.filter(p => p.model_type === 'openai').length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="google" className="gap-2">
+            Google
+            <Badge variant="secondary" className="text-xs">
+              {prompts.filter(p => p.model_type === 'google').length}
+            </Badge>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="openai" className="mt-6">
+          {renderPrompts('openai')}
+        </TabsContent>
+
+        <TabsContent value="google" className="mt-6">
+          {renderPrompts('google')}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

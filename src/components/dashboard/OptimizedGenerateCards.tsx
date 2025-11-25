@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
+import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
   id: string;
@@ -39,6 +40,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const { price: photoPrice, isLoading: priceLoading } = useGenerationPrice('photo_generation');
+  const { data: activeModel } = useActiveAiModel();
   
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef(false);
@@ -187,7 +189,8 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
       }
 
       // Create generation job
-      const { data, error } = await supabase.functions.invoke('create-generation-job-v2', {
+      const functionName = getEdgeFunctionName('create-generation-job-v2', activeModel || 'openai');
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
           productName,
           category,

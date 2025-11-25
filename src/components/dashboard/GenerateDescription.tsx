@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Clock } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
+import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
   id: string;
@@ -37,6 +38,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   const [generatedText, setGeneratedText] = useState("");
   const { toast } = useToast();
   const { price: descriptionPrice, isLoading: priceLoading } = useGenerationPrice('description_generation');
+  const { data: activeModel } = useActiveAiModel();
 
   const canGenerate = () => {
     return productName.trim() && 
@@ -64,7 +66,9 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
       const keywordsList = keywords.split(',').map(k => k.trim()).filter(Boolean);
       
-      const { data, error } = await supabase.functions.invoke('generate-description', {
+      const functionName = getEdgeFunctionName('generate-description', activeModel || 'openai');
+      
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
           productName,
           category,
