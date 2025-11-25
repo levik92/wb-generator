@@ -66,7 +66,7 @@ serve(async (req) => {
 
     console.log('Calling Google Gemini for image editing...');
 
-    // Call Lovable AI with Google Gemini image model
+    // Call Lovable AI Gateway with Google Gemini 3 Pro Image model
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -74,7 +74,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image-preview',
+        model: 'google/gemini-3-pro-image-preview',
         messages: [
           {
             role: 'user',
