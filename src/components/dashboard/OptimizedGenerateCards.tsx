@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon } from "lucide-react";
+import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 
 interface Profile {
   id: string;
@@ -37,9 +38,12 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   const [currentJob, setCurrentJob] = useState<JobStatus | null>(null);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+  const { price: photoPrice, isLoading: priceLoading } = useGenerationPrice('photo_generation');
   
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef(false);
+  
+  const totalCost = photoPrice * 6; // 6 cards
 
   // Optimized polling with exponential backoff
   const pollJobStatus = useCallback(async (jobId: string) => {
@@ -149,10 +153,10 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
       return;
     }
 
-    if (profile.tokens_balance < 6) {
+    if (profile.tokens_balance < totalCost) {
       toast({
         title: "Недостаточно токенов",
-        description: "Для генерации 6 карточек нужно 6 токенов",
+        description: `Для генерации 6 карточек нужно ${totalCost} токенов`,
         variant: "destructive",
       });
       return;
@@ -326,11 +330,11 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
 
           <div className="flex items-center justify-between pt-4">
             <div className="text-sm text-muted-foreground">
-              Стоимость: <Badge variant="secondary">6 токенов</Badge>
+              Стоимость: <Badge variant="secondary">{priceLoading ? "..." : `${totalCost} токенов`}</Badge>
             </div>
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || profile.tokens_balance < 6}
+              disabled={isGenerating || profile.tokens_balance < totalCost || priceLoading}
               className="bg-wb-purple hover:bg-wb-purple-dark"
             >
               {isGenerating ? (

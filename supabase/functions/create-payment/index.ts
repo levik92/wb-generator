@@ -14,12 +14,6 @@ interface PaymentRequest {
   promoCode?: string;
 }
 
-const PACKAGES = {
-  'Стартовый': { price: 990, tokens: 80 },
-  'Профи': { price: 2990, tokens: 250 },
-  'Бизнес': { price: 9990, tokens: 850 }
-};
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -56,12 +50,21 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-const body: PaymentRequest = await req.json();
+    const body: PaymentRequest = await req.json();
     
-    const packageInfo = PACKAGES[body.packageName as keyof typeof PACKAGES];
-    if (!packageInfo) {
+    // Fetch package info from database
+    const { data: packageData, error: packageError } = await supabaseServiceRole
+      .from('payment_packages')
+      .select('*')
+      .eq('name', body.packageName)
+      .eq('is_active', true)
+      .maybeSingle();
+    
+    if (packageError || !packageData) {
       throw new Error("Invalid package");
     }
+    
+    const packageInfo = { price: packageData.price, tokens: packageData.tokens };
 
     // Compute final price/tokens with optional promo
     let finalAmount = packageInfo.price;
