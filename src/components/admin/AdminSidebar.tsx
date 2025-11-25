@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   BarChart3, 
   Users, 
-  FileText, 
+  Bot, 
   Gift,
   Megaphone,
   Zap,
@@ -41,8 +41,8 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     },
     {
       id: 'prompts',
-      label: 'Промты',
-      icon: FileText,
+      label: 'Модель',
+      icon: Bot,
     },
     {
       id: 'promocodes',
