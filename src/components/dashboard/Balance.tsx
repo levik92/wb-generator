@@ -3,10 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, FileText, Images } from "lucide-react";
+import { Coins, FileText, Images, Loader2 } from "lucide-react";
 import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
 import { PromoCodeInput } from "./PromoCodeInput";
+import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 
 interface PromoCodeInfo {
   id: string;
@@ -23,6 +24,11 @@ export default function Balance() {
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [appliedPromo, setAppliedPromo] = useState<PromoCodeInfo | null>(null);
+  const { data: generationPrices, isLoading: pricesLoading } = useGenerationPricing();
+  
+  const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost ?? 0;
+  const regenPrice = generationPrices?.find(p => p.price_type === 'photo_regeneration')?.tokens_cost ?? 0;
+  const descPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost ?? 0;
 
   useEffect(() => {
     loadBalance();
@@ -91,44 +97,50 @@ export default function Balance() {
           <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="space-y-3">
-            <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-              <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm">1 описание товара</div>
-                <div className="text-xs text-muted-foreground">Генерация описания</div>
-              </div>
-               <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                 1 токен
-               </div>
+          {pricesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
-            <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-              <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                <Images className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
+                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm">1 описание товара</div>
+                  <div className="text-xs text-muted-foreground">Генерация описания</div>
+                </div>
+                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
+                  {descPrice} {descPrice === 1 ? 'токен' : 'токенов'}
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm">1 перегенерация изображения</div>
-                <div className="text-xs text-muted-foreground">Повторная генерация существующего изображения</div>
+              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
+                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
+                  <Images className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm">1 перегенерация изображения</div>
+                  <div className="text-xs text-muted-foreground">Повторная генерация существующего изображения</div>
+                </div>
+                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
+                  {regenPrice} {regenPrice === 1 ? 'токен' : 'токенов'}
+                </div>
               </div>
-              <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                5 токенов
+              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
+                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
+                  <Images className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm">1 изображение карточки</div>
+                  <div className="text-xs text-muted-foreground">Генерация</div>
+                </div>
+                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
+                  {photoPrice} {photoPrice === 1 ? 'токен' : 'токенов'}
+                </div>
               </div>
             </div>
-            <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-              <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                <Images className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm">1 изображение карточки</div>
-                <div className="text-xs text-muted-foreground">Генерация</div>
-              </div>
-              <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                10 токенов
-              </div>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
       
