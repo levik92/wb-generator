@@ -38,7 +38,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   const [generatedText, setGeneratedText] = useState("");
   const { toast } = useToast();
   const { price: descriptionPrice, isLoading: priceLoading } = useGenerationPrice('description_generation');
-  const { data: activeModel } = useActiveAiModel();
+  const { data: activeModel, isLoading: modelLoading } = useActiveAiModel();
 
   const canGenerate = () => {
     return productName.trim() && 
@@ -59,6 +59,16 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   };
 
   const simulateGeneration = async () => {
+    // Check if model is loaded
+    if (!activeModel) {
+      toast({
+        title: "Подождите",
+        description: "Загрузка настроек модели...",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setGenerating(true);
     setGeneratedText("");
     
@@ -66,7 +76,8 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
       const keywordsList = keywords.split(',').map(k => k.trim()).filter(Boolean);
       
-      const functionName = getEdgeFunctionName('generate-description', activeModel || 'openai');
+      const functionName = getEdgeFunctionName('generate-description', activeModel);
+      console.log('[GenerateDescription] Active model:', activeModel, '| Function:', functionName);
       
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
