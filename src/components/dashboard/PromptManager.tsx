@@ -95,6 +95,9 @@ export function PromptManager() {
 
       if (error) throw error;
       setPrompts(data || []);
+      
+      // Copy OpenAI prompts to Google if they don't exist
+      await copyOpenAIPromptsToGoogle(data || []);
     } catch (error) {
       console.error('Error loading prompts:', error);
       toast({
@@ -104,6 +107,46 @@ export function PromptManager() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyOpenAIPromptsToGoogle = async (existingPrompts: Prompt[]) => {
+    try {
+      const openaiPrompts = existingPrompts.filter(p => p.model_type === 'openai');
+      const googlePrompts = existingPrompts.filter(p => p.model_type === 'google');
+      
+      // Get prompt types that exist in OpenAI but not in Google
+      const openaiTypes = new Set(openaiPrompts.map(p => p.prompt_type));
+      const googleTypes = new Set(googlePrompts.map(p => p.prompt_type));
+      const missingTypes = [...openaiTypes].filter(type => !googleTypes.has(type));
+      
+      if (missingTypes.length > 0) {
+        const promptsToCopy = openaiPrompts
+          .filter(p => missingTypes.includes(p.prompt_type))
+          .map(p => ({
+            prompt_type: p.prompt_type,
+            prompt_template: p.prompt_template,
+            model_type: 'google'
+          }));
+        
+        const { error } = await supabase
+          .from('ai_prompts')
+          .insert(promptsToCopy);
+        
+        if (error) {
+          console.error('Error copying prompts to Google:', error);
+        } else {
+          console.log(`Copied ${promptsToCopy.length} prompts from OpenAI to Gemini`);
+          // Reload prompts to show the new ones
+          const { data } = await supabase
+            .from('ai_prompts')
+            .select('*')
+            .order('prompt_type');
+          if (data) setPrompts(data);
+        }
+      }
+    } catch (error) {
+      console.error('Error in copyOpenAIPromptsToGoogle:', error);
     }
   };
 
@@ -267,7 +310,7 @@ export function PromptManager() {
       return (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Google Gemini'}</p>
+            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Gemini'}</p>
             <p className="text-sm mt-2">Промты будут добавлены автоматически при первой генерации</p>
           </CardContent>
         </Card>
@@ -432,7 +475,7 @@ export function PromptManager() {
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="google" className="gap-2">
-            Google
+            Gemini
             <Badge variant="secondary" className="text-xs">
               {prompts.filter(p => p.model_type === 'google').length}
             </Badge>
