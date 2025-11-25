@@ -313,7 +313,7 @@ export function PromptManager() {
                     )}
                   </div>
                 </CardHeader>
-              <CardContent className="pt-0">
+                <CardContent className="pt-0">
                 <div className="space-y-4">
                   {isEditing ? (
                     <>
