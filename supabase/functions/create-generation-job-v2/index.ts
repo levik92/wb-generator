@@ -46,6 +46,25 @@ serve(async (req) => {
       });
     }
 
+    // Get photo generation price from database
+    const { data: pricingData, error: pricingError } = await supabase
+      .from('generation_pricing')
+      .select('tokens_cost')
+      .eq('price_type', 'photo_generation')
+      .single();
+
+    if (pricingError || !pricingData) {
+      console.error('Pricing error:', pricingError);
+      return new Response(JSON.stringify({
+        error: 'Failed to get pricing information'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const tokensPerCard = pricingData.tokens_cost;
+
     // Check user token balance
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -63,7 +82,7 @@ serve(async (req) => {
       });
     }
 
-    const tokensRequired = selectedCards.length * 10;
+    const tokensRequired = selectedCards.length * tokensPerCard;
     if (profile.tokens_balance < tokensRequired) {
       return new Response(JSON.stringify({
         error: 'Insufficient tokens',

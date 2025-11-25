@@ -112,6 +112,25 @@ serve(async (req) => {
       });
     }
 
+    // Get photo regeneration price from database
+    const { data: pricingData, error: pricingError } = await supabase
+      .from('generation_pricing')
+      .select('tokens_cost')
+      .eq('price_type', 'photo_regeneration')
+      .single();
+
+    if (pricingError || !pricingData) {
+      console.error('Pricing error:', pricingError);
+      return new Response(JSON.stringify({
+        error: 'Failed to get pricing information'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const tokensRequired = pricingData.tokens_cost;
+
     // Check user token balance
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -119,10 +138,10 @@ serve(async (req) => {
       .eq('id', userId)
       .single();
 
-    if (profileError || !profile || profile.tokens_balance < 5) {
+    if (profileError || !profile || profile.tokens_balance < tokensRequired) {
       return new Response(JSON.stringify({
         error: 'Insufficient tokens',
-        required: 5,
+        required: tokensRequired,
         available: profile?.tokens_balance || 0
       }), {
         status: 402,
@@ -133,7 +152,7 @@ serve(async (req) => {
     // Spend token
     const { error: spendError } = await supabase.rpc('spend_tokens', {
       user_id_param: userId,
-      tokens_amount: 5
+      tokens_amount: tokensRequired
     });
 
     if (spendError) {

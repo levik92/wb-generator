@@ -205,6 +205,33 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_pricing: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          price_type: string
+          tokens_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          price_type: string
+          tokens_cost: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          price_type?: string
+          tokens_cost?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generation_tasks: {
         Row: {
           card_index: number
