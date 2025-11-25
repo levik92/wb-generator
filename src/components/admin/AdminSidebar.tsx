@@ -11,8 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Handshake,
-  DollarSign,
-  Cpu
+  DollarSign
 } from "lucide-react";
 import { useState } from "react";
 
@@ -42,8 +41,8 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     },
     {
       id: 'prompts',
-      label: 'Модель',
-      icon: Cpu,
+      label: 'Промты',
+      icon: FileText,
     },
     {
       id: 'promocodes',

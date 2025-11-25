@@ -87,7 +87,6 @@ export function PromptManager() {
   }, []);
 
   const loadPrompts = async () => {
-    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('ai_prompts')
@@ -95,18 +94,7 @@ export function PromptManager() {
         .order('prompt_type');
 
       if (error) throw error;
-      
-      // First, check if we need to copy prompts
-      await copyOpenAIPromptsToGoogle(data || []);
-      
-      // Then reload prompts to get the newly copied ones
-      const { data: updatedData, error: reloadError } = await supabase
-        .from('ai_prompts')
-        .select('*')
-        .order('prompt_type');
-      
-      if (reloadError) throw reloadError;
-      setPrompts(updatedData || []);
+      setPrompts(data || []);
     } catch (error) {
       console.error('Error loading prompts:', error);
       toast({
@@ -116,54 +104,6 @@ export function PromptManager() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const copyOpenAIPromptsToGoogle = async (existingPrompts: Prompt[]) => {
-    try {
-      const openaiPrompts = existingPrompts.filter(p => p.model_type === 'openai');
-      const googlePrompts = existingPrompts.filter(p => p.model_type === 'google');
-      
-      // Get prompt types that exist in OpenAI but not in Google
-      const openaiTypes = new Set(openaiPrompts.map(p => p.prompt_type));
-      const googleTypes = new Set(googlePrompts.map(p => p.prompt_type));
-      const missingTypes = [...openaiTypes].filter(type => !googleTypes.has(type));
-      
-      if (missingTypes.length > 0) {
-        console.log(`Копируем ${missingTypes.length} промтов из OpenAI в Gemini...`);
-        
-        const promptsToCopy = openaiPrompts
-          .filter(p => missingTypes.includes(p.prompt_type))
-          .map(p => ({
-            prompt_type: p.prompt_type,
-            prompt_template: p.prompt_template,
-            model_type: 'google'
-          }));
-        
-        const { error } = await supabase
-          .from('ai_prompts')
-          .insert(promptsToCopy);
-        
-        if (error) {
-          console.error('Ошибка при копировании промтов:', error);
-          throw error;
-        } else {
-          console.log(`✓ Скопировано ${promptsToCopy.length} промтов в Gemini`);
-          toast({
-            title: "Промты скопированы",
-            description: `${promptsToCopy.length} промтов скопированы из OpenAI в Gemini`,
-          });
-        }
-      } else {
-        console.log('Все промты уже существуют в Gemini');
-      }
-    } catch (error) {
-      console.error('Ошибка в copyOpenAIPromptsToGoogle:', error);
-      toast({
-        title: "Ошибка копирования",
-        description: "Не удалось скопировать промты в Gemini",
-        variant: "destructive",
-      });
     }
   };
 
@@ -327,7 +267,7 @@ export function PromptManager() {
       return (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Gemini'}</p>
+            <p>Нет промтов для модели {modelType === 'openai' ? 'OpenAI' : 'Google Gemini'}</p>
             <p className="text-sm mt-2">Промты будут добавлены автоматически при первой генерации</p>
           </CardContent>
         </Card>
@@ -492,7 +432,7 @@ export function PromptManager() {
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="google" className="gap-2">
-            Gemini
+            Google
             <Badge variant="secondary" className="text-xs">
               {prompts.filter(p => p.model_type === 'google').length}
             </Badge>
