@@ -87,6 +87,7 @@ export function PromptManager() {
   }, []);
 
   const loadPrompts = async () => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('ai_prompts')
@@ -94,10 +95,18 @@ export function PromptManager() {
         .order('prompt_type');
 
       if (error) throw error;
-      setPrompts(data || []);
       
-      // Copy OpenAI prompts to Google if they don't exist
+      // First, check if we need to copy prompts
       await copyOpenAIPromptsToGoogle(data || []);
+      
+      // Then reload prompts to get the newly copied ones
+      const { data: updatedData, error: reloadError } = await supabase
+        .from('ai_prompts')
+        .select('*')
+        .order('prompt_type');
+      
+      if (reloadError) throw reloadError;
+      setPrompts(updatedData || []);
     } catch (error) {
       console.error('Error loading prompts:', error);
       toast({
@@ -121,6 +130,8 @@ export function PromptManager() {
       const missingTypes = [...openaiTypes].filter(type => !googleTypes.has(type));
       
       if (missingTypes.length > 0) {
+        console.log(`Копируем ${missingTypes.length} промтов из OpenAI в Gemini...`);
+        
         const promptsToCopy = openaiPrompts
           .filter(p => missingTypes.includes(p.prompt_type))
           .map(p => ({
@@ -134,19 +145,25 @@ export function PromptManager() {
           .insert(promptsToCopy);
         
         if (error) {
-          console.error('Error copying prompts to Google:', error);
+          console.error('Ошибка при копировании промтов:', error);
+          throw error;
         } else {
-          console.log(`Copied ${promptsToCopy.length} prompts from OpenAI to Gemini`);
-          // Reload prompts to show the new ones
-          const { data } = await supabase
-            .from('ai_prompts')
-            .select('*')
-            .order('prompt_type');
-          if (data) setPrompts(data);
+          console.log(`✓ Скопировано ${promptsToCopy.length} промтов в Gemini`);
+          toast({
+            title: "Промты скопированы",
+            description: `${promptsToCopy.length} промтов скопированы из OpenAI в Gemini`,
+          });
         }
+      } else {
+        console.log('Все промты уже существуют в Gemini');
       }
     } catch (error) {
-      console.error('Error in copyOpenAIPromptsToGoogle:', error);
+      console.error('Ошибка в copyOpenAIPromptsToGoogle:', error);
+      toast({
+        title: "Ошибка копирования",
+        description: "Не удалось скопировать промты в Gemini",
+        variant: "destructive",
+      });
     }
   };
 
