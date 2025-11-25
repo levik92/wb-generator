@@ -74,7 +74,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const { toast } = useToast();
   const { price: photoGenerationPrice, isLoading: priceLoading } = useGenerationPrice('photo_generation');
   const { price: photoRegenerationPrice } = useGenerationPrice('photo_regeneration');
-  const { data: activeModel } = useActiveAiModel();
+  const { data: activeModel, isLoading: modelLoading } = useActiveAiModel();
 
   const WAITING_MESSAGES = [
     "Еще чуть-чуть...",
@@ -494,8 +494,19 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       setJobStatus('Создание задачи генерации...');
 
+      // Check if model is loaded
+      if (!activeModel) {
+        toast({
+          title: "Подождите",
+          description: "Загрузка настроек модели...",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Create generation job with dynamic model-based function name
-      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel || 'openai');
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel);
+      console.log('[GenerateCards] Active model:', activeModel, '| Function:', createJobFunction);
       const { data, error } = await supabase.functions.invoke(createJobFunction, {
         body: {
           productName,
@@ -645,8 +656,24 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setRegeneratingCards(prev => new Set([...prev, cardKey]));
     
     try {
+      // Check if model is loaded
+      if (!activeModel) {
+        toast({
+          title: "Подождите",
+          description: "Загрузка настроек модели...",
+          variant: "destructive",
+        });
+        setRegeneratingCards(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(cardKey);
+          return newSet;
+        });
+        return;
+      }
+
       // Use dynamic model-based function name for regeneration
-      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel || 'openai');
+      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
+      console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
       const { data, error } = await supabase.functions.invoke(regenerateFunction, {
         body: {
           productName: productName,
