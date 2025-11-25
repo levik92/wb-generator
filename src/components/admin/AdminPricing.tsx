@@ -227,124 +227,141 @@ export function AdminPricing() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
       {/* Тарифы */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Тарифные планы</CardTitle>
-              <CardDescription>Управление пакетами токенов и ценами</CardDescription>
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-lg sm:text-xl">Тарифные планы</CardTitle>
+              <CardDescription className="text-xs sm:text-sm mt-1">
+                Управление пакетами токенов и ценами
+              </CardDescription>
             </div>
-            <Button onClick={handlePackageCreate} disabled={saving}>
-              <Plus className="w-4 h-4 mr-2" />
-              Добавить тариф
+            <Button 
+              onClick={handlePackageCreate} 
+              disabled={saving}
+              size="sm"
+              className="w-full sm:w-auto flex-shrink-0"
+            >
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="ml-2 sm:ml-0">Добавить тариф</span>
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Название</TableHead>
-                  <TableHead>Цена (₽)</TableHead>
-                  <TableHead>Токены</TableHead>
-                  <TableHead>Активен</TableHead>
-                  <TableHead className="text-right">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {packages.map((pkg) => (
-                  <TableRow key={pkg.id}>
-                    <TableCell>
-                      <Input
-                        value={pkg.name}
-                        onChange={(e) => {
-                          const updated = packages.map(p => 
-                            p.id === pkg.id ? { ...p, name: e.target.value } : p
-                          );
-                          setPackages(updated);
-                        }}
-                        className="max-w-xs"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        value={pkg.price}
-                        onChange={(e) => {
-                          const updated = packages.map(p => 
-                            p.id === pkg.id ? { ...p, price: parseInt(e.target.value) || 0 } : p
-                          );
-                          setPackages(updated);
-                        }}
-                        className="max-w-[120px]"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        value={pkg.tokens}
-                        onChange={(e) => {
-                          const updated = packages.map(p => 
-                            p.id === pkg.id ? { ...p, tokens: parseInt(e.target.value) || 0 } : p
-                          );
-                          setPackages(updated);
-                        }}
-                        className="max-w-[120px]"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={pkg.is_active}
-                        onCheckedChange={(checked) => {
-                          const updated = packages.map(p => 
-                            p.id === pkg.id ? { ...p, is_active: checked } : p
-                          );
-                          setPackages(updated);
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handlePackageUpdate(pkg)}
-                        disabled={saving}
-                      >
-                        <Save className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handlePackageDelete(pkg.id)}
-                        disabled={saving}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
+                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
+                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
+                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
+                    <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {packages.map((pkg) => (
+                    <TableRow key={pkg.id}>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Input
+                          value={pkg.name}
+                          onChange={(e) => {
+                            const updated = packages.map(p => 
+                              p.id === pkg.id ? { ...p, name: e.target.value } : p
+                            );
+                            setPackages(updated);
+                          }}
+                          className="w-28 sm:w-32 md:max-w-xs text-xs sm:text-sm h-8 sm:h-9"
+                        />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Input
+                          type="number"
+                          value={pkg.price}
+                          onChange={(e) => {
+                            const updated = packages.map(p => 
+                              p.id === pkg.id ? { ...p, price: parseInt(e.target.value) || 0 } : p
+                            );
+                            setPackages(updated);
+                          }}
+                          className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9"
+                        />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Input
+                          type="number"
+                          value={pkg.tokens}
+                          onChange={(e) => {
+                            const updated = packages.map(p => 
+                              p.id === pkg.id ? { ...p, tokens: parseInt(e.target.value) || 0 } : p
+                            );
+                            setPackages(updated);
+                          }}
+                          className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9"
+                        />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Switch
+                          checked={pkg.is_active}
+                          onCheckedChange={(checked) => {
+                            const updated = packages.map(p => 
+                              p.id === pkg.id ? { ...p, is_active: checked } : p
+                            );
+                            setPackages(updated);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <div className="flex items-center justify-end gap-1 sm:gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handlePackageUpdate(pkg)}
+                            disabled={saving}
+                            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                          >
+                            <Save className="w-3 h-3 sm:w-4 sm:h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handlePackageDelete(pkg.id)}
+                            disabled={saving}
+                            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                          >
+                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Цены генерации */}
       <Card>
-        <CardHeader>
-          <CardTitle>Стоимость генерации</CardTitle>
-          <CardDescription>Цены в токенах за каждый тип операции</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Стоимость генерации</CardTitle>
+          <CardDescription className="text-xs sm:text-sm mt-1">
+            Цены в токенах за каждый тип операции
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-4 sm:p-6 sm:pt-0">
+          <div className="space-y-3 sm:space-y-4">
             {generationPrices.map((price) => (
-              <div key={price.id} className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Label>{price.description}</Label>
+              <div key={price.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 sm:p-0 rounded-lg bg-muted/30 sm:bg-transparent">
+                <div className="flex-1 min-w-0">
+                  <Label className="text-xs sm:text-sm font-medium break-words">
+                    {price.description}
+                  </Label>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-2 flex-wrap sm:flex-nowrap">
                   <Input
                     type="number"
                     min="0"
@@ -357,20 +374,24 @@ export function AdminPricing() {
                       );
                       setGenerationPrices(updated);
                     }}
-                    className="w-24"
+                    className="w-16 sm:w-20 text-xs sm:text-sm h-8 sm:h-9 flex-shrink-0"
                   />
-                  <span className="text-sm text-muted-foreground">токенов</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                    токенов
+                  </span>
                   <Button
                     size="sm"
                     onClick={() => handleGenerationPriceUpdate(price)}
                     disabled={saving}
+                    className="h-8 sm:h-9 px-2 sm:px-3 flex-shrink-0"
                   >
-                    <Save className="w-4 h-4" />
+                    <Save className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                    <span className="hidden sm:inline text-xs">Сохранить</span>
                   </Button>
                 </div>
               </div>
             ))}
-            <p className="text-xs text-muted-foreground pt-2">
+            <p className="text-[10px] sm:text-xs text-muted-foreground pt-2 leading-relaxed">
               * Изменения цен применяются автоматически во всех разделах портала
             </p>
           </div>
