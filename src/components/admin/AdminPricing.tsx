@@ -103,8 +103,6 @@ export function AdminPricing() {
       
       // Invalidate cache to refresh prices everywhere
       queryClient.invalidateQueries({ queryKey: ['payment-packages'] });
-      
-      await loadPackages();
     } catch (error) {
       console.error('Error updating package:', error);
       toast({
@@ -112,6 +110,8 @@ export function AdminPricing() {
         description: "Не удалось обновить тариф",
         variant: "destructive",
       });
+      // Reload on error to revert changes
+      await loadPackages();
     } finally {
       setSaving(false);
     }
@@ -140,6 +140,7 @@ export function AdminPricing() {
       // Invalidate cache to refresh prices everywhere
       queryClient.invalidateQueries({ queryKey: ['payment-packages'] });
       
+      // Reload to show new package
       await loadPackages();
     } catch (error) {
       console.error('Error creating package:', error);
@@ -203,8 +204,6 @@ export function AdminPricing() {
 
       // Invalidate the cache to refresh prices everywhere
       queryClient.invalidateQueries({ queryKey: ['generation-pricing'] });
-      
-      await loadGenerationPrices();
     } catch (error) {
       console.error('Error updating generation price:', error);
       toast({
@@ -212,6 +211,8 @@ export function AdminPricing() {
         description: "Не удалось обновить цену",
         variant: "destructive",
       });
+      // Reload on error to revert changes
+      await loadGenerationPrices();
     } finally {
       setSaving(false);
     }

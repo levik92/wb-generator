@@ -16,6 +16,7 @@ import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw
 import JSZip from 'jszip';
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
+import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 
 interface Profile {
   id: string;
@@ -70,6 +71,8 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [smoothProgress, setSmoothProgress] = useState(0);
   const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
   const { toast } = useToast();
+  const { price: photoGenerationPrice, isLoading: priceLoading } = useGenerationPrice('photo_generation');
+  const { price: photoRegenerationPrice } = useGenerationPrice('photo_regeneration');
 
   const WAITING_MESSAGES = [
     "Еще чуть-чуть...",
@@ -257,7 +260,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   };
 
   const canGenerate = () => {
-    const tokensNeeded = selectedCards.length * 10;
+    const tokensNeeded = selectedCards.length * photoGenerationPrice;
     return files.length > 0 && 
            productName.trim() && 
            productName.trim().length <= 150 &&
@@ -265,11 +268,12 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
            description.trim().length <= 600 &&
            selectedCards.length > 0 &&
            profile.tokens_balance >= tokensNeeded && 
-           !generating;
+           !generating &&
+           !priceLoading;
   };
 
   const getGuardMessage = () => {
-    const tokensNeeded = selectedCards.length * 10;
+    const tokensNeeded = selectedCards.length * photoGenerationPrice;
     if (files.length === 0) return "Загрузите хотя бы одно изображение";
     if (!productName.trim()) return "Введите название товара";
     if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
@@ -1290,7 +1294,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             </div>
             <div className="flex items-center justify-center gap-2 mt-4 pt-4 text-xs text-muted-foreground">
               <Info className="w-3 h-3" />
-              <span>Перегенерация одного изображения: 5 токенов</span>
+              <span>Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}</span>
             </div>
           </CardContent>
         </Card>
@@ -1325,7 +1329,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           </Button>
           
           <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3 px-2">
-            Стоимость: <strong>{selectedCards.length * 10} {selectedCards.length * 10 === 1 ? 'токен' : (selectedCards.length * 10) % 10 >= 2 && (selectedCards.length * 10) % 10 <= 4 && ((selectedCards.length * 10) % 100 < 10 || (selectedCards.length * 10) % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
+            Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : (selectedCards.length * photoGenerationPrice) % 10 >= 2 && (selectedCards.length * photoGenerationPrice) % 10 <= 4 && ((selectedCards.length * photoGenerationPrice) % 100 < 10 || (selectedCards.length * photoGenerationPrice) % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
           </p>
           
           {!canGenerate() && !generating && (
