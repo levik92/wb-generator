@@ -1189,6 +1189,7 @@ export type Database = {
         Returns: boolean
       }
       check_admin_profile_access_rate: { Args: never; Returns: boolean }
+      cleanup_old_generations: { Args: never; Returns: undefined }
       generate_partner_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_payment_summary: {
