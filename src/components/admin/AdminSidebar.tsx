@@ -10,7 +10,8 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
-  Handshake
+  Handshake,
+  DollarSign
 } from "lucide-react";
 import { useState } from "react";
 
@@ -47,6 +48,11 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'promocodes',
       label: 'Промокоды',
       icon: Gift,
+    },
+    {
+      id: 'pricing',
+      label: 'Цены',
+      icon: DollarSign,
     },
     {
       id: 'news',
