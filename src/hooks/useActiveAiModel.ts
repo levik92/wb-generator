@@ -27,9 +27,18 @@ export const useActiveAiModel = () => {
   });
 };
 
+// For description generation (OpenAI без суффикса, Google с -banana)
 export const getEdgeFunctionName = (baseFunction: string, model: ActiveModel): string => {
   if (model === 'google') {
     return `${baseFunction}-banana`;
   }
   return baseFunction;
+};
+
+// For image generation (OpenAI с -v2, Google с -banana)
+export const getImageEdgeFunctionName = (baseFunction: string, model: ActiveModel): string => {
+  if (model === 'google') {
+    return `${baseFunction}-banana`;
+  }
+  return `${baseFunction}-v2`;
 };

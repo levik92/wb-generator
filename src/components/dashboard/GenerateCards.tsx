@@ -17,6 +17,7 @@ import JSZip from 'jszip';
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
+import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
   id: string;
@@ -73,6 +74,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const { toast } = useToast();
   const { price: photoGenerationPrice, isLoading: priceLoading } = useGenerationPrice('photo_generation');
   const { price: photoRegenerationPrice } = useGenerationPrice('photo_regeneration');
+  const { data: activeModel } = useActiveAiModel();
 
   const WAITING_MESSAGES = [
     "Еще чуть-чуть...",
@@ -492,8 +494,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
 
       setJobStatus('Создание задачи генерации...');
 
-      // Create generation job
-      const { data, error } = await supabase.functions.invoke('create-generation-job-v2', {
+      // Create generation job with dynamic model-based function name
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel || 'openai');
+      const { data, error } = await supabase.functions.invoke(createJobFunction, {
         body: {
           productName,
           category,
@@ -642,7 +645,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setRegeneratingCards(prev => new Set([...prev, cardKey]));
     
     try {
-      const { data, error } = await supabase.functions.invoke('regenerate-single-card-v2', {
+      // Use dynamic model-based function name for regeneration
+      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel || 'openai');
+      const { data, error } = await supabase.functions.invoke(regenerateFunction, {
         body: {
           productName: productName,
           category: category,
