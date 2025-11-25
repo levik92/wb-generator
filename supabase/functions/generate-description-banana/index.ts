@@ -40,10 +40,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
-    if (!geminiApiKey) {
-      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -98,22 +98,21 @@ serve(async (req) => {
       .replace('{competitors}', sanitizedCompetitors.join(', ') || 'не указано')
       .replace('{keywords}', sanitizedKeywords.join(', ') || 'не указано');
 
-    console.log('Using Google Gemini API for description generation');
+    console.log('Using Lovable AI Gateway (Google Gemini) for description generation');
 
-    // Call Google Gemini API directly
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
+    // Call Lovable AI Gateway with Google Gemini model
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
+        model: 'google/gemini-2.5-flash',
+        messages: [
           {
-            parts: [
-              {
-                text: finalPrompt
-              }
-            ]
+            role: 'user',
+            content: finalPrompt
           }
         ],
       }),
@@ -121,14 +120,29 @@ serve(async (req) => {
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Google Gemini API error:', aiResponse.status, errorText);
-      throw new Error('Failed to generate description with Google Gemini');
+      console.error('Lovable AI Gateway error:', aiResponse.status, errorText);
+      
+      if (aiResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded, please try again later' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (aiResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI credits exhausted, please add funds' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      throw new Error('Failed to generate description');
     }
 
     const aiData = await aiResponse.json();
-    const generatedText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const generatedText = aiData.choices?.[0]?.message?.content;
 
     if (!generatedText) {
+      console.error('No content in AI response:', aiData);
       throw new Error('No content generated');
     }
 
