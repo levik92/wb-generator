@@ -72,6 +72,25 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Get description generation price from database
+    const { data: pricingData, error: pricingError } = await supabase
+      .from('generation_pricing')
+      .select('tokens_cost')
+      .eq('price_type', 'description_generation')
+      .single();
+
+    if (pricingError || !pricingData) {
+      console.error('Pricing error:', pricingError);
+      return new Response(JSON.stringify({
+        error: 'Failed to get pricing information'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const tokensRequired = pricingData.tokens_cost;
+
     // Check if user has enough tokens before processing
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
@@ -84,9 +103,9 @@ serve(async (req) => {
       throw new Error('Ошибка при проверке баланса токенов');
     }
 
-    if (!profileData || profileData.tokens_balance < 1) {
+    if (!profileData || profileData.tokens_balance < tokensRequired) {
       return new Response(JSON.stringify({ 
-        error: 'Недостаточно токенов для генерации. Нужен 1 токен.' 
+        error: `Недостаточно токенов для генерации. Нужно ${tokensRequired} токенов.` 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -157,7 +176,7 @@ serve(async (req) => {
     // Only spend tokens after successful generation
     const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
       user_id_param: userId,
-      tokens_amount: 1
+      tokens_amount: tokensRequired
     });
 
     if (tokenError) {
@@ -181,7 +200,7 @@ serve(async (req) => {
         output_data: {
           description: generatedDescription
         },
-        tokens_used: 1,
+        tokens_used: tokensRequired,
         status: 'completed',
         product_name: sanitizedProductName,
         category: sanitizedCategory,

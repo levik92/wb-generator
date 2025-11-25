@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PaymentPackage {
   id: string;
@@ -19,25 +20,26 @@ interface PaymentPackage {
 }
 
 interface GenerationPrice {
-  card_type: string;
+  id: string;
+  price_type: string;
   tokens_cost: number;
+  description: string;
 }
 
 export function AdminPricing() {
   const [packages, setPackages] = useState<PaymentPackage[]>([]);
+  const [generationPrices, setGenerationPrices] = useState<GenerationPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
-  // Цены генерации
-  const [generationPrices, setGenerationPrices] = useState<GenerationPrice[]>([
-    { card_type: 'Стандартная карточка', tokens_cost: 1 },
-    { card_type: 'Инфографика', tokens_cost: 1 },
-    { card_type: 'Описание товара', tokens_cost: 2 },
-  ]);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    loadPackages();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    await Promise.all([loadPackages(), loadGenerationPrices()]);
+  };
 
   const loadPackages = async () => {
     try {
@@ -57,6 +59,25 @@ export function AdminPricing() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadGenerationPrices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('generation_pricing')
+        .select('*')
+        .order('price_type');
+
+      if (error) throw error;
+      setGenerationPrices(data || []);
+    } catch (error) {
+      console.error('Error loading generation prices:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить цены генерации",
+        variant: "destructive",
+      });
     }
   };
 
@@ -149,6 +170,37 @@ export function AdminPricing() {
       toast({
         title: "Ошибка",
         description: "Не удалось удалить тариф",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGenerationPriceUpdate = async (price: GenerationPrice) => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('generation_pricing')
+        .update({ tokens_cost: price.tokens_cost })
+        .eq('id', price.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Успешно",
+        description: "Цена обновлена",
+      });
+
+      // Invalidate the cache to refresh prices everywhere
+      queryClient.invalidateQueries({ queryKey: ['generation-pricing'] });
+      
+      await loadGenerationPrices();
+    } catch (error) {
+      console.error('Error updating generation price:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить цену",
         variant: "destructive",
       });
     } finally {
@@ -273,39 +325,44 @@ export function AdminPricing() {
       <Card>
         <CardHeader>
           <CardTitle>Стоимость генерации</CardTitle>
-          <CardDescription>Цены в токенах за каждый тип карточки</CardDescription>
+          <CardDescription>Цены в токенах за каждый тип операции</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {generationPrices.map((price, index) => (
-              <div key={price.card_type} className="flex items-center gap-4">
+            {generationPrices.map((price) => (
+              <div key={price.id} className="flex items-center gap-4">
                 <div className="flex-1">
-                  <Label>{price.card_type}</Label>
+                  <Label>{price.description}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
+                    min="0"
                     value={price.tokens_cost}
                     onChange={(e) => {
-                      const updated = [...generationPrices];
-                      updated[index].tokens_cost = parseInt(e.target.value) || 0;
+                      const updated = generationPrices.map(p =>
+                        p.id === price.id
+                          ? { ...p, tokens_cost: parseInt(e.target.value) || 0 }
+                          : p
+                      );
                       setGenerationPrices(updated);
                     }}
                     className="w-24"
                   />
                   <span className="text-sm text-muted-foreground">токенов</span>
+                  <Button
+                    size="sm"
+                    onClick={() => handleGenerationPriceUpdate(price)}
+                    disabled={saving}
+                  >
+                    <Save className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             ))}
-            <div className="pt-4">
-              <Button variant="outline" className="w-full">
-                <Save className="w-4 h-4 mr-2" />
-                Сохранить цены генерации
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2">
-                * Цены генерации сохраняются в конфигурации системы
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground pt-2">
+              * Изменения цен применяются автоматически во всех разделах портала
+            </p>
           </div>
         </CardContent>
       </Card>
