@@ -138,32 +138,52 @@ export function PromptManager() {
           description: 'Сначала настройте промты для OpenAI, затем можно скопировать их для Gemini.',
           variant: 'destructive',
         });
+        setSeedingGemini(false);
         return;
       }
 
-      const insertData = basePrompts.map(p => ({
-        prompt_type: p.prompt_type,
-        prompt_template: p.prompt_template,
-        model_type: 'google',
-      }));
+      // Проверяем, какие промты уже существуют для Gemini
+      const existingGeminiPrompts = prompts.filter(p => p.model_type === 'google');
+      const existingTypes = new Set(existingGeminiPrompts.map(p => p.prompt_type));
+
+      // Фильтруем только те промты, которых ещё нет для Gemini
+      const insertData = basePrompts
+        .filter(p => !existingTypes.has(p.prompt_type))
+        .map(p => ({
+          prompt_type: p.prompt_type,
+          prompt_template: p.prompt_template,
+          model_type: 'google',
+        }));
+
+      if (insertData.length === 0) {
+        toast({
+          title: 'Промты уже существуют',
+          description: 'Все промты для Gemini уже созданы.',
+        });
+        setSeedingGemini(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('ai_prompts')
         .insert(insertData)
         .select('*');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error details:', error);
+        throw error;
+      }
 
-      setPrompts(prev => [...prev, ...(data as Prompt[])]);
+      await loadPrompts();
       toast({
         title: 'Промты созданы',
-        description: 'Для Gemini скопированы промты из OpenAI. Теперь вы можете их редактировать.',
+        description: `Для Gemini создано ${insertData.length} промтов. Теперь вы можете их редактировать.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error seeding Gemini prompts:', error);
       toast({
         title: 'Ошибка',
-        description: 'Не удалось создать промты для Gemini',
+        description: error?.message || 'Не удалось создать промты для Gemini. Проверьте консоль для деталей.',
         variant: 'destructive',
       });
     } finally {
