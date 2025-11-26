@@ -66,7 +66,16 @@ serve(async (req) => {
     const base64Image = base64Encode(new Uint8Array(imageData));
     const imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
 
-    console.log('Calling Google Gemini for image editing...');
+    console.log('Calling Google Gemini for image generation...');
+
+    // Wrap prompt with explicit image generation instruction
+    const imageGenerationPrompt = `ВАЖНО: Ты ДОЛЖЕН сгенерировать и вернуть ИЗОБРАЖЕНИЕ, а не текст. Не описывай, не объясняй - создай изображение.
+
+Используя предоставленное фото товара как референс, создай новое профессиональное маркетинговое изображение товара.
+
+${prompt}
+
+ОБЯЗАТЕЛЬНО: Верни сгенерированное изображение. НЕ пиши текст, НЕ давай советы - только создай и верни изображение.`;
 
     // Call Lovable AI Gateway with Google Gemini model
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -83,7 +92,7 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: prompt
+                text: imageGenerationPrompt
               },
               {
                 type: 'image_url',
