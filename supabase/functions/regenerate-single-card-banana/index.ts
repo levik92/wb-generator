@@ -136,7 +136,7 @@ serve(async (req) => {
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
         tokens_amount: tokensCost,
-        reason_text: 'Возврат из-за ошибки создания задания регенерации (Google)',
+        reason_text: 'Возврат из-за ошибки создания задания регенерации',
       });
       throw new Error('Failed to create regeneration job');
     }
@@ -157,7 +157,7 @@ serve(async (req) => {
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
         tokens_amount: tokensCost,
-        reason_text: 'Возврат из-за ошибки создания задачи регенерации (Google)',
+        reason_text: 'Возврат из-за ошибки создания задачи регенерации',
       });
       throw new Error('Failed to create regeneration task');
     }
@@ -189,12 +189,13 @@ serve(async (req) => {
       user_id: userId,
       type: 'info',
       title: 'Регенерация запущена',
-      message: `Начата регенерация карточки "${cardType}" для "${sanitizedProductName}" с помощью Google Gemini`,
+      message: `Начата регенерация карточки "${cardType}" для "${sanitizedProductName}"`,
       read: false,
     });
 
     return new Response(
       JSON.stringify({
+        success: true,
         taskId: task.id,
         jobId: job.id,
         status: 'processing',
