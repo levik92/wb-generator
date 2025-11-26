@@ -150,7 +150,7 @@ serve(async (req) => {
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
         tokens_amount: tokensRequired,
-        reason_text: 'Возврат за неудачное создание задачи (Google Gemini)'
+        reason_text: 'Возврат за неудачное создание задачи'
       });
 
       return new Response(JSON.stringify({
@@ -182,7 +182,7 @@ serve(async (req) => {
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
         tokens_amount: tokensRequired,
-        reason_text: 'Возврат за неудачное создание задач (Google Gemini)'
+        reason_text: 'Возврат за неудачное создание задач'
       });
 
       await supabase
@@ -222,7 +222,7 @@ serve(async (req) => {
       .from('notifications')
       .insert({
         user_id: userId,
-        title: 'Генерация началась (Google Gemini)',
+        title: 'Генерация началась',
         message: `Генерация ${productName} поставлена в очередь. Вы получите уведомление по завершении.`,
         type: 'info'
       });
@@ -233,7 +233,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       jobId: job.id,
-      message: 'Generation job created successfully (Google Gemini)'
+      message: 'Generation job created successfully'
     }), {
       status: 202,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
