@@ -130,18 +130,6 @@ export default function Balance() {
               </div>
               <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
                 <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                  <Images className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">1 изображение карточки</div>
-                  <div className="text-xs text-muted-foreground">Генерация</div>
-                </div>
-                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                  {photoPrice} {photoPrice === 1 ? 'токен' : 'токенов'}
-                </div>
-              </div>
-              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
                   <Pencil className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -150,6 +138,18 @@ export default function Balance() {
                 </div>
                 <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
                   {editPrice} {editPrice === 1 ? 'токен' : 'токенов'}
+                </div>
+              </div>
+              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
+                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
+                  <Images className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm">1 изображение карточки</div>
+                  <div className="text-xs text-muted-foreground">Генерация</div>
+                </div>
+                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
+                  {photoPrice} {photoPrice === 1 ? 'токен' : 'токенов'}
                 </div>
               </div>
             </div>
