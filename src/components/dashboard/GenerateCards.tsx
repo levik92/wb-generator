@@ -1303,7 +1303,7 @@ export const GenerateCards = ({
                   </div>;
           })}
             </div>
-            <div className="gap-2 mt-4 pt-4 text-xs text-muted-foreground border-t flex items-center justify-center">
+            <div className="gap-2 mt-4 pt-4 text-xs text-muted-foreground border-t flex items-center justify-center mx-auto">
               <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}. Редактирование одного изображения: {priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}.</span>
             </div>
