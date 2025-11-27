@@ -467,7 +467,7 @@ export function PromptManager() {
               disabled={savingModel}
               className="space-y-3"
             >
-              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 transition-colors">
+              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/20 transition-colors">
                 <RadioGroupItem value="openai" id="openai" />
                 <Label htmlFor="openai" className="flex-1 cursor-pointer">
                   <div className="font-semibold">OpenAI (GPT)</div>
@@ -479,7 +479,7 @@ export function PromptManager() {
                   <Badge variant="default">Активна</Badge>
                 )}
               </div>
-              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 transition-colors">
+              <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/20 transition-colors">
                 <RadioGroupItem value="google" id="google" />
                 <Label htmlFor="google" className="flex-1 cursor-pointer">
                   <div className="font-semibold">Nanabanana Pro (Gemini)</div>
