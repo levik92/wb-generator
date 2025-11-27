@@ -69,6 +69,7 @@ export const GenerateCards = ({
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [autoDescription, setAutoDescription] = useState(false);
   const [selectedCards, setSelectedCards] = useState<number[]>([0]); // По умолчанию выбрана только главная
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -1086,6 +1087,7 @@ export const GenerateCards = ({
             setProductName("");
             setCategory("");
             setDescription("");
+            setAutoDescription(false);
             setSelectedCards([0]);
           }} className="w-auto">
               <X className="w-4 h-4 mr-1" />
@@ -1106,6 +1108,7 @@ export const GenerateCards = ({
             setProductName("");
             setCategory("");
             setDescription("");
+            setAutoDescription(false);
             setSelectedCards([0]);
           }} className="shrink-0">
               <X className="w-4 h-4 mr-1" />
@@ -1133,10 +1136,31 @@ export const GenerateCards = ({
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..." value={description} onChange={e => setDescription(e.target.value.slice(0, 600))} rows={4} maxLength={600} disabled={generating} />
+            <Textarea id="description" placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..." value={description} onChange={e => setDescription(e.target.value.slice(0, 600))} rows={4} maxLength={600} disabled={generating || autoDescription} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{description.length}/600 символов</span>
               {description.length > 570 && <span className="text-warning">Осталось символов: {600 - description.length}</span>}
+            </div>
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox 
+                id="autoDescription" 
+                checked={autoDescription} 
+                onCheckedChange={(checked) => {
+                  setAutoDescription(!!checked);
+                  if (checked) {
+                    setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
+                  } else {
+                    setDescription("");
+                  }
+                }}
+                disabled={generating}
+              />
+              <Label 
+                htmlFor="autoDescription" 
+                className="text-sm font-normal cursor-pointer"
+              >
+                Придумай сам
+              </Label>
             </div>
           </div>
         </CardContent>
