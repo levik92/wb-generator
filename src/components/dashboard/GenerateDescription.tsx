@@ -217,7 +217,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Все ссылки необязательны. Вставьте ссылки на похожие товары с WB для лучшего анализа
+                Вставьте ссылки на ваших конкурентов. WB Генератор проанализирует описание их товаров, выделит самые релевантные ключевые слова и учтет их при разработке вашего.
               </p>
             </div>
 
