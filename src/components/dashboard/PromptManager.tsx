@@ -343,7 +343,7 @@ export function PromptManager() {
     }
     return <div className="space-y-3 md:space-y-4">
         {[...filteredPrompts].sort((a, b) => {
-        const order = ['description', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'];
+        const order = ['description', 'edit-card', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'];
         return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
       }).map(prompt => {
         const {
