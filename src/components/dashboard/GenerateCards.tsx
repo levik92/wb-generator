@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit } from "lucide-react";
@@ -1266,39 +1267,66 @@ export const GenerateCards = ({
                     </div>
                     
                     <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
-                      <Button size="sm" variant="outline" onClick={e => {
-                  e.stopPropagation();
-                  openEditDialog(image, index);
-                }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать">
-                        {editingCards.has(`edit_${image.id}_${index}`) ? <>
-                            <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                            <span className="md:hidden ml-1">Редактируется...</span>
-                          </> : <>
-                            <Edit className="w-3 h-3 md:w-4 md:h-4" />
-                            <span className="md:hidden ml-1">Редактировать</span>
-                          </>}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button size="sm" variant="outline" onClick={e => {
+                      e.stopPropagation();
+                      openEditDialog(image, index);
+                    }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                              {editingCards.has(`edit_${image.id}_${index}`) ? <>
+                                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
+                                  <span className="md:hidden ml-1">Редактируется...</span>
+                                </> : <>
+                                  <Edit className="w-3 h-3 md:w-4 md:h-4" />
+                                  <span className="md:hidden ml-1">Редактировать</span>
+                                </>}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="hidden md:block">
+                            <p>Редактировать карточку</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       
-                      <Button size="sm" variant="outline" onClick={e => {
-                  e.stopPropagation();
-                  regenerateCard(image, index);
-                }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Перегенерировать">
-                        {isRegenerating ? <>
-                            <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                            <span className="md:hidden ml-1">Перегенерация...</span>
-                          </> : <>
-                            <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
-                            <span className="md:hidden ml-1">Перегенерировать</span>
-                          </>}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button size="sm" variant="outline" onClick={e => {
+                      e.stopPropagation();
+                      regenerateCard(image, index);
+                    }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                              {isRegenerating ? <>
+                                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
+                                  <span className="md:hidden ml-1">Перегенерация...</span>
+                                </> : <>
+                                  <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
+                                  <span className="md:hidden ml-1">Перегенерировать</span>
+                                </>}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="hidden md:block">
+                            <p>Перегенерировать карточку</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       
-                      <Button size="sm" variant="outline" onClick={async e => {
-                  e.stopPropagation();
-                  await downloadSingle(index);
-                }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Скачать">
-                        <Download className="w-3 h-3 md:w-4 md:h-4" />
-                        <span className="md:hidden ml-1">Скачать</span>
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button size="sm" variant="outline" onClick={async e => {
+                      e.stopPropagation();
+                      await downloadSingle(index);
+                    }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                              <Download className="w-3 h-3 md:w-4 md:h-4" />
+                              <span className="md:hidden ml-1">Скачать</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent className="hidden md:block">
+                            <p>Скачать изображение</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>;
           })}
