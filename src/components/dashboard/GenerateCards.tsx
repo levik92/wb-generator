@@ -12,12 +12,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit } from "lucide-react";
 import JSZip from 'jszip';
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface Profile {
   id: string;
@@ -71,10 +72,19 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
   const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
   const [smoothProgress, setSmoothProgress] = useState(0);
   const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
+  const [uploadedProductImages, setUploadedProductImages] = useState<Array<{url: string, name: string}>>([]);
   const { toast } = useToast();
   const { price: photoGenerationPrice, isLoading: priceLoading } = useGenerationPrice('photo_generation');
   const { price: photoRegenerationPrice } = useGenerationPrice('photo_regeneration');
+  const { price: photoEditPrice } = useGenerationPrice('photo_edit');
   const { data: activeModel, isLoading: modelLoading } = useActiveAiModel();
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState<any | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number>(-1);
+  const [editInstructions, setEditInstructions] = useState("");
+  const [editingCards, setEditingCards] = useState<Set<string>>(new Set());
 
   const WAITING_MESSAGES = [
     "Еще чуть-чуть...",
@@ -491,6 +501,9 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           name: `image_${i + 1}.${fileExt}`
         });
       }
+      
+      // Save uploaded images URLs for regeneration
+      setUploadedProductImages(productImagesData);
 
       setJobStatus('Создание задачи генерации...');
 
@@ -674,6 +687,14 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
       // Use dynamic model-based function name for regeneration
       const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
       console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
+      
+      // Use the first uploaded product image as source
+      const sourceImageUrl = uploadedProductImages.length > 0 ? uploadedProductImages[0].url : null;
+      
+      if (!sourceImageUrl) {
+        throw new Error('Оригинальное изображение недоступно');
+      }
+      
       const { data, error } = await supabase.functions.invoke(regenerateFunction, {
         body: {
           productName: productName,
@@ -682,7 +703,7 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           userId: profile.id,
           cardIndex: image.stageIndex,
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
-          sourceImageUrl: image.url
+          sourceImageUrl: sourceImageUrl
         }
       });
 
@@ -789,6 +810,168 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
     setTimeout(() => {
       clearInterval(pollInterval);
       setRegeneratingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cardKey);
+        return newSet;
+      });
+    }, 5 * 60 * 1000);
+  };
+  
+  const openEditDialog = (image: any, index: number) => {
+    setEditingImage(image);
+    setEditingIndex(index);
+    setEditInstructions("");
+    setEditDialogOpen(true);
+  };
+  
+  const editCard = async () => {
+    if (!editInstructions.trim()) {
+      toast({
+        title: "Введите инструкции",
+        description: "Пожалуйста, опишите что нужно изменить",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const cardKey = `edit_${editingImage.id}_${editingIndex}`;
+    setEditingCards(prev => new Set([...prev, cardKey]));
+    setEditDialogOpen(false);
+    
+    try {
+      // Check if model is loaded
+      if (!activeModel) {
+        toast({
+          title: "Подождите",
+          description: "Загрузка настроек модели...",
+          variant: "destructive",
+        });
+        setEditingCards(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(cardKey);
+          return newSet;
+        });
+        return;
+      }
+
+      // Use dynamic model-based function name for editing
+      const editFunction = getImageEdgeFunctionName('edit-card', activeModel);
+      console.log('[GenerateCards] Edit - Active model:', activeModel, '| Function:', editFunction);
+      
+      const { data, error } = await supabase.functions.invoke(editFunction, {
+        body: {
+          productName: productName,
+          userId: profile.id,
+          cardIndex: editingImage.stageIndex,
+          cardType: editingImage.cardType || CARD_STAGES[editingImage.stageIndex]?.key || 'cover',
+          sourceImageUrl: editingImage.url,
+          editInstructions: editInstructions
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.taskId && data?.jobId) {
+        toast({
+          title: "Редактирование запущено",
+          description: `Карточка "${editingImage.stage}" поставлена в очередь на редактирование`,
+        });
+        
+        // Update tokens balance immediately
+        onTokensUpdate();
+        
+        // Start polling for this specific edit task
+        pollEditTask(data.taskId, editingIndex, cardKey);
+        
+      } else {
+        throw new Error(data?.error || 'Неизвестная ошибка');
+      }
+    } catch (error: any) {
+      console.error('Error editing card:', error);
+      toast({
+        title: "Ошибка редактирования",
+        description: error.message || 'Произошла ошибка при редактировании',
+        variant: "destructive",
+      });
+      
+      // Remove from editing set on error
+      setEditingCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(cardKey);
+        return newSet;
+      });
+    }
+  };
+  
+  const pollEditTask = async (taskId: string, imageIndex: number, cardKey: string) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data: task, error } = await supabase
+          .from('generation_tasks')
+          .select('*')
+          .eq('id', taskId)
+          .single();
+
+        if (error) {
+          console.error('Error polling edit task:', error);
+          clearInterval(pollInterval);
+          setEditingCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardKey);
+            return newSet;
+          });
+          return;
+        }
+
+        if (task.status === 'completed' && task.image_url) {
+          // Update the generated image with new URL
+          setGeneratedImages(prev => prev.map((img, i) => 
+            i === imageIndex ? { ...img, url: task.image_url } : img
+          ));
+          
+          toast({
+            title: "Редактирование завершено",
+            description: `Карточка успешно отредактирована`,
+          });
+          
+          clearInterval(pollInterval);
+          setEditingCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardKey);
+            return newSet;
+          });
+          
+        } else if (task.status === 'failed') {
+          toast({
+            title: "Ошибка редактирования",
+            description: task.last_error || 'Редактирование не удалось',
+            variant: "destructive",
+          });
+          
+          clearInterval(pollInterval);
+          setEditingCards(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(cardKey);
+            return newSet;
+          });
+        }
+        // If status is 'pending' or 'processing', continue polling
+        
+      } catch (error) {
+        console.error('Error polling edit task:', error);
+        clearInterval(pollInterval);
+        setEditingCards(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(cardKey);
+          return newSet;
+        });
+      }
+    }, 2000);
+    
+    // Cleanup after 5 minutes max
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      setEditingCards(prev => {
         const newSet = new Set(prev);
         newSet.delete(cardKey);
         return newSet;
@@ -1289,6 +1472,29 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation();
+                          openEditDialog(image, index);
+                        }}
+                        disabled={editingCards.has(`edit_${image.id}_${index}`)}
+                        className="w-full xs:w-auto sm:w-auto text-xs px-2 whitespace-nowrap"
+                      >
+                        {editingCards.has(`edit_${image.id}_${index}`) ? (
+                          <>
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                            <span>Редактируется...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Edit className="w-3 h-3 mr-1" />
+                            <span>Редактировать</span>
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           regenerateCard(image, index);
                         }}
                         disabled={isRegenerating}
@@ -1324,9 +1530,15 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                 );
               })}
             </div>
-            <div className="flex items-center justify-center gap-2 mt-4 pt-4 text-xs text-muted-foreground">
-              <Info className="w-3 h-3" />
-              <span>Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}</span>
+            <div className="flex flex-col items-center gap-2 mt-4 pt-4 text-xs text-muted-foreground border-t">
+              <div className="flex items-center gap-2">
+                <Info className="w-3 h-3" />
+                <span>Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Info className="w-3 h-3" />
+                <span>Редактирование одного изображения: {priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1385,6 +1597,44 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
           )}
         </CardContent>
       </Card>
+      
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Редактировать карточку</DialogTitle>
+            <DialogDescription>
+              Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-instructions">
+                Что нужно изменить?
+              </Label>
+              <Textarea
+                id="edit-instructions"
+                placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..."
+                value={editInstructions}
+                onChange={(e) => setEditInstructions(e.target.value)}
+                className="min-h-[120px]"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Info className="w-4 h-4" />
+              <span>Стоимость: {photoEditPrice} {photoEditPrice === 1 ? 'токен' : 'токена'}</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={editCard} disabled={!editInstructions.trim()}>
+              Начать редактирование
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
