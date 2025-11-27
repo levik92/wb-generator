@@ -432,8 +432,8 @@ export function PromptManager() {
               <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
                 <RadioGroupItem value="openai" id="openai" />
                 <Label htmlFor="openai" className="flex-1 cursor-pointer">
-                  <div className="font-semibold">OpenAI (GPT)</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="font-semibold mb-[6px]">OpenAI (GPT)</div>
+                  <div className="text-xs text-muted-foreground">
                     Версия 2.0 - использует модель gpt-image-1 для генерации изображений
                   </div>
                 </Label>
@@ -442,8 +442,8 @@ export function PromptManager() {
               <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
                 <RadioGroupItem value="google" id="google" />
                 <Label htmlFor="google" className="flex-1 cursor-pointer">
-                  <div className="font-semibold">Nanabanana Pro (Gemini)</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="font-semibold mb-[6px]">Nanabanana Pro (Gemini)</div>
+                  <div className="text-xs text-muted-foreground">
                     Использует gemini-3-pro для описаний и gemini-3-pro-image для изображений
                   </div>
                 </Label>
