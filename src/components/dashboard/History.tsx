@@ -242,8 +242,8 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-2 truncate">История генераций</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-3xl font-bold mb-2">История генераций</h2>
+          <p className="text-muted-foreground">
             Все ваши созданные карточки и описания
           </p>
         </div>
@@ -264,8 +264,8 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
       </div>
 
       <Alert className="border-muted bg-muted/30 shadow-none">
-        <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-        <AlertDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <AlertDescription className="text-sm text-muted-foreground leading-relaxed">
           Данные генераций хранятся <span className="font-medium text-foreground/80">1 месяц</span> с момента создания и затем автоматически удаляются.
         </AlertDescription>
       </Alert>

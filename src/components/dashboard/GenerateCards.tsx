@@ -1475,17 +1475,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           openEditDialog(image, index);
                         }}
                         disabled={editingCards.has(`edit_${image.id}_${index}`)}
-                        className="w-full xs:w-auto sm:w-auto text-xs px-2 whitespace-nowrap"
+                        className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3"
+                        title="Редактировать"
                       >
                         {editingCards.has(`edit_${image.id}_${index}`) ? (
                           <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            <span>Редактируется...</span>
+                            <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
+                            <span className="md:hidden ml-1">Редактируется...</span>
                           </>
                         ) : (
                           <>
-                            <Edit className="w-3 h-3 mr-1" />
-                            <span>Редактировать</span>
+                            <Edit className="w-3 h-3 md:w-4 md:h-4" />
+                            <span className="md:hidden ml-1">Редактировать</span>
                           </>
                         )}
                       </Button>
@@ -1498,17 +1499,18 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           regenerateCard(image, index);
                         }}
                         disabled={isRegenerating}
-                        className="w-full xs:w-auto sm:w-auto text-xs px-2 whitespace-nowrap"
+                        className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3"
+                        title="Перегенерировать"
                       >
                         {isRegenerating ? (
                           <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            <span>Перегенерация...</span>
+                            <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
+                            <span className="md:hidden ml-1">Перегенерация...</span>
                           </>
                         ) : (
                           <>
-                            <RefreshCw className="w-3 h-3 mr-1" />
-                            <span>Перегенерировать</span>
+                            <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
+                            <span className="md:hidden ml-1">Перегенерировать</span>
                           </>
                         )}
                       </Button>
@@ -1520,25 +1522,20 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
                           e.stopPropagation();
                           await downloadSingle(index);
                         }}
-                        className="w-full xs:w-auto sm:w-auto text-xs px-2 whitespace-nowrap"
+                        className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3"
+                        title="Скачать"
                       >
-                        <Download className="w-3 h-3 mr-1" />
-                        Скачать
+                        <Download className="w-3 h-3 md:w-4 md:h-4" />
+                        <span className="md:hidden ml-1">Скачать</span>
                       </Button>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex flex-col items-center gap-2 mt-4 pt-4 text-xs text-muted-foreground border-t">
-              <div className="flex items-center gap-2">
-                <Info className="w-3 h-3" />
-                <span>Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Info className="w-3 h-3" />
-                <span>Редактирование одного изображения: {priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}</span>
-              </div>
+            <div className="flex items-start gap-2 mt-4 pt-4 text-xs text-muted-foreground border-t">
+              <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}. Редактирование одного изображения: {priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}.</span>
             </div>
           </CardContent>
         </Card>
@@ -1572,9 +1569,10 @@ export const GenerateCards = ({ profile, onTokensUpdate }: GenerateCardsProps) =
             )}
           </Button>
           
-          <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3 px-2">
-            Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : (selectedCards.length * photoGenerationPrice) % 10 >= 2 && (selectedCards.length * photoGenerationPrice) % 10 <= 4 && ((selectedCards.length * photoGenerationPrice) % 100 < 10 || (selectedCards.length * photoGenerationPrice) % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
-          </p>
+          <div className="flex items-center justify-center gap-2 mt-3 px-2 text-xs sm:text-sm text-muted-foreground">
+            <Info className="w-4 h-4 flex-shrink-0" />
+            <span>Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : (selectedCards.length * photoGenerationPrice) % 10 >= 2 && (selectedCards.length * photoGenerationPrice) % 10 <= 4 && ((selectedCards.length * photoGenerationPrice) % 100 < 10 || (selectedCards.length * photoGenerationPrice) % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}</span>
+          </div>
           
           {!canGenerate() && !generating && (
             <Alert className="mt-4 bg-amber-50 border-amber-200 rounded-xl [&>svg]:!text-amber-800 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
