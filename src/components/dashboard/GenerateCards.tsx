@@ -679,14 +679,41 @@ export const GenerateCards = ({
       const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
       console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
 
-      // Use saved job data (not form fields) for regeneration
-      if (!jobData) {
-        throw new Error('Данные оригинальной генерации недоступны');
+      // Try to get source image from jobData or uploadedProductImages
+      let sourceImageUrl = null;
+      
+      // First try jobData
+      if (jobData?.productImages && jobData.productImages.length > 0) {
+        sourceImageUrl = jobData.productImages[0].url;
+      }
+      // Fallback to uploadedProductImages
+      else if (uploadedProductImages.length > 0) {
+        sourceImageUrl = uploadedProductImages[0].url;
+      }
+      // Last resort: try to fetch from current job in database
+      else if (currentJobId) {
+        const { data: job } = await supabase
+          .from('generation_jobs')
+          .select('product_images')
+          .eq('id', currentJobId)
+          .single();
+        
+        if (job?.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
+          sourceImageUrl = (job.product_images as Array<{ url: string }>)[0].url;
+        }
       }
       
-      const sourceImageUrl = jobData.productImages.length > 0 ? jobData.productImages[0].url : null;
       if (!sourceImageUrl) {
         throw new Error('Оригинальное изображение недоступно');
+      }
+
+      // Use saved job data (fallback to form fields if needed)
+      const productNameToUse = jobData?.productName || productName;
+      const categoryToUse = jobData?.category || category;
+      const descriptionToUse = jobData?.description || description;
+      
+      if (!productNameToUse) {
+        throw new Error('Название товара недоступно');
       }
       
       const {
@@ -694,9 +721,9 @@ export const GenerateCards = ({
         error
       } = await supabase.functions.invoke(regenerateFunction, {
         body: {
-          productName: jobData.productName,
-          category: jobData.category,
-          description: jobData.description,
+          productName: productNameToUse,
+          category: categoryToUse,
+          description: descriptionToUse,
           userId: profile.id,
           cardIndex: image.stageIndex,
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
@@ -840,9 +867,11 @@ export const GenerateCards = ({
       const editFunction = getImageEdgeFunctionName('edit-card', activeModel);
       console.log('[GenerateCards] Edit - Active model:', activeModel, '| Function:', editFunction);
       
-      // Use saved job data (not form fields) for editing
-      if (!jobData) {
-        throw new Error('Данные оригинальной генерации недоступны');
+      // Try to get product name from jobData or form field
+      const productNameToUse = jobData?.productName || productName;
+      
+      if (!productNameToUse) {
+        throw new Error('Название товара недоступно');
       }
       
       const {
@@ -850,7 +879,7 @@ export const GenerateCards = ({
         error
       } = await supabase.functions.invoke(editFunction, {
         body: {
-          productName: jobData.productName,
+          productName: productNameToUse,
           userId: profile.id,
           cardIndex: editingImage.stageIndex,
           cardType: editingImage.cardType || CARD_STAGES[editingImage.stageIndex]?.key || 'cover',
