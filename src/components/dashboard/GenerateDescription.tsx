@@ -261,9 +261,12 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 </>
               )}
             </Button>
-            <p className="text-center text-sm text-muted-foreground mt-3">
-              Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токен{descriptionPrice !== 1 ? 'ов' : ''}</strong> за генерацию описания
-            </p>
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токен{descriptionPrice !== 1 ? 'ов' : ''}</strong> за генерацию описания
+              </p>
+            </div>
             
             {!canGenerate() && (
               <Alert className="mt-4 border-amber-200 bg-amber-50 [&>svg]:!text-amber-800 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
