@@ -1128,39 +1128,39 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
             <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-end text-xs text-muted-foreground">
               <span>{productName.length}/150 символов</span>
-              {productName.length > 140 && <span className="text-warning">Осталось символов: {150 - productName.length}</span>}
             </div>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..." value={description} onChange={e => setDescription(e.target.value.slice(0, 600))} rows={4} maxLength={600} disabled={generating || autoDescription} />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{description.length}/600 символов</span>
-              {description.length > 570 && <span className="text-warning">Осталось символов: {600 - description.length}</span>}
-            </div>
-            <div className="flex items-center space-x-2 pt-2">
-              <Checkbox 
-                id="autoDescription" 
-                checked={autoDescription} 
-                onCheckedChange={(checked) => {
-                  setAutoDescription(!!checked);
-                  if (checked) {
-                    setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
-                  } else {
-                    setDescription("");
-                  }
-                }}
-                disabled={generating}
-              />
-              <Label 
-                htmlFor="autoDescription" 
-                className="text-sm font-normal cursor-pointer"
-              >
-                Придумай сам
-              </Label>
+            <Textarea id="description" placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-2 bg-muted/50 rounded-lg px-3 py-2">
+                <Checkbox 
+                  id="autoDescription" 
+                  checked={autoDescription} 
+                  onCheckedChange={(checked) => {
+                    setAutoDescription(!!checked);
+                    if (checked) {
+                      setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
+                    } else {
+                      setDescription("");
+                    }
+                  }}
+                  disabled={generating}
+                />
+                <Label 
+                  htmlFor="autoDescription" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Придумай сам
+                </Label>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                <span>{description.length}/1200 символов</span>
+              </div>
             </div>
           </div>
         </CardContent>
