@@ -37,6 +37,11 @@ const getPromptDisplayName = (type: string): {
       description: 'Промт для генерации описаний товаров с текстовыми данными',
       category: 'Описание'
     },
+    'edit': {
+      name: 'Редактирование карточки',
+      description: 'Редактирование карточки товара',
+      category: 'Изображение'
+    },
     'edit-card': {
       name: 'Редактирование карточки',
       description: 'Редактирование карточки товара',
@@ -80,8 +85,8 @@ const getPromptDisplayName = (type: string): {
   };
   return promptNames[type] || {
     name: type,
-    description: 'Неизвестный тип промта',
-    category: 'Неизвестно'
+    description: 'Редактирование карточки товара',
+    category: 'Изображение'
   };
 };
 export function PromptManager() {
