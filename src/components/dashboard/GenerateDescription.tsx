@@ -82,7 +82,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
           productName,
-          category,
+          category: category || 'товар',
           competitors,
           keywords: keywordsList,
           userId: profile.id

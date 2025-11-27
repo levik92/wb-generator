@@ -503,7 +503,7 @@ export const GenerateCards = ({
       setUploadedProductImages(productImagesData);
       setJobData({
         productName: productName,
-        category: category,
+        category: category || 'товар',
         description: description,
         productImages: productImagesData
       });
@@ -528,7 +528,7 @@ export const GenerateCards = ({
       } = await supabase.functions.invoke(createJobFunction, {
         body: {
           productName,
-          category,
+          category: category || 'товар',
           description,
           userId: profile.id,
           productImages: productImagesData,
