@@ -40,7 +40,9 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+        globIgnores: ['**/lovable-uploads/**'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
@@ -50,6 +52,17 @@ export default defineConfig(({ mode }) => ({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+              }
+            }
+          },
+          {
+            urlPattern: /\/lovable-uploads\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               }
             }
           }
