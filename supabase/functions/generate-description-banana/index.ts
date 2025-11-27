@@ -12,10 +12,10 @@ serve(async (req) => {
   }
 
   try {
-    const { productName, category, competitors, keywords, userId } = await req.json();
+    const { productName, category = 'товар', competitors, keywords, userId } = await req.json();
 
     // Validate inputs
-    if (!productName?.trim() || !category?.trim() || !userId) {
+    if (!productName?.trim() || !userId) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -24,7 +24,7 @@ serve(async (req) => {
 
     // Sanitize inputs
     const sanitizedProductName = productName.trim().slice(0, 200);
-    const sanitizedCategory = category.trim().slice(0, 100);
+    const sanitizedCategory = (category?.trim() || 'товар').slice(0, 100);
     const sanitizedCompetitors = (competitors || []).map((c: string) => c.trim().slice(0, 500)).filter(Boolean);
     const sanitizedKeywords = (keywords || []).map((k: string) => k.trim().slice(0, 100)).filter(Boolean);
 

@@ -49,7 +49,7 @@ serve(async (req) => {
     } = await req.json();
 
     // Validate inputs
-    if (!productName?.trim() || !category?.trim() || !userId || cardIndex === undefined || !cardType || !sourceImageUrl) {
+    if (!productName?.trim() || !userId || cardIndex === undefined || !cardType || !sourceImageUrl) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -58,7 +58,7 @@ serve(async (req) => {
 
     // Sanitize inputs
     const sanitizedProductName = productName.trim().slice(0, 200);
-    const sanitizedCategory = category.trim().slice(0, 100);
+    const sanitizedCategory = (category?.trim() || 'товар').slice(0, 100);
     const sanitizedDescription = description?.trim().slice(0, 2000) || '';
 
     // Content filtering
