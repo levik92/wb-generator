@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Save, X } from "lucide-react";
+import { Pencil, Save, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Prompt {
   id: string;
@@ -86,6 +87,7 @@ export function PromptManager() {
   const [savingModel, setSavingModel] = useState(false);
   const [activeTab, setActiveTab] = useState<'openai' | 'google'>('openai');
   const [seedingGemini, setSeedingGemini] = useState(false);
+  const [openPrompts, setOpenPrompts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadPrompts();
@@ -237,9 +239,23 @@ export function PromptManager() {
     }
   };
 
+  const togglePrompt = (promptId: string) => {
+    setOpenPrompts((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(promptId)) {
+        newSet.delete(promptId);
+      } else {
+        newSet.add(promptId);
+      }
+      return newSet;
+    });
+  };
+
   const startEdit = (prompt: Prompt) => {
     setEditingPrompt(prompt.id);
     setEditValue(prompt.prompt_template);
+    // Auto-open prompt when editing
+    setOpenPrompts((prev) => new Set(prev).add(prompt.id));
   };
 
   const cancelEdit = () => {
@@ -371,76 +387,87 @@ export function PromptManager() {
             const isEditing = editingPrompt === prompt.id;
 
             return (
-              <Card key={prompt.id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <CardTitle className="text-base lg:text-lg break-words">{name}</CardTitle>
-                          <Badge variant="secondary" className="text-xs">
-                            {category}
-                          </Badge>
+              <Collapsible
+                key={prompt.id}
+                open={openPrompts.has(prompt.id)}
+                onOpenChange={() => togglePrompt(prompt.id)}
+              >
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <CollapsibleTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-1 text-left">
+                        {openPrompts.has(prompt.id) ? (
+                          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <CardTitle className="text-base lg:text-lg break-words">{name}</CardTitle>
+                            <Badge variant="secondary" className="text-xs">
+                              {category}
+                            </Badge>
+                          </div>
                         </div>
-                        <CardDescription className="text-sm break-words">{description}</CardDescription>
-                      </div>
-                    </div>
-                    {!isEditing && (
+                      </CollapsibleTrigger>
                       <Button
-                        variant="outline"
-                        size="default"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => startEdit(prompt)}
-                        className="gap-2"
+                        className="shrink-0 h-8 w-8"
                       >
                         <Pencil className="h-4 w-4" />
-                        <span>Редактировать</span>
                       </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                <div className="space-y-4">
-                  {isEditing ? (
-                    <>
-                      <Textarea
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="min-h-[250px] lg:min-h-[300px] font-mono text-sm resize-none"
-                        placeholder="Введите промт..."
-                      />
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                          onClick={() => savePrompt(prompt.id)}
-                          disabled={saving}
-                          className="gap-2 flex-1 sm:flex-none"
-                        >
-                          <Save className="h-4 w-4" />
-                          {saving ? "Сохранение..." : "Сохранить"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={cancelEdit}
-                          disabled={saving}
-                          className="gap-2 flex-1 sm:flex-none"
-                        >
-                          <X className="h-4 w-4" />
-                          Отмена
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="bg-muted p-3 lg:p-4 rounded-lg overflow-x-auto">
-                      <pre className="whitespace-pre-wrap text-xs lg:text-sm text-muted-foreground break-words">
-                        {prompt.prompt_template}
-                      </pre>
                     </div>
-                  )}
-                  <div className="text-xs text-muted-foreground">
-                    Последнее обновление: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    <CardDescription className="text-sm break-words ml-6">{description}</CardDescription>
+                  </CardHeader>
+                  
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <div className="space-y-4">
+                        {isEditing ? (
+                          <>
+                            <Textarea
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="min-h-[250px] lg:min-h-[300px] font-mono text-sm resize-none"
+                              placeholder="Введите промт..."
+                            />
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Button
+                                onClick={() => savePrompt(prompt.id)}
+                                disabled={saving}
+                                className="gap-2 flex-1 sm:flex-none"
+                              >
+                                <Save className="h-4 w-4" />
+                                {saving ? "Сохранение..." : "Сохранить"}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={cancelEdit}
+                                disabled={saving}
+                                className="gap-2 flex-1 sm:flex-none"
+                              >
+                                <X className="h-4 w-4" />
+                                Отмена
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="bg-muted p-3 lg:p-4 rounded-lg overflow-x-auto">
+                            <pre className="whitespace-pre-wrap text-xs lg:text-sm text-muted-foreground break-words">
+                              {prompt.prompt_template}
+                            </pre>
+                          </div>
+                        )}
+                        <div className="text-xs text-muted-foreground">
+                          Последнее обновление: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
             );
           })}
       </div>
