@@ -1143,7 +1143,7 @@ export const GenerateCards = ({
                   checked={autoDescription} 
                   onCheckedChange={(checked) => {
                     setAutoDescription(!!checked);
-                    if (!checked) {
+                    if (checked) {
                       setDescription("");
                     }
                   }}
