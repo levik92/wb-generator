@@ -254,7 +254,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
       <div>
-        <h2 className="text-3xl font-semibold mb-2">Генерация карточек</h2>
+        <h2 className="text-3xl font-bold mb-2">Генерация карточек</h2>
         <p className="text-muted-foreground">
           Создайте профессиональные карточки для Wildberries с помощью ИИ
         </p>
