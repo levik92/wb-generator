@@ -1144,6 +1144,8 @@ export const GenerateCards = ({
                   onCheckedChange={(checked) => {
                     setAutoDescription(!!checked);
                     if (checked) {
+                      setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
+                    } else {
                       setDescription("");
                     }
                   }}
