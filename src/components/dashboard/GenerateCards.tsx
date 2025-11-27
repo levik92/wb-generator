@@ -1355,9 +1355,9 @@ export const GenerateCards = ({
                   </div>;
           })}
             </div>
-            <div className="mt-4 pt-4 text-xs text-muted-foreground border-t flex-row mx-0 gap-0 flex items-start justify-start my-px px-[16px] py-px">
-              <Info className="w-4 h-4 flex-shrink-0 mt-0.5 my-0" />
-              <span className="text-center">Перегенерация одного изображения: {priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}. Редактирование одного изображения: {priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}.</span>
+            <div className="mt-4 pt-4 text-xs text-muted-foreground border-t flex items-center justify-center gap-2">
+              <Info className="w-4 h-4 flex-shrink-0" />
+              <span className="text-center">Перегенерация 1 изображения: <span className="font-bold">{priceLoading ? '...' : photoRegenerationPrice}</span> токен{photoRegenerationPrice !== 1 ? 'ов' : ''}. Редактирование 1 изображения: <span className="font-bold">{priceLoading ? '...' : photoEditPrice}</span> токен{photoEditPrice !== 1 ? 'ов' : 'а'}.</span>
             </div>
           </CardContent>
         </Card>}
