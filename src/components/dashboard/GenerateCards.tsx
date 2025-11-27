@@ -1138,14 +1138,12 @@ export const GenerateCards = ({
             <Textarea id="description" placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
-                <Checkbox
+                <Checkbox 
                   id="autoDescription" 
                   checked={autoDescription} 
                   onCheckedChange={(checked) => {
                     setAutoDescription(!!checked);
-                    if (checked) {
-                      setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
-                    } else {
+                    if (!checked) {
                       setDescription("");
                     }
                   }}
