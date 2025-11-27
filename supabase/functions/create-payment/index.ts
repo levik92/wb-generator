@@ -23,7 +23,9 @@ serve(async (req) => {
     console.log('Create payment request received');
     
     // Extract client information for security logging
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+    // X-Forwarded-For может содержать несколько IP через запятую, берем первый
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
     const userAgent = req.headers.get('user-agent');
     
     const supabaseServiceRole = createClient(
@@ -199,7 +201,8 @@ serve(async (req) => {
     
     // Log security event for payment error
     try {
-      const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip');
+      const forwardedFor = req.headers.get('x-forwarded-for');
+      const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
       const userAgent = req.headers.get('user-agent');
       const supabaseServiceRole = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",

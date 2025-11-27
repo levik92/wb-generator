@@ -72,7 +72,11 @@ serve(async (req) => {
     
     // Security: Verify webhook is from YooKassa by checking IP ranges
     // YooKassa webhook IPs: 185.71.76.0/27, 185.71.77.0/27, 77.75.153.0/25, 77.75.154.0/25, 2a02:5180::/32
-    const clientIP = req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For') || req.headers.get('X-Real-IP');
+    // X-Forwarded-For может содержать несколько IP через запятую, берем первый
+    const forwardedFor = req.headers.get('X-Forwarded-For');
+    const clientIP = req.headers.get('CF-Connecting-IP') || 
+                     (forwardedFor ? forwardedFor.split(',')[0].trim() : null) || 
+                     req.headers.get('X-Real-IP');
     console.log('Webhook from IP:', clientIP);
     
     // Check if IP is from YooKassa (basic validation)
@@ -133,11 +137,14 @@ serve(async (req) => {
         console.log(`Successfully processed payment ${paymentId}`);
         
         // Log successful payment processing
+        const logForwardedFor = req.headers.get('X-Forwarded-For');
+        const logIP = req.headers.get('CF-Connecting-IP') || 
+                      (logForwardedFor ? logForwardedFor.split(',')[0].trim() : null);
         await supabaseServiceRole.rpc('log_security_event', {
           user_id_param: null,
           event_type_param: 'payment_webhook_success',
           event_description_param: `Payment ${paymentId} processed successfully`,
-          ip_address_param: req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For'),
+          ip_address_param: logIP,
           user_agent_param: req.headers.get('User-Agent'),
           metadata_param: { paymentId, amount: paymentObject.amount }
         });
@@ -164,11 +171,14 @@ serve(async (req) => {
       console.log(`Payment ${paymentId} marked as canceled`);
       
       // Log payment cancellation
+      const cancelForwardedFor = req.headers.get('X-Forwarded-For');
+      const cancelIP = req.headers.get('CF-Connecting-IP') || 
+                       (cancelForwardedFor ? cancelForwardedFor.split(',')[0].trim() : null);
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
         event_type_param: 'payment_canceled',
         event_description_param: `Payment ${paymentId} was canceled`,
-        ip_address_param: req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For'),
+        ip_address_param: cancelIP,
         user_agent_param: req.headers.get('User-Agent'),
         metadata_param: { paymentId }
       });
@@ -193,11 +203,14 @@ serve(async (req) => {
         { auth: { persistSession: false } }
       );
       
+      const errorForwardedFor = req.headers.get('X-Forwarded-For');
+      const errorIP = req.headers.get('CF-Connecting-IP') || 
+                      (errorForwardedFor ? errorForwardedFor.split(',')[0].trim() : null);
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
         event_type_param: 'webhook_processing_error',
         event_description_param: `Webhook processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        ip_address_param: req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For'),
+        ip_address_param: errorIP,
         user_agent_param: req.headers.get('User-Agent'),
         metadata_param: { error: error instanceof Error ? error.message : 'Unknown error', timestamp: new Date().toISOString() }
       });
