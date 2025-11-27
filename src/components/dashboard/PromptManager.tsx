@@ -376,7 +376,7 @@ export function PromptManager() {
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </div>
-                    <CardDescription className="text-sm break-words ml-6 my-[16px] mt-0 mb-[16px]">{description}</CardDescription>
+                    <CardDescription className="text-sm break-words ml-6 my-[16px] mt-0 pb-[16px] mb-0">{description}</CardDescription>
                   </CardHeader>
                   
                   <CollapsibleContent>
