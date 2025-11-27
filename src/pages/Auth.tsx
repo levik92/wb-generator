@@ -436,12 +436,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-wb-purple/5 to-transparent rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-500/5 to-transparent rounded-full blur-3xl animate-float-delayed"></div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <YandexMetrika />
-      <div className="w-full max-w-md relative z-10 animate-scale-in">
+      <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
@@ -460,18 +457,17 @@ const Auth = () => {
           <p className="text-muted-foreground">Войдите или создайте аккаунт для начала работы</p>
         </div>
 
-        <Card className="hover-lift overflow-hidden">
+        <Card>
           <CardHeader className="space-y-1">
-            <div className="bg-wb-purple/10 text-wb-purple px-3 py-2 rounded-lg text-sm text-center animate-bounce-in relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-shine opacity-0 hover:opacity-100 transition-opacity"></div>
+            <div className="bg-wb-purple/10 text-wb-purple px-3 py-2 rounded-lg text-sm text-center">
               {referralCode ? (
                 <>
-                  <Gift className="w-4 h-4 inline mr-2 animate-pulse" />
+                  <Gift className="w-4 h-4 inline mr-2" />
                   🎉 35 токенов при регистрации (25 + 10 по реферальной программе)
                 </>
               ) : partnerCode ? (
                 <>
-                  <Gift className="w-4 h-4 inline mr-2 animate-pulse" />
+                  <Gift className="w-4 h-4 inline mr-2" />
                   🎉 25 токенов при регистрации по партнерской ссылке
                 </>
               ) : (

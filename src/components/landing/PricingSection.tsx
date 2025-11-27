@@ -61,7 +61,7 @@ export function PricingSection() {
             return (
               <Card 
                 key={plan.id}
-                className={`border-none shadow-xl hover-lift overflow-hidden rounded-t-lg group ${
+                className={`border-none shadow-xl hover:shadow-2xl transition-all overflow-hidden rounded-t-lg ${
                   isPopular 
                     ? 'bg-white overflow-visible relative' 
                     : index === 2 
@@ -71,8 +71,8 @@ export function PricingSection() {
               >
                 {isPopular && (
                   <>
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500 rounded-t-lg animate-shimmer"></div>
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 animate-bounce-in">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-wb-purple via-purple-500 to-pink-500 rounded-t-lg"></div>
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                       <Badge className="bg-gradient-to-r from-wb-purple to-purple-600 text-white border-none px-4 py-1 text-xs font-bold shadow-lg">
                         ПОПУЛЯРНЫЙ
                       </Badge>
@@ -81,8 +81,8 @@ export function PricingSection() {
                 )}
                 
                 <CardHeader className={`relative ${isPopular ? 'pt-8' : ''}`}>
-                  <CardTitle className="text-2xl group-hover:text-wb-purple transition-colors">{plan.name}</CardTitle>
-                  <div className="text-4xl font-bold text-foreground mt-2 group-hover:scale-105 transition-transform">
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <div className="text-4xl font-bold text-foreground mt-2">
                     {plan.price.toLocaleString('ru-RU')}₽
                   </div>
                   <CardDescription className="text-base">{plan.tokens} токенов</CardDescription>
@@ -143,7 +143,7 @@ export function PricingSection() {
                     </div>
                   </div>
                   <Button 
-                    className="w-full bg-wb-purple hover:bg-wb-purple-dark hover-glow group-hover:scale-105 transition-all" 
+                    className="w-full bg-wb-purple hover:bg-wb-purple-dark" 
                     onClick={() => navigate('/auth')}
                   >
                     Выбрать план
