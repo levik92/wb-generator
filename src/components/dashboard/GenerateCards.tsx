@@ -709,10 +709,10 @@ export const GenerateCards = ({
 
       // Use saved job data (fallback to form fields if needed)
       const productNameToUse = jobData?.productName || productName;
-      const categoryToUse = jobData?.category || category;
+      const categoryToUse = (jobData?.category || category || 'товар').trim() || 'товар';
       const descriptionToUse = jobData?.description || description;
       
-      if (!productNameToUse) {
+      if (!productNameToUse?.trim()) {
         throw new Error('Название товара недоступно');
       }
       
