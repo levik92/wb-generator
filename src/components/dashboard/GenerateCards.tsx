@@ -1094,7 +1094,7 @@ export const GenerateCards = ({
           
           {/* Desktop/Tablet layout */}
           <div className="hidden sm:flex sm:items-start sm:justify-between gap-2">
-            <div className="flex-1">
+            <div className="flex-1 space-y-1.5">
               <CardTitle>Информация о товаре</CardTitle>
               <CardDescription>
                 Укажите детали товара для генерации оптимальных карточек
@@ -1113,7 +1113,7 @@ export const GenerateCards = ({
           </div>
           
           {/* Mobile title - below clear button */}
-          <div className="sm:hidden">
+          <div className="sm:hidden space-y-1.5">
             <CardTitle>Информация о товаре</CardTitle>
             <CardDescription>
               Укажите детали товара для генерации оптимальных карточек
