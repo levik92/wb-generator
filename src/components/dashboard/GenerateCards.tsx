@@ -94,6 +94,13 @@ export const GenerateCards = ({
     url: string;
     name: string;
   }>>([]);
+  // Store original job data for regeneration/editing (not visible in form)
+  const [jobData, setJobData] = useState<{
+    productName: string;
+    category: string;
+    description: string;
+    productImages: Array<{ url: string; name: string }>;
+  } | null>(null);
   const {
     toast
   } = useToast();
@@ -164,11 +171,18 @@ export const GenerateCards = ({
       if (latestJob && latestJob.status === 'completed') {
         const completedTasks = latestJob.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
         if (completedTasks.length > 0) {
-          // Restore job data for regeneration
+          // Restore job data for regeneration (but don't fill form fields)
           setCurrentJobId(latestJob.id);
-          setProductName(latestJob.product_name || '');
-          setCategory(latestJob.category || '');
-          setDescription(latestJob.description || '');
+          
+          // Save job data for regeneration/editing without showing in form
+          const productImages = latestJob.product_images as Array<{ url: string; name: string }> || [];
+          setJobData({
+            productName: latestJob.product_name || '',
+            category: latestJob.category || '',
+            description: latestJob.description || '',
+            productImages: productImages
+          });
+          setUploadedProductImages(productImages);
 
           // Show completed images from the latest job
           const images = completedTasks.sort((a: any, b: any) => a.card_index - b.card_index).map((task: any) => ({
@@ -187,9 +201,16 @@ export const GenerateCards = ({
       } else if (latestJob && latestJob.status === 'processing') {
         // Restore job data for active generation
         setCurrentJobId(latestJob.id);
-        setProductName(latestJob.product_name || '');
-        setCategory(latestJob.category || '');
-        setDescription(latestJob.description || '');
+        
+        // Save job data but keep form fields empty during processing
+        const productImages = latestJob.product_images as Array<{ url: string; name: string }> || [];
+        setJobData({
+          productName: latestJob.product_name || '',
+          category: latestJob.category || '',
+          description: latestJob.description || '',
+          productImages: productImages
+        });
+        setUploadedProductImages(productImages);
 
         // Resume polling for active job
         startJobPolling(latestJob.id);
@@ -441,6 +462,7 @@ export const GenerateCards = ({
     setJobCompleted(false); // Reset completion flag
     setCurrentJobId(null); // Clear previous job ID
     setPreviousJobStatus(null); // Reset status tracking
+    setJobData(null); // Clear saved job data on new generation
 
     if (!canGenerate()) return;
     setGenerating(true);
@@ -477,8 +499,14 @@ export const GenerateCards = ({
         });
       }
 
-      // Save uploaded images URLs for regeneration
+      // Save uploaded images URLs and job data for regeneration
       setUploadedProductImages(productImagesData);
+      setJobData({
+        productName: productName,
+        category: category,
+        description: description,
+        productImages: productImagesData
+      });
       setJobStatus('Создание задачи генерации...');
 
       // Check if model is loaded
@@ -651,19 +679,24 @@ export const GenerateCards = ({
       const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
       console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
 
-      // Use the first uploaded product image as source
-      const sourceImageUrl = uploadedProductImages.length > 0 ? uploadedProductImages[0].url : null;
+      // Use saved job data (not form fields) for regeneration
+      if (!jobData) {
+        throw new Error('Данные оригинальной генерации недоступны');
+      }
+      
+      const sourceImageUrl = jobData.productImages.length > 0 ? jobData.productImages[0].url : null;
       if (!sourceImageUrl) {
         throw new Error('Оригинальное изображение недоступно');
       }
+      
       const {
         data,
         error
       } = await supabase.functions.invoke(regenerateFunction, {
         body: {
-          productName: productName,
-          category: category,
-          description: description,
+          productName: jobData.productName,
+          category: jobData.category,
+          description: jobData.description,
           userId: profile.id,
           cardIndex: image.stageIndex,
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
@@ -806,12 +839,18 @@ export const GenerateCards = ({
       // Use dynamic model-based function name for editing
       const editFunction = getImageEdgeFunctionName('edit-card', activeModel);
       console.log('[GenerateCards] Edit - Active model:', activeModel, '| Function:', editFunction);
+      
+      // Use saved job data (not form fields) for editing
+      if (!jobData) {
+        throw new Error('Данные оригинальной генерации недоступны');
+      }
+      
       const {
         data,
         error
       } = await supabase.functions.invoke(editFunction, {
         body: {
-          productName: productName,
+          productName: jobData.productName,
           userId: profile.id,
           cardIndex: editingImage.stageIndex,
           cardType: editingImage.cardType || CARD_STAGES[editingImage.stageIndex]?.key || 'cover',
