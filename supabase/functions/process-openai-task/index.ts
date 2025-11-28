@@ -152,6 +152,25 @@ serve(async (req)=>{
       const errorText = await imageResponse.text();
       console.error(`OpenAI error for task ${taskId}:`, errorText);
       
+      // Handle payment required (no credits)
+      if (imageResponse.status === 402) {
+        await supabase.from('generation_tasks').update({
+          status: 'failed',
+          last_error: 'Недостаточно кредитов API. Пополните баланс в настройках.',
+          completed_at: new Date().toISOString()
+        }).eq('id', taskId);
+        
+        return new Response(JSON.stringify({
+          error: 'Недостаточно кредитов API. Пополните баланс.'
+        }), {
+          status: 402,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+      
       // Handle rate limiting with retry logic
       if (imageResponse.status === 429) {
         const retryAfter = parseInt(imageResponse.headers.get('retry-after') || '60');
