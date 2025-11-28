@@ -33,6 +33,7 @@ serve(async (req) => {
       description, 
       userId, 
       productImages = [],
+      referenceImageUrl = null,
       selectedCards = [0, 1, 2, 3, 4, 5] // По умолчанию все карточки
     } = requestBody;
 
@@ -121,18 +122,28 @@ serve(async (req) => {
     }
 
     // Create generation job
+    const jobData: any = {
+      user_id: userId,
+      product_name: productName,
+      category: category,
+      description: description,
+      product_images: productImages,
+      status: 'pending',
+      total_cards: selectedCards.length,
+      tokens_cost: tokensRequired
+    };
+
+    // Add reference image if provided
+    if (referenceImageUrl) {
+      jobData.product_images = [
+        ...productImages,
+        { url: referenceImageUrl, type: 'reference' }
+      ];
+    }
+
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
-      .insert({
-        user_id: userId,
-        product_name: productName,
-        category: category,
-        description: description,
-        product_images: productImages,
-        status: 'pending',
-        total_cards: selectedCards.length,
-        tokens_cost: tokensRequired
-      })
+      .insert(jobData)
       .select()
       .single();
 

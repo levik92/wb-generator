@@ -46,36 +46,87 @@ serve(async (req) => {
       throw new Error('Task not found');
     }
 
+    const jobImages = task.job.product_images as Array<{ url: string; name?: string; type?: string }> || [];
+
     const retryCount = task.retry_count || 0;
     console.log(`Processing task ${taskId}, retry ${retryCount}/${MAX_RETRIES}`);
 
-    // Download source image
-    let imageData: ArrayBuffer;
-    try {
-      const imageResponse = await fetch(sourceImageUrl);
-      if (!imageResponse.ok) {
-        throw new Error(`Failed to download image: ${imageResponse.statusText}`);
+    // Separate product images from reference
+    const productImages = jobImages.filter(img => img.type !== 'reference');
+    const referenceImage = jobImages.find(img => img.type === 'reference');
+
+    // Download and convert product images to base64
+    const productImageDataUrls: string[] = [];
+    for (const img of productImages) {
+      try {
+        const response = await fetch(img.url);
+        if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
+        const buffer = await response.arrayBuffer();
+        const base64 = base64Encode(new Uint8Array(buffer));
+        productImageDataUrls.push(`data:image/jpeg;base64,${base64}`);
+      } catch (error) {
+        console.error('Product image download error:', error);
       }
-      imageData = await imageResponse.arrayBuffer();
-    } catch (error) {
-      console.error('Image download error:', error);
-      throw new Error('Failed to download source image');
     }
 
-    // Convert image to base64 using proper encoding (handles large images without stack overflow)
-    const base64Image = base64Encode(new Uint8Array(imageData));
-    const imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
+    // Download and convert reference image if exists
+    let referenceDataUrl: string | null = null;
+    if (referenceImage) {
+      try {
+        const response = await fetch(referenceImage.url);
+        if (!response.ok) throw new Error(`Failed to download reference: ${response.statusText}`);
+        const buffer = await response.arrayBuffer();
+        const base64 = base64Encode(new Uint8Array(buffer));
+        referenceDataUrl = `data:image/jpeg;base64,${base64}`;
+      } catch (error) {
+        console.error('Reference image download error:', error);
+      }
+    }
 
-    console.log('Calling Google Gemini for image generation...');
+    console.log(`Processing with ${productImageDataUrls.length} product images${referenceDataUrl ? ' and 1 reference' : ''}`);
 
-    // Wrap prompt with explicit image generation instruction
+    // Build content array with labels
+    const contentParts: any[] = [];
+    
+    // Add product images with labels
+    productImageDataUrls.forEach((dataUrl, index) => {
+      contentParts.push({
+        type: 'text',
+        text: `📦 ФОТО ТОВАРА ${index + 1}:`
+      });
+      contentParts.push({
+        type: 'image_url',
+        image_url: { url: dataUrl }
+      });
+    });
+
+    // Add reference image with label if exists
+    if (referenceDataUrl) {
+      contentParts.push({
+        type: 'text',
+        text: '🎨 РЕФЕРЕНС ДИЗАЙНА (ориентируйся на стиль этой карточки):'
+      });
+      contentParts.push({
+        type: 'image_url',
+        image_url: { url: referenceDataUrl }
+      });
+    }
+
+    // Add main prompt
     const imageGenerationPrompt = `ВАЖНО: Ты ДОЛЖЕН сгенерировать и вернуть ИЗОБРАЖЕНИЕ, а не текст. Не описывай, не объясняй - создай изображение.
 
-Используя предоставленное фото товара как референс, создай новое профессиональное маркетинговое изображение товара.
+Используя предоставленные фото товара, создай новое профессиональное маркетинговое изображение товара.${referenceDataUrl ? ' Ориентируйся на стиль референса дизайна.' : ''}
 
 ${prompt}
 
 ОБЯЗАТЕЛЬНО: Верни сгенерированное изображение. НЕ пиши текст, НЕ давай советы - только создай и верни изображение.`;
+
+    contentParts.push({
+      type: 'text',
+      text: imageGenerationPrompt
+    });
+
+    console.log('Calling Google Gemini for image generation...');
 
     // Call Lovable AI Gateway with Google Gemini model
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -89,18 +140,7 @@ ${prompt}
         messages: [
           {
             role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: imageGenerationPrompt
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageDataUrl
-                }
-              }
-            ]
+            content: contentParts
           }
         ],
         modalities: ['image', 'text']

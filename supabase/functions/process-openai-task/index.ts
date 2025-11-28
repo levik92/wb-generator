@@ -37,7 +37,8 @@ serve(async (req)=>{
         *,
         generation_jobs!inner(
           id,
-          user_id
+          user_id,
+          product_images
         )
       `)
       .eq('id', taskId)
@@ -46,10 +47,24 @@ serve(async (req)=>{
     if (taskError || !taskData) {
       throw new Error(`Task not found: ${taskError?.message || 'Unknown error'}`);
     }
-    // Download source image
-    const sourceImageResponse = await fetch(sourceImageUrl);
+
+    const jobImages = taskData.generation_jobs.product_images as Array<{ url: string; name?: string; type?: string }> || [];
+    
+    // Separate product images from reference
+    const productImages = jobImages.filter(img => img.type !== 'reference');
+    const referenceImage = jobImages.find(img => img.type === 'reference');
+    
+    // Use first product image for generation
+    const mainProductImage = productImages[0];
+    if (!mainProductImage) {
+      throw new Error('No product images found');
+    }
+
+    console.log(`Processing with main product image${referenceImage ? ' and reference' : ''}`);
+    // Download main product image
+    const sourceImageResponse = await fetch(mainProductImage.url);
     if (!sourceImageResponse.ok) {
-      throw new Error(`Failed to download source image: ${sourceImageResponse.statusText}`);
+      throw new Error(`Failed to download product image: ${sourceImageResponse.statusText}`);
     }
     const sourceImageBuffer = await sourceImageResponse.arrayBuffer();
     const sourceImageBlob = new Blob([
@@ -57,17 +72,74 @@ serve(async (req)=>{
     ], {
       type: 'image/png'
     });
-    // Call OpenAI
+
+    // Describe reference image using GPT-4o vision if provided
+    let referenceDescription = '';
+    if (referenceImage) {
+      console.log(`Analyzing reference image with GPT-4o vision...`);
+      try {
+        const refImageResponse = await fetch(referenceImage.url);
+        if (refImageResponse.ok) {
+          const refBuffer = await refImageResponse.arrayBuffer();
+          const refBase64 = btoa(String.fromCharCode(...new Uint8Array(refBuffer)));
+          
+          const visionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openAIApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o',
+              messages: [
+                {
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Опиши стиль, композицию, цветовую гамму и дизайн этой карточки товара. Будь конкретен и детален. Укажи расположение элементов, типографику, фон, освещение.'
+                    },
+                    {
+                      type: 'image_url',
+                      image_url: {
+                        url: `data:image/jpeg;base64,${refBase64}`
+                      }
+                    }
+                  ]
+                }
+              ],
+              max_tokens: 500
+            })
+          });
+
+          if (visionResponse.ok) {
+            const visionData = await visionResponse.json();
+            referenceDescription = visionData.choices?.[0]?.message?.content || '';
+            console.log(`Reference description obtained: ${referenceDescription.substring(0, 100)}...`);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to describe reference image:', error);
+        // Continue without reference description
+      }
+    }
+
+    // Enhance prompt with reference description
+    let enhancedPrompt = prompt;
+    if (referenceDescription) {
+      enhancedPrompt = `${prompt}\n\nОРИЕНТИРУЙСЬ НА ЭТОТ СТИЛЬ: ${referenceDescription}`;
+    }
+    // Call OpenAI with enhanced prompt
     const formData = new FormData();
     formData.append('image', sourceImageBlob, 'source.png');
     formData.append('model', 'gpt-image-1');
-    formData.append('prompt', prompt);
+    formData.append('prompt', enhancedPrompt);
     formData.append('n', '1');
     formData.append('size', '1024x1536');
     formData.append('output_format', 'png');
     formData.append('quality', 'high');
     formData.append('moderation', 'low');
-    console.log(`Calling OpenAI for task ${taskId} with prompt: ${prompt.substring(0, 100)}...`);
+    console.log(`Calling OpenAI for task ${taskId} with prompt: ${enhancedPrompt.substring(0, 100)}...`);
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
       headers: {
