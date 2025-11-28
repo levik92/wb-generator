@@ -27,10 +27,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
 
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (!geminiApiKey) {
+      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -85,30 +85,34 @@ serve(async (req) => {
 
     console.log(`Processing with ${productImageDataUrls.length} product images${referenceDataUrl ? ' and 1 reference' : ''}`);
 
-    // Build content array with labels
+    // Build content parts for Google Gemini API format
     const contentParts: any[] = [];
     
-    // Add product images with labels
+    // Add product images
     productImageDataUrls.forEach((dataUrl, index) => {
       contentParts.push({
-        type: 'text',
         text: `📦 ФОТО ТОВАРА ${index + 1}:`
       });
+      const base64Data = dataUrl.split(',')[1];
       contentParts.push({
-        type: 'image_url',
-        image_url: { url: dataUrl }
+        inlineData: {
+          mimeType: 'image/jpeg',
+          data: base64Data
+        }
       });
     });
 
-    // Add reference image with label if exists
+    // Add reference image if exists
     if (referenceDataUrl) {
       contentParts.push({
-        type: 'text',
         text: '🎨 РЕФЕРЕНС ДИЗАЙНА (ориентируйся на стиль этой карточки):'
       });
+      const base64Data = referenceDataUrl.split(',')[1];
       contentParts.push({
-        type: 'image_url',
-        image_url: { url: referenceDataUrl }
+        inlineData: {
+          mimeType: 'image/jpeg',
+          data: base64Data
+        }
       });
     }
 
@@ -122,51 +126,30 @@ ${prompt}
 ОБЯЗАТЕЛЬНО: Верни сгенерированное изображение. НЕ пиши текст, НЕ давай советы - только создай и верни изображение.`;
 
     contentParts.push({
-      type: 'text',
       text: imageGenerationPrompt
     });
 
-    console.log('Calling Google Gemini for image generation...');
+    console.log('Calling Google Gemini API directly for image generation...');
 
-    // Call Lovable AI Gateway with Google Gemini model
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Call Google Gemini API directly
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-pro-image-preview',
-        messages: [
-          {
-            role: 'user',
-            content: contentParts
-          }
-        ],
-        modalities: ['image', 'text']
+        contents: [{
+          parts: contentParts
+        }]
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Lovable AI error:', aiResponse.status, errorText);
+      console.error('Google Gemini API error:', aiResponse.status, errorText);
 
-      // Handle payment required (no credits)
-      if (aiResponse.status === 402) {
-        await supabase
-          .from('generation_tasks')
-          .update({
-            status: 'failed',
-            last_error: 'Недостаточно кредитов API. Пополните баланс в настройках.',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', taskId);
-
-        throw new Error('Недостаточно кредитов API. Пожалуйста, пополните баланс Lovable AI.');
-      }
-
-      // Handle rate limiting
-      if (aiResponse.status === 429) {
+      // Handle quota exceeded
+      if (aiResponse.status === 403 || aiResponse.status === 429) {
         if (retryCount < MAX_RETRIES) {
           const retryDelay = Math.pow(2, retryCount) * 5000;
           await supabase
@@ -175,7 +158,7 @@ ${prompt}
               status: 'retrying',
               retry_count: retryCount + 1,
               retry_after: retryDelay,
-              last_error: 'Rate limited, will retry',
+              last_error: 'API quota exceeded, will retry',
               updated_at: new Date().toISOString(),
             })
             .eq('id', taskId);
@@ -185,6 +168,31 @@ ${prompt}
             { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
+        
+        await supabase
+          .from('generation_tasks')
+          .update({
+            status: 'failed',
+            last_error: 'Превышена квота API. Попробуйте позже.',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', taskId);
+
+        throw new Error('Quota exceeded');
+      }
+
+      // Handle bad request
+      if (aiResponse.status === 400) {
+        await supabase
+          .from('generation_tasks')
+          .update({
+            status: 'failed',
+            last_error: 'Некорректный запрос к API.',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', taskId);
+
+        throw new Error(`Bad request: ${errorText}`);
       }
 
       throw new Error(`Google Gemini API error: ${errorText}`);
@@ -193,16 +201,16 @@ ${prompt}
     const aiData = await aiResponse.json();
     console.log('AI response received:', JSON.stringify(aiData).substring(0, 200));
     
-    const generatedImageUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    // Parse Google Gemini response format
+    const generatedImageBase64 = aiData.candidates?.[0]?.content?.parts?.find((part: any) => part.inlineData)?.inlineData?.data;
 
-    if (!generatedImageUrl) {
+    if (!generatedImageBase64) {
       console.error('No image in response:', JSON.stringify(aiData));
       throw new Error('No image generated by Google Gemini');
     }
 
     // Convert base64 to blob for storage
-    const base64Data = generatedImageUrl.split(',')[1];
-    const imageBlob = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    const imageBlob = Uint8Array.from(atob(generatedImageBase64), c => c.charCodeAt(0));
 
     // Upload to Supabase Storage
     const fileName = `${task.job.user_id}/${task.job_id}/${task.card_index}_${task.card_type}.png`;

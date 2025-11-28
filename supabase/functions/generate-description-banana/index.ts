@@ -40,10 +40,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
 
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (!geminiApiKey) {
+      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -98,40 +98,37 @@ serve(async (req) => {
       .replace('{competitors}', sanitizedCompetitors.join(', ') || 'не указано')
       .replace('{keywords}', sanitizedKeywords.join(', ') || 'не указано');
 
-    console.log('Using Lovable AI Gateway (Google Gemini) for description generation');
+    console.log('Using Google Gemini API directly for description generation');
 
-    // Call Lovable AI Gateway with Google Gemini model
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    // Call Google Gemini API directly
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-pro-preview',
-        messages: [
-          {
-            role: 'user',
-            content: finalPrompt
-          }
-        ],
+        contents: [{
+          parts: [{
+            text: finalPrompt
+          }]
+        }]
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Lovable AI Gateway error:', aiResponse.status, errorText);
+      console.error('Google Gemini API error:', aiResponse.status, errorText);
       
-      if (aiResponse.status === 429) {
+      if (aiResponse.status === 429 || aiResponse.status === 403) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded, please try again later' }),
+          JSON.stringify({ error: 'Превышена квота API, попробуйте позже' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (aiResponse.status === 402) {
+      if (aiResponse.status === 400) {
         return new Response(
-          JSON.stringify({ error: 'AI credits exhausted, please add funds' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Некорректный запрос к API' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
@@ -139,7 +136,7 @@ serve(async (req) => {
     }
 
     const aiData = await aiResponse.json();
-    const generatedText = aiData.choices?.[0]?.message?.content;
+    const generatedText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!generatedText) {
       console.error('No content in AI response:', aiData);
