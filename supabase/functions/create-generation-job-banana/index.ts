@@ -36,6 +36,7 @@ serve(async (req) => {
       description, 
       userId, 
       productImages = [],
+      referenceImageUrl = null,
       selectedCards = [0, 1, 2, 3, 4, 5] // Default all cards
     } = requestBody;
 
@@ -127,6 +128,15 @@ serve(async (req) => {
       });
     }
 
+    // Prepare product images array with reference if provided
+    let finalProductImages = productImages;
+    if (referenceImageUrl) {
+      finalProductImages = [
+        ...productImages,
+        { url: referenceImageUrl, type: 'reference' }
+      ];
+    }
+
     // Create generation job
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
@@ -135,7 +145,7 @@ serve(async (req) => {
         product_name: productName,
         category: category,
         description: description,
-        product_images: productImages,
+        product_images: finalProductImages,
         status: 'pending',
         total_cards: selectedCards.length,
         tokens_cost: tokensRequired
