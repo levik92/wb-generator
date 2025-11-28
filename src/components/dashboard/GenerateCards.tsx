@@ -1189,59 +1189,61 @@ export const GenerateCards = ({
         </CardContent>
       </Card>
 
-      {/* Reference Image Upload */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            Референс дизайна (опционально)
-          </CardTitle>
-          <CardDescription>
-            Загрузите пример карточки или дизайна, стиль которого хотите использовать
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-center w-full">
-              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}>
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                  <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-center text-muted-foreground">
-                    <span className="font-semibold">Нажмите для загрузки</span> референса
-                  </p>
-                  <p className="text-xs text-center text-muted-foreground">
-                    PNG, JPG, JPEG (1 изображение)
-                  </p>
-                </div>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={handleReferenceUpload} 
-                  disabled={generating}
-                />
-              </label>
-            </div>
-            
-            {referenceImage && (
-              <div className="relative group max-w-xs mx-auto">
-                <img
-                  src={URL.createObjectURL(referenceImage)}
-                  alt="Референс"
-                  className="w-full h-40 object-cover rounded-lg border"
-                />
-                <button
-                  onClick={removeReference}
-                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  disabled={generating}
-                >
-                  <X className="w-3 h-3" />
-                </button>
+      {/* Reference Image Upload - Temporarily Hidden */}
+      {false && (
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Референс дизайна (опционально)
+            </CardTitle>
+            <CardDescription>
+              Загрузите пример карточки или дизайна, стиль которого хотите использовать
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center w-full">
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}>
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-center text-muted-foreground">
+                      <span className="font-semibold">Нажмите для загрузки</span> референса
+                    </p>
+                    <p className="text-xs text-center text-muted-foreground">
+                      PNG, JPG, JPEG (1 изображение)
+                    </p>
+                  </div>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleReferenceUpload} 
+                    disabled={generating}
+                  />
+                </label>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              
+              {referenceImage && (
+                <div className="relative group max-w-xs mx-auto">
+                  <img
+                    src={URL.createObjectURL(referenceImage)}
+                    alt="Референс"
+                    className="w-full h-40 object-cover rounded-lg border"
+                  />
+                  <button
+                    onClick={removeReference}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={generating}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Product Details */}
       <Card className="bg-muted/30">
