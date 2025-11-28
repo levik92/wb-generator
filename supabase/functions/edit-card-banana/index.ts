@@ -63,7 +63,7 @@ serve(async (req) => {
       throw new Error('Insufficient tokens');
     }
 
-    // Create job
+    // Create job with product_images
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
       .insert({
@@ -73,7 +73,12 @@ serve(async (req) => {
         description: `Редактирование: ${editInstructions}`,
         status: 'processing',
         total_cards: 1,
-        tokens_cost: tokensCost
+        tokens_cost: tokensCost,
+        product_images: [{
+          url: sourceImageUrl,
+          name: 'edit_source',
+          type: 'product'
+        }]
       })
       .select()
       .single();
