@@ -66,6 +66,7 @@ export const GenerateCards = ({
   onTokensUpdate
 }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -294,6 +295,17 @@ export const GenerateCards = ({
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
+
+  const handleReferenceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setReferenceImage(file);
+    }
+  };
+
+  const removeReference = () => {
+    setReferenceImage(null);
+  };
   const canGenerate = () => {
     const tokensNeeded = selectedCards.length * photoGenerationPrice;
     return files.length > 0 && productName.trim() && productName.trim().length <= 150 && description.trim() && description.trim().length <= 600 && selectedCards.length > 0 && profile.tokens_balance >= tokensNeeded && !generating && !priceLoading;
@@ -499,6 +511,37 @@ export const GenerateCards = ({
         });
       }
 
+      // Upload reference image if provided
+      let referenceImageUrl: string | null = null;
+      if (referenceImage) {
+        setJobStatus('Загрузка референса дизайна...');
+        const fileExt = referenceImage.name.split('.').pop();
+        const fileName = `${profile.id}/reference_${Date.now()}.${fileExt}`;
+        
+        const {
+          data: uploadData,
+          error: uploadError
+        } = await supabase.storage.from('product-images').upload(fileName, referenceImage, {
+          upsert: true
+        });
+        
+        if (uploadError) {
+          console.error('Reference upload error:', uploadError);
+          toast({
+            title: "Ошибка загрузки референса",
+            description: `Не удалось загрузить референс: ${uploadError.message}`,
+            variant: "destructive"
+          });
+        } else {
+          const {
+            data: {
+              publicUrl
+            }
+          } = supabase.storage.from('product-images').getPublicUrl(fileName);
+          referenceImageUrl = publicUrl;
+        }
+      }
+
       // Save uploaded images URLs and job data for regeneration
       setUploadedProductImages(productImagesData);
       setJobData({
@@ -532,6 +575,7 @@ export const GenerateCards = ({
           description,
           userId: profile.id,
           productImages: productImagesData,
+          referenceImageUrl,
           selectedCards: selectedCards
         }
       });
@@ -1145,6 +1189,60 @@ export const GenerateCards = ({
         </CardContent>
       </Card>
 
+      {/* Reference Image Upload */}
+      <Card className="bg-muted/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Референс дизайна (опционально)
+          </CardTitle>
+          <CardDescription>
+            Загрузите пример карточки или дизайна, стиль которого хотите использовать
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-center w-full">
+              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}>
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                  <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                  <p className="mb-2 text-sm text-center text-muted-foreground">
+                    <span className="font-semibold">Нажмите для загрузки</span> референса
+                  </p>
+                  <p className="text-xs text-center text-muted-foreground">
+                    PNG, JPG, JPEG (1 изображение)
+                  </p>
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleReferenceUpload} 
+                  disabled={generating}
+                />
+              </label>
+            </div>
+            
+            {referenceImage && (
+              <div className="relative group max-w-xs mx-auto">
+                <img
+                  src={URL.createObjectURL(referenceImage)}
+                  alt="Референс"
+                  className="w-full h-40 object-cover rounded-lg border"
+                />
+                <button
+                  onClick={removeReference}
+                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={generating}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Product Details */}
       <Card className="bg-muted/30">
         <CardHeader>
@@ -1152,6 +1250,7 @@ export const GenerateCards = ({
           <div className="flex justify-end mb-2 sm:hidden">
             <Button variant="outline" size="sm" onClick={() => {
             setFiles([]);
+            setReferenceImage(null);
             setProductName("");
             setCategory("");
             setDescription("");
@@ -1173,6 +1272,7 @@ export const GenerateCards = ({
             </div>
             <Button variant="outline" size="sm" onClick={() => {
             setFiles([]);
+            setReferenceImage(null);
             setProductName("");
             setCategory("");
             setDescription("");
