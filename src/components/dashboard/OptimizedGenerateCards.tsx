@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { useActiveAiModel, getEdgeFunctionName, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
   id: string;
@@ -34,7 +34,9 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [autoOptimize, setAutoOptimize] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentJob, setCurrentJob] = useState<JobStatus | null>(null);
   const [progress, setProgress] = useState(0);
@@ -129,11 +131,32 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
       });
     }
     
-    setFiles(prev => [...prev, ...validFiles].slice(0, 10));
+    const combined = [...files, ...validFiles];
+    if (combined.length > 3) {
+      toast({
+        title: "Превышен лимит",
+        description: "Можно загрузить максимум 3 изображения товара",
+        variant: "destructive"
+      });
+      setFiles(combined.slice(0, 3));
+    } else {
+      setFiles(combined);
+    }
+  };
+
+  const handleReferenceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setReferenceImage(file);
+    }
   };
 
   const removeFile = (index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeReference = () => {
+    setReferenceImage(null);
   };
 
   const handleGenerate = async () => {
@@ -168,7 +191,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
     setProgress(0);
 
     try {
-      // Upload images first
+      // Upload product images first
       const imageUrls: string[] = [];
       
       for (const file of files) {
@@ -188,18 +211,44 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
         imageUrls.push(urlData.publicUrl);
       }
 
+      // Upload reference image if provided
+      let referenceImageUrl: string | null = null;
+      if (referenceImage) {
+        const fileExt = referenceImage.name.split('.').pop();
+        const fileName = `${profile.id}/reference_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, referenceImage);
+
+        if (uploadError) {
+          console.error('Reference upload error:', uploadError);
+          toast({
+            title: "Ошибка загрузки референса",
+            description: `Не удалось загрузить референс: ${uploadError.message}`,
+            variant: "destructive"
+          });
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(uploadData.path);
+          referenceImageUrl = urlData.publicUrl;
+        }
+      }
+
       // Create generation job
-      const functionName = getEdgeFunctionName('create-generation-job-v2', activeModel || 'openai');
+      const functionName = getImageEdgeFunctionName('create-generation-job', activeModel || 'openai');
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
           productName,
           category,
-          description,
+          description: autoOptimize ? 'Самостоятельно придумай и определи наилучшие параметры для достижения результата.' : description,
           userId: profile.id,
           productImages: imageUrls.map((url, index) => ({
             url: url,
             name: `image_${index + 1}.png`
           })),
+          referenceImageUrl,
           selectedCards: [0, 1, 2, 3, 4, 5] // Все карточки
         }
       });
@@ -286,33 +335,102 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
             <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea
               id="description"
-              value={description}
+              value={autoOptimize ? 'Самостоятельно придумай и определи наилучшие параметры для достижения результата.' : description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Опишите преимущества товара, основные характеристики и пожелания по дизайну и реализации. Чем больше и точнее информации, тем лучше результат..."
               className="min-h-[100px]"
-              disabled={isGenerating}
+              disabled={isGenerating || autoOptimize}
             />
+            <div className="flex items-center space-x-2 pt-2">
+              <input
+                type="checkbox"
+                id="autoOptimize"
+                checked={autoOptimize}
+                onChange={(e) => {
+                  setAutoOptimize(e.target.checked);
+                  if (e.target.checked) {
+                    setDescription('');
+                  }
+                }}
+                disabled={isGenerating}
+                className="rounded border-gray-300"
+              />
+              <Label
+                htmlFor="autoOptimize"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Придумай сам — доверь AI подбор параметров
+              </Label>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Изображения товара (до 10 фото)</Label>
-            <Input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleFileUpload}
-              disabled={isGenerating}
-              className="cursor-pointer"
-            />
-            
-            {files.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-4">
-                {files.map((file, index) => (
-                  <div key={index} className="relative group">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>
+                Фото товара
+                <span className="text-muted-foreground text-xs ml-2">(до 3 изображений)</span>
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Загрузите качественные фото вашего товара
+              </p>
+              <Input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={isGenerating}
+                className="cursor-pointer"
+              />
+              
+              {files.length > 0 && (
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  {files.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Товар ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-md border"
+                      />
+                      {!isGenerating && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeFile(index)}
+                        >
+                          ×
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Референс дизайна (опционально)
+                <span className="text-muted-foreground text-xs ml-2">(1 изображение)</span>
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Загрузите пример карточки или дизайна, стиль которого хотите использовать
+              </p>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleReferenceUpload}
+                disabled={isGenerating}
+                className="cursor-pointer"
+              />
+              
+              {referenceImage && (
+                <div className="mt-4">
+                  <div className="relative group max-w-xs">
                     <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Upload ${index + 1}`}
-                      className="w-full h-20 object-cover rounded-md border"
+                      src={URL.createObjectURL(referenceImage)}
+                      alt="Референс"
+                      className="w-full h-40 object-cover rounded-md border"
                     />
                     {!isGenerating && (
                       <Button
@@ -320,15 +438,15 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
                         variant="destructive"
                         size="sm"
                         className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeFile(index)}
+                        onClick={removeReference}
                       >
                         ×
                       </Button>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-4">
