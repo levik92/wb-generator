@@ -151,6 +151,20 @@ ${prompt}
       const errorText = await aiResponse.text();
       console.error('Lovable AI error:', aiResponse.status, errorText);
 
+      // Handle payment required (no credits)
+      if (aiResponse.status === 402) {
+        await supabase
+          .from('generation_tasks')
+          .update({
+            status: 'failed',
+            last_error: 'Недостаточно кредитов API. Пополните баланс в настройках.',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', taskId);
+
+        throw new Error('Недостаточно кредитов API. Пожалуйста, пополните баланс Lovable AI.');
+      }
+
       // Handle rate limiting
       if (aiResponse.status === 429) {
         if (retryCount < MAX_RETRIES) {
