@@ -98,10 +98,10 @@ serve(async (req) => {
       .replace('{competitors}', sanitizedCompetitors.join(', ') || 'не указано')
       .replace('{keywords}', sanitizedKeywords.join(', ') || 'не указано');
 
-    console.log('Calling Google Gemini Pro API for description generation');
+    console.log('Calling Google Gemini 3 Pro API for description generation');
 
-    // Call Google Gemini 2.5 Pro API directly
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiApiKey}`, {
+    // Call Google Gemini 3 Pro API directly
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ serve(async (req) => {
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Google Gemini API error:', aiResponse.status, errorText);
+      console.error('Google Gemini 3 Pro API error:', aiResponse.status, errorText);
       
       if (aiResponse.status === 429 || aiResponse.status === 403) {
         return new Response(
