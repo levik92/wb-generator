@@ -1149,99 +1149,102 @@ export const GenerateCards = ({
         </CardContent>
       </Card>
 
-      {/* File Upload */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            Изображения товара
-          </CardTitle>
-          <CardDescription>
-            Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-center w-full">
-              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                  <Upload className={`w-8 h-8 mb-4 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className={`mb-2 text-sm text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                    <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
-                  </p>
-                  <p className={`text-xs text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                    PNG, JPG, JPEG (МАКС. 3 изображения)
-                  </p>
-                </div>
-                <input type="file" className="hidden" multiple accept="image/*" onChange={handleFileUpload} disabled={generating} />
-              </label>
-            </div>
-            
-            {files.length > 0 && <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {files.map((file, index) => <div key={index} className="relative group">
-                    <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full aspect-square object-cover rounded-lg border" />
-                    <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>)}
-              </div>}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Reference Image Upload */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            Референс дизайна (опционально)
-          </CardTitle>
-          <CardDescription>
-            Загрузите пример карточки или дизайна, стиль которого хотите использовать
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-center w-full">
-              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}>
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                  <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-center text-muted-foreground">
-                    <span className="font-semibold">Нажмите для загрузки</span> референса
-                  </p>
-                  <p className="text-xs text-center text-muted-foreground">
-                    PNG, JPG, JPEG (1 изображение)
-                  </p>
-                </div>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={handleReferenceUpload} 
-                  disabled={generating}
-                />
-              </label>
-            </div>
-            
-            {referenceImage && (
-              <div className="relative group max-w-xs mx-auto">
-                <img
-                  src={URL.createObjectURL(referenceImage)}
-                  alt="Референс"
-                  className="w-full h-40 object-cover rounded-lg border"
-                />
-                <button
-                  onClick={removeReference}
-                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  disabled={generating}
-                >
-                  <X className="w-3 h-3" />
-                </button>
+      {/* File Upload - Horizontal layout on desktop/tablet */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Product Images - Takes 2/3 width on desktop */}
+        <Card className="bg-muted/30 md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Изображения товара
+            </CardTitle>
+            <CardDescription>
+              Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center w-full">
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <Upload className={`w-8 h-8 mb-4 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`mb-2 text-sm text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
+                    </p>
+                    <p className={`text-xs text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      PNG, JPG, JPEG (МАКС. 3 изображения)
+                    </p>
+                  </div>
+                  <input type="file" className="hidden" multiple accept="image/*" onChange={handleFileUpload} disabled={generating} />
+                </label>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              
+              {files.length > 0 && <div className="grid grid-cols-3 gap-2">
+                  {files.map((file, index) => <div key={index} className="relative group">
+                      <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full aspect-square object-cover rounded-lg border" />
+                      <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>)}
+                </div>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Reference Image - Takes 1/3 width on desktop */}
+        <Card className="bg-muted/30 md:col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Референс дизайна
+            </CardTitle>
+            <CardDescription>
+              Пример стиля (опционально)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-center w-full">
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}>
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-center text-muted-foreground">
+                      <span className="font-semibold">Загрузить</span>
+                    </p>
+                    <p className="text-xs text-center text-muted-foreground">
+                      PNG, JPG, JPEG
+                    </p>
+                  </div>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleReferenceUpload} 
+                    disabled={generating}
+                  />
+                </label>
+              </div>
+              
+              {referenceImage && (
+                <div className="relative group">
+                  <img
+                    src={URL.createObjectURL(referenceImage)}
+                    alt="Референс"
+                    className="w-full aspect-square object-cover rounded-lg border"
+                  />
+                  <button
+                    onClick={removeReference}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={generating}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Product Details */}
       <Card className="bg-muted/30">
