@@ -9,7 +9,6 @@ const corsHeaders = {
 };
 
 const MAX_RETRIES = 3;
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
