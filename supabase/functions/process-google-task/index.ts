@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { Canvas, createCanvas, loadImage } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,57 @@ const corsHeaders = {
 };
 
 const MAX_RETRIES = 3;
+
+// Add label to image
+async function addLabelToImage(imageDataUrl: string, label: string): Promise<string> {
+  try {
+    // Load the image
+    const img = await loadImage(imageDataUrl);
+    
+    // Create canvas with same dimensions as image
+    const canvas = createCanvas(img.width(), img.height());
+    const ctx = canvas.getContext('2d');
+    
+    // Draw original image
+    ctx.drawImage(img, 0, 0);
+    
+    // Configure label style
+    const fontSize = 14;
+    const padding = 8;
+    const borderRadius = 10;
+    const margin = 12;
+    
+    ctx.font = `${fontSize}px Arial`;
+    const textMetrics = ctx.measureText(label);
+    const textWidth = textMetrics.width;
+    
+    // Calculate label dimensions
+    const labelWidth = textWidth + padding * 2;
+    const labelHeight = fontSize + padding * 2;
+    
+    // Position in top right corner
+    const x = img.width() - labelWidth - margin;
+    const y = margin;
+    
+    // Draw rounded rectangle background
+    ctx.fillStyle = '#f7f7f7';
+    ctx.beginPath();
+    ctx.roundRect(x, y, labelWidth, labelHeight, borderRadius);
+    ctx.fill();
+    
+    // Draw text
+    ctx.fillStyle = '#000000';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + padding, y + labelHeight / 2);
+    
+    // Convert canvas to base64
+    return canvas.toDataURL('image/jpeg', 0.95);
+  } catch (error) {
+    console.error('Error adding label to image:', error);
+    // Return original image if labeling fails
+    return imageDataUrl;
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -63,7 +115,11 @@ serve(async (req) => {
         if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
         const buffer = await response.arrayBuffer();
         const base64 = base64Encode(new Uint8Array(buffer));
-        productImageDataUrls.push(`data:image/jpeg;base64,${base64}`);
+        const dataUrl = `data:image/jpeg;base64,${base64}`;
+        
+        // Add label to product image
+        const labeledDataUrl = await addLabelToImage(dataUrl, 'Товар');
+        productImageDataUrls.push(labeledDataUrl);
       } catch (error) {
         console.error('Product image download error:', error);
       }
@@ -77,7 +133,10 @@ serve(async (req) => {
         if (!response.ok) throw new Error(`Failed to download reference: ${response.statusText}`);
         const buffer = await response.arrayBuffer();
         const base64 = base64Encode(new Uint8Array(buffer));
-        referenceDataUrl = `data:image/jpeg;base64,${base64}`;
+        const dataUrl = `data:image/jpeg;base64,${base64}`;
+        
+        // Add label to reference image
+        referenceDataUrl = await addLabelToImage(dataUrl, 'Референс');
       } catch (error) {
         console.error('Reference image download error:', error);
       }
