@@ -113,8 +113,8 @@ serve(async (req) => {
       throw new Error('Failed to create task');
     }
 
-    // Get prompt template
-    const prompt = await getPromptTemplate(supabase, 'edit', productName, editInstructions);
+    // Get prompt template - use 'edit-card' for editing
+    const prompt = await getPromptTemplate(supabase, 'edit-card', productName, editInstructions);
 
     // Call processing function
     const { error: processingError } = await supabase.functions.invoke('process-google-task', {
@@ -127,6 +127,7 @@ serve(async (req) => {
 
     if (processingError) {
       console.error('Processing error:', processingError);
+      throw new Error('Failed to invoke processing function');
     }
 
     // Create notification

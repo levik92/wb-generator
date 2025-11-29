@@ -167,10 +167,10 @@ serve(async (req) => {
       throw new Error('Failed to create regeneration task');
     }
 
-    // Get prompt template
+    // Get prompt template - use 'generate-card' for regeneration
     const prompt = await getPromptTemplate(
       supabase,
-      cardType,
+      'generate-card',
       sanitizedProductName,
       sanitizedCategory,
       sanitizedDescription
