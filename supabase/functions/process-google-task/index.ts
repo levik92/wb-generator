@@ -2,7 +2,6 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
-import { Canvas, createCanvas, loadImage } from "https://deno.land/x/canvas@v1.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,56 +9,6 @@ const corsHeaders = {
 };
 
 const MAX_RETRIES = 3;
-
-// Add label to image
-async function addLabelToImage(imageDataUrl: string, label: string): Promise<string> {
-  try {
-    // Load the image
-    const img = await loadImage(imageDataUrl);
-    
-    // Create canvas with same dimensions as image
-    const canvas = createCanvas(img.width(), img.height());
-    const ctx = canvas.getContext('2d');
-    
-    // Draw original image
-    ctx.drawImage(img, 0, 0);
-    
-    // Configure label style
-    const fontSize = 14;
-    const padding = 8;
-    const borderRadius = 10;
-    const margin = 12;
-    
-    ctx.font = `${fontSize}px Arial`;
-    const textMetrics = ctx.measureText(label);
-    const textWidth = textMetrics.width;
-    
-    // Calculate label dimensions
-    const labelWidth = textWidth + padding * 2;
-    const labelHeight = fontSize + padding * 2;
-    
-    // Position in top right corner
-    const x = img.width() - labelWidth - margin;
-    const y = margin;
-    
-    // Draw rounded rectangle background
-    ctx.fillStyle = '#f7f7f7';
-    ctx.beginPath();
-    ctx.roundRect(x, y, labelWidth, labelHeight, borderRadius);
-    ctx.fill();
-    
-    // Draw text
-    ctx.fillStyle = '#000000';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, x + padding, y + labelHeight / 2);
-    
-    // Convert canvas to base64
-    return canvas.toDataURL('image/jpeg', 0.95);
-  } catch (error) {
-    console.error('Error adding label to image:', error);
-    // Return original image if labeling fails
-    return imageDataUrl;
-  }
 }
 
 serve(async (req) => {
@@ -115,11 +64,7 @@ serve(async (req) => {
         if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
         const buffer = await response.arrayBuffer();
         const base64 = base64Encode(new Uint8Array(buffer));
-        const dataUrl = `data:image/jpeg;base64,${base64}`;
-        
-        // Add label to product image
-        const labeledDataUrl = await addLabelToImage(dataUrl, 'Товар');
-        productImageDataUrls.push(labeledDataUrl);
+        productImageDataUrls.push(`data:image/jpeg;base64,${base64}`);
       } catch (error) {
         console.error('Product image download error:', error);
       }
@@ -133,10 +78,7 @@ serve(async (req) => {
         if (!response.ok) throw new Error(`Failed to download reference: ${response.statusText}`);
         const buffer = await response.arrayBuffer();
         const base64 = base64Encode(new Uint8Array(buffer));
-        const dataUrl = `data:image/jpeg;base64,${base64}`;
-        
-        // Add label to reference image
-        referenceDataUrl = await addLabelToImage(dataUrl, 'Референс');
+        referenceDataUrl = `data:image/jpeg;base64,${base64}`;
       } catch (error) {
         console.error('Reference image download error:', error);
       }
@@ -147,11 +89,29 @@ serve(async (req) => {
     // Build content parts for Google Gemini API format
     const contentParts: any[] = [];
     
-    // Add product images
-    productImageDataUrls.forEach((dataUrl, index) => {
-      contentParts.push({
-        text: `📦 ФОТО ТОВАРА ${index + 1}:`
-      });
+    // Add structured instruction at the beginning
+    const structuredInstruction = `ВАЖНАЯ ИНФОРМАЦИЯ О СТРУКТУРЕ ИЗОБРАЖЕНИЙ:
+
+Я отправляю тебе ${productImageDataUrls.length + (referenceDataUrl ? 1 : 0)} изображений в следующем порядке:
+
+ФОТОГРАФИИ ТОВАРА (используй эти изображения для создания карточки):
+${productImageDataUrls.map((_, index) => `• Изображение ${index + 1}: ФОТО ТОВАРА - основа для создания карточки`).join('\n')}
+${referenceDataUrl ? `\nРЕФЕРЕНС ДИЗАЙНА (используй только как пример стиля оформления):
+• Изображение ${productImageDataUrls.length + 1}: РЕФЕРЕНС - ориентируйся на СТИЛЬ, КОМПОЗИЦИЮ и ОФОРМЛЕНИЕ этой карточки. ТОВАР бери ТОЛЬКО из предыдущих изображений товара, НЕ копируй товар с референса!` : ''}
+
+ТВОЯ ЗАДАЧА:
+${prompt}
+
+КРИТИЧЕСКИ ВАЖНО:
+1. Товар для карточки бери ТОЛЬКО из первых ${productImageDataUrls.length} изображений (фото товара)
+${referenceDataUrl ? `2. Последнее изображение (референс) используй ТОЛЬКО для понимания стиля оформления, но НЕ копируй сам товар\n3. Создай новую карточку с товаром из фото товара в стиле референса` : '2. Создай профессиональную маркетинговую карточку товара'}
+
+ОБЯЗАТЕЛЬНО: Верни сгенерированное ИЗОБРАЖЕНИЕ карточки товара.`;
+
+    contentParts.push({ text: structuredInstruction });
+    
+    // Add all product images
+    productImageDataUrls.forEach((dataUrl) => {
       const base64Data = dataUrl.split(',')[1];
       contentParts.push({
         inlineData: {
@@ -161,11 +121,8 @@ serve(async (req) => {
       });
     });
 
-    // Add reference image if exists
+    // Add reference image if exists (always last)
     if (referenceDataUrl) {
-      contentParts.push({
-        text: '🎨 РЕФЕРЕНС ДИЗАЙНА (ориентируйся на стиль этой карточки):'
-      });
       const base64Data = referenceDataUrl.split(',')[1];
       contentParts.push({
         inlineData: {
@@ -174,19 +131,6 @@ serve(async (req) => {
         }
       });
     }
-
-    // Add main prompt
-    const imageGenerationPrompt = `ВАЖНО: Ты ДОЛЖЕН сгенерировать и вернуть ИЗОБРАЖЕНИЕ, а не текст. Не описывай, не объясняй - создай изображение.
-
-Используя предоставленные фото товара, создай новое профессиональное маркетинговое изображение товара.${referenceDataUrl ? ' Ориентируйся на стиль референса дизайна.' : ''}
-
-${prompt}
-
-ОБЯЗАТЕЛЬНО: Верни сгенерированное изображение. НЕ пиши текст, НЕ давай советы - только создай и верни изображение.`;
-
-    contentParts.push({
-      text: imageGenerationPrompt
-    });
 
     console.log('Calling Google Gemini 3 Pro Image API for image generation...');
 
