@@ -263,10 +263,10 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
         </div>
       </div>
 
-      <Alert className="border-muted bg-muted/30 shadow-none">
-        <Info className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-        <AlertDescription className="text-sm text-muted-foreground leading-relaxed">
-          Данные генераций хранятся <span className="font-medium text-foreground/80">1 месяц</span> с момента создания и затем автоматически удаляются.
+      <Alert className="border-purple-200 bg-purple-50 shadow-none">
+        <Info className="h-4 w-4 text-purple-600 flex-shrink-0" />
+        <AlertDescription className="text-sm text-purple-700 leading-relaxed">
+          Данные генераций хранятся <span className="font-semibold">1 месяц</span> с момента создания и затем автоматически удаляются.
         </AlertDescription>
       </Alert>
 

@@ -1226,11 +1226,11 @@ export const GenerateCards = ({
               </div>
               
               {referenceImage && (
-                <div className="relative group">
+                <div className="relative group w-20 h-20 mx-auto">
                   <img
                     src={URL.createObjectURL(referenceImage)}
                     alt="Референс"
-                    className="w-full aspect-square object-cover rounded-lg border"
+                    className="w-full h-full aspect-square object-cover rounded-lg border"
                   />
                   <button
                     onClick={removeReference}
@@ -1386,7 +1386,7 @@ export const GenerateCards = ({
                 </div>
                 <Progress value={smoothProgress} className="w-full" />
                 {generating && <div className="text-xs text-muted-foreground text-center">
-                    {estimatedTimeRemaining > 0 ? estimatedTimeRemaining >= 60 ? `Расчетное время: ~${Math.ceil(estimatedTimeRemaining / 60)} мин` : `Расчетное время: ~${estimatedTimeRemaining} сек` : WAITING_MESSAGES[waitingMessageIndex]}
+                    {estimatedTimeRemaining > 0 ? `Обрабатываю... ${estimatedTimeRemaining >= 60 ? `~${Math.ceil(estimatedTimeRemaining / 60)} мин` : `~${estimatedTimeRemaining} сек`}` : WAITING_MESSAGES[waitingMessageIndex]}
                   </div>}
               </div>
               
