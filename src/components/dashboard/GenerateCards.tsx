@@ -1179,9 +1179,9 @@ export const GenerateCards = ({
                 </label>
               </div>
               
-              {files.length > 0 && <div className="grid grid-cols-3 gap-2">
-                  {files.map((file, index) => <div key={index} className="relative group">
-                      <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full aspect-square object-cover rounded-lg border" />
+              {files.length > 0 && <div className="flex flex-wrap gap-2">
+                  {files.map((file, index) => <div key={index} className="relative group w-24 h-24">
+                      <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full h-full aspect-square object-cover rounded-lg border" />
                       <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
                         <X className="w-3 h-3" />
                       </button>
@@ -1226,7 +1226,7 @@ export const GenerateCards = ({
               </div>
               
               {referenceImage && (
-                <div className="relative group w-20 h-20 mx-auto">
+                <div className="relative group w-24 h-24 mx-auto">
                   <img
                     src={URL.createObjectURL(referenceImage)}
                     alt="Референс"
