@@ -1196,10 +1196,10 @@ export const GenerateCards = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
-              Референс дизайна
+              Референс
             </CardTitle>
             <CardDescription>
-              Пример стиля (опционально)
+              WB Генератор может взять за основу прикрепленный дизайн (не обязательно)
             </CardDescription>
           </CardHeader>
           <CardContent>
