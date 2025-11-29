@@ -1150,9 +1150,9 @@ export const GenerateCards = ({
       </Card>
 
       {/* File Upload - Horizontal layout on desktop/tablet */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Product Images - Takes 2/3 width on desktop */}
-        <Card className="bg-muted/30 md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* Product Images - Takes 3/5 width on desktop */}
+        <Card className="bg-muted/30 md:col-span-3">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1191,8 +1191,8 @@ export const GenerateCards = ({
           </CardContent>
         </Card>
 
-        {/* Reference Image - Takes 1/3 width on desktop */}
-        <Card className="bg-muted/30 md:col-span-1">
+        {/* Reference Image - Takes 2/5 width on desktop */}
+        <Card className="bg-muted/30 md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
