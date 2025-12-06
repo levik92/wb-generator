@@ -25,27 +25,46 @@ async function fetchWithRetry(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       console.log(`YooKassa API request attempt ${attempt + 1}/${maxRetries}`);
-      const response = await fetch(url, options);
+      
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        // Force new connection for each attempt
+        keepalive: false,
+      });
+      
+      clearTimeout(timeoutId);
       return response;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`Attempt ${attempt + 1} failed:`, lastError.message);
       
-      // Only retry on connection/TLS errors
+      // Only retry on connection/TLS/timeout errors
       if (
         lastError.message.includes('connection error') ||
         lastError.message.includes('TLS') ||
         lastError.message.includes('peer closed') ||
-        lastError.message.includes('SendRequest')
+        lastError.message.includes('SendRequest') ||
+        lastError.message.includes('aborted') ||
+        lastError.name === 'AbortError'
       ) {
-        // Wait before retry with exponential backoff
-        const delay = Math.pow(2, attempt) * 500; // 500ms, 1s, 2s
-        console.log(`Waiting ${delay}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
+        if (attempt < maxRetries - 1) {
+          // Wait before retry with exponential backoff
+          const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+          console.log(`Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
       }
       
-      // For other errors, throw immediately
+      // For other errors or last attempt, throw
+      if (attempt === maxRetries - 1) {
+        throw lastError;
+      }
       throw lastError;
     }
   }
@@ -62,7 +81,6 @@ serve(async (req) => {
     console.log('Create payment request received');
     
     // Extract client information for security logging
-    // X-Forwarded-For может содержать несколько IP через запятую, берем первый
     const forwardedFor = req.headers.get('x-forwarded-for');
     const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
     const userAgent = req.headers.get('user-agent');
@@ -149,7 +167,8 @@ serve(async (req) => {
       headers: {
         'Authorization': `Basic ${btoa(`1150875:${Deno.env.get("YOOKASSA_SECRET_KEY")}`)}`,
         'Content-Type': 'application/json',
-        'Idempotence-Key': idempotenceKey
+        'Idempotence-Key': idempotenceKey,
+        'Connection': 'close', // Force connection close to avoid TLS issues
       },
       body: JSON.stringify({
         amount: {
