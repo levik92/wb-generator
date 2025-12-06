@@ -14,6 +14,45 @@ interface PaymentRequest {
   promoCode?: string;
 }
 
+// Retry fetch with exponential backoff for TLS/connection errors
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3
+): Promise<Response> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      console.log(`YooKassa API request attempt ${attempt + 1}/${maxRetries}`);
+      const response = await fetch(url, options);
+      return response;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.error(`Attempt ${attempt + 1} failed:`, lastError.message);
+      
+      // Only retry on connection/TLS errors
+      if (
+        lastError.message.includes('connection error') ||
+        lastError.message.includes('TLS') ||
+        lastError.message.includes('peer closed') ||
+        lastError.message.includes('SendRequest')
+      ) {
+        // Wait before retry with exponential backoff
+        const delay = Math.pow(2, attempt) * 500; // 500ms, 1s, 2s
+        console.log(`Waiting ${delay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      // For other errors, throw immediately
+      throw lastError;
+    }
+  }
+  
+  throw lastError || new Error('All retry attempts failed');
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -102,13 +141,15 @@ serve(async (req) => {
 
     console.log(`Creating payment for user ${user.id}, package: ${body.packageName}, amount: ${finalAmount}`);
 
-    // Create payment in ЮKassa
-    const yookassaResponse = await fetch('https://api.yookassa.ru/v3/payments', {
+    const idempotenceKey = `${user.id}-${Date.now()}`;
+    
+    // Create payment in ЮKassa with retry logic
+    const yookassaResponse = await fetchWithRetry('https://api.yookassa.ru/v3/payments', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${btoa(`1150875:${Deno.env.get("YOOKASSA_SECRET_KEY")}`)}`,
         'Content-Type': 'application/json',
-        'Idempotence-Key': `${user.id}-${Date.now()}`
+        'Idempotence-Key': idempotenceKey
       },
       body: JSON.stringify({
         amount: {
