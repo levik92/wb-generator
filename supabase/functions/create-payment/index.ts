@@ -1,4 +1,3 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -12,64 +11,6 @@ interface PaymentRequest {
   amount?: number;
   tokens?: number;
   promoCode?: string;
-}
-
-// Retry fetch with exponential backoff for TLS/connection errors
-async function fetchWithRetry(
-  url: string,
-  options: RequestInit,
-  maxRetries = 3
-): Promise<Response> {
-  let lastError: Error | null = null;
-  
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      console.log(`YooKassa API request attempt ${attempt + 1}/${maxRetries}`);
-      
-      // Create AbortController for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-      
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-        // Force new connection for each attempt
-        keepalive: false,
-      });
-      
-      clearTimeout(timeoutId);
-      return response;
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      console.error(`Attempt ${attempt + 1} failed:`, lastError.message);
-      
-      // Only retry on connection/TLS/timeout errors
-      if (
-        lastError.message.includes('connection error') ||
-        lastError.message.includes('TLS') ||
-        lastError.message.includes('peer closed') ||
-        lastError.message.includes('SendRequest') ||
-        lastError.message.includes('aborted') ||
-        lastError.name === 'AbortError'
-      ) {
-        if (attempt < maxRetries - 1) {
-          // Wait before retry with exponential backoff
-          const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
-          console.log(`Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
-      }
-      
-      // For other errors or last attempt, throw
-      if (attempt === maxRetries - 1) {
-        throw lastError;
-      }
-      throw lastError;
-    }
-  }
-  
-  throw lastError || new Error('All retry attempts failed');
 }
 
 serve(async (req) => {
@@ -159,65 +100,108 @@ serve(async (req) => {
 
     console.log(`Creating payment for user ${user.id}, package: ${body.packageName}, amount: ${finalAmount}`);
 
-    const idempotenceKey = `${user.id}-${Date.now()}`;
+    const idempotenceKey = `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
-    // Create payment in ЮKassa with retry logic
-    const yookassaResponse = await fetchWithRetry('https://api.yookassa.ru/v3/payments', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${btoa(`1150875:${Deno.env.get("YOOKASSA_SECRET_KEY")}`)}`,
-        'Content-Type': 'application/json',
-        'Idempotence-Key': idempotenceKey,
-        'Connection': 'close', // Force connection close to avoid TLS issues
+    const paymentPayload = {
+      amount: {
+        value: finalAmount.toFixed(2),
+        currency: 'RUB'
       },
-      body: JSON.stringify({
-        amount: {
-          value: finalAmount.toFixed(2),
-          currency: 'RUB'
+      confirmation: {
+        type: 'redirect',
+        return_url: `${req.headers.get("origin") || 'https://wbgen.ru'}/dashboard?payment=success`
+      },
+      capture: true,
+      description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
+      receipt: {
+        customer: {
+          email: user.email
         },
-        confirmation: {
-          type: 'redirect',
-          return_url: `${req.headers.get("origin")}/dashboard?payment=success`
-        },
-        capture: true,
-        description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
-        receipt: {
-          customer: {
-            email: user.email
+        items: [
+          {
+            description: `Токены для WB Генератор: ${body.packageName}`,
+            quantity: "1.00",
+            amount: {
+              value: finalAmount.toFixed(2),
+              currency: 'RUB'
+            },
+            vat_code: 1,
+            payment_mode: "full_payment",
+            payment_subject: "service"
+          }
+        ]
+      },
+      metadata: {
+        user_id: user.id,
+        package_name: body.packageName,
+        tokens_amount: finalTokens.toString(),
+        promo_code: appliedPromo?.code || '',
+        promo_type: appliedPromo?.type || '',
+        promo_value: appliedPromo?.value?.toString() || ''
+      }
+    };
+
+    console.log('Sending request to YooKassa API...');
+    
+    // Try multiple attempts with simple fetch
+    let yookassaData: any = null;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        console.log(`YooKassa API attempt ${attempt}/5`);
+        
+        const response = await fetch('https://api.yookassa.ru/v3/payments', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${btoa(`1150875:${Deno.env.get("YOOKASSA_SECRET_KEY")}`)}`,
+            'Content-Type': 'application/json',
+            'Idempotence-Key': idempotenceKey,
           },
-          items: [
-            {
-              description: `Токены для WB Генератор: ${body.packageName}`,
-              quantity: "1.00",
-              amount: {
-                value: finalAmount.toFixed(2),
-                currency: 'RUB'
-              },
-              vat_code: 1,
-              payment_mode: "full_payment",
-              payment_subject: "service"
-            }
-          ]
-        },
-        metadata: {
-          user_id: user.id,
-          package_name: body.packageName,
-          tokens_amount: finalTokens.toString(),
-          promo_code: appliedPromo?.code || '',
-          promo_type: appliedPromo?.type || '',
-          promo_value: appliedPromo?.value?.toString() || ''
+          body: JSON.stringify(paymentPayload)
+        });
+        
+        console.log('YooKassa response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('YooKassa API error response:', errorText);
+          throw new Error(`YooKassa API error: ${response.status} - ${errorText}`);
         }
-      })
-    });
-
-    if (!yookassaResponse.ok) {
-      const errorData = await yookassaResponse.text();
-      console.error('ЮKassa API error:', errorData);
-      throw new Error(`ЮKassa API error: ${yookassaResponse.status}`);
+        
+        yookassaData = await response.json();
+        console.log('YooKassa payment created successfully:', yookassaData.id);
+        break; // Success, exit loop
+        
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`Attempt ${attempt} failed:`, lastError.message);
+        
+        // Check if it's a network/TLS error worth retrying
+        const msg = lastError.message.toLowerCase();
+        const isNetworkError = msg.includes('connection') || 
+                               msg.includes('tls') || 
+                               msg.includes('eof') ||
+                               msg.includes('peer') ||
+                               msg.includes('reset') ||
+                               msg.includes('abort') ||
+                               msg.includes('timeout');
+        
+        if (isNetworkError && attempt < 5) {
+          const delay = attempt * 2000; // 2s, 4s, 6s, 8s
+          console.log(`Network error, waiting ${delay}ms before retry...`);
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        
+        // Non-network error or last attempt - throw
+        throw lastError;
+      }
     }
-
-    const yookassaData = await yookassaResponse.json();
-    console.log('ЮKassa payment created:', yookassaData.id);
+    
+    if (!yookassaData) {
+      throw lastError || new Error('Failed to create payment after all attempts');
+    }
 
     // Store payment in database
     const { error: insertError } = await supabaseServiceRole
