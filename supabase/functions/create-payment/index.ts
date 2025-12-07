@@ -13,6 +13,24 @@ interface PaymentRequest {
   promoCode?: string;
 }
 
+// Custom fetch with timeout using AbortController
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -143,23 +161,34 @@ serve(async (req) => {
 
     console.log('Sending request to YooKassa API...');
     
-    // Try multiple attempts with simple fetch
+    const yookassaSecretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
+    if (!yookassaSecretKey) {
+      throw new Error('YooKassa secret key not configured');
+    }
+    
+    // Try multiple attempts with timeout
     let yookassaData: any = null;
     let lastError: Error | null = null;
+    const maxAttempts = 3;
     
-    for (let attempt = 1; attempt <= 5; attempt++) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        console.log(`YooKassa API attempt ${attempt}/5`);
+        console.log(`YooKassa API attempt ${attempt}/${maxAttempts}`);
         
-        const response = await fetch('https://api.yookassa.ru/v3/payments', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${btoa(`1150875:${Deno.env.get("YOOKASSA_SECRET_KEY")}`)}`,
-            'Content-Type': 'application/json',
-            'Idempotence-Key': idempotenceKey,
+        const response = await fetchWithTimeout(
+          'https://api.yookassa.ru/v3/payments',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${btoa(`1150875:${yookassaSecretKey}`)}`,
+              'Content-Type': 'application/json',
+              'Idempotence-Key': idempotenceKey,
+              'Connection': 'close', // Force connection close to avoid TLS issues
+            },
+            body: JSON.stringify(paymentPayload)
           },
-          body: JSON.stringify(paymentPayload)
-        });
+          25000 // 25 second timeout
+        );
         
         console.log('YooKassa response status:', response.status);
         
@@ -177,24 +206,25 @@ serve(async (req) => {
         lastError = error instanceof Error ? error : new Error(String(error));
         console.error(`Attempt ${attempt} failed:`, lastError.message);
         
-        // Check if it's a network/TLS error worth retrying
+        // Check if it's a retriable error
         const msg = lastError.message.toLowerCase();
-        const isNetworkError = msg.includes('connection') || 
-                               msg.includes('tls') || 
-                               msg.includes('eof') ||
-                               msg.includes('peer') ||
-                               msg.includes('reset') ||
-                               msg.includes('abort') ||
-                               msg.includes('timeout');
+        const isRetriable = msg.includes('abort') || 
+                           msg.includes('timeout') ||
+                           msg.includes('connection') || 
+                           msg.includes('tls') || 
+                           msg.includes('eof') ||
+                           msg.includes('peer') ||
+                           msg.includes('reset') ||
+                           msg.includes('network');
         
-        if (isNetworkError && attempt < 5) {
-          const delay = attempt * 2000; // 2s, 4s, 6s, 8s
-          console.log(`Network error, waiting ${delay}ms before retry...`);
+        if (isRetriable && attempt < maxAttempts) {
+          const delay = attempt * 2000;
+          console.log(`Retriable error, waiting ${delay}ms before retry...`);
           await new Promise(r => setTimeout(r, delay));
           continue;
         }
         
-        // Non-network error or last attempt - throw
+        // Non-retriable error or last attempt - throw
         throw lastError;
       }
     }
