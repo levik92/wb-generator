@@ -32,9 +32,65 @@ export default function Pricing({ appliedPromo }: PricingProps) {
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
 
-  const handlePayment = (packageName: string, amount: number, tokens: number) => {
-    // Temporary redirect to Telegram support while payment system is being fixed
-    window.open('https://t.me/wbgen_support', '_blank');
+  const handlePayment = async (packageName: string, amount: number, tokens: number) => {
+    try {
+      setLoading(packageName);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Ошибка",
+          description: "Необходимо войти в систему",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Calculate final amount and tokens with promo
+      let finalAmount = amount;
+      let finalTokens = tokens;
+
+      if (appliedPromo) {
+        if (appliedPromo.type === 'discount') {
+          finalAmount = Math.round(amount * (1 - appliedPromo.value / 100));
+        } else if (appliedPromo.type === 'tokens') {
+          finalTokens = tokens + appliedPromo.value;
+        }
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: { 
+          packageName, 
+          amount: finalAmount, 
+          tokens: finalTokens,
+          promoCode: appliedPromo?.code
+        }
+      });
+
+      if (error) {
+        console.error('Payment creation error:', error);
+        toast({
+          title: "Ошибка",
+          description: "Не удалось создать платеж. Попробуйте позже или обратитесь в поддержку.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Redirect to payment URL
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при создании платежа",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
   };
 
   if (packagesLoading || pricesLoading) {
@@ -147,7 +203,12 @@ export default function Pricing({ appliedPromo }: PricingProps) {
                   onClick={() => handlePayment(plan.name, plan.price, plan.tokens)}
                   disabled={loading === plan.name}
                 >
-                  {loading === plan.name ? "Создание платежа..." : "Выбрать план"}
+                  {loading === plan.name ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Создание платежа...
+                    </>
+                  ) : "Выбрать план"}
                 </Button>
               </CardContent>
             </Card>
