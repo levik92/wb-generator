@@ -6,110 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to call YooKassa via Cloudflare proxy or direct
-async function callYooKassa(
-  endpoint: string, 
-  payload: any, 
-  authHeader: string, 
-  idempotenceKey: string
-): Promise<{ success: boolean; data?: any; error?: string }> {
-  const proxyUrl = Deno.env.get("YOOKASSA_PROXY_URL");
-  const proxySecret = Deno.env.get("PROXY_SECRET_KEY");
-  
-  // Try Cloudflare proxy first if configured
-  if (proxyUrl && proxySecret) {
-    console.log('Using Cloudflare proxy for YooKassa request');
-    console.log('Proxy URL:', proxyUrl);
-    try {
-      const proxyResponse = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Proxy-Secret': proxySecret,
-        },
-        body: JSON.stringify({
-          endpoint,
-          method: 'POST',
-          headers: { Authorization: authHeader },
-          payload,
-          idempotenceKey,
-        }),
-      });
-      
-      console.log('Proxy response status:', proxyResponse.status);
-      
-      if (proxyResponse.ok) {
-        const data = await proxyResponse.json();
-        console.log('Proxy call successful, payment ID:', data.id);
-        return { success: true, data };
-      } else {
-        const errorText = await proxyResponse.text();
-        console.error('Proxy error response:', errorText);
-        // Fall through to direct call
-      }
-    } catch (proxyError) {
-      console.error('Proxy call failed:', proxyError instanceof Error ? proxyError.message : proxyError);
-      // Fall through to direct call
-    }
-  } else {
-    console.log('Cloudflare proxy not configured, using direct call');
-  }
-  
-  // Direct call to YooKassa (with retry for TLS issues)
-  console.log('Using direct YooKassa API call');
-  const maxAttempts = 3;
-  
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    console.log(`Direct call attempt ${attempt}/${maxAttempts}`);
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-      
-      const response = await fetch(`https://api.yookassa.ru${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': authHeader,
-          'Content-Type': 'application/json',
-          'Idempotence-Key': idempotenceKey,
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-      
-      clearTimeout(timeoutId);
-      console.log('Direct call response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        return { success: true, data };
-      } else {
-        const errorText = await response.text();
-        return { success: false, error: `API error: ${response.status} - ${errorText}` };
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`Direct call attempt ${attempt} failed:`, errorMessage);
-      
-      const isRetriable = errorMessage.toLowerCase().includes('tls') ||
-                         errorMessage.toLowerCase().includes('connection') ||
-                         errorMessage.toLowerCase().includes('eof') ||
-                         errorMessage.toLowerCase().includes('peer') ||
-                         errorMessage.toLowerCase().includes('abort');
-      
-      if (isRetriable && attempt < maxAttempts) {
-        const delay = attempt * 2000;
-        console.log(`Waiting ${delay}ms before retry...`);
-        await new Promise(r => setTimeout(r, delay));
-        continue;
-      }
-      
-      return { success: false, error: errorMessage };
-    }
-  }
-  
-  return { success: false, error: 'All attempts failed' };
-}
-
 interface PaymentRequest {
   packageName: string;
   amount?: number;
@@ -122,16 +18,24 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Log environment info at the start
   const startTime = Date.now();
   console.log('=== CREATE PAYMENT FUNCTION START ===');
   console.log('Timestamp:', new Date().toISOString());
+  console.log('Deno version:', Deno.version.deno);
+  console.log('V8 version:', Deno.version.v8);
+  console.log('TypeScript version:', Deno.version.typescript);
+  console.log('SUPABASE_URL:', Deno.env.get("SUPABASE_URL"));
+  console.log('Expected region: us-east-2 (Ohio)');
   
   try {
+    // Extract client information for security logging
     const forwardedFor = req.headers.get('x-forwarded-for');
     const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
     const userAgent = req.headers.get('user-agent');
     
     console.log('Client IP:', clientIP);
+    console.log('User Agent:', userAgent?.substring(0, 100));
     
     const supabaseServiceRole = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -144,6 +48,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
+    // Get authenticated user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       throw new Error("No authorization header");
@@ -157,8 +62,9 @@ serve(async (req) => {
     }
 
     const body: PaymentRequest = await req.json();
-    console.log('Package:', body.packageName);
+    console.log('Request body:', JSON.stringify(body));
     
+    // Fetch package info from database
     const { data: packageData, error: packageError } = await supabaseServiceRole
       .from('payment_packages')
       .select('*')
@@ -167,11 +73,14 @@ serve(async (req) => {
       .maybeSingle();
     
     if (packageError || !packageData) {
+      console.error('Package error:', packageError);
       throw new Error("Invalid package");
     }
     
     const packageInfo = { price: packageData.price, tokens: packageData.tokens };
+    console.log('Package info:', JSON.stringify(packageInfo));
 
+    // Compute final price/tokens with optional promo
     let finalAmount = packageInfo.price;
     let finalTokens = packageInfo.tokens;
     let appliedPromo: any = null;
@@ -183,10 +92,18 @@ serve(async (req) => {
         .eq('code', body.promoCode.trim().toUpperCase())
         .eq('is_active', true)
         .maybeSingle();
-      if (promoError) throw new Error('Promo validation failed');
-      if (!promo) throw new Error('Invalid promo code');
-      if (promo.valid_until && new Date(promo.valid_until) < new Date()) throw new Error('Promo code expired');
-      if (promo.max_uses && promo.current_uses >= promo.max_uses) throw new Error('Promo code usage limit reached');
+      if (promoError) {
+        throw new Error('Promo validation failed');
+      }
+      if (!promo) {
+        throw new Error('Invalid promo code');
+      }
+      if (promo.valid_until && new Date(promo.valid_until) < new Date()) {
+        throw new Error('Promo code expired');
+      }
+      if (promo.max_uses && promo.current_uses >= promo.max_uses) {
+        throw new Error('Promo code usage limit reached');
+      }
       if (promo.type === 'discount') {
         finalAmount = Math.round(packageInfo.price * (1 - (promo.value / 100)));
       } else if (promo.type === 'tokens') {
@@ -195,16 +112,15 @@ serve(async (req) => {
       appliedPromo = { id: promo.id, code: promo.code, type: promo.type, value: promo.value };
     }
 
-    console.log(`Creating payment: amount=${finalAmount}, tokens=${finalTokens}`);
+    console.log(`Creating payment: user=${user.id}, package=${body.packageName}, amount=${finalAmount}, tokens=${finalTokens}`);
 
     const idempotenceKey = `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const yookassaSecretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
-    if (!yookassaSecretKey) {
-      throw new Error('YooKassa secret key not configured');
-    }
     
     const paymentPayload = {
-      amount: { value: finalAmount.toFixed(2), currency: 'RUB' },
+      amount: {
+        value: finalAmount.toFixed(2),
+        currency: 'RUB'
+      },
       confirmation: {
         type: 'redirect',
         return_url: `${req.headers.get("origin") || 'https://wbgen.ru'}/dashboard?payment=success`
@@ -212,15 +128,22 @@ serve(async (req) => {
       capture: true,
       description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
       receipt: {
-        customer: { email: user.email },
-        items: [{
-          description: `Токены для WB Генератор: ${body.packageName}`,
-          quantity: "1.00",
-          amount: { value: finalAmount.toFixed(2), currency: 'RUB' },
-          vat_code: 1,
-          payment_mode: "full_payment",
-          payment_subject: "service"
-        }]
+        customer: {
+          email: user.email
+        },
+        items: [
+          {
+            description: `Токены для WB Генератор: ${body.packageName}`,
+            quantity: "1.00",
+            amount: {
+              value: finalAmount.toFixed(2),
+              currency: 'RUB'
+            },
+            vat_code: 1,
+            payment_mode: "full_payment",
+            payment_subject: "service"
+          }
+        ]
       },
       metadata: {
         user_id: user.id,
@@ -232,16 +155,14 @@ serve(async (req) => {
       }
     };
 
-    const yookassaAuth = `Basic ${btoa(`1150875:${yookassaSecretKey}`)}`;
-    
-    // Call YooKassa via proxy or direct
-    const result = await callYooKassa('/v3/payments', paymentPayload, yookassaAuth, idempotenceKey);
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to create payment');
+    const yookassaSecretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
+    if (!yookassaSecretKey) {
+      throw new Error('YooKassa secret key not configured');
     }
     
-    const yookassaData = result.data;
+    console.log('=== YOOKASSA API CALL START ===');
+    console.log('Target URL: https://api.yookassa.ru/v3/payments');
+    console.log('Idempotence Key:', idempotenceKey);
     
     // Single attempt with detailed logging
     let yookassaData: any = null;
@@ -319,7 +240,11 @@ serve(async (req) => {
       }
     }
     
-    console.log('Payment created successfully, ID:', yookassaData.id);
+    if (!yookassaData) {
+      throw new Error('Failed to create payment after all attempts');
+    }
+
+    console.log('=== YOOKASSA API CALL SUCCESS ===');
 
     // Store payment in database
     const { error: insertError } = await supabaseServiceRole
@@ -340,17 +265,20 @@ serve(async (req) => {
       throw new Error(`Database error: ${insertError.message}`);
     }
 
+    console.log('Payment saved to database');
+
+    // Log security event for payment creation
     await supabaseServiceRole.rpc('log_security_event', {
       user_id_param: user.id,
       event_type_param: 'payment_created',
-      event_description_param: `Payment created: ${body.packageName}, ${finalAmount} RUB`,
+      event_description_param: `Payment created for package: ${body.packageName}, amount: ${finalAmount} RUB`,
       ip_address_param: clientIP,
       user_agent_param: userAgent,
-      metadata_param: { payment_id: yookassaData.id }
+      metadata_param: { payment_id: yookassaData.id, package_name: body.packageName, promo: appliedPromo }
     });
 
     const totalDuration = Date.now() - startTime;
-    console.log(`=== SUCCESS (${totalDuration}ms) ===`);
+    console.log(`=== CREATE PAYMENT FUNCTION END (${totalDuration}ms) ===`);
 
     return new Response(JSON.stringify({ 
       payment_url: yookassaData.confirmation.confirmation_url,
@@ -362,7 +290,31 @@ serve(async (req) => {
 
   } catch (error) {
     const totalDuration = Date.now() - startTime;
-    console.error(`=== ERROR (${totalDuration}ms):`, error instanceof Error ? error.message : error);
+    console.error(`=== CREATE PAYMENT FUNCTION ERROR (${totalDuration}ms) ===`);
+    console.error('Error:', error instanceof Error ? error.message : String(error));
+    console.error('Stack:', error instanceof Error ? error.stack : 'No stack');
+    
+    // Log security event for payment error
+    try {
+      const forwardedFor = req.headers.get('x-forwarded-for');
+      const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
+      const userAgent = req.headers.get('user-agent');
+      const supabaseServiceRole = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      await supabaseServiceRole.rpc('log_security_event', {
+        user_id_param: null,
+        event_type_param: 'payment_error',
+        event_description_param: `Payment creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ip_address_param: clientIP,
+        user_agent_param: userAgent,
+        metadata_param: { error: error instanceof Error ? error.message : 'Unknown error' }
+      });
+    } catch (logError) {
+      console.error('Failed to log security event:', logError);
+    }
     
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
