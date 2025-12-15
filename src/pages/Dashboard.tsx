@@ -344,17 +344,19 @@ const Dashboard = () => {
         />
       )}
       
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - Fixed */}
       {!isMobile && (
-        <DashboardSidebar 
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          profile={profile}
-        />
+        <div className="sticky top-0 h-screen">
+          <DashboardSidebar 
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            profile={profile}
+          />
+        </div>
       )}
       
-      <div className="flex-1 flex flex-col">
-        {/* Header with Mobile Menu */}
+      <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
+        {/* Header with Mobile Menu - Scrollable on mobile */}
         <div className="flex items-center justify-between p-4 border-b md:hidden">
           <MobileMenu 
             activeTab={activeTab}
@@ -404,7 +406,7 @@ const Dashboard = () => {
           </DropdownMenu>
         </div>
         
-        {/* Desktop Header */}
+        {/* Desktop Header - Scrollable with content */}
         {!isMobile && (
           <DashboardHeader 
             profile={profile} 
