@@ -159,7 +159,7 @@ export default function Pricing({
                   <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-md">
                     1 описание = {(pricePerToken * descriptionPrice).toFixed(2)}₽
                   </div>
-                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-md">
                     1 изображение = {(pricePerToken * photoPrice).toFixed(2)}₽
                   </div>
                 </div>
