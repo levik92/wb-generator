@@ -1568,7 +1568,7 @@ export const GenerateCards = ({
               <p className="text-muted-foreground text-xs sm:text-sm flex items-start sm:items-center gap-2">
                 <Info className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 sm:mt-0 text-primary" />
                 <span className="leading-relaxed">
-                  Результат создает нейросеть. Хотите другой результат либо есть ошибки? Нажмите "перегенерировать" - это в 2 раза дешевле!
+                  Результат создает нейросеть. Не понравилось либо заметили ошибки? Нажмите "перегенерировать" - это в 5 раз дешевле!
                 </span>
               </p>
             </div>}
