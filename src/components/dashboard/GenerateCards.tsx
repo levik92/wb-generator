@@ -1218,7 +1218,7 @@ export const GenerateCards = ({
                 </label>
               </div>
               
-              {referenceImage && <div className="relative group w-24 h-24 mx-auto">
+              {referenceImage && <div className="relative group w-24 h-24">
                   <img src={URL.createObjectURL(referenceImage)} alt="Референс" className="w-full h-full aspect-square object-cover rounded-lg border" />
                   <button onClick={removeReference} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
                     <X className="w-3 h-3" />
