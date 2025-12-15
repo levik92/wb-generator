@@ -7,7 +7,6 @@ import { Copy, Users, ExternalLink, Link2, Calendar, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
-
 interface Profile {
   id: string;
   email: string;
@@ -16,7 +15,6 @@ interface Profile {
   wb_connected: boolean;
   referral_code: string;
 }
-
 interface ReferredUser {
   id: string;
   created_at: string;
@@ -24,42 +22,41 @@ interface ReferredUser {
   tokens_awarded?: number;
   referred_user_email?: string;
 }
-
 interface ReferralsProps {
   profile: Profile;
 }
-
-export const Referrals = ({ profile }: ReferralsProps) => {
+export const Referrals = ({
+  profile
+}: ReferralsProps) => {
   const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const referralLink = `${window.location.origin}/auth?ref=${profile.referral_code}`;
-
   useEffect(() => {
     loadReferredUsers();
   }, [profile.id]);
-
   const loadReferredUsers = async () => {
     try {
       setLoading(true);
       // Get referrals data
-      const { data: referrals, error } = await supabase
-        .from('referrals')
-        .select(`
+      const {
+        data: referrals,
+        error
+      } = await supabase.from('referrals').select(`
           *,
           referred:profiles!referred_id(email)
-        `)
-        .eq('referrer_id', profile.id)
-        .order('created_at', { ascending: false });
-
+        `).eq('referrer_id', profile.id).order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
 
       // Get completed referrals
-      const { data: completed, error: completedError } = await supabase
-        .from('referrals_completed')
-        .select('*')
-        .eq('referrer_id', profile.id);
-
+      const {
+        data: completed,
+        error: completedError
+      } = await supabase.from('referrals_completed').select('*').eq('referrer_id', profile.id);
       if (completedError) throw completedError;
 
       // Combine data
@@ -73,7 +70,6 @@ export const Referrals = ({ profile }: ReferralsProps) => {
           referred_user_email: ref.referred?.email || 'Пользователь'
         };
       }) || [];
-
       setReferredUsers(combinedData);
     } catch (error: any) {
       console.error('Error loading referrals:', error);
@@ -81,15 +77,13 @@ export const Referrals = ({ profile }: ReferralsProps) => {
       setLoading(false);
     }
   };
-
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
     toast({
       title: "Ссылка скопирована!",
-      description: "Поделитесь ей с друзьями",
+      description: "Поделитесь ей с друзьями"
     });
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: '2-digit',
@@ -99,9 +93,7 @@ export const Referrals = ({ profile }: ReferralsProps) => {
       minute: '2-digit'
     });
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Реферальная программа</h2>
         <p className="text-muted-foreground">
@@ -137,16 +129,8 @@ export const Referrals = ({ profile }: ReferralsProps) => {
                   Ваша реферальная ссылка:
                 </h3>
                 <div className="flex gap-2">
-                  <Input
-                    value={referralLink}
-                    readOnly
-                    className="flex-1 bg-background/80"
-                  />
-                  <Button
-                    onClick={copyReferralLink}
-                    variant="outline"
-                    className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
-                  >
+                  <Input value={referralLink} readOnly className="flex-1 bg-background/80" />
+                  <Button onClick={copyReferralLink} variant="outline" className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800">
                     <Copy className="h-4 w-4 mr-2" />
                     Копировать
                   </Button>
@@ -158,7 +142,7 @@ export const Referrals = ({ profile }: ReferralsProps) => {
                   <div className="text-3xl font-bold text-green-600 mb-1">+20</div>
                   <div className="text-sm text-green-700 font-medium">токенов за первую покупку друга</div>
                 </div>
-                <div className="text-center p-4 bg-blue-100 border-2 border-blue-300 rounded-xl shadow-sm">
+                <div className="text-center p-4 bg-blue-100 border-blue-300 rounded-xl shadow-sm border">
                   <div className="text-3xl font-bold text-blue-600 mb-1">+10</div>
                   <div className="text-sm text-blue-700 font-medium">токенов другу при регистрации</div>
                 </div>
@@ -181,20 +165,14 @@ export const Referrals = ({ profile }: ReferralsProps) => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {loading ? (
-                <div className="text-center py-8">
+              {loading ? <div className="text-center py-8">
                   <p className="text-muted-foreground">Загрузка...</p>
-                </div>
-              ) : referredUsers.length === 0 ? (
-                <div className="text-center py-12">
+                </div> : referredUsers.length === 0 ? <div className="text-center py-12">
                   <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                   <h3 className="text-lg font-semibold mb-2">Пока никто не зарегистрировался</h3>
                   <p className="text-muted-foreground">Поделитесь своей реферальной ссылкой с друзьями</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {referredUsers.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                </div> : <div className="space-y-3">
+                  {referredUsers.map(user => <div key={user.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
                           <Users className="w-5 h-5 text-blue-600" />
@@ -208,25 +186,18 @@ export const Referrals = ({ profile }: ReferralsProps) => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        {user.status === 'completed' && user.tokens_awarded ? (
-                          <Badge className="bg-green-100 text-green-700 border-green-200">
+                        {user.status === 'completed' && user.tokens_awarded ? <Badge className="bg-green-100 text-green-700 border-green-200">
                             <Gift className="w-3 h-3 mr-1" />
                             +{user.tokens_awarded} токенов
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">
+                          </Badge> : <Badge variant="secondary">
                             Ожидает покупки
-                          </Badge>
-                        )}
+                          </Badge>}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    </div>)}
+                </div>}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
