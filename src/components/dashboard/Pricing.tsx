@@ -121,7 +121,7 @@ export default function Pricing({
       <Alert className="border-primary/30 bg-primary/5">
         <AlertCircle className="h-4 w-4 text-primary" />
         <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-          <span className="text-sm leading-relaxed text-gray-800">
+          <span className="text-sm leading-relaxed text-gray-700">
             Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы создадим платёж для вас вручную и поможем пополнить баланс.
           </span>
           <Button size="sm" className="shrink-0 gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-0 w-full sm:w-auto" onClick={() => window.open('https://t.me/wbgen_support', '_blank')}>
