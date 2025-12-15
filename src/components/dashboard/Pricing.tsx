@@ -8,7 +8,6 @@ import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 interface PromoCodeInfo {
   id: string;
   code: string;
@@ -19,30 +18,38 @@ interface PromoCodeInfo {
   valid_until: string | null;
   is_active: boolean;
 }
-
 interface PricingProps {
   appliedPromo?: PromoCodeInfo | null;
 }
-
-export default function Pricing({ appliedPromo }: PricingProps) {
+export default function Pricing({
+  appliedPromo
+}: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
-  const { data: packages, isLoading: packagesLoading } = usePaymentPackages();
-  const { data: generationPrices, isLoading: pricesLoading } = useGenerationPricing();
+  const {
+    data: packages,
+    isLoading: packagesLoading
+  } = usePaymentPackages();
+  const {
+    data: generationPrices,
+    isLoading: pricesLoading
+  } = useGenerationPricing();
 
   // Get pricing for calculations
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
-
   const handlePayment = async (packageName: string, amount: number, tokens: number) => {
     try {
       setLoading(packageName);
-      
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         toast({
           title: "Ошибка",
           description: "Необходимо войти в систему",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -50,7 +57,6 @@ export default function Pricing({ appliedPromo }: PricingProps) {
       // Calculate final amount and tokens with promo
       let finalAmount = amount;
       let finalTokens = tokens;
-
       if (appliedPromo) {
         if (appliedPromo.type === 'discount') {
           finalAmount = Math.round(amount * (1 - appliedPromo.value / 100));
@@ -58,22 +64,23 @@ export default function Pricing({ appliedPromo }: PricingProps) {
           finalTokens = tokens + appliedPromo.value;
         }
       }
-
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: { 
-          packageName, 
-          amount: finalAmount, 
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('create-payment', {
+        body: {
+          packageName,
+          amount: finalAmount,
           tokens: finalTokens,
           promoCode: appliedPromo?.code
         }
       });
-
       if (error) {
         console.error('Payment creation error:', error);
         toast({
           title: "Ошибка",
           description: "Не удалось создать платеж",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
@@ -87,31 +94,23 @@ export default function Pricing({ appliedPromo }: PricingProps) {
       toast({
         title: "Ошибка",
         description: "Произошла ошибка при создании платежа",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(null);
     }
   };
-
   if (packagesLoading || pricesLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
+    return <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
-
   if (!packages || packages.length === 0) {
-    return (
-      <div className="text-center py-12">
+    return <div className="text-center py-12">
         <p className="text-muted-foreground">Тарифные планы временно недоступны</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Тарифные планы</h2>
         <p className="text-muted-foreground">
@@ -122,14 +121,10 @@ export default function Pricing({ appliedPromo }: PricingProps) {
       <Alert className="border-primary/30 bg-primary/5">
         <AlertCircle className="h-4 w-4 text-primary" />
         <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-          <span className="text-sm leading-relaxed">
+          <span className="text-sm leading-relaxed text-gray-50">
             Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы создадим платёж для вас вручную и поможем пополнить баланс.
           </span>
-          <Button 
-            size="sm" 
-            className="shrink-0 gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-0 w-full sm:w-auto"
-            onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
-          >
+          <Button size="sm" className="shrink-0 gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-0 w-full sm:w-auto" onClick={() => window.open('https://t.me/wbgen_support', '_blank')}>
             <MessageCircle className="h-4 w-4" />
             Поддержка
           </Button>
@@ -138,34 +133,22 @@ export default function Pricing({ appliedPromo }: PricingProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {packages.map((plan, index) => {
-          const isPopular = index === 1; // Mark middle plan as popular
-          const pricePerToken = plan.price / plan.tokens;
-          const photoCount = Math.floor(plan.tokens / photoPrice);
-          const descCount = Math.floor(plan.tokens / descriptionPrice);
-
-          return (
-            <Card key={plan.id} className={isPopular ? "border-primary" : ""}>
+        const isPopular = index === 1; // Mark middle plan as popular
+        const pricePerToken = plan.price / plan.tokens;
+        const photoCount = Math.floor(plan.tokens / photoPrice);
+        const descCount = Math.floor(plan.tokens / descriptionPrice);
+        return <Card key={plan.id} className={isPopular ? "border-primary" : ""}>
               <CardHeader>
-                {isPopular && (
-                  <Badge className="w-fit mb-2">Популярный</Badge>
-                )}
+                {isPopular && <Badge className="w-fit mb-2">Популярный</Badge>}
                 <CardTitle>{plan.name}</CardTitle>
                 <div className="text-3xl font-bold">
-                  {appliedPromo?.type === 'discount' 
-                    ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` 
-                    : `${plan.price}₽`
-                  }
-                  {appliedPromo?.type === 'discount' && (
-                    <span className="text-lg text-muted-foreground line-through ml-2">
+                  {appliedPromo?.type === 'discount' ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` : `${plan.price}₽`}
+                  {appliedPromo?.type === 'discount' && <span className="text-lg text-muted-foreground line-through ml-2">
                       {plan.price}₽
-                    </span>
-                  )}
+                    </span>}
                 </div>
                 <CardDescription>
-                  {appliedPromo?.type === 'tokens' 
-                    ? `${plan.tokens + appliedPromo.value} токенов (+${appliedPromo.value} бонусных)`
-                    : `${plan.tokens} токенов`
-                  }
+                  {appliedPromo?.type === 'tokens' ? `${plan.tokens + appliedPromo.value} токенов (+${appliedPromo.value} бонусных)` : `${plan.tokens} токенов`}
                 </CardDescription>
                 <div className="text-sm text-muted-foreground mt-2">
                   <strong>{pricePerToken.toFixed(2)}₽</strong> за токен
@@ -197,8 +180,7 @@ export default function Pricing({ appliedPromo }: PricingProps) {
                     <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
                     <span className="text-sm">Поддержка в чате</span>
                   </div>
-                  {index === 2 && (
-                    <>
+                  {index === 2 && <>
                       <div className="flex items-center">
                         <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
                         <span className="text-sm">Персональный менеджер</span>
@@ -207,27 +189,18 @@ export default function Pricing({ appliedPromo }: PricingProps) {
                         <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
                         <span className="text-sm">API доступ</span>
                       </div>
-                    </>
-                  )}
-                  {index === 1 && (
-                    <div className="flex items-center">
+                    </>}
+                  {index === 1 && <div className="flex items-center">
                       <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
                       <span className="text-sm">Приоритетная поддержка</span>
-                    </div>
-                  )}
+                    </div>}
                 </div>
-                <Button 
-                  className="w-full" 
-                  onClick={() => handlePayment(plan.name, plan.price, plan.tokens)}
-                  disabled={loading === plan.name}
-                >
+                <Button className="w-full" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name}>
                   {loading === plan.name ? "Создание платежа..." : "Выбрать план"}
                 </Button>
               </CardContent>
-            </Card>
-          );
-        })}
+            </Card>;
+      })}
       </div>
-    </div>
-  );
+    </div>;
 }
