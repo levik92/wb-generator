@@ -119,7 +119,7 @@ export default function Pricing({
       </div>
 
       <Alert className="border-primary/30 bg-primary/5">
-        <AlertCircle className="h-4 w-4 text-wb-purple" />
+        <AlertCircle className="h-4 w-4" style={{ color: '#9333ea' }} />
         <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
           <span className="text-sm leading-relaxed text-gray-600">
             Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы создадим платёж для вас вручную и поможем пополнить баланс.
