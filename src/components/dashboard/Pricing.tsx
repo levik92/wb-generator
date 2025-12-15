@@ -119,7 +119,9 @@ export default function Pricing({
       </div>
 
       <Alert className="border-primary/30 bg-primary/5">
-        <AlertCircle className="h-4 w-4" style={{ color: '#9333ea' }} />
+        <AlertCircle className="h-4 w-4" style={{
+        color: '#9333ea'
+      }} />
         <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
           <span className="text-sm leading-relaxed text-gray-600">
             Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы создадим платёж для вас вручную и поможем пополнить баланс.
@@ -154,7 +156,7 @@ export default function Pricing({
                   <strong>{pricePerToken.toFixed(2)}₽</strong> за токен
                 </div>
                 <div className="mt-3 space-y-2">
-                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-md">
                     1 описание = {(pricePerToken * descriptionPrice).toFixed(2)}₽
                   </div>
                   <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-lg">
