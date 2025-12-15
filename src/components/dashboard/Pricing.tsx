@@ -71,7 +71,7 @@ export default function Pricing({ appliedPromo }: PricingProps) {
         console.error('Payment creation error:', error);
         toast({
           title: "Ошибка",
-          description: "Не удалось создать платеж. Попробуйте позже или обратитесь в поддержку.",
+          description: "Не удалось создать платеж",
           variant: "destructive",
         });
         return;
@@ -203,12 +203,7 @@ export default function Pricing({ appliedPromo }: PricingProps) {
                   onClick={() => handlePayment(plan.name, plan.price, plan.tokens)}
                   disabled={loading === plan.name}
                 >
-                  {loading === plan.name ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Создание платежа...
-                    </>
-                  ) : "Выбрать план"}
+                  {loading === plan.name ? "Создание платежа..." : "Выбрать план"}
                 </Button>
               </CardContent>
             </Card>

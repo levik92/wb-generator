@@ -13,29 +13,36 @@ interface PaymentRequest {
   promoCode?: string;
 }
 
+// Custom fetch with timeout using AbortController
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Log environment info at the start
-  const startTime = Date.now();
-  console.log('=== CREATE PAYMENT FUNCTION START ===');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Deno version:', Deno.version.deno);
-  console.log('V8 version:', Deno.version.v8);
-  console.log('TypeScript version:', Deno.version.typescript);
-  console.log('SUPABASE_URL:', Deno.env.get("SUPABASE_URL"));
-  console.log('Expected region: us-east-2 (Ohio)');
-  
   try {
+    console.log('Create payment request received');
+    
     // Extract client information for security logging
     const forwardedFor = req.headers.get('x-forwarded-for');
     const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
     const userAgent = req.headers.get('user-agent');
-    
-    console.log('Client IP:', clientIP);
-    console.log('User Agent:', userAgent?.substring(0, 100));
     
     const supabaseServiceRole = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -62,7 +69,6 @@ serve(async (req) => {
     }
 
     const body: PaymentRequest = await req.json();
-    console.log('Request body:', JSON.stringify(body));
     
     // Fetch package info from database
     const { data: packageData, error: packageError } = await supabaseServiceRole
@@ -73,12 +79,10 @@ serve(async (req) => {
       .maybeSingle();
     
     if (packageError || !packageData) {
-      console.error('Package error:', packageError);
       throw new Error("Invalid package");
     }
     
     const packageInfo = { price: packageData.price, tokens: packageData.tokens };
-    console.log('Package info:', JSON.stringify(packageInfo));
 
     // Compute final price/tokens with optional promo
     let finalAmount = packageInfo.price;
@@ -112,7 +116,7 @@ serve(async (req) => {
       appliedPromo = { id: promo.id, code: promo.code, type: promo.type, value: promo.value };
     }
 
-    console.log(`Creating payment: user=${user.id}, package=${body.packageName}, amount=${finalAmount}, tokens=${finalTokens}`);
+    console.log(`Creating payment for user ${user.id}, package: ${body.packageName}, amount: ${finalAmount}`);
 
     const idempotenceKey = `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
@@ -155,51 +159,38 @@ serve(async (req) => {
       }
     };
 
+    console.log('Sending request to YooKassa API...');
+    
     const yookassaSecretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
     if (!yookassaSecretKey) {
       throw new Error('YooKassa secret key not configured');
     }
     
-    console.log('=== YOOKASSA API CALL START ===');
-    console.log('Target URL: https://api.yookassa.ru/v3/payments');
-    console.log('Idempotence Key:', idempotenceKey);
-    
-    // Single attempt with detailed logging
+    // Try multiple attempts with timeout
     let yookassaData: any = null;
+    let lastError: Error | null = null;
     const maxAttempts = 3;
     
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const attemptStart = Date.now();
-      console.log(`\n--- Attempt ${attempt}/${maxAttempts} ---`);
-      console.log('Attempt start time:', new Date().toISOString());
-      
       try {
-        // Create AbortController with 30 second timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          console.log('Request timeout triggered after 30s');
-          controller.abort();
-        }, 30000);
+        console.log(`YooKassa API attempt ${attempt}/${maxAttempts}`);
         
-        console.log('Sending fetch request...');
-        
-        const response = await fetch('https://api.yookassa.ru/v3/payments', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${btoa(`1150875:${yookassaSecretKey}`)}`,
-            'Content-Type': 'application/json',
-            'Idempotence-Key': idempotenceKey,
+        const response = await fetchWithTimeout(
+          'https://api.yookassa.ru/v3/payments',
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${btoa(`1150875:${yookassaSecretKey}`)}`,
+              'Content-Type': 'application/json',
+              'Idempotence-Key': idempotenceKey,
+              'Connection': 'close', // Force connection close to avoid TLS issues
+            },
+            body: JSON.stringify(paymentPayload)
           },
-          body: JSON.stringify(paymentPayload),
-          signal: controller.signal,
-        });
+          25000 // 25 second timeout
+        );
         
-        clearTimeout(timeoutId);
-        
-        const attemptDuration = Date.now() - attemptStart;
-        console.log(`Response received in ${attemptDuration}ms`);
-        console.log('Response status:', response.status);
-        console.log('Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
+        console.log('YooKassa response status:', response.status);
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -208,43 +199,39 @@ serve(async (req) => {
         }
         
         yookassaData = await response.json();
-        console.log('YooKassa payment created successfully!');
-        console.log('Payment ID:', yookassaData.id);
-        console.log('Confirmation URL:', yookassaData.confirmation?.confirmation_url);
-        break; // Success
+        console.log('YooKassa payment created successfully:', yookassaData.id);
+        break; // Success, exit loop
         
       } catch (error) {
-        const attemptDuration = Date.now() - attemptStart;
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`Attempt ${attempt} failed after ${attemptDuration}ms:`, errorMessage);
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`Attempt ${attempt} failed:`, lastError.message);
         
-        // Check if retriable
-        const isRetriable = errorMessage.toLowerCase().includes('abort') ||
-                           errorMessage.toLowerCase().includes('timeout') ||
-                           errorMessage.toLowerCase().includes('connection') ||
-                           errorMessage.toLowerCase().includes('tls') ||
-                           errorMessage.toLowerCase().includes('eof') ||
-                           errorMessage.toLowerCase().includes('peer') ||
-                           errorMessage.toLowerCase().includes('reset') ||
-                           errorMessage.toLowerCase().includes('network');
+        // Check if it's a retriable error
+        const msg = lastError.message.toLowerCase();
+        const isRetriable = msg.includes('abort') || 
+                           msg.includes('timeout') ||
+                           msg.includes('connection') || 
+                           msg.includes('tls') || 
+                           msg.includes('eof') ||
+                           msg.includes('peer') ||
+                           msg.includes('reset') ||
+                           msg.includes('network');
         
         if (isRetriable && attempt < maxAttempts) {
-          const delay = attempt * 3000; // 3s, 6s delays
-          console.log(`Retriable error detected. Waiting ${delay}ms before retry...`);
+          const delay = attempt * 2000;
+          console.log(`Retriable error, waiting ${delay}ms before retry...`);
           await new Promise(r => setTimeout(r, delay));
           continue;
         }
         
-        // Throw on last attempt or non-retriable error
-        throw error;
+        // Non-retriable error or last attempt - throw
+        throw lastError;
       }
     }
     
     if (!yookassaData) {
-      throw new Error('Failed to create payment after all attempts');
+      throw lastError || new Error('Failed to create payment after all attempts');
     }
-
-    console.log('=== YOOKASSA API CALL SUCCESS ===');
 
     // Store payment in database
     const { error: insertError } = await supabaseServiceRole
@@ -265,8 +252,6 @@ serve(async (req) => {
       throw new Error(`Database error: ${insertError.message}`);
     }
 
-    console.log('Payment saved to database');
-
     // Log security event for payment creation
     await supabaseServiceRole.rpc('log_security_event', {
       user_id_param: user.id,
@@ -277,9 +262,6 @@ serve(async (req) => {
       metadata_param: { payment_id: yookassaData.id, package_name: body.packageName, promo: appliedPromo }
     });
 
-    const totalDuration = Date.now() - startTime;
-    console.log(`=== CREATE PAYMENT FUNCTION END (${totalDuration}ms) ===`);
-
     return new Response(JSON.stringify({ 
       payment_url: yookassaData.confirmation.confirmation_url,
       payment_id: yookassaData.id
@@ -289,10 +271,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    const totalDuration = Date.now() - startTime;
-    console.error(`=== CREATE PAYMENT FUNCTION ERROR (${totalDuration}ms) ===`);
-    console.error('Error:', error instanceof Error ? error.message : String(error));
-    console.error('Stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('Error in create-payment function:', error);
     
     // Log security event for payment error
     try {
