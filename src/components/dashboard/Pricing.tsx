@@ -141,7 +141,7 @@ export default function Pricing({
         const descCount = Math.floor(plan.tokens / descriptionPrice);
         return <Card key={plan.id} className={isPopular ? "border-primary" : ""}>
               <CardHeader>
-                {isPopular && <Badge className="w-fit mb-2 rounded-md">Популярный</Badge>}
+                {isPopular && <Badge className="w-fit mb-2 rounded-sm">Популярный</Badge>}
                 <CardTitle>{plan.name}</CardTitle>
                 <div className="text-3xl font-bold">
                   {appliedPromo?.type === 'discount' ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` : `${plan.price}₽`}
