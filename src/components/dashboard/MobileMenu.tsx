@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, Zap, Image, FileText, History, CreditCard, Users, Settings, Tags, Newspaper, GraduationCap, Video, Handshake } from "lucide-react";
+import { Menu, Zap, Image, FileText, History, CreditCard, Users, Settings, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
 interface Profile {
   id: string;
   email: string;
@@ -125,16 +124,6 @@ export const MobileMenu = ({
             })}
             </div>
           </nav>
-
-          {/* Partner Link */}
-          <div className="p-4 border-t">
-            <Link to="/partner" onClick={() => setOpen(false)}>
-              <Button variant="outline" className="w-full justify-start border-wb-purple/30 text-wb-purple hover:bg-wb-purple/10">
-                <Handshake className="w-4 h-4 mr-2" />
-                Партнерам
-              </Button>
-            </Link>
-          </div>
 
           {/* WB Connection Status */}
           <div className="p-4 pt-0">
