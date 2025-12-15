@@ -3,10 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PromoCodeInfo {
   id: string;
@@ -117,6 +118,24 @@ export default function Pricing({ appliedPromo }: PricingProps) {
           Выберите подходящий пакет токенов
         </p>
       </div>
+
+      <Alert className="border-primary/30 bg-primary/5">
+        <AlertCircle className="h-4 w-4 text-primary" />
+        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <span className="text-sm">
+            Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы поможем пополнить баланс вручную.
+          </span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="shrink-0 gap-2"
+            onClick={() => window.open('https://t.me/wbgenerator_support', '_blank')}
+          >
+            <MessageCircle className="h-4 w-4" />
+            Поддержка
+          </Button>
+        </AlertDescription>
+      </Alert>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {packages.map((plan, index) => {
