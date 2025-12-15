@@ -246,7 +246,7 @@ export const History = ({
 
       <Alert className="border-purple-200 bg-purple-50 shadow-none">
         <Info className="h-4 w-4 text-purple-600 flex-shrink-0" />
-        <AlertDescription className="text-sm leading-relaxed text-gray-500">
+        <AlertDescription className="text-sm leading-relaxed text-gray-600">
           Данные генераций хранятся <span className="font-semibold">1 месяц</span> с момента создания и затем автоматически удаляются.
         </AlertDescription>
       </Alert>
