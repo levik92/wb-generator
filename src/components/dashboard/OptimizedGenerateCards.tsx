@@ -8,7 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ALLOWED_EXTENSIONS = ['JPG', 'PNG', 'WebP'];
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getEdgeFunctionName, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
@@ -37,6 +42,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
   const [autoOptimize, setAutoOptimize] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentJob, setCurrentJob] = useState<JobStatus | null>(null);
   const [progress, setProgress] = useState(0);
@@ -119,19 +125,56 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
     };
   }, []);
 
+  // Validate files for size and format
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return { valid: false, error: `"${file.name}" — неподдерживаемый формат. Разрешены: ${ALLOWED_EXTENSIONS.join(', ')}` };
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      return { valid: false, error: `"${file.name}" (${sizeMB} МБ) — превышает лимит 10 МБ` };
+    }
+    return { valid: true };
+  };
+
+  // Check if all current files are valid
+  const getValidationErrors = useCallback(() => {
+    const errors: string[] = [];
+    files.forEach(file => {
+      const result = validateFile(file);
+      if (!result.valid && result.error) {
+        errors.push(result.error);
+      }
+    });
+    if (referenceImage) {
+      const result = validateFile(referenceImage);
+      if (!result.valid && result.error) {
+        errors.push(result.error);
+      }
+    }
+    return errors;
+  }, [files, referenceImage]);
+
+  // Update errors when files change
+  useEffect(() => {
+    setFileErrors(getValidationErrors());
+  }, [getValidationErrors]);
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
-    const validFiles = uploadedFiles.filter(file => file.type.startsWith('image/'));
     
-    if (validFiles.length !== uploadedFiles.length) {
+    // Filter and validate files
+    const validFormatFiles = uploadedFiles.filter(file => ALLOWED_TYPES.includes(file.type));
+    
+    if (validFormatFiles.length !== uploadedFiles.length) {
       toast({
         title: "Некорректные файлы",
-        description: "Можно загружать только изображения",
+        description: `Разрешены только форматы: ${ALLOWED_EXTENSIONS.join(', ')}`,
         variant: "destructive",
       });
     }
     
-    const combined = [...files, ...validFiles];
+    const combined = [...files, ...validFormatFiles];
     if (combined.length > 3) {
       toast({
         title: "Превышен лимит",
@@ -146,7 +189,15 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
 
   const handleReferenceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast({
+          title: "Некорректный формат",
+          description: `Разрешены только форматы: ${ALLOWED_EXTENSIONS.join(', ')}`,
+          variant: "destructive",
+        });
+        return;
+      }
       setReferenceImage(file);
     }
   };
@@ -376,7 +427,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
               <Input
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileUpload}
                 disabled={isGenerating}
                 className="cursor-pointer"
@@ -418,7 +469,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
               </p>
               <Input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleReferenceUpload}
                 disabled={isGenerating}
                 className="cursor-pointer"
@@ -449,27 +500,47 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-muted-foreground">
-              Стоимость: <Badge variant="secondary">{priceLoading ? "..." : `${totalCost} токенов`}</Badge>
+          {/* Validation Errors Alert */}
+          {fileErrors.length > 0 && (
+            <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <p className="font-medium mb-1">Исправьте ошибки перед генерацией:</p>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  {fileErrors.map((error, i) => (
+                    <li key={i}>{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex flex-col gap-3 pt-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Стоимость: <Badge variant="secondary">{priceLoading ? "..." : `${totalCost} токенов`}</Badge>
+              </div>
+              <Button
+                onClick={handleGenerate}
+                disabled={isGenerating || profile.tokens_balance < totalCost || priceLoading || fileErrors.length > 0}
+                className="bg-wb-purple hover:bg-wb-purple-dark"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Генерация...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Сгенерировать карточки
+                  </>
+                )}
+              </Button>
             </div>
-            <Button
-              onClick={handleGenerate}
-              disabled={isGenerating || profile.tokens_balance < totalCost || priceLoading}
-              className="bg-wb-purple hover:bg-wb-purple-dark"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Генерация...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  Сгенерировать карточки
-                </>
-              )}
-            </Button>
+            <p className="text-xs text-muted-foreground text-right">
+              Макс. размер файла: 10 МБ • Форматы: {ALLOWED_EXTENSIONS.join(', ')}
+            </p>
           </div>
         </CardContent>
       </Card>
