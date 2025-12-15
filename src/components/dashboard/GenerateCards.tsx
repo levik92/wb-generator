@@ -100,7 +100,10 @@ export const GenerateCards = ({
     productName: string;
     category: string;
     description: string;
-    productImages: Array<{ url: string; name: string }>;
+    productImages: Array<{
+      url: string;
+      name: string;
+    }>;
   } | null>(null);
   const {
     toast
@@ -174,9 +177,12 @@ export const GenerateCards = ({
         if (completedTasks.length > 0) {
           // Restore job data for regeneration (but don't fill form fields)
           setCurrentJobId(latestJob.id);
-          
+
           // Save job data for regeneration/editing without showing in form
-          const productImages = latestJob.product_images as Array<{ url: string; name: string }> || [];
+          const productImages = latestJob.product_images as Array<{
+            url: string;
+            name: string;
+          }> || [];
           setJobData({
             productName: latestJob.product_name || '',
             category: latestJob.category || '',
@@ -202,9 +208,12 @@ export const GenerateCards = ({
       } else if (latestJob && latestJob.status === 'processing') {
         // Restore job data for active generation
         setCurrentJobId(latestJob.id);
-        
+
         // Save job data but keep form fields empty during processing
-        const productImages = latestJob.product_images as Array<{ url: string; name: string }> || [];
+        const productImages = latestJob.product_images as Array<{
+          url: string;
+          name: string;
+        }> || [];
         setJobData({
           productName: latestJob.product_name || '',
           category: latestJob.category || '',
@@ -295,14 +304,12 @@ export const GenerateCards = ({
   const removeFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
   };
-
   const handleReferenceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setReferenceImage(file);
     }
   };
-
   const removeReference = () => {
     setReferenceImage(null);
   };
@@ -517,14 +524,12 @@ export const GenerateCards = ({
         setJobStatus('Загрузка референса дизайна...');
         const fileExt = referenceImage.name.split('.').pop();
         const fileName = `${profile.id}/reference_${Date.now()}.${fileExt}`;
-        
         const {
           data: uploadData,
           error: uploadError
         } = await supabase.storage.from('product-images').upload(fileName, referenceImage, {
           upsert: true
         });
-        
         if (uploadError) {
           console.error('Reference upload error:', uploadError);
           toast({
@@ -725,7 +730,7 @@ export const GenerateCards = ({
 
       // Try to get source image from jobData or uploadedProductImages
       let sourceImageUrl = null;
-      
+
       // First try jobData
       if (jobData?.productImages && jobData.productImages.length > 0) {
         sourceImageUrl = jobData.productImages[0].url;
@@ -736,17 +741,15 @@ export const GenerateCards = ({
       }
       // Last resort: try to fetch from current job in database
       else if (currentJobId) {
-        const { data: job } = await supabase
-          .from('generation_jobs')
-          .select('product_images')
-          .eq('id', currentJobId)
-          .single();
-        
+        const {
+          data: job
+        } = await supabase.from('generation_jobs').select('product_images').eq('id', currentJobId).single();
         if (job?.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
-          sourceImageUrl = (job.product_images as Array<{ url: string }>)[0].url;
+          sourceImageUrl = (job.product_images as Array<{
+            url: string;
+          }>)[0].url;
         }
       }
-      
       if (!sourceImageUrl) {
         throw new Error('Оригинальное изображение недоступно');
       }
@@ -755,11 +758,9 @@ export const GenerateCards = ({
       const productNameToUse = jobData?.productName || productName;
       const categoryToUse = (jobData?.category || category || 'товар').trim() || 'товар';
       const descriptionToUse = jobData?.description || description;
-      
       if (!productNameToUse?.trim()) {
         throw new Error('Название товара недоступно');
       }
-      
       const {
         data,
         error
@@ -910,14 +911,12 @@ export const GenerateCards = ({
       // Use dynamic model-based function name for editing
       const editFunction = getImageEdgeFunctionName('edit-card', activeModel);
       console.log('[GenerateCards] Edit - Active model:', activeModel, '| Function:', editFunction);
-      
+
       // Try to get product name from jobData or form field
       const productNameToUse = jobData?.productName || productName;
-      
       if (!productNameToUse) {
         throw new Error('Название товара недоступно');
       }
-      
       const {
         data,
         error
@@ -1215,32 +1214,16 @@ export const GenerateCards = ({
                       PNG, JPG, JPEG
                     </p>
                   </div>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*" 
-                    onChange={handleReferenceUpload} 
-                    disabled={generating}
-                  />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleReferenceUpload} disabled={generating} />
                 </label>
               </div>
               
-              {referenceImage && (
-                <div className="relative group w-24 h-24 mx-auto">
-                  <img
-                    src={URL.createObjectURL(referenceImage)}
-                    alt="Референс"
-                    className="w-full h-full aspect-square object-cover rounded-lg border"
-                  />
-                  <button
-                    onClick={removeReference}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    disabled={generating}
-                  >
+              {referenceImage && <div className="relative group w-24 h-24 mx-auto">
+                  <img src={URL.createObjectURL(referenceImage)} alt="Референс" className="w-full h-full aspect-square object-cover rounded-lg border" />
+                  <button onClick={removeReference} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
                     <X className="w-3 h-3" />
                   </button>
-                </div>
-              )}
+                </div>}
             </div>
           </CardContent>
         </Card>
@@ -1309,23 +1292,15 @@ export const GenerateCards = ({
             <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
-                <Checkbox 
-                  id="autoDescription" 
-                  checked={autoDescription} 
-                  onCheckedChange={(checked) => {
-                    setAutoDescription(!!checked);
-                    if (checked) {
-                      setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
-                    } else {
-                      setDescription("");
-                    }
-                  }}
-                  disabled={generating}
-                />
-                <Label 
-                  htmlFor="autoDescription" 
-                  className="text-sm font-normal cursor-pointer"
-                >
+                <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
+                setAutoDescription(!!checked);
+                if (checked) {
+                  setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
+                } else {
+                  setDescription("");
+                }
+              }} disabled={generating} />
+                <Label htmlFor="autoDescription" className="text-sm font-normal cursor-pointer">
                   Придумай сам
                 </Label>
               </div>
@@ -1466,9 +1441,9 @@ export const GenerateCards = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button size="sm" variant="outline" onClick={e => {
-                      e.stopPropagation();
-                      openEditDialog(image, index);
-                    }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                        e.stopPropagation();
+                        openEditDialog(image, index);
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
                               {editingCards.has(`edit_${image.id}_${index}`) ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
                                   <span className="md:hidden ml-1">Редактируется...</span>
@@ -1488,9 +1463,9 @@ export const GenerateCards = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button size="sm" variant="outline" onClick={e => {
-                      e.stopPropagation();
-                      regenerateCard(image, index);
-                    }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                        e.stopPropagation();
+                        regenerateCard(image, index);
+                      }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
                               {isRegenerating ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
                                   <span className="md:hidden ml-1">Перегенерация...</span>
@@ -1510,9 +1485,9 @@ export const GenerateCards = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button size="sm" variant="outline" onClick={async e => {
-                      e.stopPropagation();
-                      await downloadSingle(index);
-                    }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                        e.stopPropagation();
+                        await downloadSingle(index);
+                      }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
                               <Download className="w-3 h-3 md:w-4 md:h-4" />
                               <span className="md:hidden ml-1">Скачать</span>
                             </Button>
@@ -1528,7 +1503,7 @@ export const GenerateCards = ({
             </div>
             <div className="mt-4 pt-4 text-xs text-muted-foreground border-t flex items-center justify-center gap-2">
               <Info className="w-4 h-4 flex-shrink-0" />
-              <span className="text-center">Перегенерация 1 изображения: <span className="font-bold">{priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}</span>. Редактирование 1 изображения: <span className="font-bold">{priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}</span>.</span>
+              <span className="text-center">Перегенерация 1 изображения: <span className="font-bold">{priceLoading ? '...' : photoRegenerationPrice} токен{photoRegenerationPrice !== 1 ? 'ов' : ''}</span>​а <span className="font-bold">{priceLoading ? '...' : photoEditPrice} токен{photoEditPrice !== 1 ? 'ов' : 'а'}</span>.</span>
             </div>
           </CardContent>
         </Card>}
