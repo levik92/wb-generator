@@ -138,7 +138,7 @@ export const Referrals = ({
               </div>
               
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-green-100 border-2 border-green-300 rounded-xl shadow-sm">
+                <div className="text-center p-4 bg-green-100 border-green-300 rounded-xl shadow-sm border">
                   <div className="text-3xl font-bold text-green-600 mb-1">+20</div>
                   <div className="text-sm text-green-700 font-medium">токенов за первую покупку друга</div>
                 </div>
