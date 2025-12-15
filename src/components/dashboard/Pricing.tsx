@@ -121,15 +121,14 @@ export default function Pricing({ appliedPromo }: PricingProps) {
 
       <Alert className="border-primary/30 bg-primary/5">
         <AlertCircle className="h-4 w-4 text-primary" />
-        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <span className="text-sm">
-            Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы поможем пополнить баланс вручную.
+        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
+          <span className="text-sm leading-relaxed">
+            Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы создадим платёж для вас вручную и поможем пополнить баланс.
           </span>
           <Button 
-            variant="outline" 
             size="sm" 
-            className="shrink-0 gap-2"
-            onClick={() => window.open('https://t.me/wbgenerator_support', '_blank')}
+            className="shrink-0 gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-0 w-full sm:w-auto"
+            onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
           >
             <MessageCircle className="h-4 w-4" />
             Поддержка
