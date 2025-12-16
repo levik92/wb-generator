@@ -29,7 +29,7 @@ import News from "@/pages/News";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { TutorialDialog } from "@/components/dashboard/TutorialDialog";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -390,6 +390,13 @@ const Dashboard = () => {
                 </p>
               </div>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => navigate('/partner')}
+                className="hover:bg-wb-purple/10"
+              >
+                <Handshake className="mr-2 h-4 w-4" />
+                <span>Партнёрам</span>
+              </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => setActiveTab('settings')}
                 className="hover:bg-wb-purple/10"
