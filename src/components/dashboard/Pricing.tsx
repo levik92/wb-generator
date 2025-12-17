@@ -119,7 +119,7 @@ export default function Pricing({
       </div>
 
       <Alert className="border-primary/30 bg-primary/5">
-        <AlertCircle className="h-4 w-4" style={{
+        <AlertCircle className="h-4 w-4 top-1/2 -translate-y-1/2" style={{
         color: '#9333ea'
       }} />
         <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
