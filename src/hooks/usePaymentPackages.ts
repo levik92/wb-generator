@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export interface PaymentPackage {
   id: string;
@@ -12,6 +13,29 @@ export interface PaymentPackage {
 }
 
 export const usePaymentPackages = () => {
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    // Wait for auth to be ready before enabling the query
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAuthReady(true);
+      }
+    };
+    
+    checkAuth();
+
+    // Also listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setIsAuthReady(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return useQuery({
     queryKey: ['payment-packages'],
     queryFn: async () => {
@@ -24,6 +48,9 @@ export const usePaymentPackages = () => {
       if (error) throw error;
       return data as PaymentPackage[];
     },
+    enabled: isAuthReady, // Only run query when auth is ready
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 3, // Retry up to 3 times on failure
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 };
