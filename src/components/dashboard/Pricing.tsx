@@ -7,7 +7,7 @@ import { Check, Loader2, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
 interface PromoCodeInfo {
   id: string;
   code: string;
@@ -118,20 +118,18 @@ export default function Pricing({
         </p>
       </div>
 
-      <Alert className="border-primary/30 bg-primary/5">
-        <AlertCircle className="h-4 w-4 top-1/2 -translate-y-1/2" style={{
-        color: '#9333ea'
-      }} />
-        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-          <span className="text-sm leading-relaxed text-gray-600">
+      <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" style={{ color: '#9333ea' }} />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4 flex-1">
+          <span className="text-sm leading-relaxed text-muted-foreground">
             Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Мы создадим платёж для вас вручную и поможем пополнить баланс.
           </span>
           <Button size="sm" className="shrink-0 gap-2 bg-primary/20 hover:bg-primary/30 text-primary border-0 w-full sm:w-auto" onClick={() => window.open('https://t.me/wbgen_support', '_blank')}>
             <MessageCircle className="h-4 w-4" />
             Поддержка
           </Button>
-        </AlertDescription>
-      </Alert>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {packages.map((plan, index) => {
