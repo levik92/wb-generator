@@ -43,10 +43,39 @@ serve(async (req) => {
       .single();
 
     if (taskError || !task) {
-      throw new Error('Task not found');
+      console.error('Task not found:', taskError?.message || 'No task data');
+      return new Response(
+        JSON.stringify({ error: 'Task not found', details: taskError?.message }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!task.job) {
+      console.error('Job not found for task:', taskId);
+      return new Response(
+        JSON.stringify({ error: 'Job not found for task' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const jobImages = task.job.product_images as Array<{ url: string; name?: string; type?: string }> || [];
+    
+    if (!jobImages || jobImages.length === 0) {
+      console.error('No images in job data');
+      await supabase
+        .from('generation_tasks')
+        .update({
+          status: 'failed',
+          last_error: 'Не найдены изображения в задании.',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', taskId);
+      
+      return new Response(
+        JSON.stringify({ error: 'No images in job data' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const retryCount = task.retry_count || 0;
     console.log(`Processing task ${taskId}, retry ${retryCount}/${MAX_RETRIES}`);
@@ -55,31 +84,90 @@ serve(async (req) => {
     const productImages = jobImages.filter(img => img.type !== 'reference');
     const referenceImage = jobImages.find(img => img.type === 'reference');
 
-    // Download and convert product images to base64
+    console.log(`Found ${productImages.length} product images and ${referenceImage ? 1 : 0} reference in job data`);
+
+    // Validate we have at least one product image source
+    if (productImages.length === 0) {
+      console.error('No product images found in job data');
+      await supabase
+        .from('generation_tasks')
+        .update({
+          status: 'failed',
+          last_error: 'Не найдены изображения товара для генерации.',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', taskId);
+      
+      return new Response(
+        JSON.stringify({ error: 'No product images found' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Download and convert product images to base64 with timeout
     const productImageDataUrls: string[] = [];
     for (const img of productImages) {
       try {
-        const response = await fetch(img.url);
-        if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
+        console.log(`Downloading product image: ${img.url?.substring(0, 100)}...`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
+        const response = await fetch(img.url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          console.error(`Failed to download image: ${response.status} ${response.statusText}`);
+          continue;
+        }
         const buffer = await response.arrayBuffer();
         const base64 = base64Encode(new Uint8Array(buffer));
         productImageDataUrls.push(`data:image/jpeg;base64,${base64}`);
+        console.log(`Successfully downloaded product image (${buffer.byteLength} bytes)`);
       } catch (error) {
-        console.error('Product image download error:', error);
+        console.error('Product image download error:', error.message || error);
       }
+    }
+
+    // Validate we have at least one successfully downloaded image
+    if (productImageDataUrls.length === 0) {
+      console.error('Failed to download any product images');
+      await supabase
+        .from('generation_tasks')
+        .update({
+          status: 'failed',
+          last_error: 'Не удалось загрузить изображения товара. Проверьте доступность файлов.',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', taskId);
+      
+      return new Response(
+        JSON.stringify({ error: 'Failed to download product images' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Download and convert reference image if exists
     let referenceDataUrl: string | null = null;
     if (referenceImage) {
       try {
-        const response = await fetch(referenceImage.url);
-        if (!response.ok) throw new Error(`Failed to download reference: ${response.statusText}`);
-        const buffer = await response.arrayBuffer();
-        const base64 = base64Encode(new Uint8Array(buffer));
-        referenceDataUrl = `data:image/jpeg;base64,${base64}`;
+        console.log(`Downloading reference image: ${referenceImage.url?.substring(0, 100)}...`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
+        const response = await fetch(referenceImage.url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          console.error(`Failed to download reference: ${response.status} ${response.statusText}`);
+        } else {
+          const buffer = await response.arrayBuffer();
+          const base64 = base64Encode(new Uint8Array(buffer));
+          referenceDataUrl = `data:image/jpeg;base64,${base64}`;
+          console.log(`Successfully downloaded reference image (${buffer.byteLength} bytes)`);
+        }
       } catch (error) {
-        console.error('Reference image download error:', error);
+        console.error('Reference image download error:', error.message || error);
+        // Reference is optional, so we continue without it
       }
     }
 
