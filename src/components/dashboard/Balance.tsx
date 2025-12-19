@@ -8,8 +8,6 @@ import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
 import { PromoCodeInput } from "./PromoCodeInput";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
-import { SubscriptionStatus } from "./SubscriptionStatus";
-import { SubscriptionPlans } from "./SubscriptionPlans";
 
 interface PromoCodeInfo {
   id: string;
@@ -60,19 +58,8 @@ export default function Balance() {
     }
   };
 
-  const scrollToPricing = () => {
-    const pricingElement = document.getElementById('pricing-section');
-    if (pricingElement) {
-      pricingElement.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
-      {/* Subscription Status Card */}
-      <SubscriptionStatus onUpgrade={scrollToPricing} />
-
-      {/* Legacy Token Balance (kept for backward compatibility) */}
       <div className="bg-gradient-to-br from-wb-purple/5 via-wb-purple/10 to-wb-purple-dark/15 border border-wb-purple/20 rounded-xl p-4 sm:p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent pointer-events-none" />
         <div className="relative z-10">
@@ -92,7 +79,12 @@ export default function Balance() {
               </p>
             </div>
             <Button 
-              onClick={scrollToPricing}
+              onClick={() => {
+                const pricingElement = document.getElementById('pricing-section');
+                if (pricingElement) {
+                  pricingElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="bg-gradient-to-r from-wb-purple to-wb-purple-dark hover:from-wb-purple-dark hover:to-wb-purple shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
             >
               Пополнить
@@ -165,18 +157,13 @@ export default function Balance() {
         </CardContent>
       </Card>
       
-      <Tabs defaultValue="subscriptions" className="space-y-4 w-full overflow-hidden">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="subscriptions" className="text-xs sm:text-sm">Подписки</TabsTrigger>
-          <TabsTrigger value="tokens" className="text-xs sm:text-sm">Токены</TabsTrigger>
-          <TabsTrigger value="history" className="text-xs sm:text-sm">История</TabsTrigger>
+      <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="pricing" className="text-xs sm:text-sm">Пополнить баланс</TabsTrigger>
+          <TabsTrigger value="history" className="text-xs sm:text-sm">История пополнений</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="subscriptions" id="pricing-section" className="space-y-4 sm:space-y-6 mt-4">
-          <SubscriptionPlans />
-        </TabsContent>
-
-        <TabsContent value="tokens" className="space-y-4 sm:space-y-6 mt-4">
+        <TabsContent value="pricing" id="pricing-section" className="space-y-4 sm:space-y-6 mt-4">
           <Pricing appliedPromo={appliedPromo} />
           <PromoCodeInput onPromoApplied={setAppliedPromo} />
         </TabsContent>
