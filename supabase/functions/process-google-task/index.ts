@@ -10,6 +10,81 @@ const corsHeaders = {
 
 const MAX_RETRIES = 3;
 
+const IMAGE_FETCH_TIMEOUT_MS = 60_000;
+// Практика показала, что очень большие референсы могут приводить к падению Edge Runtime (546).
+// Ограничиваем размер, чтобы вместо падения дать понятную деградацию (пропустить референс).
+const MAX_IMAGE_BYTES = 3_000_000; // ~3MB
+
+type FetchImageResult =
+  | { ok: true; base64: string; bytes: number; mimeType: string }
+  | { ok: false; reason: string };
+
+async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) {
+      return { ok: false, reason: `download_failed:${res.status}` };
+    }
+
+    const mimeType = res.headers.get('content-type')?.split(';')[0]?.trim() || 'image/jpeg';
+    const contentLengthHeader = res.headers.get('content-length');
+    const contentLength = contentLengthHeader ? Number(contentLengthHeader) : null;
+
+    if (contentLength !== null && Number.isFinite(contentLength) && contentLength > MAX_IMAGE_BYTES) {
+      return { ok: false, reason: `too_large:${contentLength}` };
+    }
+
+    if (!res.body) {
+      // fallback: arrayBuffer (редко, но бывает)
+      const buf = await res.arrayBuffer();
+      if (buf.byteLength > MAX_IMAGE_BYTES) return { ok: false, reason: `too_large:${buf.byteLength}` };
+      const base64 = base64Encode(new Uint8Array(buf));
+      return { ok: true, base64, bytes: buf.byteLength, mimeType };
+    }
+
+    // stream read with hard cap
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      received += value.byteLength;
+      if (received > MAX_IMAGE_BYTES) {
+        try {
+          await reader.cancel();
+        } catch (_) {
+          // ignore
+        }
+        return { ok: false, reason: `too_large:${received}` };
+      }
+
+      chunks.push(value);
+    }
+
+    const merged = new Uint8Array(received);
+    let offset = 0;
+    for (const c of chunks) {
+      merged.set(c, offset);
+      offset += c.byteLength;
+    }
+
+    const base64 = base64Encode(merged);
+    return { ok: true, base64, bytes: received, mimeType };
+  } catch (e) {
+    const msg = (e as any)?.name === 'AbortError' ? 'timeout' : ((e as any)?.message || 'unknown');
+    return { ok: false, reason: msg };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -104,32 +179,21 @@ serve(async (req) => {
       );
     }
 
-    // Download and convert product images to base64 with timeout
-    const productImageDataUrls: string[] = [];
+    // Download product images as base64 (size-limited)
+    const productImageBase64: Array<{ base64: string; mimeType: string; bytes: number }> = [];
     for (const img of productImages) {
-      try {
-        console.log(`Downloading product image: ${img.url?.substring(0, 100)}...`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-        
-        const response = await fetch(img.url, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          console.error(`Failed to download image: ${response.status} ${response.statusText}`);
-          continue;
-        }
-        const buffer = await response.arrayBuffer();
-        const base64 = base64Encode(new Uint8Array(buffer));
-        productImageDataUrls.push(`data:image/jpeg;base64,${base64}`);
-        console.log(`Successfully downloaded product image (${buffer.byteLength} bytes)`);
-      } catch (error) {
-        console.error('Product image download error:', error.message || error);
+      console.log(`Downloading product image: ${img.url?.substring(0, 100)}...`);
+      const r = await fetchImageAsBase64(img.url);
+      if (!r.ok) {
+        console.warn(`Product image skipped (${r.reason}): ${img.url}`);
+        continue;
       }
+      productImageBase64.push({ base64: r.base64, mimeType: r.mimeType, bytes: r.bytes });
+      console.log(`Successfully downloaded product image (${r.bytes} bytes)`);
     }
 
-    // Validate we have at least one successfully downloaded image
-    if (productImageDataUrls.length === 0) {
+    // Validate we have at least one successfully downloaded product image
+    if (productImageBase64.length === 0) {
       console.error('Failed to download any product images');
       await supabase
         .from('generation_tasks')
@@ -139,39 +203,28 @@ serve(async (req) => {
           updated_at: new Date().toISOString(),
         })
         .eq('id', taskId);
-      
+
       return new Response(
         JSON.stringify({ error: 'Failed to download product images' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Download and convert reference image if exists
-    let referenceDataUrl: string | null = null;
-    if (referenceImage) {
-      try {
-        console.log(`Downloading reference image: ${referenceImage.url?.substring(0, 100)}...`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-        
-        const response = await fetch(referenceImage.url, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          console.error(`Failed to download reference: ${response.status} ${response.statusText}`);
-        } else {
-          const buffer = await response.arrayBuffer();
-          const base64 = base64Encode(new Uint8Array(buffer));
-          referenceDataUrl = `data:image/jpeg;base64,${base64}`;
-          console.log(`Successfully downloaded reference image (${buffer.byteLength} bytes)`);
-        }
-      } catch (error) {
-        console.error('Reference image download error:', error.message || error);
-        // Reference is optional, so we continue without it
+    // Download reference (optional). If it's too large/slow, skip it to avoid Edge crash.
+    let referenceBase64: { base64: string; mimeType: string; bytes: number } | null = null;
+    if (referenceImage?.url) {
+      console.log(`Downloading reference image: ${referenceImage.url?.substring(0, 100)}...`);
+      const r = await fetchImageAsBase64(referenceImage.url);
+      if (!r.ok) {
+        console.warn(`Reference image skipped (${r.reason}): ${referenceImage.url}`);
+        referenceBase64 = null;
+      } else {
+        referenceBase64 = { base64: r.base64, mimeType: r.mimeType, bytes: r.bytes };
+        console.log(`Successfully downloaded reference image (${r.bytes} bytes)`);
       }
     }
 
-    console.log(`Processing with ${productImageDataUrls.length} product images${referenceDataUrl ? ' and 1 reference' : ''}`);
+    console.log(`Processing with ${productImageBase64.length} product images${referenceBase64 ? ' and 1 reference' : ''}`);
 
     // Build content parts for Google Gemini API format
     const contentParts: any[] = [];
@@ -179,43 +232,40 @@ serve(async (req) => {
     // Add structured instruction at the beginning
     const structuredInstruction = `ВАЖНАЯ ИНФОРМАЦИЯ О СТРУКТУРЕ ИЗОБРАЖЕНИЙ:
 
-Я отправляю тебе ${productImageDataUrls.length + (referenceDataUrl ? 1 : 0)} изображений в следующем порядке:
+Я отправляю тебе ${productImageBase64.length + (referenceBase64 ? 1 : 0)} изображений в следующем порядке:
 
 ФОТОГРАФИИ ТОВАРА (используй эти изображения для создания карточки):
-${productImageDataUrls.map((_, index) => `• Изображение ${index + 1}: ФОТО ТОВАРА - основа для создания карточки`).join('\n')}
-${referenceDataUrl ? `\nРЕФЕРЕНС ДИЗАЙНА (используй только как пример стиля оформления):
-• Изображение ${productImageDataUrls.length + 1}: РЕФЕРЕНС - ориентируйся на СТИЛЬ, КОМПОЗИЦИЮ и ОФОРМЛЕНИЕ этой карточки. ТОВАР бери ТОЛЬКО из предыдущих изображений товара, НЕ копируй товар с референса!` : ''}
+${productImageBase64.map((_, index) => `• Изображение ${index + 1}: ФОТО ТОВАРА - основа для создания карточки`).join('\n')}
+${referenceBase64 ? `\nРЕФЕРЕНС ДИЗАЙНА (используй только как пример стиля оформления):\n• Изображение ${productImageBase64.length + 1}: РЕФЕРЕНС - ориентируйся на СТИЛЬ, КОМПОЗИЦИЮ и ОФОРМЛЕНИЕ этой карточки. ТОВАР бери ТОЛЬКО из предыдущих изображений товара, НЕ копируй товар с референса!` : ''}
 
 ТВОЯ ЗАДАЧА:
 ${prompt}
 
 КРИТИЧЕСКИ ВАЖНО:
-1. Товар для карточки бери ТОЛЬКО из первых ${productImageDataUrls.length} изображений (фото товара)
-${referenceDataUrl ? `2. Последнее изображение (референс) используй ТОЛЬКО для понимания стиля оформления, но НЕ копируй сам товар\n3. Создай новую карточку с товаром из фото товара в стиле референса` : '2. Создай профессиональную маркетинговую карточку товара'}
+1. Товар для карточки бери ТОЛЬКО из первых ${productImageBase64.length} изображений (фото товара)
+${referenceBase64 ? `2. Последнее изображение (референс) используй ТОЛЬКО для понимания стиля оформления, но НЕ копируй сам товар\n3. Создай новую карточку с товаром из фото товара в стиле референса` : '2. Создай профессиональную маркетинговую карточку товара'}
 
 ОБЯЗАТЕЛЬНО: Верни сгенерированное ИЗОБРАЖЕНИЕ карточки товара.`;
 
     contentParts.push({ text: structuredInstruction });
-    
+
     // Add all product images
-    productImageDataUrls.forEach((dataUrl) => {
-      const base64Data = dataUrl.split(',')[1];
+    for (const img of productImageBase64) {
       contentParts.push({
         inlineData: {
-          mimeType: 'image/jpeg',
-          data: base64Data
-        }
+          mimeType: img.mimeType,
+          data: img.base64,
+        },
       });
-    });
+    }
 
     // Add reference image if exists (always last)
-    if (referenceDataUrl) {
-      const base64Data = referenceDataUrl.split(',')[1];
+    if (referenceBase64) {
       contentParts.push({
         inlineData: {
-          mimeType: 'image/jpeg',
-          data: base64Data
-        }
+          mimeType: referenceBase64.mimeType,
+          data: referenceBase64.base64,
+        },
       });
     }
 
