@@ -243,12 +243,13 @@ export const GenerateCards = ({
       });
       return false;
     }
-    const maxSizeBytes = 10 * 1024 * 1024;
+    const maxSizeBytes = 3 * 1024 * 1024; // 3 MB
     const oversizedFiles = uploadedFiles.filter(file => file.size > maxSizeBytes);
     if (oversizedFiles.length > 0) {
+      const fileNames = oversizedFiles.map(f => `"${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} МБ)`).join(', ');
       toast({
         title: "Файлы слишком большие",
-        description: "Максимальный размер файла: 10 МБ",
+        description: `Максимальный размер файла: 3 МБ. Пожалуйста, сожмите или загрузите изображения меньшего размера. Превышен лимит: ${fileNames}`,
         variant: "destructive"
       });
       return false;
