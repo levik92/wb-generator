@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ALLOWED_EXTENSIONS = ['JPG', 'PNG', 'WebP'];
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -132,7 +132,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
     }
     if (file.size > MAX_FILE_SIZE) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-      return { valid: false, error: `"${file.name}" (${sizeMB} МБ) — превышает лимит 10 МБ` };
+      return { valid: false, error: `"${file.name}" (${sizeMB} МБ) — превышает лимит 3 МБ. Пожалуйста, сожмите изображение.` };
     }
     return { valid: true };
   };
