@@ -308,6 +308,17 @@ export const GenerateCards = ({
   const handleReferenceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
+      const maxSizeBytes = 3 * 1024 * 1024; // 3 MB
+      if (file.size > maxSizeBytes) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        toast({
+          title: "Файл слишком большой",
+          description: `"${file.name}" (${sizeMB} МБ) превышает лимит 3 МБ. Пожалуйста, сожмите изображение.`,
+          variant: "destructive"
+        });
+        event.target.value = '';
+        return;
+      }
       setReferenceImage(file);
     }
   };
