@@ -198,6 +198,15 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
         });
         return;
       }
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+        toast({
+          title: "Файл слишком большой",
+          description: `"${file.name}" (${sizeMB} МБ) превышает лимит 3 МБ. Пожалуйста, сожмите изображение.`,
+          variant: "destructive",
+        });
+        return;
+      }
       setReferenceImage(file);
     }
   };
