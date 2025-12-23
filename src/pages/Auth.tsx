@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,14 +6,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSecurityLogger } from "@/hooks/useSecurityLogger";
 import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
 import YandexMetrika from "@/components/YandexMetrika";
+
+// Lazy load HCaptcha for faster initial page load
+const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -28,7 +31,7 @@ const Auth = () => {
   const [showTermsError, setShowTermsError] = useState(false);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captchaRef = useRef<HCaptcha>(null);
+  const captchaRef = useRef<any>(null);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
@@ -511,12 +514,14 @@ const Auth = () => {
 
                   {captchaSiteKey && (
                     <div className="flex justify-center">
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
+                      <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                        <HCaptcha
+                          ref={captchaRef}
+                          sitekey={captchaSiteKey}
+                          onVerify={(token) => setCaptchaToken(token)}
+                          onExpire={() => setCaptchaToken(null)}
+                        />
+                      </Suspense>
                     </div>
                   )}
 
@@ -590,12 +595,14 @@ const Auth = () => {
 
                   {captchaSiteKey && (
                     <div className="flex justify-center">
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
+                      <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                        <HCaptcha
+                          ref={captchaRef}
+                          sitekey={captchaSiteKey}
+                          onVerify={(token) => setCaptchaToken(token)}
+                          onExpire={() => setCaptchaToken(null)}
+                        />
+                      </Suspense>
                     </div>
                   )}
 
@@ -749,12 +756,14 @@ const Auth = () => {
 
                   {captchaSiteKey && (
                     <div className="flex justify-center">
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
+                      <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                        <HCaptcha
+                          ref={captchaRef}
+                          sitekey={captchaSiteKey}
+                          onVerify={(token) => setCaptchaToken(token)}
+                          onExpire={() => setCaptchaToken(null)}
+                        />
+                      </Suspense>
                     </div>
                   )}
 

@@ -1,13 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { Shield } from "lucide-react";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+
+// Lazy load HCaptcha for faster initial page load
+const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -15,7 +18,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captchaRef = useRef<HCaptcha>(null);
+  const captchaRef = useRef<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -139,12 +142,14 @@ export default function AdminLogin() {
 
             {captchaSiteKey && (
               <div className="flex justify-center">
-                <HCaptcha
-                  ref={captchaRef}
-                  sitekey={captchaSiteKey}
-                  onVerify={(token) => setCaptchaToken(token)}
-                  onExpire={() => setCaptchaToken(null)}
-                />
+                <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                  <HCaptcha
+                    ref={captchaRef}
+                    sitekey={captchaSiteKey}
+                    onVerify={(token) => setCaptchaToken(token)}
+                    onExpire={() => setCaptchaToken(null)}
+                  />
+                </Suspense>
               </div>
             )}
 
