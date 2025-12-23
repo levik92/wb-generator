@@ -405,7 +405,8 @@ const Partner = () => {
                       tickMargin={8}
                       axisLine={false}
                       tickLine={false}
-                      domain={[0, 'dataMax']}
+                      allowDecimals={false}
+                      domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                     />
                     <Tooltip 
                       contentStyle={{
