@@ -27,7 +27,7 @@ import lightning3d from "@/assets/3d-lightning.png";
 // Компонент анимированного счетчика
 const AnimatedCounter = () => {
   const [count, setCount] = useState(0);
-  
+
   // Вычисляем итоговое значение с накопительным увеличением
   const getTargetValue = () => {
     const baseValue = 12120; // Стартовое значение
@@ -35,36 +35,33 @@ const AnimatedCounter = () => {
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - startDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     // Для каждого дня генерируем свой уникальный инкремент от 20 до 100
     let totalIncrement = 0;
     for (let day = 0; day < diffDays; day++) {
       const dayDate = new Date(startDate);
       dayDate.setDate(startDate.getDate() + day);
       const dateStr = dayDate.toISOString().split('T')[0];
-      
+
       // Генерируем стабильный hash для этой даты
       let hash = 0;
       for (let i = 0; i < dateStr.length; i++) {
-        hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+        hash = (hash << 5) - hash + dateStr.charCodeAt(i);
         hash = hash & hash;
       }
-      
+
       // Генерируем случайное число от 20 до 100 для этого дня
       const dailyIncrement = Math.abs(hash % 81) + 20;
       totalIncrement += dailyIncrement;
     }
-    
     return baseValue + totalIncrement;
   };
-
   useEffect(() => {
     const targetValue = getTargetValue();
     const duration = 2000; // 2 секунды
     const steps = 60;
     const increment = targetValue / steps;
     let currentStep = 0;
-
     const timer = setInterval(() => {
       currentStep++;
       if (currentStep >= steps) {
@@ -74,24 +71,18 @@ const AnimatedCounter = () => {
         setCount(Math.floor(increment * currentStep));
       }
     }, duration / steps);
-
     return () => clearInterval(timer);
   }, []);
-
-  return (
-    <span className="font-bold text-primary">{count.toLocaleString('ru-RU')}</span>
-  );
+  return <span className="font-bold text-primary">{count.toLocaleString('ru-RU')}</span>;
 };
-
 const Landing = () => {
   const navigate = useNavigate();
-  
   const scrollToExamples = () => {
-    document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('examples')?.scrollIntoView({
+      behavior: 'smooth'
+    });
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <YandexMetrika />
       {/* Header */}
       <header className="border-b border-border">
@@ -190,11 +181,7 @@ const Landing = () => {
                 {/* Before Image */}
                 <div className="relative transform -rotate-6 sm:-rotate-3 transition-transform hover:rotate-0">
                   <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
-                    <img 
-                      src="/lovable-uploads/clarins-before.jpeg" 
-                      alt="До генерации"
-                      className="w-56 sm:w-48 md:w-64 h-auto rounded-lg"
-                    />
+                    <img alt="До генерации" className="w-56 sm:w-48 md:w-64 h-auto rounded-lg" src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg" />
                     <div className="text-center mt-2 text-xs sm:text-sm font-medium text-muted-foreground">
                       До
                     </div>
@@ -214,11 +201,7 @@ const Landing = () => {
                 {/* After Image */}
                 <div className="relative transform rotate-6 sm:rotate-3 transition-transform hover:rotate-0">
                   <div className="bg-white p-2 sm:p-4 rounded-xl shadow-2xl">
-                    <img 
-                      src="/lovable-uploads/clarins-after.png" 
-                      alt="После генерации"
-                      className="w-56 sm:w-48 md:w-64 h-auto rounded-lg"
-                    />
+                    <img alt="После генерации" className="w-56 sm:w-48 md:w-64 h-auto rounded-lg" src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg" />
                     <div className="text-center mt-2 text-xs sm:text-sm font-medium text-green-600 font-bold">
                       После
                     </div>
@@ -335,13 +318,7 @@ const Landing = () => {
                   {/* Before */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
-                      <img 
-                        src="/lovable-uploads/1-1.png" 
-                        alt="До"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/1-1.png" alt="До" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
                       </div>
@@ -356,13 +333,7 @@ const Landing = () => {
                   {/* After */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
-                      <img 
-                        src="/lovable-uploads/1-2.png" 
-                        alt="После"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/1-2.png" alt="После" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
                       </div>
@@ -407,13 +378,7 @@ const Landing = () => {
                   {/* Before */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
-                      <img 
-                        src="/lovable-uploads/2-1.jpg" 
-                        alt="До"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/2-1.jpg" alt="До" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
                       </div>
@@ -428,13 +393,7 @@ const Landing = () => {
                   {/* After */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
-                      <img 
-                        src="/lovable-uploads/2-2.png" 
-                        alt="После"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/2-2.png" alt="После" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
                       </div>
@@ -479,13 +438,7 @@ const Landing = () => {
                   {/* Before */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
-                      <img 
-                        src="/lovable-uploads/3-1.webp" 
-                        alt="До"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/3-1.webp" alt="До" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
                       </div>
@@ -500,13 +453,7 @@ const Landing = () => {
                   {/* After */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
-                      <img 
-                        src="/lovable-uploads/3-2.png" 
-                        alt="После"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/3-2.png" alt="После" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
                       </div>
@@ -551,13 +498,7 @@ const Landing = () => {
                   {/* Before */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md">
-                      <img 
-                        src="/lovable-uploads/4-1.webp" 
-                        alt="До"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/4-1.webp" alt="До" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-medium">
                         До
                       </div>
@@ -572,13 +513,7 @@ const Landing = () => {
                   {/* After */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
-                      <img 
-                        src="/lovable-uploads/4-2.png" 
-                        alt="После"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <img src="/lovable-uploads/4-2.png" alt="После" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
                       </div>
@@ -1021,8 +956,6 @@ const Landing = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
