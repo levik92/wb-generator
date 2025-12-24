@@ -357,7 +357,7 @@ const Landing = () => {
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">WB Генератор:</span>
-                      <span className="font-bold text-wb-purple">120₽</span>
+                      <span className="font-bold text-wb-purple">59₽</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Дизайнер:</span>
@@ -417,7 +417,7 @@ const Landing = () => {
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">WB Генератор:</span>
-                      <span className="font-bold text-wb-purple">120₽</span>
+                      <span className="font-bold text-wb-purple">59₽</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Фотограф:</span>
@@ -477,7 +477,7 @@ const Landing = () => {
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">WB Генератор:</span>
-                      <span className="font-bold text-wb-purple">120₽</span>
+                      <span className="font-bold text-wb-purple">59₽</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Дизайнер:</span>
@@ -537,7 +537,7 @@ const Landing = () => {
                   <div className="pt-2 border-t space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">WB Генератор:</span>
-                      <span className="font-bold text-wb-purple">120₽</span>
+                      <span className="font-bold text-wb-purple">59₽</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Дизайнер:</span>
