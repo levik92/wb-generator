@@ -361,10 +361,10 @@ const Landing = () => {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Дизайнер:</span>
-                      <span className="line-through text-gray-400">15 000₽</span>
+                      <span className="line-through text-gray-400">3 000₽</span>
                     </div>
                     <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
-                      Экономия 14 880₽
+                      Экономия 2 941₽
                     </div>
                   </div>
                 </div>
@@ -421,10 +421,10 @@ const Landing = () => {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Фотограф:</span>
-                      <span className="line-through text-gray-400">8 000₽</span>
+                      <span className="line-through text-gray-400">5 000₽</span>
                     </div>
                     <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
-                      Экономия 7 880₽
+                      Экономия 4 941₽
                     </div>
                   </div>
                 </div>
@@ -481,10 +481,10 @@ const Landing = () => {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Дизайнер:</span>
-                      <span className="line-through text-gray-400">12 000₽</span>
+                      <span className="line-through text-gray-400">6 000₽</span>
                     </div>
                     <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
-                      Экономия 11 880₽
+                      Экономия 5 941₽
                     </div>
                   </div>
                 </div>
@@ -541,10 +541,10 @@ const Landing = () => {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Дизайнер:</span>
-                      <span className="line-through text-gray-400">10 000₽</span>
+                      <span className="line-through text-gray-400">8 000₽</span>
                     </div>
                     <div className="bg-green-50 px-2 py-1 rounded text-xs text-green-700 font-medium text-center">
-                      Экономия 9 880₽
+                      Экономия 7 941₽
                     </div>
                   </div>
                 </div>
