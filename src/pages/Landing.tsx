@@ -453,7 +453,7 @@ const Landing = () => {
                   {/* After */}
                   <div className="flex-1">
                     <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-md ring-2 ring-green-500">
-                      <img src="/lovable-uploads/3-2.png" alt="После" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                      <img src="/lovable-uploads/yoga-mat-main.png" alt="После" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       <div className="absolute bottom-0 left-0 right-0 bg-green-600 text-white text-xs py-1 text-center font-medium">
                         После
                       </div>
