@@ -333,16 +333,16 @@ export const AdminNews = () => {
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <Badge className={tagColors[item.tag] || 'bg-gray-100 text-gray-800'}>
+                      <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} hover:bg-inherit`}>
                         {item.tag}
                       </Badge>
                       {item.is_published ? (
-                        <Badge className="bg-green-100 text-green-800">
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                           <Eye className="w-3 h-3 mr-1" />
                           Опубликовано
                         </Badge>
                       ) : (
-                        <Badge className="bg-orange-100 text-orange-800">
+                        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
                           <EyeOff className="w-3 h-3 mr-1" />
                           Черновик
                         </Badge>
@@ -371,27 +371,27 @@ export const AdminNews = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => openEditDialog(item)}
-                      className="h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3"
+                      className="h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2"
                     >
                       <Edit className="w-3 h-3 lg:w-4 lg:h-4" />
-                      <span className="hidden lg:inline ml-1">Изменить</span>
+                      <span className="hidden lg:inline ml-2">Изменить</span>
                     </Button>
                     <Button
                       variant={item.is_published ? "outline" : "default"}
                       size="sm"
                       onClick={() => publishNews(item.id, !item.is_published)}
-                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3 ${!item.is_published ? "bg-green-600 hover:bg-green-700" : ""}`}
+                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2 ${!item.is_published ? "bg-green-600 hover:bg-green-700" : ""}`}
                     >
                       {item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
-                      <span className="hidden lg:inline ml-1">
+                      <span className="hidden lg:inline ml-2">
                         {item.is_published ? "Скрыть" : "Опубликовать"}
                       </span>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3">
+                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
                           <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
-                          <span className="hidden lg:inline ml-1">Удалить</span>
+                          <span className="hidden lg:inline ml-2">Удалить</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="mx-2">
