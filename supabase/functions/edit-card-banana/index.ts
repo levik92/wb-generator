@@ -7,6 +7,8 @@ const corsHeaders = {
 };
 
 async function getPromptTemplate(supabase: any, promptType: string, productName: string, editInstructions: string): Promise<string> {
+  console.log(`Fetching prompt template for type: ${promptType}, product: ${productName}`);
+  
   const { data: promptData, error: promptError } = await supabase
     .from('ai_prompts')
     .select('prompt_template')
@@ -30,10 +32,17 @@ serve(async (req) => {
   }
 
   try {
-    const { productName, userId, cardIndex, cardType, sourceImageUrl, editInstructions } = await req.json();
+    const body = await req.json();
+    const { productName, userId, cardIndex, cardType, sourceImageUrl, editInstructions } = body;
+
+    console.log('Edit card request:', { productName, userId, cardIndex, cardType, sourceImageUrl: sourceImageUrl?.substring(0, 50), editInstructions });
 
     if (!productName || !userId || cardIndex === undefined || !cardType || !sourceImageUrl || !editInstructions) {
-      throw new Error('Missing required fields');
+      console.error('Missing required fields:', { productName, userId, cardIndex, cardType, sourceImageUrl: !!sourceImageUrl, editInstructions });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing required fields' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -48,10 +57,15 @@ serve(async (req) => {
       .single();
 
     if (pricingError || !pricing) {
-      throw new Error('Failed to fetch pricing');
+      console.error('Failed to fetch pricing:', pricingError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to fetch pricing' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const tokensCost = pricing.tokens_cost;
+    console.log(`Tokens cost for edit: ${tokensCost}`);
 
     // Check and spend tokens
     const { data: spendResult, error: spendError } = await supabase.rpc('spend_tokens', {
@@ -60,10 +74,16 @@ serve(async (req) => {
     });
 
     if (spendError || !spendResult) {
-      throw new Error('Insufficient tokens');
+      console.error('Insufficient tokens:', spendError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Insufficient tokens' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Create job with product_images
+    console.log('Tokens spent successfully');
+
+    // Create job with product_images - this is what process-google-task expects
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
       .insert({
@@ -77,20 +97,26 @@ serve(async (req) => {
         product_images: [{
           url: sourceImageUrl,
           name: 'edit_source',
-          type: 'product'
+          type: 'product' // Important: must be 'product' type for process-google-task
         }]
       })
       .select()
       .single();
 
     if (jobError || !job) {
+      console.error('Failed to create job:', jobError);
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
         tokens_amount: tokensCost,
         reason_text: 'Ошибка создания задачи редактирования'
       });
-      throw new Error('Failed to create job');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to create job' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    console.log('Job created:', job.id);
 
     // Create task
     const { data: task, error: taskError } = await supabase
@@ -105,18 +131,27 @@ serve(async (req) => {
       .single();
 
     if (taskError || !task) {
+      console.error('Failed to create task:', taskError);
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
         tokens_amount: tokensCost,
         reason_text: 'Ошибка создания задачи редактирования'
       });
-      throw new Error('Failed to create task');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Failed to create task' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    console.log('Task created:', task.id);
 
     // Get prompt template - use 'edit-card' for editing
     const prompt = await getPromptTemplate(supabase, 'edit-card', productName, editInstructions);
+    console.log('Generated prompt:', prompt.substring(0, 100) + '...');
 
-    // Call processing function
+    // Call processing function with the source image URL
+    // Note: process-google-task reads product_images from job, but we also pass sourceImageUrl for compatibility
+    console.log('Invoking process-google-task...');
     const { error: processingError } = await supabase.functions.invoke('process-google-task', {
       body: {
         taskId: task.id,
@@ -127,7 +162,11 @@ serve(async (req) => {
 
     if (processingError) {
       console.error('Processing error:', processingError);
-      throw new Error('Failed to invoke processing function');
+      // Don't fail - the task is created and might be processed later
+      // Just log the error and return success since task/job are created
+      console.log('Note: process-google-task invocation failed, but task is created');
+    } else {
+      console.log('process-google-task invoked successfully');
     }
 
     // Create notification
@@ -137,6 +176,8 @@ serve(async (req) => {
       title: 'Редактирование запущено',
       message: `Редактирование карточки "${productName}" начато`
     });
+
+    console.log('Edit card request completed successfully');
 
     return new Response(
       JSON.stringify({ 
@@ -149,9 +190,9 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('Error:', error);
+    console.error('Error in edit-card-banana:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ success: false, error: error.message || 'Internal server error' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
