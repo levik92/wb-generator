@@ -7,20 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Map card types to available prompt types
-const CARD_TYPE_TO_PROMPT: Record<string, string> = {
-  'cover': 'cover',
-  'lifestyle': 'lifestyle',
-  'macro': 'macro',
-  'features': 'features',
-  'bundle': 'bundle',
-  'guarantee': 'guarantee',
-  'beforeAfter': 'beforeAfter',
-  'comparison': 'features', // comparison uses features prompt
-  'usage': 'lifestyle',     // usage uses lifestyle prompt
-  'clean': 'cover',         // clean uses cover prompt
-};
-
 // Helper function to get prompt template
 async function getPromptTemplate(
   supabase: any,
@@ -29,34 +15,15 @@ async function getPromptTemplate(
   category: string,
   benefits: string
 ): Promise<string> {
-  // Map the card type to an available prompt type
-  const mappedPromptType = CARD_TYPE_TO_PROMPT[promptType] || 'cover';
-  
   const { data, error } = await supabase
     .from('ai_prompts')
     .select('prompt_template')
-    .eq('prompt_type', mappedPromptType)
+    .eq('prompt_type', promptType)
     .eq('model_type', 'google')
     .single();
 
   if (error || !data) {
-    console.error(`Failed to fetch prompt for type: ${mappedPromptType}, falling back to cover`);
-    // Fallback to cover prompt
-    const { data: fallbackData } = await supabase
-      .from('ai_prompts')
-      .select('prompt_template')
-      .eq('prompt_type', 'cover')
-      .eq('model_type', 'google')
-      .single();
-    
-    if (!fallbackData) {
-      throw new Error(`No prompts available for regeneration`);
-    }
-    
-    return fallbackData.prompt_template
-      .replace('{productName}', productName)
-      .replace('{category}', category)
-      .replace('{benefits}', benefits);
+    throw new Error(`Failed to fetch prompt for type: ${promptType}`);
   }
 
   return data.prompt_template
