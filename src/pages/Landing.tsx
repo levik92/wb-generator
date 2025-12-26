@@ -118,7 +118,7 @@ const Landing = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 px-4 py-2 rounded-full text-xs sm:text-sm mb-8 border border-green-200 shadow-sm">
               <Sparkles className="w-4 h-4" />
-              <span className="font-medium">15 токенов бесплатно при регистрации</span>
+              <span className="font-medium">20 токенов бесплатно при регистрации</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight px-4">
@@ -946,7 +946,7 @@ const Landing = () => {
           <div className="animate-fade-in">
             <Link to="/auth?tab=signup">
               <Button size="lg" className="bg-white text-wb-purple hover:bg-gray-100 text-sm sm:text-base md:text-lg px-6 sm:px-10 py-5 sm:py-7 hover-scale shadow-2xl font-semibold">
-                Получить 15 токенов бесплатно
+                Получить 20 токенов бесплатно
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
