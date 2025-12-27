@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import { Shield } from "lucide-react";
+import { Shield, Loader2 } from "lucide-react";
 
 // Lazy load HCaptcha for faster initial page load
 const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
@@ -142,7 +142,12 @@ export default function AdminLogin() {
 
             {captchaSiteKey && (
               <div className="flex justify-center">
-                <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                <Suspense fallback={
+                  <div className="h-[78px] w-[303px] rounded border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Загрузка капчи...</span>
+                  </div>
+                }>
                   <HCaptcha
                     ref={captchaRef}
                     sitekey={captchaSiteKey}
