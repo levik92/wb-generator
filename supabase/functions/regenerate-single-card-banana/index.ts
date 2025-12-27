@@ -7,6 +7,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map frontend card types to Google prompt types in database
+const cardTypeToPromptType: Record<string, string> = {
+  'cover': 'cover',
+  'features': 'features', 
+  'macro': 'macro',
+  'usage': 'lifestyle',      // "Товар в использовании" -> lifestyle prompt
+  'comparison': 'beforeAfter', // "Сравнение" -> beforeAfter prompt
+  'clean': 'cover',          // "Без инфографики" -> use cover as base
+};
+
 // Helper function to get prompt template
 async function getPromptTemplate(
   supabase: any,
@@ -167,10 +177,13 @@ serve(async (req) => {
       throw new Error('Failed to create regeneration task');
     }
 
-    // Get prompt template - use specific card type for regeneration
+    // Get prompt template - map card type to actual prompt type in database
+    const promptType = cardTypeToPromptType[cardType] || 'cover';
+    console.log(`Regenerating card type "${cardType}" using prompt type "${promptType}"`);
+    
     const prompt = await getPromptTemplate(
       supabase,
-      cardType,
+      promptType,
       sanitizedProductName,
       sanitizedCategory,
       sanitizedDescription
