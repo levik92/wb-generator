@@ -1,6 +1,9 @@
 User-agent: Googlebot
 Allow: /
 
+User-agent: Yandex
+Allow: /
+
 User-agent: Bingbot
 Allow: /
 
@@ -12,3 +15,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /partner
+
+Sitemap: https://wbgen.ru/sitemap.xml
+Host: https://wbgen.ru
