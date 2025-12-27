@@ -122,13 +122,12 @@ const Landing = () => {
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight px-4">
-              Карточки для <span className="whitespace-nowrap">WB <br className="sm:hidden" /></span>
-              <span className="hidden sm:inline"><br /></span>
-              <span className="text-gradient">за 3 минуты</span>
+              Карточки для Wildberries <br className="hidden sm:inline" />
+              <span className="text-gradient">с помощью ИИ за 3 минуты</span>
             </h1>
             
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed px-4">
-              Генерируйте дизайнерские карточки, описания и этикетки с помощью ИИ. Без дизайнера и опыта.
+              Генерируйте продающие карточки, инфографику, SEO-описания и этикетки для маркетплейсов. Без дизайнера и опыта.
             </p>
 
             {/* Stats Section - NEW */}
@@ -217,9 +216,9 @@ const Landing = () => {
       <section className="py-16 sm:py-20 bg-gradient-to-b from-gray-50/50 to-white">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Почему выбирают нас</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Дизайн карточек WB без дизайнера</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Профессиональный результат без команды дизайнеров
+              ИИ-генератор карточек для Wildberries — профессиональный результат за минуты
             </p>
           </div>
 
@@ -303,9 +302,9 @@ const Landing = () => {
       <section id="examples" className="py-16 sm:py-20 bg-gray-100">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Примеры генераций</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Инфографика и дизайн для маркетплейсов</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Реальные результаты клиентов WB Генератор
+              Реальные примеры карточек товаров Wildberries — до и после генерации
             </p>
           </div>
 
@@ -567,9 +566,9 @@ const Landing = () => {
       <section className="py-16 sm:py-20">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Как это работает</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Как увеличить продажи на Wildberries</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Четыре простых шага до профессиональных карточек
+              Четыре простых шага до профессиональных карточек товара
             </p>
           </div>
 
@@ -664,11 +663,11 @@ const Landing = () => {
           <div className="text-center mb-12 sm:mb-16">
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-wb-purple/10 to-purple-500/10 text-wb-purple px-4 py-2 rounded-full text-xs sm:text-sm mb-6 border border-wb-purple/20">
               <Sparkles className="w-4 h-4" />
-              <span className="font-medium">ИИ-генерация SEO-описаний</span>
+              <span className="font-medium">Нейросеть для SEO-описаний</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Продающие описания за минуту</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">SEO-описания для карточек Wildberries</h2>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Нейросеть анализирует конкурентов и создает уникальные SEO-тексты
+              ИИ анализирует конкурентов и создает уникальные продающие тексты для маркетплейсов
             </p>
           </div>
 
