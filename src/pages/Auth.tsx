@@ -514,7 +514,12 @@ const Auth = () => {
 
                   {captchaSiteKey && (
                     <div className="flex justify-center">
-                      <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                      <Suspense fallback={
+                        <div className="h-[78px] w-[303px] rounded border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Загрузка капчи...</span>
+                        </div>
+                      }>
                         <HCaptcha
                           ref={captchaRef}
                           sitekey={captchaSiteKey}
@@ -595,7 +600,12 @@ const Auth = () => {
 
                   {captchaSiteKey && (
                     <div className="flex justify-center">
-                      <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                      <Suspense fallback={
+                        <div className="h-[78px] w-[303px] rounded border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Загрузка капчи...</span>
+                        </div>
+                      }>
                         <HCaptcha
                           ref={captchaRef}
                           sitekey={captchaSiteKey}
@@ -756,7 +766,12 @@ const Auth = () => {
 
                   {captchaSiteKey && (
                     <div className="flex justify-center">
-                      <Suspense fallback={<Skeleton className="h-[78px] w-[303px] rounded" />}>
+                      <Suspense fallback={
+                        <div className="h-[78px] w-[303px] rounded border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
+                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">Загрузка капчи...</span>
+                        </div>
+                      }>
                         <HCaptcha
                           ref={captchaRef}
                           sitekey={captchaSiteKey}
