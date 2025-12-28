@@ -11,7 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Handshake,
-  DollarSign
+  DollarSign,
+  LayoutDashboard
 } from "lucide-react";
 import { useState } from "react";
 
@@ -53,6 +54,11 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'pricing',
       label: 'Цены',
       icon: DollarSign,
+    },
+    {
+      id: 'banners',
+      label: 'Баннеры',
+      icon: LayoutDashboard,
     },
     {
       id: 'news',

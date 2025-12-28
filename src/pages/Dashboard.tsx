@@ -29,6 +29,7 @@ import News from "@/pages/News";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { TutorialDialog } from "@/components/dashboard/TutorialDialog";
+import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake } from "lucide-react";
 
 interface Profile {
@@ -423,6 +424,9 @@ const Dashboard = () => {
         )}
         
         <main className="flex-1 p-4 md:p-6">
+          {/* Dashboard Banners */}
+          <DashboardBanners userId={profile.id} />
+          
           {renderContent()}
         </main>
         

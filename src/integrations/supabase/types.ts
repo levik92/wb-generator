@@ -175,6 +175,42 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_banners: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          gradient_end: string
+          gradient_start: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number
+          gradient_end?: string
+          gradient_start?: string
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          gradient_end?: string
+          gradient_start?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generation_jobs: {
         Row: {
           category: string
@@ -1130,6 +1166,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_dismissed_banners: {
+        Row: {
+          banner_id: string
+          dismissed_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          banner_id: string
+          dismissed_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          banner_id?: string
+          dismissed_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_dismissed_banners_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_banners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
