@@ -11,7 +11,8 @@ import {
   Gift, 
   Megaphone,
   Handshake,
-  DollarSign
+  DollarSign,
+  LayoutDashboard
 } from "lucide-react";
 
 interface AdminMobileMenuProps {
@@ -52,6 +53,11 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
       id: 'pricing',
       label: 'Цены',
       icon: DollarSign,
+    },
+    {
+      id: 'banners',
+      label: 'Баннеры',
+      icon: LayoutDashboard,
     },
     {
       id: 'news',
