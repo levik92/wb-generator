@@ -132,7 +132,7 @@ export const DashboardBanners = ({ userId }: DashboardBannersProps) => {
           <h3 className="text-base md:text-lg font-semibold text-white mb-1 md:mb-2 line-clamp-1">
             {currentBanner.title}
           </h3>
-          <p className="text-sm md:text-base text-white/90 line-clamp-2">
+          <p className="text-xs md:text-sm text-white/90 line-clamp-2">
             {currentBanner.description}
           </p>
         </div>
