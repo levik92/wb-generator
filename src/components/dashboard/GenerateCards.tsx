@@ -1544,9 +1544,9 @@ export const GenerateCards = ({
             <span className="text-left text-xs">Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : selectedCards.length * photoGenerationPrice % 10 >= 2 && selectedCards.length * photoGenerationPrice % 10 <= 4 && (selectedCards.length * photoGenerationPrice % 100 < 10 || selectedCards.length * photoGenerationPrice % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}</span>
           </div>
           
-          {!canGenerate() && !generating && <Alert className="mt-4 bg-amber-50 border-amber-200 rounded-xl [&>svg]:!text-amber-800 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
+          {!canGenerate() && !generating && <Alert className="mt-4 bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
               <Info className="h-4 w-4" />
-              <AlertDescription className="text-amber-800 font-medium text-xs sm:text-sm">
+              <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
                 {getGuardMessage()}
               </AlertDescription>
             </Alert>}

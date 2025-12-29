@@ -124,7 +124,7 @@ export const DashboardHeader = ({
               </div>
               {notifications.length === 0 ? <div className="p-4 text-center text-muted-foreground">
                   Нет уведомлений
-                </div> : notifications.map(notification => <DropdownMenuItem key={notification.id} className={`group p-3 cursor-pointer border-b last:border-b-0 bg-gray-50 hover:bg-wb-purple ${!notification.read ? 'bg-wb-purple/10' : ''}`} onClick={() => markAsRead(notification.id)}>
+                </div> : notifications.map(notification => <DropdownMenuItem key={notification.id} className={`group p-3 cursor-pointer border-b last:border-b-0 bg-secondary hover:bg-wb-purple ${!notification.read ? 'bg-wb-purple/10' : ''}`} onClick={() => markAsRead(notification.id)}>
                     <div className="flex items-start space-x-3 w-full">
                       <span className="text-lg flex-shrink-0 mt-0.5">
                         {getNotificationIcon(notification.type)}
