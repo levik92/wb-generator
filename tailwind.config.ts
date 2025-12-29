@@ -151,13 +151,24 @@ export default {
 					to: {
 						transform: 'translateY(0)'
 					}
+				},
+				'snowfall': {
+					'0%': {
+						transform: 'translateY(-10px) rotate(0deg)',
+						opacity: '1'
+					},
+					'100%': {
+						transform: 'translateY(200px) rotate(360deg)',
+						opacity: '0'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.6s ease-out',
-				'slide-up': 'slide-up 0.4s ease-out'
+				'slide-up': 'slide-up 0.4s ease-out',
+				'snowfall': 'snowfall linear infinite'
 			}
 		}
 	},
