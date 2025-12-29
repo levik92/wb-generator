@@ -96,10 +96,10 @@ export const MobileMenu = ({
             </div>
             
             {/* Token Balance */}
-            <div className="space-y-2 border-solid border-8 border-gray-50 rounded-md bg-gray-50">
+            <div className="space-y-2 border-solid border-8 border-secondary rounded-md bg-secondary">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-500">Токены</span>
-                <Badge variant="secondary" className="font-semibold bg-gray-200">
+                <span className="text-sm font-medium text-muted-foreground">Токены</span>
+                <Badge variant="secondary" className="font-semibold bg-muted">
                   {profile.tokens_balance}
                 </Badge>
               </div>

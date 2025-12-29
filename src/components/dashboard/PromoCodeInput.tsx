@@ -150,18 +150,18 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
             </div>
 
             {error && (
-              <Alert className="border-red-200 bg-red-50 flex items-center [&>svg]:static [&>svg]:translate-y-0 [&>svg]:mr-3 [&>svg]:text-red-600 [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+              <Alert className="border-destructive/30 bg-destructive/10 flex items-center [&>svg]:static [&>svg]:translate-y-0 [&>svg]:mr-3 [&>svg]:text-destructive [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
                 <XCircle className="h-4 w-4 flex-shrink-0" />
-                <AlertDescription className="text-red-800">
+                <AlertDescription className="text-destructive">
                   {error}
                 </AlertDescription>
               </Alert>
             )}
           </>
         ) : (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className="border-green-500/30 bg-green-500/10">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-300">
               <div className="flex items-center justify-between">
                 <div>
                   <strong>Промокод активирован!</strong>

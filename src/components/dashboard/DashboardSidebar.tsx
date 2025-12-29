@@ -133,7 +133,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen border-r border-border flex flex-col transition-all duration-300 overflow-y-auto`} style={{ backgroundColor: '#fcfcfc' }}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen border-r border-border bg-sidebar flex flex-col transition-all duration-300 overflow-y-auto`}>
       {/* Logo / Collapse Toggle */}
       <div className={`p-6 ${isCollapsed ? 'p-4' : 'p-6'}`}>
         <div className="flex items-center justify-between">
@@ -241,18 +241,18 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
 
       {/* WB Connection Status */}
       <div className={`p-4 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-gray-100/50 border border-gray-200/50 opacity-60`}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-secondary border border-border opacity-60`}>
           {!isCollapsed && (
             <>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600">Wildberries</p>
-                <p className="text-xs text-gray-500">В разработке</p>
+                <p className="text-sm font-medium text-muted-foreground">Wildberries</p>
+                <p className="text-xs text-muted-foreground">В разработке</p>
               </div>
-              <span className="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600">Скоро</span>
+              <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">Скоро</span>
             </>
           )}
           {isCollapsed && (
-            <div className="w-4 h-4 bg-gray-400 rounded-full" title="Wildberries - в разработке" />
+            <div className="w-4 h-4 bg-muted-foreground/50 rounded-full" title="Wildberries - в разработке" />
           )}
         </div>
       </div>
