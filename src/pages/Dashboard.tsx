@@ -30,6 +30,7 @@ import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { TutorialDialog } from "@/components/dashboard/TutorialDialog";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
+import { Snowfall } from "@/components/Snowfall";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake } from "lucide-react";
 
 interface Profile {
@@ -337,6 +338,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <Snowfall />
       {profile && (
         <TutorialDialog 
           userId={profile.id} 
