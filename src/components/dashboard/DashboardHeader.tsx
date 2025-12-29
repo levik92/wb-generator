@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LogOut, User, UserIcon, Bell, Check, X, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
 interface Profile {
   id: string;
@@ -102,7 +103,10 @@ export const DashboardHeader = ({
           </p>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
+          {/* Theme Toggle */}
+          {!isMobile && <ThemeToggle />}
+          
           {/* Notifications - Hide on mobile */}
           {!isMobile && <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, Zap, Image, FileText, History, CreditCard, Users, Settings, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
+import { Menu, Zap, Image, FileText, History, CreditCard, Users, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 interface Profile {
   id: string;
   email: string;
@@ -24,6 +25,8 @@ export const MobileMenu = ({
   hasUnreadNews = false
 }: MobileMenuProps) => {
   const [open, setOpen] = useState(false);
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const menuItems = [{
     id: 'cards',
     label: 'Генерация карточек',
@@ -125,9 +128,25 @@ export const MobileMenu = ({
             </div>
           </nav>
 
+          {/* Theme Toggle */}
+          <div className="p-4 pt-0">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+            >
+              {isDark ? (
+                <Sun className="w-4 h-4 mr-2" />
+              ) : (
+                <Moon className="w-4 h-4 mr-2" />
+              )}
+              {isDark ? "Светлая тема" : "Тёмная тема"}
+            </Button>
+          </div>
+
           {/* WB Connection Status */}
           <div className="p-4 pt-0">
-            <div className="bg-gray-50 rounded-lg p-3">
+            <div className="bg-secondary rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Wildberries</span>
                 <Badge variant="outline" className="text-xs">
