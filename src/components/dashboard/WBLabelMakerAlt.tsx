@@ -210,7 +210,7 @@ export default function WBLabelMakerAlt() {
       <style>{`
   #wb-gen, #wb-gen *{box-sizing:border-box}
   #wb-gen{
-    --bg:#ffffff; --card:#f5f6f8; --line:#e3e6ea; --muted:#7e8a8a; --text:#222;
+    --bg:hsl(var(--background)); --card:hsl(var(--secondary)); --line:hsl(var(--border)); --muted:hsl(var(--muted-foreground)); --text:hsl(var(--foreground));
     --green:#20a04b; --green-h:#199243; --radius:14px; --shadow:0 8px 28px rgba(0,0,0,.06);
     font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);
     background:var(--bg); padding:0; border-radius:var(--radius);
@@ -219,7 +219,7 @@ export default function WBLabelMakerAlt() {
   #wb-gen .wb-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden}
 
   .wb-input,.wb-select,.wb-btn{width:100%;max-width:520px}
-  .wb-input,.wb-select{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;outline:none;background:#fff}
+  .wb-input,.wb-select{height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;outline:none;background:hsl(var(--background));color:hsl(var(--foreground))}
   .wb-input:focus,.wb-select:focus{border-color:#cfd7d6;box-shadow:0 0 0 2px rgba(32,160,75,.07)}
   .wb-label{display:block;font-weight:600;margin:10px 2px 6px}
   .wb-label.req::after{content:" *";color:#d33}
@@ -236,8 +236,8 @@ export default function WBLabelMakerAlt() {
   .wb-range-top{display:flex;justify-content:space-between;align-items:center;font-weight:600}
   .wb-range input[type=range]{-webkit-appearance:none;appearance:none;height:34px;background:transparent;width:100%}
   .wb-range input[type=range]:focus{outline:none}
-  .wb-range input[type=range]::-webkit-slider-runnable-track{height:8px;background:#eef2f1;border-radius:999px;border:1px solid var(--line)}
-  .wb-range input[type=range]::-moz-range-track{height:8px;background:#eef2f1;border-radius:999px;border:1px solid var(--line)}
+  .wb-range input[type=range]::-webkit-slider-runnable-track{height:8px;background:hsl(var(--muted));border-radius:999px;border:1px solid var(--line)}
+  .wb-range input[type=range]::-moz-range-track{height:8px;background:hsl(var(--muted));border-radius:999px;border:1px solid var(--line)}
   .wb-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;margin-top:-6px;width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .wb-range input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .wb-range input[type=range]::-moz-range-progress{height:8px;background:rgba(32,160,75,.25);border-radius:999px}
@@ -245,9 +245,9 @@ export default function WBLabelMakerAlt() {
   .wb-preview{display:flex;flex-direction:column;gap:14px}
   .wb-prev-head{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 0}
   .wb-prev-title{font-weight:700;font-size:20px}
-  .wb-badge{font-weight:700;font-size:12px;color:#6c757d;border:1px solid var(--line);padding:4px 8px;border-radius:999px;background:#fff}
-  .wb-prev-stage{flex:1;border:1px dashed #dcdedd;border-radius:12px;padding:14px;background:#f5f6f8;min-height:360px}
-  .wb-stage-in{background:#fff;border-radius:10px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:auto}
+  .wb-badge{font-weight:700;font-size:12px;color:hsl(var(--muted-foreground));border:1px solid var(--line);padding:4px 8px;border-radius:999px;background:hsl(var(--background))}
+  .wb-prev-stage{flex:1;border:1px dashed var(--line);border-radius:12px;padding:14px;background:var(--card);min-height:360px}
+  .wb-stage-in{background:hsl(var(--background));border-radius:10px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:auto}
   canvas#preview{display:block;max-width:100%;height:auto}
 
   @media (max-width:980px){

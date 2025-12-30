@@ -8,6 +8,7 @@ import {
   Download,
   Loader2
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminMobileMenu } from "@/components/admin/AdminMobileMenu";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
@@ -176,7 +177,8 @@ export default function Admin() {
               <p className="text-muted-foreground text-xs md:text-sm hidden sm:block truncate">Управление системой WB Генератор</p>
             </div>
           </div>
-          <div className="flex gap-1 md:gap-2 shrink-0 ml-2">
+          <div className="flex items-center gap-1 md:gap-2 shrink-0 ml-2">
+            <ThemeToggle />
             <DataExportDialog>
               <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
                 <Download className="h-3 w-3 md:h-4 md:w-4" />
