@@ -95,9 +95,20 @@ const Dashboard = () => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
+      if (!data) {
+        console.log('Profile not found for user, it may still be creating...');
+        toast({
+          title: "Профиль загружается",
+          description: "Подождите немного, профиль создаётся...",
+        });
+        // Retry after a short delay
+        setTimeout(() => loadProfile(userId), 2000);
+        return;
+      }
       
       // Инкрементируем login_count при каждом входе
       const currentLoginCount = data.login_count || 0;
