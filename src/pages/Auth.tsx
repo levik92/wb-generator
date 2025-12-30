@@ -32,6 +32,8 @@ const Auth = () => {
   const [showTermsError, setShowTermsError] = useState(false);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const captchaRef = useRef<any>(null);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
@@ -41,15 +43,52 @@ const Auth = () => {
   const partnerCode = searchParams.get("partner");
   const tabParam = searchParams.get("tab");
 
+  // Handle session recovery from URL (for password reset links)
   useEffect(() => {
-    if (tabParam === "reset-password") {
-      setActiveTab("new-password");
-    } else if (tabParam === "signup") {
-      setActiveTab("signup");
-    } else if (tabParam === "signin") {
-      setActiveTab("signin");
-    }
-  }, [tabParam]);
+    const handleSessionFromUrl = async () => {
+      // Check if we're on password reset flow
+      if (tabParam === "reset-password") {
+        setActiveTab("new-password");
+        
+        // Wait for Supabase to process the URL tokens
+        // The URL contains access_token and refresh_token in the hash
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          toast({
+            title: "Ошибка",
+            description: "Не удалось восстановить сессию. Попробуйте запросить новую ссылку.",
+            variant: "destructive",
+          });
+        } else if (session) {
+          setSessionReady(true);
+        } else {
+          // Session might not be ready yet, listen for auth state change
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+              setSessionReady(true);
+              subscription.unsubscribe();
+            }
+          });
+          
+          // Cleanup after 10 seconds if nothing happens
+          setTimeout(() => {
+            subscription.unsubscribe();
+            setSessionLoading(false);
+          }, 10000);
+        }
+      } else if (tabParam === "signup") {
+        setActiveTab("signup");
+      } else if (tabParam === "signin") {
+        setActiveTab("signin");
+      }
+      
+      setSessionLoading(false);
+    };
+
+    handleSessionFromUrl();
+  }, [tabParam, toast]);
 
   useEffect(() => {
     // Site key для hCaptcha - получите его из настроек Supabase
@@ -338,6 +377,19 @@ const Auth = () => {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check if session is ready first
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast({
+        title: "Ошибка",
+        description: "Сессия истекла или недействительна. Пожалуйста, запросите новую ссылку для сброса пароля.",
+        variant: "destructive",
+      });
+      setActiveTab("reset");
+      return;
+    }
+
     // Validate password complexity
     const passwordValidation = validatePassword(newPassword);
     if (!passwordValidation.isValid) {
@@ -377,6 +429,17 @@ const Auth = () => {
 
       navigate("/dashboard");
     } catch (error: any) {
+      // Handle specific errors
+      if (error.message?.includes("Auth session missing")) {
+        toast({
+          title: "Ошибка",
+          description: "Ссылка для сброса пароля истекла. Запросите новую ссылку.",
+          variant: "destructive",
+        });
+        setActiveTab("reset");
+        return;
+      }
+      
       toast({
         title: "Ошибка",
         description: error.message,
