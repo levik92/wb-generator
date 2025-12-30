@@ -15,6 +15,7 @@ import {
   LayoutDashboard
 } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -68,7 +69,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-16 md:w-20' : 'w-64'} shrink-0 border-r border-border flex flex-col transition-all duration-300 hidden md:flex`} style={{ backgroundColor: '#fcfcfc' }}>
+    <div className={`${isCollapsed ? 'w-16 md:w-20' : 'w-64'} shrink-0 border-r border-border bg-sidebar flex flex-col transition-all duration-300 hidden md:flex`}>
       {/* Logo / Collapse Toggle */}
       <div className={`${isCollapsed ? 'p-2' : 'p-6'} shrink-0`}>
         <div className="flex items-center justify-between">
@@ -131,6 +132,18 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
           })}
         </ul>
       </nav>
+
+      {/* Theme Toggle */}
+      <div className={`p-4 border-t border-border ${isCollapsed ? 'p-2 flex justify-center' : ''}`}>
+        {isCollapsed ? (
+          <ThemeToggle />
+        ) : (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Тема</span>
+            <ThemeToggle />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

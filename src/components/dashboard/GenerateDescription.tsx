@@ -269,9 +269,9 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
             </div>
             
             {!canGenerate() && (
-              <Alert className="mt-4 border-amber-200 bg-amber-50 [&>svg]:!text-amber-800 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
+              <Alert className="mt-4 border-amber-500/30 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-400/10 [&>svg]:!text-amber-700 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-amber-800 font-medium">
+                <AlertDescription className="text-amber-800 dark:text-amber-300 font-medium">
                   {getGuardMessage()}
                 </AlertDescription>
               </Alert>

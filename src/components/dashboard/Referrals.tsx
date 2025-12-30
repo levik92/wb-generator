@@ -104,7 +104,7 @@ export const Referrals = ({
       <Tabs defaultValue="program" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="program">Программа</TabsTrigger>
-          <TabsTrigger value="invited">Приглашенные ({referredUsers.length})</TabsTrigger>
+          <TabsTrigger value="invited">Приглашенные <span className="ml-1 text-muted-foreground">({referredUsers.length})</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="program" className="space-y-6">
@@ -130,7 +130,7 @@ export const Referrals = ({
                 </h3>
                 <div className="flex gap-2">
                   <Input value={referralLink} readOnly className="flex-1 bg-background/80" />
-                  <Button onClick={copyReferralLink} variant="outline" className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800">
+                  <Button onClick={copyReferralLink} variant="outline" className="px-4 bg-wb-purple/10 border-wb-purple/30 text-wb-purple hover:bg-wb-purple/20 hover:text-wb-purple dark:bg-wb-purple/20 dark:border-wb-purple/40 dark:text-wb-purple-light dark:hover:bg-wb-purple/30">
                     <Copy className="h-4 w-4 mr-2" />
                     Копировать
                   </Button>
@@ -138,13 +138,13 @@ export const Referrals = ({
               </div>
               
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-green-100 border-green-300 rounded-xl shadow-sm border">
-                  <div className="text-3xl font-bold text-green-600 mb-1">+20</div>
-                  <div className="text-sm text-green-700 font-medium">токенов за первую покупку друга</div>
+                <div className="text-center p-4 bg-green-500/10 border-green-500/30 dark:bg-green-500/15 dark:border-green-500/30 rounded-xl shadow-sm border">
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">+20</div>
+                  <div className="text-sm text-green-700 dark:text-green-300 font-medium">токенов за первую покупку друга</div>
                 </div>
-                <div className="text-center p-4 bg-blue-100 border-blue-300 rounded-xl shadow-sm border">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">+10</div>
-                  <div className="text-sm text-blue-700 font-medium">токенов другу при регистрации</div>
+                <div className="text-center p-4 bg-blue-500/10 border-blue-500/30 dark:bg-blue-500/15 dark:border-blue-500/30 rounded-xl shadow-sm border">
+                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">+10</div>
+                  <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">токенов другу при регистрации</div>
                 </div>
               </div>
               
@@ -186,7 +186,7 @@ export const Referrals = ({
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        {user.status === 'completed' && user.tokens_awarded ? <Badge className="bg-green-100 text-green-700 border-green-200">
+                        {user.status === 'completed' && user.tokens_awarded ? <Badge className="bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30">
                             <Gift className="w-3 h-3 mr-1" />
                             +{user.tokens_awarded} токенов
                           </Badge> : <Badge variant="secondary">

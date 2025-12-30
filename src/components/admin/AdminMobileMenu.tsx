@@ -14,6 +14,7 @@ import {
   DollarSign,
   LayoutDashboard
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface AdminMobileMenuProps {
   activeTab: string;
@@ -85,7 +86,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
       <SheetContent side="left" className="w-80 p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b">
+          <div className="p-6 border-b border-border">
             <div className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
@@ -130,6 +131,14 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
               })}
             </div>
           </nav>
+
+          {/* Theme Toggle */}
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Тема</span>
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
       </SheetContent>
     </Sheet>

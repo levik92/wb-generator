@@ -54,19 +54,19 @@ const getNotificationColor = (type: string) => {
   switch (type) {
     case 'card_generated':
     case 'description_generated':
-      return 'bg-blue-100 text-blue-600 border-blue-200';
+      return 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30';
     case 'tokens_added':
     case 'referral_bonus':
-      return 'bg-green-100 text-green-600 border-green-200';
+      return 'bg-green-500/10 text-green-600 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30';
     case 'payment_confirmed':
-      return 'bg-purple-100 text-purple-600 border-purple-200';
+      return 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:bg-purple-500/20 dark:text-purple-400 dark:border-purple-500/30';
     case 'email_changed':
     case 'password_changed':
-      return 'bg-yellow-100 text-yellow-600 border-yellow-200';
+      return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30';
     case 'news':
       return 'bg-wb-purple/10 text-wb-purple border-wb-purple/20';
     default:
-      return 'bg-gray-100 text-gray-600 border-gray-200';
+      return 'bg-muted text-muted-foreground border-border';
   }
 };
 

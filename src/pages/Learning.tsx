@@ -116,7 +116,7 @@ const Learning = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {videoLessons.map((lesson, index) => (
-            <Card key={lesson.id} className="overflow-hidden bg-gray-50 border">
+            <Card key={lesson.id} className="overflow-hidden bg-secondary border">
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-wb-purple/10 rounded-lg flex items-center justify-center shrink-0 mt-1">
