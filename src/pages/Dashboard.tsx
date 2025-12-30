@@ -67,7 +67,7 @@ const Dashboard = () => {
         return;
       }
       setUser(session.user);
-      loadProfile(session.user);
+      loadProfile(session.user.id);
     });
 
     // Listen for auth changes
@@ -78,10 +78,10 @@ const Dashboard = () => {
           return;
         }
         setUser(session.user);
-
+        
         // Defer profile loading to prevent potential deadlocks
         setTimeout(() => {
-          loadProfile(session.user);
+          loadProfile(session.user.id);
         }, 0);
       }
     );
@@ -89,41 +89,16 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const loadProfile = async (authUser: User) => {
-    const userId = authUser.id;
-
+  const loadProfile = async (userId: string) => {
     try {
-      const { data: profileData, error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
-
-      // If profile is missing (older users / failed trigger), create it on the fly
-      let data = profileData;
-      if (!data) {
-        const email = authUser.email ?? '';
-        if (!email) {
-          throw new Error('Не удалось получить email пользователя для создания профиля');
-        }
-
-        const { data: created, error: createError } = await supabase
-          .from('profiles')
-          .insert({
-            id: userId,
-            email,
-            full_name: (authUser.user_metadata as any)?.full_name ?? null,
-          })
-          .select('*')
-          .maybeSingle();
-
-        if (createError) throw createError;
-        if (!created) throw new Error('Не удалось создать профиль пользователя');
-        data = created as any;
-      }
-
+      
       // Инкрементируем login_count при каждом входе
       const currentLoginCount = data.login_count || 0;
       if (currentLoginCount < 3) {
@@ -131,16 +106,16 @@ const Dashboard = () => {
           .from('profiles')
           .update({ login_count: currentLoginCount + 1 })
           .eq('id', userId);
-
+        
         // Обновляем данные профиля с новым значением
         data.login_count = currentLoginCount + 1;
       }
-
+      
       setProfile(data);
-
+      
       // Check for unread news after loading profile
       await checkUnreadNews(userId);
-
+      
       // Process pending referral/partner codes from OAuth flow
       await processPendingCodes(userId, data);
     } catch (error: any) {
@@ -302,7 +277,7 @@ const Dashboard = () => {
 
   const refreshProfile = () => {
     if (user) {
-      loadProfile(user);
+      loadProfile(user.id);
     }
   };
 
