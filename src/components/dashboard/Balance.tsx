@@ -44,12 +44,12 @@ export default function Balance() {
         .from('profiles')
         .select('tokens_balance')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error loading balance:', error);
-      } else {
-        setBalance(data?.tokens_balance || 0);
+      } else if (data) {
+        setBalance(data.tokens_balance || 0);
       }
     } catch (error) {
       console.error('Error loading balance:', error);
