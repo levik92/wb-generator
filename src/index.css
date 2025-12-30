@@ -114,44 +114,44 @@
   }
 
   .dark {
-    /* Dark mode - neutral dark like Lovable */
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    /* Dark mode - #111111 based dark theme */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 93%;
     
     /* Wildberries purple - preserved and vibrant in dark mode */
     --wb-purple: 268 83% 65%;
     --wb-purple-light: 268 83% 75%;
     --wb-purple-dark: 268 83% 55%;
     
-    /* Neutral dark palette */
-    --gray-50: 215 28% 17%;
-    --gray-100: 217 33% 13%;
-    --gray-200: 215 28% 17%;
-    --gray-300: 217 19% 27%;
-    --gray-400: 215 14% 40%;
-    --gray-500: 215 14% 55%;
-    --gray-600: 210 14% 66%;
-    --gray-700: 210 11% 71%;
-    --gray-800: 214 32% 91%;
-    --gray-900: 213 31% 91%;
+    /* Neutral dark palette based on #111111 */
+    --gray-50: 0 0% 13%;
+    --gray-100: 0 0% 10%;
+    --gray-200: 0 0% 15%;
+    --gray-300: 0 0% 20%;
+    --gray-400: 0 0% 35%;
+    --gray-500: 0 0% 50%;
+    --gray-600: 0 0% 65%;
+    --gray-700: 0 0% 75%;
+    --gray-800: 0 0% 85%;
+    --gray-900: 0 0% 93%;
 
-    --card: 222 47% 7%;
-    --card-foreground: 213 31% 91%;
-    --card-border: 217 33% 17%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 93%;
+    --card-border: 0 0% 18%;
 
-    --popover: 222 47% 7%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 93%;
 
     --primary: 268 83% 65%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 268 83% 55%;
 
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 213 31% 91%;
-    --secondary-hover: 217 33% 22%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 93%;
+    --secondary-hover: 0 0% 18%;
 
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 14% 55%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
 
     --accent: 268 83% 65%;
     --accent-foreground: 0 0% 100%;
@@ -159,9 +159,9 @@
     --destructive: 0 63% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 13%;
-    --input-border: 217 19% 27%;
+    --border: 0 0% 18%;
+    --input: 0 0% 10%;
+    --input-border: 0 0% 22%;
     --ring: 268 83% 65%;
 
     /* Dark shadows */
@@ -176,13 +176,13 @@
     --gradient-card: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--gray-100)) 100%);
 
     /* Sidebar tokens for dark mode */
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 213 31% 91%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 93%;
     --sidebar-primary: 268 83% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 28% 17%;
-    --sidebar-accent-foreground: 213 31% 91%;
-    --sidebar-border: 217 33% 17%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 0 0% 18%;
     --sidebar-ring: 268 83% 65%;
   }
 }

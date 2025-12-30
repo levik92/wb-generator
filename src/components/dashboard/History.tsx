@@ -313,7 +313,7 @@ export const History = ({
                           <span className="truncate">Скачать</span>
                         </>}
                     </Button>
-                    <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 flex-shrink-0 px-3">
+                    <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:border-destructive flex-shrink-0 px-3">
                       Удалить
                     </Button>
                   </div>
