@@ -272,10 +272,10 @@ export const History = ({
                 <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
                   {/* Main content */}
                   <div className="flex items-start space-x-3 min-w-0 flex-1">
-                    {generation.generation_type === 'cards' && generation.output_data?.images?.[0] ? (
+                    {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? (
                       <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex-shrink-0 overflow-hidden">
                         <img 
-                          src={generation.output_data.images[0]} 
+                          src={generation.output_data.images[0].image_url} 
                           alt="Превью" 
                           className="w-full h-full object-cover"
                           onError={(e) => {
