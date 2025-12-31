@@ -273,7 +273,7 @@ export const History = ({
                   {/* Main content */}
                   <div className="flex items-start space-x-3 min-w-0 flex-1">
                     {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? (
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex-shrink-0 overflow-hidden">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg flex-shrink-0 overflow-hidden">
                         <img 
                           src={generation.output_data.images[0].image_url} 
                           alt="Превью" 
@@ -288,8 +288,8 @@ export const History = ({
                         />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/50 dark:to-purple-800/50 flex-shrink-0">
-                        {generation.generation_type === 'cards' ? <Image className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" /> : <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" />}
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/50 dark:to-purple-800/50 flex-shrink-0">
+                        {generation.generation_type === 'cards' ? <Image className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-600 dark:text-purple-400" /> : <FileText className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-600 dark:text-purple-400" />}
                       </div>
                     )}
                     
