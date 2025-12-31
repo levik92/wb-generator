@@ -397,29 +397,29 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
             <div className="space-y-6">
               {/* Stats Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-green-800">
+                <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-3">
+                  <div className="text-base lg:text-lg font-semibold text-green-600 dark:text-green-400">
                     {userDetails.totalPaid}₽
                   </div>
-                  <div className="text-xs text-green-600">Всего оплачено</div>
+                  <div className="text-xs text-green-600/80 dark:text-green-400/80">Всего оплачено</div>
                 </div>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-blue-800">
+                <div className="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
+                  <div className="text-base lg:text-lg font-semibold text-blue-600 dark:text-blue-400">
                     {userDetails.tokensSpent}
                   </div>
-                  <div className="text-xs text-blue-600">Потрачено токенов</div>
+                  <div className="text-xs text-blue-600/80 dark:text-blue-400/80">Потрачено токенов</div>
                 </div>
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-purple-800">
+                <div className="bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 rounded-lg p-3">
+                  <div className="text-base lg:text-lg font-semibold text-purple-600 dark:text-purple-400">
                     {userDetails.generationsCount}
                   </div>
-                  <div className="text-xs text-purple-600">Генераций</div>
+                  <div className="text-xs text-purple-600/80 dark:text-purple-400/80">Генераций</div>
                 </div>
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-orange-800">
+                <div className="bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 rounded-lg p-3">
+                  <div className="text-base lg:text-lg font-semibold text-orange-600 dark:text-orange-400">
                     {userDetails.referralsCount}
                   </div>
-                  <div className="text-xs text-orange-600">Рефералов</div>
+                  <div className="text-xs text-orange-600/80 dark:text-orange-400/80">Рефералов</div>
                 </div>
               </div>
 

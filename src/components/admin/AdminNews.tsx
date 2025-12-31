@@ -34,14 +34,14 @@ const availableTags = [
 ];
 
 const tagColors: Record<string, string> = {
-  'Новости': 'bg-blue-100 text-blue-800',
-  'Обновления': 'bg-green-100 text-green-800',
-  'Технические работы': 'bg-orange-100 text-orange-800',
-  'Исправления': 'bg-red-100 text-red-800',
-  'Инструкции': 'bg-purple-100 text-purple-800',
-  'Советы': 'bg-yellow-100 text-yellow-800',
-  'Аналитика': 'bg-indigo-100 text-indigo-800',
-  'Кейсы': 'bg-pink-100 text-pink-800',
+  'Новости': 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+  'Обновления': 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400',
+  'Технические работы': 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400',
+  'Исправления': 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400',
+  'Инструкции': 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+  'Советы': 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
+  'Аналитика': 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+  'Кейсы': 'bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400',
 };
 
 export const AdminNews = () => {

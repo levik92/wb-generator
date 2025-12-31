@@ -34,7 +34,7 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
             <CardTitle className="text-base md:text-lg">Активные пользователи</CardTitle>
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-2xl md:text-3xl font-bold text-green-600">
+            <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">
               {users.filter(u => !u.is_blocked).length}
             </div>
             <p className="text-xs md:text-sm text-muted-foreground">
@@ -48,7 +48,7 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
             <CardTitle className="text-base md:text-lg">Подключений WB</CardTitle>
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-2xl md:text-3xl font-bold text-blue-600">
+            <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">
               {users.filter(u => u.wb_connected).length}
             </div>
             <p className="text-xs md:text-sm text-muted-foreground">
@@ -62,7 +62,7 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
             <CardTitle className="text-base md:text-lg">Заблокированные</CardTitle>
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-2xl md:text-3xl font-bold text-red-600">
+            <div className="text-2xl md:text-3xl font-bold text-red-600 dark:text-red-400">
               {users.filter(u => u.is_blocked).length}
             </div>
             <p className="text-xs md:text-sm text-muted-foreground">

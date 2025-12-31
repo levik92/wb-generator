@@ -272,9 +272,26 @@ export const History = ({
                 <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
                   {/* Main content */}
                   <div className="flex items-start space-x-3 min-w-0 flex-1">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 flex-shrink-0">
-                      {generation.generation_type === 'cards' ? <Image className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600" /> : <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600" />}
-                    </div>
+                    {generation.generation_type === 'cards' && generation.output_data?.images?.[0] ? (
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex-shrink-0 overflow-hidden">
+                        <img 
+                          src={generation.output_data.images[0]} 
+                          alt="Превью" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Fallback to icon if image fails to load
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement!.classList.add('bg-gradient-to-br', 'from-purple-100', 'to-purple-200', 'dark:from-purple-900/50', 'dark:to-purple-800/50', 'items-center', 'justify-center');
+                            target.parentElement!.innerHTML = '<svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/50 dark:to-purple-800/50 flex-shrink-0">
+                        {generation.generation_type === 'cards' ? <Image className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" /> : <FileText className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" />}
+                      </div>
+                    )}
                     
                     <div className="min-w-0 flex-1">
                       {/* Title and status */}
