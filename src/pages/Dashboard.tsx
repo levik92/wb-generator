@@ -269,13 +269,9 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      // Clean up auth state
-      localStorage.clear();
-      sessionStorage.clear();
-      
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
-      
+
       navigate("/");
     } catch (error: any) {
       toast({
@@ -285,7 +281,6 @@ const Dashboard = () => {
       });
     }
   };
-
   const refreshProfile = () => {
     if (user) {
       loadProfile(user.id);
