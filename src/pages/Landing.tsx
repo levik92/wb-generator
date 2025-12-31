@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PricingSection } from "@/components/landing/PricingSection";
 import Footer from "@/components/Footer";
 import YandexMetrika from "@/components/YandexMetrika";
-
+import { ForceLightTheme } from "@/components/ForceLightTheme";
 import heroDemo from "@/assets/hero-demo.jpg";
 import dashboardDemo from "@/assets/dashboard-demo.png";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
@@ -84,6 +84,7 @@ const Landing = () => {
     });
   };
   return <div className="min-h-screen bg-background">
+      <ForceLightTheme />
       <YandexMetrika />
       {/* Header */}
       <header className="border-b border-border">
