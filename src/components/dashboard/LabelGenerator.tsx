@@ -406,10 +406,10 @@ export default function LabelGenerator() {
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Генератор этикеток</h1>
           <p className="text-muted-foreground mt-1">Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров</p>
         </div>
-        <div className="bg-green-100 border border-green-300 rounded-lg p-3 max-w-sm">
+        <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-3 max-w-sm">
           <div className="flex items-center gap-2">
             <Badge className="bg-green-500 text-white px-2 py-1 text-xs hover:bg-green-500 focus:outline-none focus:ring-0 pointer-events-none">БЕСПЛАТНО</Badge>
-            <span className="text-green-700 text-sm font-medium">для всех пользователей WB Генератор</span>
+            <span className="text-green-600 dark:text-green-400 text-sm font-medium">для всех пользователей WB Генератор</span>
           </div>
         </div>
       </div>
