@@ -14,7 +14,7 @@ import { ArrowLeft, Zap, Loader2, Gift } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YandexMetrika from "@/components/YandexMetrika";
-import { ForceLightTheme } from "@/components/ForceLightTheme";
+
 
 // Lazy load HCaptcha for faster initial page load
 const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
@@ -504,7 +504,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <ForceLightTheme />
       <YandexMetrika />
       <div className="w-full max-w-md">
         {/* Header */}
