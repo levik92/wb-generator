@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { MobileMenu } from "@/components/dashboard/MobileMenu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GenerateCards } from "@/components/dashboard/GenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
@@ -28,10 +27,15 @@ import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import News from "@/pages/News";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
-import { TutorialDialog } from "@/components/dashboard/TutorialDialog";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { Snowfall } from "@/components/Snowfall";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
+
+// Mobile components
+import { MobileTabBar } from "@/components/mobile/MobileTabBar";
+import { MobileSideMenu } from "@/components/mobile/MobileSideMenu";
+import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
+import { OnboardingWizard } from "@/components/mobile/OnboardingWizard";
 
 interface Profile {
   id: string;
@@ -52,6 +56,7 @@ const Dashboard = () => {
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
   const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -345,11 +350,34 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <Snowfall />
-      {profile && (
-        <TutorialDialog 
+      
+      {/* PWA Install Prompt - Mobile only */}
+      {profile && isMobile && (
+        <PWAInstallPrompt 
           userId={profile.id} 
           loginCount={profile.login_count || 0}
-          onNavigateToLearning={() => handleTabChange('learning')}
+        />
+      )}
+      
+      {/* Onboarding Wizard - for first-time users */}
+      {profile && (
+        <OnboardingWizard 
+          userId={profile.id} 
+          loginCount={profile.login_count || 0}
+          onComplete={() => {}}
+          onSkip={() => {}}
+        />
+      )}
+      
+      {/* Mobile Side Menu */}
+      {isMobile && (
+        <MobileSideMenu
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          profile={profile}
+          hasUnreadNews={hasUnreadNews}
         />
       )}
       
@@ -365,62 +393,66 @@ const Dashboard = () => {
       )}
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
-        {/* Header with Mobile Menu - Scrollable on mobile */}
-        <div className="flex items-center justify-between p-4 border-b md:hidden">
-          <MobileMenu 
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            profile={profile}
-            hasUnreadNews={hasUnreadNews}
-          />
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-base sm:text-lg font-semibold">WB Генератор</span>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-wb-purple text-white">
-                    <UserIcon className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-background border shadow-lg" align="end" forceMount>
-              <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium leading-none">
-                  {profile.full_name || 'Пользователь'}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {profile.email}
-                </p>
+        {/* Mobile Header */}
+        {isMobile && (
+          <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-background/95 backdrop-blur-xl z-30">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="bg-primary/10 hover:bg-primary/20"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-5 w-5 text-primary" />
+            </Button>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                <Zap className="w-5 h-5 text-white" />
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => navigate('/partner')}
-                className="hover:bg-wb-purple/10"
-              >
-                <Handshake className="mr-2 h-4 w-4" />
-                <span>Партнёрам</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => setActiveTab('settings')}
-                className="hover:bg-wb-purple/10"
-              >
-                <UserIconName className="mr-2 h-4 w-4" />
-                <span>Настройки</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="hover:bg-wb-purple/10">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Выйти</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              <span className="text-base font-semibold">WB Генератор</span>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-white">
+                      <UserIcon className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-background border shadow-lg" align="end" forceMount>
+                <div className="flex flex-col space-y-1 p-2">
+                  <p className="text-sm font-medium leading-none">
+                    {profile.full_name || 'Пользователь'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {profile.email}
+                  </p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => navigate('/partner')}
+                  className="hover:bg-primary/10"
+                >
+                  <Handshake className="mr-2 h-4 w-4" />
+                  <span>Партнёрам</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setActiveTab('settings')}
+                  className="hover:bg-primary/10"
+                >
+                  <UserIconName className="mr-2 h-4 w-4" />
+                  <span>Настройки</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="hover:bg-primary/10">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Выйти</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         
         {/* Desktop Header - Scrollable with content */}
         {!isMobile && (
@@ -431,15 +463,23 @@ const Dashboard = () => {
           />
         )}
         
-        <main className="flex-1 p-4 md:p-6">
+        <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
           {/* Dashboard Banners */}
           <DashboardBanners userId={profile.id} />
           
           {renderContent()}
         </main>
         
-        <Footer />
+        {!isMobile && <Footer />}
       </div>
+      
+      {/* Mobile Tab Bar */}
+      {isMobile && (
+        <MobileTabBar 
+          activeTab={activeTab} 
+          onTabChange={handleTabChange} 
+        />
+      )}
     </div>
   );
 };
