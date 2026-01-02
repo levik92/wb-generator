@@ -1,0 +1,171 @@
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { Check, X, Minus } from "lucide-react";
+
+const comparisonData = [
+  {
+    feature: "Время на 1 карточку",
+    wbgen: "3 минуты",
+    designer: "1-3 дня",
+    constructor: "1-2 часа",
+  },
+  {
+    feature: "Стоимость карточки",
+    wbgen: "от 120₽",
+    designer: "5 000-15 000₽",
+    constructor: "Бесплатно*",
+  },
+  {
+    feature: "Профессиональный дизайн",
+    wbgen: true,
+    designer: true,
+    constructor: false,
+  },
+  {
+    feature: "Уникальность",
+    wbgen: true,
+    designer: true,
+    constructor: false,
+  },
+  {
+    feature: "Инфографика",
+    wbgen: true,
+    designer: true,
+    constructor: "partial",
+  },
+  {
+    feature: "SEO-описания",
+    wbgen: true,
+    designer: false,
+    constructor: false,
+  },
+  {
+    feature: "Правки бесплатно",
+    wbgen: true,
+    designer: false,
+    constructor: true,
+  },
+  {
+    feature: "Не нужен опыт",
+    wbgen: true,
+    designer: true,
+    constructor: false,
+  },
+];
+
+const renderValue = (value: boolean | string) => {
+  if (value === true) {
+    return (
+      <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+        <Check className="w-4 h-4 text-emerald-400" />
+      </div>
+    );
+  }
+  if (value === false) {
+    return (
+      <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+        <X className="w-4 h-4 text-red-400" />
+      </div>
+    );
+  }
+  if (value === "partial") {
+    return (
+      <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+        <Minus className="w-4 h-4 text-amber-400" />
+      </div>
+    );
+  }
+  return <span className="text-white/70">{value}</span>;
+};
+
+export const ComparisonSection = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(240,10%,4%)] via-[hsl(240,8%,6%)] to-[hsl(240,10%,4%)]" />
+
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        {/* Section header */}
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+            Сравнение
+          </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
+            WBGen vs альтернативы
+          </h2>
+          <p className="text-lg text-white/50 max-w-2xl mx-auto">
+            Объективное сравнение способов создания карточек для Wildberries
+          </p>
+        </motion.div>
+
+        {/* Comparison table */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="max-w-4xl mx-auto"
+        >
+          <div className="glass-card rounded-3xl overflow-hidden">
+            {/* Header */}
+            <div className="grid grid-cols-4 gap-4 p-6 border-b border-white/10">
+              <div className="text-sm text-white/40 font-medium">Критерий</div>
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)]">
+                  <span className="text-sm font-bold text-white">WBGen</span>
+                </div>
+              </div>
+              <div className="text-center text-sm text-white/60 font-medium">
+                Дизайнер
+              </div>
+              <div className="text-center text-sm text-white/60 font-medium">
+                Конструктор
+              </div>
+            </div>
+
+            {/* Rows */}
+            <div className="divide-y divide-white/5">
+              {comparisonData.map((row, index) => (
+                <motion.div
+                  key={row.feature}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.3 + index * 0.05 }}
+                  className="grid grid-cols-4 gap-4 p-6 items-center hover:bg-white/[0.02] transition-colors"
+                >
+                  <div className="text-sm text-white/70">{row.feature}</div>
+                  <div className="flex justify-center">
+                    <div className="comparison-highlight rounded-lg px-3 py-2">
+                      {renderValue(row.wbgen)}
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    {renderValue(row.designer)}
+                  </div>
+                  <div className="flex justify-center">
+                    {renderValue(row.constructor)}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Footer note */}
+            <div className="p-6 border-t border-white/10 bg-white/[0.02]">
+              <p className="text-xs text-white/40 text-center">
+                * Бесплатные конструкторы ограничены в функционале и не дают профессионального результата
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};

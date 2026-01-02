@@ -1,0 +1,256 @@
+/* Liquid Glass Landing Theme - Premium Dark Mode */
+
+/* Landing-specific CSS variables */
+.landing-dark {
+  /* Deep dark background */
+  --landing-bg: 240 10% 4%;
+  --landing-bg-secondary: 240 8% 8%;
+  --landing-bg-tertiary: 240 6% 12%;
+  
+  /* Glass effect tokens */
+  --glass-bg: 240 10% 10% / 0.6;
+  --glass-border: 0 0% 100% / 0.1;
+  --glass-border-hover: 0 0% 100% / 0.2;
+  
+  /* Neon glow colors */
+  --glow-purple: 268 100% 65%;
+  --glow-blue: 220 100% 65%;
+  --glow-green: 160 100% 50%;
+  --glow-pink: 330 100% 65%;
+  
+  /* Text hierarchy */
+  --text-primary: 0 0% 100%;
+  --text-secondary: 0 0% 70%;
+  --text-tertiary: 0 0% 50%;
+  
+  /* Accent colors */
+  --accent-purple: 268 83% 60%;
+  --accent-purple-glow: 268 100% 70%;
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Glass card effect */
+.glass-card {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--glass-bg)) 0%,
+    hsl(240 10% 8% / 0.4) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--glass-border));
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: hsl(var(--glass-border-hover));
+  transform: translateY(-4px);
+  box-shadow: 
+    0 20px 40px -15px hsl(var(--glow-purple) / 0.15),
+    0 0 0 1px hsl(var(--glass-border-hover));
+}
+
+/* Glow effects */
+.glow-purple {
+  box-shadow: 
+    0 0 20px hsl(var(--glow-purple) / 0.3),
+    0 0 40px hsl(var(--glow-purple) / 0.2),
+    0 0 60px hsl(var(--glow-purple) / 0.1);
+}
+
+.glow-text {
+  text-shadow: 
+    0 0 20px hsl(var(--glow-purple) / 0.5),
+    0 0 40px hsl(var(--glow-purple) / 0.3);
+}
+
+/* Animated gradient background */
+.gradient-animated {
+  background: linear-gradient(
+    -45deg,
+    hsl(268 83% 15%) 0%,
+    hsl(240 10% 6%) 25%,
+    hsl(220 100% 15%) 50%,
+    hsl(240 10% 6%) 75%,
+    hsl(268 83% 15%) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating animation */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(20px) rotate(-2deg); }
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 10s ease-in-out infinite;
+}
+
+/* Pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px hsl(var(--glow-purple) / 0.4),
+      0 0 40px hsl(var(--glow-purple) / 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px hsl(var(--glow-purple) / 0.6),
+      0 0 60px hsl(var(--glow-purple) / 0.3);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Grid pattern overlay */
+.grid-pattern {
+  background-image: 
+    linear-gradient(hsl(0 0% 100% / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 100% / 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Smooth scroll reveal */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Button premium styles */
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, hsl(var(--accent-purple)) 0%, hsl(268 83% 50%) 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(0 0% 100% / 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-premium:hover::before {
+  left: 100%;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 30px -10px hsl(var(--glow-purple) / 0.5),
+    0 0 0 1px hsl(var(--accent-purple) / 0.3);
+}
+
+/* Before/After slider styles */
+.before-after-handle {
+  background: linear-gradient(180deg, hsl(var(--accent-purple)) 0%, hsl(268 83% 50%) 100%);
+  box-shadow: 
+    0 0 20px hsl(var(--glow-purple) / 0.5),
+    0 4px 15px -5px hsl(0 0% 0% / 0.3);
+}
+
+/* Section divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--glass-border)) 20%,
+    hsl(var(--accent-purple) / 0.3) 50%,
+    hsl(var(--glass-border)) 80%,
+    transparent 100%
+  );
+}
+
+/* Comparison table styles */
+.comparison-highlight {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--accent-purple) / 0.1) 0%,
+    hsl(var(--accent-purple) / 0.05) 100%
+  );
+  border: 1px solid hsl(var(--accent-purple) / 0.3);
+}
+
+/* FAQ accordion styles */
+.faq-item {
+  border: 1px solid hsl(var(--glass-border));
+  background: hsl(var(--glass-bg));
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+  border-color: hsl(var(--glass-border-hover));
+  background: hsl(240 10% 12% / 0.6);
+}
+
+/* Stats counter animation */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-number {
+  animation: count-up 0.6s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .glass-card {
+    backdrop-filter: blur(10px);
+  }
+  
+  .glow-purple {
+    box-shadow: 
+      0 0 15px hsl(var(--glow-purple) / 0.2),
+      0 0 30px hsl(var(--glow-purple) / 0.1);
+  }
+}
