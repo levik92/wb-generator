@@ -5,125 +5,61 @@ import Footer from "@/components/Footer";
 
 const Privacy = () => {
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="mb-8">
-          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors gap-2">
+            <ArrowLeft className="w-4 h-4" />
             На главную
           </Link>
-          <h1 className="text-3xl font-bold mb-4">Политика конфиденциальности</h1>
-          <p className="text-muted-foreground">Последнее обновление: 26 августа 2025 г.</p>
+        </div>
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3">Политика конфиденциальности</h1>
+          <p className="text-muted-foreground text-sm">Последнее обновление: 26 августа 2025 г.</p>
         </div>
 
-        <Card>
+        <Card className="rounded-2xl border-border">
           <CardHeader>
-            <CardTitle>1. Общие положения</CardTitle>
+            <CardTitle className="text-lg">1. Общие положения</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 text-sm sm:text-base">
             <div>
-              <h3 className="text-lg font-semibold mb-3">1.1. Основные понятия</h3>
-              <p className="mb-4">
-                Настоящая Политика конфиденциальности персональных данных (далее — Политика) действует в отношении всей информации, которую WB Генератор и/или его аффилированные лица могут получить о Пользователе во время использования им сайта wbgen.ru, его программ и его продуктов.
+              <h3 className="font-semibold mb-3">1.1. Основные понятия</h3>
+              <p className="mb-4 text-muted-foreground leading-relaxed">
+                Настоящая Политика конфиденциальности персональных данных действует в отношении всей информации, которую WB Генератор может получить о Пользователе во время использования сайта wbgen.ru.
               </p>
-              <p className="mb-4">
-                Использование сервисов WB Генератор означает безоговорочное согласие пользователя с настоящей Политикой и указанными в ней условиями обработки его персональной информации; в случае несогласия с этими условиями пользователь должен воздержаться от использования сервисов.
+              <p className="text-muted-foreground leading-relaxed">
+                Использование сервисов WB Генератор означает безоговорочное согласие пользователя с настоящей Политикой.
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">2. Персональная информация пользователей, которую получает и обрабатывает WB Генератор</h3>
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">2.1. В рамках настоящей Политики под «персональной информацией пользователя» понимаются:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Персональные данные пользователя, которые пользователь предоставляет о себе самостоятельно при регистрации или в процессе использования Сервисов.</li>
-                  <li>Данные, которые передаются в автоматическом режиме в зависимости от настроек используемого Пользователем программного обеспечения.</li>
-                </ul>
-              </div>
-              
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">2.2. WB Генератор обрабатывает следующие персональные данные:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Адрес электронной почты</li>
-                  <li>Имя пользователя</li>
-                  <li>Данные об использовании сервиса</li>
-                  <li>Информация о загружаемых изображениях товаров</li>
-                  <li>История генераций и транзакций</li>
-                </ul>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">3. Цели обработки персональной информации пользователей</h3>
-              <div className="mb-4">
-                <p className="mb-2">3.1. WB Генератор обрабатывает персональную информацию пользователей в следующих целях:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>Предоставление пользователю услуг WB Генератор</li>
-                  <li>Связь с пользователем, в том числе направление уведомлений, запросов и информации</li>
-                  <li>Улучшение качества Сервисов, удобства их использования</li>
-                  <li>Проведение статистических и иных исследований</li>
-                  <li>Обеспечение безопасности и предотвращение мошенничества</li>
-                </ul>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">4. Условия обработки персональной информации пользователей и её передачи третьим лицам</h3>
-              <p className="mb-4">
-                4.1. WB Генератор хранит персональную информацию пользователей в соответствии с внутренними регламентами конкретных сервисов.
-              </p>
-              <p className="mb-4">
-                4.2. В отношении персональной информации пользователя сохраняется её конфиденциальность. При использовании сервисов пользователь соглашается с тем, что определённая часть его персональной информации становится общедоступной.
-              </p>
-              <p className="mb-4">
-                4.3. WB Генератор вправе передать персональную информацию пользователя третьим лицам в следующих случаях:
-              </p>
-              <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                <li>Пользователь выразил согласие на такие действия</li>
-                <li>Передача необходима для использования пользователем определённого Сервиса</li>
-                <li>Передача предусмотрена российским или иным применимым законодательством</li>
-                <li>Для обеспечения безопасности сервисов</li>
+              <h3 className="font-semibold mb-3">2. Персональная информация</h3>
+              <p className="mb-3 text-muted-foreground">WB Генератор обрабатывает следующие данные:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
+                <li>Адрес электронной почты</li>
+                <li>Имя пользователя</li>
+                <li>Данные об использовании сервиса</li>
+                <li>Информация о загружаемых изображениях</li>
+                <li>История генераций и транзакций</li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">5. Изменение и удаление персональной информации</h3>
-              <p className="mb-4">
-                5.1. Пользователь может в любой момент изменить (обновить, дополнить) предоставленную им персональную информацию или её часть, а также параметры её конфиденциальности.
-              </p>
-              <p className="mb-4">
-                5.2. Пользователь может удалить предоставленную им в рамках определённой учетной записи персональную информацию. При этом удаление аккаунта может повлечь невозможность использования ряда Сервисов WB Генератор.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">6. Меры, применяемые для защиты персональной информации пользователей</h3>
-              <p className="mb-4">
-                6.1. WB Генератор принимает необходимые и достаточные организационные и технические меры для защиты персональной информации пользователя от неправомерного или случайного доступа, уничтожения, изменения, блокирования, копирования, распространения, а также от иных неправомерных действий с ней третьих лиц.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">7. Контактная информация и реквизиты</h3>
-              <p className="mb-4">
-                7.1. Все вопросы и предложения по настоящей Политике следует направлять по адресу: info@wbgen.ru
-              </p>
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">7.2. Реквизиты оператора персональных данных:</h4>
-                <ul className="list-none space-y-1 ml-4 text-sm">
-                  <li><strong>Наименование:</strong> ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ "МАРКЕТШОП №1"</li>
+              <h3 className="font-semibold mb-3">7. Контактная информация</h3>
+              <p className="mb-4 text-muted-foreground">Вопросы направляйте по адресу: info@wbgen.ru</p>
+              <div className="p-4 rounded-xl bg-secondary/50">
+                <p className="font-medium mb-2 text-sm">Реквизиты:</p>
+                <ul className="list-none space-y-1 text-xs text-muted-foreground">
+                  <li><strong>Наименование:</strong> ООО "МАРКЕТШОП №1"</li>
                   <li><strong>ИНН:</strong> 6700002780</li>
-                  <li><strong>КПП:</strong> 670001001</li>
-                  <li><strong>Расчётный счёт:</strong> 40702810820000198340</li>
-                  <li><strong>Название банка:</strong> ООО "Банк Точка"</li>
-                  <li><strong>БИК:</strong> 044525104</li>
-                  <li><strong>Корреспондентский счёт:</strong> 30101810745374525104</li>
                   <li><strong>Сайт:</strong> wbgen.ru</li>
                 </ul>
               </div>
-              <p className="mb-4">
-                7.3. Настоящая Политика может быть изменена или дополнена. При внесении изменений в актуальной редакции указывается дата последнего обновления.
-              </p>
             </div>
           </CardContent>
         </Card>

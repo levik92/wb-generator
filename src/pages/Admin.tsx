@@ -6,7 +6,8 @@ import { toast } from "@/hooks/use-toast";
 import { 
   LogOut,
   Download,
-  Loader2
+  Loader2,
+  Zap
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
@@ -34,19 +35,11 @@ interface User {
   referral_code: string;
 }
 
-interface UserStats {
-  total_users: number;
-  total_generations: number;
-  total_tokens_spent: number;
-  total_revenue: number;
-}
-
 type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'promocodes' | 'news' | 'pricing' | 'banners';
 
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('analytics');
@@ -92,7 +85,6 @@ export default function Admin() {
   };
 
   const loadUsers = async () => {
-    // Use the secure admin function to get all users
     const { data, error } = await supabase.rpc('admin_get_all_users');
 
     if (error) {
@@ -141,8 +133,13 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-wb-purple" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
+            <Zap className="w-6 h-6 text-white animate-pulse" />
+          </div>
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
@@ -163,9 +160,8 @@ export default function Admin() {
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 md:p-4 border-b shrink-0">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b border-border bg-card/50 backdrop-blur-xl shrink-0 sticky top-0 z-20">
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-            {/* Mobile Menu */}
             {isMobile && (
               <AdminMobileMenu 
                 activeTab={activeTab}
@@ -173,19 +169,21 @@ export default function Admin() {
               />
             )}
             <div className="min-w-0 flex-1 overflow-hidden">
-              <h1 className="text-lg md:text-xl lg:text-2xl font-bold truncate">Админ-панель</h1>
-              <p className="text-muted-foreground text-xs md:text-sm hidden sm:block truncate">Управление системой WB Генератор</p>
+              <h1 className="text-lg md:text-xl font-bold truncate">Админ-панель</h1>
+              <p className="text-muted-foreground text-xs hidden sm:block truncate">
+                Управление системой WBGen
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 md:gap-2 shrink-0 ml-2">
+          <div className="flex items-center gap-2 shrink-0 ml-2">
             <ThemeToggle />
             <DataExportDialog>
-              <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
+              <Button variant="outline" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2 rounded-xl">
                 <Download className="h-3 w-3 md:h-4 md:w-4" />
                 {!isMobile && <span className="hidden lg:inline">Экспорт</span>}
               </Button>
             </DataExportDialog>
-            <Button onClick={handleSignOut} variant="destructive" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2">
+            <Button onClick={handleSignOut} variant="destructive" size={isMobile ? "sm" : "default"} className="gap-1 md:gap-2 rounded-xl">
               <LogOut className="h-3 w-3 md:h-4 md:w-4" />
               {!isMobile && <span className="hidden lg:inline">Выйти</span>}
             </Button>

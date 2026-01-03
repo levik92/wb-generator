@@ -4,13 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Wildberries SaaS Design System - Apple/ChatGPT Minimalism */
+/* WBGen Premium Design System - Liquid Glass Aesthetic */
 
 @layer base {
   :root {
-    /* Core brand colors */
-    --background: 0 0% 100%;
-    --foreground: 220 9% 4%;
+    /* Core brand colors - Light mode */
+    --background: 240 5% 96%;
+    --foreground: 240 10% 8%;
     
     /* Wildberries signature purple */
     --wb-purple: 268 83% 58%;
@@ -18,35 +18,35 @@
     --wb-purple-dark: 268 83% 48%;
     
     /* Neutral palette */
-    --gray-50: 0 0% 98%;
-    --gray-100: 0 0% 96%;
-    --gray-200: 0 0% 93%;
-    --gray-300: 0 0% 88%;
-    --gray-400: 0 0% 74%;
-    --gray-500: 0 0% 62%;
-    --gray-600: 0 0% 45%;
-    --gray-700: 0 0% 32%;
-    --gray-800: 0 0% 20%;
-    --gray-900: 220 9% 4%;
+    --gray-50: 240 5% 98%;
+    --gray-100: 240 5% 96%;
+    --gray-200: 240 5% 92%;
+    --gray-300: 240 5% 86%;
+    --gray-400: 240 4% 70%;
+    --gray-500: 240 4% 55%;
+    --gray-600: 240 4% 40%;
+    --gray-700: 240 5% 28%;
+    --gray-800: 240 6% 18%;
+    --gray-900: 240 10% 8%;
 
     /* Component tokens */
-    --card: 0 0% 99%;
-    --card-foreground: 220 9% 4%;
-    --card-border: 0 0% 93%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 8%;
+    --card-border: 240 5% 90%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 9% 4%;
+    --popover-foreground: 240 10% 8%;
 
     --primary: 268 83% 58%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 268 83% 48%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 220 9% 4%;
-    --secondary-hover: 0 0% 93%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 10% 8%;
+    --secondary-hover: 240 5% 90%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 4% 45%;
 
     --accent: 268 83% 58%;
     --accent-foreground: 0 0% 100%;
@@ -54,9 +54,9 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 93%;
+    --border: 240 5% 90%;
     --input: 0 0% 100%;
-    --input-border: 0 0% 88%;
+    --input-border: 240 5% 85%;
     --ring: 268 83% 58%;
 
     --radius: 12px;
@@ -64,15 +64,21 @@
     --radius-xl: 20px;
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
-    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-md: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.04);
+    --shadow: 0 4px 8px -2px hsl(0 0% 0% / 0.06), 0 2px 4px -2px hsl(0 0% 0% / 0.04);
+    --shadow-md: 0 8px 16px -4px hsl(0 0% 0% / 0.08), 0 4px 8px -4px hsl(0 0% 0% / 0.04);
+    --shadow-lg: 0 16px 24px -6px hsl(0 0% 0% / 0.1), 0 8px 12px -6px hsl(0 0% 0% / 0.06);
+    --shadow-xl: 0 24px 48px -12px hsl(0 0% 0% / 0.15);
+
+    /* Glass effect */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.8;
+    --glass-backdrop: blur(20px);
 
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--wb-purple)) 0%, hsl(var(--wb-purple-dark)) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--gray-50)) 100%);
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--gray-100)) 100%);
+    --gradient-purple-glow: linear-gradient(135deg, hsl(268 83% 58% / 0.2) 0%, hsl(268 83% 58% / 0.05) 100%);
 
     /* Typography */
     --font-size-xs: 0.75rem;
@@ -103,86 +109,91 @@
     --transition-slow: 0.5s ease-out;
 
     /* Sidebar tokens */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 268 83% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 5% 10%;
+    --sidebar-border: 240 5% 92%;
+    --sidebar-ring: 268 83% 58%;
   }
 
   .dark {
-    /* Dark mode - #111111 based dark theme */
-    --background: 0 0% 7%;
-    --foreground: 0 0% 93%;
+    /* Dark mode - Premium dark theme */
+    --background: 240 10% 6%;
+    --foreground: 0 0% 95%;
     
-    /* Wildberries purple - preserved and vibrant in dark mode */
+    /* Wildberries purple - more vibrant in dark mode */
     --wb-purple: 268 83% 65%;
     --wb-purple-light: 268 83% 75%;
     --wb-purple-dark: 268 83% 55%;
     
-    /* Neutral dark palette based on #111111 */
-    --gray-50: 0 0% 13%;
-    --gray-100: 0 0% 10%;
-    --gray-200: 0 0% 15%;
-    --gray-300: 0 0% 20%;
-    --gray-400: 0 0% 35%;
-    --gray-500: 0 0% 50%;
-    --gray-600: 0 0% 65%;
-    --gray-700: 0 0% 75%;
-    --gray-800: 0 0% 85%;
-    --gray-900: 0 0% 93%;
+    /* Neutral dark palette */
+    --gray-50: 240 8% 12%;
+    --gray-100: 240 8% 10%;
+    --gray-200: 240 8% 14%;
+    --gray-300: 240 8% 20%;
+    --gray-400: 240 6% 35%;
+    --gray-500: 240 5% 50%;
+    --gray-600: 240 4% 65%;
+    --gray-700: 240 4% 75%;
+    --gray-800: 240 4% 85%;
+    --gray-900: 0 0% 95%;
 
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 93%;
-    --card-border: 0 0% 18%;
+    --card: 240 8% 9%;
+    --card-foreground: 0 0% 95%;
+    --card-border: 240 8% 16%;
 
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 93%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 95%;
 
     --primary: 268 83% 65%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 268 83% 55%;
 
-    --secondary: 0 0% 13%;
-    --secondary-foreground: 0 0% 93%;
-    --secondary-hover: 0 0% 18%;
+    --secondary: 240 8% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --secondary-hover: 240 8% 16%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 240 8% 14%;
+    --muted-foreground: 240 5% 55%;
 
     --accent: 268 83% 65%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 51%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 10%;
-    --input-border: 0 0% 22%;
+    --border: 240 8% 16%;
+    --input: 240 8% 10%;
+    --input-border: 240 8% 20%;
     --ring: 268 83% 65%;
 
     /* Dark shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
-    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-md: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-lg: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.3);
-    --shadow-xl: 0 25px 50px -12px hsl(0 0% 0% / 0.6);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow: 0 4px 8px -2px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 8px 16px -4px hsl(0 0% 0% / 0.4), 0 4px 8px -4px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 16px 24px -6px hsl(0 0% 0% / 0.4), 0 8px 12px -6px hsl(0 0% 0% / 0.3);
+    --shadow-xl: 0 24px 48px -12px hsl(0 0% 0% / 0.5);
+
+    /* Glass effect - dark mode */
+    --glass-bg: 240 8% 10% / 0.8;
+    --glass-border: 240 8% 20% / 0.5;
 
     /* Dark gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--wb-purple)) 0%, hsl(var(--wb-purple-dark)) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--gray-100)) 100%);
+    --gradient-subtle: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--gray-100)) 100%);
+    --gradient-purple-glow: linear-gradient(135deg, hsl(268 83% 65% / 0.15) 0%, hsl(268 83% 65% / 0.03) 100%);
 
     /* Sidebar tokens for dark mode */
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 93%;
+    --sidebar-background: 240 8% 7%;
+    --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 268 83% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 93%;
-    --sidebar-border: 0 0% 18%;
+    --sidebar-accent: 240 8% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 240 8% 16%;
     --sidebar-ring: 268 83% 65%;
   }
 }
@@ -250,6 +261,49 @@
     transition: var(--transition-base);
   }
 
+  /* Glass card effect for app */
+  .app-glass-card {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid hsl(var(--glass-border));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .app-glass-card:hover {
+    border-color: hsl(var(--accent) / 0.3);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Premium card styles */
+  .premium-card {
+    @apply rounded-xl sm:rounded-2xl border border-border bg-card;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+  }
+
+  .premium-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: hsl(var(--accent) / 0.2);
+  }
+
+  /* Glow effects */
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.3);
+  }
+
+  /* Purple gradient button */
+  .btn-gradient {
+    @apply relative overflow-hidden;
+    background: var(--gradient-hero);
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -8px hsl(var(--accent) / 0.5);
+  }
+
 /* Standardized borders for all inputs - 1px gray */
 input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
 textarea, 
@@ -286,5 +340,26 @@ button[role="combobox"]:focus,
     @apply bg-wb-purple/10 backdrop-blur-sm;
   }
 
-  /* Removed duplicate fade-in animation - now defined in tailwind.config.ts */
+  /* Sidebar premium styling */
+  .sidebar-premium {
+    @apply border-r border-border;
+    background: linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(var(--sidebar-background)) 100%);
+  }
+
+  /* Menu item active state */
+  .menu-item-active {
+    @apply bg-accent/10 text-accent border-l-2 border-accent;
+  }
+
+  /* Stat card styles */
+  .stat-card {
+    @apply rounded-xl p-4 sm:p-6 border border-border bg-card;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary) / 0.5) 100%);
+  }
+
+  .stat-card-accent {
+    @apply rounded-xl p-4 sm:p-6 border;
+    background: var(--gradient-purple-glow);
+    border-color: hsl(var(--accent) / 0.2);
+  }
 }

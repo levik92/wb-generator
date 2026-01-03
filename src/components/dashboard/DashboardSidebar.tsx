@@ -43,11 +43,9 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   useEffect(() => {
     const checkUnreadNews = async () => {
       try {
-        // This is a simplified check - in real implementation you'd check against read status
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Use any type to bypass TypeScript checks for news table
         const { data: newsData } = await (supabase as any)
           .from('news')
           .select('id, published_at')
@@ -89,7 +87,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       label: 'Генератор этикеток',
       icon: Tags,
       badge: 'Free',
-      badgeColor: 'bg-green-500'
+      badgeColor: 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'
     },
     {
       id: 'history',
@@ -106,7 +104,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       label: 'Новости',
       icon: Newspaper,
       badge: hasUnreadNews ? 'Новое' : undefined,
-      badgeColor: hasUnreadNews ? 'bg-wb-purple text-white' : undefined
+      badgeColor: hasUnreadNews ? 'bg-primary/20 text-primary border-primary/30' : undefined
     },
     {
       id: 'referrals',
@@ -123,7 +121,8 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       label: 'Видео для карточек',
       icon: Video,
       disabled: true,
-      badge: 'Скоро'
+      badge: 'Скоро',
+      badgeColor: 'bg-muted text-muted-foreground border-border'
     },
     {
       id: 'settings',
@@ -133,9 +132,9 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen border-r border-border bg-sidebar flex flex-col transition-all duration-300 overflow-y-auto`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 overflow-y-auto`}>
       {/* Logo / Collapse Toggle */}
-      <div className={`p-6 ${isCollapsed ? 'p-4' : 'p-6'}`}>
+      <div className={`p-4 ${isCollapsed ? 'p-3' : 'p-5'}`}>
         <div className="flex items-center justify-between">
           {isCollapsed ? (
             <div className="flex justify-center w-full">
@@ -143,24 +142,24 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="hidden md:flex h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-accent/10 text-muted-foreground hover:text-accent"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           ) : (
             <>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-semibold">WB Генератор</span>
+                <span className="text-sm font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">WBGen</span>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="hidden md:flex h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="hidden md:flex h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-accent/10 text-muted-foreground hover:text-accent"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -169,29 +168,29 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
         </div>
       </div>
 
-      {/* Token Balance or Mini Balance */}
-      <div className={`px-6 pb-4 ${isCollapsed ? 'px-4' : 'px-6'}`}>
+      {/* Token Balance */}
+      <div className={`px-4 pb-4 ${isCollapsed ? 'px-3' : 'px-4'}`}>
         {isCollapsed ? (
           <div className="flex justify-center">
             <Button 
               size="sm" 
-              className="w-8 h-8 p-0 bg-wb-purple hover:bg-wb-purple/80"
+              className="w-10 h-10 p-0 rounded-xl btn-gradient"
               onClick={() => onTabChange('pricing')}
             >
               <Plus className="w-4 h-4" />
             </Button>
           </div>
         ) : (
-          <div className="bg-wb-purple/5 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-wb-purple">Токены</span>
-              <Badge variant="secondary" className="bg-wb-purple hover:bg-wb-purple-light text-white">
+          <div className="rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-primary">Токены</span>
+              <Badge className="bg-primary hover:bg-primary text-primary-foreground font-bold px-2.5 py-0.5 text-xs">
                 {profile.tokens_balance}
               </Badge>
             </div>
             <Button 
               size="sm" 
-              className="w-full bg-wb-purple hover:bg-wb-purple/80"
+              className="w-full h-9 btn-gradient rounded-xl text-sm font-semibold"
               onClick={() => onTabChange('pricing')}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -201,11 +200,11 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
         )}
       </div>
 
-      <Separator />
+      <Separator className="opacity-50" />
 
       {/* Navigation */}
-      <nav className={`flex-1 p-4 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-        <ul className="space-y-2">
+      <nav className={`flex-1 p-2 ${isCollapsed ? 'p-2' : 'p-3'}`}>
+        <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -213,22 +212,24 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             return (
               <li key={item.id} className="relative">
                 <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} ${
-                    isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
+                  variant="ghost"
+                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-10 rounded-xl transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-primary/10 text-primary hover:bg-primary/15 font-medium' 
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={() => !item.disabled && onTabChange(item.id)}
                   disabled={item.disabled}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-4 h-4 ${!isCollapsed ? 'mr-2' : ''}`} />
-                  {!isCollapsed && <span className="flex-1 text-left">{item.label}</span>}
+                  <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary' : ''}`} />
+                  {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
                 {item.badge && !isCollapsed && (
                   <Badge 
-                    className={`absolute -top-1 -right-1 text-[8px] px-1 py-0 h-4 min-w-0 ${
-                      item.badgeColor || 'bg-muted text-muted-foreground'
-                    } border-0 rounded-md shadow-sm z-10 pointer-events-none`}
+                    className={`absolute -top-1 right-1 text-[9px] px-1.5 py-0 h-4 min-w-0 border ${
+                      item.badgeColor || 'bg-muted text-muted-foreground border-border'
+                    } rounded-md shadow-sm z-10 pointer-events-none font-medium`}
                   >
                     {item.badge}
                   </Badge>
@@ -240,19 +241,19 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       </nav>
 
       {/* WB Connection Status */}
-      <div className={`p-4 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg bg-secondary border border-border opacity-60`}>
+      <div className={`p-3 ${isCollapsed ? 'p-2' : 'p-3'}`}>
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-xl bg-secondary/50 border border-border/50`}>
           {!isCollapsed && (
             <>
               <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">Wildberries</p>
-                <p className="text-xs text-muted-foreground">В разработке</p>
+                <p className="text-xs font-medium text-muted-foreground">Wildberries</p>
+                <p className="text-[10px] text-muted-foreground/70">В разработке</p>
               </div>
-              <span className="text-xs bg-muted px-2 py-1 rounded text-muted-foreground">Скоро</span>
+              <span className="text-[10px] bg-muted px-2 py-0.5 rounded-md text-muted-foreground font-medium">Скоро</span>
             </>
           )}
           {isCollapsed && (
-            <div className="w-4 h-4 bg-muted-foreground/50 rounded-full" title="Wildberries - в разработке" />
+            <div className="w-3 h-3 bg-muted-foreground/30 rounded-full" title="Wildberries - в разработке" />
           )}
         </div>
       </div>
