@@ -253,4 +253,31 @@
       0 0 15px hsl(var(--glow-purple) / 0.2),
       0 0 30px hsl(var(--glow-purple) / 0.1);
   }
+  
+  /* Reduce animations on mobile for performance */
+  .animate-float-slow,
+  .animate-float-reverse {
+    animation: none;
+  }
+  
+  /* Better touch targets */
+  .btn-premium {
+    min-height: 48px;
+  }
+  
+  /* Reduce glow effects on mobile */
+  .animate-pulse-glow {
+    animation: none;
+    box-shadow: 0 0 15px hsl(var(--glow-purple) / 0.2);
+  }
+}
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

@@ -28,7 +28,6 @@ import News from "@/pages/News";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
-import { Snowfall } from "@/components/Snowfall";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
 
 // Mobile components
@@ -61,11 +60,9 @@ const Dashboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Use active jobs hook
   const { hasCompletedJobs, resetCompletedJobsFlag } = useActiveJobs(profile?.id || '');
 
   useEffect(() => {
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.user) {
         navigate("/auth");
@@ -75,7 +72,6 @@ const Dashboard = () => {
       loadProfile(session.user.id);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (!session?.user) {
@@ -83,8 +79,6 @@ const Dashboard = () => {
           return;
         }
         setUser(session.user);
-        
-        // Defer profile loading to prevent potential deadlocks
         setTimeout(() => {
           loadProfile(session.user.id);
         }, 0);
@@ -105,34 +99,25 @@ const Dashboard = () => {
       if (error) throw error;
       
       if (!data) {
-        console.log('Profile not found for user, it may still be creating...');
         toast({
           title: "Профиль загружается",
           description: "Подождите немного, профиль создаётся...",
         });
-        // Retry after a short delay
         setTimeout(() => loadProfile(userId), 2000);
         return;
       }
       
-      // Инкрементируем login_count при каждом входе
       const currentLoginCount = data.login_count || 0;
       if (currentLoginCount < 3) {
         await supabase
           .from('profiles')
           .update({ login_count: currentLoginCount + 1 })
           .eq('id', userId);
-        
-        // Обновляем данные профиля с новым значением
         data.login_count = currentLoginCount + 1;
       }
       
       setProfile(data);
-      
-      // Check for unread news after loading profile
       await checkUnreadNews(userId);
-      
-      // Process pending referral/partner codes from OAuth flow
       await processPendingCodes(userId, data);
     } catch (error: any) {
       toast({
@@ -150,96 +135,56 @@ const Dashboard = () => {
       const pendingReferralCode = sessionStorage.getItem('pending_referral_code');
       const pendingPartnerCode = sessionStorage.getItem('pending_partner_code');
       
-      // Process referral code if present and user doesn't already have a referrer
       if (pendingReferralCode && !profileData.referred_by) {
-        console.log('Processing pending referral code:', pendingReferralCode);
-        
-        // Find referrer by code
         const { data: referrerData, error: referrerError } = await supabase
           .from('profiles')
           .select('id')
           .eq('referral_code', pendingReferralCode)
           .single();
         
-        if (referrerError) {
-          console.error('Error finding referrer:', referrerError);
-        } else if (referrerData) {
-          // Check that user is not trying to refer themselves
-          if (referrerData.id === userId) {
-            console.log('User trying to use own referral link, skipping');
-          } else {
-            // Update profile with referrer
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({ 
-                referred_by: referrerData.id,
-                tokens_balance: profileData.tokens_balance + 10
-              })
-              .eq('id', userId);
+        if (!referrerError && referrerData && referrerData.id !== userId) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ 
+              referred_by: referrerData.id,
+              tokens_balance: profileData.tokens_balance + 10
+            })
+            .eq('id', userId);
+          
+          if (!updateError) {
+            await supabase.from('referrals').insert({
+              referrer_id: referrerData.id,
+              referred_id: userId,
+              status: 'pending'
+            });
             
-            if (updateError) {
-              console.error('Error updating profile with referrer:', updateError);
-            } else {
-              // Create referral record
-              const { error: referralError } = await supabase
-                .from('referrals')
-                .insert({
-                  referrer_id: referrerData.id,
-                  referred_id: userId,
-                  status: 'pending'
-                });
-              
-              if (referralError) {
-                console.error('Error creating referral record:', referralError);
-              }
-              
-              // Add token transaction
-              const { error: transactionError } = await supabase
-                .from('token_transactions')
-                .insert({
-                  user_id: userId,
-                  amount: 10,
-                  transaction_type: 'referral_bonus',
-                  description: 'Бонус за регистрацию по реферальной ссылке'
-                });
-              
-              if (transactionError) {
-                console.error('Error creating token transaction:', transactionError);
-              } else {
-                toast({
-                  title: "Реферальный бонус начислен! 🎉",
-                  description: "Вы получили дополнительные 10 токенов",
-                });
-              }
-            }
+            await supabase.from('token_transactions').insert({
+              user_id: userId,
+              amount: 10,
+              transaction_type: 'referral_bonus',
+              description: 'Бонус за регистрацию по реферальной ссылке'
+            });
+            
+            toast({
+              title: "Реферальный бонус начислен! 🎉",
+              description: "Вы получили дополнительные 10 токенов",
+            });
           }
         }
-        
         sessionStorage.removeItem('pending_referral_code');
       }
       
-      // Process partner code if present
       if (pendingPartnerCode) {
-        console.log('Processing pending partner code:', pendingPartnerCode);
-        
-        // Call edge function to process partner signup
         const { data, error } = await supabase.functions.invoke('process-partner-signup', {
-          body: {
-            user_id: userId,
-            partner_code: pendingPartnerCode
-          }
+          body: { user_id: userId, partner_code: pendingPartnerCode }
         });
         
-        if (error) {
-          console.error('Error processing partner signup:', error);
-        } else {
-          console.log('Partner signup processed successfully:', data);
+        if (!error) {
           toast({
             title: "Добро пожаловать! 🎉",
             description: "Вы зарегистрированы по партнерской ссылке",
           });
         }
-        
         sessionStorage.removeItem('pending_partner_code');
       }
     } catch (error) {
@@ -249,7 +194,6 @@ const Dashboard = () => {
 
   const checkUnreadNews = async (userId: string) => {
     try {
-      // Use any type to bypass TypeScript checks for news table
       const { data: newsData } = await (supabase as any)
         .from('news')
         .select('id, published_at')
@@ -276,7 +220,6 @@ const Dashboard = () => {
     try {
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
-
       navigate("/");
     } catch (error: any) {
       toast({
@@ -286,6 +229,7 @@ const Dashboard = () => {
       });
     }
   };
+
   const refreshProfile = () => {
     if (user) {
       loadProfile(user.id);
@@ -296,7 +240,6 @@ const Dashboard = () => {
     setActiveTab(tab as ActiveTab);
   };
 
-  // Handle completed jobs - refresh history when needed
   useEffect(() => {
     if (hasCompletedJobs) {
       setShouldRefreshHistory(true);
@@ -310,8 +253,13 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-wb-purple" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
+            <Zap className="w-6 h-6 text-white animate-pulse" />
+          </div>
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
@@ -349,8 +297,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <Snowfall />
-      
       {/* PWA Install Prompt - Mobile only */}
       {profile && isMobile && (
         <PWAInstallPrompt 
@@ -359,7 +305,7 @@ const Dashboard = () => {
         />
       )}
       
-      {/* Onboarding Wizard - for first-time users */}
+      {/* Onboarding Wizard */}
       {profile && (
         <OnboardingWizard 
           userId={profile.id} 
@@ -381,7 +327,7 @@ const Dashboard = () => {
         />
       )}
       
-      {/* Desktop Sidebar - Fixed */}
+      {/* Desktop Sidebar */}
       {!isMobile && (
         <div className="sticky top-0 h-screen">
           <DashboardSidebar 
@@ -395,11 +341,11 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
         {/* Mobile Header */}
         {isMobile && (
-          <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-background/95 backdrop-blur-xl z-30">
+          <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="bg-primary/10 hover:bg-primary/20"
+              className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5 text-primary" />
@@ -408,21 +354,21 @@ const Dashboard = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-base font-semibold">WB Генератор</span>
+              <span className="text-base font-bold">WBGen</span>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-secondary">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-white">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
                       <UserIcon className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-background border shadow-lg" align="end" forceMount>
-                <div className="flex flex-col space-y-1 p-2">
-                  <p className="text-sm font-medium leading-none">
+              <DropdownMenuContent className="w-56 bg-card border shadow-xl rounded-xl" align="end" forceMount>
+                <div className="flex flex-col space-y-1 p-3">
+                  <p className="text-sm font-semibold leading-none">
                     {profile.full_name || 'Пользователь'}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
@@ -430,22 +376,16 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => navigate('/partner')}
-                  className="hover:bg-primary/10"
-                >
+                <DropdownMenuItem onClick={() => navigate('/partner')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
                   <Handshake className="mr-2 h-4 w-4" />
                   <span>Партнёрам</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setActiveTab('settings')}
-                  className="hover:bg-primary/10"
-                >
+                <DropdownMenuItem onClick={() => setActiveTab('settings')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
                   <UserIconName className="mr-2 h-4 w-4" />
                   <span>Настройки</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="hover:bg-primary/10">
+                <DropdownMenuItem onClick={handleSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Выйти</span>
                 </DropdownMenuItem>
@@ -454,7 +394,7 @@ const Dashboard = () => {
           </div>
         )}
         
-        {/* Desktop Header - Scrollable with content */}
+        {/* Desktop Header */}
         {!isMobile && (
           <DashboardHeader 
             profile={profile} 
@@ -464,9 +404,7 @@ const Dashboard = () => {
         )}
         
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
-          {/* Dashboard Banners */}
           <DashboardBanners userId={profile.id} />
-          
           {renderContent()}
         </main>
         

@@ -65,7 +65,7 @@ export const BeforeAfterSliderNew = ({
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="relative aspect-[3/4] max-w-md mx-auto overflow-hidden rounded-3xl cursor-ew-resize select-none"
+      className="relative aspect-[3/4] w-full mx-auto overflow-hidden rounded-2xl sm:rounded-3xl cursor-ew-resize select-none touch-pan-y"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -75,10 +75,10 @@ export const BeforeAfterSliderNew = ({
       onTouchEnd={handleTouchEnd}
     >
       {/* Glow effect */}
-      <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(268,83%,50%)] via-[hsl(280,90%,60%)] to-[hsl(268,83%,50%)] rounded-[2rem] blur-2xl opacity-30 animate-pulse-glow" />
+      <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(268,83%,50%)] via-[hsl(280,90%,60%)] to-[hsl(268,83%,50%)] rounded-[2rem] blur-2xl opacity-20 sm:opacity-30 animate-pulse-glow" />
 
       {/* Container with border */}
-      <div className="relative w-full h-full rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
+      <div className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
         {/* Before Image (Background) */}
         <div className="absolute inset-0">
           <img
@@ -114,22 +114,22 @@ export const BeforeAfterSliderNew = ({
 
           {/* Handle */}
           <div
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 before-after-handle ${
+            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 before-after-handle ${
               isDragging ? "scale-110" : "hover:scale-105"
             }`}
           >
-            <GripVertical className="w-5 h-5 text-white" />
+            <GripVertical className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
         </div>
 
         {/* Labels */}
-        <div className="absolute top-4 left-4 z-20">
-          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-black/60 backdrop-blur-sm text-white/90 border border-white/10">
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20">
+          <span className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium bg-black/60 backdrop-blur-sm text-white/90 border border-white/10">
             До
           </span>
         </div>
-        <div className="absolute top-4 right-4 z-20">
-          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] text-white border border-white/20">
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20">
+          <span className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium bg-gradient-to-r from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] text-white border border-white/20">
             После
           </span>
         </div>

@@ -5,182 +5,61 @@ import Footer from "@/components/Footer";
 
 const Terms = () => {
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="mb-8">
-          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors gap-2">
+            <ArrowLeft className="w-4 h-4" />
             На главную
           </Link>
-          <h1 className="text-3xl font-bold mb-4">Договор оферты</h1>
-          <p className="text-muted-foreground">Последнее обновление: 26 августа 2025 г.</p>
+        </div>
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3">Договор оферты</h1>
+          <p className="text-muted-foreground text-sm">Последнее обновление: 26 августа 2025 г.</p>
         </div>
 
-        <Card>
+        <Card className="rounded-2xl border-border">
           <CardHeader>
-            <CardTitle>Договор-оферта на оказание услуг</CardTitle>
+            <CardTitle className="text-lg">Договор-оферта на оказание услуг</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 text-sm sm:text-base">
             <div>
-              <h3 className="text-lg font-semibold mb-3">1. Общие положения</h3>
-              <p className="mb-4">
-                1.1. Настоящий Договор-оферта (далее — Договор) является официальным предложением WB Генератор (далее — Исполнитель) на оказание услуг по генерации карточек товаров и SEO-описаний для маркетплейсов.
-              </p>
-              <p className="mb-4">
-                1.2. Договор вступает в силу с момента его акцепта Заказчиком. Акцептом является регистрация на сайте wbgen.ru и/или начало использования услуг Исполнителя.
-              </p>
-              <p className="mb-4">
-                1.3. Заказчик — физическое или юридическое лицо, заключившее с Исполнителем настоящий Договор на условиях, содержащихся в данной оферте.
+              <h3 className="font-semibold mb-3">1. Общие положения</h3>
+              <p className="mb-4 text-muted-foreground leading-relaxed">
+                Настоящий Договор-оферта является официальным предложением WB Генератор на оказание услуг по генерации карточек товаров и SEO-описаний для маркетплейсов.
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">2. Предмет договора</h3>
-              <p className="mb-4">
-                2.1. Исполнитель обязуется оказать Заказчику услуги по:
-              </p>
-              <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                <li>Генерации карточек товаров размером 960×1280 пикселей для маркетплейсов с использованием технологий искусственного интеллекта</li>
-                <li>Созданию SEO-оптимизированных описаний товаров</li>
-                <li>Предоставлению доступа к онлайн-платформе для выполнения указанных услуг</li>
+              <h3 className="font-semibold mb-3">2. Предмет договора</h3>
+              <p className="mb-3 text-muted-foreground">Исполнитель обязуется оказать услуги по:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
+                <li>Генерации карточек товаров 960×1280 пикселей</li>
+                <li>Созданию SEO-оптимизированных описаний</li>
+                <li>Предоставлению доступа к онлайн-платформе</li>
               </ul>
-              <p className="mb-4">
-                2.2. Заказчик обязуется принять и оплатить оказанные услуги в соответствии с условиями настоящего Договора.
-              </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">3. Порядок оказания услуг</h3>
-              <p className="mb-4">
-                3.1. Услуги оказываются через веб-интерфейс сервиса WB Генератор после прохождения Заказчиком процедуры регистрации.
-              </p>
-              <p className="mb-4">
-                3.2. Для генерации карточек Заказчик предоставляет:
-              </p>
-              <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                <li>Изображения товара (до 5 фотографий)</li>
-                <li>Название товара</li>
-                <li>Категорию товара</li>
-                <li>Ключевые преимущества и описание</li>
+              <h3 className="font-semibold mb-3">4. Стоимость услуг</h3>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
+                <li>Генерация комплекта карточек: 6 токенов</li>
+                <li>SEO-описание: 1 токен</li>
+                <li>При регистрации: 20 бесплатных токенов</li>
               </ul>
-              <p className="mb-4">
-                3.3. Исполнитель генерирует 6 изображений для карточки товара: обложка, контекст использования, макро-детали, сравнение до/после, комплектация, гарантии.
-              </p>
             </div>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-3">4. Стоимость услуг и порядок расчетов</h3>
-              <p className="mb-4">
-                4.1. Стоимость услуг определяется в токенах согласно тарифам, размещенным на сайте Исполнителя.
-              </p>
-              <p className="mb-4">
-                4.2. Стоимость генерации комплекта из 6 карточек составляет 6 токенов.
-              </p>
-              <p className="mb-4">
-                4.3. Стоимость генерации SEO-описания составляет 1 токен.
-              </p>
-              <p className="mb-4">
-                4.4. При регистрации Заказчик получает 20 токенов бесплатно.
-              </p>
-              <p className="mb-4">
-                4.5. Пополнение баланса производится через платежные системы, указанные на сайте Исполнителя.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">5. Права и обязанности сторон</h3>
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">5.1. Исполнитель имеет право:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                  <li>Требовать от Заказчика предоставления необходимой для оказания услуг информации</li>
-                  <li>Приостановить оказание услуг при нарушении Заказчиком условий Договора</li>
-                  <li>Изменять условия Договора с уведомлением Заказчика</li>
-                </ul>
-              </div>
-
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">5.2. Исполнитель обязуется:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                  <li>Оказывать услуги надлежащего качества</li>
-                  <li>Обеспечивать конфиденциальность предоставленной Заказчиком информации</li>
-                  <li>Предоставлять техническую поддержку в рамках оказываемых услуг</li>
-                </ul>
-              </div>
-
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">5.3. Заказчик имеет право:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                  <li>Получать услуги в соответствии с условиями Договора</li>
-                  <li>Требовать соблюдения конфиденциальности предоставленной информации</li>
-                </ul>
-              </div>
-
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">5.4. Заказчик обязуется:</h4>
-                <ul className="list-disc list-inside space-y-1 ml-4 mb-4">
-                  <li>Своевременно оплачивать услуги Исполнителя</li>
-                  <li>Предоставлять достоверную информацию</li>
-                  <li>Не нарушать права третьих лиц при использовании услуг</li>
-                  <li>Использовать услуги исключительно в законных целях</li>
-                </ul>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">6. Ответственность сторон</h3>
-              <p className="mb-4">
-                6.1. За неисполнение или ненадлежащее исполнение обязательств по Договору Стороны несут ответственность в соответствии с действующим законодательством РФ.
-              </p>
-              <p className="mb-4">
-                6.2. Исполнитель не несет ответственности за содержание предоставляемых Заказчиком материалов и их соответствие требованиям маркетплейсов.
-              </p>
-              <p className="mb-4">
-                6.3. Заказчик несет полную ответственность за законность использования сгенерированных материалов.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">7. Интеллектуальная собственность</h3>
-              <p className="mb-4">
-                7.1. Права на программное обеспечение и технологии, используемые Исполнителем, принадлежат Исполнителю.
-              </p>
-              <p className="mb-4">
-                7.2. Сгенерированные с помощью сервиса материалы передаются Заказчику для использования в коммерческих целях.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">8. Конфиденциальность</h3>
-              <p className="mb-4">
-                8.1. Стороны обязуются не разглашать конфиденциальную информацию, полученную в ходе исполнения Договора.
-              </p>
-              <p className="mb-4">
-                8.2. К конфиденциальной информации относятся все данные, передаваемые Заказчиком, включая изображения товаров и текстовые материалы.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">9. Заключительные положения</h3>
-              <p className="mb-4">
-                9.1. Договор действует с момента акцепта до полного исполнения обязательств сторонами.
-              </p>
-              <p className="mb-4">
-                9.2. Все споры разрешаются путем переговоров, а при невозможности достижения соглашения — в суде по месту нахождения Исполнителя.
-              </p>
-              <div className="mb-4">
-                <h4 className="font-medium mb-2">9.3. Реквизиты Исполнителя:</h4>
-                <ul className="list-none space-y-1 ml-4 text-sm">
-                  <li><strong>Наименование:</strong> ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ "МАРКЕТШОП №1"</li>
-                  <li><strong>ИНН:</strong> 6700002780</li>
-                  <li><strong>КПП:</strong> 670001001</li>
-                  <li><strong>Расчётный счёт:</strong> 40702810820000198340</li>
-                  <li><strong>Название банка:</strong> ООО "Банк Точка"</li>
-                  <li><strong>БИК:</strong> 044525104</li>
-                  <li><strong>Корреспондентский счёт:</strong> 30101810745374525104</li>
-                  <li><strong>Электронная почта:</strong> info@wbgen.ru</li>
-                  <li><strong>Сайт:</strong> wbgen.ru</li>
-                </ul>
-              </div>
+            <div className="p-4 rounded-xl bg-secondary/50">
+              <p className="font-medium mb-2 text-sm">Реквизиты Исполнителя:</p>
+              <ul className="list-none space-y-1 text-xs text-muted-foreground">
+                <li><strong>Наименование:</strong> ООО "МАРКЕТШОП №1"</li>
+                <li><strong>ИНН:</strong> 6700002780</li>
+                <li><strong>Email:</strong> info@wbgen.ru</li>
+              </ul>
             </div>
           </CardContent>
         </Card>
