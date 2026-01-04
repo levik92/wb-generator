@@ -13,6 +13,8 @@ const examples = [
     category: "Электроника",
     conversionGrowth: "+183%",
     ordersChange: "3 → 8",
+    designerCost: "3 000₽",
+    wbgenCost: "от 59₽",
     savings: "2 941₽",
   },
   {
@@ -21,6 +23,8 @@ const examples = [
     category: "Одежда",
     conversionGrowth: "+250%",
     ordersChange: "2 → 7",
+    designerCost: "5 000₽",
+    wbgenCost: "от 59₽",
     savings: "4 941₽",
   },
   {
@@ -29,6 +33,8 @@ const examples = [
     category: "Спорт",
     conversionGrowth: "+153%",
     ordersChange: "4 → 10",
+    designerCost: "6 000₽",
+    wbgenCost: "от 59₽",
     savings: "5 941₽",
   },
   {
@@ -37,6 +43,8 @@ const examples = [
     category: "Дом",
     conversionGrowth: "+197%",
     ordersChange: "5 → 15",
+    designerCost: "8 000₽",
+    wbgenCost: "от 59₽",
     savings: "7 941₽",
   },
 ];
@@ -132,17 +140,23 @@ export const ExamplesSection = () => {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3">
-                      <div className="text-[10px] sm:text-xs text-white/40 mb-0.5 sm:mb-1">Заказов/день</div>
-                      <div className="text-base sm:text-lg font-bold text-white">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-white/5 rounded-lg p-2">
+                      <div className="text-[9px] sm:text-[10px] text-white/40 mb-0.5">Заказы</div>
+                      <div className="text-xs sm:text-sm font-bold text-white">
                         {example.ordersChange}
                       </div>
                     </div>
-                    <div className="bg-emerald-500/10 rounded-lg sm:rounded-xl p-2 sm:p-3">
-                      <div className="text-[10px] sm:text-xs text-emerald-400/70 mb-0.5 sm:mb-1">Экономия</div>
-                      <div className="text-base sm:text-lg font-bold text-emerald-400">
-                        {example.savings}
+                    <div className="bg-red-500/10 rounded-lg p-2">
+                      <div className="text-[9px] sm:text-[10px] text-red-400/70 mb-0.5">Дизайнер</div>
+                      <div className="text-xs sm:text-sm font-bold text-red-400 line-through">
+                        {example.designerCost}
+                      </div>
+                    </div>
+                    <div className="bg-emerald-500/10 rounded-lg p-2">
+                      <div className="text-[9px] sm:text-[10px] text-emerald-400/70 mb-0.5">WBGen</div>
+                      <div className="text-xs sm:text-sm font-bold text-emerald-400">
+                        {example.wbgenCost}
                       </div>
                     </div>
                   </div>

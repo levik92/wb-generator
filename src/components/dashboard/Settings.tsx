@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2 } from "lucide-react";
+import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Profile {
   id: string;
@@ -267,48 +268,64 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Настройки</h2>
-        <p className="text-muted-foreground">
-          Управление профилем и подключениями
-        </p>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <SettingsIcon className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Настройки</h2>
+          <p className="text-muted-foreground text-sm">Управление профилем и подключениями</p>
+        </div>
       </div>
 
       {/* Support Block */}
-      <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-200/30">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-              <Headphones className="h-5 w-5 text-white" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
+        <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
+          <CardHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <Headphones className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">
+                  Поддержка
+                </CardTitle>
+                <CardDescription>
+                  Нужна помощь? Мы всегда готовы помочь!
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                Поддержка
-              </CardTitle>
-              <CardDescription className="text-blue-600/80">
-                Нужна помощь? Мы всегда готовы помочь!
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
-            asChild
-          >
-            <a 
-              href="https://t.me/wbgen_support/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2"
+          </CardHeader>
+          <CardContent className="relative">
+            <Button 
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+              asChild
             >
-              <MessageCircle className="w-4 h-4" />
-              Написать в поддержку
-            </a>
-          </Button>
-        </CardContent>
-      </Card>
+              <a 
+                href="https://t.me/wbgen_support/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Написать в поддержку
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <Card className="bg-muted/30">
         <CardHeader>
@@ -459,6 +476,6 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 };

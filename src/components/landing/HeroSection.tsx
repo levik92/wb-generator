@@ -230,18 +230,65 @@ export const HeroSection = () => {
               ))}
             </motion.div>
 
-            {/* Before/After Hero - improved design */}
+            {/* Before/After Hero - separate images with arrow */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="max-w-lg mx-auto"
+              className="max-w-2xl mx-auto"
             >
-              <BeforeAfterSliderNew
-                beforeImage="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
-                afterImage="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
-                alt="Пример генерации карточки"
-              />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                {/* Before Image */}
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 to-orange-500/30 rounded-xl blur-sm opacity-50 group-hover:opacity-70 transition-opacity" />
+                  <div className="relative">
+                    <img 
+                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
+                      alt="До обработки"
+                      className="w-36 sm:w-44 h-auto rounded-xl border border-white/10 shadow-2xl"
+                    />
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md text-xs text-white/80">
+                      До
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <motion.div
+                  animate={{ x: [0, 8, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-purple-400"
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-0">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </motion.div>
+
+                {/* After Image */}
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/40 to-pink-500/40 rounded-xl blur-sm opacity-60 group-hover:opacity-80 transition-opacity" />
+                  <div className="relative">
+                    <img 
+                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
+                      alt="После обработки"
+                      className="w-36 sm:w-44 h-auto rounded-xl border border-purple-500/30 shadow-2xl"
+                    />
+                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-purple-500/60 backdrop-blur-sm rounded-md text-xs text-white">
+                      После
+                    </div>
+                    {/* Glow effect */}
+                    <motion.div
+                      className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl opacity-20"
+                      animate={{ opacity: [0.1, 0.3, 0.1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-center text-white/40 text-xs mt-4">
+                Создание карточки от <span className="text-purple-400 font-semibold">59₽</span>
+              </p>
             </motion.div>
           </div>
         </motion.div>

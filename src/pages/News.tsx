@@ -6,6 +6,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Newspaper, Clock, ChevronLeft, ChevronRight, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 interface NewsItem {
   id: string;
@@ -24,14 +25,14 @@ interface Profile {
 const NEWS_PER_PAGE = 10;
 
 const tagColors: Record<string, string> = {
-  'Новости': 'bg-blue-500/10 text-blue-700 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400',
-  'Обновления': 'bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400',
-  'Технические работы': 'bg-orange-500/10 text-orange-700 border-orange-500/20 dark:bg-orange-500/20 dark:text-orange-400',
-  'Исправления': 'bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400',
-  'Инструкции': 'bg-purple-500/10 text-purple-700 border-purple-500/20 dark:bg-purple-500/20 dark:text-purple-400',
-  'Советы': 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400',
-  'Аналитика': 'bg-indigo-500/10 text-indigo-700 border-indigo-500/20 dark:bg-indigo-500/20 dark:text-indigo-400',
-  'Кейсы': 'bg-pink-500/10 text-pink-700 border-pink-500/20 dark:bg-pink-500/20 dark:text-pink-400',
+  'Новости': 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400',
+  'Обновления': 'bg-green-500/10 text-green-600 border-green-500/20 dark:bg-green-500/20 dark:text-green-400',
+  'Технические работы': 'bg-orange-500/10 text-orange-600 border-orange-500/20 dark:bg-orange-500/20 dark:text-orange-400',
+  'Исправления': 'bg-red-500/10 text-red-600 border-red-500/20 dark:bg-red-500/20 dark:text-red-400',
+  'Инструкции': 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:bg-purple-500/20 dark:text-purple-400',
+  'Советы': 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400',
+  'Аналитика': 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20 dark:bg-indigo-500/20 dark:text-indigo-400',
+  'Кейсы': 'bg-pink-500/10 text-pink-600 border-pink-500/20 dark:bg-pink-500/20 dark:text-pink-400',
 };
 
 const News = () => {
@@ -196,30 +197,47 @@ const News = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Новости</h2>
-          <p className="text-muted-foreground">Загрузка новостей...</p>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <Newspaper className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">Новости</h2>
+            <p className="text-muted-foreground text-sm">Загрузка новостей...</p>
+          </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Новости</h2>
-          <p className="text-muted-foreground">
-            Последние обновления и важная информация о сервисе
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <Newspaper className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">Новости</h2>
+            <p className="text-muted-foreground text-sm">Последние обновления сервиса</p>
+          </div>
         </div>
         {news.length > 0 && (
           <Button
             onClick={markAllAsRead}
             variant="outline"
             size="sm"
-            className="shrink-0"
+            className="shrink-0 border-primary/20 hover:bg-primary/10"
           >
             <CheckCheck className="w-4 h-4 mr-2" />
             Прочитать все
@@ -228,32 +246,37 @@ const News = () => {
       </div>
 
       {news.length === 0 ? (
-        <Card>
+        <Card className="bg-card/80 backdrop-blur-xl border-border/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-muted-foreground">
               <Newspaper className="w-5 h-5 opacity-50" />
               Новостей пока нет
             </CardTitle>
             <CardDescription className="text-muted-foreground/70">
-              Здесь будут появляться последние обновления и важная информация о сервисе
+              Здесь будут появляться обновления сервиса
             </CardDescription>
           </CardHeader>
         </Card>
       ) : (
         <>
-          <div className="space-y-4">
-            {news.map((item) => {
+          <div className="space-y-3">
+            {news.map((item, index) => {
               const isRead = readNewsIds.has(item.id);
               const isNew = isNewNews(item.published_at);
               
               return (
-                <Card
+                <motion.div
                   key={item.id}
-                  className={`cursor-pointer transition-all hover:shadow-md bg-muted/50 ${
-                    !isRead ? 'border-wb-purple/20' : ''
-                  }`}
-                  onClick={() => markAsRead(item.id)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
+                  <Card
+                    className={`cursor-pointer transition-all duration-300 bg-card/80 backdrop-blur-xl hover:shadow-lg hover:shadow-primary/5 ${
+                      !isRead ? 'border-primary/30 hover:border-primary/50' : 'border-border/50 hover:border-primary/20'
+                    }`}
+                    onClick={() => markAsRead(item.id)}
+                  >
                   <CardHeader>
                     {/* Mobile: Date above tags */}
                     <div className="flex md:hidden items-center gap-2 text-sm text-muted-foreground mb-3">
@@ -319,7 +342,8 @@ const News = () => {
                       );
                     })()}
                   </CardContent>
-                </Card>
+                  </Card>
+                </motion.div>
               );
             })}
           </div>
@@ -359,7 +383,7 @@ const News = () => {
           )}
         </>
       )}
-    </div>
+    </motion.div>
   );
 };
 

@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, FileText, Images, Loader2, Pencil } from "lucide-react";
+import { Coins, FileText, Images, Loader2, Pencil, Zap } from "lucide-react";
 import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
 import { PromoCodeInput } from "./PromoCodeInput";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
+import { motion } from "framer-motion";
 
 interface PromoCodeInfo {
   id: string;
@@ -59,23 +60,37 @@ export default function Balance() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
-      <div className="bg-gradient-to-br from-wb-purple/5 via-wb-purple/10 to-wb-purple-dark/15 border border-wb-purple/20 rounded-xl p-4 sm:p-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent pointer-events-none" />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0"
+    >
+      {/* Balance Header */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="relative overflow-hidden rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20"
+      >
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
+        
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-wb-purple/20 to-wb-purple-dark/20 p-2 sm:p-3 rounded-lg shadow-lg">
-                <Coins className="h-5 w-5 sm:h-6 sm:w-6 text-wb-purple" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/30">
+                <Zap className="h-6 w-6 text-primary-foreground" />
               </div>
-              <h2 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-wb-purple to-wb-purple-dark bg-clip-text text-transparent">Баланс токенов</h2>
+              <h2 className="text-lg sm:text-xl font-semibold">Баланс токенов</h2>
             </div>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-wb-purple to-wb-purple-dark bg-clip-text text-transparent mb-2">{balance}</div>
+              <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-1">{balance}</div>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                токенов доступно для генерации
+                токенов доступно
               </p>
             </div>
             <Button 
@@ -85,93 +100,107 @@ export default function Balance() {
                   pricingElement.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="bg-gradient-to-r from-wb-purple to-wb-purple-dark hover:from-wb-purple-dark hover:to-wb-purple shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
             >
               Пополнить
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <Card className="bg-muted/30 w-full overflow-hidden">
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
-          {pricesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+      {/* Generation Costs Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <Card className="bg-card/80 backdrop-blur-xl border-border/50 w-full overflow-hidden">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            {pricesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">Описание товара</div>
+                    <div className="text-xs text-muted-foreground">SEO-описание</div>
+                  </div>
+                  <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
+                    {descPrice}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">1 описание товара</div>
-                  <div className="text-xs text-muted-foreground">Генерация описания</div>
+                <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Images className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">Изображение</div>
+                    <div className="text-xs text-muted-foreground">Генерация</div>
+                  </div>
+                  <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
+                    {photoPrice}
+                  </div>
                 </div>
-                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                  {descPrice} {descPrice === 1 ? 'токен' : 'токенов'}
+                <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Images className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">Перегенерация</div>
+                    <div className="text-xs text-muted-foreground">Изображения</div>
+                  </div>
+                  <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
+                    {regenPrice}
+                  </div>
+                </div>
+                <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Pencil className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">Редактирование</div>
+                    <div className="text-xs text-muted-foreground">Карточки</div>
+                  </div>
+                  <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
+                    {editPrice}
+                  </div>
                 </div>
               </div>
-              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                  <Images className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">1 перегенерация изображения</div>
-                  <div className="text-xs text-muted-foreground">Повторная генерация существующего изображения</div>
-                </div>
-                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                  {regenPrice} {regenPrice === 1 ? 'токен' : 'токенов'}
-                </div>
-              </div>
-              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">1 редактирование карточки</div>
-                  <div className="text-xs text-muted-foreground">Изменение существующего изображения по вашим инструкциям</div>
-                </div>
-                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                  {editPrice} {editPrice === 1 ? 'токен' : 'токенов'}
-                </div>
-              </div>
-              <div className="bg-muted/30 border border-border rounded-[10px] p-3 sm:p-4 flex items-center gap-3">
-                <div className="bg-muted p-2 rounded-lg flex-shrink-0">
-                  <Images className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm">1 изображение карточки</div>
-                  <div className="text-xs text-muted-foreground">Генерация</div>
-                </div>
-                <div className="bg-background border px-2 sm:px-3 py-1 rounded-lg font-medium text-xs sm:text-sm flex-shrink-0">
-                  {photoPrice} {photoPrice === 1 ? 'токен' : 'токенов'}
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
       
-      <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pricing" className="text-xs sm:text-sm">Пополнить баланс</TabsTrigger>
-          <TabsTrigger value="history" className="text-xs sm:text-sm">История пополнений</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="pricing" id="pricing-section" className="space-y-4 sm:space-y-6 mt-4">
-          <Pricing appliedPromo={appliedPromo} />
-          <PromoCodeInput onPromoApplied={setAppliedPromo} />
-        </TabsContent>
-        
-        <TabsContent value="history" className="mt-4 w-full min-w-0">
-          <PaymentHistory />
-        </TabsContent>
-      </Tabs>
-    </div>
+      {/* Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      >
+        <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-xl">
+            <TabsTrigger value="pricing" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Пополнить баланс</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">История пополнений</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="pricing" id="pricing-section" className="space-y-4 sm:space-y-6 mt-4">
+            <Pricing appliedPromo={appliedPromo} />
+            <PromoCodeInput onPromoApplied={setAppliedPromo} />
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-4 w-full min-w-0">
+            <PaymentHistory />
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+    </motion.div>
   );
 }
