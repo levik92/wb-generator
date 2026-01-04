@@ -70,13 +70,13 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
                   transition-all duration-200
                 `}
               >
-                {/* Center button special styling */}
+                {/* Center button special styling - no transparency */}
                 {isCenter && (
                   <div className={`
                     absolute inset-0 rounded-full
                     ${isActive 
-                      ? 'bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/30' 
-                      : 'bg-gradient-to-br from-primary/20 to-primary/10'
+                      ? 'bg-gradient-to-br from-primary to-primary shadow-lg shadow-primary/30' 
+                      : 'bg-gradient-to-br from-primary to-primary/90'
                     }
                     transition-all duration-300
                   `} />

@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ExternalLink, Play, MessageCircle, HelpCircle } from "lucide-react";
+import { ExternalLink, Play, MessageCircle, HelpCircle, Zap, GraduationCap } from "lucide-react";
+import { motion } from "framer-motion";
 
 const videoLessons = [
   {
@@ -76,96 +77,142 @@ const Learning = () => {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Обучение</h2>
-        <p className="text-muted-foreground">Изучите все возможности WB Генератор с помощью наших видеоуроков</p>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <GraduationCap className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Обучение</h2>
+          <p className="text-muted-foreground text-sm">Изучите все возможности WB Генератор</p>
+        </div>
       </div>
 
       {/* Telegram Group Promo */}
-      <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-200/30">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
-                <MessageCircle className="h-5 w-5 text-white" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+      >
+        <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
+          <CardContent className="p-6 relative">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <MessageCircle className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Telegram-канал
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Новости, обновления и полезные советы
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent font-semibold">
-                  Подписывайтесь на нашу группу в Telegram
-                </h3>
-                <p className="text-blue-600/80 text-sm">
-                  Получайте последние новости, обновления и полезные советы по работе с сервисом
-                </p>
-              </div>
+              <Button
+                onClick={handleTelegramClick}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Присоединиться
+              </Button>
             </div>
-            <Button
-              onClick={handleTelegramClick}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Присоединиться
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Video Lessons */}
-      <div className="space-y-6">
-        <h3 className="text-2xl font-semibold">Видеоуроки</h3>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center gap-2">
+          <Play className="w-5 h-5 text-primary" />
+          <h3 className="text-xl sm:text-2xl font-semibold">Видеоуроки</h3>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {videoLessons.map((lesson, index) => (
-            <Card key={lesson.id} className="overflow-hidden bg-secondary border">
-              <CardHeader>
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-wb-purple/10 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                    <Play className="w-4 h-4 text-wb-purple" />
+            <motion.div
+              key={lesson.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 * index }}
+            >
+              <Card className="overflow-hidden bg-card/80 backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-1">
+                      <span className="text-sm font-bold text-primary">{index + 1}</span>
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-base sm:text-lg mb-1">
+                        {lesson.title}
+                      </CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">{lesson.description}</CardDescription>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-1">
-                      {index + 1}. {lesson.title}
-                    </CardTitle>
-                    <CardDescription>{lesson.description}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {lesson.embedCode.includes("<div") ? (
-                  <div
-                    className="rounded-lg overflow-hidden bg-black/5"
-                    dangerouslySetInnerHTML={{ __html: lesson.embedCode }}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-48 bg-muted/50 rounded-lg">
-                    <p className="text-muted-foreground">{lesson.embedCode}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  {lesson.embedCode.includes("<div") ? (
+                    <div
+                      className="rounded-xl overflow-hidden bg-black/5"
+                      dangerouslySetInnerHTML={{ __html: lesson.embedCode }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-48 bg-muted/50 rounded-xl">
+                      <p className="text-muted-foreground">{lesson.embedCode}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <Separator />
+      <Separator className="bg-border/50" />
 
       {/* FAQ Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <HelpCircle className="w-6 h-6 text-wb-purple" />
-          <h3 className="text-2xl font-semibold">Часто задаваемые вопросы</h3>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center gap-2">
+          <HelpCircle className="w-5 h-5 text-primary" />
+          <h3 className="text-xl sm:text-2xl font-semibold">Часто задаваемые вопросы</h3>
         </div>
 
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible className="w-full space-y-2">
           {faqItems.map((item, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left">{item.question}</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">{item.answer}</AccordionContent>
+            <AccordionItem 
+              key={index} 
+              value={`item-${index}`}
+              className="border border-border/50 rounded-xl px-4 bg-card/50 backdrop-blur-sm data-[state=open]:border-primary/20 transition-all duration-300"
+            >
+              <AccordionTrigger className="text-left hover:no-underline py-4 text-sm sm:text-base">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed text-sm pb-4">
+                {item.answer}
+              </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

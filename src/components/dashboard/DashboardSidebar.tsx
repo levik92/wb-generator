@@ -215,7 +215,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
                   variant="ghost"
                   className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-10 rounded-xl transition-all duration-200 ${
                     isActive 
-                      ? 'bg-primary/10 text-primary hover:bg-primary/15 font-medium' 
+                      ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary font-medium' 
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={() => !item.disabled && onTabChange(item.id)}
