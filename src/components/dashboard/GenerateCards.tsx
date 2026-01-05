@@ -1207,7 +1207,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="bg-background border-border/50 md:col-span-2 shadow-sm">
+        <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
