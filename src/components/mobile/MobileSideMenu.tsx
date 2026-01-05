@@ -164,7 +164,7 @@ export const MobileSideMenu = ({
                       {profile.tokens_balance}
                     </Badge>
                   </div>
-                  <Button size="sm" onClick={() => handleTabChange('pricing')} className="w-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 rounded-md">
+                  <Button size="sm" onClick={() => handleTabChange('pricing')} className="w-full bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 rounded-lg">
                     Пополнить
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
