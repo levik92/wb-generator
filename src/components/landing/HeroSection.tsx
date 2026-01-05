@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X } from "lucide-react";
-import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
 
 // Animated counter component
 const AnimatedCounter = ({ target, duration = 2000 }: { target: number; duration?: number }) => {
@@ -100,7 +99,7 @@ export const HeroSection = () => {
   });
 
   const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
 
   const stats = [
     { value: 12500, label: "карточек создано", suffix: "+" },
@@ -113,7 +112,7 @@ export const HeroSection = () => {
     <>
       <section
         ref={containerRef}
-        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 sm:pt-36 md:pt-40"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 sm:pt-36 md:pt-44"
       >
         {/* Animated gradient background */}
         <div className="absolute inset-0 gradient-animated" />
@@ -143,9 +142,9 @@ export const HeroSection = () => {
               transition={{ duration: 0.6 }}
               className="flex justify-center mb-6 sm:mb-8"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+              <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4 text-[hsl(268,83%,65%)]" />
-                <span className="text-sm text-white/80">
+                <span className="text-sm text-white/80 text-center">
                   20 бесплатных токенов при регистрации
                 </span>
               </div>
@@ -158,7 +157,7 @@ export const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.1 }}
               className="text-center mb-6"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-4 max-w-5xl mx-auto">
                 <span className="text-white">Дизайнерские карточки для </span>
                 <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] via-[hsl(280,90%,70%)] to-[hsl(268,83%,65%)] bg-clip-text text-transparent">
                   Wildberries
@@ -172,7 +171,7 @@ export const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-base sm:text-lg md:text-xl text-white/60 text-center max-w-3xl mx-auto mb-8 leading-relaxed"
+              className="text-sm sm:text-base md:text-lg text-white/60 text-center max-w-3xl mx-auto mb-8 leading-relaxed"
             >
               Генерируйте продающие карточки, инфографику, SEO-описания и этикетки.
               <span className="text-white/80"> Без дизайнера и опыта.</span>
@@ -230,65 +229,71 @@ export const HeroSection = () => {
               ))}
             </motion.div>
 
-            {/* Before/After Hero - separate images with arrow */}
+            {/* Before/After Hero - separate images with arrow and rotation */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.6 }}
-              className="max-w-2xl mx-auto"
+              className="max-w-3xl mx-auto mb-16 sm:mb-24"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-                {/* Before Image */}
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 to-orange-500/30 rounded-xl blur-sm opacity-50 group-hover:opacity-70 transition-opacity" />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+                {/* Before Image - rotated */}
+                <motion.div 
+                  className="relative group"
+                  initial={{ rotate: -5 }}
+                  whileHover={{ rotate: 0, scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-md opacity-50 group-hover:opacity-70 transition-opacity" />
                   <div className="relative">
                     <img 
-                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
+                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
                       alt="До обработки"
-                      className="w-36 sm:w-44 h-auto rounded-xl border border-white/10 shadow-2xl"
+                      className="w-44 sm:w-56 md:w-64 h-auto rounded-2xl border border-white/10 shadow-2xl transform -rotate-3"
                     />
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md text-xs text-white/80">
+                    <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-sm text-white/80 font-medium">
                       До
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Arrow */}
                 <motion.div
-                  animate={{ x: [0, 8, 0] }}
+                  animate={{ x: [0, 10, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   className="text-purple-400"
                 >
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-0">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-0">
                     <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </motion.div>
 
-                {/* After Image */}
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/40 to-pink-500/40 rounded-xl blur-sm opacity-60 group-hover:opacity-80 transition-opacity" />
+                {/* After Image - rotated opposite */}
+                <motion.div 
+                  className="relative group"
+                  initial={{ rotate: 5 }}
+                  whileHover={{ rotate: 0, scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-2xl blur-md opacity-60 group-hover:opacity-80 transition-opacity" />
                   <div className="relative">
                     <img 
-                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
+                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
                       alt="После обработки"
-                      className="w-36 sm:w-44 h-auto rounded-xl border border-purple-500/30 shadow-2xl"
+                      className="w-44 sm:w-56 md:w-64 h-auto rounded-2xl border border-purple-500/30 shadow-2xl transform rotate-3"
                     />
-                    <div className="absolute bottom-2 left-2 px-2 py-1 bg-purple-500/60 backdrop-blur-sm rounded-md text-xs text-white">
+                    <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-purple-500/60 backdrop-blur-sm rounded-lg text-sm text-white font-medium">
                       После
                     </div>
                     {/* Glow effect */}
                     <motion.div
-                      className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl opacity-20"
+                      className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl opacity-20"
                       animate={{ opacity: [0.1, 0.3, 0.1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   </div>
-                </div>
+                </motion.div>
               </div>
-              
-              <p className="text-center text-white/40 text-xs mt-4">
-                Создание карточки от <span className="text-purple-400 font-semibold">59₽</span>
-              </p>
             </motion.div>
           </div>
         </motion.div>

@@ -263,7 +263,7 @@ const Partner = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -276,8 +276,10 @@ const Partner = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-semibold">Партнерская программа</h1>
-                <p className="text-sm text-muted-foreground">Зарабатывайте с каждым привлеченным клиентом</p>
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  Партнерская программа
+                </h1>
+                <p className="text-sm text-muted-foreground hidden sm:block">Зарабатывайте с каждым привлеченным клиентом</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
@@ -291,21 +293,24 @@ const Partner = () => {
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Balance Card - Full Width */}
-        <Card className="bg-muted/30">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+          <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Текущий баланс
             </CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="text-4xl font-bold">{partner?.current_balance || 0} ₽</div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                {partner?.current_balance || 0} ₽
+              </div>
               {partner && (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
                   {partner.current_balance < 5000 && (
                     <p className="text-xs text-muted-foreground sm:order-2">
-                      Минимальная сумма для вывода: 5 000 ₽
+                      Минимум для вывода: 5 000 ₽
                     </p>
                   )}
                   <WithdrawalButton
@@ -321,8 +326,8 @@ const Partner = () => {
         </Card>
 
         {/* Charts with Date Range */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="bg-muted/30">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -435,7 +440,7 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/30">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -550,7 +555,7 @@ const Partner = () => {
         </div>
 
         {/* Program Info */}
-        <Card className="bg-muted/30">
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -618,7 +623,7 @@ const Partner = () => {
         </Card>
 
         {/* Referrals and Withdrawals Tabs */}
-        <Card className="bg-muted/30">
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Партнерские данные</CardTitle>
           </CardHeader>

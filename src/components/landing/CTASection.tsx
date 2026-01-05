@@ -115,10 +115,10 @@ export const CTASection = () => {
             <Link to="/auth?tab=signup">
               <Button
                 size="lg"
-                className="bg-white text-[hsl(268,83%,40%)] hover:bg-white/90 text-base sm:text-lg px-10 py-7 rounded-xl font-bold shadow-2xl shadow-black/20 group"
+                className="bg-white text-[hsl(268,83%,40%)] hover:bg-white/90 text-sm sm:text-base md:text-lg px-8 sm:px-10 py-5 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/20 group max-w-full"
               >
-                Получить 20 токенов бесплатно
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <span className="truncate">Получить 20 токенов бесплатно</span>
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
               </Button>
             </Link>
             <p className="text-white/50 text-sm mt-6">

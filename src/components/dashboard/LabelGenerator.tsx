@@ -400,44 +400,47 @@ export default function LabelGenerator() {
   }, [labelState, wbState, activeTab]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-0">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Генератор этикеток</h1>
-          <p className="text-muted-foreground mt-1">Создавайте профессиональные этикетки, штрихкоды и QR-коды для ваших товаров</p>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Генератор этикеток
+          </h1>
+          <p className="text-muted-foreground mt-1">Создавайте этикетки, штрихкоды и QR-коды</p>
         </div>
-        <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-3 max-w-sm">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-green-500 text-white px-2 py-1 text-xs hover:bg-green-500 focus:outline-none focus:ring-0 pointer-events-none">БЕСПЛАТНО</Badge>
-            <span className="text-green-600 dark:text-green-400 text-sm font-medium">для всех пользователей WB Генератор</span>
-          </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+          <Badge className="bg-emerald-500 text-white px-2 py-1 text-xs hover:bg-emerald-500 pointer-events-none">
+            БЕСПЛАТНО
+          </Badge>
+          <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">для всех</span>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         {/* Mobile Tab Selector */}
-        <div className="block sm:hidden mb-4">
+        <div className="block sm:hidden">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-colors">
+            <SelectTrigger className="w-full bg-card/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white border-purple-200 shadow-lg">
-              <SelectItem value="barcode" className="hover:bg-purple-50">
+            <SelectContent>
+              <SelectItem value="barcode">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-purple-600" />
-                  <span className="font-medium">Этикетки</span>
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  <span>Этикетки</span>
                 </div>
               </SelectItem>
-              <SelectItem value="qr" className="hover:bg-purple-50">
+              <SelectItem value="qr">
                 <div className="flex items-center gap-2">
-                  <QrCode className="h-4 w-4 text-purple-600" />
-                  <span className="font-medium">QR-коды</span>
+                  <QrCode className="h-4 w-4 text-primary" />
+                  <span>QR-коды</span>
                 </div>
               </SelectItem>
-              <SelectItem value="wb" className="hover:bg-purple-50">
+              <SelectItem value="wb">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-purple-600" />
-                  <span className="font-medium">Короба WB</span>
+                  <Package className="h-4 w-4 text-primary" />
+                  <span>Короба WB</span>
                 </div>
               </SelectItem>
             </SelectContent>
@@ -445,16 +448,16 @@ export default function LabelGenerator() {
         </div>
 
         {/* Desktop Tab List */}
-        <TabsList className="hidden sm:grid w-full grid-cols-3 h-10">
-          <TabsTrigger value="barcode" className="flex items-center gap-2 text-sm">
+        <TabsList className="hidden sm:grid w-full grid-cols-3 h-12 bg-card/50 border border-border/50 rounded-xl p-1">
+          <TabsTrigger value="barcode" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <BarChart3 className="h-4 w-4" />
             Этикетки
           </TabsTrigger>
-          <TabsTrigger value="qr" className="flex items-center gap-2 text-sm">
+          <TabsTrigger value="qr" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <QrCode className="h-4 w-4" />
             QR-коды
           </TabsTrigger>
-          <TabsTrigger value="wb" className="flex items-center gap-2 text-sm">
+          <TabsTrigger value="wb" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Package className="h-4 w-4" />
             Короба WB
           </TabsTrigger>
@@ -468,13 +471,14 @@ export default function LabelGenerator() {
           <WBLabelMakerAlt />
         </TabsContent>
 
-        <TabsContent value="qr" className="space-y-4 sm:space-y-6">
-          <Card className="bg-secondary border">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">Генератор QR-кодов</CardTitle>
-              <CardDescription>Создавайте QR-коды для любых данных</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <TabsContent value="qr" className="space-y-6">
+          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-1">Генератор QR-кодов</h3>
+              <p className="text-sm text-muted-foreground">Создавайте QR-коды для любых данных</p>
+            </div>
+            
+            <div className="space-y-5">
               <div>
                 <Label htmlFor="qr-text">Текст или URL</Label>
                 <Textarea
@@ -482,7 +486,7 @@ export default function LabelGenerator() {
                   placeholder="Введите текст, URL или любые данные для QR-кода..."
                   value={qrText}
                   onChange={(e) => setQrText(e.target.value)}
-                  className="min-h-20"
+                  className="min-h-20 bg-background/50 border-border/50 focus:border-primary/50"
                 />
               </div>
               
@@ -495,14 +499,14 @@ export default function LabelGenerator() {
                     max={500}
                     min={100}
                     step={50}
-                    className="mt-2 [&_[role=slider]]:bg-green-500 [&_[role=slider]]:border-green-600 [&>span>span]:bg-green-500"
+                    className="mt-3"
                   />
                 </div>
                 
                 <div>
                   <Label>Формат файла</Label>
                   <Select value={qrFormat} onValueChange={setQrFormat}>
-                    <SelectTrigger className="border-2">
+                    <SelectTrigger className="bg-background/50 border-border/50">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -513,30 +517,30 @@ export default function LabelGenerator() {
                 </div>
               </div>
               
-              <div className="flex gap-2">
-                <Button onClick={generateQR} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
-                  <QrCode className="h-4 w-4" />
-                  Сгенерировать QR-код
+              <div className="flex gap-3">
+                <Button onClick={generateQR} className="bg-primary hover:bg-primary/90">
+                  <QrCode className="h-4 w-4 mr-2" />
+                  Сгенерировать
                 </Button>
                 
                 {qrPreview && (
-                  <Button onClick={downloadQR} variant="outline" className="flex items-center gap-2">
-                    <Download className="h-4 w-4" />
+                  <Button onClick={downloadQR} variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
                     Скачать
                   </Button>
                 )}
               </div>
               
               {qrPreview && (
-                <div className="mt-4 p-4 border rounded-lg bg-secondary">
-                  <h3 className="font-medium mb-2">Превью QR-кода:</h3>
+                <div className="mt-4 p-6 rounded-xl border border-border/50 bg-background/50">
+                  <h3 className="font-medium mb-4 text-sm text-muted-foreground">Превью:</h3>
                   <div className="flex justify-center">
-                    <img src={qrPreview} alt="Generated QR Code" className="border" />
+                    <img src={qrPreview} alt="Generated QR Code" className="rounded-lg shadow-lg" />
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
