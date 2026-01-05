@@ -236,7 +236,7 @@ export const GenerateDescription = ({
               <span>Стоимость: <strong className="text-foreground">{priceLoading ? '...' : descriptionPrice} токенов</strong></span>
             </div>
             
-            {!canGenerate() && <Alert className="border-amber-500/30 bg-amber-500/10 text-[#db7706]">
+            {!canGenerate() && <Alert className="mt-4 bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
                 <AlertCircle className="h-4 w-4 text-amber-500" />
                 <AlertDescription className="text-amber-600 dark:text-amber-400">
                   {getGuardMessage()}
