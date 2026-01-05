@@ -122,7 +122,7 @@ export default function Balance() {
       duration: 0.4,
       delay: 0.2
     }}>
-        <Card className="border-border/50 w-full overflow-hidden bg-card">
+        <Card className="border-border/50 w-full overflow-hidden bg-zinc-50">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
           </CardHeader>
