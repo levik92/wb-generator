@@ -319,7 +319,7 @@ export const Settings = ({
         </Card>
       </motion.div>
 
-      <Card className="border border-border/50 bg-card">
+      <Card className="border border-border/50 bg-zinc-50">
         <CardHeader>
           <CardTitle>Профиль</CardTitle>
           <CardDescription>Основная информация аккаунта</CardDescription>
@@ -341,7 +341,7 @@ export const Settings = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 bg-card">
+      <Card className="border border-border/50 bg-zinc-50">
         <CardHeader>
           <CardTitle>Смена email</CardTitle>
           <CardDescription>Изменить адрес электронной почты</CardDescription>
@@ -359,7 +359,7 @@ export const Settings = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 bg-card">
+      <Card className="border border-border/50 bg-zinc-50">
         <CardHeader>
           <CardTitle>Смена пароля</CardTitle>
           <CardDescription>Изменить пароль для входа</CardDescription>
@@ -387,7 +387,7 @@ export const Settings = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 relative bg-card">
+      <Card className="border border-border/50 relative bg-zinc-50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -411,7 +411,7 @@ export const Settings = ({
         </CardContent>
       </Card>
 
-      <Card className="bg-background border border-border/50">
+      <Card className="border border-border/50 bg-zinc-50">
         <CardHeader>
           <CardTitle>Действия</CardTitle>
         </CardHeader>
