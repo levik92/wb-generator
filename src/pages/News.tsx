@@ -203,7 +203,7 @@ const News = () => {
         className="space-y-6"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
             <Newspaper className="w-6 h-6 text-primary" />
           </div>
           <div>
@@ -224,7 +224,7 @@ const News = () => {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
             <Newspaper className="w-6 h-6 text-primary" />
           </div>
           <div>

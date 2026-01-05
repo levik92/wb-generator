@@ -51,7 +51,6 @@ export const MobileSideMenu = ({
     { id: 'news', label: 'Новости', icon: Newspaper, badge: hasUnreadNews ? 'Новое' : undefined, badgeColor: 'bg-wb-purple text-white' },
     { id: 'referrals', label: 'Рефералы', icon: Users },
     { id: 'learning', label: 'Обучение', icon: GraduationCap },
-    { id: 'video-cards', label: 'Видео для карточек', icon: Video, disabled: true, badge: 'Скоро' },
     { id: 'settings', label: 'Настройки', icon: Settings },
   ];
 
@@ -174,10 +173,8 @@ export const MobileSideMenu = ({
                               ? 'bg-primary/10 text-primary' 
                               : 'text-foreground hover:bg-muted/50'
                             }
-                            ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}
                           `}
-                          onClick={() => !item.disabled && handleTabChange(item.id)}
-                          disabled={item.disabled}
+                          onClick={() => handleTabChange(item.id)}
                         >
                           <div className={`
                             w-8 h-8 rounded-lg flex items-center justify-center

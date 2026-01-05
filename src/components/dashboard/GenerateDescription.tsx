@@ -136,7 +136,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         transition={{ duration: 0.5 }}
         className="flex items-center gap-3"
       >
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
           <FileText className="w-6 h-6 text-primary" />
         </div>
         <div>
@@ -150,11 +150,11 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative overflow-hidden rounded-2xl bg-background border border-border/50 p-6"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1">
@@ -164,8 +164,8 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-primary/20">
+            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
             <p className="text-sm">
@@ -181,7 +181,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="rounded-2xl border border-border/50 bg-background p-6 space-y-5"
+          className="rounded-2xl border border-border/50 bg-background p-6 space-y-5 shadow-sm"
         >
           <div>
             <h3 className="text-lg font-semibold mb-1">Параметры генерации</h3>
@@ -299,7 +299,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="rounded-2xl border border-border/50 bg-background p-6 space-y-4"
+          className="rounded-2xl border border-border/50 bg-background p-6 space-y-4 shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div>

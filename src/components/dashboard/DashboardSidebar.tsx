@@ -71,6 +71,39 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
     checkUnreadNews();
   }, []);
   
+  // Count unread news
+  const [unreadCount, setUnreadCount] = useState(0);
+  
+  useEffect(() => {
+    const countUnreadNews = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: newsData } = await (supabase as any)
+          .from('news')
+          .select('id')
+          .eq('is_published', true);
+
+        if (newsData && newsData.length > 0) {
+          const { data: readData } = await (supabase as any)
+            .from('news_read_status')
+            .select('news_id')
+            .eq('user_id', user.id);
+
+          const readIds = new Set((readData as any)?.map((r: any) => r.news_id) || []);
+          const count = (newsData as any).filter((news: any) => !readIds.has(news.id)).length;
+          setUnreadCount(count);
+          setHasUnreadNews(count > 0);
+        }
+      } catch (error) {
+        console.error('Error counting unread news:', error);
+      }
+    };
+
+    countUnreadNews();
+  }, []);
+  
   const menuItems = [
     {
       id: 'cards',
@@ -101,8 +134,8 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'news',
       label: 'Новости',
       icon: Newspaper,
-      badge: hasUnreadNews ? 'Новое' : undefined,
-      badgeColor: hasUnreadNews ? 'bg-primary/20 text-primary border-primary/30' : undefined
+      badge: unreadCount > 0 ? unreadCount.toString() : undefined,
+      badgeColor: unreadCount > 0 ? 'bg-primary text-primary-foreground border-primary' : undefined
     },
     {
       id: 'referrals',
@@ -113,14 +146,6 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'learning',
       label: 'Обучение',
       icon: GraduationCap,
-    },
-    {
-      id: 'video-cards',
-      label: 'Видео для карточек',
-      icon: Video,
-      disabled: true,
-      badge: 'Скоро',
-      badgeColor: 'bg-muted text-muted-foreground border-border'
     },
     {
       id: 'settings',
@@ -188,7 +213,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             </div>
             <Button 
               size="sm" 
-              className="w-full h-9 btn-gradient rounded-xl text-sm font-semibold"
+              className="w-full h-9 btn-gradient rounded-[35px] text-sm font-semibold"
               onClick={() => onTabChange('pricing')}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -202,7 +227,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
 
       {/* Navigation */}
       <nav className={`flex-1 p-2 ${isCollapsed ? 'p-2' : 'p-3'}`}>
-        <ul className="space-y-1.5">
+        <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -211,26 +236,28 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
               <li key={item.id} className="relative">
                 <Button
                   variant="ghost"
-                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[12px] transition-all duration-200 ${
+                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[35px] transition-all duration-200 ${
                     isActive 
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' 
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-                  } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={() => !item.disabled && onTabChange(item.id)}
-                  disabled={item.disabled}
+                  }`}
+                  onClick={() => onTabChange(item.id)}
                   title={isCollapsed ? item.label : undefined}
                 >
                   <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
                 {item.badge && !isCollapsed && (
-                  <Badge 
-                    className={`absolute -top-1 right-1 text-[9px] px-1.5 py-0 h-4 min-w-0 border ${
-                      item.badgeColor || 'bg-muted text-muted-foreground border-border'
-                    } rounded-md shadow-sm z-10 pointer-events-none font-medium`}
-                  >
-                    {item.badge}
-                  </Badge>
+                  <div className="absolute top-1/2 -translate-y-1/2 right-3 flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                    <Badge 
+                      className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${
+                        item.badgeColor || 'bg-muted text-muted-foreground border-border'
+                      } rounded-full shadow-sm pointer-events-none font-semibold`}
+                    >
+                      {item.badge}
+                    </Badge>
+                  </div>
                 )}
               </li>
             );

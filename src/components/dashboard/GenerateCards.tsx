@@ -1108,7 +1108,7 @@ export const GenerateCards = ({
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
           <Images className="w-6 h-6 text-primary" />
         </div>
         <div>
@@ -1117,7 +1117,7 @@ export const GenerateCards = ({
         </div>
       </div>
 
-      <Card className="bg-background border-border/50">
+      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
           <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
@@ -1130,8 +1130,8 @@ export const GenerateCards = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
@@ -1140,8 +1140,8 @@ export const GenerateCards = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
@@ -1150,8 +1150,8 @@ export const GenerateCards = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
                   <Gift className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
@@ -1167,7 +1167,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="bg-background border-border/50 md:col-span-3">
+        <Card className="bg-background border-border/50 md:col-span-3 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1207,7 +1207,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="bg-muted/30 md:col-span-2">
+        <Card className="bg-background border-border/50 md:col-span-2 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1246,7 +1246,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="bg-muted/30">
+      <Card className="bg-background border-border/50 shadow-sm">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-end mb-2 sm:hidden">

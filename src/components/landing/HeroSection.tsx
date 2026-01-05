@@ -237,10 +237,10 @@ export const HeroSection = () => {
               className="max-w-3xl mx-auto mb-16 sm:mb-24"
             >
               <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
-                {/* Before Image - rotated */}
+                {/* Before Image - rotated left */}
                 <motion.div 
                   className="relative group"
-                  initial={{ rotate: -6 }}
+                  initial={{ rotate: -4 }}
                   whileHover={{ rotate: 0, scale: 1.05 }}
                   transition={{ duration: 0.3 }}
                 >
@@ -249,7 +249,7 @@ export const HeroSection = () => {
                     <img 
                       src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
                       alt="До обработки"
-                      className="w-48 sm:w-60 md:w-72 h-auto rounded-2xl border border-white/10 shadow-2xl transform -rotate-3"
+                      className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border border-white/10 shadow-2xl"
                     />
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-sm text-white/80 font-medium">
                       До
@@ -268,27 +268,27 @@ export const HeroSection = () => {
                   </svg>
                 </motion.div>
 
-                {/* After Image - rotated opposite */}
+                {/* After Image - rotated right with glow */}
                 <motion.div 
                   className="relative group"
-                  initial={{ rotate: 6 }}
+                  initial={{ rotate: 4 }}
                   whileHover={{ rotate: 0, scale: 1.05 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
+                  <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/40 to-pink-500/40 rounded-2xl blur-xl opacity-70 group-hover:opacity-90 transition-opacity" />
                   <div className="relative">
                     <img 
                       src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
                       alt="После обработки"
-                      className="w-48 sm:w-60 md:w-72 h-auto rounded-2xl border border-purple-500/30 shadow-2xl transform rotate-3"
+                      className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border-2 border-purple-500/40 shadow-2xl"
                     />
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-purple-500/60 backdrop-blur-sm rounded-lg text-sm text-white font-medium">
                       После
                     </div>
                     {/* Glow effect */}
                     <motion.div
-                      className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl opacity-20"
-                      animate={{ opacity: [0.1, 0.3, 0.1] }}
+                      className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl opacity-20 -z-10"
+                      animate={{ opacity: [0.15, 0.35, 0.15] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
                   </div>

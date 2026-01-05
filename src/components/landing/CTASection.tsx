@@ -73,7 +73,7 @@ export const CTASection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-lg sm:text-xl md:text-2xl text-white/70 mb-12 max-w-2xl mx-auto"
+            className="text-base sm:text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto"
           >
             20 бесплатных токенов ждут вас. Создайте первые профессиональные карточки за 3 минуты.
           </motion.p>
