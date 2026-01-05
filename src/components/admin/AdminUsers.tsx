@@ -6,20 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { 
-  Ban, 
-  Shield, 
-  Pencil, 
-  Search,
-  UserCheck,
-  Eye,
-  Coins,
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+import { Ban, Shield, Pencil, Search, UserCheck, Eye, Coins, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-
 interface User {
   id: string;
   email: string;
@@ -30,7 +19,6 @@ interface User {
   created_at: string;
   referral_code: string;
 }
-
 interface UserDetails {
   totalPaid: number;
   tokensSpent: number;
@@ -41,13 +29,14 @@ interface UserDetails {
   paymentHistory: any[];
   referrals: any[];
 }
-
 interface AdminUsersProps {
   users: User[];
   onUsersUpdate: () => void;
 }
-
-export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
+export function AdminUsers({
+  users,
+  onUsersUpdate
+}: AdminUsersProps) {
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newTokenBalance, setNewTokenBalance] = useState<string>("");
@@ -56,7 +45,6 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  
   const usersPerPage = 20;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
@@ -65,48 +53,39 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
 
   // Update filtered users when users prop changes or search changes
   useEffect(() => {
-    const filtered = users.filter(user => 
-      user.email.toLowerCase().includes(searchEmail.toLowerCase())
-    );
+    const filtered = users.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase()));
     setFilteredUsers(filtered);
     setCurrentPage(1);
   }, [users, searchEmail]);
-
   const loadUserDetails = async (user: User) => {
     setDetailsLoading(true);
     try {
       // Get referrals without the join (avoid RLS issues)
-      const referralsRes = await supabase
-        .from('referrals')
-        .select('*')
-        .eq('referrer_id', user.id);
+      const referralsRes = await supabase.from('referrals').select('*').eq('referrer_id', user.id);
 
       // For each referral, get the email using the secure function
-      const referralsWithEmails = await Promise.all(
-        (referralsRes.data || []).map(async (ref) => {
-          const { data: refData } = await supabase.rpc('admin_get_profile', {
-            target_user_id: ref.referred_id,
-            access_reason: 'View referral details'
-          });
-          return {
-            ...ref,
-            referred: { email: refData?.[0]?.email || 'Unknown' }
-          };
-        })
-      );
-
-      const [paymentsRes, tokensRes, generationsRes] = await Promise.all([
-        supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
-        supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
-        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10)
-      ]);
-
+      const referralsWithEmails = await Promise.all((referralsRes.data || []).map(async ref => {
+        const {
+          data: refData
+        } = await supabase.rpc('admin_get_profile', {
+          target_user_id: ref.referred_id,
+          access_reason: 'View referral details'
+        });
+        return {
+          ...ref,
+          referred: {
+            email: refData?.[0]?.email || 'Unknown'
+          }
+        };
+      }));
+      const [paymentsRes, tokensRes, generationsRes] = await Promise.all([supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'), supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'), supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', {
+        ascending: false
+      }).limit(10)]);
       const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
       const generationsCount = generationsRes.data?.length || 0;
       const referralsCount = referralsWithEmails.length;
       const referralsEarnings = referralsWithEmails.reduce((sum, r) => sum + (r.tokens_awarded || 0), 0);
-
       setUserDetails({
         totalPaid,
         tokensSpent,
@@ -122,99 +101,89 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
       toast({
         title: "Ошибка",
         description: "Не удалось загрузить детали пользователя",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setDetailsLoading(false);
     }
   };
-
   const toggleUserBlock = async (userId: string, currentStatus: boolean) => {
     try {
-      const { data, error } = await supabase.rpc('admin_toggle_user_block', {
+      const {
+        data,
+        error
+      } = await supabase.rpc('admin_toggle_user_block', {
         target_user_id: userId,
         block_status: !currentStatus
       });
-
       if (error) {
         throw error;
       }
-
       toast({
         title: "Успешно",
-        description: `Пользователь ${!currentStatus ? 'заблокирован' : 'разблокирован'}`,
+        description: `Пользователь ${!currentStatus ? 'заблокирован' : 'разблокирован'}`
       });
-      
+
       // Give database time to update and force refresh
       setTimeout(async () => {
         await onUsersUpdate();
         // Force re-render by updating the local state
-        const updatedUsers = users.map(u => 
-          u.id === userId ? { ...u, is_blocked: !currentStatus } : u
-        );
-        setFilteredUsers(updatedUsers.filter(user => 
-          user.email.toLowerCase().includes(searchEmail.toLowerCase())
-        ));
+        const updatedUsers = users.map(u => u.id === userId ? {
+          ...u,
+          is_blocked: !currentStatus
+        } : u);
+        setFilteredUsers(updatedUsers.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase())));
       }, 300);
     } catch (error: any) {
       console.error('Error toggling user block:', error);
       toast({
         title: "Ошибка",
         description: error.message || "Не удалось изменить статус пользователя",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const updateTokenBalance = async () => {
     if (!editingUser || !newTokenBalance) return;
-
     const newBalance = parseInt(newTokenBalance);
     if (isNaN(newBalance) || newBalance < 0) {
       toast({
         title: "Ошибка",
         description: "Введите корректное количество токенов",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
-    const { data, error } = await supabase.rpc('admin_update_user_tokens', {
+    const {
+      data,
+      error
+    } = await supabase.rpc('admin_update_user_tokens', {
       target_user_id: editingUser.id,
       new_balance: newBalance,
       reason: 'Корректировка баланса администратором'
     });
-
     if (error) {
       toast({
         title: "Ошибка",
         description: "Не удалось обновить баланс токенов",
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Успешно",
-        description: "Баланс токенов обновлен",
+        description: "Баланс токенов обновлен"
       });
-      
       setEditingUser(null);
       setNewTokenBalance("");
       onUsersUpdate();
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Поиск по email..."
-            value={searchEmail}
-            onChange={(e) => setSearchEmail(e.target.value)}
-            className="pl-10"
-          />
+          <Input placeholder="Поиск по email..." value={searchEmail} onChange={e => setSearchEmail(e.target.value)} className="pl-10" />
         </div>
         <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
           Найдено: {filteredUsers.length} из {users.length}
@@ -222,7 +191,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
       </div>
 
       {/* Users Table */}
-      <Card>
+      <Card className="bg-zinc-50">
         <CardHeader>
           <CardTitle>Управление пользователями</CardTitle>
           <CardDescription>
@@ -244,13 +213,11 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[180px] truncate text-xs md:text-sm" 
-                      onClick={() => {
-                        setSelectedUser(user);
-                        loadUserDetails(user);
-                      }}>
+                {currentUsers.map(user => <TableRow key={user.id}>
+                    <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[180px] truncate text-xs md:text-sm" onClick={() => {
+                  setSelectedUser(user);
+                  loadUserDetails(user);
+                }}>
                       {user.email}
                     </TableCell>
                     <TableCell className="max-w-[100px] truncate text-xs hidden lg:table-cell">{user.full_name || 'Не указано'}</TableCell>
@@ -272,29 +239,19 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-0.5 md:gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            loadUserDetails(user);
-                          }}
-                          className="h-7 w-7 md:h-8 md:w-8 p-0"
-                        >
+                        <Button variant="outline" size="sm" onClick={() => {
+                      setSelectedUser(user);
+                      loadUserDetails(user);
+                    }} className="h-7 w-7 md:h-8 md:w-8 p-0">
                           <Eye className="h-3 w-3" />
                         </Button>
                         
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEditingUser(user);
-                                setNewTokenBalance(user.tokens_balance.toString());
-                              }}
-                              className="h-7 w-7 md:h-8 md:w-8 p-0"
-                            >
+                            <Button variant="outline" size="sm" onClick={() => {
+                          setEditingUser(user);
+                          setNewTokenBalance(user.tokens_balance.toString());
+                        }} className="h-7 w-7 md:h-8 md:w-8 p-0">
                               <Pencil className="h-3 w-3" />
                             </Button>
                           </DialogTrigger>
@@ -308,13 +265,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                             <div className="space-y-4">
                               <div className="space-y-2">
                                 <Label htmlFor="tokens">Новый баланс токенов</Label>
-                                <Input
-                                  id="tokens"
-                                  type="number"
-                                  min="0"
-                                  value={newTokenBalance}
-                                  onChange={(e) => setNewTokenBalance(e.target.value)}
-                                />
+                                <Input id="tokens" type="number" min="0" value={newTokenBalance} onChange={e => setNewTokenBalance(e.target.value)} />
                               </div>
                             </div>
                             <DialogFooter>
@@ -323,59 +274,35 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                           </DialogContent>
                         </Dialog>
 
-                        <Button
-                          variant={user.is_blocked ? "default" : "destructive"}
-                          size="sm"
-                          onClick={() => toggleUserBlock(user.id, user.is_blocked)}
-                          className="h-7 w-7 md:h-8 md:w-8 p-0"
-                        >
-                          {user.is_blocked ? (
-                            <UserCheck className="h-3 w-3" />
-                          ) : (
-                            <Ban className="h-3 w-3" />
-                          )}
+                        <Button variant={user.is_blocked ? "default" : "destructive"} size="sm" onClick={() => toggleUserBlock(user.id, user.is_blocked)} className="h-7 w-7 md:h-8 md:w-8 p-0">
+                          {user.is_blocked ? <UserCheck className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
                         </Button>
                       </div>
                     </TableCell>
-                  </TableRow>
-                ))}
+                  </TableRow>)}
               </TableBody>
             </Table>
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between mt-3 md:mt-4 gap-2 px-2">
+          {totalPages > 1 && <div className="flex flex-col sm:flex-row items-center justify-between mt-3 md:mt-4 gap-2 px-2">
               <div className="text-xs md:text-sm text-muted-foreground order-2 sm:order-1">
                 Показано {startIndex + 1}-{Math.min(endIndex, filteredUsers.length)} из {filteredUsers.length}
               </div>
               <div className="flex items-center gap-1 md:gap-2 order-1 sm:order-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="h-8"
-                >
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8">
                   <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
                   <span className="hidden md:inline ml-1">Назад</span>
                 </Button>
                 <span className="text-xs md:text-sm px-1 md:px-2 whitespace-nowrap">
                   {currentPage} / {totalPages}
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="h-8"
-                >
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="h-8">
                   <span className="hidden md:inline mr-1">Вперед</span>
                   <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
               </div>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
 
@@ -389,12 +316,9 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
             </DialogDescription>
           </DialogHeader>
 
-          {detailsLoading ? (
-            <div className="flex justify-center py-8">
+          {detailsLoading ? <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : userDetails && (
-            <div className="space-y-6">
+            </div> : userDetails && <div className="space-y-6">
               {/* Stats Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-3">
@@ -438,8 +362,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {userDetails.paymentHistory.map((payment: any) => (
-                          <TableRow key={payment.id}>
+                        {userDetails.paymentHistory.map((payment: any) => <TableRow key={payment.id}>
                             <TableCell className="text-xs">
                               {new Date(payment.created_at).toLocaleDateString('ru-RU')}
                             </TableCell>
@@ -448,8 +371,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                             <TableCell>
                               <Badge variant="default" className="text-xs">{payment.status}</Badge>
                             </TableCell>
-                          </TableRow>
-                        ))}
+                          </TableRow>)}
                       </TableBody>
                     </Table>
                   </div>
@@ -469,8 +391,7 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {userDetails.referrals.map((referral: any) => (
-                          <TableRow key={referral.id}>
+                        {userDetails.referrals.map((referral: any) => <TableRow key={referral.id}>
                              <TableCell className="truncate max-w-[150px]">{referral.referred?.email}</TableCell>
                             <TableCell className="text-xs">
                               {new Date(referral.created_at).toLocaleDateString('ru-RU')}
@@ -480,17 +401,14 @@ export function AdminUsers({ users, onUsersUpdate }: AdminUsersProps) {
                                 {referral.tokens_awarded} токенов
                               </Badge>
                             </TableCell>
-                          </TableRow>
-                        ))}
+                          </TableRow>)}
                       </TableBody>
                     </Table>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
