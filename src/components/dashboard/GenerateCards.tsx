@@ -1329,7 +1329,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="bg-card">
+      <Card className="bg-zinc-50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Images className="w-4 h-4" />
