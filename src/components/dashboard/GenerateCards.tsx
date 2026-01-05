@@ -1167,7 +1167,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
+        <Card className="border-border/50 md:col-span-3 shadow-sm bg-zinc-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
