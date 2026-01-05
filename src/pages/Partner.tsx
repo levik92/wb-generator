@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import { ArrowLeft, LogOut, Copy, CreditCard, TrendingUp, Users, AlertCircle, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Bar, BarChart, CartesianGrid, Legend } from "recharts";
@@ -16,7 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BankDetailsForm } from "@/components/partner/BankDetailsForm";
 import { WithdrawalButton } from "@/components/partner/WithdrawalButton";
 import Footer from "@/components/Footer";
-
 interface PartnerProfile {
   id: string;
   partner_code: string;
@@ -26,7 +24,6 @@ interface PartnerProfile {
   current_balance: number;
   invited_clients_count: number;
 }
-
 interface PartnerReferral {
   id: string;
   referred_user_id: string;
@@ -42,7 +39,6 @@ interface PartnerReferral {
     full_name: string | null;
   };
 }
-
 interface PartnerCommission {
   id: string;
   commission_amount: number;
@@ -50,7 +46,6 @@ interface PartnerCommission {
   created_at: string;
   status: string;
 }
-
 interface PartnerWithdrawal {
   id: string;
   amount: number;
@@ -60,10 +55,11 @@ interface PartnerWithdrawal {
   payment_method: string | null;
   notes: string | null;
 }
-
 const Partner = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [loading, setLoading] = useState(true);
   const [chartsLoading, setChartsLoading] = useState(true);
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
@@ -74,63 +70,68 @@ const Partner = () => {
   const [earningsDateRange, setEarningsDateRange] = useState("7");
   const [clientsDateRange, setClientsDateRange] = useState("7");
   const [activeTab, setActiveTab] = useState("clients");
-
   useEffect(() => {
     loadPartnerData();
   }, []);
-
   const loadPartnerData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) {
         navigate("/auth");
         return;
       }
 
       // Загрузка профиля партнера
-      const { data: partnerData, error: partnerError } = await supabase
-        .from("partner_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
+      const {
+        data: partnerData,
+        error: partnerError
+      } = await supabase.from("partner_profiles").select("*").eq("user_id", user.id).single();
       if (partnerError && partnerError.code !== "PGRST116") {
         throw partnerError;
       }
 
       // Если партнера нет, создаем
       if (!partnerData) {
-        const { data: codeData } = await supabase.rpc("generate_partner_code");
-        const { data: newPartner, error: createError } = await supabase
-          .from("partner_profiles")
-          .insert({
-            user_id: user.id,
-            partner_code: codeData,
-            status: "inactive"
-          })
-          .select()
-          .single();
-
+        const {
+          data: codeData
+        } = await supabase.rpc("generate_partner_code");
+        const {
+          data: newPartner,
+          error: createError
+        } = await supabase.from("partner_profiles").insert({
+          user_id: user.id,
+          partner_code: codeData,
+          status: "inactive"
+        }).select().single();
         if (createError) throw createError;
         setPartner(newPartner);
       } else {
         setPartner(partnerData);
 
         // Загрузка рефералов без join
-        const { data: referralsData, error: referralsError } = await supabase
-          .from("partner_referrals")
-          .select("*")
-          .eq("partner_id", partnerData.id)
-          .order("registered_at", { ascending: false });
-
+        const {
+          data: referralsData,
+          error: referralsError
+        } = await supabase.from("partner_referrals").select("*").eq("partner_id", partnerData.id).order("registered_at", {
+          ascending: false
+        });
         if (referralsError) {
           console.error("Error loading partner referrals:", referralsError);
         }
 
         // Попытка обогатить данными из edge-функции (masked_email, full_name)
         try {
-          const { data: enriched, error: enrichError } = await supabase.functions.invoke('get-partner-referrals', {
-            body: { partnerId: partnerData.id }
+          const {
+            data: enriched,
+            error: enrichError
+          } = await supabase.functions.invoke('get-partner-referrals', {
+            body: {
+              partnerId: partnerData.id
+            }
           });
           if (!enrichError && enriched?.referrals) {
             setReferrals(enriched.referrals as any);
@@ -144,22 +145,19 @@ const Partner = () => {
         }
 
         // Загрузка комиссий
-        const { data: commissionsData } = await supabase
-          .from("partner_commissions")
-          .select("*")
-          .eq("partner_id", partnerData.id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
+        const {
+          data: commissionsData
+        } = await supabase.from("partner_commissions").select("*").eq("partner_id", partnerData.id).order("created_at", {
+          ascending: false
+        }).limit(50);
         if (commissionsData) setCommissions(commissionsData);
 
         // Загрузка выплат
-        const { data: withdrawalsData } = await supabase
-          .from("partner_withdrawals")
-          .select("*")
-          .eq("partner_id", partnerData.id)
-          .order("requested_at", { ascending: false });
-
+        const {
+          data: withdrawalsData
+        } = await supabase.from("partner_withdrawals").select("*").eq("partner_id", partnerData.id).order("requested_at", {
+          ascending: false
+        });
         if (withdrawalsData) setWithdrawals(withdrawalsData);
       }
     } catch (error) {
@@ -175,7 +173,6 @@ const Partner = () => {
       setTimeout(() => setChartsLoading(false), 500);
     }
   };
-
   const copyPartnerLink = () => {
     const link = `${window.location.origin}/auth?partner=${partner?.partner_code}`;
     navigator.clipboard.writeText(link);
@@ -184,7 +181,6 @@ const Partner = () => {
       description: "Партнерская ссылка скопирована в буфер обмена"
     });
   };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -200,27 +196,37 @@ const Partner = () => {
   // График заработка по дням
   const getEarningsChartData = (days: number) => {
     const filtered = getFilteredCommissions(days);
-    const grouped: { [key: string]: number } = {};
-    
+    const grouped: {
+      [key: string]: number;
+    } = {};
+
     // Создаем массив всех дат в периоде
     const dates: string[] = [];
     const now = new Date();
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      dates.push(date.toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }));
+      dates.push(date.toLocaleDateString("ru-RU", {
+        day: "2-digit",
+        month: "short"
+      }));
       grouped[dates[dates.length - 1]] = 0;
     }
-    
+
     // Заполняем данные
     filtered.forEach(comm => {
-      const date = new Date(comm.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
+      const date = new Date(comm.created_at).toLocaleDateString("ru-RU", {
+        day: "2-digit",
+        month: "short"
+      });
       if (grouped.hasOwnProperty(date)) {
         grouped[date] += parseFloat(comm.commission_amount.toString());
       }
     });
-
-    return dates.map(date => ({ date, amount: grouped[date] }));
+    return dates.map(date => ({
+      date,
+      amount: grouped[date]
+    }));
   };
 
   // График рефералов по дням
@@ -228,51 +234,50 @@ const Partner = () => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     const filtered = referrals.filter(r => new Date(r.registered_at) >= cutoffDate);
-    
-    const grouped: { [key: string]: number } = {};
-    
+    const grouped: {
+      [key: string]: number;
+    } = {};
+
     // Создаем массив всех дат в периоде
     const dates: string[] = [];
     const now = new Date();
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      dates.push(date.toLocaleDateString("ru-RU", { day: "2-digit", month: "short" }));
+      dates.push(date.toLocaleDateString("ru-RU", {
+        day: "2-digit",
+        month: "short"
+      }));
       grouped[dates[dates.length - 1]] = 0;
     }
-    
+
     // Заполняем данные
     filtered.forEach(ref => {
-      const date = new Date(ref.registered_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "short" });
+      const date = new Date(ref.registered_at).toLocaleDateString("ru-RU", {
+        day: "2-digit",
+        month: "short"
+      });
       if (grouped.hasOwnProperty(date)) {
         grouped[date] += 1;
       }
     });
-
-    return dates.map(date => ({ date, count: grouped[date] }));
+    return dates.map(date => ({
+      date,
+      count: grouped[date]
+    }));
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/dashboard")}
-                className="shrink-0"
-              >
+              <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="shrink-0">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -293,7 +298,7 @@ const Partner = () => {
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Balance Card - Full Width */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <Card className="border-border/50 backdrop-blur-sm overflow-hidden bg-zinc-50">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -306,28 +311,19 @@ const Partner = () => {
               <div className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {partner?.current_balance || 0} ₽
               </div>
-              {partner && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
-                  {partner.current_balance < 5000 && (
-                    <p className="text-xs text-muted-foreground sm:order-2">
+              {partner && <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+                  {partner.current_balance < 5000 && <p className="text-xs text-muted-foreground sm:order-2">
                       Минимум для вывода: 5 000 ₽
-                    </p>
-                  )}
-                  <WithdrawalButton
-                    balance={partner.current_balance}
-                    partnerId={partner.id}
-                    hasBankDetails={hasBankDetails}
-                    onSuccess={loadPartnerData}
-                  />
-                </div>
-              )}
+                    </p>}
+                  <WithdrawalButton balance={partner.current_balance} partnerId={partner.id} hasBankDetails={hasBankDetails} onSuccess={loadPartnerData} />
+                </div>}
             </div>
           </CardContent>
         </Card>
 
         {/* Charts with Date Range */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="border-border/50 backdrop-blur-sm bg-zinc-50">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -336,58 +332,27 @@ const Partner = () => {
                 </div>
               </div>
               <div className="flex items-end justify-between">
-                {chartsLoading ? (
-                  <Skeleton className="h-12 w-32" />
-                ) : (
-                  <div className="text-4xl font-bold">{partner?.total_earned || 0} ₽</div>
-                )}
+                {chartsLoading ? <Skeleton className="h-12 w-32" /> : <div className="text-4xl font-bold">{partner?.total_earned || 0} ₽</div>}
                 <div className="flex gap-1">
-                  <Button
-                    variant={earningsDateRange === "7" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setEarningsDateRange("7")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={earningsDateRange === "7" ? "default" : "ghost"} size="sm" onClick={() => setEarningsDateRange("7")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     7д
                   </Button>
-                  <Button
-                    variant={earningsDateRange === "30" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setEarningsDateRange("30")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={earningsDateRange === "30" ? "default" : "ghost"} size="sm" onClick={() => setEarningsDateRange("30")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     30д
                   </Button>
-                  <Button
-                    variant={earningsDateRange === "90" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setEarningsDateRange("90")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={earningsDateRange === "90" ? "default" : "ghost"} size="sm" onClick={() => setEarningsDateRange("90")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     3м
                   </Button>
-                  <Button
-                    variant={earningsDateRange === "365" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setEarningsDateRange("365")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={earningsDateRange === "365" ? "default" : "ghost"} size="sm" onClick={() => setEarningsDateRange("365")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     1г
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              {chartsLoading ? (
-                <div className="flex items-center justify-center h-[300px]">
+              {chartsLoading ? <div className="flex items-center justify-center h-[300px]">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                </div> : getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={getEarningsChartData(parseInt(earningsDateRange))}>
                     <defs>
                       <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
@@ -396,51 +361,22 @@ const Partner = () => {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                      axisLine={false}
-                      tickLine={false}
-                      allowDecimals={false}
-                      domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "6px"
-                      }}
-                      formatter={(value: any) => [`${Number(value).toFixed(2)} ₽`, 'Сумма']}
-                      labelFormatter={(label: any) => `Дата: ${label}`}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="amount"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#earningsGradient)"
-                    />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} tickMargin={8} axisLine={false} tickLine={false} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickMargin={8} axisLine={false} tickLine={false} allowDecimals={false} domain={[0, (dataMax: number) => Math.max(dataMax, 1)]} />
+                    <Tooltip contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "6px"
+                  }} formatter={(value: any) => [`${Number(value).toFixed(2)} ₽`, 'Сумма']} labelFormatter={(label: any) => `Дата: ${label}`} />
+                    <Area type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#earningsGradient)" />
                   </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
+                </ResponsiveContainer> : <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
                   Нет данных для отображения
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="border-border/50 backdrop-blur-sm bg-zinc-50">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -449,58 +385,27 @@ const Partner = () => {
                 </div>
               </div>
               <div className="flex items-end justify-between">
-                {chartsLoading ? (
-                  <Skeleton className="h-12 w-24" />
-                ) : (
-                  <div className="text-4xl font-bold">{partner?.invited_clients_count || 0}</div>
-                )}
+                {chartsLoading ? <Skeleton className="h-12 w-24" /> : <div className="text-4xl font-bold">{partner?.invited_clients_count || 0}</div>}
                 <div className="flex gap-1">
-                  <Button
-                    variant={clientsDateRange === "7" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setClientsDateRange("7")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={clientsDateRange === "7" ? "default" : "ghost"} size="sm" onClick={() => setClientsDateRange("7")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     7д
                   </Button>
-                  <Button
-                    variant={clientsDateRange === "30" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setClientsDateRange("30")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={clientsDateRange === "30" ? "default" : "ghost"} size="sm" onClick={() => setClientsDateRange("30")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     30д
                   </Button>
-                  <Button
-                    variant={clientsDateRange === "90" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setClientsDateRange("90")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={clientsDateRange === "90" ? "default" : "ghost"} size="sm" onClick={() => setClientsDateRange("90")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     3м
                   </Button>
-                  <Button
-                    variant={clientsDateRange === "365" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setClientsDateRange("365")}
-                    className="h-8 px-3 text-xs"
-                    disabled={chartsLoading}
-                  >
+                  <Button variant={clientsDateRange === "365" ? "default" : "ghost"} size="sm" onClick={() => setClientsDateRange("365")} className="h-8 px-3 text-xs" disabled={chartsLoading}>
                     1г
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              {chartsLoading ? (
-                <div className="flex items-center justify-center h-[300px]">
+              {chartsLoading ? <div className="flex items-center justify-center h-[300px]">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : getReferralsChartData(parseInt(clientsDateRange)).length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
+                </div> : getReferralsChartData(parseInt(clientsDateRange)).length > 0 ? <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={getReferralsChartData(parseInt(clientsDateRange))}>
                     <defs>
                       <linearGradient id="clientsGradient" x1="0" y1="0" x2="0" y2="1">
@@ -509,53 +414,24 @@ const Partner = () => {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={11}
-                      tickMargin={8}
-                      axisLine={false}
-                      tickLine={false}
-                      allowDecimals={false}
-                      domain={[0, 'dataMax + 1']}
-                    />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "6px"
-                      }}
-                      formatter={(value: any) => [value, 'Пользователи']}
-                      labelFormatter={(label: any) => `Дата: ${label}`}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="count"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#clientsGradient)"
-                    />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} tickMargin={8} axisLine={false} tickLine={false} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickMargin={8} axisLine={false} tickLine={false} allowDecimals={false} domain={[0, 'dataMax + 1']} />
+                    <Tooltip contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "6px"
+                  }} formatter={(value: any) => [value, 'Пользователи']} labelFormatter={(label: any) => `Дата: ${label}`} />
+                    <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#clientsGradient)" />
                   </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
+                </ResponsiveContainer> : <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
                   Нет данных для отображения
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
 
         {/* Program Info */}
-        <Card className="border-border/50 bg-background">
+        <Card className="border-border/50 bg-zinc-50">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -583,39 +459,24 @@ const Partner = () => {
                 Ваша партнерская ссылка:
               </h3>
               <div className="flex gap-2">
-                <Input
-                  value={`${window.location.origin}/auth?partner=${partner?.partner_code}`}
-                  readOnly
-                  className="flex-1 bg-background/80"
-                />
-                <Button
-                  onClick={copyPartnerLink}
-                  variant="outline"
-                  className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
-                >
+                <Input value={`${window.location.origin}/auth?partner=${partner?.partner_code}`} readOnly className="flex-1 bg-background/80" />
+                <Button onClick={copyPartnerLink} variant="outline" className="px-4 bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800">
                   <Copy className="h-4 w-4 mr-2" />
                   Копировать
                 </Button>
               </div>
             </div>
 
-            {partner?.status === "inactive" && (
-              <div className="flex items-start gap-2 p-4 rounded-lg bg-amber-50 border border-amber-200">
+            {partner?.status === "inactive" && <div className="flex items-start gap-2 p-4 rounded-lg bg-amber-50 border border-amber-200">
                 <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                 <p className="text-sm text-amber-800">
                   Партнерский статус станет активным после первого привлеченного платежа.
                 </p>
-              </div>
-            )}
+              </div>}
 
             <p className="text-sm text-muted-foreground">
               Распространяя партнерскую ссылку вы соглашаетесь с условиями{" "}
-              <a
-                href="/partner-agreement"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
+              <a href="/partner-agreement" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 Оферты партнерской программы
               </a>
             </p>
@@ -623,7 +484,7 @@ const Partner = () => {
         </Card>
 
         {/* Referrals and Withdrawals Tabs */}
-        <Card className="border-border/50 bg-background">
+        <Card className="border-border/50 bg-zinc-50">
           <CardHeader>
             <CardTitle>Партнерские данные</CardTitle>
           </CardHeader>
@@ -641,8 +502,7 @@ const Partner = () => {
               </TabsList>
 
               <TabsContent value="clients" className="mt-6">
-                {referrals.length > 0 ? (
-                  <div className="overflow-x-auto">
+                {referrals.length > 0 ? <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -654,15 +514,14 @@ const Partner = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {referrals.map((ref) => (
-                          <TableRow key={ref.id}>
+                        {referrals.map(ref => <TableRow key={ref.id}>
                             <TableCell>
                               {ref.full_name || ref.masked_email || (ref.profiles?.email ? (() => {
-                                const email = ref.profiles.email;
-                                const [local, domain] = email.split('@');
-                                const maskedLocal = local.charAt(0) + '***';
-                                return `${maskedLocal}@${domain}`;
-                              })() : `ID: ${ref.referred_user_id.slice(0, 8)}…`)}
+                            const email = ref.profiles.email;
+                            const [local, domain] = email.split('@');
+                            const maskedLocal = local.charAt(0) + '***';
+                            return `${maskedLocal}@${domain}`;
+                          })() : `ID: ${ref.referred_user_id.slice(0, 8)}…`)}
                             </TableCell>
                             <TableCell>
                               {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
@@ -670,39 +529,22 @@ const Partner = () => {
                             <TableCell>{Number(ref.total_payments || 0).toLocaleString('ru-RU')} ₽</TableCell>
                             <TableCell className="font-semibold">{Number(ref.total_commission || 0).toLocaleString('ru-RU')} ₽</TableCell>
                             <TableCell>
-                              <Badge
-                                variant={
-                                  ref.status === "active"
-                                    ? "default"
-                                    : ref.status === "registered"
-                                    ? "secondary"
-                                    : "outline"
-                                }
-                              >
-                                {ref.status === "active"
-                                  ? "Активен"
-                                  : ref.status === "registered"
-                                  ? "Зарегистрирован"
-                                  : "Неактивен"}
+                              <Badge variant={ref.status === "active" ? "default" : ref.status === "registered" ? "secondary" : "outline"}>
+                                {ref.status === "active" ? "Активен" : ref.status === "registered" ? "Зарегистрирован" : "Неактивен"}
                               </Badge>
                             </TableCell>
-                          </TableRow>
-                        ))}
+                          </TableRow>)}
                       </TableBody>
                     </Table>
-                  </div>
-                ) : (
-                  <div className="py-12 text-center text-muted-foreground">
+                  </div> : <div className="py-12 text-center text-muted-foreground">
                     <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Пока нет приглашенных клиентов</p>
                     <p className="text-sm mt-2">Поделитесь своей партнерской ссылкой</p>
-                  </div>
-                )}
+                  </div>}
               </TabsContent>
 
               <TabsContent value="withdrawals" className="mt-6">
-                {withdrawals.length > 0 ? (
-                  <div className="overflow-x-auto">
+                {withdrawals.length > 0 ? <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -713,62 +555,41 @@ const Partner = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {withdrawals.map((withdrawal) => (
-                          <TableRow key={withdrawal.id}>
+                        {withdrawals.map(withdrawal => <TableRow key={withdrawal.id}>
                             <TableCell>
                               {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit"
-                              })}
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })}
                             </TableCell>
                             <TableCell className="font-semibold">
                               {Number(withdrawal.amount).toLocaleString('ru-RU')} ₽
                             </TableCell>
                             <TableCell>
-                              <Badge
-                                variant={
-                                  withdrawal.status === "completed"
-                                    ? "default"
-                                    : withdrawal.status === "processing"
-                                    ? "secondary"
-                                    : "outline"
-                                }
-                              >
-                                {withdrawal.status === "completed"
-                                  ? "Успешно проведено"
-                                  : withdrawal.status === "processing"
-                                  ? "В обработке"
-                                  : withdrawal.status === "pending"
-                                  ? "Ожидает"
-                                  : "Отклонено"}
+                              <Badge variant={withdrawal.status === "completed" ? "default" : withdrawal.status === "processing" ? "secondary" : "outline"}>
+                                {withdrawal.status === "completed" ? "Успешно проведено" : withdrawal.status === "processing" ? "В обработке" : withdrawal.status === "pending" ? "Ожидает" : "Отклонено"}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {withdrawal.processed_at
-                                ? new Date(withdrawal.processed_at).toLocaleDateString("ru-RU", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit"
-                                  })
-                                : "—"}
+                              {withdrawal.processed_at ? new Date(withdrawal.processed_at).toLocaleDateString("ru-RU", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          }) : "—"}
                             </TableCell>
-                          </TableRow>
-                        ))}
+                          </TableRow>)}
                       </TableBody>
                     </Table>
-                  </div>
-                ) : (
-                  <div className="py-12 text-center text-muted-foreground">
+                  </div> : <div className="py-12 text-center text-muted-foreground">
                     <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Пока нет истории выплат</p>
                     <p className="text-sm mt-2">Запросите выплату, когда накопите достаточный баланс</p>
-                  </div>
-                )}
+                  </div>}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -779,8 +600,6 @@ const Partner = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Partner;

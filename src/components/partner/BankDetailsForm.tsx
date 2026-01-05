@@ -7,32 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Edit2, Save, ExternalLink, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-const RF_BANKS = [
-  "Сбербанк",
-  "Альфа-Банк",
-  "ВТБ",
-  "Газпромбанк",
-  "Россельхозбанк",
-  "Открытие",
-  "Совкомбанк",
-  "Промсвязьбанк",
-  "Райффайзенбанк",
-  "Росбанк",
-  "Банк Санкт-Петербург",
-  "Ак Барс",
-  "МКБ",
-  "Уралсиб",
-  "Тинькофф",
-  "Другой банк"
-];
-
+const RF_BANKS = ["Сбербанк", "Альфа-Банк", "ВТБ", "Газпромбанк", "Россельхозбанк", "Открытие", "Совкомбанк", "Промсвязьбанк", "Райффайзенбанк", "Росбанк", "Банк Санкт-Петербург", "Ак Барс", "МКБ", "Уралсиб", "Тинькофф", "Другой банк"];
 interface BankDetailsFormProps {
   partnerId: string;
 }
-
-export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
-  const { toast } = useToast();
+export const BankDetailsForm = ({
+  partnerId
+}: BankDetailsFormProps) => {
+  const {
+    toast
+  } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasDetails, setHasDetails] = useState(false);
@@ -42,23 +26,18 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
     phone_number: "",
     full_name: ""
   });
-
   useEffect(() => {
     loadBankDetails();
   }, [partnerId]);
-
   const loadBankDetails = async () => {
     try {
-      const { data, error } = await supabase
-        .from("partner_bank_details")
-        .select("*")
-        .eq("partner_id", partnerId)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from("partner_bank_details").select("*").eq("partner_id", partnerId).maybeSingle();
       if (error && error.code !== "PGRST116") {
         throw error;
       }
-
       if (data) {
         setFormData(data);
         setHasDetails(true);
@@ -67,7 +46,6 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
       console.error("Error loading bank details:", error);
     }
   };
-
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -82,26 +60,21 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
       if (!cardRegex.test(formData.card_number.replace(/\s/g, ""))) {
         throw new Error("Неверный формат номера карты");
       }
-
       if (hasDetails) {
-        const { error } = await supabase
-          .from("partner_bank_details")
-          .update(formData)
-          .eq("partner_id", partnerId);
-
+        const {
+          error
+        } = await supabase.from("partner_bank_details").update(formData).eq("partner_id", partnerId);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("partner_bank_details")
-          .insert({
-            ...formData,
-            partner_id: partnerId
-          });
-
+        const {
+          error
+        } = await supabase.from("partner_bank_details").insert({
+          ...formData,
+          partner_id: partnerId
+        });
         if (error) throw error;
         setHasDetails(true);
       }
-
       toast({
         title: "Успешно",
         description: "Банковские реквизиты сохранены"
@@ -118,90 +91,63 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="space-y-4">
-      <Card className="bg-background border border-border/50">
+  return <div className="space-y-4">
+      <Card className="border border-border/50 bg-zinc-50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Банковские реквизиты</CardTitle>
-            {!isEditing && hasDetails && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-              >
+            {!isEditing && hasDetails && <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                 <Edit2 className="h-4 w-4 mr-2" />
                 Редактировать
-              </Button>
-            )}
+              </Button>}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="bank_name">Банк</Label>
-            <Select
-              value={formData.bank_name}
-              onValueChange={(value) => setFormData({ ...formData, bank_name: value })}
-              disabled={!isEditing && hasDetails}
-            >
+            <Select value={formData.bank_name} onValueChange={value => setFormData({
+            ...formData,
+            bank_name: value
+          })} disabled={!isEditing && hasDetails}>
               <SelectTrigger>
                 <SelectValue placeholder="Выберите банк" />
               </SelectTrigger>
               <SelectContent>
-                {RF_BANKS.map((bank) => (
-                  <SelectItem key={bank} value={bank}>
+                {RF_BANKS.map(bank => <SelectItem key={bank} value={bank}>
                     {bank}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="card_number">Номер карты</Label>
-            <Input
-              id="card_number"
-              placeholder="1234 5678 9012 3456"
-              value={formData.card_number}
-              onChange={(e) => setFormData({ ...formData, card_number: e.target.value })}
-              disabled={!isEditing && hasDetails}
-              maxLength={19}
-            />
+            <Input id="card_number" placeholder="1234 5678 9012 3456" value={formData.card_number} onChange={e => setFormData({
+            ...formData,
+            card_number: e.target.value
+          })} disabled={!isEditing && hasDetails} maxLength={19} />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone_number">Номер телефона</Label>
-            <Input
-              id="phone_number"
-              placeholder="+7 (900) 123-45-67"
-              value={formData.phone_number}
-              onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-              disabled={!isEditing && hasDetails}
-            />
+            <Input id="phone_number" placeholder="+7 (900) 123-45-67" value={formData.phone_number} onChange={e => setFormData({
+            ...formData,
+            phone_number: e.target.value
+          })} disabled={!isEditing && hasDetails} />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="full_name">ФИО</Label>
-            <Input
-              id="full_name"
-              placeholder="Иванов Иван Иванович"
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              disabled={!isEditing && hasDetails}
-            />
+            <Input id="full_name" placeholder="Иванов Иван Иванович" value={formData.full_name} onChange={e => setFormData({
+            ...formData,
+            full_name: e.target.value
+          })} disabled={!isEditing && hasDetails} />
           </div>
 
-          {(isEditing || !hasDetails) && (
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-              className="w-full"
-            >
+          {(isEditing || !hasDetails) && <Button onClick={handleSave} disabled={loading} className="w-full">
               <Save className="h-4 w-4 mr-2" />
               {loading ? "Сохранение..." : "Сохранить"}
-            </Button>
-          )}
+            </Button>}
         </CardContent>
       </Card>
 
@@ -222,17 +168,12 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
                 Напишите в поддержку, поможем вам
               </p>
             </div>
-            <Button
-              onClick={() => window.open("https://t.me/wbgen_support", "_blank")}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-full sm:w-auto flex-shrink-0 gap-2"
-              size="sm"
-            >
+            <Button onClick={() => window.open("https://t.me/wbgen_support", "_blank")} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-full sm:w-auto flex-shrink-0 gap-2" size="sm">
               <ExternalLink className="h-4 w-4" />
               Написать
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
