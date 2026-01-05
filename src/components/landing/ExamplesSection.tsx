@@ -89,20 +89,30 @@ export const ExamplesSection = () => {
           </p>
         </motion.div>
 
-        {/* Navigation arrows for desktop */}
-        <div className="hidden md:flex justify-end gap-2 mb-6">
+        {/* Navigation arrows - visible on all screens */}
+        <div className="flex justify-center sm:justify-end gap-2 mb-4 sm:mb-6">
           <button
             onClick={() => scrollTo("left")}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/30 transition-all"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all active:scale-95"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scrollTo("right")}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/30 transition-all"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all active:scale-95"
           >
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ChevronRight className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Mobile scroll hint */}
+        <div className="flex items-center justify-center gap-2 mb-4 sm:hidden">
+          <div className="flex gap-1">
+            <div className="w-2 h-2 rounded-full bg-white/30 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-white/20" />
+            <div className="w-2 h-2 rounded-full bg-white/10" />
+          </div>
+          <span className="text-xs text-white/40">Листайте для просмотра</span>
         </div>
 
         {/* Examples carousel */}
@@ -174,7 +184,7 @@ export const ExamplesSection = () => {
           className="text-center mt-8 sm:mt-12"
         >
           <Link to="/auth?tab=signup">
-            <Button className="btn-premium text-sm sm:text-base md:text-lg px-6 sm:px-8 py-5 sm:py-6 rounded-xl font-semibold group">
+            <Button className="btn-premium text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-xl font-semibold group">
               Получить такие же результаты
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>

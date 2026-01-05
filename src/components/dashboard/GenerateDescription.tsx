@@ -1,17 +1,17 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Clock } from "lucide-react";
+import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { LightningLoader } from "@/components/ui/lightning-loader";
 
 interface Profile {
   id: string;
@@ -59,7 +59,6 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   };
 
   const simulateGeneration = async () => {
-    // Check if model is loaded
     if (!activeModel) {
       toast({
         title: "Подождите",
@@ -96,8 +95,6 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
       }
 
       setGeneratedText(data.description);
-      
-      // Refresh profile to update token balance
       onTokensUpdate();
       
       toast({
@@ -131,51 +128,66 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Генерация описаний</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
+    <div className="space-y-6 max-w-full overflow-hidden">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+          Генерация описаний
+        </h2>
+        <p className="text-muted-foreground">
           Создайте профессиональное описание товара для Wildberries
         </p>
-      </div>
+      </motion.div>
 
-      <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-background border-primary/20">
-        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Умный текст, который продаёт
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Забудь про скучные шаблоны. Генератор описаний от WB Генератор подбирает стиль, ключевые слова и эмоциональные акценты так, чтобы карточка выглядела профессионально и попадала в поиск Wildberries.
+      {/* Feature Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6"
+      >
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+        <div className="relative space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Умный текст, который продаёт</h3>
+              <p className="text-sm text-muted-foreground">
+                Подбор стиля, ключевых слов и эмоциональных акцентов
               </p>
             </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 border border-primary/10">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium leading-relaxed">
-                  CTR и конверсия растут — время на описание сокращается до 30 секунд
-                </p>
-              </div>
-            </div>
           </div>
-        </CardContent>
-      </Card>
-
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-border/50">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-primary" />
+            </div>
+            <p className="text-sm">
+              CTR и конверсия растут — время на описание <span className="font-semibold text-primary">30 секунд</span>
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Input Form */}
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2">
-        <Card className="bg-muted/30">
-          <CardHeader>
-            <CardTitle>Параметры генерации</CardTitle>
-            <CardDescription>
-              Заполните данные для создания уникального описания
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 space-y-5"
+        >
+          <div>
+            <h3 className="text-lg font-semibold mb-1">Параметры генерации</h3>
+            <p className="text-sm text-muted-foreground">Заполните данные для создания уникального описания</p>
+          </div>
+
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="productName">Название товара</Label>
               <Input
@@ -184,40 +196,40 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
                 value={productName}
                 onChange={(e) => setProductName(e.target.value.slice(0, 150))}
                 maxLength={150}
-                className="input-bordered"
+                className="bg-background/50 border-border/50 focus:border-primary/50"
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{productName.length}/150 символов</span>
                 {productName.length > 140 && (
-                  <span className="text-warning">Осталось символов: {150 - productName.length}</span>
+                  <span className="text-amber-500">Осталось: {150 - productName.length}</span>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Ссылки на конкурентов</Label>
+              <Label>Ссылки на конкурентов <span className="text-muted-foreground">(необязательно)</span></Label>
               <div className="space-y-2">
                 <Input
-                  placeholder="Ссылка на конкурента 1 (по желанию)"
+                  placeholder="Ссылка на конкурента 1"
                   value={competitor1}
                   onChange={(e) => setCompetitor1(e.target.value)}
-                  className="input-bordered"
+                  className="bg-background/50 border-border/50 focus:border-primary/50"
                 />
                 <Input
-                  placeholder="Ссылка на конкурента 2 (по желанию)"
+                  placeholder="Ссылка на конкурента 2"
                   value={competitor2}
                   onChange={(e) => setCompetitor2(e.target.value)}
-                  className="input-bordered"
+                  className="bg-background/50 border-border/50 focus:border-primary/50"
                 />
                 <Input
-                  placeholder="Ссылка на конкурента 3 (по желанию)"
+                  placeholder="Ссылка на конкурента 3"
                   value={competitor3}
                   onChange={(e) => setCompetitor3(e.target.value)}
-                  className="input-bordered"
+                  className="bg-background/50 border-border/50 focus:border-primary/50"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Вставьте ссылки на ваших конкурентов. WB Генератор проанализирует описание их товаров, выделит самые релевантные ключевые слова и учтет их при разработке вашего.
+                WB Генератор проанализирует описания конкурентов и выделит ключевые слова
               </p>
             </div>
 
@@ -225,136 +237,132 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
               <Label htmlFor="keywords">Ключевые слова</Label>
               <Textarea
                 id="keywords"
-                placeholder="Введите ключевые слова через запятую в формате: Ключ1, ключ2, ключ3 и т.д."
+                placeholder="Введите ключевые слова через запятую: Ключ1, ключ2, ключ3"
                 value={keywords}
                 onChange={(e) => setKeywords(e.target.value.slice(0, 1200))}
                 maxLength={1200}
-                className="input-bordered min-h-[80px] resize-none"
+                className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[80px] resize-none"
                 rows={3}
               />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Разделяйте запятыми (необязательное поле)</span>
-                <span>{keywords.length}/1200 символов</span>
+                <span>Разделяйте запятыми (необязательно)</span>
+                <span>{keywords.length}/1200</span>
               </div>
-              {keywords.length > 1140 && (
-                <div className="text-xs text-warning">
-                  Осталось символов: {1200 - keywords.length}
-                </div>
-              )}
             </div>
 
             <Button 
               onClick={simulateGeneration}
               disabled={!canGenerate() || generating}
-              className="w-full bg-wb-purple hover:bg-wb-purple-dark"
+              className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-xl"
             >
               {generating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  <span className="hidden sm:inline">Генерирую... (это может занять несколько минут)</span>
-                  <span className="sm:hidden">Генерирую...</span>
-                </>
+                <span className="flex items-center gap-3">
+                  <LightningLoader size="sm" />
+                  <span>Генерирую описание...</span>
+                </span>
               ) : (
                 <>
-                  <FileText className="w-4 h-4 mr-2" />
-                  {generatedText ? 'Сгенерировать еще варианты' : 'Сгенерировать описание'}
+                  <Zap className="w-4 h-4 mr-2" />
+                  {generatedText ? 'Сгенерировать еще' : 'Сгенерировать описание'}
                 </>
               )}
             </Button>
-            <div className="flex items-center justify-center gap-2 mt-3">
-              <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              <p className="text-xs text-muted-foreground">
-                Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токен{descriptionPrice !== 1 ? 'ов' : ''}</strong> за генерацию описания
-              </p>
+
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <Info className="w-3.5 h-3.5" />
+              <span>Стоимость: <strong className="text-foreground">{priceLoading ? '...' : descriptionPrice} токенов</strong></span>
             </div>
             
             {!canGenerate() && (
-              <Alert className="mt-4 border-amber-500/30 bg-amber-500/10 dark:border-amber-400/30 dark:bg-amber-400/10 [&>svg]:!text-amber-700 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-amber-800 dark:text-amber-300 font-medium">
+              <Alert className="border-amber-500/30 bg-amber-500/10">
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+                <AlertDescription className="text-amber-600 dark:text-amber-400">
                   {getGuardMessage()}
                 </AlertDescription>
               </Alert>
             )}
             
             {generating && (
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
+              <Alert className="border-primary/30 bg-primary/10">
+                <AlertCircle className="h-4 w-4 text-primary" />
                 <AlertDescription>
-                  <strong>Важно:</strong> Генерация может занять несколько минут. 
-                  Пожалуйста, не закрывайте страницу и не перезагружайте её.
+                  <strong>Важно:</strong> Генерация может занять несколько минут. Не закрывайте страницу.
                 </AlertDescription>
               </Alert>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
 
         {/* Generated Result */}
-        <Card className="bg-muted/30">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="mb-3">Готовое описание</CardTitle>
-                <CardDescription>
-                  {generatedText ? `${generatedText.length} символов` : "Результат появится здесь"}
-                </CardDescription>
-              </div>
-              {generatedText && (
-                <div className="flex space-x-2">
-                  <Button size="sm" variant="outline" onClick={copyToClipboard}>
-                    <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Button>
-                </div>
-              )}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold mb-1">Готовое описание</h3>
+              <p className="text-sm text-muted-foreground">
+                {generatedText ? `${generatedText.length} символов` : "Результат появится здесь"}
+              </p>
             </div>
-          </CardHeader>
-          <CardContent>
-            {generatedText ? (
-              <div className="space-y-4">
-                <Textarea
-                  value={generatedText}
-                  onChange={(e) => setGeneratedText(e.target.value)}
-                  rows={8}
-                  className="font-mono text-xs sm:text-sm border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                />
-                
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => downloadAsFile('txt')}
-                  >
-                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    TXT
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => downloadAsFile('docx')}
-                  >
-                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    DOCX
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => downloadAsFile('pdf')}
-                  >
-                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    PDF
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <FileText className="w-8 h-8 mx-auto mb-3" />
-                  <p className="text-sm">Описание появится после генерации</p>
-                </div>
-              </div>
+            {generatedText && (
+              <Button size="sm" variant="outline" onClick={copyToClipboard} className="gap-2">
+                <Copy className="w-4 h-4" />
+                Копировать
+              </Button>
             )}
-          </CardContent>
-        </Card>
+          </div>
+
+          {generatedText ? (
+            <div className="space-y-4">
+              <Textarea
+                value={generatedText}
+                onChange={(e) => setGeneratedText(e.target.value)}
+                rows={8}
+                className="bg-background/50 border-border/50 font-mono text-sm"
+              />
+              
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => downloadAsFile('txt')}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  TXT
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => downloadAsFile('docx')}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  DOCX
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => downloadAsFile('pdf')}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  PDF
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center rounded-xl border border-dashed border-border/50 bg-background/30">
+              <div className="text-center text-muted-foreground">
+                <FileText className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">Описание появится после генерации</p>
+              </div>
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   );

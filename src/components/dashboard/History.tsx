@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import JSZip from 'jszip';
+
 interface Generation {
   id: string;
   generation_type: string;
@@ -18,6 +19,7 @@ interface Generation {
   created_at: string;
   updated_at: string;
 }
+
 interface Profile {
   id: string;
   email: string;
@@ -26,34 +28,27 @@ interface Profile {
   wb_connected: boolean;
   referral_code: string;
 }
+
 interface HistoryProps {
   profile: Profile;
   shouldRefresh?: boolean;
   onRefreshComplete?: () => void;
 }
-export const History = ({
-  profile,
-  shouldRefresh,
-  onRefreshComplete
-}: HistoryProps & {
-  shouldRefresh?: boolean;
-  onRefreshComplete?: () => void;
-}) => {
+
+export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryProps) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'cards' | 'description'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const ITEMS_PER_PAGE = 20;
+
   useEffect(() => {
     loadHistory();
   }, [currentPage, filter]);
 
-  // Handle external refresh requests
   useEffect(() => {
     if (shouldRefresh) {
       loadHistory().then(() => {
@@ -61,118 +56,81 @@ export const History = ({
       });
     }
   }, [shouldRefresh]);
+
   const loadHistory = async () => {
     try {
       setLoading(true);
 
-      // Get total count first
-      let countQuery = supabase.from('generations').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('user_id', profile.id);
+      let countQuery = supabase.from('generations').select('*', { count: 'exact', head: true }).eq('user_id', profile.id);
       if (filter !== 'all') {
         countQuery = countQuery.eq('generation_type', filter);
       }
-      const {
-        count
-      } = await countQuery;
+      const { count } = await countQuery;
       const totalItems = count || 0;
       const calculatedTotalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
       setTotalPages(calculatedTotalPages);
 
-      // Get paginated data
-      let query = supabase.from('generations').select('*').eq('user_id', profile.id).order('created_at', {
-        ascending: false
-      }).range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+      let query = supabase.from('generations').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }).range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
       if (filter !== 'all') {
         query = query.eq('generation_type', filter);
       }
-      const {
-        data,
-        error
-      } = await query;
+      const { data, error } = await query;
       if (error) throw error;
       setGenerations(data || []);
     } catch (error: any) {
-      toast({
-        title: "Ошибка загрузки истории",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка загрузки истории", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
+
   const downloadGeneration = async (generation: Generation) => {
     if (downloadingIds.has(generation.id)) return;
     setDownloadingIds(prev => new Set(prev).add(generation.id));
     try {
       const zip = new JSZip();
-      // Use original product name for individual files, only replace problematic characters
       const safeProductName = (generation.input_data?.productName || 'generation').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+      
       if (generation.generation_type === 'cards') {
-        // Add images to ZIP
         if (generation.output_data?.images && Array.isArray(generation.output_data.images)) {
           const images = generation.output_data.images;
           if (images.length === 0) {
-            toast({
-              title: "Нет изображений",
-              description: "В этой генерации нет сохраненных изображений",
-              variant: "destructive"
-            });
+            toast({ title: "Нет изображений", description: "В этой генерации нет сохраненных изображений", variant: "destructive" });
             return;
           }
 
-          // Add each image to ZIP
           for (let i = 0; i < images.length; i++) {
             const image = images[i];
             if (image.image_url) {
               const response = await fetch(image.image_url);
               const blob = await response.blob();
-              // Use original type name, only replace problematic characters for file system
               const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
               const fileName = `${safeProductName}_${safeStageName}.png`;
               zip.file(fileName, blob);
             }
           }
         } else {
-          toast({
-            title: "Ошибка скачивания",
-            description: "Не удалось найти изображения для скачивания",
-            variant: "destructive"
-          });
+          toast({ title: "Ошибка скачивания", description: "Не удалось найти изображения", variant: "destructive" });
           return;
         }
       } else {
-        // Add description text file to ZIP
         const description = generation.output_data?.description || 'Описание товара';
         zip.file(`${safeProductName}_description.txt`, description);
       }
 
-      // Generate ZIP and download
-      const zipBlob = await zip.generateAsync({
-        type: 'blob'
-      });
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
       const url = window.URL.createObjectURL(zipBlob);
       const link = document.createElement('a');
       link.href = url;
-      // Use original product name for ZIP archive
       const safeZipName = (generation.input_data?.productName || 'generation').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       link.download = `${safeZipName}_${generation.generation_type === 'cards' ? 'карточки' : 'описание'}.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast({
-        title: "Скачивание завершено",
-        description: `ZIP-архив успешно скачан`
-      });
+      toast({ title: "Скачивание завершено", description: "ZIP-архив успешно скачан" });
     } catch (error) {
-      toast({
-        title: "Ошибка создания архива",
-        description: "Не удалось создать ZIP-архив",
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка создания архива", description: "Не удалось создать ZIP-архив", variant: "destructive" });
     } finally {
       setDownloadingIds(prev => {
         const newSet = new Set(prev);
@@ -181,27 +139,18 @@ export const History = ({
       });
     }
   };
+
   const deleteGeneration = async (generationId: string) => {
     try {
-      const {
-        error
-      } = await supabase.from('generations').delete().eq('id', generationId).eq('user_id', profile.id);
+      const { error } = await supabase.from('generations').delete().eq('id', generationId).eq('user_id', profile.id);
       if (error) throw error;
-
-      // Remove from local state
       setGenerations(prev => prev.filter(gen => gen.id !== generationId));
-      toast({
-        title: "Удалено",
-        description: "Генерация успешно удалена"
-      });
+      toast({ title: "Удалено", description: "Генерация успешно удалена" });
     } catch (error: any) {
-      toast({
-        title: "Ошибка удаления",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка удаления", description: error.message, variant: "destructive" });
     }
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: '2-digit',
@@ -211,158 +160,223 @@ export const History = ({
       minute: '2-digit'
     });
   };
-  const filteredGenerations = generations;
+
   if (loading) {
-    return <div className="space-y-6">
+    return (
+      <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold mb-2">История генераций</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+            История генераций
+          </h2>
           <p className="text-muted-foreground">Загрузка...</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <h2 className="text-3xl font-bold mb-2">История генераций</h2>
-          <p className="text-muted-foreground">
-            Все ваши созданные карточки и описания
-          </p>
+
+  return (
+    <div className="space-y-6 w-full min-w-0">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+      >
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+            История генераций
+          </h2>
+          <p className="text-muted-foreground">Все ваши созданные карточки и описания</p>
         </div>
         
-        <div className="flex items-center space-x-2 w-full sm:w-auto lg:w-auto flex-shrink-0">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <Filter className="w-4 h-4 text-muted-foreground hidden sm:block" />
           <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-full sm:w-40 lg:w-48">
+            <SelectTrigger className="w-full sm:w-48 bg-card/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все</SelectItem>
+              <SelectItem value="all">Все генерации</SelectItem>
               <SelectItem value="cards">Карточки</SelectItem>
               <SelectItem value="description">Описания</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </motion.div>
 
-      <Alert className="border-wb-purple/30 bg-wb-purple/10 shadow-none">
-        <Info className="h-4 w-4 flex-shrink-0 text-wb-purple" />
-        <AlertDescription className="text-sm leading-relaxed text-foreground">
-          Данные генераций хранятся <span className="font-semibold">1 месяц</span> с момента создания и затем автоматически удаляются.
-        </AlertDescription>
-      </Alert>
+      {/* Info Alert */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Alert className="border-primary/20 bg-primary/5">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription>
+            Данные хранятся <span className="font-semibold">1 месяц</span> и затем автоматически удаляются.
+          </AlertDescription>
+        </Alert>
+      </motion.div>
 
-      {filteredGenerations.length === 0 ? <Card>
-          <CardHeader>
-            <CardTitle>История пуста</CardTitle>
-            <CardDescription>
-              {filter === 'all' ? "История будет доступна после первых генераций" : `Нет ${filter === 'cards' ? 'карточек' : 'описаний'} в истории`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="w-8 h-8 mx-auto mb-3" />
-              <p className="text-sm">
-                {filter === 'all' ? "Начните генерацию, чтобы увидеть историю здесь" : `Создайте ${filter === 'cards' ? 'карточки' : 'описания'}, чтобы увидеть их здесь`}
-              </p>
-            </div>
-          </CardContent>
-        </Card> : <div className="grid gap-3 sm:gap-4">
-          {filteredGenerations.map(generation => <Card key={generation.id} className="hover:shadow-md transition-shadow bg-muted/30 w-full overflow-hidden">
-              <CardContent className="p-3 sm:p-4 lg:p-6">
-                <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-4">
-                  {/* Main content */}
-                  <div className="flex items-start space-x-3 min-w-0 flex-1">
-                    {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? (
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg flex-shrink-0 overflow-hidden">
-                        <img 
-                          src={generation.output_data.images[0].image_url} 
-                          alt="Превью" 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // Fallback to icon if image fails to load
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            target.parentElement!.classList.add('bg-gradient-to-br', 'from-purple-100', 'to-purple-200', 'dark:from-purple-900/50', 'dark:to-purple-800/50', 'items-center', 'justify-center');
-                            target.parentElement!.innerHTML = '<svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-600 dark:text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg flex items-center justify-center bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/50 dark:to-purple-800/50 flex-shrink-0">
-                        {generation.generation_type === 'cards' ? <Image className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-600 dark:text-purple-400" /> : <FileText className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-purple-600 dark:text-purple-400" />}
-                      </div>
-                    )}
+      {/* Content */}
+      {generations.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-8"
+        >
+          <div className="text-center py-12">
+            <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+            <h3 className="text-lg font-semibold mb-2">История пуста</h3>
+            <p className="text-muted-foreground">
+              {filter === 'all' ? "Начните генерацию, чтобы увидеть историю здесь" : `Нет ${filter === 'cards' ? 'карточек' : 'описаний'} в истории`}
+            </p>
+          </div>
+        </motion.div>
+      ) : (
+        <div className="grid gap-4">
+          {generations.map((generation, index) => (
+            <motion.div
+              key={generation.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
+              className="group rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                {/* Content */}
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? (
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden ring-2 ring-border/50 group-hover:ring-primary/30 transition-all">
+                      <img 
+                        src={generation.output_data.images[0].image_url} 
+                        alt="Превью" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
+                      {generation.generation_type === 'cards' ? (
+                        <Image className="w-6 h-6 text-primary" />
+                      ) : (
+                        <FileText className="w-6 h-6 text-primary" />
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h3 className="font-semibold">
+                        {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
+                      </h3>
+                      <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                        {generation.status === 'completed' ? 'Готово' : 'В процессе'}
+                      </Badge>
+                    </div>
                     
-                    <div className="min-w-0 flex-1">
-                      {/* Title and status */}
-                      <div className="flex items-start sm:items-center gap-2 mb-2">
-                        <h3 className="font-medium text-sm sm:text-base leading-tight">
-                          {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
-                        </h3>
-                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs flex-shrink-0">
-                          {generation.status === 'completed' ? 'Готово' : 'В процессе'}
-                        </Badge>
-                      </div>
-                      
-                      {/* Details */}
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                          <Calendar className="w-3 h-3 flex-shrink-0" />
-                          <span>{formatDate(generation.created_at)}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{generation.tokens_used} токенов</span>
-                          {generation.input_data?.productName && <span className="truncate">• {generation.input_data.productName}</span>}
-                        </div>
-                      </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(generation.created_at)}
+                      </span>
+                      <span>{generation.tokens_used} токенов</span>
+                      {generation.input_data?.productName && (
+                        <span className="truncate max-w-[200px]">• {generation.input_data.productName}</span>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Action buttons */}
-                  <div className="flex gap-2 w-full sm:w-auto sm:flex-shrink-0">
-                    <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-wb-purple hover:bg-wb-purple-dark text-white disabled:opacity-50 flex-1 sm:flex-initial min-w-0">
-                      {downloadingIds.has(generation.id) ? <>
-                          <Loader2 className="w-3 h-3 mr-1 animate-spin flex-shrink-0" />
-                          <span className="truncate">Создаю ZIP</span>
-                        </> : <>
-                          <Download className="w-3 h-3 mr-1 flex-shrink-0" />
-                          <span className="truncate">Скачать</span>
-                        </>}
-                    </Button>
-                    <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:border-destructive flex-shrink-0 px-3">
-                      Удалить
-                    </Button>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>)}
-        </div>}
+                
+                {/* Actions */}
+                <div className="flex gap-2 flex-shrink-0">
+                  <Button 
+                    onClick={() => downloadGeneration(generation)} 
+                    size="sm" 
+                    disabled={downloadingIds.has(generation.id)}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {downloadingIds.has(generation.id) ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ZIP
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Скачать
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    onClick={() => deleteGeneration(generation.id)} 
+                    size="sm" 
+                    variant="outline"
+                    className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-4 sm:mt-6 px-2">
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="w-full sm:w-auto">
-            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+      {totalPages > 1 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6"
+        >
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
+            disabled={currentPage === 1}
+            className="w-full sm:w-auto"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
             Назад
           </Button>
           
-          <div className="flex items-center space-x-1 overflow-x-auto max-w-full">
-            {Array.from({
-          length: Math.min(window.innerWidth < 640 ? 3 : 5, totalPages)
-        }, (_, i) => {
-          const maxButtons = window.innerWidth < 640 ? 3 : 5;
-          const pageNum = Math.max(1, Math.min(totalPages - maxButtons + 1, currentPage - Math.floor(maxButtons / 2))) + i;
-          if (pageNum > totalPages) return null;
-          return <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(pageNum)} className={`min-w-[32px] sm:min-w-[40px] ${currentPage === pageNum ? "bg-wb-purple hover:bg-wb-purple/80" : ""}`}>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+              if (pageNum > totalPages) return null;
+              return (
+                <Button 
+                  key={pageNum} 
+                  variant={currentPage === pageNum ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`min-w-[40px] ${currentPage === pageNum ? "bg-primary" : ""}`}
+                >
                   {pageNum}
-                </Button>;
-        })}
+                </Button>
+              );
+            })}
           </div>
           
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} 
+            disabled={currentPage === totalPages}
+            className="w-full sm:w-auto"
+          >
             Вперед
-            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
+            <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
-        </div>}
-    </div>;
+        </motion.div>
+      )}
+    </div>
+  );
 };
