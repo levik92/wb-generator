@@ -4,85 +4,64 @@ import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ExternalLink, Play, MessageCircle, HelpCircle, Zap, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
-
-const videoLessons = [
-  {
-    id: "registration",
-    title: "Регистрация на сервисе и обзор",
-    description: "Узнайте, как зарегистрироваться и начать работу с WB Генератор",
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/o4YjCa9hxRutSYxHNaEHZv" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
-  },
-  {
-    id: "cards",
-    title: "Как работать с генерацией карточек",
-    description: "Изучите процесс создания карточек товаров с помощью ИИ",
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/0cxw1JdVWSehbpVZ14QTZP" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
-  },
-  {
-    id: "descriptions",
-    title: "Как работать с генерацией описаний",
-    description: "Научитесь создавать продающие описания для ваших товаров",
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/8dxZ3uWTBxGYoXUP1wD6Zq" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
-  },
-  {
-    id: "barcodes",
-    title: "Как работать с генерацией штрих-кодов",
-    description: "Создавайте штрих-коды и этикетки для ваших товаров",
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/kyZHWqtTVUX3EMTGGpm1gG" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
-  },
-  {
-    id: "overview",
-    title: "Обзор сервиса",
-    description: "Полный обзор всех возможностей WB Генератор",
-    embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/eFQT3SQABzjexyqfK1i7qk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`,
-  },
-];
-
-const faqItems = [
-  {
-    question: "Как получить токены для генерации?",
-    answer:
-      "Токены можно получить несколькими способами: при регистрации вы получаете 15 бесплатных токенов, можете пополнить баланс в разделе 'Баланс', пригласить друзей по реферальной программе или использовать промокоды.",
-  },
-  {
-    question: "Сколько токенов нужно для генерации карточки?",
-    answer:
-      "Для генерации одной карточки требуется 10 токенов. В стандартном наборе генерируется 6 карточек, что стоит 60 токенов.",
-  },
-  {
-    question: "Можно ли редактировать сгенерированные карточки?",
-    answer:
-      "Да, после генерации вы можете скачать карточки и отредактировать их в любом графическом редакторе. Также можете перегенерировать отдельные карточки, если результат не устраивает.",
-  },
-  {
-    question: "Как работает реферальная программа?",
-    answer:
-      "За каждого приглашенного друга, который совершит первую покупку токенов, вы получаете 20 бонусных токенов. Ваш реферальный код можно найти в разделе 'Рефералы'.",
-  },
-  {
-    question: "Какие форматы изображений поддерживаются?",
-    answer:
-      "Сервис поддерживает загрузку изображений в форматах JPG, PNG и WebP. Рекомендуется использовать изображения высокого качества для лучшего результата генерации.",
-  },
-  {
-    question: "Как получить поддержку?",
-    answer:
-      "Если у вас возникли вопросы или проблемы, вы можете обратиться к нам через Telegram @wbgen_support или написать на почту info@wbgen.ru",
-  },
-];
-
+const videoLessons = [{
+  id: "registration",
+  title: "Регистрация на сервисе и обзор",
+  description: "Узнайте, как зарегистрироваться и начать работу с WB Генератор",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/o4YjCa9hxRutSYxHNaEHZv" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+}, {
+  id: "cards",
+  title: "Как работать с генерацией карточек",
+  description: "Изучите процесс создания карточек товаров с помощью ИИ",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/0cxw1JdVWSehbpVZ14QTZP" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+}, {
+  id: "descriptions",
+  title: "Как работать с генерацией описаний",
+  description: "Научитесь создавать продающие описания для ваших товаров",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/8dxZ3uWTBxGYoXUP1wD6Zq" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+}, {
+  id: "barcodes",
+  title: "Как работать с генерацией штрих-кодов",
+  description: "Создавайте штрих-коды и этикетки для ваших товаров",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/kyZHWqtTVUX3EMTGGpm1gG" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+}, {
+  id: "overview",
+  title: "Обзор сервиса",
+  description: "Полный обзор всех возможностей WB Генератор",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/eFQT3SQABzjexyqfK1i7qk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+}];
+const faqItems = [{
+  question: "Как получить токены для генерации?",
+  answer: "Токены можно получить несколькими способами: при регистрации вы получаете 15 бесплатных токенов, можете пополнить баланс в разделе 'Баланс', пригласить друзей по реферальной программе или использовать промокоды."
+}, {
+  question: "Сколько токенов нужно для генерации карточки?",
+  answer: "Для генерации одной карточки требуется 10 токенов. В стандартном наборе генерируется 6 карточек, что стоит 60 токенов."
+}, {
+  question: "Можно ли редактировать сгенерированные карточки?",
+  answer: "Да, после генерации вы можете скачать карточки и отредактировать их в любом графическом редакторе. Также можете перегенерировать отдельные карточки, если результат не устраивает."
+}, {
+  question: "Как работает реферальная программа?",
+  answer: "За каждого приглашенного друга, который совершит первую покупку токенов, вы получаете 20 бонусных токенов. Ваш реферальный код можно найти в разделе 'Рефералы'."
+}, {
+  question: "Какие форматы изображений поддерживаются?",
+  answer: "Сервис поддерживает загрузку изображений в форматах JPG, PNG и WebP. Рекомендуется использовать изображения высокого качества для лучшего результата генерации."
+}, {
+  question: "Как получить поддержку?",
+  answer: "Если у вас возникли вопросы или проблемы, вы можете обратиться к нам через Telegram @wbgen_support или написать на почту info@wbgen.ru"
+}];
 const Learning = () => {
   const handleTelegramClick = () => {
     window.open("https://t.me/wbgen_official/", "_blank");
   };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-8"
-    >
+  return <motion.div initial={{
+    opacity: 0,
+    y: 20
+  }} animate={{
+    opacity: 1,
+    y: 0
+  }} transition={{
+    duration: 0.4
+  }} className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
@@ -95,11 +74,16 @@ const Learning = () => {
       </div>
 
       {/* Telegram Group Promo */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-      >
+      <motion.div initial={{
+      opacity: 0,
+      y: 20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} transition={{
+      duration: 0.4,
+      delay: 0.1
+    }}>
         <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
           <CardContent className="p-6 relative">
@@ -117,10 +101,7 @@ const Learning = () => {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={handleTelegramClick}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300"
-              >
+              <Button onClick={handleTelegramClick} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300">
                 <ExternalLink className="w-4 h-4" />
                 Присоединиться
               </Button>
@@ -130,26 +111,33 @@ const Learning = () => {
       </motion.div>
 
       {/* Video Lessons */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="space-y-6"
-      >
+      <motion.div initial={{
+      opacity: 0,
+      y: 20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} transition={{
+      duration: 0.4,
+      delay: 0.2
+    }} className="space-y-6">
         <div className="flex items-center gap-2">
           <Play className="w-5 h-5 text-primary" />
           <h3 className="text-xl sm:text-2xl font-semibold">Видеоуроки</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {videoLessons.map((lesson, index) => (
-            <motion.div
-              key={lesson.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 * index }}
-            >
-              <Card className="overflow-hidden bg-card/80 backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full">
+          {videoLessons.map((lesson, index) => <motion.div key={lesson.id} initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.4,
+          delay: 0.1 * index
+        }}>
+              <Card className="overflow-hidden backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full bg-zinc-50">
                 <CardHeader className="pb-3">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-1">
@@ -164,56 +152,46 @@ const Learning = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {lesson.embedCode.includes("<div") ? (
-                    <div
-                      className="rounded-xl overflow-hidden bg-black/5"
-                      dangerouslySetInnerHTML={{ __html: lesson.embedCode }}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-48 bg-muted/50 rounded-xl">
+                  {lesson.embedCode.includes("<div") ? <div className="rounded-xl overflow-hidden bg-black/5" dangerouslySetInnerHTML={{
+                __html: lesson.embedCode
+              }} /> : <div className="flex items-center justify-center h-48 bg-muted/50 rounded-xl">
                       <p className="text-muted-foreground">{lesson.embedCode}</p>
-                    </div>
-                  )}
+                    </div>}
                 </CardContent>
               </Card>
-            </motion.div>
-          ))}
+            </motion.div>)}
         </div>
       </motion.div>
 
       <Separator className="bg-border/50" />
 
       {/* FAQ Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="space-y-6"
-      >
+      <motion.div initial={{
+      opacity: 0,
+      y: 20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} transition={{
+      duration: 0.4,
+      delay: 0.3
+    }} className="space-y-6">
         <div className="flex items-center gap-2">
           <HelpCircle className="w-5 h-5 text-primary" />
           <h3 className="text-xl sm:text-2xl font-semibold">Часто задаваемые вопросы</h3>
         </div>
 
         <Accordion type="single" collapsible className="w-full space-y-2">
-          {faqItems.map((item, index) => (
-            <AccordionItem 
-              key={index} 
-              value={`item-${index}`}
-              className="border border-border/50 rounded-xl px-4 bg-card/50 backdrop-blur-sm data-[state=open]:border-primary/20 transition-all duration-300"
-            >
+          {faqItems.map((item, index) => <AccordionItem key={index} value={`item-${index}`} className="border border-border/50 rounded-xl px-4 bg-card/50 backdrop-blur-sm data-[state=open]:border-primary/20 transition-all duration-300">
               <AccordionTrigger className="text-left hover:no-underline py-4 text-sm sm:text-base">
                 {item.question}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground leading-relaxed text-sm pb-4">
                 {item.answer}
               </AccordionContent>
-            </AccordionItem>
-          ))}
+            </AccordionItem>)}
         </Accordion>
       </motion.div>
-    </motion.div>
-  );
+    </motion.div>;
 };
-
 export default Learning;
