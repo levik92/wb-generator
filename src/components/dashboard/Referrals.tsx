@@ -108,7 +108,7 @@ export const Referrals = ({
         </TabsList>
 
         <TabsContent value="program" className="space-y-6">
-          <Card className="bg-background border border-border/50">
+          <Card className="border border-border/50 bg-card">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="bg-muted p-3 rounded-lg">
