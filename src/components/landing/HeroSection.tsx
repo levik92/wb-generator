@@ -99,7 +99,7 @@ export const HeroSection = () => {
   });
 
   const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 1]);
 
   const stats = [
     { value: 12500, label: "карточек создано", suffix: "+" },
@@ -236,20 +236,20 @@ export const HeroSection = () => {
               transition={{ duration: 1, delay: 0.6 }}
               className="max-w-3xl mx-auto mb-16 sm:mb-24"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
                 {/* Before Image - rotated */}
                 <motion.div 
                   className="relative group"
-                  initial={{ rotate: -5 }}
+                  initial={{ rotate: -6 }}
                   whileHover={{ rotate: 0, scale: 1.05 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-md opacity-50 group-hover:opacity-70 transition-opacity" />
+                  <div className="absolute -inset-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
                   <div className="relative">
                     <img 
-                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
+                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
                       alt="До обработки"
-                      className="w-44 sm:w-56 md:w-64 h-auto rounded-2xl border border-white/10 shadow-2xl transform -rotate-3"
+                      className="w-48 sm:w-60 md:w-72 h-auto rounded-2xl border border-white/10 shadow-2xl transform -rotate-3"
                     />
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-sm text-white/80 font-medium">
                       До
@@ -263,7 +263,7 @@ export const HeroSection = () => {
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   className="text-purple-400"
                 >
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-0">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-0">
                     <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </motion.div>
@@ -271,16 +271,16 @@ export const HeroSection = () => {
                 {/* After Image - rotated opposite */}
                 <motion.div 
                   className="relative group"
-                  initial={{ rotate: 5 }}
+                  initial={{ rotate: 6 }}
                   whileHover={{ rotate: 0, scale: 1.05 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-2xl blur-md opacity-60 group-hover:opacity-80 transition-opacity" />
+                  <div className="absolute -inset-3 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
                   <div className="relative">
                     <img 
-                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
+                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
                       alt="После обработки"
-                      className="w-44 sm:w-56 md:w-64 h-auto rounded-2xl border border-purple-500/30 shadow-2xl transform rotate-3"
+                      className="w-48 sm:w-60 md:w-72 h-auto rounded-2xl border border-purple-500/30 shadow-2xl transform rotate-3"
                     />
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-purple-500/60 backdrop-blur-sm rounded-lg text-sm text-white font-medium">
                       После

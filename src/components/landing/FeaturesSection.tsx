@@ -22,7 +22,7 @@ const features = [
   },
   {
     icon: TrendingUp,
-    title: "От 120₽",
+    title: "От 59₽",
     description: "за карточку вместо 5000-15000₽",
     color: "from-emerald-500 to-green-600",
   },

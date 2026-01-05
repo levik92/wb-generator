@@ -101,7 +101,7 @@ export const CTASection = () => {
                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
                   {stat.value}
                 </div>
-                <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
+                <div className="text-[10px] sm:text-xs text-white/50 leading-tight">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>

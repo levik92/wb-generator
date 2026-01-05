@@ -102,13 +102,13 @@ export const Referrals = ({
       </div>
 
       <Tabs defaultValue="program" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="program">Программа</TabsTrigger>
-          <TabsTrigger value="invited">Приглашенные <span className="ml-1 text-muted-foreground">({referredUsers.length})</span></TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-background p-1 rounded-xl border border-border/50">
+          <TabsTrigger value="program" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Программа</TabsTrigger>
+          <TabsTrigger value="invited" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Приглашенные <span className="ml-1 opacity-70">({referredUsers.length})</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="program" className="space-y-6">
-          <Card className="bg-muted/30 border border-muted/50">
+          <Card className="bg-background border border-border/50">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="bg-muted p-3 rounded-lg">
@@ -123,7 +123,7 @@ export const Referrals = ({
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-muted/30 border border-muted rounded-[12px] p-6 shadow-sm">
+              <div className="bg-secondary/30 border border-border/50 rounded-[12px] p-6 shadow-sm">
                 <h3 className="font-medium mb-4 text-foreground flex items-center gap-2">
                   <Link2 className="h-4 w-4" />
                   Ваша реферальная ссылка:
@@ -157,7 +157,7 @@ export const Referrals = ({
         </TabsContent>
 
         <TabsContent value="invited" className="space-y-4">
-          <Card>
+          <Card className="bg-background border border-border/50">
             <CardHeader>
               <CardTitle>Приглашенные пользователи</CardTitle>
               <CardDescription>

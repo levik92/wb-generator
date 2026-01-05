@@ -1106,18 +1106,22 @@ export const GenerateCards = ({
     };
   }, []);
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Генерация карточек</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Создайте профессиональные карточки для Wildberries с помощью ИИ
-        </p>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <Images className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Генерация карточек</h2>
+          <p className="text-muted-foreground text-sm">Создайте профессиональные карточки для Wildberries с помощью ИИ</p>
+        </div>
       </div>
 
-      <Card className="bg-gradient-to-br from-primary/5 via-primary/3 to-background border-primary/20">
+      <Card className="bg-background border-border/50">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
           <div className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <h3 className="text-xl sm:text-2xl font-bold">
                 Карточки, которые продают — за 3 минуты
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
@@ -1126,7 +1130,7 @@ export const GenerateCards = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
                 <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
@@ -1136,7 +1140,7 @@ export const GenerateCards = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
                 <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-primary" />
                 </div>
@@ -1146,7 +1150,7 @@ export const GenerateCards = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/10">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
                 <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Gift className="w-4 h-4 text-primary" />
                 </div>
@@ -1163,7 +1167,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="bg-muted/30 md:col-span-3">
+        <Card className="bg-background border-border/50 md:col-span-3">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />

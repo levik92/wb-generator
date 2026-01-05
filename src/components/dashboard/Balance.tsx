@@ -114,7 +114,7 @@ export default function Balance() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        <Card className="bg-card/80 backdrop-blur-xl border-border/50 w-full overflow-hidden">
+        <Card className="bg-background border-border/50 w-full overflow-hidden">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
           </CardHeader>
@@ -186,7 +186,7 @@ export default function Balance() {
         transition={{ duration: 0.4, delay: 0.3 }}
       >
         <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
-          <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-2 bg-background p-1 rounded-xl border border-border/50">
             <TabsTrigger value="pricing" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Пополнить баланс</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">История пополнений</TabsTrigger>
           </TabsList>

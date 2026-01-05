@@ -45,7 +45,7 @@ export const MobileSideMenu = ({
   const menuItems = [
     { id: 'cards', label: 'Генерация карточек', icon: Image },
     { id: 'description', label: 'Генерация описаний', icon: FileText },
-    { id: 'labels', label: 'Генератор этикеток', icon: Tags, badge: 'FREE', badgeColor: 'bg-green-500 text-white' },
+    { id: 'labels', label: 'Генератор этикеток', icon: Tags },
     { id: 'history', label: 'История', icon: History },
     { id: 'pricing', label: 'Баланс', icon: CreditCard },
     { id: 'news', label: 'Новости', icon: Newspaper, badge: hasUnreadNews ? 'Новое' : undefined, badgeColor: 'bg-wb-purple text-white' },
@@ -216,17 +216,6 @@ export const MobileSideMenu = ({
                     {isDark ? "Светлая тема" : "Тёмная тема"}
                   </span>
                 </button>
-                
-                {/* WB Connection Status */}
-                <div className="bg-secondary/50 rounded-xl p-3 border border-border/50">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">Wildberries</span>
-                    <Badge variant="outline" className="text-[10px]">В разработке</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Скоро появится автоматическая загрузка карточек
-                  </p>
-                </div>
               </div>
             </div>
           </motion.div>

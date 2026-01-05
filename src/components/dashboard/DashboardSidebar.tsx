@@ -86,8 +86,6 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       id: 'labels',
       label: 'Генератор этикеток',
       icon: Tags,
-      badge: 'Free',
-      badgeColor: 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'
     },
     {
       id: 'history',
@@ -204,7 +202,7 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
 
       {/* Navigation */}
       <nav className={`flex-1 p-2 ${isCollapsed ? 'p-2' : 'p-3'}`}>
-        <ul className="space-y-1">
+        <ul className="space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -213,16 +211,16 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
               <li key={item.id} className="relative">
                 <Button
                   variant="ghost"
-                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-10 rounded-xl transition-all duration-200 ${
+                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[12px] transition-all duration-200 ${
                     isActive 
-                      ? 'bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary font-medium' 
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' 
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={() => !item.disabled && onTabChange(item.id)}
                   disabled={item.disabled}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary' : ''}`} />
+                  <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
                 {item.badge && !isCollapsed && (
@@ -240,23 +238,6 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
         </ul>
       </nav>
 
-      {/* WB Connection Status */}
-      <div className={`p-3 ${isCollapsed ? 'p-2' : 'p-3'}`}>
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-xl bg-secondary/50 border border-border/50`}>
-          {!isCollapsed && (
-            <>
-              <div className="flex-1">
-                <p className="text-xs font-medium text-muted-foreground">Wildberries</p>
-                <p className="text-[10px] text-muted-foreground/70">В разработке</p>
-              </div>
-              <span className="text-[10px] bg-muted px-2 py-0.5 rounded-md text-muted-foreground font-medium">Скоро</span>
-            </>
-          )}
-          {isCollapsed && (
-            <div className="w-3 h-3 bg-muted-foreground/30 rounded-full" title="Wildberries - в разработке" />
-          )}
-        </div>
-      </div>
     </div>
   );
 };

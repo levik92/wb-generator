@@ -555,7 +555,7 @@ const Partner = () => {
         </div>
 
         {/* Program Info */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="border-border/50 bg-background">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -623,13 +623,13 @@ const Partner = () => {
         </Card>
 
         {/* Referrals and Withdrawals Tabs */}
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="border-border/50 bg-background">
           <CardHeader>
             <CardTitle>Партнерские данные</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-background p-1 border border-border/50 rounded-xl">
                 <TabsTrigger value="clients">
                   <span className="sm:hidden">Клиенты</span>
                   <span className="hidden sm:inline">Приглашенные клиенты</span>

@@ -387,10 +387,10 @@ const Auth = () => {
         {/* Back to home */}
         <Link
           to="/"
-          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
+          className="absolute top-6 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm hidden sm:inline">На главную</span>
+          <span className="text-sm">Назад</span>
         </Link>
 
         {/* Auth card */}
@@ -515,15 +515,17 @@ const Auth = () => {
 
                 {captchaSiteKey && (
                   <div className="flex justify-center">
-                    <Suspense fallback={<div className="h-[78px] bg-white/5 rounded-lg animate-pulse" />}>
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        theme="dark"
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
-                    </Suspense>
+                    <div className="rounded-xl overflow-hidden border border-white/10">
+                      <Suspense fallback={<div className="h-[78px] w-full bg-white/5 rounded-lg animate-pulse flex items-center justify-center text-white/30 text-sm">Загрузка капчи...</div>}>
+                        <HCaptcha
+                          ref={captchaRef}
+                          sitekey={captchaSiteKey}
+                          theme="dark"
+                          onVerify={(token) => setCaptchaToken(token)}
+                          onExpire={() => setCaptchaToken(null)}
+                        />
+                      </Suspense>
+                    </div>
                   </div>
                 )}
 
