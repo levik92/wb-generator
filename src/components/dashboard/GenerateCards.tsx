@@ -1396,7 +1396,7 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="bg-card">
+      {generatedImages.length > 0 && <Card className="bg-zinc-50">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
