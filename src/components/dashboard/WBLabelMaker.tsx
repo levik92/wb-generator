@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download } from "lucide-react";
 import JsBarcode from "jsbarcode";
-
 export default function WBLabelMaker() {
   // -------- state (управляемые поля) ----------
   const [code, setCode] = useState("ABC-abc-1234");
   const [title, setTitle] = useState("");
   const [sku, setSku] = useState("");
-  const [format, setFormat] = useState("a4");   // "a4" | "58x40"
-  const [barWidth, setBarWidth] = useState(3);  // 1..5 (целое)
-  const [barHPct, setBarHPct] = useState(45);   // 20..80 (%)
+  const [format, setFormat] = useState("a4"); // "a4" | "58x40"
+  const [barWidth, setBarWidth] = useState(3); // 1..5 (целое)
+  const [barHPct, setBarHPct] = useState(45); // 20..80 (%)
 
   // -------- refs ----------
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,23 +16,37 @@ export default function WBLabelMaker() {
   const badgeRef = useRef<HTMLDivElement>(null);
 
   // -------- пресеты/утилиты ----------
-  const PRESETS = useMemo(
-    () => ({
-      a4: {
-        w_mm: 210, h_mm: 297, dpi: 300, badge: "A4",
-        margins_mm: { top: 15, left: 15, right: 15, bottom: 25 },
-        titlePx: 36, skuPx: 28,
+  const PRESETS = useMemo(() => ({
+    a4: {
+      w_mm: 210,
+      h_mm: 297,
+      dpi: 300,
+      badge: "A4",
+      margins_mm: {
+        top: 15,
+        left: 15,
+        right: 15,
+        bottom: 25
       },
-      "58x40": {
-        w_mm: 58, h_mm: 40, dpi: 203, badge: "58×40",
-        margins_mm: { top: 3, left: 3, right: 3, bottom: 6 },
-        titlePx: 16, skuPx: 13,
+      titlePx: 36,
+      skuPx: 28
+    },
+    "58x40": {
+      w_mm: 58,
+      h_mm: 40,
+      dpi: 203,
+      badge: "58×40",
+      margins_mm: {
+        top: 3,
+        left: 3,
+        right: 3,
+        bottom: 6
       },
-    }),
-    []
-  );
-
-  const mm2px = useCallback((mm: number, dpi: number) => Math.round((mm / 25.4) * dpi), []);
+      titlePx: 16,
+      skuPx: 13
+    }
+  }), []);
+  const mm2px = useCallback((mm: number, dpi: number) => Math.round(mm / 25.4 * dpi), []);
 
   // -------- загрузка шрифта Montserrat (из head) ----------
   useEffect(() => {
@@ -41,8 +54,7 @@ export default function WBLabelMaker() {
       const l = document.createElement("link");
       l.id = "montserrat-link";
       l.rel = "stylesheet";
-      l.href =
-        "https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap";
+      l.href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap";
       document.head.appendChild(l);
     }
   }, []);
@@ -60,10 +72,8 @@ export default function WBLabelMaker() {
         await (document as any).fonts.ready;
       } catch {}
     }
-
     const fmt = PRESETS[format as keyof typeof PRESETS];
     if (badge) badge.textContent = fmt.badge;
-
     const W = mm2px(fmt.w_mm, fmt.dpi);
     const H = mm2px(fmt.h_mm, fmt.dpi);
 
@@ -119,7 +129,6 @@ export default function WBLabelMaker() {
     const bCanvas = document.createElement("canvas");
     bCanvas.width = innerW;
     bCanvas.height = barHeight;
-
     let barcodeOk = true;
     try {
       JsBarcode(bCanvas, (code || " ").trim(), {
@@ -130,7 +139,7 @@ export default function WBLabelMaker() {
         displayValue: true,
         fontSize: Math.max(18, Math.round(barHeight * 0.13)),
         textMargin: 8,
-        lineColor: "#000",
+        lineColor: "#000"
       });
     } catch (e: any) {
       barcodeOk = false;
@@ -174,12 +183,10 @@ export default function WBLabelMaker() {
     // превью (масштаб под контейнер)
     const box = stageBox.getBoundingClientRect();
     const scale = Math.min(box.width / W, box.height / H, 1) || 1;
-
     const p = previewCanvasRef.current;
     if (!p) return;
     p.width = Math.round(W * scale);
     p.height = Math.round(H * scale);
-
     const pctx = p.getContext("2d");
     if (!pctx) return;
     pctx.imageSmoothingEnabled = true;
@@ -217,9 +224,7 @@ export default function WBLabelMaker() {
     a.href = full.toDataURL("image/png", 1.0);
     a.click();
   }, [format]);
-
-  return (
-    <div id="wb-gen">
+  return <div id="wb-gen">
       {/* локальные стили один-в-один с Тильдой (слегка адаптированы под React) */}
       <style>{`
   #wb-gen, #wb-gen *{box-sizing:border-box}
@@ -281,38 +286,19 @@ export default function WBLabelMaker() {
 
       <div className="wb-grid">
         {/* LEFT: form */}
-        <div className="wb-card wb-form">
+        <div className="wb-card wb-form bg-background">
           <label className="wb-label req">Штрих-код (Code-128)*</label>
-          <input
-            className="wb-input"
-            placeholder="Введите штрихкод"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
+          <input className="wb-input" placeholder="Введите штрихкод" value={code} onChange={e => setCode(e.target.value)} />
 
           <label className="wb-label">Наименование</label>
-          <input
-            className="wb-input"
-            placeholder="Введите наименование товара"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          <input className="wb-input" placeholder="Введите наименование товара" value={title} onChange={e => setTitle(e.target.value)} />
 
           <label className="wb-label">Артикул</label>
-          <input
-            className="wb-input"
-            placeholder="Введите артикул товара"
-            value={sku}
-            onChange={(e) => setSku(e.target.value)}
-          />
+          <input className="wb-input" placeholder="Введите артикул товара" value={sku} onChange={e => setSku(e.target.value)} />
 
           <label className="wb-label">Формат печати</label>
           <div className="wb-select-wrap">
-            <select
-              className="wb-select"
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
-            >
+            <select className="wb-select" value={format} onChange={e => setFormat(e.target.value)}>
               <option value="a4">A4 (лист)</option>
               <option value="58x40">58×40 мм (термоэтикетка)</option>
             </select>
@@ -325,14 +311,7 @@ export default function WBLabelMaker() {
                 <span>Толщина штрихов</span>
                 <span id="val_width">{barWidth}</span>
               </div>
-              <input
-                type="range"
-                min="1"
-                max="5"
-                step="1"
-                value={barWidth}
-                onChange={(e) => setBarWidth(parseInt(e.target.value || "1", 10))}
-              />
+              <input type="range" min="1" max="5" step="1" value={barWidth} onChange={e => setBarWidth(parseInt(e.target.value || "1", 10))} />
             </div>
 
             <div className="wb-range">
@@ -340,14 +319,7 @@ export default function WBLabelMaker() {
                 <span>Высота штрих-кода</span>
                 <span id="val_hpct">{barHPct}%</span>
               </div>
-              <input
-                type="range"
-                min="20"
-                max="80"
-                step="1"
-                value={barHPct}
-                onChange={(e) => setBarHPct(parseInt(e.target.value || "20", 10))}
-              />
+              <input type="range" min="20" max="80" step="1" value={barHPct} onChange={e => setBarHPct(parseInt(e.target.value || "20", 10))} />
             </div>
           </div>
 
@@ -361,7 +333,7 @@ export default function WBLabelMaker() {
         </div>
 
         {/* RIGHT: preview */}
-        <div className="wb-card wb-preview">
+        <div className="wb-card wb-preview bg-background">
           <div className="wb-prev-head">
             <div className="wb-prev-title">Превью макета</div>
             <div ref={badgeRef} className="wb-badge">A4</div>
@@ -374,6 +346,5 @@ export default function WBLabelMaker() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
