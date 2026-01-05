@@ -387,7 +387,7 @@ const Auth = () => {
         {/* Back to home */}
         <Link
           to="/"
-          className="absolute top-6 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
+          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Назад</span>
@@ -398,9 +398,9 @@ const Auth = () => {
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="relative z-10 w-full max-w-md mx-4 sm:mx-0"
+          className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
         >
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-colors">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 sm:hover:border-white/20 transition-colors">
             {/* Logo */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-2 mb-4">

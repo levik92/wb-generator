@@ -85,7 +85,7 @@ const Learning = () => {
     >
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
           <GraduationCap className="w-6 h-6 text-primary" />
         </div>
         <div>
@@ -105,15 +105,15 @@ const Learning = () => {
           <CardContent className="p-6 relative">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <MessageCircle className="h-6 w-6 text-white" />
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <MessageCircle className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h3 className="text-base font-semibold text-foreground">
                     Telegram-канал
                   </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Новости, обновления и полезные советы
+                  <p className="text-muted-foreground text-xs">
+                    Новости и советы
                   </p>
                 </div>
               </div>

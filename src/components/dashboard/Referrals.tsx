@@ -95,8 +95,8 @@ export const Referrals = ({
   };
   return <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold mb-2">Реферальная программа</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Реферальная программа</h2>
+        <p className="text-muted-foreground text-sm">
           Приглашайте друзей и получайте бонусы
         </p>
       </div>

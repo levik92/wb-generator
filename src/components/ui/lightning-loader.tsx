@@ -28,14 +28,14 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
         <motion.div
           className={`${sizeClasses[size]} rounded-full absolute inset-0`}
           style={{
-            background: "radial-gradient(circle, hsl(268 83% 58% / 0.3) 0%, transparent 70%)"
+            background: "radial-gradient(circle, hsl(var(--primary) / 0.4) 0%, transparent 70%)"
           }}
           animate={{
-            scale: [1, 1.4, 1],
+            scale: [1, 1.5, 1],
             opacity: [0.6, 0.2, 0.6],
           }}
           transition={{
-            duration: 1,
+            duration: 1.2,
             repeat: Infinity,
             ease: "easeInOut",
           }}
@@ -45,7 +45,7 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
         <motion.div
           className={`${sizeClasses[size]} rounded-full`}
           style={{
-            background: "conic-gradient(from 0deg, transparent 0%, hsl(268 83% 58%) 25%, transparent 50%)",
+            background: "conic-gradient(from 0deg, transparent 0%, hsl(var(--primary)) 30%, transparent 60%)",
           }}
           animate={{ rotate: 360 }}
           transition={{
@@ -59,10 +59,10 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           animate={{
-            scale: [1, 1.2, 1],
+            scale: [1, 1.15, 1],
           }}
           transition={{
-            duration: 0.5,
+            duration: 0.6,
             repeat: Infinity,
             ease: "easeInOut",
           }}
@@ -70,13 +70,13 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
           <motion.div
             animate={{
               filter: [
-                "drop-shadow(0 0 3px hsl(268 83% 58%))",
-                "drop-shadow(0 0 10px hsl(268 83% 58%))",
-                "drop-shadow(0 0 3px hsl(268 83% 58%))",
+                "drop-shadow(0 0 4px hsl(var(--primary)))",
+                "drop-shadow(0 0 12px hsl(var(--primary)))",
+                "drop-shadow(0 0 4px hsl(var(--primary)))",
               ],
             }}
             transition={{
-              duration: 0.6,
+              duration: 0.8,
               repeat: Infinity,
               ease: "easeInOut",
             }}
@@ -157,9 +157,9 @@ export const LightningProgress = ({ progress, showPercentage = true, text }: Lig
             animate={{
               scale: [1, 1.2, 1],
               filter: [
-                "drop-shadow(0 0 2px hsl(268 83% 58%))",
-                "drop-shadow(0 0 8px hsl(268 83% 58%))",
-                "drop-shadow(0 0 2px hsl(268 83% 58%))",
+                "drop-shadow(0 0 2px hsl(var(--primary)))",
+                "drop-shadow(0 0 8px hsl(var(--primary)))",
+                "drop-shadow(0 0 2px hsl(var(--primary)))",
               ],
             }}
             transition={{
@@ -236,6 +236,82 @@ export const DescriptionLoadingBar = ({ isLoading }: DescriptionLoadingBarProps)
             <Zap className="w-3 h-3 text-primary/70 fill-primary/70" />
           </motion.div>
         ))}
+      </div>
+    </div>
+  );
+};
+
+// Global page loader - Supabase-style lightning animation
+export const PageLoader = () => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div className="relative">
+        {/* Multiple expanding rings */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className="absolute inset-0 w-20 h-20 rounded-full border-2 border-primary/30"
+            initial={{ scale: 0.8, opacity: 0.8 }}
+            animate={{
+              scale: [0.8, 1.5, 2],
+              opacity: [0.8, 0.4, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: i * 0.6,
+              ease: "easeOut",
+            }}
+            style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+        ))}
+        
+        {/* Center lightning */}
+        <motion.div
+          className="relative w-20 h-20 flex items-center justify-center"
+          animate={{
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 0.8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <motion.div
+            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/30"
+            animate={{
+              boxShadow: [
+                "0 0 20px hsl(var(--primary) / 0.3)",
+                "0 0 40px hsl(var(--primary) / 0.5)",
+                "0 0 20px hsl(var(--primary) / 0.3)",
+              ],
+            }}
+            transition={{
+              duration: 1.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <motion.div
+              animate={{
+                rotate: [0, 5, -5, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 0.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <Zap className="w-7 h-7 text-primary-foreground fill-primary-foreground" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

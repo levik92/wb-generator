@@ -165,7 +165,7 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
             <HistoryIcon className="w-6 h-6 text-primary" />
           </div>
           <div>
@@ -187,7 +187,7 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
         className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
             <HistoryIcon className="w-6 h-6 text-primary" />
           </div>
           <div>
