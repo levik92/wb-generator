@@ -157,7 +157,7 @@ export const Referrals = ({
         </TabsContent>
 
         <TabsContent value="invited" className="space-y-4">
-          <Card className="bg-background border border-border/50">
+          <Card className="border border-border/50 bg-zinc-50">
             <CardHeader>
               <CardTitle>Приглашенные пользователи</CardTitle>
               <CardDescription>
