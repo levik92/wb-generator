@@ -3,12 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { 
-  LogOut,
-  Download,
-  Loader2,
-  Zap
-} from "lucide-react";
+import { LogOut, Download, Loader2, Zap } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminMobileMenu } from "@/components/admin/AdminMobileMenu";
@@ -23,7 +18,6 @@ import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminBanners } from "@/components/admin/AdminBanners";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
-
 interface User {
   id: string;
   email: string;
@@ -34,9 +28,7 @@ interface User {
   created_at: string;
   referral_code: string;
 }
-
 type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'promocodes' | 'news' | 'pricing' | 'banners';
-
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
@@ -44,36 +36,33 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('analytics');
   const isMobile = useIsMobile();
-
   useEffect(() => {
     checkAdminAccess();
   }, []);
-
   const checkAdminAccess = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         navigate('/auth');
         return;
       }
-
-      const { data: userRoles, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .eq('role', 'admin')
-        .single();
-
+      const {
+        data: userRoles,
+        error
+      } = await supabase.from('user_roles').select('role').eq('user_id', session.user.id).eq('role', 'admin').single();
       if (error || !userRoles) {
         toast({
           title: "Доступ запрещен",
           description: "У вас нет прав администратора",
-          variant: "destructive",
+          variant: "destructive"
         });
         navigate('/dashboard');
         return;
       }
-
       setIsAdmin(true);
       await loadUsers();
     } catch (error) {
@@ -83,31 +72,29 @@ export default function Admin() {
       setLoading(false);
     }
   };
-
   const loadUsers = async () => {
-    const { data, error } = await supabase.rpc('admin_get_all_users');
-
+    const {
+      data,
+      error
+    } = await supabase.rpc('admin_get_all_users');
     if (error) {
       console.error('Error loading users:', error);
       toast({
         title: "Ошибка",
         description: "Не удалось загрузить пользователей",
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       setUsers(data || []);
     }
   };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
-
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as ActiveTab);
   };
-
   const renderContent = () => {
     switch (activeTab) {
       case 'analytics':
@@ -130,44 +117,28 @@ export default function Admin() {
         return <AdminAnalytics users={users} />;
     }
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+    return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
             <Zap className="w-6 h-6 text-white animate-pulse" />
           </div>
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!isAdmin) {
     return null;
   }
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row w-full overflow-hidden">
+  return <div className="min-h-screen bg-background flex flex-col md:flex-row w-full overflow-hidden">
       {/* Desktop Sidebar */}
-      {!isMobile && (
-        <AdminSidebar 
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
-      )}
+      {!isMobile && <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} className="bg-zinc-50" />}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-3 md:p-4 border-b border-border bg-card/50 backdrop-blur-xl shrink-0 sticky top-0 z-20">
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-            {isMobile && (
-              <AdminMobileMenu 
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-              />
-            )}
+            {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} />}
             <div className="min-w-0 flex-1 overflow-hidden">
               <h1 className="text-lg md:text-xl font-bold truncate">Админ-панель</h1>
               <p className="text-muted-foreground text-xs hidden sm:block truncate">
@@ -198,6 +169,5 @@ export default function Admin() {
         
         <Footer />
       </div>
-    </div>
-  );
+    </div>;
 }
