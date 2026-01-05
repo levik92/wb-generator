@@ -4,13 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveJobs } from "@/hooks/useActiveJobs";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -35,7 +29,6 @@ import { MobileTabBar } from "@/components/mobile/MobileTabBar";
 import { MobileSideMenu } from "@/components/mobile/MobileSideMenu";
 import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
 import { OnboardingWizard } from "@/components/mobile/OnboardingWizard";
-
 interface Profile {
   id: string;
   email: string;
@@ -45,9 +38,7 @@ interface Profile {
   referral_code: string;
   login_count: number;
 }
-
 type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications' | 'news' | 'learning';
-
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -57,13 +48,20 @@ const Dashboard = () => {
   const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const isMobile = useIsMobile();
-  
-  const { hasCompletedJobs, resetCompletedJobsFlag } = useActiveJobs(profile?.id || '');
-
+  const {
+    hasCompletedJobs,
+    resetCompletedJobsFlag
+  } = useActiveJobs(profile?.id || '');
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       if (!session?.user) {
         navigate("/auth");
         return;
@@ -71,51 +69,44 @@ const Dashboard = () => {
       setUser(session.user);
       loadProfile(session.user.id);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!session?.user) {
-          navigate("/auth");
-          return;
-        }
-        setUser(session.user);
-        setTimeout(() => {
-          loadProfile(session.user.id);
-        }, 0);
+    const {
+      data: {
+        subscription
       }
-    );
-
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session?.user) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      setTimeout(() => {
+        loadProfile(session.user.id);
+      }, 0);
+    });
     return () => subscription.unsubscribe();
   }, [navigate]);
-
   const loadProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (error) throw error;
-      
       if (!data) {
         toast({
           title: "Профиль загружается",
-          description: "Подождите немного, профиль создаётся...",
+          description: "Подождите немного, профиль создаётся..."
         });
         setTimeout(() => loadProfile(userId), 2000);
         return;
       }
-      
       const currentLoginCount = data.login_count || 0;
       if (currentLoginCount < 3) {
-        await supabase
-          .from('profiles')
-          .update({ login_count: currentLoginCount + 1 })
-          .eq('id', userId);
+        await supabase.from('profiles').update({
+          login_count: currentLoginCount + 1
+        }).eq('id', userId);
         data.login_count = currentLoginCount + 1;
       }
-      
       setProfile(data);
       await checkUnreadNews(userId);
       await processPendingCodes(userId, data);
@@ -123,66 +114,62 @@ const Dashboard = () => {
       toast({
         title: "Ошибка загрузки профиля",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const processPendingCodes = async (userId: string, profileData: any) => {
     try {
       const pendingReferralCode = sessionStorage.getItem('pending_referral_code');
       const pendingPartnerCode = sessionStorage.getItem('pending_partner_code');
-      
       if (pendingReferralCode && !profileData.referred_by) {
-        const { data: referrerData, error: referrerError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('referral_code', pendingReferralCode)
-          .single();
-        
+        const {
+          data: referrerData,
+          error: referrerError
+        } = await supabase.from('profiles').select('id').eq('referral_code', pendingReferralCode).single();
         if (!referrerError && referrerData && referrerData.id !== userId) {
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ 
-              referred_by: referrerData.id,
-              tokens_balance: profileData.tokens_balance + 10
-            })
-            .eq('id', userId);
-          
+          const {
+            error: updateError
+          } = await supabase.from('profiles').update({
+            referred_by: referrerData.id,
+            tokens_balance: profileData.tokens_balance + 10
+          }).eq('id', userId);
           if (!updateError) {
             await supabase.from('referrals').insert({
               referrer_id: referrerData.id,
               referred_id: userId,
               status: 'pending'
             });
-            
             await supabase.from('token_transactions').insert({
               user_id: userId,
               amount: 10,
               transaction_type: 'referral_bonus',
               description: 'Бонус за регистрацию по реферальной ссылке'
             });
-            
             toast({
               title: "Реферальный бонус начислен! 🎉",
-              description: "Вы получили дополнительные 10 токенов",
+              description: "Вы получили дополнительные 10 токенов"
             });
           }
         }
         sessionStorage.removeItem('pending_referral_code');
       }
-      
       if (pendingPartnerCode) {
-        const { data, error } = await supabase.functions.invoke('process-partner-signup', {
-          body: { user_id: userId, partner_code: pendingPartnerCode }
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('process-partner-signup', {
+          body: {
+            user_id: userId,
+            partner_code: pendingPartnerCode
+          }
         });
-        
         if (!error) {
           toast({
             title: "Добро пожаловать! 🎉",
-            description: "Вы зарегистрированы по партнерской ссылке",
+            description: "Вы зарегистрированы по партнерской ссылке"
           });
         }
         sessionStorage.removeItem('pending_partner_code');
@@ -191,22 +178,17 @@ const Dashboard = () => {
       console.error('Error processing pending codes:', error);
     }
   };
-
   const checkUnreadNews = async (userId: string) => {
     try {
-      const { data: newsData } = await (supabase as any)
-        .from('news')
-        .select('id, published_at')
-        .eq('is_published', true)
-        .order('published_at', { ascending: false })
-        .limit(5);
-
+      const {
+        data: newsData
+      } = await (supabase as any).from('news').select('id, published_at').eq('is_published', true).order('published_at', {
+        ascending: false
+      }).limit(5);
       if (newsData && newsData.length > 0) {
-        const { data: readData } = await (supabase as any)
-          .from('news_read_status')
-          .select('news_id')
-          .eq('user_id', userId);
-
+        const {
+          data: readData
+        } = await (supabase as any).from('news_read_status').select('news_id').eq('user_id', userId);
         const readIds = new Set((readData as any)?.map((r: any) => r.news_id) || []);
         const hasUnread = (newsData as any).some((news: any) => !readIds.has(news.id));
         setHasUnreadNews(hasUnread);
@@ -215,59 +197,53 @@ const Dashboard = () => {
       console.error('Error checking unread news:', error);
     }
   };
-
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      const {
+        error
+      } = await supabase.auth.signOut({
+        scope: 'global'
+      });
       if (error) throw error;
       navigate("/");
     } catch (error: any) {
       toast({
         title: "Ошибка выхода",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const refreshProfile = () => {
     if (user) {
       loadProfile(user.id);
     }
   };
-
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as ActiveTab);
   };
-
   useEffect(() => {
     if (hasCompletedJobs) {
       setShouldRefreshHistory(true);
     }
   }, [hasCompletedJobs]);
-
   const handleHistoryRefreshComplete = () => {
     setShouldRefreshHistory(false);
     resetCompletedJobsFlag();
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+    return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
             <Zap className="w-6 h-6 text-white animate-pulse" />
           </div>
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!user || !profile) {
     return null;
   }
-
   const renderContent = () => {
     switch (activeTab) {
       case 'cards':
@@ -294,60 +270,25 @@ const Dashboard = () => {
         return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background flex">
+  return <div className="min-h-screen bg-background flex">
       {/* PWA Install Prompt - Mobile only */}
-      {profile && isMobile && (
-        <PWAInstallPrompt 
-          userId={profile.id} 
-          loginCount={profile.login_count || 0}
-        />
-      )}
+      {profile && isMobile && <PWAInstallPrompt userId={profile.id} loginCount={profile.login_count || 0} />}
       
       {/* Onboarding Wizard */}
-      {profile && (
-        <OnboardingWizard 
-          userId={profile.id} 
-          loginCount={profile.login_count || 0}
-          onComplete={() => {}}
-          onSkip={() => {}}
-        />
-      )}
+      {profile && <OnboardingWizard userId={profile.id} loginCount={profile.login_count || 0} onComplete={() => {}} onSkip={() => {}} />}
       
       {/* Mobile Side Menu */}
-      {isMobile && (
-        <MobileSideMenu
-          isOpen={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          profile={profile}
-          hasUnreadNews={hasUnreadNews}
-        />
-      )}
+      {isMobile && <MobileSideMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} activeTab={activeTab} onTabChange={handleTabChange} profile={profile} hasUnreadNews={hasUnreadNews} />}
       
       {/* Desktop Sidebar */}
-      {!isMobile && (
-        <div className="sticky top-0 h-screen">
-          <DashboardSidebar 
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            profile={profile}
-          />
-        </div>
-      )}
+      {!isMobile && <div className="sticky top-0 h-screen">
+          <DashboardSidebar activeTab={activeTab} onTabChange={handleTabChange} profile={profile} className="bg-gray-50" />
+        </div>}
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
         {/* Mobile Header */}
-        {isMobile && (
-          <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20"
-              onClick={() => setMobileMenuOpen(true)}
-            >
+        {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20" onClick={() => setMobileMenuOpen(true)}>
               <Menu className="h-5 w-5 text-primary" />
             </Button>
             <div className="flex items-center space-x-2">
@@ -391,17 +332,10 @@ const Dashboard = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        )}
+          </div>}
         
         {/* Desktop Header */}
-        {!isMobile && (
-          <DashboardHeader 
-            profile={profile} 
-            onSignOut={handleSignOut}
-            onNavigateToSettings={() => setActiveTab('settings')}
-          />
-        )}
+        {!isMobile && <DashboardHeader profile={profile} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} />}
         
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
           <DashboardBanners userId={profile.id} />
@@ -412,14 +346,7 @@ const Dashboard = () => {
       </div>
       
       {/* Mobile Tab Bar */}
-      {isMobile && (
-        <MobileTabBar 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange} 
-        />
-      )}
-    </div>
-  );
+      {isMobile && <MobileTabBar activeTab={activeTab} onTabChange={handleTabChange} />}
+    </div>;
 };
-
 export default Dashboard;
