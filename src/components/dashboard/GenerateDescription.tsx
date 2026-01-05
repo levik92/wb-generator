@@ -238,7 +238,7 @@ export const GenerateDescription = ({
             
             {!canGenerate() && <Alert className="mt-4 bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
                 <AlertCircle className="h-4 w-4 text-amber-500" />
-                <AlertDescription className="text-amber-600 dark:text-amber-400">
+                <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
                   {getGuardMessage()}
                 </AlertDescription>
               </Alert>}
