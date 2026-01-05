@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Edit, Trash2, Tag } from "lucide-react";
-
 interface PromoCode {
   id: string;
   code: string;
@@ -23,7 +22,6 @@ interface PromoCode {
   is_active: boolean;
   created_at: string;
 }
-
 export const PromoCodeManager = () => {
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,18 +34,17 @@ export const PromoCodeManager = () => {
     maxUses: '',
     validUntil: ''
   });
-
   useEffect(() => {
     loadPromoCodes();
   }, []);
-
   const loadPromoCodes = async () => {
     try {
-      const { data, error } = await supabase
-        .from('promocodes')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from('promocodes').select('*').order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
       setPromoCodes((data || []).map(promo => ({
         ...promo,
@@ -58,24 +55,22 @@ export const PromoCodeManager = () => {
       toast({
         title: "Ошибка",
         description: "Не удалось загрузить промокоды",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleSubmit = async () => {
     try {
       if (!formData.code || !formData.value) {
         toast({
           title: "Ошибка",
           description: "Заполните все обязательные поля",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
       const promoData = {
         code: formData.code.toUpperCase(),
         type: formData.type,
@@ -84,26 +79,21 @@ export const PromoCodeManager = () => {
         valid_until: formData.validUntil ? new Date(formData.validUntil).toISOString() : null,
         is_active: true
       };
-
       let error;
       if (editingPromo) {
-        ({ error } = await supabase
-          .from('promocodes')
-          .update(promoData)
-          .eq('id', editingPromo.id));
+        ({
+          error
+        } = await supabase.from('promocodes').update(promoData).eq('id', editingPromo.id));
       } else {
-        ({ error } = await supabase
-          .from('promocodes')
-          .insert(promoData));
+        ({
+          error
+        } = await supabase.from('promocodes').insert(promoData));
       }
-
       if (error) throw error;
-
       toast({
         title: "Успешно",
-        description: editingPromo ? "Промокод обновлен" : "Промокод создан",
+        description: editingPromo ? "Промокод обновлен" : "Промокод создан"
       });
-
       setIsDialogOpen(false);
       resetForm();
       loadPromoCodes();
@@ -112,11 +102,10 @@ export const PromoCodeManager = () => {
       toast({
         title: "Ошибка",
         description: error.message || "Не удалось сохранить промокод",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleEdit = (promo: PromoCode) => {
     setEditingPromo(promo);
     setFormData({
@@ -128,57 +117,48 @@ export const PromoCodeManager = () => {
     });
     setIsDialogOpen(true);
   };
-
   const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('promocodes')
-        .delete()
-        .eq('id', id);
-
+      const {
+        error
+      } = await supabase.from('promocodes').delete().eq('id', id);
       if (error) throw error;
-
       toast({
         title: "Успешно",
-        description: "Промокод удален",
+        description: "Промокод удален"
       });
-
       loadPromoCodes();
     } catch (error) {
       console.error('Error deleting promocode:', error);
       toast({
         title: "Ошибка",
         description: "Не удалось удалить промокод",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const toggleActive = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('promocodes')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-
+      const {
+        error
+      } = await supabase.from('promocodes').update({
+        is_active: !currentStatus
+      }).eq('id', id);
       if (error) throw error;
-
       toast({
         title: "Успешно",
-        description: `Промокод ${!currentStatus ? 'активирован' : 'деактивирован'}`,
+        description: `Промокод ${!currentStatus ? 'активирован' : 'деактивирован'}`
       });
-
       loadPromoCodes();
     } catch (error) {
       console.error('Error updating promocode:', error);
       toast({
         title: "Ошибка",
         description: "Не удалось обновить статус промокода",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const resetForm = () => {
     setFormData({
       code: '',
@@ -189,13 +169,10 @@ export const PromoCodeManager = () => {
     });
     setEditingPromo(null);
   };
-
   if (loading) {
     return <div>Загрузка промокодов...</div>;
   }
-
-  return (
-    <Card>
+  return <Card className="bg-zinc-50">
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -226,16 +203,17 @@ export const PromoCodeManager = () => {
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">Код промокода</Label>
-                  <Input
-                    id="code"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="WELCOME2024"
-                  />
+                  <Input id="code" value={formData.code} onChange={e => setFormData({
+                  ...formData,
+                  code: e.target.value
+                })} placeholder="WELCOME2024" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="type">Тип</Label>
-                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value as 'tokens' | 'discount' })}>
+                  <Select value={formData.type} onValueChange={value => setFormData({
+                  ...formData,
+                  type: value as 'tokens' | 'discount'
+                })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -249,32 +227,24 @@ export const PromoCodeManager = () => {
                   <Label htmlFor="value">
                     {formData.type === 'tokens' ? 'Количество токенов' : 'Размер скидки (%)'}
                   </Label>
-                  <Input
-                    id="value"
-                    type="number"
-                    value={formData.value}
-                    onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                    placeholder={formData.type === 'tokens' ? '25' : '10'}
-                  />
+                  <Input id="value" type="number" value={formData.value} onChange={e => setFormData({
+                  ...formData,
+                  value: e.target.value
+                })} placeholder={formData.type === 'tokens' ? '25' : '10'} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="maxUses">Максимальное количество использований</Label>
-                  <Input
-                    id="maxUses"
-                    type="number"
-                    value={formData.maxUses}
-                    onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-                    placeholder="Оставьте пустым для неограниченного"
-                  />
+                  <Input id="maxUses" type="number" value={formData.maxUses} onChange={e => setFormData({
+                  ...formData,
+                  maxUses: e.target.value
+                })} placeholder="Оставьте пустым для неограниченного" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="validUntil">Действует до</Label>
-                  <Input
-                    id="validUntil"
-                    type="date"
-                    value={formData.validUntil}
-                    onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                  />
+                  <Input id="validUntil" type="date" value={formData.validUntil} onChange={e => setFormData({
+                  ...formData,
+                  validUntil: e.target.value
+                })} />
                 </div>
               </div>
               <DialogFooter>
@@ -304,8 +274,7 @@ export const PromoCodeManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {promoCodes.map((promo) => (
-                  <TableRow key={promo.id}>
+                {promoCodes.map(promo => <TableRow key={promo.id}>
                     <TableCell className="font-mono text-xs md:text-sm">{promo.code}</TableCell>
                     <TableCell>
                       <Badge variant={promo.type === 'tokens' ? 'default' : 'secondary'} className="text-xs">
@@ -319,43 +288,31 @@ export const PromoCodeManager = () => {
                       {promo.current_uses} / {promo.max_uses || '∞'}
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={promo.is_active ? 'default' : 'secondary'}
-                        className="cursor-pointer text-xs"
-                        onClick={() => toggleActive(promo.id, promo.is_active)}
-                      >
+                      <Badge variant={promo.is_active ? 'default' : 'secondary'} className="cursor-pointer text-xs" onClick={() => toggleActive(promo.id, promo.is_active)}>
                         {promo.is_active ? 'Да' : 'Нет'}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs">
-                      {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '∞'}
+                      {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: '2-digit'
+                }) : '∞'}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-0.5 md:gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(promo)}
-                          className="h-7 w-7 md:h-8 md:w-8 p-0"
-                        >
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(promo)} className="h-7 w-7 md:h-8 md:w-8 p-0">
                           <Edit className="h-3 w-3" />
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDelete(promo.id)}
-                          className="h-7 w-7 md:h-8 md:w-8 p-0"
-                        >
+                        <Button variant="destructive" size="sm" onClick={() => handleDelete(promo.id)} className="h-7 w-7 md:h-8 md:w-8 p-0">
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </TableCell>
-                  </TableRow>
-                ))}
+                  </TableRow>)}
               </TableBody>
             </Table>
           </div>
         </CardContent>
-    </Card>
-  );
+    </Card>;
 };
