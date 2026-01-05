@@ -295,7 +295,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
           <CardHeader className="relative">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
                 <Headphones className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -327,7 +327,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </Card>
       </motion.div>
 
-      <Card className="bg-muted/30">
+      <Card className="bg-background border border-border/50">
         <CardHeader>
           <CardTitle>Профиль</CardTitle>
           <CardDescription>Основная информация аккаунта</CardDescription>
@@ -358,7 +358,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/30">
+      <Card className="bg-background border border-border/50">
         <CardHeader>
           <CardTitle>Смена email</CardTitle>
           <CardDescription>Изменить адрес электронной почты</CardDescription>
@@ -386,7 +386,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/30">
+      <Card className="bg-background border border-border/50">
         <CardHeader>
           <CardTitle>Смена пароля</CardTitle>
           <CardDescription>Изменить пароль для входа</CardDescription>
@@ -437,7 +437,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/30 relative">
+      <Card className="bg-background border border-border/50 relative">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -465,7 +465,7 @@ export const Settings = ({ profile, onUpdate, onSignOut }: SettingsProps) => {
         </CardContent>
       </Card>
 
-      <Card className="bg-muted/30">
+      <Card className="bg-background border border-border/50">
         <CardHeader>
           <CardTitle>Действия</CardTitle>
         </CardHeader>

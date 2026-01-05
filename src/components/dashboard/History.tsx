@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2 } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import JSZip from 'jszip';
 
@@ -164,11 +164,14 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-            История генераций
-          </h2>
-          <p className="text-muted-foreground">Загрузка...</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <HistoryIcon className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">История генераций</h2>
+            <p className="text-muted-foreground text-sm">Загрузка...</p>
+          </div>
         </div>
       </div>
     );
@@ -183,17 +186,20 @@ export const History = ({ profile, shouldRefresh, onRefreshComplete }: HistoryPr
         transition={{ duration: 0.5 }}
         className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
       >
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-            История генераций
-          </h2>
-          <p className="text-muted-foreground">Все ваши созданные карточки и описания</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <HistoryIcon className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold">История генераций</h2>
+            <p className="text-muted-foreground text-sm">Все ваши созданные карточки и описания</p>
+          </div>
         </div>
         
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Filter className="w-4 h-4 text-muted-foreground hidden sm:block" />
           <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-full sm:w-48 bg-card/50 border-border/50">
+            <SelectTrigger className="w-full sm:w-48 bg-background border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -16,7 +16,7 @@ const comparisonData = [
     constructor: "от 990₽*",
   },
   {
-    feature: "Профессиональный дизайн",
+    feature: "Проф. дизайн",
     wbgen: true,
     designer: true,
     constructor: false,

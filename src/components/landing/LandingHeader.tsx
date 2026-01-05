@@ -62,7 +62,7 @@ export const LandingHeader = () => {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
               </div>
-              <span className="text-xl font-bold text-white hidden sm:block">
+              <span className="text-xl font-bold text-white">
                 WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
               </span>
             </Link>
@@ -171,7 +171,7 @@ export const LandingHeader = () => {
                 </nav>
 
                 {/* Bottom buttons */}
-                <div className="p-4 border-t border-white/10 space-y-3">
+                <div className="p-4 border-t border-white/10 space-y-4">
                   <Link to="/auth?tab=signin" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button
                       variant="outline"
@@ -185,6 +185,9 @@ export const LandingHeader = () => {
                       Зарегистрироваться
                     </Button>
                   </Link>
+                  <p className="text-center text-xs text-white/30 pt-2">
+                    © 2025. Все права защищены.
+                  </p>
                 </div>
               </div>
             </motion.div>

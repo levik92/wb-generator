@@ -2,18 +2,20 @@ import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 
 interface LightningLoaderProps {
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   text?: string;
 }
 
 export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => {
   const sizeClasses = {
+    xs: "w-5 h-5",
     sm: "w-8 h-8",
     md: "w-12 h-12",
     lg: "w-16 h-16",
   };
 
   const iconSizes = {
+    xs: "w-2.5 h-2.5",
     sm: "w-4 h-4",
     md: "w-6 h-6",
     lg: "w-8 h-8",
@@ -24,48 +26,43 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
       <div className="relative">
         {/* Outer glow ring */}
         <motion.div
-          className={`${sizeClasses[size]} rounded-full bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 absolute inset-0`}
+          className={`${sizeClasses[size]} rounded-full absolute inset-0`}
+          style={{
+            background: "radial-gradient(circle, hsl(268 83% 58% / 0.3) 0%, transparent 70%)"
+          }}
           animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.5, 0.2, 0.5],
+            scale: [1, 1.4, 1],
+            opacity: [0.6, 0.2, 0.6],
           }}
           transition={{
-            duration: 1.5,
+            duration: 1,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         />
         
-        {/* Inner rotating ring */}
+        {/* Spinning conic gradient */}
         <motion.div
-          className={`${sizeClasses[size]} rounded-full border-2 border-transparent`}
+          className={`${sizeClasses[size]} rounded-full`}
           style={{
-            background: "linear-gradient(135deg, transparent 0%, transparent 100%)",
-            borderImage: "linear-gradient(135deg, hsl(268, 83%, 65%), hsl(280, 90%, 70%), hsl(220, 100%, 60%)) 1",
+            background: "conic-gradient(from 0deg, transparent 0%, hsl(268 83% 58%) 25%, transparent 50%)",
           }}
           animate={{ rotate: 360 }}
           transition={{
-            duration: 1.5,
+            duration: 0.8,
             repeat: Infinity,
             ease: "linear",
           }}
-        >
-          <div 
-            className={`${sizeClasses[size]} rounded-full`}
-            style={{
-              background: "conic-gradient(from 0deg, transparent, hsl(268, 83%, 65%), transparent)",
-            }}
-          />
-        </motion.div>
+        />
 
         {/* Center lightning icon */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           animate={{
-            scale: [1, 1.15, 1],
+            scale: [1, 1.2, 1],
           }}
           transition={{
-            duration: 0.6,
+            duration: 0.5,
             repeat: Infinity,
             ease: "easeInOut",
           }}
@@ -73,25 +70,25 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
           <motion.div
             animate={{
               filter: [
-                "drop-shadow(0 0 4px hsl(268, 83%, 65%))",
-                "drop-shadow(0 0 12px hsl(268, 83%, 65%))",
-                "drop-shadow(0 0 4px hsl(268, 83%, 65%))",
+                "drop-shadow(0 0 3px hsl(268 83% 58%))",
+                "drop-shadow(0 0 10px hsl(268 83% 58%))",
+                "drop-shadow(0 0 3px hsl(268 83% 58%))",
               ],
             }}
             transition={{
-              duration: 0.8,
+              duration: 0.6,
               repeat: Infinity,
               ease: "easeInOut",
             }}
           >
-            <Zap className={`${iconSizes[size]} text-purple-400 fill-purple-400`} />
+            <Zap className={`${iconSizes[size]} text-primary fill-primary`} />
           </motion.div>
         </motion.div>
       </div>
 
       {text && (
         <motion.p
-          className="text-sm text-white/60"
+          className="text-sm text-muted-foreground"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
@@ -114,17 +111,17 @@ export const LightningProgress = ({ progress, showPercentage = true, text }: Lig
     <div className="w-full space-y-2">
       {(text || showPercentage) && (
         <div className="flex items-center justify-between text-sm">
-          {text && <span className="text-white/70">{text}</span>}
+          {text && <span className="text-muted-foreground">{text}</span>}
           {showPercentage && (
-            <span className="text-purple-400 font-medium">{Math.round(progress)}%</span>
+            <span className="text-primary font-medium">{Math.round(progress)}%</span>
           )}
         </div>
       )}
       
-      <div className="relative h-3 bg-white/5 rounded-full overflow-hidden border border-white/10">
+      <div className="relative h-3 bg-secondary rounded-full overflow-hidden border border-border/50">
         {/* Background glow */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10"
+          className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/20 to-primary/10"
           animate={{
             opacity: [0.3, 0.6, 0.3],
           }}
@@ -137,7 +134,7 @@ export const LightningProgress = ({ progress, showPercentage = true, text }: Lig
         
         {/* Progress fill */}
         <motion.div
-          className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-400 rounded-full relative"
+          className="h-full bg-gradient-to-r from-primary via-primary/90 to-primary rounded-full relative"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -160,9 +157,9 @@ export const LightningProgress = ({ progress, showPercentage = true, text }: Lig
             animate={{
               scale: [1, 1.2, 1],
               filter: [
-                "drop-shadow(0 0 2px hsl(268, 83%, 65%))",
-                "drop-shadow(0 0 8px hsl(268, 83%, 65%))",
-                "drop-shadow(0 0 2px hsl(268, 83%, 65%))",
+                "drop-shadow(0 0 2px hsl(268 83% 58%))",
+                "drop-shadow(0 0 8px hsl(268 83% 58%))",
+                "drop-shadow(0 0 2px hsl(268 83% 58%))",
               ],
             }}
             transition={{
@@ -171,7 +168,7 @@ export const LightningProgress = ({ progress, showPercentage = true, text }: Lig
               ease: "easeInOut",
             }}
           >
-            <Zap className="w-4 h-4 text-white fill-white" />
+            <Zap className="w-4 h-4 text-primary-foreground fill-primary-foreground" />
           </motion.div>
         </motion.div>
       </div>
@@ -201,10 +198,10 @@ export const DescriptionLoadingBar = ({ isLoading }: DescriptionLoadingBarProps)
             ease: "easeInOut",
           }}
         >
-          <Zap className="w-5 h-5 text-purple-400 fill-purple-400" />
+          <Zap className="w-5 h-5 text-primary fill-primary" />
         </motion.div>
         <motion.span
-          className="text-sm text-white/70"
+          className="text-sm text-muted-foreground"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
@@ -212,9 +209,9 @@ export const DescriptionLoadingBar = ({ isLoading }: DescriptionLoadingBarProps)
         </motion.span>
       </div>
 
-      <div className="relative h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
+      <div className="relative h-2 bg-secondary rounded-full overflow-hidden border border-border/50">
         <motion.div
-          className="absolute inset-0 h-full bg-gradient-to-r from-transparent via-purple-500 to-transparent"
+          className="absolute inset-0 h-full bg-gradient-to-r from-transparent via-primary to-transparent"
           animate={{ x: ["-100%", "100%"] }}
           transition={{
             duration: 1.2,
@@ -236,7 +233,7 @@ export const DescriptionLoadingBar = ({ isLoading }: DescriptionLoadingBarProps)
               delay: i * 0.5,
             }}
           >
-            <Zap className="w-3 h-3 text-purple-300 fill-purple-300" />
+            <Zap className="w-3 h-3 text-primary/70 fill-primary/70" />
           </motion.div>
         ))}
       </div>

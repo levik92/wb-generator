@@ -121,7 +121,7 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
 
   return (
     <div className="space-y-4">
-      <Card className="bg-muted/30">
+      <Card className="bg-background border border-border/50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Банковские реквизиты</CardTitle>
@@ -205,29 +205,34 @@ export const BankDetailsForm = ({ partnerId }: BankDetailsFormProps) => {
         </CardContent>
       </Card>
 
-      <div className="bg-blue-50 rounded-lg p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="flex-shrink-0">
-          <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center">
-            <MessageCircle className="h-6 w-6 text-white" />
+      <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
+        <CardContent className="p-6 relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <MessageCircle className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold mb-1">
+                Есть вопросы?
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Напишите в поддержку, поможем вам
+              </p>
+            </div>
+            <Button
+              onClick={() => window.open("https://t.me/wbgen_support", "_blank")}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-full sm:w-auto flex-shrink-0 gap-2"
+              size="sm"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Написать
+            </Button>
           </div>
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-blue-900 mb-1">
-            Есть вопросы?
-          </h3>
-          <p className="text-sm text-blue-700">
-            Напишите в поддержку, поможем вам
-          </p>
-        </div>
-        <Button
-          onClick={() => window.open("https://t.me/wbgen_support", "_blank")}
-          className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto flex-shrink-0"
-          size="sm"
-        >
-          <ExternalLink className="h-4 w-4 mr-2" />
-          Написать
-        </Button>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -134,13 +134,15 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="flex items-center gap-3"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-          Генерация описаний
-        </h2>
-        <p className="text-muted-foreground">
-          Создайте профессиональное описание товара для Wildberries
-        </p>
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <FileText className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Генерация описаний</h2>
+          <p className="text-muted-foreground text-sm">Создайте профессиональное описание товара для Wildberries</p>
+        </div>
       </motion.div>
 
       {/* Feature Card */}
@@ -148,22 +150,21 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6"
+        className="relative overflow-hidden rounded-2xl bg-background border border-border/50 p-6"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-        <div className="relative space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+        <div className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
-            <div>
-              <h3 className="text-xl font-bold">Умный текст, который продаёт</h3>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold mb-1">Умный текст, который продаёт</h3>
               <p className="text-sm text-muted-foreground">
                 Подбор стиля, ключевых слов и эмоциональных акцентов
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-border/50">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
@@ -180,7 +181,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 space-y-5"
+          className="rounded-2xl border border-border/50 bg-background p-6 space-y-5"
         >
           <div>
             <h3 className="text-lg font-semibold mb-1">Параметры генерации</h3>
@@ -298,7 +299,7 @@ export const GenerateDescription = ({ profile, onTokensUpdate }: GenerateDescrip
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 space-y-4"
+          className="rounded-2xl border border-border/50 bg-background p-6 space-y-4"
         >
           <div className="flex items-center justify-between">
             <div>
