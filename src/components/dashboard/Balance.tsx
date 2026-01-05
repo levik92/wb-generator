@@ -65,7 +65,7 @@ export default function Balance() {
     y: 0
   }} transition={{
     duration: 0.4
-  }} className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
+  }} className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0 px-0 py-0">
       {/* Balance Header */}
       <motion.div initial={{
       opacity: 0,
