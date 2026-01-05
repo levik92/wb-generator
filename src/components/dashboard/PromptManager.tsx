@@ -358,7 +358,7 @@ export function PromptManager() {
         } = getPromptDisplayName(prompt.prompt_type);
         const isEditing = editingPrompt === prompt.id;
         return <Collapsible key={prompt.id} open={openPrompts.has(prompt.id)} onOpenChange={() => togglePrompt(prompt.id)}>
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden bg-zinc-50">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between gap-3">
                       <CollapsibleTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-1 text-left">
@@ -420,7 +420,7 @@ export function PromptManager() {
         </div>
 
         {/* Model Selection */}
-        <Card>
+        <Card className="bg-zinc-50">
           <CardHeader>
             <CardTitle className="text-lg">Активная модель генерации</CardTitle>
             <CardDescription>
