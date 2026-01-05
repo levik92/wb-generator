@@ -54,7 +54,7 @@ export const LandingHeader = () => {
                 <div className="w-10 h-10 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_hsl(268,83%,60%,0.4)] transition-shadow duration-300">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] blur-lg transition-opacity rounded-lg opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] blur-lg transition-opacity rounded-lg opacity-50" />
               </div>
               <span className="text-xl font-bold text-white rounded-lg">
                 WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
