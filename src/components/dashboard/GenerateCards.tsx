@@ -1246,7 +1246,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="bg-background border-border/50 shadow-sm">
+      <Card className="border-border/50 shadow-sm bg-card">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-end mb-2 sm:hidden">
@@ -1329,7 +1329,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="bg-muted/30">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Images className="w-4 h-4" />
