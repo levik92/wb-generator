@@ -1207,7 +1207,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
+        <Card className="border-border/50 md:col-span-2 shadow-sm bg-zinc-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1246,7 +1246,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/50 shadow-sm bg-card">
+      <Card className="border-border/50 shadow-sm bg-zinc-50">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-end mb-2 sm:hidden">
