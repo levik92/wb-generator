@@ -1525,8 +1525,8 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card className="bg-card">
-        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 bg-gray-50">
+      <Card className="bg-zinc-50">
+        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 bg-inherit">
           <Button onClick={simulateGeneration} disabled={!canGenerate()} className="w-full bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base" size="lg">
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
