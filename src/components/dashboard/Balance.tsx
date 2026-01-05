@@ -9,7 +9,6 @@ import PaymentHistory from "./PaymentHistory";
 import { PromoCodeInput } from "./PromoCodeInput";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { motion } from "framer-motion";
-
 interface PromoCodeInfo {
   id: string;
   code: string;
@@ -20,33 +19,33 @@ interface PromoCodeInfo {
   valid_until: string | null;
   is_active: boolean;
 }
-
 export default function Balance() {
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [appliedPromo, setAppliedPromo] = useState<PromoCodeInfo | null>(null);
-  const { data: generationPrices, isLoading: pricesLoading } = useGenerationPricing();
-  
+  const {
+    data: generationPrices,
+    isLoading: pricesLoading
+  } = useGenerationPricing();
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost ?? 0;
   const regenPrice = generationPrices?.find(p => p.price_type === 'photo_regeneration')?.tokens_cost ?? 0;
   const descPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost ?? 0;
   const editPrice = generationPrices?.find(p => p.price_type === 'photo_edit')?.tokens_cost ?? 0;
-
   useEffect(() => {
     loadBalance();
   }, []);
-
   const loadBalance = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) return;
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('tokens_balance')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('tokens_balance').eq('id', session.user.id).maybeSingle();
       if (error) {
         console.error('Error loading balance:', error);
       } else if (data) {
@@ -58,21 +57,26 @@ export default function Balance() {
       setLoading(false);
     }
   };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0"
-    >
+  return <motion.div initial={{
+    opacity: 0,
+    y: 20
+  }} animate={{
+    opacity: 1,
+    y: 0
+  }} transition={{
+    duration: 0.4
+  }} className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
       {/* Balance Header */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="relative overflow-hidden rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20"
-      >
+      <motion.div initial={{
+      opacity: 0,
+      scale: 0.98
+    }} animate={{
+      opacity: 1,
+      scale: 1
+    }} transition={{
+      duration: 0.4,
+      delay: 0.1
+    }} className="relative overflow-hidden rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
@@ -93,15 +97,14 @@ export default function Balance() {
                 токенов доступно
               </p>
             </div>
-            <Button 
-              onClick={() => {
-                const pricingElement = document.getElementById('pricing-section');
-                if (pricingElement) {
-                  pricingElement.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
-            >
+            <Button onClick={() => {
+            const pricingElement = document.getElementById('pricing-section');
+            if (pricingElement) {
+              pricingElement.scrollIntoView({
+                behavior: 'smooth'
+              });
+            }
+          }} className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto">
               Пополнить
             </Button>
           </div>
@@ -109,22 +112,24 @@ export default function Balance() {
       </motion.div>
 
       {/* Generation Costs Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-      >
-        <Card className="bg-background border-border/50 w-full overflow-hidden">
+      <motion.div initial={{
+      opacity: 0,
+      y: 20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} transition={{
+      duration: 0.4,
+      delay: 0.2
+    }}>
+        <Card className="border-border/50 w-full overflow-hidden bg-card">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
-            {pricesLoading ? (
-              <div className="flex items-center justify-center py-8">
+            {pricesLoading ? <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              </div> : <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                     <FileText className="h-5 w-5 text-primary" />
@@ -173,18 +178,22 @@ export default function Balance() {
                     {editPrice}
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
           </CardContent>
         </Card>
       </motion.div>
       
       {/* Tabs */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-      >
+      <motion.div initial={{
+      opacity: 0,
+      y: 20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} transition={{
+      duration: 0.4,
+      delay: 0.3
+    }}>
         <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
           <TabsList className="grid w-full grid-cols-2 bg-background p-1 rounded-xl border border-border/50">
             <TabsTrigger value="pricing" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Пополнить баланс</TabsTrigger>
@@ -201,6 +210,5 @@ export default function Balance() {
           </TabsContent>
         </Tabs>
       </motion.div>
-    </motion.div>
-  );
+    </motion.div>;
 }
