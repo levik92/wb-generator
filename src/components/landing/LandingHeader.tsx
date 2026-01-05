@@ -56,7 +56,7 @@ export const LandingHeader = () => {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] blur-lg opacity-50 group-hover:opacity-70 transition-opacity rounded-lg" />
               </div>
-              <span className="text-xl font-bold text-white">
+              <span className="text-xl font-bold text-white rounded-lg">
                 WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
               </span>
             </Link>
