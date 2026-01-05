@@ -1525,7 +1525,7 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card className="bg-card">
+      <Card className="bg-zinc-50">
         <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 bg-gray-50">
           <Button onClick={simulateGeneration} disabled={!canGenerate()} className="w-full bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base" size="lg">
             {generating ? <>
