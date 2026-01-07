@@ -146,7 +146,7 @@ export const LandingHeader = () => {
                 </nav>
 
                 {/* Bottom buttons */}
-                <div className="p-4 border-t border-white/10 space-y-4">
+                <div className="p-4 border-t border-white/10 space-y-6">
                   <Link to="/auth?tab=signin" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white">
                       Войти

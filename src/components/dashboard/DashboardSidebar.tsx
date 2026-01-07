@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Image, FileText, History, CreditCard, Users, Settings, Zap, Plus, ChevronLeft, ChevronRight, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 interface Profile {
@@ -174,7 +175,7 @@ export const DashboardSidebar = ({
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return <li key={item.id} className="relative">
-                <Button variant="ghost" className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[35px] transition-all duration-200 ${isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`} onClick={() => onTabChange(item.id)} title={isCollapsed ? item.label : undefined}>
+                <Button variant="ghost" className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[25px] transition-all duration-200 ${isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`} onClick={() => onTabChange(item.id)} title={isCollapsed ? item.label : undefined}>
                   <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
@@ -189,5 +190,9 @@ export const DashboardSidebar = ({
         </ul>
       </nav>
 
+      {/* Theme Toggle - fixed at bottom */}
+      <div className={`p-3 border-t border-border ${isCollapsed ? 'flex justify-center' : ''}`}>
+        <ThemeToggle />
+      </div>
     </div>;
 };

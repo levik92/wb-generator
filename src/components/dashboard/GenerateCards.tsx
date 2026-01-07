@@ -370,8 +370,8 @@ export const GenerateCards = ({
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
 
-    // Расчет времени: 40 секунд на изображение
-    const estimatedSecondsPerCard = 40;
+    // Расчет времени: 25 секунд на изображение
+    const estimatedSecondsPerCard = 25;
     const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
     setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
     setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса

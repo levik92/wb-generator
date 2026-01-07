@@ -282,7 +282,7 @@ const Dashboard = () => {
       
       {/* Desktop Sidebar */}
       {!isMobile && <div className="sticky top-0 h-screen">
-          <DashboardSidebar activeTab={activeTab} onTabChange={handleTabChange} profile={profile} className="bg-gray-50" />
+          <DashboardSidebar activeTab={activeTab} onTabChange={handleTabChange} profile={profile} />
         </div>}
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
