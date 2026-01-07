@@ -287,7 +287,7 @@ export const History = ({
       }} transition={{
         duration: 0.4,
         delay: 0.1 + index * 0.05
-      }} className="group rounded-2xl border border-border/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all bg-zinc-50">
+      }} className="group rounded-2xl border border-border/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all bg-card">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 {/* Content */}
                 <div className="flex items-start gap-4 flex-1 min-w-0">

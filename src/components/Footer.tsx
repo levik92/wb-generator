@@ -3,7 +3,7 @@ import { Zap } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-50 border-t border-border py-12">
+    <footer className="bg-card border-t border-border py-12">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and description */}

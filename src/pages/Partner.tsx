@@ -298,7 +298,7 @@ const Partner = () => {
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Balance Card - Full Width */}
-        <Card className="border-border/50 backdrop-blur-sm overflow-hidden bg-zinc-50">
+        <Card className="border-border/50 backdrop-blur-sm overflow-hidden bg-card">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -323,7 +323,7 @@ const Partner = () => {
 
         {/* Charts with Date Range */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-border/50 backdrop-blur-sm bg-zinc-50">
+          <Card className="border-border/50 backdrop-blur-sm bg-card">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ const Partner = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 backdrop-blur-sm bg-zinc-50">
+          <Card className="border-border/50 backdrop-blur-sm bg-card">
             <CardHeader className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -431,7 +431,7 @@ const Partner = () => {
         </div>
 
         {/* Program Info */}
-        <Card className="border-border/50 bg-zinc-50">
+        <Card className="border-border/50 bg-card">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -467,7 +467,7 @@ const Partner = () => {
               </div>
             </div>
 
-            {partner?.status === "inactive" && <div className="flex items-start gap-2 p-4 rounded-lg bg-amber-50 border border-amber-200">
+            {partner?.status === "inactive" && <div className="flex items-start gap-2 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                 <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                 <p className="text-sm text-amber-800">
                   Партнерский статус станет активным после первого привлеченного платежа.
@@ -484,7 +484,7 @@ const Partner = () => {
         </Card>
 
         {/* Referrals and Withdrawals Tabs */}
-        <Card className="border-border/50 bg-zinc-50">
+        <Card className="border-border/50 bg-card">
           <CardHeader>
             <CardTitle>Партнерские данные</CardTitle>
           </CardHeader>

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Image, FileText, History, CreditCard, Users, Settings, Zap, Plus, ChevronLeft, ChevronRight, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 interface Profile {
@@ -189,10 +188,5 @@ export const DashboardSidebar = ({
         })}
         </ul>
       </nav>
-
-      {/* Theme Toggle - fixed at bottom */}
-      <div className={`p-3 border-t border-border ${isCollapsed ? 'flex justify-center' : ''}`}>
-        <ThemeToggle />
-      </div>
     </div>;
 };

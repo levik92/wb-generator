@@ -101,7 +101,7 @@ export const PromoCodeInput = ({
     setError(null);
     onPromoApplied(null);
   };
-  return <Card className="bg-zinc-50">
+  return <Card className="bg-card">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Gift className="w-5 h-5 text-wb-purple" />

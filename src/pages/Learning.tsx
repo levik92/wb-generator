@@ -137,7 +137,7 @@ const Learning = () => {
           duration: 0.4,
           delay: 0.1 * index
         }}>
-              <Card className="overflow-hidden backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full bg-zinc-50">
+              <Card className="overflow-hidden backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full bg-card">
                 <CardHeader className="pb-3">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-1">

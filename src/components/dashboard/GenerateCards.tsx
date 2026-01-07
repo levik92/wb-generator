@@ -1167,7 +1167,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-3 shadow-sm bg-zinc-50">
+        <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1207,7 +1207,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-2 shadow-sm bg-zinc-50">
+        <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
@@ -1246,7 +1246,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/50 shadow-sm bg-zinc-50">
+      <Card className="border-border/50 shadow-sm bg-card">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-end mb-2 sm:hidden">
@@ -1329,7 +1329,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="bg-zinc-50">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Images className="w-4 h-4" />
@@ -1396,7 +1396,7 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="bg-zinc-50">
+      {generatedImages.length > 0 && <Card className="bg-card">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -1525,8 +1525,8 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card className="bg-zinc-50 px-0 py-0">
-        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 bg-inherit">
+      <Card className="bg-card px-0 py-0">
+        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
           <Button onClick={simulateGeneration} disabled={!canGenerate()} className="w-full bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base" size="lg">
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -184,7 +184,7 @@ export const GenerateDescription = ({
       }} transition={{
         duration: 0.5,
         delay: 0.2
-      }} className="rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-zinc-50">
+      }} className="rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
           <div>
             <h3 className="text-lg font-semibold mb-1">Параметры генерации</h3>
             <p className="text-sm text-muted-foreground">Заполните данные для создания уникального описания</p>
@@ -262,7 +262,7 @@ export const GenerateDescription = ({
       }} transition={{
         duration: 0.5,
         delay: 0.3
-      }} className="rounded-2xl border border-border/50 p-6 space-y-4 shadow-sm bg-zinc-50">
+      }} className="rounded-2xl border border-border/50 p-6 space-y-4 shadow-sm bg-card">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold mb-1">Готовое описание</h3>

@@ -286,7 +286,7 @@ export default function WBLabelMaker() {
 
       <div className="wb-grid">
         {/* LEFT: form */}
-        <div className="wb-card wb-form bg-white">
+        <div className="wb-card wb-form bg-card">
           <label className="wb-label req">Штрих-код (Code-128)*</label>
           <input className="wb-input" placeholder="Введите штрихкод" value={code} onChange={e => setCode(e.target.value)} />
 
