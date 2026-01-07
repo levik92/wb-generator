@@ -239,7 +239,7 @@ export const AdminPartners = () => {
   return <div className="space-y-6">
       {/* Overall Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Всего партнеров
@@ -251,7 +251,7 @@ export const AdminPartners = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Сумма вознаграждений
@@ -263,7 +263,7 @@ export const AdminPartners = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Привлечено клиентов
@@ -275,7 +275,7 @@ export const AdminPartners = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Ожидают выплаты
@@ -287,7 +287,7 @@ export const AdminPartners = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Выплачено партнерам
@@ -301,7 +301,7 @@ export const AdminPartners = () => {
       </div>
 
       {/* Partners List */}
-      <Card className="bg-zinc-50">
+      <Card className="bg-card">
         <CardHeader className="">
           <CardTitle>Активные партнеры</CardTitle>
         </CardHeader>

@@ -172,7 +172,7 @@ export const PromoCodeManager = () => {
   if (loading) {
     return <div>Загрузка промокодов...</div>;
   }
-  return <Card className="bg-zinc-50">
+  return <Card className="bg-card">
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">

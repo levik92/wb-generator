@@ -191,7 +191,7 @@ export function AdminUsers({
       </div>
 
       {/* Users Table */}
-      <Card className="bg-zinc-50">
+      <Card className="bg-card">
         <CardHeader>
           <CardTitle>Управление пользователями</CardTitle>
           <CardDescription>

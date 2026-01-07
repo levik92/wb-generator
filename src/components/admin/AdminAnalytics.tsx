@@ -27,7 +27,7 @@ export function AdminAnalytics({
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base md:text-lg">Активные пользователи</CardTitle>
           </CardHeader>
@@ -41,7 +41,7 @@ export function AdminAnalytics({
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base md:text-lg">Подключений WB</CardTitle>
           </CardHeader>
@@ -55,7 +55,7 @@ export function AdminAnalytics({
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-50">
+        <Card className="bg-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-base md:text-lg">Заблокированные</CardTitle>
           </CardHeader>

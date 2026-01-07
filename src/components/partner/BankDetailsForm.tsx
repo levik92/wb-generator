@@ -92,7 +92,7 @@ export const BankDetailsForm = ({
     }
   };
   return <div className="space-y-4">
-      <Card className="border border-border/50 bg-zinc-50">
+      <Card className="border border-border/50 bg-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Банковские реквизиты</CardTitle>
