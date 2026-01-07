@@ -132,7 +132,7 @@ export default function Admin() {
   }
   return <div className="min-h-screen bg-background flex flex-col md:flex-row w-full overflow-hidden">
       {/* Desktop Sidebar */}
-      {!isMobile && <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} className="bg-zinc-50" />}
+      {!isMobile && <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />}
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}

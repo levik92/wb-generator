@@ -70,13 +70,13 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
                   transition-all duration-200
                 `}
               >
-                {/* Center button special styling - no transparency */}
+                {/* Center button special styling - gray when not active */}
                 {isCenter && (
                   <div className={`
                     absolute inset-0 rounded-full
                     ${isActive 
                       ? 'bg-gradient-to-br from-primary to-primary shadow-lg shadow-primary/30' 
-                      : 'bg-primary'
+                      : 'bg-gray-300 dark:bg-gray-600'
                     }
                     transition-all duration-300
                   `} />
@@ -99,7 +99,7 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
                       ${isCenter ? 'w-6 h-6' : 'w-5 h-5'}
                       ${isActive 
                         ? isCenter ? 'text-white' : 'text-primary' 
-                        : 'text-muted-foreground'
+                        : isCenter ? 'text-gray-600 dark:text-gray-300' : 'text-muted-foreground'
                       }
                       transition-colors duration-200
                     `}

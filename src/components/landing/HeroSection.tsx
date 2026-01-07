@@ -237,41 +237,10 @@ export const HeroSection = () => {
               className="max-w-3xl mx-auto mb-16 sm:mb-24"
             >
               <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
-                {/* Before Image - rotated left */}
+                {/* After Image - теперь первый (слева), rotated left with glow */}
                 <motion.div 
                   className="relative group"
                   initial={{ rotate: -4 }}
-                  whileHover={{ rotate: 0, scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="absolute -inset-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
-                  <div className="relative">
-                    <img 
-                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
-                      alt="До обработки"
-                      className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border border-white/10 shadow-2xl"
-                    />
-                    <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-sm text-white/80 font-medium">
-                      До
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Arrow */}
-                <motion.div
-                  animate={{ x: [0, 10, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-purple-400"
-                >
-                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-0">
-                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </motion.div>
-
-                {/* After Image - rotated right with glow */}
-                <motion.div 
-                  className="relative group"
-                  initial={{ rotate: 4 }}
                   whileHover={{ rotate: 0, scale: 1.05 }}
                   transition={{ duration: 0.3 }}
                 >
@@ -291,6 +260,37 @@ export const HeroSection = () => {
                       animate={{ opacity: [0.15, 0.35, 0.15] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
+                  </div>
+                </motion.div>
+
+                {/* Arrow - направление инвертировано */}
+                <motion.div
+                  animate={{ x: [0, -10, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-purple-400"
+                >
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" className="rotate-90 sm:rotate-180">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </motion.div>
+
+                {/* Before Image - теперь второй (справа), rotated right */}
+                <motion.div 
+                  className="relative group"
+                  initial={{ rotate: 4 }}
+                  whileHover={{ rotate: 0, scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute -inset-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
+                  <div className="relative">
+                    <img 
+                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
+                      alt="До обработки"
+                      className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border border-white/10 shadow-2xl"
+                    />
+                    <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-sm text-white/80 font-medium">
+                      До
+                    </div>
                   </div>
                 </motion.div>
               </div>

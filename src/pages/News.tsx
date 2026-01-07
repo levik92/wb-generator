@@ -127,15 +127,29 @@ const News = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
-      // Получаем все ID новостей, которые еще не прочитаны
-      const unreadNewsIds = news
-        .map(item => item.id)
-        .filter(id => !readNewsIds.has(id));
+      // Получаем ВСЕ опубликованные новости из БД (не только текущую страницу)
+      const { data: allNews } = await (supabase as any)
+        .from('news')
+        .select('id')
+        .eq('is_published', true);
 
-      if (unreadNewsIds.length === 0) return;
+      if (!allNews || allNews.length === 0) return;
+
+      // Фильтруем только непрочитанные
+      const unreadNewsIds = allNews
+        .map((item: any) => item.id)
+        .filter((id: string) => !readNewsIds.has(id));
+
+      if (unreadNewsIds.length === 0) {
+        toast({
+          title: "Готово",
+          description: "Все новости уже прочитаны",
+        });
+        return;
+      }
 
       // Создаем записи для всех непрочитанных новостей
-      const insertData = unreadNewsIds.map(newsId => ({
+      const insertData = unreadNewsIds.map((newsId: string) => ({
         news_id: newsId,
         user_id: user.data.user!.id
       }));
@@ -153,7 +167,7 @@ const News = () => {
 
       toast({
         title: "Готово",
-        description: "Все новости отмечены как прочитанные",
+        description: `Все новости (${unreadNewsIds.length}) отмечены как прочитанные`,
       });
     } catch (error: any) {
       console.error('Error marking all news as read:', error);
