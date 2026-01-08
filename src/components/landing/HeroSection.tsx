@@ -145,7 +145,7 @@ export const HeroSection = () => {
               <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4 text-[hsl(268,83%,65%)]" />
                 <span className="text-sm text-white/80 text-center">
-                  20 бесплатных токенов при регистрации
+                  10 бесплатных токенов при регистрации
                 </span>
               </div>
             </motion.div>
@@ -237,7 +237,7 @@ export const HeroSection = () => {
               className="max-w-3xl mx-auto mb-16 sm:mb-24"
             >
               <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
-                {/* Before Image - слева, с красным свечением */}
+                {/* Before Image - слева, iPhone на белом фоне, с красным свечением */}
                 <motion.div 
                   className="relative group"
                   initial={{ rotate: -4 }}
@@ -247,7 +247,7 @@ export const HeroSection = () => {
                   <div className="absolute -inset-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity" />
                   <div className="relative">
                     <img 
-                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
+                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
                       alt="До обработки"
                       className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border border-white/10 shadow-2xl"
                     />
@@ -268,7 +268,7 @@ export const HeroSection = () => {
                   </svg>
                 </motion.div>
 
-                {/* After Image - справа, с фиолетовым свечением */}
+                {/* After Image - справа, iPhone на тёмном фоне, с фиолетовым свечением */}
                 <motion.div 
                   className="relative group"
                   initial={{ rotate: 4 }}
@@ -278,7 +278,7 @@ export const HeroSection = () => {
                   <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/40 to-pink-500/40 rounded-2xl blur-xl opacity-70 group-hover:opacity-90 transition-opacity" />
                   <div className="relative">
                     <img 
-                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
+                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
                       alt="После обработки"
                       className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border-2 border-purple-500/40 shadow-2xl"
                     />

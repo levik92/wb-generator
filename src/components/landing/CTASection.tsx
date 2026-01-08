@@ -75,7 +75,7 @@ export const CTASection = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="text-base sm:text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto"
           >
-            20 бесплатных токенов ждут вас. Создайте первые профессиональные карточки за 3 минуты.
+            10 бесплатных токенов ждут вас. Создайте первые профессиональные карточки за 3 минуты.
           </motion.p>
 
           {/* Stats */}
@@ -117,7 +117,7 @@ export const CTASection = () => {
                 size="lg"
                 className="bg-white text-[hsl(268,83%,40%)] hover:bg-white/90 text-sm sm:text-base md:text-lg px-8 sm:px-10 py-5 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/20 group max-w-full"
               >
-                <span className="truncate">Получить 20 токенов бесплатно</span>
+                <span className="truncate">Получить 10 токенов бесплатно</span>
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
               </Button>
             </Link>
