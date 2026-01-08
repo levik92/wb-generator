@@ -49,7 +49,7 @@ const Terms = () => {
               <ul className="list-disc list-inside space-y-1 ml-4 text-muted-foreground">
                 <li>Генерация комплекта карточек: 6 токенов</li>
                 <li>SEO-описание: 1 токен</li>
-                <li>При регистрации: 20 бесплатных токенов</li>
+                <li>При регистрации: 10 бесплатных токенов</li>
               </ul>
             </div>
 

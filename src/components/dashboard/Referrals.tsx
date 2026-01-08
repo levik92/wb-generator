@@ -149,7 +149,7 @@ export const Referrals = ({
               </div>
               
               <div className="bg-muted/40 p-4 rounded-lg border text-sm text-muted-foreground">
-                <strong>Как это работает:</strong> Ваш друг получает +10 токенов сразу при регистрации (итого 25 токенов). 
+                <strong>Как это работает:</strong> Ваш друг получает +10 токенов сразу при регистрации (итого 20 токенов). 
                 Вы получаете +20 токенов только после его первого пополнения баланса.
               </div>
             </CardContent>

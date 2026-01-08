@@ -1155,7 +1155,7 @@ export const GenerateCards = ({
                   <Gift className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium">Бесплатные 20 токенов</p>
+                  <p className="text-xs font-medium">Бесплатные 10 токенов</p>
                   <p className="text-[10px] text-muted-foreground">для теста</p>
                 </div>
               </div>

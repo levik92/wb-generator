@@ -41,7 +41,7 @@ const features = [
   {
     icon: Zap,
     title: "Мгновенный старт",
-    description: "20 бесплатных токенов после регистрации",
+    description: "10 бесплатных токенов после регистрации",
     color: "from-amber-500 to-orange-600",
   },
   {
