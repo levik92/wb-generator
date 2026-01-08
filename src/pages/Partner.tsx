@@ -490,7 +490,7 @@ const Partner = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full max-w-md grid-cols-2 bg-background p-1 border border-border/50 rounded-xl">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-card p-1 border border-border/50 rounded-xl">
                 <TabsTrigger value="clients">
                   <span className="sm:hidden">Клиенты</span>
                   <span className="hidden sm:inline">Приглашенные клиенты</span>

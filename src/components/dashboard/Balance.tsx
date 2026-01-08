@@ -195,7 +195,7 @@ export default function Balance() {
       delay: 0.3
     }}>
         <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
-          <TabsList className="grid w-full grid-cols-2 bg-background p-1 rounded-xl border border-border/50">
+          <TabsList className="grid w-full grid-cols-2 bg-card p-1 rounded-xl border border-border/50">
             <TabsTrigger value="pricing" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Пополнить баланс</TabsTrigger>
             <TabsTrigger value="history" className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">История пополнений</TabsTrigger>
           </TabsList>
