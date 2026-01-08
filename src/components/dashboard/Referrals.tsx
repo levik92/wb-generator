@@ -102,7 +102,7 @@ export const Referrals = ({
       </div>
 
       <Tabs defaultValue="program" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 bg-background p-1 rounded-xl border border-border/50">
+        <TabsList className="grid w-full grid-cols-2 bg-card p-1 rounded-xl border border-border/50">
           <TabsTrigger value="program" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Программа</TabsTrigger>
           <TabsTrigger value="invited" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Приглашенные <span className="ml-1 opacity-70">({referredUsers.length})</span></TabsTrigger>
         </TabsList>

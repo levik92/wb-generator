@@ -448,7 +448,7 @@ export default function LabelGenerator() {
         </div>
 
         {/* Desktop Tab List */}
-        <TabsList className="hidden sm:grid w-full grid-cols-3 h-12 bg-card/50 border border-border/50 rounded-xl p-1">
+        <TabsList className="hidden sm:grid w-full grid-cols-3 h-12 bg-card border border-border/50 rounded-xl p-1">
           <TabsTrigger value="barcode" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <BarChart3 className="h-4 w-4" />
             Этикетки
