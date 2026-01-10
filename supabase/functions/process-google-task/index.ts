@@ -13,7 +13,8 @@ const MAX_RETRIES = 3;
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
 // Практика показала, что очень большие референсы могут приводить к падению Edge Runtime (546).
 // Ограничиваем размер, чтобы вместо падения дать понятную деградацию (пропустить референс).
-const MAX_IMAGE_BYTES = 3_000_000; // ~3MB
+// Увеличен до 5MB для поддержки больших PNG изображений
+const MAX_IMAGE_BYTES = 5_000_000; // ~5MB
 
 type FetchImageResult =
   | { ok: true; base64: string; bytes: number; mimeType: string }
@@ -195,11 +196,18 @@ serve(async (req) => {
     // Validate we have at least one successfully downloaded product image
     if (productImageBase64.length === 0) {
       console.error('Failed to download any product images');
+      
+      // Check if images were skipped due to size
+      const skippedLargeImages = productImages.some(img => img.url);
+      const errorMessage = skippedLargeImages 
+        ? 'Изображение слишком большое (макс. 5 МБ). Пожалуйста, уменьшите размер файла и попробуйте снова.'
+        : 'Не удалось загрузить изображения товара. Проверьте доступность файлов.';
+      
       await supabase
         .from('generation_tasks')
         .update({
           status: 'failed',
-          last_error: 'Не удалось загрузить изображения товара. Проверьте доступность файлов.',
+          last_error: errorMessage,
           updated_at: new Date().toISOString(),
         })
         .eq('id', taskId);
