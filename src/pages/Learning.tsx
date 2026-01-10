@@ -28,7 +28,7 @@ const videoLessons = [{
   id: "partners",
   title: "Зарабатывайте вместе с нами",
   description: "Обзор кабинета партнеров и как можно скооперироваться с нашим сервисом",
-  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/3xtC4NLZDQ7836gZfcXdDx" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/5m7ZHxn36euywnnGFUzvTx" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
 }];
 const faqItems = [{
   question: "Как получить токены для генерации?",
