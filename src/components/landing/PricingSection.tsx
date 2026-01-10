@@ -9,7 +9,7 @@ export function PricingSection() {
   const navigate = useNavigate();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const { data: packages, isLoading: packagesLoading } = usePaymentPackages();
+  const { data: packages, isLoading: packagesLoading } = usePaymentPackages({ requireAuth: false });
   const { data: generationPrices, isLoading: pricesLoading } = useGenerationPricing();
 
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
