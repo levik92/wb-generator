@@ -76,14 +76,14 @@ const VideoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
           <X className="w-5 h-5" />
         </button>
         
-        {/* Placeholder for video - user will provide Kinescope link later */}
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="text-center text-white/60">
-            <Play className="w-16 h-16 mx-auto mb-4 opacity-50" />
-            <p className="text-lg">Демо-видео скоро будет здесь</p>
-            <p className="text-sm mt-2 text-white/40">Ссылка на Kinescope будет добавлена</p>
-          </div>
-        </div>
+        {/* Kinescope video embed */}
+        <iframe 
+          src="https://kinescope.io/embed/8hkzrTcYzVKzQoR1GVvof7" 
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" 
+          frameBorder="0" 
+          allowFullScreen 
+          className="absolute w-full h-full top-0 left-0"
+        />
       </motion.div>
     </motion.div>
   );
