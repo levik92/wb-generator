@@ -515,7 +515,7 @@ const Auth = () => {
 
                 {captchaSiteKey && (
                   <div className="flex justify-center">
-                    <div className="rounded-xl overflow-hidden border border-white/10">
+                    <div className="rounded-xl overflow-hidden">
                       <Suspense fallback={<div className="h-[78px] w-full bg-white/5 rounded-lg animate-pulse flex items-center justify-center text-white/30 text-sm">Загрузка капчи...</div>}>
                         <HCaptcha
                           ref={captchaRef}
