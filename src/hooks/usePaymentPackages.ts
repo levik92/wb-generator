@@ -12,10 +12,20 @@ export interface PaymentPackage {
   created_at: string;
 }
 
-export const usePaymentPackages = () => {
-  const [isAuthReady, setIsAuthReady] = useState(false);
+interface UsePaymentPackagesOptions {
+  requireAuth?: boolean;
+}
+
+export const usePaymentPackages = (options: UsePaymentPackagesOptions = {}) => {
+  const { requireAuth = true } = options;
+  const [isAuthReady, setIsAuthReady] = useState(!requireAuth);
 
   useEffect(() => {
+    if (!requireAuth) {
+      setIsAuthReady(true);
+      return;
+    }
+
     // Wait for auth to be ready before enabling the query
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -34,7 +44,7 @@ export const usePaymentPackages = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [requireAuth]);
 
   return useQuery({
     queryKey: ['payment-packages'],

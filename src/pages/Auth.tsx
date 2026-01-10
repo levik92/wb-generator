@@ -400,7 +400,7 @@ const Auth = () => {
           transition={{ duration: 0.5 }}
           className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
         >
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 sm:hover:border-white/20 transition-colors">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10">
             {/* Logo */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-2 mb-4">
@@ -515,17 +515,15 @@ const Auth = () => {
 
                 {captchaSiteKey && (
                   <div className="flex justify-center">
-                    <div className="rounded-xl overflow-hidden">
-                      <Suspense fallback={<div className="h-[78px] w-full bg-white/5 rounded-lg animate-pulse flex items-center justify-center text-white/30 text-sm">Загрузка капчи...</div>}>
-                        <HCaptcha
-                          ref={captchaRef}
-                          sitekey={captchaSiteKey}
-                          theme="dark"
-                          onVerify={(token) => setCaptchaToken(token)}
-                          onExpire={() => setCaptchaToken(null)}
-                        />
-                      </Suspense>
-                    </div>
+                    <Suspense fallback={<div className="h-[78px] bg-white/5 rounded-lg animate-pulse" />}>
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey={captchaSiteKey}
+                        theme="dark"
+                        onVerify={(token) => setCaptchaToken(token)}
+                        onExpire={() => setCaptchaToken(null)}
+                      />
+                    </Suspense>
                   </div>
                 )}
 
