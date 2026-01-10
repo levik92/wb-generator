@@ -5,30 +5,30 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ExternalLink, Play, MessageCircle, HelpCircle, Zap, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 const videoLessons = [{
-  id: "registration",
-  title: "Регистрация на сервисе и обзор",
-  description: "Узнайте, как зарегистрироваться и начать работу с WB Генератор",
-  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/o4YjCa9hxRutSYxHNaEHZv" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+  id: "overview",
+  title: "Обзор сервиса и всех функций",
+  description: "Узнайте о всех функциях кабинета WB генератор и как с ними работать",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/soVNVxif9ePmX7h7Hj5tMm" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
 }, {
   id: "cards",
   title: "Как работать с генерацией карточек",
-  description: "Изучите процесс создания карточек товаров с помощью ИИ",
-  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/0cxw1JdVWSehbpVZ14QTZP" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+  description: "Полный обзор функций и процесса создания карточек товара до высокого уровня",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/gxehUBTUM5Eg5GGcjZxs6T" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
 }, {
-  id: "descriptions",
-  title: "Как работать с генерацией описаний",
-  description: "Научитесь создавать продающие описания для ваших товаров",
-  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/8dxZ3uWTBxGYoXUP1wD6Zq" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+  id: "top-cards",
+  title: "Как делать карточки ТОП уровня",
+  description: "\"Лайфхаки\" и \"фишки\" как работать с сервисом и довести уровень дизайна карточек до идеала",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/wt1tRnXbyNeAv5NMFRfEGc" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
 }, {
-  id: "barcodes",
-  title: "Как работать с генерацией штрих-кодов",
-  description: "Создавайте штрих-коды и этикетки для ваших товаров",
-  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/kyZHWqtTVUX3EMTGGpm1gG" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+  id: "seo",
+  title: "Как делать лучшие SEO карточек",
+  description: "Рассказываем как работать в генераторе описаний и делать SEO, выводящие товары в ТОП10 выдачи",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/usJ75nHxa7YXYw1bUeLnXV" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
 }, {
-  id: "overview",
-  title: "Обзор сервиса",
-  description: "Полный обзор всех возможностей WB Генератор",
-  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/eFQT3SQABzjexyqfK1i7qk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
+  id: "partners",
+  title: "Зарабатывайте вместе с нами",
+  description: "Обзор кабинета партнеров и как можно скооперироваться с нашим сервисом",
+  embedCode: `<div style="position: relative; padding-top: 67.84%; width: 100%"><iframe src="https://kinescope.io/embed/3xtC4NLZDQ7836gZfcXdDx" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>`
 }];
 const faqItems = [{
   question: "Как получить токены для генерации?",
