@@ -296,17 +296,26 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       const errorText = await aiResponse.text();
       console.error('Google Gemini 3 Pro Image API error:', aiResponse.status, errorText);
 
-      // Handle rate limit or quota exceeded
-      if (aiResponse.status === 429 || aiResponse.status === 403) {
+      // Handle rate limit, quota exceeded, or service unavailable (overloaded)
+      if (aiResponse.status === 429 || aiResponse.status === 403 || aiResponse.status === 503) {
         if (retryCount < MAX_RETRIES) {
-          const retryDelay = Math.pow(2, retryCount) * 5000;
+          // Longer delay for 503 (model overloaded)
+          const baseDelay = aiResponse.status === 503 ? 15000 : 5000;
+          const retryDelay = Math.pow(2, retryCount) * baseDelay;
+          
+          const errorReason = aiResponse.status === 503 
+            ? 'Model overloaded, will retry' 
+            : 'API quota exceeded, will retry';
+          
+          console.log(`Scheduling retry ${retryCount + 1}/${MAX_RETRIES} with delay ${retryDelay}ms`);
+          
           await supabase
             .from('generation_tasks')
             .update({
               status: 'retrying',
               retry_count: retryCount + 1,
               retry_after: retryDelay,
-              last_error: 'API quota exceeded, will retry',
+              last_error: errorReason,
               updated_at: new Date().toISOString(),
             })
             .eq('id', taskId);
@@ -317,16 +326,20 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           );
         }
         
+        const failMessage = aiResponse.status === 503 
+          ? 'Сервис временно перегружен. Попробуйте через несколько минут.' 
+          : 'Превышена квота API. Попробуйте позже.';
+        
         await supabase
           .from('generation_tasks')
           .update({
             status: 'failed',
-            last_error: 'Превышена квота API. Попробуйте позже.',
+            last_error: failMessage,
             updated_at: new Date().toISOString(),
           })
           .eq('id', taskId);
 
-        throw new Error('Quota exceeded');
+        throw new Error(failMessage);
       }
 
       // Handle bad request
