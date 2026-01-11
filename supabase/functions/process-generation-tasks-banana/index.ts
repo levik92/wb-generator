@@ -229,26 +229,42 @@ async function processTask(supabase: any, task: any, job: any) {
     console.error(`Error processing task ${task.id}:`, error);
 
     const retryCount = task.retry_count || 0;
+    const errorMessage = error.message || 'Unknown error';
+    
+    // Check if it's a 503 model overloaded error
+    const isModelOverloaded = errorMessage.includes('503') || 
+                               errorMessage.includes('overloaded') ||
+                               errorMessage.includes('UNAVAILABLE');
     
     if (retryCount < MAX_RETRIES) {
-      const retryDelay = Math.pow(2, retryCount) * 5000;
+      // Longer delays for overloaded model
+      const baseDelay = isModelOverloaded ? 20000 : 10000; // 20s or 10s base
+      const retryDelay = Math.pow(2, retryCount) * baseDelay;
+      
+      console.log(`Task ${task.id} will retry in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+      
       await supabase
         .from('generation_tasks')
         .update({
           status: 'retrying',
           retry_count: retryCount + 1,
           retry_after: retryDelay,
-          last_error: error.message,
+          last_error: isModelOverloaded ? 'Сервис временно перегружен, повторяем...' : errorMessage,
         })
         .eq('id', task.id);
 
+      // Wait before retry
       await new Promise(resolve => setTimeout(resolve, retryDelay));
     } else {
+      const finalError = isModelOverloaded 
+        ? 'Сервис временно перегружен. Попробуйте через несколько минут.'
+        : errorMessage;
+        
       await supabase
         .from('generation_tasks')
         .update({
           status: 'failed',
-          last_error: error.message,
+          last_error: finalError,
         })
         .eq('id', task.id);
     }
