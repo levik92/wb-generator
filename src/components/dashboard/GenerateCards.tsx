@@ -416,6 +416,8 @@ export const GenerateCards = ({
             } else {
               setJobStatus('Обработка...');
             }
+          } else if (job.status === 'pending') {
+            setJobStatus('Обрабатываю...');
           } else {
             setJobStatus(job.status);
           }
