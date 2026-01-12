@@ -12,9 +12,9 @@ const cardTypeToPromptType: Record<string, string> = {
   'cover': 'cover',
   'features': 'features', 
   'macro': 'macro',
-  'usage': 'lifestyle',      // "Товар в использовании" -> lifestyle prompt
-  'comparison': 'beforeAfter', // "Сравнение" -> beforeAfter prompt
-  'clean': 'cover',          // "Без инфографики" -> use cover as base
+  'usage': 'beforeAfter',    // "Товар в использовании" -> beforeAfter (карточка-инструкция, товар в действии)
+  'comparison': 'bundle',    // "Сравнение с другими товарами" -> bundle (карточка сравнения)
+  'clean': 'guarantee',      // "Фото без инфографики" -> guarantee (чистое имиджевое фото без текста)
 };
 
 // Helper function to get prompt template
