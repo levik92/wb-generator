@@ -189,6 +189,15 @@ serve(async (req)=>{
           last_error: `OpenAI error: ${errorText}`,
           completed_at: new Date().toISOString()
         }).eq('id', taskId);
+
+        // Refund tokens for failed task
+        const tokensToRefund = 1;
+        console.log(`Refunding ${tokensToRefund} tokens to user ${taskData.generation_jobs.user_id} for failed task ${taskId}`);
+        await supabase.rpc('refund_tokens', {
+          user_id_param: taskData.generation_jobs.user_id,
+          tokens_amount: tokensToRefund,
+          reason_text: `Возврат за неудачную генерацию: OpenAI error`
+        });
       }
       
       return new Response(JSON.stringify({
