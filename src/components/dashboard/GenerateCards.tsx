@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit } from "lucide-react";
 import JSZip from 'jszip';
+import { compressImage, formatFileSize } from "@/lib/imageCompression";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -503,17 +504,27 @@ export const GenerateCards = ({
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
     try {
-      // Upload files to Supabase Storage first
+      // Upload files to Supabase Storage first (with compression for large files)
       const productImagesData = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileExt = file.name.split('.').pop();
+        
+        // Compress image if it's too large (over 4MB)
+        setJobStatus(`Обработка изображения ${i + 1} из ${files.length}...`);
+        const compressionResult = await compressImage(file);
+        const fileToUpload = compressionResult.file;
+        
+        if (compressionResult.wasCompressed) {
+          console.log(`Image ${i + 1} compressed: ${formatFileSize(compressionResult.originalSize)} → ${formatFileSize(compressionResult.compressedSize)}`);
+        }
+        
+        const fileExt = fileToUpload.name.split('.').pop();
         const fileName = `${profile.id}/${Date.now()}_${i}.${fileExt}`;
         setJobStatus(`Загрузка изображения ${i + 1} из ${files.length}...`);
         const {
           data: uploadData,
           error: uploadError
-        } = await supabase.storage.from('product-images').upload(fileName, file, {
+        } = await supabase.storage.from('product-images').upload(fileName, fileToUpload, {
           upsert: true
         });
         if (uploadError) {
@@ -532,16 +543,26 @@ export const GenerateCards = ({
         });
       }
 
-      // Upload reference image if provided
+      // Upload reference image if provided (with compression for large files)
       let referenceImageUrl: string | null = null;
       if (referenceImage) {
+        setJobStatus('Обработка референса дизайна...');
+        
+        // Compress reference image if it's too large
+        const compressionResult = await compressImage(referenceImage);
+        const fileToUpload = compressionResult.file;
+        
+        if (compressionResult.wasCompressed) {
+          console.log(`Reference image compressed: ${formatFileSize(compressionResult.originalSize)} → ${formatFileSize(compressionResult.compressedSize)}`);
+        }
+        
         setJobStatus('Загрузка референса дизайна...');
-        const fileExt = referenceImage.name.split('.').pop();
+        const fileExt = fileToUpload.name.split('.').pop();
         const fileName = `${profile.id}/reference_${Date.now()}.${fileExt}`;
         const {
           data: uploadData,
           error: uploadError
-        } = await supabase.storage.from('product-images').upload(fileName, referenceImage, {
+        } = await supabase.storage.from('product-images').upload(fileName, fileToUpload, {
           upsert: true
         });
         if (uploadError) {
