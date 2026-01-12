@@ -213,7 +213,7 @@ async function processTask(supabase: any, task: any, job: any) {
     }
 
     // Call Google task processor
-    const { error: processError } = await supabase.functions.invoke('process-google-task', {
+    const { data, error: processError } = await supabase.functions.invoke('process-google-task', {
       body: {
         taskId: task.id,
         sourceImageUrl: sourceImageUrl,
@@ -221,6 +221,32 @@ async function processTask(supabase: any, task: any, job: any) {
       },
     });
 
+    // After invoking, check the actual task status in DB
+    // The process-google-task function may have set status to 'retrying', 'completed', or 'failed'
+    const { data: updatedTask } = await supabase
+      .from('generation_tasks')
+      .select('status, last_error')
+      .eq('id', task.id)
+      .single();
+
+    // If task is now completed or retrying (will be retried later), don't throw
+    if (updatedTask?.status === 'completed') {
+      console.log(`Task ${task.id} completed successfully`);
+      return;
+    }
+
+    if (updatedTask?.status === 'retrying') {
+      console.log(`Task ${task.id} scheduled for retry: ${updatedTask.last_error}`);
+      return;
+    }
+
+    // If task is failed, we don't need to retry here - it's already handled
+    if (updatedTask?.status === 'failed') {
+      console.log(`Task ${task.id} failed: ${updatedTask.last_error}`);
+      return;
+    }
+
+    // If there was an invoke error and task is still processing, handle retry
     if (processError) {
       throw processError;
     }
@@ -228,15 +254,30 @@ async function processTask(supabase: any, task: any, job: any) {
   } catch (error) {
     console.error(`Error processing task ${task.id}:`, error);
 
-    const retryCount = task.retry_count || 0;
+    // Re-check task status - it might have been updated by process-google-task
+    const { data: currentTask } = await supabase
+      .from('generation_tasks')
+      .select('status, retry_count')
+      .eq('id', task.id)
+      .single();
+
+    // If already handled (completed, failed, retrying), don't duplicate
+    if (currentTask?.status && ['completed', 'failed', 'retrying'].includes(currentTask.status)) {
+      console.log(`Task ${task.id} already in terminal/retry state: ${currentTask.status}`);
+      return;
+    }
+
+    const retryCount = currentTask?.retry_count || task.retry_count || 0;
     const errorMessage = error.message || 'Unknown error';
     
-    // Check if it's a 503 model overloaded error
+    // Check if it's a 503 model overloaded error or image too large error
     const isModelOverloaded = errorMessage.includes('503') || 
                                errorMessage.includes('overloaded') ||
                                errorMessage.includes('UNAVAILABLE');
+    const isImageTooLarge = errorMessage.includes('too_large') || 
+                            errorMessage.includes('слишком большое');
     
-    if (retryCount < MAX_RETRIES) {
+    if (retryCount < MAX_RETRIES && !isImageTooLarge) {
       // Longer delays for overloaded model
       const baseDelay = isModelOverloaded ? 20000 : 10000; // 20s or 10s base
       const retryDelay = Math.pow(2, retryCount) * baseDelay;
@@ -256,9 +297,12 @@ async function processTask(supabase: any, task: any, job: any) {
       // Wait before retry
       await new Promise(resolve => setTimeout(resolve, retryDelay));
     } else {
-      const finalError = isModelOverloaded 
-        ? 'Сервис временно перегружен. Попробуйте через несколько минут.'
-        : errorMessage;
+      let finalError = errorMessage;
+      if (isModelOverloaded) {
+        finalError = 'Сервис временно перегружен. Попробуйте через несколько минут.';
+      } else if (isImageTooLarge) {
+        finalError = 'Изображение слишком большое (макс. 5 МБ). Уменьшите размер файла и попробуйте снова.';
+      }
         
       await supabase
         .from('generation_tasks')
@@ -275,6 +319,14 @@ async function processTask(supabase: any, task: any, job: any) {
         user_id_param: job.user_id,
         tokens_amount: tokensToRefund,
         reason_text: `Возврат за неудачную генерацию: ${finalError}`
+      });
+
+      // Create notification for user about failure
+      await supabase.from('notifications').insert({
+        user_id: job.user_id,
+        type: 'error',
+        title: 'Ошибка генерации',
+        message: finalError,
       });
     }
   }

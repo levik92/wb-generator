@@ -10,8 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Download, Zap, RefreshCw, Image as ImageIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { compressImage, formatFileSize } from "@/lib/imageCompression";
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB (increased since we now compress)
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ALLOWED_EXTENSIONS = ['JPG', 'PNG', 'WebP'];
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -251,16 +252,26 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
     setProgress(0);
 
     try {
-      // Upload product images first
+      // Upload product images first (with compression for large files)
       const imageUrls: string[] = [];
       
-      for (const file of files) {
-        const fileExt = file.name.split('.').pop();
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Compress image if it's too large (over 4MB)
+        const compressionResult = await compressImage(file);
+        const fileToUpload = compressionResult.file;
+        
+        if (compressionResult.wasCompressed) {
+          console.log(`Image ${i + 1} compressed: ${formatFileSize(compressionResult.originalSize)} → ${formatFileSize(compressionResult.compressedSize)}`);
+        }
+        
+        const fileExt = fileToUpload.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(`${profile.id}/${fileName}`, file);
+          .upload(`${profile.id}/${fileName}`, fileToUpload);
 
         if (uploadError) throw uploadError;
 
@@ -271,15 +282,23 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
         imageUrls.push(urlData.publicUrl);
       }
 
-      // Upload reference image if provided
+      // Upload reference image if provided (with compression)
       let referenceImageUrl: string | null = null;
       if (referenceImage) {
-        const fileExt = referenceImage.name.split('.').pop();
+        // Compress reference image if it's too large
+        const compressionResult = await compressImage(referenceImage);
+        const fileToUpload = compressionResult.file;
+        
+        if (compressionResult.wasCompressed) {
+          console.log(`Reference image compressed: ${formatFileSize(compressionResult.originalSize)} → ${formatFileSize(compressionResult.compressedSize)}`);
+        }
+        
+        const fileExt = fileToUpload.name.split('.').pop();
         const fileName = `${profile.id}/reference_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(fileName, referenceImage);
+          .upload(fileName, fileToUpload);
 
         if (uploadError) {
           console.error('Reference upload error:', uploadError);
