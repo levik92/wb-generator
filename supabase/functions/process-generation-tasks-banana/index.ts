@@ -267,6 +267,15 @@ async function processTask(supabase: any, task: any, job: any) {
           last_error: finalError,
         })
         .eq('id', task.id);
+
+      // Refund tokens for failed task
+      const tokensToRefund = 1; // 1 token per card
+      console.log(`Refunding ${tokensToRefund} tokens to user ${job.user_id} for failed task ${task.id}`);
+      await supabase.rpc('refund_tokens', {
+        user_id_param: job.user_id,
+        tokens_amount: tokensToRefund,
+        reason_text: `Возврат за неудачную генерацию: ${finalError}`
+      });
     }
   }
 }

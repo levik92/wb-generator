@@ -339,6 +339,15 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           })
           .eq('id', taskId);
 
+        // Refund tokens for failed task
+        const tokensToRefund = 1; // 1 token per card
+        console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for failed task ${taskId}`);
+        await supabase.rpc('refund_tokens', {
+          user_id_param: task.job.user_id,
+          tokens_amount: tokensToRefund,
+          reason_text: `Возврат за неудачную генерацию: ${failMessage}`
+        });
+
         throw new Error(failMessage);
       }
 
