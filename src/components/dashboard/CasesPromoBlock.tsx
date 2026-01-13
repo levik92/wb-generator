@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Coins, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowRight, Coins, Sparkles, TrendingUp, ExternalLink, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -30,17 +30,17 @@ export const CasesPromoBlock = ({ onNavigateToBalance }: CasesPromoBlockProps) =
                 {/* Content */}
                 <div className="flex-1 space-y-4">
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-medium text-primary">Вдохновляйтесь</span>
+                    <Images className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-primary">Галерея работ</span>
                   </div>
                   
                   <div>
                     <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
-                      Посмотрите, что создают в WBGen
+                      Посмотрите примеры генерации
                     </h3>
                     <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
-                      Реальные примеры карточек товаров: до и после обработки. Узнайте, как наши клиенты 
-                      увеличивают конверсию на Wildberries.
+                      Узнайте, какие карточки товаров создают селлеры на нашем сервисе и как это помогает 
+                      увеличивать конверсию на Wildberries.
                     </p>
                   </div>
 
@@ -57,11 +57,11 @@ export const CasesPromoBlock = ({ onNavigateToBalance }: CasesPromoBlockProps) =
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Coins className="w-4 h-4 text-primary" />
+                        <Sparkles className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-foreground">5 000₽</div>
-                        <div className="text-xs text-muted-foreground">Экономия</div>
+                        <div className="text-sm font-bold text-foreground">12500+</div>
+                        <div className="text-xs text-muted-foreground">Карточек создано</div>
                       </div>
                     </div>
                   </div>
@@ -74,7 +74,7 @@ export const CasesPromoBlock = ({ onNavigateToBalance }: CasesPromoBlockProps) =
                     className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold group"
                   >
                     Смотреть кейсы
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ExternalLink className="w-4 h-4 ml-2" />
                   </Button>
                   <Button 
                     variant="outline" 

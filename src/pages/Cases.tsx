@@ -1,14 +1,14 @@
 import "@/styles/landing-theme.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, TrendingUp, Zap, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "@/components/landing/BeforeAfterSliderNew";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 
-// Кейсы с изображениями до/после
-const cases = [
+// Все кейсы с изображениями до/после
+const allCases = [
   {
     id: 1,
     before: "/lovable-uploads/57f9f37f-ed50-4951-8b39-46348cdcd204.jpg",
@@ -37,7 +37,7 @@ const cases = [
   },
   {
     id: 3,
-    before: "/lovable-uploads/yoga-mat-main.png",
+    before: "/lovable-uploads/3-2.png",
     after: "/lovable-uploads/3-1.webp",
     category: "Спорт",
     title: "Коврик для йоги",
@@ -87,19 +87,135 @@ const cases = [
     savings: "5 441₽",
     description: "Карточка премиум-наушников с детализацией технических характеристик.",
   },
+  {
+    id: 7,
+    before: "/lovable-uploads/yoga-mat-main.png",
+    after: "/lovable-uploads/yoga-after.png",
+    category: "Спорт",
+    title: "Йога аксессуары",
+    conversionGrowth: "+168%",
+    ordersChange: "3 → 9",
+    designerCost: "4 500₽",
+    wbgenCost: "от 59₽",
+    savings: "4 441₽",
+    description: "Инфографика для аксессуаров йоги с акцентом на материалы и комфорт.",
+  },
+  {
+    id: 8,
+    before: "/lovable-uploads/1-2.png",
+    after: "/lovable-uploads/1-1.png",
+    category: "Электроника",
+    title: "Беспроводная гарнитура",
+    conversionGrowth: "+192%",
+    ordersChange: "5 → 12",
+    designerCost: "4 000₽",
+    wbgenCost: "от 59₽",
+    savings: "3 941₽",
+    description: "Карточка с детальным описанием функций и преимуществ гарнитуры.",
+  },
+  {
+    id: 9,
+    before: "/lovable-uploads/869233fb-76b8-4213-ab24-c4bf07f7689b.jpg",
+    after: "/lovable-uploads/women-after.png",
+    category: "Одежда",
+    title: "Женская одежда",
+    conversionGrowth: "+220%",
+    ordersChange: "4 → 13",
+    designerCost: "6 500₽",
+    wbgenCost: "от 59₽",
+    savings: "6 441₽",
+    description: "Стильная карточка с размерами и особенностями материала.",
+  },
+  {
+    id: 10,
+    before: "/lovable-uploads/9b5fed84-262e-47a8-8439-f34e328d8daf.jpg",
+    after: "/lovable-uploads/syoss-after.png",
+    category: "Косметика",
+    title: "Средства для волос",
+    conversionGrowth: "+185%",
+    ordersChange: "6 → 16",
+    designerCost: "5 000₽",
+    wbgenCost: "от 59₽",
+    savings: "4 941₽",
+    description: "Профессиональная карточка для средств по уходу за волосами.",
+  },
+  {
+    id: 11,
+    before: "/lovable-uploads/f840eecf-7892-4183-8444-9879d02c6e20.jpg",
+    after: "/lovable-uploads/4fc1d149-23bc-42ba-8a35-f732f142a15d.png",
+    category: "Бытовая техника",
+    title: "Мелкая бытовая техника",
+    conversionGrowth: "+165%",
+    ordersChange: "3 → 8",
+    designerCost: "5 500₽",
+    wbgenCost: "от 59₽",
+    savings: "5 441₽",
+    description: "Инфографика для бытовой техники с указанием характеристик и функций.",
+  },
+  {
+    id: 12,
+    before: "/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg",
+    after: "/lovable-uploads/5030ec29-2f6f-4436-9d03-bafcfc526692.png",
+    category: "Аксессуары",
+    title: "Модные аксессуары",
+    conversionGrowth: "+178%",
+    ordersChange: "4 → 11",
+    designerCost: "4 500₽",
+    wbgenCost: "от 59₽",
+    savings: "4 441₽",
+    description: "Элегантная карточка для аксессуаров с акцентом на стиль.",
+  },
 ];
 
 const stats = [
-  { value: "500+", label: "Созданных карточек" },
+  { value: "12500+", label: "Созданных карточек" },
   { value: "200%", label: "Средний рост конверсии" },
   { value: "5 000₽", label: "Средняя экономия" },
 ];
 
+const ITEMS_PER_PAGE = 6;
+
 const Cases = () => {
   const headerRef = useRef(null);
   const gridRef = useRef(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-50px" });
   const isGridInView = useInView(gridRef, { once: true, margin: "-100px" });
+  
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const visibleCases = allCases.slice(0, visibleCount);
+  const hasMore = visibleCount < allCases.length;
+
+  const loadMore = useCallback(() => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    // Simulate loading delay for smooth UX
+    setTimeout(() => {
+      setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, allCases.length));
+      setIsLoading(false);
+    }, 300);
+  }, [isLoading, hasMore]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loadMore, hasMore, isLoading]);
 
   useEffect(() => {
     // Force dark mode for cases page
@@ -111,6 +227,13 @@ const Cases = () => {
       document.body.style.backgroundColor = "";
     };
   }, []);
+
+  const scrollToContent = () => {
+    const gridElement = document.getElementById('cases-grid');
+    if (gridElement) {
+      gridElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[hsl(240,10%,4%)] text-white landing-dark">
@@ -148,7 +271,7 @@ const Cases = () => {
 
       <main className="pt-24 sm:pt-32">
         {/* Hero Section */}
-        <section className="relative py-12 sm:py-20 overflow-hidden">
+        <section className="relative py-12 sm:py-20 overflow-hidden min-h-[60vh] flex flex-col justify-center">
           <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px]" />
 
@@ -162,19 +285,18 @@ const Cases = () => {
             >
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
-                Реальные результаты клиентов
+                Реальные результаты для селлеров
               </span>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                Кейсы и примеры
+                Примеры генерации
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)]">
-                  наших работ
+                  на сервисе WBGen
                 </span>
               </h1>
               
               <p className="text-base sm:text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10">
-                Посмотрите, как WBGen помогает селлерам создавать продающие карточки товаров
-                и увеличивать конверсию на Wildberries
+                Посмотрите примеры генерации на нашем сервисе и их результаты
               </p>
 
               {/* Stats */}
@@ -196,21 +318,38 @@ const Cases = () => {
               </div>
             </motion.div>
           </div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
+            onClick={scrollToContent}
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2"
+            >
+              <div className="w-1.5 h-3 bg-white/40 rounded-full" />
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Cases Grid */}
-        <section className="relative py-12 sm:py-20">
+        <section id="cases-grid" className="relative py-12 sm:py-20">
           <div className="container mx-auto px-4 sm:px-6">
             <motion.div
               ref={gridRef}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             >
-              {cases.map((caseItem, index) => (
+              {visibleCases.map((caseItem, index) => (
                 <motion.div
                   key={caseItem.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={isGridInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  transition={{ duration: 0.6, delay: Math.min(index * 0.1, 0.5) }}
                   className="group"
                 >
                   <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden h-full flex flex-col">
@@ -265,6 +404,45 @@ const Cases = () => {
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* Load more trigger */}
+            {hasMore && (
+              <div 
+                ref={loadMoreRef} 
+                className="flex justify-center py-12"
+              >
+                {isLoading ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center gap-3 text-white/50"
+                  >
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                    <span>Загрузка...</span>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    animate={{ y: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="flex flex-col items-center gap-2 text-white/40"
+                  >
+                    <ChevronDown className="w-6 h-6" />
+                    <span className="text-sm">Листайте для загрузки</span>
+                  </motion.div>
+                )}
+              </div>
+            )}
+
+            {/* All loaded message */}
+            {!hasMore && visibleCount > ITEMS_PER_PAGE && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-8 text-white/40"
+              >
+                Вы просмотрели все {allCases.length} кейсов
+              </motion.div>
+            )}
           </div>
         </section>
 
@@ -296,7 +474,7 @@ const Cases = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/auth?tab=signup">
                   <Button className="btn-premium text-base px-8 py-6 rounded-xl font-semibold group w-full sm:w-auto">
-                    Начать бесплатно
+                    Начать магию
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
