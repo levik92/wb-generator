@@ -138,76 +138,80 @@ export default function Pricing({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
         {packages.map((plan, index) => {
-        const isPopular = index === 1; // Mark middle plan as popular
+        const isPopular = index === 1; // Mark second plan as popular
         const pricePerToken = plan.price / plan.tokens;
         const photoCount = Math.floor(plan.tokens / photoPrice);
         const descCount = Math.floor(plan.tokens / descriptionPrice);
         return <Card key={plan.id} className={isPopular ? "border-primary" : ""}>
-              <CardHeader>
+              <CardHeader className="pb-4">
                 {isPopular && <Badge className="w-fit mb-2 rounded-sm border-4">Популярный</Badge>}
-                <CardTitle>{plan.name}</CardTitle>
-                <div className="text-3xl font-bold">
+                <CardTitle className="text-lg">{plan.name}</CardTitle>
+                <div className="text-2xl lg:text-3xl font-bold">
                   {appliedPromo?.type === 'discount' ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` : `${plan.price}₽`}
-                  {appliedPromo?.type === 'discount' && <span className="text-lg text-muted-foreground line-through ml-2">
+                  {appliedPromo?.type === 'discount' && <span className="text-base text-muted-foreground line-through ml-2">
                       {plan.price}₽
                     </span>}
                 </div>
-                <CardDescription>
+                <CardDescription className="text-sm">
                   {appliedPromo?.type === 'tokens' ? `${plan.tokens + appliedPromo.value} токенов (+${appliedPromo.value} бонусных)` : `${plan.tokens} токенов`}
                 </CardDescription>
-                <div className="text-sm text-muted-foreground mt-2">
+                <div className="text-xs text-muted-foreground mt-1">
                   <strong>{pricePerToken.toFixed(2)}₽</strong> за токен
                 </div>
-                <div className="mt-3 space-y-2">
-                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-md">
+                <div className="mt-2 space-y-1">
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1.5 rounded-md">
                     1 описание = {(pricePerToken * descriptionPrice).toFixed(2)}₽
                   </div>
-                  <div className="bg-primary/10 text-primary text-xs font-medium px-3 py-2 rounded-md">
-                    1 изображение = {(pricePerToken * photoPrice).toFixed(2)}₽
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1.5 rounded-md">
+                    1 фото = {(pricePerToken * photoPrice).toFixed(2)}₽
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-6">
+              <CardContent className="pt-0">
+                <div className="space-y-2 mb-4">
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                    <span className="text-sm">{plan.tokens} токенов ({pricePerToken.toFixed(2)}₽ за токен)</span>
+                    <span className="text-xs">{photoCount} фото карточек</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                    <span className="text-sm">{photoCount} изображений карточек товаров</span>
+                    <span className="text-xs">{descCount} описаний</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                    <span className="text-sm">{descCount} описаний товаров</span>
+                    <span className="text-xs">Поддержка в чате</span>
                   </div>
-                  <div className="flex items-center">
-                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                    <span className="text-sm">Поддержка в чате</span>
-                  </div>
-                  {index === 2 && <>
-                      <div className="flex items-center">
-                        <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                        <span className="text-sm">Персональный менеджер</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                        <span className="text-sm">API доступ</span>
-                      </div>
-                    </>}
-                  {index === 1 && <div className="flex items-center">
-                      <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
-                      <span className="text-sm">Приоритетная поддержка</span>
-                    </div>}
                 </div>
-                <Button className="w-full" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name}>
-                  {loading === plan.name ? "Создание платежа..." : "Выбрать план"}
+                <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name}>
+                  {loading === plan.name ? "Создание..." : "Выбрать"}
                 </Button>
               </CardContent>
             </Card>;
       })}
       </div>
+
+      {/* Individual tariff block */}
+      <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
+        <CardContent className="py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h3 className="text-lg font-bold mb-1">Индивидуальный тариф</h3>
+              <p className="text-sm text-muted-foreground">
+                Нужен особый объём или специальные условия? Свяжитесь с нами!
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="gap-2 border-primary/30 hover:bg-primary/10 shrink-0"
+              onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
+            >
+              <MessageCircle className="h-4 w-4" />
+              Связаться
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>;
 }

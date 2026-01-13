@@ -181,8 +181,14 @@ export const ExamplesSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-center mt-8 sm:mt-12"
+          className="text-center mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
+          <button
+            onClick={() => window.open("/cases", "_blank")}
+            className="px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base border border-white/20 text-white hover:bg-white/10 transition-all"
+          >
+            Посмотреть ещё примеры
+          </button>
           <Link to="/auth?tab=signup">
             <Button className="btn-premium text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-xl font-semibold group">
               Получить такие же результаты

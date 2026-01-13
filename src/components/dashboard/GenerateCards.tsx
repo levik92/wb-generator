@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit } from "lucide-react";
+import { CasesPromoBlock } from "./CasesPromoBlock";
 import JSZip from 'jszip';
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
@@ -31,6 +32,7 @@ interface Profile {
 interface GenerateCardsProps {
   profile: Profile;
   onTokensUpdate: () => void;
+  onNavigateToBalance?: () => void;
 }
 const CARD_STAGES = [{
   name: "Главная",
@@ -63,7 +65,8 @@ let globalPollingInterval: NodeJS.Timeout | null = null;
 let currentPollingJobId: string | null = null;
 export const GenerateCards = ({
   profile,
-  onTokensUpdate
+  onTokensUpdate,
+  onNavigateToBalance
 }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
@@ -1165,6 +1168,11 @@ export const GenerateCards = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Cases Promo Block */}
+      {onNavigateToBalance && (
+        <CasesPromoBlock onNavigateToBalance={onNavigateToBalance} />
+      )}
 
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
