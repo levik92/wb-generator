@@ -267,7 +267,7 @@ const Dashboard = () => {
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
       default:
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} onNavigateToBalance={() => handleTabChange('balance')} />;
     }
   };
   return <div className="min-h-screen bg-background flex">

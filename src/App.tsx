@@ -8,6 +8,7 @@ import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import Cases from "./pages/Cases";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -56,6 +57,7 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/partner-agreement" element={<PartnerAgreement />} />
+          <Route path="/cases" element={<Cases />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
