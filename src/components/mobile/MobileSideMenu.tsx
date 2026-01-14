@@ -200,10 +200,12 @@ export const MobileSideMenu = ({
                 </div>
               </nav>
 
-              {/* Bottom section */}
-              <div className="p-3 border-t border-border/50 space-y-3">
-                {/* Theme Toggle */}
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/50 transition-colors" onClick={() => setTheme(isDark ? "light" : "dark")}>
+              {/* Bottom section - Theme Toggle */}
+              <div className="shrink-0 p-3 border-t border-border/50">
+                <button 
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/50 transition-colors" 
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                >
                   <div className="w-8 h-8 rounded-lg bg-muted/30 flex items-center justify-center">
                     {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   </div>
