@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X } from "lucide-react";
 
@@ -92,14 +92,6 @@ const VideoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 export const HeroSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 1]);
 
   const stats = [
     { value: 12500, label: "карточек создано", suffix: "+" },
@@ -120,20 +112,12 @@ export const HeroSection = () => {
         {/* Grid pattern */}
         <div className="absolute inset-0 grid-pattern opacity-30" />
         
-        {/* Floating orbs */}
-        <motion.div
-          style={{ y }}
-          className="absolute top-1/4 left-[10%] w-64 h-64 bg-[hsl(268,83%,50%)] rounded-full blur-[120px] opacity-20"
-        />
-        <motion.div
-          style={{ y: useTransform(scrollYProgress, [0, 1], [0, -100]) }}
-          className="absolute bottom-1/4 right-[10%] w-96 h-96 bg-[hsl(220,100%,50%)] rounded-full blur-[150px] opacity-15"
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[hsl(268,83%,40%)] rounded-full blur-[200px] opacity-10"
-        />
+        {/* Floating orbs - simplified, no scroll-based animation */}
+        <div className="absolute top-1/4 left-[10%] w-64 h-64 bg-[hsl(268,83%,50%)] rounded-full blur-[120px] opacity-20" />
+        <div className="absolute bottom-1/4 right-[10%] w-96 h-96 bg-[hsl(220,100%,50%)] rounded-full blur-[150px] opacity-15" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[hsl(268,83%,40%)] rounded-full blur-[200px] opacity-10" />
 
-        <motion.div style={{ opacity }} className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-7xl mx-auto">
             {/* Badge */}
             <motion.div
@@ -285,18 +269,14 @@ export const HeroSection = () => {
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-purple-500/60 backdrop-blur-sm rounded-lg text-sm text-white font-medium">
                       После
                     </div>
-                    {/* Glow effect */}
-                    <motion.div
-                      className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl opacity-20 -z-10"
-                      animate={{ opacity: [0.15, 0.35, 0.15] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
+                    {/* Glow effect - simplified, no animation */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl opacity-25 -z-10" />
                   </div>
                 </motion.div>
               </div>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Scroll indicator */}
         <motion.div

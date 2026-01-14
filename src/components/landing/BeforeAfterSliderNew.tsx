@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
 import { GripVertical } from "lucide-react";
 
 interface BeforeAfterSliderNewProps {
@@ -60,11 +59,8 @@ export const BeforeAfterSliderNew = ({
   }, []);
 
   return (
-    <motion.div
+    <div
       ref={containerRef}
-      initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.6 }}
       className="relative aspect-[3/4] w-full mx-auto overflow-hidden rounded-2xl sm:rounded-3xl cursor-ew-resize select-none touch-pan-y"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -74,8 +70,8 @@ export const BeforeAfterSliderNew = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Glow effect */}
-      <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(268,83%,50%)] via-[hsl(280,90%,60%)] to-[hsl(268,83%,50%)] rounded-[2rem] blur-2xl opacity-20 sm:opacity-30 animate-pulse-glow" />
+      {/* Simplified glow - no animation */}
+      <div className="absolute -inset-2 bg-gradient-to-r from-[hsl(268,83%,50%)] to-[hsl(280,90%,60%)] rounded-[1.5rem] blur-xl opacity-15" />
 
       {/* Container with border */}
       <div className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
@@ -134,6 +130,6 @@ export const BeforeAfterSliderNew = ({
           </span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
