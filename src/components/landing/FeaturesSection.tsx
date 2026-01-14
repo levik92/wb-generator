@@ -116,11 +116,8 @@ export const FeaturesSection = () => {
         {/* Features grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-24">
           {features.map((feature, index) => (
-            <motion.div
+            <div
               key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
               className="glass-card rounded-2xl p-6 sm:p-8 group"
             >
               <div
@@ -132,32 +129,24 @@ export const FeaturesSection = () => {
                 {feature.title}
               </h3>
               <p className="text-white/50">{feature.description}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Capabilities section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
             Полный набор инструментов
           </h3>
           <p className="text-white/50 max-w-xl mx-auto">
             Всё, что нужно для создания продающих карточек на маркетплейсах
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {capabilities.map((cap, index) => (
-            <motion.div
+          {capabilities.map((cap) => (
+            <div
               key={cap.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
               className="glass-card rounded-2xl p-6 sm:p-8"
             >
               <div className="flex items-start gap-4">
@@ -181,7 +170,7 @@ export const FeaturesSection = () => {
                   </ul>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

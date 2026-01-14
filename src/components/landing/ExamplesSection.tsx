@@ -122,11 +122,8 @@ export const ExamplesSection = () => {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {examples.map((example, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
               className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] snap-center"
             >
               <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden">
@@ -172,17 +169,12 @@ export const ExamplesSection = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-center mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
+        <div className="text-center mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             onClick={() => window.open("/cases", "_blank")}
             className="px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base border border-white/20 text-white hover:bg-white/10 transition-all"
@@ -195,7 +187,7 @@ export const ExamplesSection = () => {
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

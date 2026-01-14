@@ -82,11 +82,8 @@ export const HowItWorksSection = () => {
 
             <div className="space-y-8 sm:space-y-0">
               {steps.map((step, index) => (
-                <motion.div
+                <div
                   key={step.number}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
                   className={`relative flex items-center gap-6 sm:gap-0 ${
                     index % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"
                   }`}
@@ -129,26 +126,21 @@ export const HowItWorksSection = () => {
 
                   {/* Spacer for alternating layout */}
                   <div className="hidden sm:block flex-1 sm:w-[calc(50%-3rem)]" />
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
         </div>
 
         {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center mt-16"
-        >
+        <div className="text-center mt-16">
           <Link to="/auth?tab=signup">
             <Button className="btn-premium text-base sm:text-lg px-8 py-6 rounded-xl font-semibold group">
               Попробовать бесплатно
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

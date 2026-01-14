@@ -219,7 +219,6 @@ const Cases = () => {
   const gridRef = useRef(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-50px" });
-  const isGridInView = useInView(gridRef, { once: true, margin: "-100px" });
   
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
@@ -338,58 +337,42 @@ const Cases = () => {
                 Посмотрите примеры генерации на нашем сервисе и их результаты
               </p>
 
-              {/* Stats */}
+              {/* Stats - simplified, no individual animations */}
               <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-xl mx-auto">
                 {stats.map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isHeaderInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                    className="text-center"
-                  >
+                  <div key={index} className="text-center">
                     <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
                       {stat.value}
                     </div>
                     <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </motion.div>
           </div>
 
-          {/* Scroll indicator - smaller size */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 cursor-pointer"
+          {/* Scroll indicator - simplified */}
+          <div
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
             onClick={scrollToContent}
           >
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5"
-            >
+            <div className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5">
               <div className="w-1 h-2 bg-white/40 rounded-full" />
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </section>
 
         {/* Cases Grid */}
         <section id="cases-grid" className="relative py-12 sm:py-20">
           <div className="container mx-auto px-4 sm:px-6">
-            <motion.div
+            <div
               ref={gridRef}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             >
-              {visibleCases.map((caseItem, index) => (
-                <motion.div
+              {visibleCases.map((caseItem) => (
+                <div
                   key={caseItem.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isGridInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.6, delay: Math.min(index * 0.1, 0.5) }}
-                  className="group"
+                  className="group animate-fade-in"
                 >
                   <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden h-full flex flex-col">
                     {/* Before/After Slider */}
@@ -440,9 +423,9 @@ const Cases = () => {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
 
             {/* Load more trigger */}
             {hasMore && (
