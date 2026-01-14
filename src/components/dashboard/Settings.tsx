@@ -331,7 +331,7 @@ export const Settings = ({
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <Card className="border border-border/50 bg-card">
-          <CardHeader className="pb-4">
+          <CardHeader className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
