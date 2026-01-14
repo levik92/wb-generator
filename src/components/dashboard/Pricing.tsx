@@ -192,46 +192,34 @@ export default function Pricing({
       })}
       </div>
 
-      {/* Individual tariff block - premium design */}
-      <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-primary/5 rounded-full blur-xl" />
-        
-        <CardContent className="relative py-8 px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Icon and content */}
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/30 shrink-0">
-                <MessageCircle className="h-7 w-7 text-primary-foreground" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-                  Индивидуальный тариф
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Нужен большой объём токенов или особые условия сотрудничества? 
-                  Свяжитесь с нами — подберём оптимальное решение для вашего бизнеса.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
-                  <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-md font-medium">
-                    Персональные условия
-                  </span>
-                  <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-md font-medium">
-                    Приоритетная поддержка
-                  </span>
-                </div>
+      {/* Individual tariff block - subtle design */}
+      <Card className="border-border/50 bg-card/50">
+        <CardContent className="py-6 px-6">
+          <div className="flex flex-col gap-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">
+                Индивидуальный тариф
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Нужен большой объём токенов или особые условия сотрудничества? 
+                Свяжитесь с нами — подберём оптимальное решение для вашего бизнеса.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-md">
+                  Персональные условия
+                </span>
+                <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-md">
+                  Приоритетная поддержка
+                </span>
               </div>
             </div>
             
-            {/* CTA Button */}
             <Button
-              size="lg"
-              className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200 shrink-0 font-semibold"
+              variant="outline"
+              className="w-full sm:w-auto gap-2"
               onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-4 w-4" />
               Связаться с нами
             </Button>
           </div>
