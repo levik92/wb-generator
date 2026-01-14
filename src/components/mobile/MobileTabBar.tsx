@@ -76,7 +76,7 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
                     absolute inset-0 rounded-full
                     ${isActive 
                       ? 'bg-gradient-to-br from-primary to-primary shadow-lg shadow-primary/30' 
-                      : 'bg-gray-300 dark:bg-gray-500'
+                      : 'bg-gray-300 dark:bg-card'
                     }
                     transition-all duration-300
                   `} />
