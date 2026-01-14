@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon, Sun, Moon, Monitor } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
 interface Profile {
   id: string;
   email: string;
@@ -61,11 +63,14 @@ export const Settings = ({
   const [maskedWbKey, setMaskedWbKey] = useState<string | null>(null);
   const [showWbApiKey, setShowWbApiKey] = useState(false);
   const [hasWbKey, setHasWbKey] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  // Load Wildberries API key status on component mount
+  // Avoid hydration mismatch for theme
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   useEffect(() => {
     loadWbApiKeyStatus();
   }, []);
@@ -315,6 +320,87 @@ export const Settings = ({
                 Написать в поддержку
               </a>
             </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Theme Settings */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.4, delay: 0.15 }}
+      >
+        <Card className="border border-border/50 bg-card">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                {mounted && resolvedTheme === 'dark' ? (
+                  <Moon className="w-5 h-5 text-primary" />
+                ) : (
+                  <Sun className="w-5 h-5 text-primary" />
+                )}
+              </div>
+              <div>
+                <CardTitle className="text-lg">Тема оформления</CardTitle>
+                <CardDescription>Выберите предпочитаемую тему</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <button
+                onClick={() => setTheme('light')}
+                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${
+                  mounted && theme === 'light' 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                }`}
+              >
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center shadow-lg ${
+                  mounted && theme === 'light' ? 'shadow-amber-400/30' : ''
+                }`}>
+                  <Sun className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium">Светлая</span>
+              </button>
+              
+              <button
+                onClick={() => setTheme('dark')}
+                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${
+                  mounted && theme === 'dark' 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                }`}
+              >
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-lg ${
+                  mounted && theme === 'dark' ? 'shadow-slate-500/30' : ''
+                }`}>
+                  <Moon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium">Тёмная</span>
+              </button>
+              
+              <button
+                onClick={() => setTheme('system')}
+                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${
+                  mounted && theme === 'system' 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                }`}
+              >
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg ${
+                  mounted && theme === 'system' ? 'shadow-gray-400/30' : ''
+                }`}>
+                  <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium">Авто</span>
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 text-center">
+              {mounted && theme === 'system' 
+                ? `Сейчас: ${resolvedTheme === 'dark' ? 'тёмная' : 'светлая'} (по системе)` 
+                : 'Авто — следует настройкам системы'}
+            </p>
           </CardContent>
         </Card>
       </motion.div>
