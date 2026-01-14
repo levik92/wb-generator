@@ -141,7 +141,7 @@ export const MobileSideMenu = ({
             {/* Glass effect background */}
             <div className="absolute inset-0 bg-background/95 backdrop-blur-xl border-r border-border/50 shadow-2xl" />
             
-            <div className="relative flex flex-col h-full">
+            <div className="relative flex flex-col h-full pb-20">
               {/* Header */}
               <div className="p-5 border-b border-border/50">
                 <div className="flex items-center justify-between mb-4">
