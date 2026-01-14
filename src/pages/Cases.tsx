@@ -11,159 +11,68 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 const allCases = [
   {
     id: 1,
-    before: "/lovable-uploads/57f9f37f-ed50-4951-8b39-46348cdcd204.jpg",
-    after: "/lovable-uploads/1-1.png",
-    category: "Электроника",
-    title: "Беспроводные наушники",
-    conversionGrowth: "+183%",
-    ordersChange: "3 → 8",
-    designerCost: "3 000₽",
-    wbgenCost: "от 59₽",
-    savings: "2 941₽",
-    description: "Карточка с инфографикой для беспроводных наушников. Добавлены ключевые характеристики и преимущества.",
-  },
-  {
-    id: 2,
-    before: "/lovable-uploads/2-2.png",
-    after: "/lovable-uploads/2-1.jpg",
-    category: "Одежда",
-    title: "Женская блузка",
-    conversionGrowth: "+250%",
-    ordersChange: "2 → 7",
+    before: "/lovable-uploads/case-before-01.webp",
+    after: "/lovable-uploads/case-after-01.jpg",
+    category: "Продукты",
+    title: "Чипсы Lay's",
+    conversionGrowth: "+195%",
+    ordersChange: "4 → 12",
     designerCost: "5 000₽",
     wbgenCost: "от 59₽",
     savings: "4 941₽",
-    description: "Стильная карточка с размерной сеткой и описанием материала для женской одежды.",
+    description: "Яркая карточка с аппетитной инфографикой и акцентом на вкус и объём упаковки.",
   },
   {
-    id: 3,
-    before: "/lovable-uploads/3-2.png",
-    after: "/lovable-uploads/3-1.webp",
-    category: "Спорт",
-    title: "Коврик для йоги",
-    conversionGrowth: "+153%",
-    ordersChange: "4 → 10",
-    designerCost: "6 000₽",
-    wbgenCost: "от 59₽",
-    savings: "5 941₽",
-    description: "Карточка с инфографикой о характеристиках и преимуществах коврика для йоги.",
-  },
-  {
-    id: 4,
-    before: "/lovable-uploads/4-2.png",
-    after: "/lovable-uploads/4-1.webp",
-    category: "Дом",
-    title: "Товары для дома",
-    conversionGrowth: "+197%",
-    ordersChange: "5 → 15",
-    designerCost: "8 000₽",
-    wbgenCost: "от 59₽",
-    savings: "7 941₽",
-    description: "Детальная карточка товара для дома с указанием особенностей и применения.",
-  },
-  {
-    id: 5,
-    before: "/lovable-uploads/clarins-before.jpeg",
-    after: "/lovable-uploads/clarins-after.png",
-    category: "Косметика",
-    title: "Уходовая косметика",
-    conversionGrowth: "+210%",
-    ordersChange: "6 → 18",
+    id: 2,
+    before: "/lovable-uploads/case-before-02.webp",
+    after: "/lovable-uploads/case-after-02.jpg",
+    category: "Игрушки",
+    title: "LEGO Technic Porsche",
+    conversionGrowth: "+230%",
+    ordersChange: "2 → 9",
     designerCost: "7 000₽",
     wbgenCost: "от 59₽",
     savings: "6 941₽",
-    description: "Премиальная карточка для косметики с акцентом на состав и эффект.",
+    description: "Премиальная карточка с деталями о масштабе, количестве деталей и лицензии.",
   },
   {
-    id: 6,
-    before: "/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg",
-    after: "/lovable-uploads/headphones-after.png",
+    id: 3,
+    before: "/lovable-uploads/case-before-03.webp",
+    after: "/lovable-uploads/case-after-03.jpg",
     category: "Электроника",
-    title: "Наушники премиум",
+    title: "Игровые наушники HyperX",
+    conversionGrowth: "+183%",
+    ordersChange: "3 → 10",
+    designerCost: "6 000₽",
+    wbgenCost: "от 59₽",
+    savings: "5 941₽",
+    description: "Динамичная карточка с характеристиками звука и комфорта для геймеров.",
+  },
+  {
+    id: 4,
+    before: "/lovable-uploads/case-before-04.jpg",
+    after: "/lovable-uploads/case-after-04.jpg",
+    category: "Электроника",
+    title: "Игровая клавиатура HyperX",
     conversionGrowth: "+175%",
     ordersChange: "4 → 11",
     designerCost: "5 500₽",
     wbgenCost: "от 59₽",
     savings: "5 441₽",
-    description: "Карточка премиум-наушников с детализацией технических характеристик.",
+    description: "Карточка с RGB-подсветкой и характеристиками механических клавиш.",
   },
   {
-    id: 7,
-    before: "/lovable-uploads/yoga-mat-main.png",
-    after: "/lovable-uploads/yoga-after.png",
-    category: "Спорт",
-    title: "Йога аксессуары",
-    conversionGrowth: "+168%",
-    ordersChange: "3 → 9",
-    designerCost: "4 500₽",
-    wbgenCost: "от 59₽",
-    savings: "4 441₽",
-    description: "Инфографика для аксессуаров йоги с акцентом на материалы и комфорт.",
-  },
-  {
-    id: 8,
-    before: "/lovable-uploads/1-2.png",
-    after: "/lovable-uploads/1-1.png",
-    category: "Электроника",
-    title: "Беспроводная гарнитура",
-    conversionGrowth: "+192%",
-    ordersChange: "5 → 12",
-    designerCost: "4 000₽",
-    wbgenCost: "от 59₽",
-    savings: "3 941₽",
-    description: "Карточка с детальным описанием функций и преимуществ гарнитуры.",
-  },
-  {
-    id: 9,
-    before: "/lovable-uploads/869233fb-76b8-4213-ab24-c4bf07f7689b.jpg",
-    after: "/lovable-uploads/women-after.png",
-    category: "Одежда",
-    title: "Женская одежда",
-    conversionGrowth: "+220%",
-    ordersChange: "4 → 13",
+    id: 5,
+    before: "/lovable-uploads/case-before-05.webp",
+    after: "/lovable-uploads/case-after-05.jpg",
+    category: "Обувь",
+    title: "Кроссовки Nike Air Force",
+    conversionGrowth: "+210%",
+    ordersChange: "5 → 16",
     designerCost: "6 500₽",
     wbgenCost: "от 59₽",
     savings: "6 441₽",
-    description: "Стильная карточка с размерами и особенностями материала.",
-  },
-  {
-    id: 10,
-    before: "/lovable-uploads/9b5fed84-262e-47a8-8439-f34e328d8daf.jpg",
-    after: "/lovable-uploads/syoss-after.png",
-    category: "Косметика",
-    title: "Средства для волос",
-    conversionGrowth: "+185%",
-    ordersChange: "6 → 16",
-    designerCost: "5 000₽",
-    wbgenCost: "от 59₽",
-    savings: "4 941₽",
-    description: "Профессиональная карточка для средств по уходу за волосами.",
-  },
-  {
-    id: 11,
-    before: "/lovable-uploads/f840eecf-7892-4183-8444-9879d02c6e20.jpg",
-    after: "/lovable-uploads/4fc1d149-23bc-42ba-8a35-f732f142a15d.png",
-    category: "Бытовая техника",
-    title: "Мелкая бытовая техника",
-    conversionGrowth: "+165%",
-    ordersChange: "3 → 8",
-    designerCost: "5 500₽",
-    wbgenCost: "от 59₽",
-    savings: "5 441₽",
-    description: "Инфографика для бытовой техники с указанием характеристик и функций.",
-  },
-  {
-    id: 12,
-    before: "/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg",
-    after: "/lovable-uploads/5030ec29-2f6f-4436-9d03-bafcfc526692.png",
-    category: "Аксессуары",
-    title: "Модные аксессуары",
-    conversionGrowth: "+178%",
-    ordersChange: "4 → 11",
-    designerCost: "4 500₽",
-    wbgenCost: "от 59₽",
-    savings: "4 441₽",
-    description: "Элегантная карточка для аксессуаров с акцентом на стиль.",
+    description: "Стильная карточка с акцентом на материалы, амортизацию и легендарный дизайн.",
   },
 ];
 
@@ -271,7 +180,7 @@ const Cases = () => {
 
       <main className="pt-24 sm:pt-32">
         {/* Hero Section */}
-        <section className="relative py-12 sm:py-20 overflow-hidden min-h-[60vh] flex flex-col justify-center">
+        <section className="relative py-16 sm:py-24 overflow-hidden min-h-[70vh] flex flex-col justify-center">
           <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px]" />
 
@@ -281,7 +190,7 @@ const Cases = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isHeaderInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="text-center max-w-4xl mx-auto"
+              className="text-center max-w-4xl mx-auto mb-16 sm:mb-20"
             >
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -319,20 +228,20 @@ const Cases = () => {
             </motion.div>
           </div>
 
-          {/* Scroll indicator */}
+          {/* Scroll indicator - smaller size */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 cursor-pointer"
             onClick={scrollToContent}
           >
             <motion.div
-              animate={{ y: [0, 10, 0] }}
+              animate={{ y: [0, 6, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2"
+              className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5"
             >
-              <div className="w-1.5 h-3 bg-white/40 rounded-full" />
+              <div className="w-1 h-2 bg-white/40 rounded-full" />
             </motion.div>
           </motion.div>
         </section>
