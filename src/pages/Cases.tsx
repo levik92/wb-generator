@@ -309,8 +309,8 @@ const Cases = () => {
 
       <main className="pt-24 sm:pt-32">
         {/* Hero Section */}
-        <section className="relative py-16 sm:py-24 overflow-hidden min-h-[70vh] flex flex-col justify-center">
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
+        <section className="relative py-16 sm:py-24 overflow-visible min-h-[70vh] flex flex-col justify-center">
+          <div className="absolute -top-[200px] left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px]" />
 
           <div className="container mx-auto px-4 sm:px-6 relative z-10">
