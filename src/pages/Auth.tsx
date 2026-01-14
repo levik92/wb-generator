@@ -400,7 +400,7 @@ const Auth = () => {
           transition={{ duration: 0.5 }}
           className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
         >
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/[0.7] transition-colors">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/30 transition-colors">
             {/* Logo */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-2 mb-4">
