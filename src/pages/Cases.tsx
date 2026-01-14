@@ -311,7 +311,7 @@ const Cases = () => {
               <span className="text-lg sm:text-xl font-bold text-white">WBGen</span>
             </Link>
 
-            <Link to="/auth?tab=signup">
+            <Link to="/dashboard?tab=pricing">
               <Button className="btn-premium text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold">
                 Попробовать
               </Button>
@@ -507,7 +507,7 @@ const Cases = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/auth?tab=signup">
+                <Link to="/dashboard?tab=pricing">
                   <Button className="btn-premium text-base px-8 py-6 rounded-xl font-semibold group w-full sm:w-auto">
                     Начать магию
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

@@ -64,13 +64,13 @@ export const MobileSideMenu = ({
     badge: hasUnreadNews ? 'Новое' : undefined,
     badgeColor: 'bg-wb-purple text-white'
   }, {
-    id: 'referrals',
-    label: 'Рефералы',
-    icon: Users
-  }, {
     id: 'learning',
     label: 'Обучение',
     icon: GraduationCap
+  }, {
+    id: 'referrals',
+    label: 'Рефералы',
+    icon: Users
   }, {
     id: 'settings',
     label: 'Настройки',

@@ -56,13 +56,13 @@ export const MobileMenu = ({
     badge: hasUnreadNews ? 'Новое' : undefined,
     badgeColor: hasUnreadNews ? 'bg-wb-purple text-white' : undefined
   }, {
-    id: 'referrals',
-    label: 'Рефералы',
-    icon: Users
-  }, {
     id: 'learning',
     label: 'Обучение',
     icon: GraduationCap
+  }, {
+    id: 'referrals',
+    label: 'Рефералы',
+    icon: Users
   }, {
     id: 'video-cards',
     label: 'Видео для карточек',
