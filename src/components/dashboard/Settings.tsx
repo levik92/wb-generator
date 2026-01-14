@@ -362,11 +362,11 @@ export const Settings = ({
                 aria-label="Переключить тему"
               >
                 {/* Track icons */}
-                <div className="absolute inset-0 flex items-center justify-between px-1.5">
-                  <Sun className={`w-4 h-4 transition-opacity duration-200 ${
+                <div className="absolute inset-0 flex items-center justify-between px-2">
+                  <Sun className={`w-3.5 h-3.5 transition-opacity duration-200 ${
                     mounted && resolvedTheme === 'dark' ? 'opacity-50 text-primary-foreground' : 'opacity-0'
                   }`} />
-                  <Moon className={`w-4 h-4 transition-opacity duration-200 ${
+                  <Moon className={`w-3.5 h-3.5 transition-opacity duration-200 ${
                     mounted && resolvedTheme === 'dark' ? 'opacity-0' : 'opacity-50 text-muted-foreground'
                   }`} />
                 </div>
