@@ -348,6 +348,14 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           reason_text: `Возврат за неудачную генерацию: ${failMessage}`
         });
 
+        // Send notification to user about the failure
+        await supabase.from('notifications').insert({
+          user_id: task.job.user_id,
+          type: 'error',
+          title: 'Ошибка генерации',
+          message: `Не удалось сгенерировать карточку "${task.job.product_name}". ${failMessage} Токены возвращены на баланс.`
+        });
+
         throw new Error(failMessage);
       }
 
