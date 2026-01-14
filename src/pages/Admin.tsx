@@ -73,19 +73,48 @@ export default function Admin() {
     }
   };
   const loadUsers = async () => {
-    const {
-      data,
-      error
-    } = await supabase.rpc('admin_get_all_users');
-    if (error) {
+    try {
+      // Use pagination to fetch all users (Supabase has 1000 row limit by default)
+      const allUsers: User[] = [];
+      let offset = 0;
+      const limit = 1000;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, email, full_name, tokens_balance, referral_code, wb_connected, is_blocked, created_at')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + limit - 1);
+        
+        if (error) {
+          // If direct access fails, try RPC (admin_get_all_users)
+          console.log('Direct query failed, trying RPC:', error.message);
+          const { data: rpcData, error: rpcError } = await supabase.rpc('admin_get_all_users');
+          if (rpcError) {
+            throw rpcError;
+          }
+          setUsers(rpcData || []);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          allUsers.push(...data);
+          offset += limit;
+          hasMore = data.length === limit; // If we got less than limit, we've fetched all
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      setUsers(allUsers);
+    } catch (error) {
       console.error('Error loading users:', error);
       toast({
         title: "Ошибка",
         description: "Не удалось загрузить пользователей",
         variant: "destructive"
       });
-    } else {
-      setUsers(data || []);
     }
   };
   const handleSignOut = async () => {
