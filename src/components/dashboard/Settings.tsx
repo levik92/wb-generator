@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon, Sun, Moon, Monitor } from "lucide-react";
+import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon, Sun, Moon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 interface Profile {
@@ -331,77 +331,74 @@ export const Settings = ({
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <Card className="border border-border/50 bg-card">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                {mounted && resolvedTheme === 'dark' ? (
-                  <Moon className="w-5 h-5 text-primary" />
-                ) : (
-                  <Sun className="w-5 h-5 text-primary" />
-                )}
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  {mounted && resolvedTheme === 'dark' ? (
+                    <Moon className="w-5 h-5 text-primary" />
+                  ) : (
+                    <Sun className="w-5 h-5 text-primary" />
+                  )}
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Тема оформления</CardTitle>
+                  <CardDescription>
+                    {mounted && resolvedTheme === 'dark' ? 'Тёмная тема' : 'Светлая тема'}
+                  </CardDescription>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-lg">Тема оформления</CardTitle>
-                <CardDescription>Выберите предпочитаемую тему</CardDescription>
-              </div>
+              
+              {/* Apple-style Theme Switch */}
+              <button
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                className={`
+                  relative w-16 h-9 rounded-full transition-all duration-300 ease-in-out
+                  ${mounted && resolvedTheme === 'dark' 
+                    ? 'bg-primary shadow-lg shadow-primary/30' 
+                    : 'bg-muted border border-border'
+                  }
+                `}
+                aria-label="Переключить тему"
+              >
+                {/* Track icons */}
+                <div className="absolute inset-0 flex items-center justify-between px-1.5">
+                  <Sun className={`w-4 h-4 transition-opacity duration-200 ${
+                    mounted && resolvedTheme === 'dark' ? 'opacity-50 text-primary-foreground' : 'opacity-0'
+                  }`} />
+                  <Moon className={`w-4 h-4 transition-opacity duration-200 ${
+                    mounted && resolvedTheme === 'dark' ? 'opacity-0' : 'opacity-50 text-muted-foreground'
+                  }`} />
+                </div>
+                
+                {/* Thumb */}
+                <motion.div
+                  className={`
+                    absolute top-1 w-7 h-7 rounded-full shadow-md
+                    flex items-center justify-center
+                    ${mounted && resolvedTheme === 'dark' 
+                      ? 'bg-white' 
+                      : 'bg-white border border-border/50'
+                    }
+                  `}
+                  animate={{
+                    left: mounted && resolvedTheme === 'dark' ? 'calc(100% - 32px)' : '4px',
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 30,
+                  }}
+                >
+                  {mounted && resolvedTheme === 'dark' ? (
+                    <Moon className="w-4 h-4 text-primary" />
+                  ) : (
+                    <Sun className="w-4 h-4 text-amber-500" />
+                  )}
+                </motion.div>
+              </button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <button
-                onClick={() => setTheme('light')}
-                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${
-                  mounted && theme === 'light' 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                }`}
-              >
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center shadow-lg ${
-                  mounted && theme === 'light' ? 'shadow-amber-400/30' : ''
-                }`}>
-                  <Sun className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700" />
-                </div>
-                <span className="text-xs sm:text-sm font-medium">Светлая</span>
-              </button>
-              
-              <button
-                onClick={() => setTheme('dark')}
-                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${
-                  mounted && theme === 'dark' 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                }`}
-              >
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-lg ${
-                  mounted && theme === 'dark' ? 'shadow-slate-500/30' : ''
-                }`}>
-                  <Moon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-300" />
-                </div>
-                <span className="text-xs sm:text-sm font-medium">Тёмная</span>
-              </button>
-              
-              <button
-                onClick={() => setTheme('system')}
-                className={`flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 ${
-                  mounted && theme === 'system' 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                }`}
-              >
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg ${
-                  mounted && theme === 'system' ? 'shadow-gray-400/30' : ''
-                }`}>
-                  <Monitor className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-                </div>
-                <span className="text-xs sm:text-sm font-medium">Авто</span>
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-3 text-center">
-              {mounted && theme === 'system' 
-                ? `Сейчас: ${resolvedTheme === 'dark' ? 'тёмная' : 'светлая'} (по системе)` 
-                : 'Авто — следует настройкам системы'}
-            </p>
-          </CardContent>
         </Card>
       </motion.div>
 
