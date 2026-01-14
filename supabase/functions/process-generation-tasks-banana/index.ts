@@ -37,9 +37,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const MAX_CONCURRENT_TASKS = 1; // Reduced to avoid overloading
+  const MAX_CONCURRENT_TASKS = 1; // Process one task at a time
   const MAX_RETRIES = 3;
-  const MAX_PROCESSING_TIME = 45 * 60 * 1000; // 45 minutes
+  const MAX_PROCESSING_TIME = 8 * 60 * 1000; // 8 minutes timeout
 
   try {
     const { jobId } = await req.json();
@@ -217,11 +217,11 @@ async function processTasks(
         continue;
       }
 
-      // Process tasks one by one (to avoid overloading)
+      // Process tasks one by one (to avoid overloading the API)
       for (const task of readyTasks) {
         await processTask(supabase, task, job, MAX_RETRIES);
-        // Small delay between tasks
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Delay between tasks to prevent API overload
+        await new Promise(resolve => setTimeout(resolve, 6000));
       }
     }
 
