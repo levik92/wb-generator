@@ -134,17 +134,43 @@ async function processTasks(supabase: any, jobId: string, job: any) {
               completed_at: new Date().toISOString(),
             })
             .eq('id', jobId);
+          
+          // Notify user about success
+          await supabase.from('notifications').insert({
+            user_id: job.user_id,
+            type: 'success',
+            title: 'Генерация завершена',
+            message: `Карточки для "${job.product_name}" успешно сгенерированы!`
+          });
+          
           console.log(`Job ${jobId} completed successfully`);
           break;
         } else if (allDone) {
+          // Count failed tasks
+          const failedCount = allTasks?.filter(t => t.status === 'failed').length || 0;
+          const completedCount = allTasks?.filter(t => t.status === 'completed').length || 0;
+          
           await supabase
             .from('generation_jobs')
             .update({
               status: 'failed',
-              error_message: 'Some tasks failed to complete',
+              error_message: `Не удалось сгенерировать ${failedCount} из ${allTasks?.length || 0} карточек`,
             })
             .eq('id', jobId);
-          console.log(`Job ${jobId} failed`);
+          
+          // Notify user about partial/full failure
+          const notifyMessage = completedCount > 0
+            ? `Частично завершено: ${completedCount} из ${allTasks?.length || 0} карточек для "${job.product_name}". Токены за неудачные карточки возвращены.`
+            : `Не удалось сгенерировать карточки для "${job.product_name}". Сервис временно перегружен. Токены возвращены на баланс.`;
+          
+          await supabase.from('notifications').insert({
+            user_id: job.user_id,
+            type: 'error',
+            title: completedCount > 0 ? 'Генерация частично завершена' : 'Ошибка генерации',
+            message: notifyMessage
+          });
+          
+          console.log(`Job ${jobId} failed with ${failedCount} failed tasks`);
           break;
         }
 
@@ -166,9 +192,18 @@ async function processTasks(supabase: any, jobId: string, job: any) {
         .from('generation_jobs')
         .update({
           status: 'failed',
-          error_message: 'Processing timeout exceeded',
+          error_message: 'Превышено время ожидания генерации',
         })
         .eq('id', jobId);
+      
+      // Notify user and refund remaining tokens
+      await supabase.from('notifications').insert({
+        user_id: job.user_id,
+        type: 'error',
+        title: 'Время генерации истекло',
+        message: `Генерация карточек для "${job.product_name}" заняла слишком много времени. Попробуйте снова позже.`
+      });
+      
       console.error(`Job ${jobId} timed out`);
     }
 
@@ -276,6 +311,8 @@ async function processTask(supabase: any, task: any, job: any) {
         tokens_amount: tokensToRefund,
         reason_text: `Возврат за неудачную генерацию: ${finalError}`
       });
+
+      // Notification will be sent when job completes/fails (in processTasks)
     }
   }
 }
