@@ -71,11 +71,8 @@ export const ExamplesSection = () => {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <motion.div
+        <div
           ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
           className="text-center mb-8 sm:mb-12 md:mb-16"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-4 sm:mb-6">
@@ -87,7 +84,7 @@ export const ExamplesSection = () => {
           <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto">
             Примеры карточек товаров Wildberries, созданных с помощью WBGen
           </p>
-        </motion.div>
+        </div>
 
         {/* Navigation arrows - visible on all screens */}
         <div className="flex justify-center sm:justify-end gap-2 mb-4 sm:mb-6">
