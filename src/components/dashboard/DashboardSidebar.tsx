@@ -111,13 +111,13 @@ export const DashboardSidebar = ({
     badge: unreadCount > 0 ? unreadCount.toString() : undefined,
     badgeColor: unreadCount > 0 ? 'bg-primary text-primary-foreground border-primary' : undefined
   }, {
-    id: 'referrals',
-    label: 'Рефералы',
-    icon: Users
-  }, {
     id: 'learning',
     label: 'Обучение',
     icon: GraduationCap
+  }, {
+    id: 'referrals',
+    label: 'Рефералы',
+    icon: Users
   }, {
     id: 'settings',
     label: 'Настройки',

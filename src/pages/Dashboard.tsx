@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +48,7 @@ const Dashboard = () => {
   const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     toast
   } = useToast();
@@ -56,6 +57,16 @@ const Dashboard = () => {
     hasCompletedJobs,
     resetCompletedJobsFlag
   } = useActiveJobs(profile?.id || '');
+  // Handle tab from URL query param
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['cards', 'description', 'labels', 'history', 'pricing', 'referrals', 'settings', 'notifications', 'news', 'learning'].includes(tabParam)) {
+      setActiveTab(tabParam as ActiveTab);
+      // Clear the query param after setting the tab
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({
       data: {
