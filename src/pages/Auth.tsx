@@ -394,10 +394,7 @@ const Auth = () => {
         </Link>
 
         {/* Auth card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
         >
           <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/30 transition-colors">
@@ -742,7 +739,7 @@ const Auth = () => {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       </div>
     </>
   );

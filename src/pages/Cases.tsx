@@ -385,7 +385,7 @@ const Cases = () => {
               {visibleCases.map((caseItem) => (
                 <div
                   key={caseItem.id}
-                  className="group animate-fade-in"
+                  className="group"
                 >
                   <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden h-full flex flex-col">
                     {/* Before/After Slider */}
