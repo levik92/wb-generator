@@ -4,9 +4,10 @@ import { Zap } from "lucide-react";
 interface LightningLoaderProps {
   size?: "xs" | "sm" | "md" | "lg";
   text?: string;
+  className?: string;
 }
 
-export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => {
+export const LightningLoader = ({ size = "md", text, className }: LightningLoaderProps) => {
   const sizeClasses = {
     xs: "w-5 h-5",
     sm: "w-8 h-8",
@@ -81,7 +82,7 @@ export const LightningLoader = ({ size = "md", text }: LightningLoaderProps) => 
               ease: "easeInOut",
             }}
           >
-            <Zap className={`${iconSizes[size]} text-primary fill-primary`} />
+            <Zap className={`${iconSizes[size]} ${className || 'text-primary fill-primary'}`} />
           </motion.div>
         </motion.div>
       </div>

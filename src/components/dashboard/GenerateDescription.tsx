@@ -223,7 +223,7 @@ export const GenerateDescription = ({
 
             <Button onClick={simulateGeneration} disabled={!canGenerate() || generating} className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-xl">
               {generating ? <span className="flex items-center gap-3">
-                  <LightningLoader size="sm" />
+                  <LightningLoader size="sm" className="text-white fill-white" />
                   <span>Генерирую описание...</span>
                 </span> : <>
                   <Zap className="w-4 h-4 mr-2" />
