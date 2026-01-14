@@ -56,7 +56,6 @@
 
 .glass-card:hover {
   border-color: hsl(var(--glass-border-hover));
-  transform: translateY(-4px);
   box-shadow: 
     0 20px 40px -15px hsl(var(--glow-purple) / 0.15),
     0 0 0 1px hsl(var(--glass-border-hover));
