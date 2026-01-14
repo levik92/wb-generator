@@ -286,11 +286,11 @@ export const HeroSection = () => {
           className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:block"
         >
           <motion.div
-            animate={{ y: [0, 10, 0] }}
+            animate={{ y: [0, 8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2"
+            className="w-5 h-8 rounded-full border-2 border-white/20 flex justify-center pt-1.5"
           >
-            <div className="w-1.5 h-3 bg-white/40 rounded-full" />
+            <div className="w-1 h-2 bg-white/40 rounded-full" />
           </motion.div>
         </motion.div>
       </section>
