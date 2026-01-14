@@ -204,6 +204,19 @@ const allCases = [
     savings: "7 441₽",
     description: "Топовая карточка с пространственным аудио, шумоподавлением и 20ч работы.",
   },
+  {
+    id: 16,
+    before: "/lovable-uploads/case-before-16.jpg",
+    after: "/lovable-uploads/case-after-16.jpg",
+    category: "Красота",
+    title: "Шампунь The Act Everyday",
+    conversionGrowth: "+187%",
+    ordersChange: "5 → 14",
+    designerCost: "5 000₽",
+    wbgenCost: "от 59₽",
+    savings: "4 941₽",
+    description: "Стильная карточка с акцентом на натуральные ингредиенты и ежедневное восстановление.",
+  },
 ];
 
 const stats = [
