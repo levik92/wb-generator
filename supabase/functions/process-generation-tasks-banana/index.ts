@@ -37,10 +37,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const MAX_CONCURRENT_TASKS = 2;
+  const MAX_CONCURRENT_TASKS = 1; // Reduced to avoid overloading
   const MAX_RETRIES = 3;
-  const RETRY_DELAY = 5000;
-  const MAX_PROCESSING_TIME = 30 * 60 * 1000; // 30 minutes
+  const MAX_PROCESSING_TIME = 45 * 60 * 1000; // 45 minutes
 
   try {
     const { jobId } = await req.json();
@@ -77,7 +76,7 @@ serve(async (req) => {
       .eq('id', jobId);
 
     // Start background processing
-    processTasks(supabase, jobId, job).catch(error => {
+    processTasks(supabase, jobId, job, MAX_CONCURRENT_TASKS, MAX_RETRIES, MAX_PROCESSING_TIME).catch(error => {
       console.error('Background processing error:', error);
     });
 
@@ -95,13 +94,20 @@ serve(async (req) => {
   }
 });
 
-async function processTasks(supabase: any, jobId: string, job: any) {
+async function processTasks(
+  supabase: any, 
+  jobId: string, 
+  job: any,
+  MAX_CONCURRENT_TASKS: number,
+  MAX_RETRIES: number,
+  MAX_PROCESSING_TIME: number
+) {
   const startTime = Date.now();
-  const MAX_CONCURRENT_TASKS = 2;
-  const MAX_PROCESSING_TIME = 30 * 60 * 1000;
 
   const isTaskReady = (task: any) => {
-    if (task.status !== 'retrying') return true;
+    if (task.status === 'pending') return true;
+    if (task.status !== 'retrying') return false;
+    
     const retryAfterMs = Number(task.retry_after || 0);
     if (!Number.isFinite(retryAfterMs) || retryAfterMs <= 0) return true;
 
@@ -112,7 +118,7 @@ async function processTasks(supabase: any, jobId: string, job: any) {
 
   try {
     while (Date.now() - startTime < MAX_PROCESSING_TIME) {
-      // Fetch pending/retrying tasks (include updated_at/retry_after for scheduling)
+      // Fetch pending/retrying tasks
       const { data: tasks, error: tasksError } = await supabase
         .from('generation_tasks')
         .select('*')
@@ -130,7 +136,7 @@ async function processTasks(supabase: any, jobId: string, job: any) {
         // Check if all tasks are completed or failed
         const { data: allTasks } = await supabase
           .from('generation_tasks')
-          .select('status')
+          .select('id, status')
           .eq('job_id', jobId);
 
         const allCompleted = allTasks?.every(t => t.status === 'completed');
@@ -145,7 +151,6 @@ async function processTasks(supabase: any, jobId: string, job: any) {
             })
             .eq('id', jobId);
 
-          // Notify user about success
           await supabase.from('notifications').insert({
             user_id: job.user_id,
             type: 'success',
@@ -162,8 +167,9 @@ async function processTasks(supabase: any, jobId: string, job: any) {
           await supabase
             .from('generation_jobs')
             .update({
-              status: 'failed',
+              status: failedCount === allTasks?.length ? 'failed' : 'completed',
               error_message: `Не удалось сгенерировать ${failedCount} из ${allTasks?.length || 0} карточек`,
+              completed_at: new Date().toISOString(),
             })
             .eq('id', jobId);
 
@@ -173,12 +179,12 @@ async function processTasks(supabase: any, jobId: string, job: any) {
 
           await supabase.from('notifications').insert({
             user_id: job.user_id,
-            type: 'error',
+            type: completedCount > 0 ? 'warning' : 'error',
             title: completedCount > 0 ? 'Генерация частично завершена' : 'Ошибка генерации',
             message: notifyMessage
           });
 
-          console.log(`Job ${jobId} failed with ${failedCount} failed tasks`);
+          console.log(`Job ${jobId} finished with ${completedCount} completed, ${failedCount} failed`);
           break;
         }
 
@@ -186,11 +192,11 @@ async function processTasks(supabase: any, jobId: string, job: any) {
         continue;
       }
 
-      // Only process tasks that are ready (respect retry_after)
+      // Only process tasks that are ready
       const readyTasks = tasks.filter(isTaskReady).slice(0, MAX_CONCURRENT_TASKS);
 
       if (readyTasks.length === 0) {
-        // No tasks ready yet -> wait until the soonest retry becomes available
+        // Calculate wait time until next retry
         const retrying = tasks.filter((t: any) => t.status === 'retrying' && t.retry_after);
         if (retrying.length === 0) {
           await new Promise(resolve => setTimeout(resolve, 5000));
@@ -198,49 +204,75 @@ async function processTasks(supabase: any, jobId: string, job: any) {
         }
 
         const now = Date.now();
-        const nextWaitMs = Math.max(
-          1000,
-          Math.min(
-            20000,
-            ...retrying.map((t: any) => {
-              const baseTs = new Date(t.updated_at || t.created_at || now).getTime();
-              const nextRetryAt = baseTs + Number(t.retry_after || 0);
-              return Math.max(0, nextRetryAt - now);
-            })
-          )
-        );
+        const waitTimes = retrying.map((t: any) => {
+          const baseTs = new Date(t.updated_at || t.created_at || now).getTime();
+          const nextRetryAt = baseTs + Number(t.retry_after || 0);
+          return Math.max(0, nextRetryAt - now);
+        });
+        
+        const nextWaitMs = Math.min(30000, Math.max(1000, Math.min(...waitTimes)));
 
         console.log(`No tasks ready; waiting ${nextWaitMs}ms for next retry window`);
         await new Promise(resolve => setTimeout(resolve, nextWaitMs));
         continue;
       }
 
-      // Process tasks concurrently
-      await Promise.all(readyTasks.map(task => processTask(supabase, task, job)));
-
-      // Small delay between batches
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Process tasks one by one (to avoid overloading)
+      for (const task of readyTasks) {
+        await processTask(supabase, task, job, MAX_RETRIES);
+        // Small delay between tasks
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
 
-    // Check for timeout
+    // Handle timeout - refund all incomplete tasks
     if (Date.now() - startTime >= MAX_PROCESSING_TIME) {
+      console.error(`Job ${jobId} timed out after ${MAX_PROCESSING_TIME}ms`);
+      
+      // Get all incomplete tasks
+      const { data: incompleteTasks } = await supabase
+        .from('generation_tasks')
+        .select('id')
+        .eq('job_id', jobId)
+        .not('status', 'in', '("completed","failed")');
+      
+      if (incompleteTasks && incompleteTasks.length > 0) {
+        // Mark all incomplete tasks as failed
+        await supabase
+          .from('generation_tasks')
+          .update({
+            status: 'failed',
+            last_error: 'timeout_exceeded',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('job_id', jobId)
+          .not('status', 'in', '("completed","failed")');
+        
+        // Refund tokens for timed out tasks
+        const tokensToRefund = incompleteTasks.length;
+        console.log(`Refunding ${tokensToRefund} tokens for ${incompleteTasks.length} timed out tasks`);
+        await supabase.rpc('refund_tokens', {
+          user_id_param: job.user_id,
+          tokens_amount: tokensToRefund,
+          reason_text: 'Возврат за задачи, не завершённые вовремя'
+        });
+      }
+      
       await supabase
         .from('generation_jobs')
         .update({
           status: 'failed',
           error_message: 'Превышено время ожидания генерации',
+          completed_at: new Date().toISOString(),
         })
         .eq('id', jobId);
 
-      // Notify user
       await supabase.from('notifications').insert({
         user_id: job.user_id,
         type: 'error',
         title: 'Время генерации истекло',
-        message: `Генерация карточек для "${job.product_name}" заняла слишком много времени. Попробуйте снова позже.`
+        message: `Генерация карточек для "${job.product_name}" заняла слишком много времени. Токены возвращены на баланс.`
       });
-
-      console.error(`Job ${jobId} timed out`);
     }
 
   } catch (error) {
@@ -250,14 +282,13 @@ async function processTasks(supabase: any, jobId: string, job: any) {
       .update({
         status: 'failed',
         error_message: error.message,
+        completed_at: new Date().toISOString(),
       })
       .eq('id', jobId);
   }
 }
 
-async function processTask(supabase: any, task: any, job: any) {
-  const MAX_RETRIES = 3;
-
+async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: number) {
   try {
     // Mark as processing
     await supabase
@@ -265,6 +296,7 @@ async function processTask(supabase: any, task: any, job: any) {
       .update({
         status: 'processing',
         started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .eq('id', task.id);
 
@@ -296,36 +328,67 @@ async function processTask(supabase: any, task: any, job: any) {
       throw processError;
     }
 
+    // After invoke, read actual task status from DB
+    const { data: updatedTask } = await supabase
+      .from('generation_tasks')
+      .select('status, retry_count, last_error')
+      .eq('id', task.id)
+      .single();
+    
+    if (updatedTask) {
+      console.log(`Task ${task.id} status after process-google-task: ${updatedTask.status}, retry_count: ${updatedTask.retry_count}`);
+    }
+
   } catch (error) {
     console.error(`Error processing task ${task.id}:`, error);
 
-    const retryCount = task.retry_count || 0;
+    // Read current task state from DB (to get accurate retry_count)
+    const { data: currentTask } = await supabase
+      .from('generation_tasks')
+      .select('status, retry_count')
+      .eq('id', task.id)
+      .single();
+    
+    const actualRetryCount = currentTask?.retry_count || task.retry_count || 0;
+    const currentStatus = currentTask?.status;
+    
+    // If task is already handled (completed, failed, or retrying with new count), skip
+    if (currentStatus === 'completed' || currentStatus === 'failed') {
+      console.log(`Task ${task.id} already in final state: ${currentStatus}`);
+      return;
+    }
+    
+    if (currentStatus === 'retrying' && actualRetryCount > (task.retry_count || 0)) {
+      console.log(`Task ${task.id} already scheduled for retry (count: ${actualRetryCount})`);
+      return;
+    }
+
     const errorMessage = error.message || 'Unknown error';
     
-    // Check if it's a 503 model overloaded error
+    // Check if it's a model overloaded error
     const isModelOverloaded = errorMessage.includes('503') || 
                                errorMessage.includes('overloaded') ||
-                               errorMessage.includes('UNAVAILABLE');
+                               errorMessage.includes('UNAVAILABLE') ||
+                               errorMessage.includes('google_503');
     
-    if (retryCount < MAX_RETRIES) {
-      // Longer delays for overloaded model
-      const baseDelay = isModelOverloaded ? 20000 : 10000; // 20s or 10s base
-      const retryDelay = Math.pow(2, retryCount) * baseDelay;
+    if (actualRetryCount < MAX_RETRIES) {
+      // Retry delays: 10s, 20s, 25s
+      const RETRY_DELAYS = [10000, 20000, 25000];
+      const retryDelay = RETRY_DELAYS[actualRetryCount] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
       
-      console.log(`Task ${task.id} will retry in ${retryDelay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+      console.log(`Task ${task.id} will retry in ${retryDelay}ms (attempt ${actualRetryCount + 1}/${MAX_RETRIES})`);
       
       await supabase
         .from('generation_tasks')
         .update({
           status: 'retrying',
-          retry_count: retryCount + 1,
+          retry_count: actualRetryCount + 1,
           retry_after: retryDelay,
-          last_error: isModelOverloaded ? 'Сервис временно перегружен, повторяем...' : errorMessage,
+          last_error: isModelOverloaded ? 'google_503_overloaded' : errorMessage,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', task.id);
 
-      // Do not wait here (avoid long-running edge function). Scheduler in processTasks respects retry_after.
-      return;
     } else {
       const finalError = isModelOverloaded 
         ? 'Сервис временно перегружен. Попробуйте через несколько минут.'
@@ -336,19 +399,18 @@ async function processTask(supabase: any, task: any, job: any) {
         .update({
           status: 'failed',
           last_error: finalError,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', task.id);
 
       // Refund tokens for failed task
-      const tokensToRefund = 1; // 1 token per card
+      const tokensToRefund = 1;
       console.log(`Refunding ${tokensToRefund} tokens to user ${job.user_id} for failed task ${task.id}`);
       await supabase.rpc('refund_tokens', {
         user_id_param: job.user_id,
         tokens_amount: tokensToRefund,
         reason_text: `Возврат за неудачную генерацию: ${finalError}`
       });
-
-      // Notification will be sent when job completes/fails (in processTasks)
     }
   }
 }

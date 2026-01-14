@@ -9,11 +9,10 @@ const corsHeaders = {
 };
 
 const MAX_RETRIES = 3;
+// Retry delays: 10s, 20s, 25s
+const RETRY_DELAYS = [10000, 20000, 25000];
 
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
-// Практика показала, что очень большие референсы могут приводить к падению Edge Runtime (546).
-// Ограничиваем размер, чтобы вместо падения дать понятную деградацию (пропустить референс).
-// Увеличен до 5MB для поддержки больших PNG изображений
 const MAX_IMAGE_BYTES = 5_000_000; // ~5MB
 
 type FetchImageResult =
@@ -39,14 +38,12 @@ async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
     }
 
     if (!res.body) {
-      // fallback: arrayBuffer (редко, но бывает)
       const buf = await res.arrayBuffer();
       if (buf.byteLength > MAX_IMAGE_BYTES) return { ok: false, reason: `too_large:${buf.byteLength}` };
       const base64 = base64Encode(new Uint8Array(buf));
       return { ok: true, base64, bytes: buf.byteLength, mimeType };
     }
 
-    // stream read with hard cap
     const reader = res.body.getReader();
     const chunks: Uint8Array[] = [];
     let received = 0;
@@ -86,6 +83,44 @@ async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
   }
 }
 
+// Call Google Gemini API with specified API key
+async function callGeminiApi(
+  apiKey: string,
+  contentParts: any[],
+  keyName: string
+): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
+  console.log(`Calling Google Gemini API with ${keyName}...`);
+  
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: contentParts
+          }]
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Google Gemini API error (${keyName}):`, response.status, errorText);
+      return { ok: false, status: response.status, error: errorText };
+    }
+
+    const data = await response.json();
+    return { ok: true, data };
+  } catch (e) {
+    console.error(`Google Gemini API exception (${keyName}):`, e);
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -103,9 +138,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    const geminiApiKey1 = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    const geminiApiKey2 = Deno.env.get('GOOGLE_GEMINI_API_KEY_2');
 
-    if (!geminiApiKey) {
+    if (!geminiApiKey1) {
       throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
@@ -162,7 +198,6 @@ serve(async (req) => {
 
     console.log(`Found ${productImages.length} product images and ${referenceImage ? 1 : 0} reference in job data`);
 
-    // Validate we have at least one product image source
     if (productImages.length === 0) {
       console.error('No product images found in job data');
       await supabase
@@ -180,7 +215,7 @@ serve(async (req) => {
       );
     }
 
-    // Download product images as base64 (size-limited)
+    // Download product images as base64
     const productImageBase64: Array<{ base64: string; mimeType: string; bytes: number }> = [];
     for (const img of productImages) {
       console.log(`Downloading product image: ${img.url?.substring(0, 100)}...`);
@@ -193,15 +228,10 @@ serve(async (req) => {
       console.log(`Successfully downloaded product image (${r.bytes} bytes)`);
     }
 
-    // Validate we have at least one successfully downloaded product image
     if (productImageBase64.length === 0) {
       console.error('Failed to download any product images');
       
-      // Check if images were skipped due to size
-      const skippedLargeImages = productImages.some(img => img.url);
-      const errorMessage = skippedLargeImages 
-        ? 'Изображение слишком большое (макс. 5 МБ). Пожалуйста, уменьшите размер файла и попробуйте снова.'
-        : 'Не удалось загрузить изображения товара. Проверьте доступность файлов.';
+      const errorMessage = 'Изображение слишком большое (макс. 5 МБ). Пожалуйста, уменьшите размер файла и попробуйте снова.';
       
       await supabase
         .from('generation_tasks')
@@ -218,7 +248,7 @@ serve(async (req) => {
       );
     }
 
-    // Download reference (optional). If it's too large/slow, skip it to avoid Edge crash.
+    // Download reference (optional)
     let referenceBase64: { base64: string; mimeType: string; bytes: number } | null = null;
     if (referenceImage?.url) {
       console.log(`Downloading reference image: ${referenceImage.url?.substring(0, 100)}...`);
@@ -234,10 +264,9 @@ serve(async (req) => {
 
     console.log(`Processing with ${productImageBase64.length} product images${referenceBase64 ? ' and 1 reference' : ''}`);
 
-    // Build content parts for Google Gemini API format
+    // Build content parts for Google Gemini API
     const contentParts: any[] = [];
     
-    // Add structured instruction at the beginning
     const structuredInstruction = `ВАЖНАЯ ИНФОРМАЦИЯ О СТРУКТУРЕ ИЗОБРАЖЕНИЙ:
 
 Я отправляю тебе ${productImageBase64.length + (referenceBase64 ? 1 : 0)} изображений в следующем порядке:
@@ -257,7 +286,6 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
 
     contentParts.push({ text: structuredInstruction });
 
-    // Add all product images
     for (const img of productImageBase64) {
       contentParts.push({
         inlineData: {
@@ -267,7 +295,6 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       });
     }
 
-    // Add reference image if exists (always last)
     if (referenceBase64) {
       contentParts.push({
         inlineData: {
@@ -277,37 +304,38 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       });
     }
 
-    console.log('Calling Google Gemini 3 Pro Image API for image generation...');
+    // Try primary API key first
+    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY');
+    
+    // If primary key fails with 503/429/403, try fallback key
+    if (!aiResult.ok && (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
+      if (geminiApiKey2) {
+        console.log(`Primary API key returned ${aiResult.status}, trying fallback API key...`);
+        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY');
+        
+        if (aiResult.ok) {
+          console.log('Fallback API key succeeded!');
+        }
+      } else {
+        console.warn('No fallback API key configured (GOOGLE_GEMINI_API_KEY_2)');
+      }
+    }
 
-    // Call Google Gemini 3 Pro Image API directly
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: contentParts
-        }]
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('Google Gemini 3 Pro Image API error:', aiResponse.status, errorText);
-
-      // Handle rate limit, quota exceeded, or service unavailable (overloaded)
-      if (aiResponse.status === 429 || aiResponse.status === 403 || aiResponse.status === 503) {
+    // Handle API errors
+    if (!aiResult.ok) {
+      const status = aiResult.status || 500;
+      const errorText = aiResult.error || 'Unknown error';
+      
+      // Handle rate limit, quota exceeded, or service unavailable
+      if (status === 429 || status === 403 || status === 503) {
         if (retryCount < MAX_RETRIES) {
-          // Longer delay for 503 (model overloaded)
-          const baseDelay = aiResponse.status === 503 ? 15000 : 5000;
-          const retryDelay = Math.pow(2, retryCount) * baseDelay;
+          const retryDelay = RETRY_DELAYS[retryCount] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
           
-          const errorReason = aiResponse.status === 503 
-            ? 'Model overloaded, will retry' 
-            : 'API quota exceeded, will retry';
+          const errorReason = status === 503 
+            ? `google_503_overloaded` 
+            : `google_${status}_quota`;
           
-          console.log(`Scheduling retry ${retryCount + 1}/${MAX_RETRIES} with delay ${retryDelay}ms`);
+          console.log(`Scheduling retry ${retryCount + 1}/${MAX_RETRIES} with delay ${retryDelay}ms (${errorReason})`);
           
           await supabase
             .from('generation_tasks')
@@ -321,12 +349,12 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
             .eq('id', taskId);
 
           return new Response(
-            JSON.stringify({ message: 'Task will retry', retryAfter: retryDelay }),
+            JSON.stringify({ message: 'Task will retry', retryAfter: retryDelay, attempt: retryCount + 1 }),
             { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
         
-        const failMessage = aiResponse.status === 503 
+        const failMessage = status === 503 
           ? 'Сервис временно перегружен. Попробуйте через несколько минут.' 
           : 'Превышена квота API. Попробуйте позже.';
         
@@ -334,13 +362,13 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           .from('generation_tasks')
           .update({
             status: 'failed',
-            last_error: failMessage,
+            last_error: `google_${status}_final_fail`,
             updated_at: new Date().toISOString(),
           })
           .eq('id', taskId);
 
-        // Refund tokens for failed task
-        const tokensToRefund = 1; // 1 token per card
+        // Refund tokens
+        const tokensToRefund = 1;
         console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for failed task ${taskId}`);
         await supabase.rpc('refund_tokens', {
           user_id_param: task.job.user_id,
@@ -348,7 +376,6 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           reason_text: `Возврат за неудачную генерацию: ${failMessage}`
         });
 
-        // Send notification to user about the failure
         await supabase.from('notifications').insert({
           user_id: task.job.user_id,
           type: 'error',
@@ -360,12 +387,12 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       }
 
       // Handle bad request
-      if (aiResponse.status === 400) {
+      if (status === 400) {
         await supabase
           .from('generation_tasks')
           .update({
             status: 'failed',
-            last_error: 'Некорректный запрос к API.',
+            last_error: 'google_400_bad_request',
             updated_at: new Date().toISOString(),
           })
           .eq('id', taskId);
@@ -373,18 +400,18 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         throw new Error(`Bad request: ${errorText}`);
       }
 
-      throw new Error(`Google Gemini 3 Pro Image API error: ${errorText}`);
+      throw new Error(`Google Gemini API error: ${errorText}`);
     }
 
-    const aiData = await aiResponse.json();
+    // Success - extract image
+    const aiData = aiResult.data;
     console.log('AI response received:', JSON.stringify(aiData).substring(0, 200));
     
-    // Parse Google Gemini response format
     const generatedImageBase64 = aiData.candidates?.[0]?.content?.parts?.find((part: any) => part.inlineData)?.inlineData?.data;
 
     if (!generatedImageBase64) {
       console.error('No image in response:', JSON.stringify(aiData));
-      throw new Error('No image generated by Google Gemini 3 Pro Image');
+      throw new Error('No image generated by Google Gemini');
     }
 
     // Convert base64 to blob for storage
