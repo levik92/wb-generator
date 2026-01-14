@@ -374,20 +374,17 @@ export const Settings = ({
                 {/* Thumb */}
                 <motion.div
                   className={`
-                    absolute top-1 w-7 h-7 rounded-full shadow-md
-                    flex items-center justify-center
-                    ${mounted && resolvedTheme === 'dark' 
-                      ? 'bg-white' 
-                      : 'bg-white border border-border/50'
-                    }
+                    absolute top-1 left-1 w-7 h-7 rounded-full shadow-md
+                    flex items-center justify-center bg-white
+                    ${mounted && resolvedTheme !== 'dark' ? 'border border-border/50' : ''}
                   `}
                   animate={{
-                    left: mounted && resolvedTheme === 'dark' ? 'calc(100% - 32px)' : '4px',
+                    x: mounted && resolvedTheme === 'dark' ? 28 : 0,
                   }}
                   transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 30,
+                    type: "tween",
+                    duration: 0.2,
+                    ease: "easeOut",
                   }}
                 >
                   {mounted && resolvedTheme === 'dark' ? (
