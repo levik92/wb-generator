@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Coins, Sparkles, Eye } from "lucide-react";
+import { X, ExternalLink, Coins, Sparkles, Eye, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 interface CasesPromoBannerProps {
   userId: string;
@@ -61,13 +60,14 @@ export const CasesPromoBanner = ({ userId, onNavigateToBalance }: CasesPromoBann
         <div className="absolute inset-0 bg-gradient-to-r from-primary via-purple-500 to-pink-500 animate-gradient-x" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
         
-        {/* Floating particles animation */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-4 left-[10%] w-2 h-2 bg-white/30 rounded-full animate-float-slow" />
-          <div className="absolute top-8 left-[30%] w-3 h-3 bg-white/20 rounded-full animate-float-medium" />
-          <div className="absolute top-6 right-[25%] w-2 h-2 bg-white/25 rounded-full animate-float-fast" />
-          <div className="absolute bottom-4 left-[20%] w-2 h-2 bg-white/20 rounded-full animate-float-medium" />
-          <div className="absolute bottom-6 right-[15%] w-3 h-3 bg-white/15 rounded-full animate-float-slow" />
+        {/* Floating lightning bolts animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <Zap className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
+          <Zap className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
+          <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
+          <Zap className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
+          <Zap className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
+          <Zap className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
         </div>
 
         {/* Shimmer effect */}
@@ -77,13 +77,13 @@ export const CasesPromoBanner = ({ userId, onNavigateToBalance }: CasesPromoBann
           {/* Close button */}
           <button
             onClick={handleDismiss}
-            className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white"
+            className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-10"
             aria-label="Закрыть"
           >
             <X className="w-4 h-4" />
           </button>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pr-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 pr-8">
             {/* Icon */}
             <div className="flex-shrink-0">
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -101,8 +101,8 @@ export const CasesPromoBanner = ({ userId, onNavigateToBalance }: CasesPromoBann
               </p>
             </div>
 
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:flex-shrink-0">
+            {/* Buttons - vertical on desktop for more text space, under content on tablet/mobile */}
+            <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-shrink-0">
               <Button
                 onClick={handleViewCases}
                 className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
