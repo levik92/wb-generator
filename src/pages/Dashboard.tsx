@@ -258,7 +258,12 @@ const Dashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'cards':
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} />;
+        return <GenerateCards 
+          profile={profile} 
+          onTokensUpdate={refreshProfile} 
+          onNavigateToBalance={() => handleTabChange('pricing')}
+          onNavigateToLearning={() => handleTabChange('learning')}
+        />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'notifications':
@@ -278,7 +283,12 @@ const Dashboard = () => {
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
       default:
-        return <GenerateCards profile={profile} onTokensUpdate={refreshProfile} onNavigateToBalance={() => handleTabChange('balance')} />;
+        return <GenerateCards 
+          profile={profile} 
+          onTokensUpdate={refreshProfile} 
+          onNavigateToBalance={() => handleTabChange('pricing')}
+          onNavigateToLearning={() => handleTabChange('learning')}
+        />;
     }
   };
   return <div className="min-h-screen bg-background flex">

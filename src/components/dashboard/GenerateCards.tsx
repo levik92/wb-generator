@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit } from "lucide-react";
 import { CasesPromoBlock } from "./CasesPromoBlock";
+import { CasesPromoBanner } from "./CasesPromoBanner";
+import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
@@ -33,6 +35,7 @@ interface GenerateCardsProps {
   profile: Profile;
   onTokensUpdate: () => void;
   onNavigateToBalance?: () => void;
+  onNavigateToLearning?: () => void;
 }
 const CARD_STAGES = [{
   name: "Главная",
@@ -66,7 +69,8 @@ let currentPollingJobId: string | null = null;
 export const GenerateCards = ({
   profile,
   onTokensUpdate,
-  onNavigateToBalance
+  onNavigateToBalance,
+  onNavigateToLearning
 }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
@@ -94,6 +98,7 @@ export const GenerateCards = ({
   const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
   const [smoothProgress, setSmoothProgress] = useState(0);
   const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
+  const [generationCount, setGenerationCount] = useState<number>(0);
   const [uploadedProductImages, setUploadedProductImages] = useState<Array<{
     url: string;
     name: string;
@@ -133,6 +138,14 @@ export const GenerateCards = ({
   const [editInstructions, setEditInstructions] = useState("");
   const [editingCards, setEditingCards] = useState<Set<string>>(new Set());
   const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
+
+  // Load generation count from localStorage on mount
+  useEffect(() => {
+    const storedCount = localStorage.getItem(`generation_count_${profile.id}`);
+    if (storedCount) {
+      setGenerationCount(parseInt(storedCount, 10));
+    }
+  }, [profile.id]);
 
   // Check for active jobs on component mount (only once)
   useEffect(() => {
@@ -453,6 +466,11 @@ export const GenerateCards = ({
             setPreviousJobStatus(job.status);
             if (allCompleted && jobJustCompleted) {
               setCompletionNotificationShown(true);
+
+              // Increment generation count for popups tracking
+              const newCount = generationCount + 1;
+              setGenerationCount(newCount);
+              localStorage.setItem(`generation_count_${profile.id}`, String(newCount));
 
               // Note: Уведомления и история теперь создаются автоматически database trigger'ом
               // когда job status меняется на 'completed'. Это работает даже если клиент офлайн.
@@ -1169,9 +1187,18 @@ export const GenerateCards = ({
         </CardContent>
       </Card>
 
-      {/* Cases Promo Block */}
+      {/* Dismissible Cases Promo Banner */}
       {onNavigateToBalance && (
-        <CasesPromoBlock onNavigateToBalance={onNavigateToBalance} />
+        <CasesPromoBanner userId={profile.id} onNavigateToBalance={onNavigateToBalance} />
+      )}
+
+      {/* Generation Popups */}
+      {onNavigateToLearning && (
+        <GenerationPopups 
+          userId={profile.id} 
+          generationCount={generationCount} 
+          onNavigateToLearning={onNavigateToLearning} 
+        />
       )}
 
       {/* File Upload - Horizontal layout on desktop/tablet */}
