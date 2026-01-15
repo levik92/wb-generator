@@ -16,23 +16,23 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon-192x192.png', 'icon-512x512.png', 'apple-touch-icon.png'],
+      includeAssets: ['pwa-icon-192.png', 'pwa-icon-512.png', 'apple-touch-icon-new.png'],
       manifest: {
         name: 'WB Generator',
-        short_name: 'WB Generator',
+        short_name: 'WBGen',
         description: 'Идеальные фото и SEO-описания для Wildberries без дизайнера',
         theme_color: '#8B5CF6',
-        background_color: '#ffffff',
+        background_color: '#8B5CF6',
         display: 'standalone',
         icons: [
           {
-            src: '/icon-192x192.png',
+            src: '/pwa-icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: '/icon-512x512.png',
+            src: '/pwa-icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
