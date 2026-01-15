@@ -97,7 +97,7 @@ export const HeroSection = () => {
     { value: 12500, label: "карточек создано", suffix: "+" },
     { value: 3, label: "минуты до результата", suffix: " мин" },
     { value: 98, label: "довольны результатом", suffix: "%" },
-    { value: 10, label: "× дешевле дизайнера", suffix: "", prefix: "" },
+    { value: 10, label: "дешевле дизайнера", suffix: "", prefix: "х" },
   ];
 
   return (
