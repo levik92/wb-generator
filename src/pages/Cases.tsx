@@ -504,13 +504,13 @@ const Cases = () => {
                 Создайте такие же результаты
               </h2>
               <p className="text-base sm:text-lg text-white/50 mb-8">
-                Зарегистрируйтесь и получите первые карточки уже сегодня
+                Профессиональный дизайн от 59₽ вместо 5000₽ у дизайнера
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link to="/dashboard?tab=pricing">
                   <Button className="btn-premium text-base px-8 py-6 rounded-xl font-semibold group w-full sm:w-auto">
-                    Начать магию
+                    Создать карточку
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>

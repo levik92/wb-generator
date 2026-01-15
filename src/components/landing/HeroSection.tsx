@@ -129,7 +129,7 @@ export const HeroSection = () => {
               <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4 text-[hsl(268,83%,65%)]" />
                 <span className="text-sm text-white/80 text-center">
-                  10 бесплатных токенов при регистрации
+                  ИИ-дизайн карточек — результат за 3 минуты
                 </span>
               </div>
             </motion.div>
@@ -173,7 +173,7 @@ export const HeroSection = () => {
                   size="lg"
                   className="btn-premium text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-semibold group"
                 >
-                  Попробовать бесплатно
+                  Создать карточку сейчас
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
