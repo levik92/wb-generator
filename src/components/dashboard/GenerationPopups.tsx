@@ -85,6 +85,12 @@ export const GenerationPopups = ({
     setShowLearningPopup(false);
   };
 
+  const handleLearningOpenChange = (open: boolean) => {
+    if (!open) {
+      handleLearningClose();
+    }
+  };
+
   const handleLearningNavigate = () => {
     localStorage.setItem(`${FIRST_GEN_POPUP_KEY}_${userId}`, "true");
     onNavigateToLearning();
@@ -103,7 +109,7 @@ export const GenerationPopups = ({
   return (
     <>
       {/* Welcome popup - View cases before paying */}
-      <Dialog open={showWelcomePopup} onOpenChange={setShowWelcomePopup}>
+      <Dialog open={showWelcomePopup} onOpenChange={(open) => { if (!open) handleWelcomeClose(); }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
@@ -135,7 +141,7 @@ export const GenerationPopups = ({
       </Dialog>
 
       {/* Learning popup - After first generation */}
-      <Dialog open={showLearningPopup} onOpenChange={setShowLearningPopup}>
+      <Dialog open={showLearningPopup} onOpenChange={handleLearningOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
