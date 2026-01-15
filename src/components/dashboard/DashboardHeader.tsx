@@ -145,9 +145,9 @@ export const DashboardHeader = ({
                   notifications.map(notification => (
                     <DropdownMenuItem 
                       key={notification.id} 
-                      className={`group p-3 cursor-pointer border-b last:border-b-0 hover:bg-primary/5 ${
+                      className={`group p-3 cursor-pointer border-b last:border-b-0 hover:bg-primary hover:text-primary-foreground ${
                         !notification.read ? 'bg-primary/5' : ''
-                      }`}
+                      } [&:hover_p]:text-primary-foreground [&:hover_span]:text-primary-foreground/80`}
                       onClick={() => markAsRead(notification.id)}
                     >
                       <div className="flex items-start space-x-3 w-full">
