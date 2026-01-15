@@ -131,7 +131,7 @@ export const DashboardHeader = ({
                       variant="ghost" 
                       size="sm" 
                       onClick={markAllAsRead} 
-                      className="text-xs h-auto py-1 px-2 hover:bg-primary/10 text-primary"
+                      className="text-xs h-auto py-1 px-2 hover:bg-primary/10 text-primary hover:text-foreground"
                     >
                       Прочитать все
                     </Button>
