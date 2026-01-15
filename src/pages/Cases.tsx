@@ -394,6 +394,7 @@ const Cases = () => {
                         beforeImage={caseItem.before}
                         afterImage={caseItem.after}
                         alt={caseItem.title}
+                        priority={visibleCases.indexOf(caseItem) < 4}
                       />
                     </div>
 

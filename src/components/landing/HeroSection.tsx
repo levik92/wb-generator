@@ -234,6 +234,8 @@ export const HeroSection = () => {
                       src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg"
                       alt="До обработки"
                       className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border border-white/10 shadow-2xl"
+                      loading="eager"
+                      decoding="async"
                     />
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-sm text-white/80 font-medium">
                       До
@@ -265,6 +267,8 @@ export const HeroSection = () => {
                       src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg"
                       alt="После обработки"
                       className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border-2 border-purple-500/40 shadow-2xl"
+                      loading="eager"
+                      decoding="async"
                     />
                     <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-purple-500/60 backdrop-blur-sm rounded-lg text-sm text-white font-medium">
                       После

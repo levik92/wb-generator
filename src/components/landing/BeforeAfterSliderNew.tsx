@@ -1,20 +1,51 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { GripVertical } from "lucide-react";
 
 interface BeforeAfterSliderNewProps {
   beforeImage: string;
   afterImage: string;
   alt: string;
+  priority?: boolean;
 }
 
 export const BeforeAfterSliderNew = ({
   beforeImage,
   afterImage,
   alt,
+  priority = false,
 }: BeforeAfterSliderNewProps) => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState({ before: false, after: false });
+  const [isInView, setIsInView] = useState(priority);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Lazy loading with Intersection Observer
+  useEffect(() => {
+    if (priority) {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: "300px",
+        threshold: 0,
+      }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [priority]);
 
   const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
@@ -58,6 +89,8 @@ export const BeforeAfterSliderNew = ({
     setIsDragging(false);
   }, []);
 
+  const allImagesLoaded = imagesLoaded.before && imagesLoaded.after;
+
   return (
     <div
       ref={containerRef}
@@ -75,14 +108,26 @@ export const BeforeAfterSliderNew = ({
 
       {/* Container with border */}
       <div className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
+        {/* Loading skeleton */}
+        {!allImagesLoaded && (
+          <div className="absolute inset-0 bg-white/5 animate-pulse z-10" />
+        )}
+
         {/* Before Image (Background) */}
         <div className="absolute inset-0">
-          <img
-            src={beforeImage}
-            alt={`До: ${alt}`}
-            className="w-full h-full object-cover"
-            draggable={false}
-          />
+          {isInView && (
+            <img
+              src={beforeImage}
+              alt={`До: ${alt}`}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imagesLoaded.before ? "opacity-100" : "opacity-0"
+              }`}
+              draggable={false}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              onLoad={() => setImagesLoaded(prev => ({ ...prev, before: true }))}
+            />
+          )}
           {/* Dark overlay for before */}
           <div className="absolute inset-0 bg-black/10" />
         </div>
@@ -92,12 +137,19 @@ export const BeforeAfterSliderNew = ({
           className="absolute inset-0"
           style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
         >
-          <img
-            src={afterImage}
-            alt={`После: ${alt}`}
-            className="w-full h-full object-cover"
-            draggable={false}
-          />
+          {isInView && (
+            <img
+              src={afterImage}
+              alt={`После: ${alt}`}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imagesLoaded.after ? "opacity-100" : "opacity-0"
+              }`}
+              draggable={false}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              onLoad={() => setImagesLoaded(prev => ({ ...prev, after: true }))}
+            />
+          )}
         </div>
 
         {/* Divider Line */}
