@@ -130,6 +130,7 @@ export const ExamplesSection = () => {
                     beforeImage={example.before}
                     afterImage={example.after}
                     alt={`Пример ${example.category}`}
+                    priority={index === 0}
                   />
                 </div>
 
