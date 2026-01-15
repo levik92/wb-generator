@@ -419,7 +419,7 @@ const Auth = () => {
               </h1>
               <p className="text-white/50 text-sm">
                 {activeTab === "signin" && "Войдите, чтобы продолжить"}
-                {activeTab === "signup" && "Зарегистрируйтесь бесплатно"}
+                {activeTab === "signup" && "Создавайте карточки за 3 минуты"}
                 {activeTab === "reset" && "Введите email для восстановления"}
                 {activeTab === "new-password" && "Придумайте новый пароль"}
               </p>
