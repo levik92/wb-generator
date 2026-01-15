@@ -86,7 +86,7 @@ export const CTASection = () => {
             className="grid grid-cols-3 gap-4 sm:gap-6 max-w-2xl mx-auto mb-12"
           >
             {[
-              { value: "₽0", label: "Начало работы", icon: Gift },
+              { value: "от 59₽", label: "За карточку", icon: Gift },
               { value: "3 мин", label: "До результата", icon: Zap },
               { value: "+40%", label: "Рост продаж", icon: Sparkles },
             ].map((stat, index) => (
