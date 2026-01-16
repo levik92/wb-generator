@@ -8,9 +8,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MAX_RETRIES = 3;
-// Retry delays: 10s, 20s, 25s
-const RETRY_DELAYS = [10000, 20000, 25000];
+// Delay before fallback to API2 (2 seconds)
+const FALLBACK_DELAY_MS = 2000;
 
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
 const MAX_IMAGE_BYTES = 5_000_000; // ~5MB
@@ -189,8 +188,7 @@ serve(async (req) => {
       );
     }
 
-    const retryCount = task.retry_count || 0;
-    console.log(`Processing task ${taskId}, retry ${retryCount}/${MAX_RETRIES}`);
+    console.log(`Processing task ${taskId}`);
 
     // Separate product images from reference
     const productImages = jobImages.filter(img => img.type !== 'reference');
@@ -307,10 +305,11 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     // Try primary API key first
     let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY');
     
-    // If primary key fails with 503/429/403, try fallback key
+    // If primary key fails with 503/429/403, wait 2 seconds and try fallback key immediately
     if (!aiResult.ok && (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
       if (geminiApiKey2) {
-        console.log(`Primary API key returned ${aiResult.status}, trying fallback API key...`);
+        console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
+        await new Promise(resolve => setTimeout(resolve, FALLBACK_DELAY_MS));
         aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY');
         
         if (aiResult.ok) {
@@ -326,43 +325,19 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       const status = aiResult.status || 500;
       const errorText = aiResult.error || 'Unknown error';
       
-      // Handle rate limit, quota exceeded, or service unavailable
+      // Handle rate limit, quota exceeded, or service unavailable - both API keys failed
       if (status === 429 || status === 403 || status === 503) {
-        if (retryCount < MAX_RETRIES) {
-          const retryDelay = RETRY_DELAYS[retryCount] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
-          
-          const errorReason = status === 503 
-            ? `google_503_overloaded` 
-            : `google_${status}_quota`;
-          
-          console.log(`Scheduling retry ${retryCount + 1}/${MAX_RETRIES} with delay ${retryDelay}ms (${errorReason})`);
-          
-          await supabase
-            .from('generation_tasks')
-            .update({
-              status: 'retrying',
-              retry_count: retryCount + 1,
-              retry_after: retryDelay,
-              last_error: errorReason,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', taskId);
-
-          return new Response(
-            JSON.stringify({ message: 'Task will retry', retryAfter: retryDelay, attempt: retryCount + 1 }),
-            { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        
         const failMessage = status === 503 
           ? 'Сервис временно перегружен. Попробуйте через несколько минут.' 
           : 'Превышена квота API. Попробуйте позже.';
+        
+        console.log(`Both API keys failed with status ${status}, marking task as failed`);
         
         await supabase
           .from('generation_tasks')
           .update({
             status: 'failed',
-            last_error: `google_${status}_final_fail`,
+            last_error: `google_${status}_both_keys_failed`,
             updated_at: new Date().toISOString(),
           })
           .eq('id', taskId);
