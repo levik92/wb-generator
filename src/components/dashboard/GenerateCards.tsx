@@ -30,6 +30,7 @@ interface Profile {
   tokens_balance: number;
   wb_connected: boolean;
   referral_code: string;
+  login_count?: number;
 }
 interface GenerateCardsProps {
   profile: Profile;
@@ -1189,7 +1190,11 @@ export const GenerateCards = ({
 
       {/* Dismissible Cases Promo Banner */}
       {onNavigateToBalance && (
-        <CasesPromoBanner userId={profile.id} onNavigateToBalance={onNavigateToBalance} />
+        <CasesPromoBanner 
+          userId={profile.id} 
+          loginCount={profile.login_count || 0} 
+          onNavigateToBalance={onNavigateToBalance} 
+        />
       )}
 
       {/* Generation Popups */}

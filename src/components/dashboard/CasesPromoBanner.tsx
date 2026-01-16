@@ -4,11 +4,13 @@ import { X, ExternalLink, Coins, Sparkles, Eye, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 interface CasesPromoBannerProps {
   userId: string;
+  loginCount: number;
   onNavigateToBalance: () => void;
 }
 const BANNER_DISMISSED_KEY = "cases_promo_banner_dismissed";
 export const CasesPromoBanner = ({
   userId,
+  loginCount,
   onNavigateToBalance
 }: CasesPromoBannerProps) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -16,7 +18,14 @@ export const CasesPromoBanner = ({
   useEffect(() => {
     const checkDismissed = async () => {
       try {
-        // Check localStorage first
+        // Показываем только при самом первом входе (loginCount === 1)
+        if (loginCount !== 1) {
+          setIsVisible(false);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Check localStorage - если уже закрыли, не показываем
         const localDismissed = localStorage.getItem(`${BANNER_DISMISSED_KEY}_${userId}`);
         if (localDismissed === "true") {
           setIsVisible(false);
@@ -26,12 +35,12 @@ export const CasesPromoBanner = ({
         setIsVisible(true);
       } catch (error) {
         console.error("Error checking banner status:", error);
-        setIsVisible(true);
+        setIsVisible(false);
       }
       setIsLoading(false);
     };
     checkDismissed();
-  }, [userId]);
+  }, [userId, loginCount]);
   const handleDismiss = () => {
     localStorage.setItem(`${BANNER_DISMISSED_KEY}_${userId}`, "true");
     setIsVisible(false);
