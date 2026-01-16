@@ -10,6 +10,8 @@ const corsHeaders = {
 
 // Delay before fallback to API2 (2 seconds)
 const FALLBACK_DELAY_MS = 2000;
+// Delay before final retry on API1 (10 seconds)
+const FINAL_RETRY_DELAY_MS = 10000;
 
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
 const MAX_IMAGE_BYTES = 5_000_000; // ~5MB
@@ -305,7 +307,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     // Try primary API key first
     let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY');
     
-    // If primary key fails with 503/429/403, wait 2 seconds and try fallback key immediately
+    // If primary key fails with 503/429/403, wait 2 seconds and try fallback key
     if (!aiResult.ok && (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
       if (geminiApiKey2) {
         console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
@@ -314,6 +316,15 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         
         if (aiResult.ok) {
           console.log('Fallback API key succeeded!');
+        } else if (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403) {
+          // Fallback also failed, wait 10 seconds and try primary key one more time
+          console.log(`Fallback API key also returned ${aiResult.status}, waiting ${FINAL_RETRY_DELAY_MS}ms before final retry on primary key...`);
+          await new Promise(resolve => setTimeout(resolve, FINAL_RETRY_DELAY_MS));
+          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY');
+          
+          if (aiResult.ok) {
+            console.log('Final retry on primary API key succeeded!');
+          }
         }
       } else {
         console.warn('No fallback API key configured (GOOGLE_GEMINI_API_KEY_2)');
