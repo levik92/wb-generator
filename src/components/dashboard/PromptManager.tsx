@@ -81,6 +81,11 @@ const getPromptDisplayName = (type: string): {
       name: 'Свойства и преимущества',
       description: 'Промт для фото с описанием свойств и преимуществ товара',
       category: 'Изображение'
+    },
+    'mainEdit': {
+      name: 'Редактирование основная',
+      description: 'Промт для профессиональной обработки фото: улучшение фона, освещения и цветокоррекции',
+      category: 'Изображение'
     }
   };
   return promptNames[type] || {
@@ -348,7 +353,7 @@ export function PromptManager() {
     }
     return <div className="space-y-3 md:space-y-4">
         {[...filteredPrompts].sort((a, b) => {
-        const order = ['description', 'edit-card', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle'];
+        const order = ['description', 'edit-card', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle', 'mainEdit'];
         return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
       }).map(prompt => {
         const {
