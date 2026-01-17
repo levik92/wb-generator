@@ -3,22 +3,65 @@ import { ServicePageLayout, ServiceHero, ServiceCTA } from "@/components/service
 import { motion } from "framer-motion";
 import { FileText, Clock, Eye, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/service-blog-hero.jpg";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  excerpt: string;
-  tag: string;
-  slug: string;
-  is_published: boolean;
-  published_at: string | null;
-  created_at: string;
-  views: number;
-}
+// Placeholder posts until blog_posts table is created
+const placeholderPosts = [
+  {
+    id: "1",
+    title: "Как создать продающую карточку товара на Wildberries",
+    excerpt: "Разбираем ключевые элементы успешной карточки: от заголовка до инфографики. Практические советы от топ-селлеров.",
+    tag: "Гайд",
+    slug: "kak-sozdat-prodayuschuyu-kartochku",
+    published_at: "2025-01-15",
+    views: 1247,
+  },
+  {
+    id: "2",
+    title: "SEO-оптимизация описаний: 10 правил для роста продаж",
+    excerpt: "Узнайте, как правильно составлять описания товаров, чтобы попадать в топ поисковой выдачи маркетплейса.",
+    tag: "Советы",
+    slug: "seo-optimizaciya-opisaniy",
+    published_at: "2025-01-12",
+    views: 892,
+  },
+  {
+    id: "3",
+    title: "Обновление WBGen: новые шаблоны карточек",
+    excerpt: "Добавили 15 новых профессиональных шаблонов для разных категорий товаров. Теперь создавать карточки ещё проще!",
+    tag: "Обновление",
+    slug: "novye-shablony-kartochek",
+    published_at: "2025-01-10",
+    views: 654,
+  },
+  {
+    id: "4",
+    title: "Кейс: рост продаж на 340% после редизайна карточек",
+    excerpt: "Реальная история селлера косметики, который переоформил карточки с помощью WBGen и увеличил конверсию втрое.",
+    tag: "Кейс",
+    slug: "keys-rost-prodazh-340",
+    published_at: "2025-01-08",
+    views: 1503,
+  },
+  {
+    id: "5",
+    title: "Тренды оформления карточек в 2025 году",
+    excerpt: "Какие визуальные решения сейчас в моде на маркетплейсах и как это использовать для повышения CTR.",
+    tag: "Новости",
+    slug: "trendy-oformleniya-2025",
+    published_at: "2025-01-05",
+    views: 728,
+  },
+  {
+    id: "6",
+    title: "Штрих-коды для Wildberries: полный гайд",
+    excerpt: "Всё о генерации, размещении и требованиях к штрих-кодам. Избегаем частых ошибок при маркировке.",
+    tag: "Гайд",
+    slug: "shtrih-kody-polnyy-gayd",
+    published_at: "2025-01-03",
+    views: 1089,
+  },
+];
 
 const tagColors: Record<string, string> = {
   "Гайд": "bg-blue-500/20 text-blue-400",
@@ -29,30 +72,6 @@ const tagColors: Record<string, string> = {
 };
 
 const Blog = () => {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  const loadPosts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('is_published', true)
-        .order('published_at', { ascending: false });
-
-      if (error) throw error;
-      setPosts(data || []);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: 'numeric',
@@ -82,73 +101,58 @@ const Blog = () => {
 
       <section className="py-16 sm:py-24">
         <div className="container mx-auto px-4 sm:px-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="w-8 h-8 border-2 border-[hsl(268,83%,60%)] border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {posts.map((post, index) => (
-                <motion.article
-                  key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="glass-card rounded-2xl overflow-hidden group"
-                >
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${tagColors[post.tag] || 'bg-gray-500/20 text-gray-400'}`}>
-                        {post.tag}
-                      </span>
-                      <div className="flex items-center gap-1 text-white/40 text-xs">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(post.published_at || post.created_at)}
-                      </div>
-                    </div>
-                    
-                    <h2 className="text-lg font-bold text-white mb-3 group-hover:text-[hsl(268,83%,65%)] transition-colors line-clamp-2">
-                      {post.title}
-                    </h2>
-                    
-                    <p className="text-white/60 text-sm mb-4 line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-white/40 text-xs">
-                        <Eye className="w-3 h-3" />
-                        {post.views} просмотров
-                      </div>
-                      <Link 
-                        to={`/blog/${post.slug}`}
-                        className="text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 hover:gap-2 transition-all"
-                      >
-                        Читать <ArrowRight className="w-4 h-4" />
-                      </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {placeholderPosts.map((post, index) => (
+              <motion.article
+                key={post.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="glass-card rounded-2xl overflow-hidden group"
+              >
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${tagColors[post.tag] || 'bg-gray-500/20 text-gray-400'}`}>
+                      {post.tag}
+                    </span>
+                    <div className="flex items-center gap-1 text-white/40 text-xs">
+                      <Clock className="w-3 h-3" />
+                      {formatDate(post.published_at)}
                     </div>
                   </div>
-                </motion.article>
-              ))}
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass-card rounded-3xl p-8 sm:p-12 max-w-2xl mx-auto text-center"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] flex items-center justify-center mx-auto mb-6">
-                <FileText className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                Скоро здесь появятся статьи
-              </h2>
-              <p className="text-white/60 mb-8">
-                Мы готовим полезный контент для селлеров: гайды по оформлению карточек, 
-                секреты SEO-продвижения, разборы кейсов и новости маркетплейсов.
-              </p>
-            </motion.div>
-          )}
+                  
+                  <h2 className="text-lg font-bold text-white mb-3 group-hover:text-[hsl(268,83%,65%)] transition-colors line-clamp-2">
+                    {post.title}
+                  </h2>
+                  
+                  <p className="text-white/60 text-sm mb-4 line-clamp-3">
+                    {post.excerpt}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-white/40 text-xs">
+                      <Eye className="w-3 h-3" />
+                      {post.views} просмотров
+                    </div>
+                    <span className="text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 opacity-50 cursor-not-allowed">
+                      Скоро <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-12 text-center"
+          >
+            <p className="text-white/50 text-sm">
+              Полноценный блог с возможностью чтения статей появится совсем скоро
+            </p>
+          </motion.div>
         </div>
       </section>
 
