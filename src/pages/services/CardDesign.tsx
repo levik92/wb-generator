@@ -20,6 +20,7 @@ import {
   Video,
   Barcode,
 } from "lucide-react";
+import heroImage from "@/assets/service-cards-hero.jpg";
 
 const features = [
   {
@@ -161,6 +162,7 @@ const CardDesign = () => {
         ctaText="Создать карточку"
         secondaryCtaText="Смотреть примеры"
         secondaryCtaLink="/cases"
+        heroImage={heroImage}
       />
 
       <ServiceFeatures

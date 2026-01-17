@@ -18,6 +18,7 @@ import {
   FileText,
   Barcode,
 } from "lucide-react";
+import heroImage from "@/assets/service-video-hero.jpg";
 
 const features = [
   {
@@ -133,6 +134,7 @@ const VideoGeneration = () => {
           { label: "Видео-генерация" },
         ]}
         isComingSoon={true}
+        heroImage={heroImage}
       />
 
       <ServiceFeatures

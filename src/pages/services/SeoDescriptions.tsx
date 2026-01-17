@@ -18,6 +18,7 @@ import {
   Video,
   Barcode,
 } from "lucide-react";
+import heroImage from "@/assets/service-seo-hero.jpg";
 
 const features = [
   {
@@ -154,6 +155,7 @@ const SeoDescriptions = () => {
         ctaText="Создать описание"
         secondaryCtaText="Смотреть тарифы"
         secondaryCtaLink="/pricing"
+        heroImage={heroImage}
       />
 
       <ServiceFeatures

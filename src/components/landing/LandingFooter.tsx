@@ -9,7 +9,7 @@ const productLinks = [
 ];
 
 const resourceLinks = [
-  { label: "Кейсы", href: "/cases" },
+  { label: "Кейсы", href: "/cases", external: true },
   { label: "База знаний", href: "/baza-znaniy" },
   { label: "Блог", href: "/blog" },
   { label: "Тарифы", href: "/pricing" },
@@ -69,9 +69,15 @@ export const LandingFooter = () => {
             <ul className="space-y-3 text-sm">
               {resourceLinks.map((link) => (
                 <li key={link.href}>
-                  <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
-                    {link.label}
-                  </Link>
+                  {link.external ? (
+                    <Link to={link.href} target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
