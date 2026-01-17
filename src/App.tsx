@@ -18,6 +18,18 @@ import AdminLogin from "./pages/AdminLogin";
 import Partner from "./pages/Partner";
 import PartnerAgreement from "./pages/PartnerAgreement";
 
+// Service pages
+import CardDesign from "./pages/services/CardDesign";
+import SeoDescriptions from "./pages/services/SeoDescriptions";
+import BarcodeGenerator from "./pages/services/BarcodeGenerator";
+import VideoGeneration from "./pages/services/VideoGeneration";
+
+// Resource pages
+import Blog from "./pages/Blog";
+import KnowledgeBase from "./pages/KnowledgeBase";
+import PricingPage from "./pages/PricingPage";
+import PartnersPage from "./pages/PartnersPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -58,6 +70,19 @@ const App = () => (
           } />
           <Route path="/partner-agreement" element={<PartnerAgreement />} />
           <Route path="/cases" element={<Cases />} />
+          
+          {/* Product/Service pages */}
+          <Route path="/sozdanie-kartochek" element={<CardDesign />} />
+          <Route path="/seo-opisaniya" element={<SeoDescriptions />} />
+          <Route path="/generator-shk" element={<BarcodeGenerator />} />
+          <Route path="/video-generaciya" element={<VideoGeneration />} />
+          
+          {/* Resource pages */}
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/baza-znaniy" element={<KnowledgeBase />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/partners" element={<PartnersPage />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

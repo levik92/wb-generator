@@ -1,32 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main pages -->
   <url>
     <loc>https://wbgen.ru/</loc>
-    <lastmod>2025-01-01</lastmod>
+    <lastmod>2026-01-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://wbgen.ru/auth</loc>
-    <lastmod>2025-01-01</lastmod>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product pages -->
+  <url>
+    <loc>https://wbgen.ru/sozdanie-kartochek</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wbgen.ru/seo-opisaniya</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wbgen.ru/generator-shk</loc>
+    <lastmod>2026-01-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://wbgen.ru/video-generaciya</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Resource pages -->
+  <url>
+    <loc>https://wbgen.ru/cases</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wbgen.ru/blog</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wbgen.ru/baza-znaniy</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Commercial pages -->
+  <url>
+    <loc>https://wbgen.ru/pricing</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wbgen.ru/partners</loc>
+    <lastmod>2026-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Legal pages -->
+  <url>
     <loc>https://wbgen.ru/privacy</loc>
-    <lastmod>2025-01-01</lastmod>
+    <lastmod>2026-01-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://wbgen.ru/terms</loc>
-    <lastmod>2025-01-01</lastmod>
+    <lastmod>2026-01-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://wbgen.ru/partner-agreement</loc>
-    <lastmod>2025-01-01</lastmod>
+    <lastmod>2026-01-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
