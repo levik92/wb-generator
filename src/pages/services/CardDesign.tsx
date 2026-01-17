@@ -6,9 +6,11 @@ import {
   ServiceFAQ,
   ServiceCTA,
   RelatedServices,
+  BenefitsSection,
+  StepsSection,
+  TestimonialsSection,
+  StatsSection,
 } from "@/components/services";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { ExamplesSection } from "@/components/landing/ExamplesSection";
 import {
   Sparkles,
   Clock,
@@ -19,6 +21,13 @@ import {
   FileText,
   Video,
   Barcode,
+  Upload,
+  Wand2,
+  Download,
+  Users,
+  ShoppingCart,
+  Award,
+  Target,
 } from "lucide-react";
 import heroImage from "@/assets/service-cards-hero.jpg";
 
@@ -58,6 +67,84 @@ const features = [
     title: "Готовые PNG",
     description: "Скачивайте в нужном разрешении, готовые для загрузки на Wildberries и Ozon",
     color: "from-indigo-500 to-purple-600",
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Загрузите фото",
+    description: "Добавьте фотографию товара в хорошем качестве на белом или нейтральном фоне",
+    icon: Upload,
+  },
+  {
+    number: "02",
+    title: "Опишите товар",
+    description: "Укажите название, категорию и ключевые преимущества, которые хотите подчеркнуть",
+    icon: FileText,
+  },
+  {
+    number: "03",
+    title: "Выберите стиль",
+    description: "Подберите визуальный стиль из 10+ готовых вариантов под вашу нишу и аудиторию",
+    icon: Wand2,
+  },
+  {
+    number: "04",
+    title: "Скачайте карточки",
+    description: "Получите готовые PNG-файлы в высоком разрешении для загрузки на маркетплейс",
+    icon: Download,
+  },
+];
+
+const benefits = [
+  {
+    title: "Экономия до 50 000₽ в месяц",
+    description: "Не нужно платить дизайнеру — создавайте карточки самостоятельно за минуты",
+  },
+  {
+    title: "Увеличение CTR на 40-60%",
+    description: "Профессиональная инфографика привлекает больше кликов в каталоге",
+  },
+  {
+    title: "Рост конверсии в покупку",
+    description: "Качественные карточки повышают доверие и стимулируют продажи",
+  },
+  {
+    title: "Единый стиль для всех товаров",
+    description: "Создавайте узнаваемый бренд с помощью стилизованных карточек",
+  },
+  {
+    title: "Быстрый выход на маркетплейс",
+    description: "Запускайте новые товары за часы вместо недель ожидания дизайна",
+  },
+];
+
+const stats = [
+  { value: "15 000+", label: "карточек создано", icon: Image },
+  { value: "3 000+", label: "селлеров", icon: Users },
+  { value: "+42%", label: "средний рост CTR", icon: TrendingUp },
+  { value: "4.8/5", label: "оценка сервиса", icon: Award },
+];
+
+const testimonials = [
+  {
+    name: "Анна К.",
+    role: "Селлер косметики",
+    content: "Раньше платила дизайнеру 3000₽ за карточку и ждала неделю. Теперь делаю сама за 5 минут, и результат даже лучше! CTR вырос на 35%.",
+    rating: 5,
+  },
+  {
+    name: "Михаил Д.",
+    role: "Поставщик электроники",
+    content: "Запустил 50 новых SKU за месяц благодаря WBGen. Карточки выглядят профессионально, продажи пошли сразу.",
+    rating: 5,
+  },
+  {
+    name: "Елена С.",
+    role: "Продавец одежды",
+    content: "Удобно, что можно выбирать стили. Для разных категорий использую разное оформление — покупатели замечают и лучше кликают.",
+    rating: 5,
   },
 ];
 
@@ -165,15 +252,31 @@ const CardDesign = () => {
         heroImage={heroImage}
       />
 
+      <StatsSection stats={stats} />
+
       <ServiceFeatures
         title="Почему выбирают WBGen"
         subtitle="Современные ИИ-технологии для создания продающих карточек"
         features={features}
       />
 
-      <HowItWorksSection />
+      <StepsSection
+        title="Как это работает"
+        subtitle="4 простых шага до готовых карточек"
+        steps={steps}
+      />
 
-      <ExamplesSection />
+      <BenefitsSection
+        title="Что вы получите"
+        subtitle="Реальные результаты для вашего бизнеса на маркетплейсах"
+        benefits={benefits}
+      />
+
+      <TestimonialsSection
+        title="Отзывы селлеров"
+        subtitle="Что говорят наши пользователи"
+        testimonials={testimonials}
+      />
 
       <ServiceFAQ items={faqItems} />
 

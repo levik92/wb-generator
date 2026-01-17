@@ -6,6 +6,10 @@ import {
   ServiceFAQ,
   ServiceCTA,
   RelatedServices,
+  BenefitsSection,
+  StepsSection,
+  TestimonialsSection,
+  StatsSection,
 } from "@/components/services";
 import {
   FileText,
@@ -17,6 +21,12 @@ import {
   Image,
   Video,
   Barcode,
+  PenTool,
+  Sparkles,
+  Copy,
+  CheckCircle,
+  Users,
+  Award,
 } from "lucide-react";
 import heroImage from "@/assets/service-seo-hero.jpg";
 
@@ -56,6 +66,84 @@ const features = [
     title: "Структура продаж",
     description: "Описание строится по формуле AIDA для максимальной конверсии",
     color: "from-indigo-500 to-purple-600",
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Введите данные",
+    description: "Укажите название товара, категорию и основные характеристики продукта",
+    icon: PenTool,
+  },
+  {
+    number: "02",
+    title: "ИИ анализирует",
+    description: "Нейросеть изучает конкурентов и подбирает релевантные ключевые слова",
+    icon: Sparkles,
+  },
+  {
+    number: "03",
+    title: "Генерация текста",
+    description: "Создаётся уникальное продающее описание по формуле AIDA",
+    icon: FileText,
+  },
+  {
+    number: "04",
+    title: "Скопируйте и используйте",
+    description: "Готовое описание можно сразу вставить в карточку товара",
+    icon: Copy,
+  },
+];
+
+const benefits = [
+  {
+    title: "Рост позиций в поиске",
+    description: "Ключевые слова помогают товару попадать в топ выдачи Wildberries",
+  },
+  {
+    title: "Увеличение конверсии на 35%",
+    description: "Продающая структура текста мотивирует покупателей к заказу",
+  },
+  {
+    title: "Экономия времени",
+    description: "Вместо часов работы копирайтера — готовый текст за 30 секунд",
+  },
+  {
+    title: "Уникальность контента",
+    description: "Каждое описание генерируется индивидуально, без шаблонов",
+  },
+  {
+    title: "Соответствие требованиям WB",
+    description: "Оптимальная длина и структура для алгоритмов маркетплейса",
+  },
+];
+
+const stats = [
+  { value: "50 000+", label: "описаний создано", icon: FileText },
+  { value: "3 000+", label: "селлеров", icon: Users },
+  { value: "+35%", label: "средний рост CTR", icon: TrendingUp },
+  { value: "30 сек", label: "на генерацию", icon: Zap },
+];
+
+const testimonials = [
+  {
+    name: "Ольга М.",
+    role: "Продавец товаров для дома",
+    content: "Описания реально работают! После замены текстов на сгенерированные продажи выросли на 28%. Теперь все новые карточки делаю через WBGen.",
+    rating: 5,
+  },
+  {
+    name: "Артём В.",
+    role: "Селлер спортивных товаров",
+    content: "Главное — ключевые слова подбираются автоматически. Раньше я не знал, какие запросы использовать, теперь ИИ всё делает за меня.",
+    rating: 5,
+  },
+  {
+    name: "Наталья К.",
+    role: "Поставщик косметики",
+    content: "Удобно, что можно указать свои ключи и особенности товара. Получается уникальное описание, которое точно передаёт преимущества.",
+    rating: 4,
   },
 ];
 
@@ -158,10 +246,30 @@ const SeoDescriptions = () => {
         heroImage={heroImage}
       />
 
+      <StatsSection stats={stats} />
+
       <ServiceFeatures
         title="Возможности генератора описаний"
         subtitle="Умный ИИ для создания продающих текстов"
         features={features}
+      />
+
+      <StepsSection
+        title="Как создать описание"
+        subtitle="От ввода данных до готового текста за минуту"
+        steps={steps}
+      />
+
+      <BenefitsSection
+        title="Преимущества для вашего бизнеса"
+        subtitle="Почему SEO-описания увеличивают продажи"
+        benefits={benefits}
+      />
+
+      <TestimonialsSection
+        title="Отзывы пользователей"
+        subtitle="Реальные результаты селлеров"
+        testimonials={testimonials}
       />
 
       <ServiceFAQ items={faqItems} />

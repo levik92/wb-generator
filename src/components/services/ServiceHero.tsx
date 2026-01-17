@@ -40,49 +40,36 @@ export const ServiceHero = ({
 }: ServiceHeroProps) => {
   return (
     <section className="relative pt-24 pb-16 sm:pt-32 sm:pb-24 overflow-hidden">
-      {/* Animated gradient background */}
+      {/* Subtle gradient background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(268,83%,15%)/30] via-transparent to-transparent" />
+        {/* Base gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,8%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
         
-        {/* Animated mesh gradient */}
-        <div className="absolute inset-0">
-          <div 
-            className="absolute w-[800px] h-[800px] -top-40 -left-40 rounded-full opacity-30"
-            style={{
-              background: 'radial-gradient(circle, hsl(268, 83%, 50%) 0%, transparent 70%)',
-              animation: 'pulse-glow 8s ease-in-out infinite',
-            }}
-          />
-          <div 
-            className="absolute w-[600px] h-[600px] top-20 right-0 rounded-full opacity-20"
-            style={{
-              background: 'radial-gradient(circle, hsl(280, 90%, 55%) 0%, transparent 70%)',
-              animation: 'pulse-glow 10s ease-in-out infinite reverse',
-            }}
-          />
-          <div 
-            className="absolute w-[500px] h-[500px] bottom-0 left-1/3 rounded-full opacity-25"
-            style={{
-              background: 'radial-gradient(circle, hsl(250, 80%, 50%) 0%, transparent 70%)',
-              animation: 'pulse-glow 12s ease-in-out infinite',
-            }}
-          />
-        </div>
-        
-        {/* Shimmer effect */}
+        {/* Soft ambient glow - very subtle */}
         <div 
-          className="absolute inset-0 opacity-10"
+          className="absolute w-[1000px] h-[1000px] -top-1/2 -left-1/4 rounded-full opacity-[0.08]"
           style={{
-            background: 'linear-gradient(45deg, transparent 30%, hsl(268, 83%, 60%) 50%, transparent 70%)',
-            backgroundSize: '200% 200%',
-            animation: 'shimmer 8s linear infinite',
+            background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)',
           }}
         />
+        <div 
+          className="absolute w-[800px] h-[800px] top-1/4 -right-1/4 rounded-full opacity-[0.06]"
+          style={{
+            background: 'radial-gradient(circle, hsl(280, 60%, 45%) 0%, transparent 60%)',
+          }}
+        />
+        
+        {/* Subtle noise texture */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        />
+        
+        {/* Very subtle gradient line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(268,70%,50%)/20] to-transparent" />
       </div>
-      
-      {/* Animated orbs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-[hsl(268,83%,60%)/15] rounded-full blur-3xl animate-float-slow" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-[hsl(280,90%,50%)/10] rounded-full blur-3xl animate-float-reverse" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <Breadcrumbs items={breadcrumbs} />
@@ -180,40 +167,47 @@ export const ServiceHero = ({
             )}
           </motion.div>
 
-          {/* Hero Image */}
+          {/* Hero Image - styled like product UI preview */}
           {heroImage && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, x: 50 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
               className="hidden lg:block relative"
             >
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/20">
-                <img 
-                  src={heroImage} 
-                  alt={title}
-                  className="w-full h-auto rounded-2xl"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[hsl(240,10%,4%)/50] to-transparent" />
+              {/* Browser-like frame */}
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[hsl(240,10%,8%)]">
+                {/* Window header */}
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="px-4 py-1 rounded-md bg-white/5 text-xs text-white/30 font-mono">
+                      wbgen.ru
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Image content */}
+                <div className="relative">
+                  <img 
+                    src={heroImage} 
+                    alt={title}
+                    className="w-full h-auto"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(240,10%,4%)/60] via-transparent to-transparent" />
+                </div>
               </div>
-              {/* Glow effect behind image */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-[hsl(268,83%,50%)/30] to-[hsl(280,90%,50%)/30] rounded-3xl blur-2xl -z-10" />
+              
+              {/* Subtle glow behind */}
+              <div className="absolute -inset-8 bg-gradient-to-br from-[hsl(268,60%,40%)/15] to-[hsl(280,50%,35%)/10] rounded-3xl blur-3xl -z-10" />
             </motion.div>
           )}
         </div>
       </div>
-      
-      {/* CSS for animations */}
-      <style>{`
-        @keyframes pulse-glow {
-          0%, 100% { transform: scale(1); opacity: 0.3; }
-          50% { transform: scale(1.1); opacity: 0.5; }
-        }
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </section>
   );
 };
