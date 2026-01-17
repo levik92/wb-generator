@@ -16,6 +16,7 @@ import { AdminNews } from "@/components/admin/AdminNews";
 import { AdminPartners } from "@/components/admin/AdminPartners";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminBanners } from "@/components/admin/AdminBanners";
+import { AdminBlog } from "@/components/admin/AdminBlog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 interface User {
@@ -28,7 +29,7 @@ interface User {
   created_at: string;
   referral_code: string;
 }
-type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'promocodes' | 'news' | 'pricing' | 'banners';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'promocodes' | 'news' | 'pricing' | 'banners' | 'blog';
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
@@ -142,6 +143,8 @@ export default function Admin() {
         return <AdminPricing />;
       case 'banners':
         return <AdminBanners />;
+      case 'blog':
+        return <AdminBlog />;
       default:
         return <AdminAnalytics users={users} />;
     }

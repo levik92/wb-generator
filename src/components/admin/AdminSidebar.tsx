@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Handshake,
   DollarSign,
-  LayoutDashboard
+  LayoutDashboard,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -65,6 +66,11 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'news',
       label: 'Новости',
       icon: Megaphone,
+    },
+    {
+      id: 'blog',
+      label: 'Блог',
+      icon: FileText,
     }
   ];
 
