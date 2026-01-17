@@ -14,7 +14,8 @@ const CARD_STAGES = [
   { name: "Макро", key: "macro" },
   { name: "До/После", key: "beforeAfter" },
   { name: "Комплект", key: "bundle" },
-  { name: "Гарантия", key: "guarantee" }
+  { name: "Гарантия", key: "guarantee" },
+  { name: "Редактирование основная", key: "mainEdit" }
 ];
 
 serve(async (req) => {
