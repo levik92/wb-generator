@@ -1,3 +1,4 @@
+# Main crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -13,8 +14,31 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# All other crawlers
 User-agent: *
 Allow: /
+
+# Product pages
+Allow: /sozdanie-kartochek
+Allow: /seo-opisaniya
+Allow: /generator-shk
+Allow: /video-generaciya
+
+# Resource pages
+Allow: /cases
+Allow: /blog
+Allow: /baza-znaniy
+
+# Commercial pages
+Allow: /pricing
+Allow: /partners
+
+# Legal pages
+Allow: /privacy
+Allow: /terms
+Allow: /partner-agreement
+
+# Protected areas
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /admin-login

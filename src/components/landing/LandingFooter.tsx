@@ -1,15 +1,41 @@
 import { Link } from "react-router-dom";
 import { Zap } from "lucide-react";
 
+const productLinks = [
+  { label: "Создание карточек", href: "/sozdanie-kartochek" },
+  { label: "SEO-описания", href: "/seo-opisaniya" },
+  { label: "Генератор ШК", href: "/generator-shk" },
+  { label: "Видео-генерация", href: "/video-generaciya" },
+];
+
+const resourceLinks = [
+  { label: "Кейсы", href: "/cases" },
+  { label: "База знаний", href: "/baza-znaniy" },
+  { label: "Блог", href: "/blog" },
+  { label: "Тарифы", href: "/pricing" },
+];
+
+const companyLinks = [
+  { label: "Партнёрам", href: "/partners" },
+  { label: "Telegram", href: "https://t.me/wbgen_official", external: true },
+  { label: "Поддержка", href: "https://t.me/wbgen_support/", external: true },
+];
+
+const legalLinks = [
+  { label: "Политика конфиденциальности", href: "/privacy" },
+  { label: "Договор оферты", href: "/terms" },
+  { label: "Партнёрское соглашение", href: "/partner-agreement" },
+];
+
 export const LandingFooter = () => {
   return (
     <footer className="relative py-16 border-t border-white/10">
       <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Logo */}
-          <div className="md:col-span-2">
+          <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
@@ -18,28 +44,80 @@ export const LandingFooter = () => {
                 WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
               </span>
             </Link>
-            <p className="text-white/50 text-sm max-w-md">
-              Все инструменты для продавцов WB в одном месте: генерация фото, SEO-описаний и штрихкодов с AI.
+            <p className="text-white/50 text-sm">
+              ИИ-инструменты для селлеров маркетплейсов
             </p>
           </div>
 
-          {/* Links */}
+          {/* Product */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Документы</h3>
+            <h3 className="text-white font-semibold mb-4">Продукт</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/privacy" className="text-white/50 hover:text-white transition-colors">Политика конфиденциальности</Link></li>
-              <li><Link to="/terms" className="text-white/50 hover:text-white transition-colors">Договор оферты</Link></li>
-              <li><Link to="/partner" className="text-white/50 hover:text-white transition-colors">Партнерам</Link></li>
+              {productLinks.map((link) => (
+                <li key={link.href}>
+                  <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Resources */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Контакты</h3>
+            <h3 className="text-white font-semibold mb-4">Ресурсы</h3>
             <ul className="space-y-3 text-sm">
-              <li><a href="mailto:info@wbgen.ru" className="text-white/50 hover:text-white transition-colors">info@wbgen.ru</a></li>
-              <li><a href="https://t.me/wbgen_official" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">Telegram-группа</a></li>
-              <li><a href="https://t.me/wbgen_support/" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">Поддержка</a></li>
+              {resourceLinks.map((link) => (
+                <li key={link.href}>
+                  <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Компания</h3>
+            <ul className="space-y-3 text-sm">
+              {companyLinks.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/50 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+              <li>
+                <a href="mailto:info@wbgen.ru" className="text-white/50 hover:text-white transition-colors">
+                  info@wbgen.ru
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Документы</h3>
+            <ul className="space-y-3 text-sm">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

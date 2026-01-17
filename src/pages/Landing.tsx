@@ -7,10 +7,10 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { ExamplesSection } from "@/components/landing/ExamplesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ComparisonSection } from "@/components/landing/ComparisonSection";
-import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQSection } from "@/components/landing/FAQSection";
 import { CTASection } from "@/components/landing/CTASection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { PricingTeaser } from "@/components/services/PricingTeaser";
 import YandexMetrika from "@/components/YandexMetrika";
 
 const Landing = () => {
@@ -52,7 +52,7 @@ const Landing = () => {
           <HowItWorksSection />
           <ComparisonSection />
           <section id="pricing">
-            <PricingSection />
+            <PricingTeaser />
           </section>
           <FAQSection />
           <CTASection />
