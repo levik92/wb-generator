@@ -39,7 +39,7 @@ export const ServiceHero = ({
   heroImage,
 }: ServiceHeroProps) => {
   return (
-    <section className="relative pt-24 pb-16 sm:pt-32 sm:pb-24 overflow-hidden">
+    <section className="relative pt-28 pb-20 sm:pt-36 sm:pb-32 lg:pt-44 lg:pb-40 overflow-hidden">
       {/* Subtle gradient background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Base gradient overlay */}
@@ -47,13 +47,13 @@ export const ServiceHero = ({
         
         {/* Soft ambient glow - very subtle */}
         <div 
-          className="absolute w-[1000px] h-[1000px] -top-1/2 -left-1/4 rounded-full opacity-[0.08]"
+          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.06]"
           style={{
             background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)',
           }}
         />
         <div 
-          className="absolute w-[800px] h-[800px] top-1/4 -right-1/4 rounded-full opacity-[0.06]"
+          className="absolute w-[900px] h-[900px] top-1/4 -right-1/4 rounded-full opacity-[0.05]"
           style={{
             background: 'radial-gradient(circle, hsl(280, 60%, 45%) 0%, transparent 60%)',
           }}
@@ -61,39 +61,39 @@ export const ServiceHero = ({
         
         {/* Subtle noise texture */}
         <div 
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
           }}
         />
         
         {/* Very subtle gradient line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(268,70%,50%)/20] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(268,70%,50%)/15] to-transparent" />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <Breadcrumbs items={breadcrumbs} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-2xl"
+            className="max-w-2xl lg:pr-8"
           >
             {badge && (
-              <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/60 mb-8">
                 {badge}
               </span>
             )}
 
             {isComingSoon && (
-              <span className="inline-block px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-sm text-amber-400 mb-6">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-sm text-amber-400 mb-8">
                 🚧 В разработке
               </span>
             )}
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
               {title}
               <br />
               <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)] bg-clip-text text-transparent">
@@ -101,11 +101,11 @@ export const ServiceHero = ({
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/60 mb-8 max-w-2xl">
+            <p className="text-lg sm:text-xl text-white/50 mb-10 max-w-xl leading-relaxed">
               {description}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 mb-14">
               {!isComingSoon ? (
                 <>
                   <Link to={ctaLink}>
@@ -122,7 +122,7 @@ export const ServiceHero = ({
                       <Button 
                         size="lg" 
                         variant="outline"
-                        className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 px-8 py-6 text-lg"
+                        className="w-full sm:w-auto border-white/15 text-white hover:bg-white/5 px-8 py-6 text-lg"
                       >
                         {secondaryCtaText}
                       </Button>
@@ -130,8 +130,8 @@ export const ServiceHero = ({
                   )}
                 </>
               ) : (
-                <div className="glass-card rounded-xl p-6 max-w-md">
-                  <p className="text-white/70 mb-4">
+                <div className="rounded-2xl p-6 max-w-md bg-white/[0.03] border border-white/10">
+                  <p className="text-white/60 mb-4">
                     Оставьте email и мы сообщим о запуске первыми
                   </p>
                   <div className="flex gap-2">
@@ -149,7 +149,7 @@ export const ServiceHero = ({
             </div>
 
             {stats && stats.length > 0 && (
-              <div className="flex flex-wrap gap-8 sm:gap-12">
+              <div className="flex flex-wrap gap-10 sm:gap-14">
                 {stats.map((stat, index) => (
                   <motion.div
                     key={index}
@@ -157,35 +157,35 @@ export const ServiceHero = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                   >
-                    <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
+                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1.5">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-white/50">{stat.label}</div>
+                    <div className="text-sm text-white/40">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
             )}
           </motion.div>
 
-          {/* Hero Image - styled like product UI preview */}
+          {/* Hero Image - extending beyond the edge */}
           {heroImage && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="hidden lg:block relative"
+              className="hidden lg:block relative -mr-[15%] xl:-mr-[20%] 2xl:-mr-[25%]"
             >
               {/* Browser-like frame */}
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[hsl(240,10%,8%)]">
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[hsl(240,10%,6%)] shadow-2xl shadow-black/40">
                 {/* Window header */}
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
                   <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                    <div className="w-3 h-3 rounded-full bg-white/20" />
+                    <div className="w-3 h-3 rounded-full bg-white/15" />
+                    <div className="w-3 h-3 rounded-full bg-white/10" />
                   </div>
                   <div className="flex-1 flex justify-center">
-                    <div className="px-4 py-1 rounded-md bg-white/5 text-xs text-white/30 font-mono">
+                    <div className="px-4 py-1 rounded-md bg-white/5 text-xs text-white/25 font-mono">
                       wbgen.ru
                     </div>
                   </div>
@@ -198,12 +198,13 @@ export const ServiceHero = ({
                     alt={title}
                     className="w-full h-auto"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(240,10%,4%)/60] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(240,10%,4%)/50] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[hsl(240,10%,4%)/30]" />
                 </div>
               </div>
               
               {/* Subtle glow behind */}
-              <div className="absolute -inset-8 bg-gradient-to-br from-[hsl(268,60%,40%)/15] to-[hsl(280,50%,35%)/10] rounded-3xl blur-3xl -z-10" />
+              <div className="absolute -inset-12 bg-gradient-to-br from-[hsl(268,60%,35%)/10] to-[hsl(280,50%,30%)/8] rounded-3xl blur-3xl -z-10" />
             </motion.div>
           )}
         </div>
