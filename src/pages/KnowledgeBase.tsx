@@ -394,13 +394,13 @@ const KnowledgeBase = () => {
                   <ul className="space-y-2">
                     {cat.articles.map((article, articleIndex) => (
                       <li key={articleIndex}>
-                        <a 
-                          href={`#${article.id}`}
+                        <Link 
+                          to={`/baza-znaniy/${article.id}`}
                           className="text-sm text-white/70 hover:text-[hsl(268,83%,65%)] transition-colors flex items-center gap-2"
                         >
                           <ArrowRight className="w-3 h-3" />
                           {article.title}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -470,17 +470,19 @@ const KnowledgeBase = () => {
 
             <div className="space-y-6">
               {Object.entries(articleContent).slice(0, 3).map(([id, article]) => (
-                <div key={id} id={id} className="glass-card rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">{article.title}</h3>
-                  <div className="text-white/60 text-sm prose prose-invert prose-sm max-w-none">
-                    {article.content.split('\n').slice(0, 5).map((line, i) => (
-                      <p key={i}>{line.replace(/^#+\s*/, '').replace(/\*\*/g, '')}</p>
-                    ))}
+                <Link key={id} to={`/baza-znaniy/${id}`} className="block">
+                  <div className="glass-card rounded-xl p-6 hover:bg-white/5 transition-colors">
+                    <h3 className="text-lg font-semibold text-white mb-3">{article.title}</h3>
+                    <div className="text-white/60 text-sm prose prose-invert prose-sm max-w-none">
+                      {article.content.split('\n').slice(0, 5).map((line, i) => (
+                        <p key={i}>{line.replace(/^#+\s*/, '').replace(/\*\*/g, '')}</p>
+                      ))}
+                    </div>
+                    <span className="mt-4 text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Читать полностью <ArrowRight className="w-4 h-4" />
+                    </span>
                   </div>
-                  <button className="mt-4 text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 hover:gap-2 transition-all">
-                    Читать полностью <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
+                </Link>
               ))}
             </div>
           </motion.div>

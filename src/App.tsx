@@ -27,6 +27,7 @@ import VideoGeneration from "./pages/services/VideoGeneration";
 // Resource pages
 import Blog from "./pages/Blog";
 import KnowledgeBase from "./pages/KnowledgeBase";
+import KnowledgeArticle from "./pages/KnowledgeArticle";
 import PricingPage from "./pages/PricingPage";
 import PartnersPage from "./pages/PartnersPage";
 
@@ -80,6 +81,7 @@ const App = () => (
           {/* Resource pages */}
           <Route path="/blog" element={<Blog />} />
           <Route path="/baza-znaniy" element={<KnowledgeBase />} />
+          <Route path="/baza-znaniy/:articleId" element={<KnowledgeArticle />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/partners" element={<PartnersPage />} />
           
