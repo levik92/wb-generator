@@ -6,6 +6,9 @@ import {
   ServiceFAQ,
   ServiceCTA,
   RelatedServices,
+  BenefitsSection,
+  StepsSection,
+  StatsSection,
 } from "@/components/services";
 import {
   Barcode,
@@ -16,6 +19,12 @@ import {
   QrCode,
   Image,
   Video,
+  PenTool,
+  Sparkles,
+  Users,
+  Gift,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
 import heroImage from "@/assets/service-barcode-hero.jpg";
 
@@ -56,6 +65,63 @@ const features = [
     description: "Создавайте этикетки для нескольких товаров одновременно",
     color: "from-indigo-500 to-purple-600",
   },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Введите данные",
+    description: "Укажите артикул, название товара и баркод для генерации",
+    icon: PenTool,
+  },
+  {
+    number: "02",
+    title: "Выберите формат",
+    description: "CODE-128 для стандартных этикеток или QR-код для расширенной маркировки",
+    icon: Barcode,
+  },
+  {
+    number: "03",
+    title: "Генерация",
+    description: "Система мгновенно создаёт готовую этикетку в нужном размере",
+    icon: Sparkles,
+  },
+  {
+    number: "04",
+    title: "Скачайте PDF",
+    description: "Получите файл, готовый для печати на любом принтере",
+    icon: Download,
+  },
+];
+
+const benefits = [
+  {
+    title: "Полностью бесплатно",
+    description: "Никаких скрытых платежей, лимитов или подписок — генерируйте сколько нужно",
+  },
+  {
+    title: "Соответствие требованиям WB",
+    description: "Штрихкоды соответствуют всем требованиям Wildberries к маркировке",
+  },
+  {
+    title: "Готово к печати",
+    description: "PDF-файлы оптимизированы для термопринтеров и обычных принтеров",
+  },
+  {
+    title: "Экономия времени",
+    description: "Массовая генерация позволяет создавать сотни этикеток за минуты",
+  },
+  {
+    title: "Нет зависимости от софта",
+    description: "Работает в браузере — не нужно устанавливать программы",
+  },
+];
+
+const stats = [
+  { value: "100 000+", label: "этикеток создано", icon: Barcode },
+  { value: "0₽", label: "навсегда", icon: Gift },
+  { value: "5 000+", label: "селлеров", icon: Users },
+  { value: "5 сек", label: "на генерацию", icon: Clock },
 ];
 
 const faqItems = [
@@ -163,10 +229,24 @@ const BarcodeGenerator = () => {
         heroImage={heroImage}
       />
 
+      <StatsSection stats={stats} />
+
       <ServiceFeatures
         title="Возможности генератора"
         subtitle="Всё необходимое для маркировки товаров"
         features={features}
+      />
+
+      <StepsSection
+        title="Как создать этикетку"
+        subtitle="От ввода данных до готового PDF за секунды"
+        steps={steps}
+      />
+
+      <BenefitsSection
+        title="Почему наш генератор"
+        subtitle="Преимущества бесплатного инструмента для селлеров"
+        benefits={benefits}
       />
 
       <ServiceFAQ items={faqItems} />

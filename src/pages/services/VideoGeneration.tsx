@@ -6,6 +6,8 @@ import {
   ServiceFAQ,
   ServiceCTA,
   RelatedServices,
+  BenefitsSection,
+  StepsSection,
 } from "@/components/services";
 import {
   Video,
@@ -17,6 +19,9 @@ import {
   Image,
   FileText,
   Barcode,
+  Upload,
+  Wand2,
+  Download,
 } from "lucide-react";
 import heroImage from "@/assets/service-video-hero.jpg";
 
@@ -59,6 +64,56 @@ const features = [
   },
 ];
 
+const steps = [
+  {
+    number: "01",
+    title: "Загрузите фото",
+    description: "Добавьте качественные фотографии товара с разных ракурсов",
+    icon: Upload,
+  },
+  {
+    number: "02",
+    title: "Выберите стиль",
+    description: "Подберите тип видео: презентация, демонстрация или lifestyle",
+    icon: Clapperboard,
+  },
+  {
+    number: "03",
+    title: "ИИ создаёт видео",
+    description: "Нейросеть анимирует фотографии и создаёт динамичный ролик",
+    icon: Wand2,
+  },
+  {
+    number: "04",
+    title: "Скачайте MP4",
+    description: "Получите готовый видеоролик для загрузки на маркетплейс",
+    icon: Download,
+  },
+];
+
+const benefits = [
+  {
+    title: "Увеличение CTR на 60%",
+    description: "Видео привлекает больше внимания в каталоге, чем статичные изображения",
+  },
+  {
+    title: "Выделение среди конкурентов",
+    description: "Меньше 5% карточек на WB используют видео — выделитесь на их фоне",
+  },
+  {
+    title: "Демонстрация товара в действии",
+    description: "Покажите преимущества продукта динамично и убедительно",
+  },
+  {
+    title: "Рост времени просмотра",
+    description: "Покупатели дольше изучают карточку с видео",
+  },
+  {
+    title: "Профессиональное качество",
+    description: "ИИ создаёт видео уровня продакшн-студии за минуты",
+  },
+];
+
 const faqItems = [
   {
     question: "Когда будет доступна видео-генерация?",
@@ -79,6 +134,10 @@ const faqItems = [
   {
     question: "Нужно ли специальное оборудование?",
     answer: "Нет, достаточно загрузить фотографии товара. ИИ сам создаст видеоролик на их основе.",
+  },
+  {
+    question: "Можно ли добавить музыку?",
+    answer: "Да, мы планируем библиотеку роялти-фри музыки для добавления к видео. Также можно будет загрузить свой аудиотрек.",
   },
 ];
 
@@ -123,7 +182,7 @@ const VideoGeneration = () => {
         title="Видео-генерация"
         subtitle="для карточек товаров"
         description="Создавайте динамичные видеообложки, которые привлекают внимание в каталоге. ИИ генерирует профессиональные видеоролики на основе фотографий товара."
-        badge="Новая функция"
+        badge="Скоро"
         stats={[
           { value: "+60%", label: "внимания" },
           { value: "15-30 сек", label: "видео" },
@@ -141,6 +200,18 @@ const VideoGeneration = () => {
         title="Что мы разрабатываем"
         subtitle="Возможности, которые скоро станут доступны"
         features={features}
+      />
+
+      <StepsSection
+        title="Как это будет работать"
+        subtitle="Простой процесс создания видео"
+        steps={steps}
+      />
+
+      <BenefitsSection
+        title="Зачем нужно видео на карточке"
+        subtitle="Преимущества видеоконтента для продаж"
+        benefits={benefits}
       />
 
       <ServiceFAQ 

@@ -6,3 +6,7 @@ export { ServiceCTA } from "./ServiceCTA";
 export { RelatedServices } from "./RelatedServices";
 export { PricingTeaser } from "./PricingTeaser";
 export { ServicePageLayout } from "./ServicePageLayout";
+export { BenefitsSection } from "./BenefitsSection";
+export { StepsSection } from "./StepsSection";
+export { TestimonialsSection } from "./TestimonialsSection";
+export { StatsSection } from "./StatsSection";
