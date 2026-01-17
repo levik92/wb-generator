@@ -175,6 +175,51 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          content: string
+          created_at: string
+          excerpt: string
+          id: string
+          is_published: boolean
+          published_at: string | null
+          slug: string
+          tag: string
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          author_id?: string | null
+          content: string
+          created_at?: string
+          excerpt: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug: string
+          tag?: string
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          author_id?: string | null
+          content?: string
+          created_at?: string
+          excerpt?: string
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          slug?: string
+          tag?: string
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       dashboard_banners: {
         Row: {
           created_at: string
