@@ -1,0 +1,44 @@
+import { Helmet } from "react-helmet-async";
+import { ServicePageLayout, ServiceHero, ServiceFAQ, ServiceCTA } from "@/components/services";
+import { PricingSection } from "@/components/landing/PricingSection";
+
+const faqItems = [
+  { question: "Что такое токены?", answer: "Токены — внутренняя валюта сервиса. На генерацию карточек и описаний тратится определённое количество токенов в зависимости от сложности." },
+  { question: "Есть ли подписка?", answer: "Нет обязательной подписки. Вы покупаете пакет токенов и используете их когда нужно. Токены не сгорают." },
+  { question: "Какие способы оплаты?", answer: "Банковские карты Visa, MasterCard, МИР. Оплата через ЮKassa, безопасно и быстро." },
+  { question: "Можно ли вернуть деньги?", answer: "Возврат возможен если вы не использовали токены. Обратитесь в поддержку." },
+  { question: "Есть ли скидки?", answer: "Да, чем больше пакет — тем ниже цена за токен. Также следите за промокодами в нашем Telegram." },
+];
+
+const PricingPage = () => {
+  return (
+    <ServicePageLayout>
+      <Helmet>
+        <title>Тарифы WBGen — цены на генерацию карточек</title>
+        <meta name="description" content="Тарифы WBGen: от 59₽ за карточку. Пакеты токенов без подписки, штрихкоды бесплатно. Выберите подходящий тариф." />
+        <meta property="og:title" content="Тарифы WBGen" />
+        <meta property="og:url" content="https://wbgen.ru/pricing" />
+        <link rel="canonical" href="https://wbgen.ru/pricing" />
+      </Helmet>
+
+      <ServiceHero
+        title="Тарифы"
+        subtitle="WBGen"
+        description="Простое ценообразование без подписок. Покупайте токены и используйте когда нужно — они не сгорают."
+        breadcrumbs={[{ label: "Тарифы" }]}
+        badge="Прозрачные цены"
+        ctaText="Начать бесплатно"
+        secondaryCtaText="Написать в поддержку"
+        secondaryCtaLink="https://t.me/wbgen_support"
+      />
+
+      <PricingSection />
+
+      <ServiceFAQ items={faqItems} title="Вопросы об оплате" />
+
+      <ServiceCTA title="Остались вопросы?" subtitle="Напишите нам и мы подберём оптимальный тариф" ctaText="Написать в Telegram" ctaLink="https://t.me/wbgen_support" />
+    </ServicePageLayout>
+  );
+};
+
+export default PricingPage;
