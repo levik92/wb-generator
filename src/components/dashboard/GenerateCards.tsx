@@ -1391,14 +1391,7 @@ export const GenerateCards = ({
                 <div className="flex items-start gap-3">
                   <Checkbox checked={selectedCards.includes(index)} onChange={() => handleCardToggle(index)} className="mt-0.5" disabled={generating} />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h4 className="font-medium text-sm sm:text-base leading-tight">{stage.name}</h4>
-                      {stage.key === 'mainEdit' && (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] px-1.5 py-0 h-4 font-medium">
-                          Новое
-                        </Badge>
-                      )}
-                    </div>
+                    <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
                   </div>
                 </div>
