@@ -12,7 +12,7 @@ const productItems = [
 ];
 
 const resourceItems = [
-  { label: "Кейсы", href: "/cases", icon: FolderOpen },
+  { label: "Кейсы", href: "/cases", icon: FolderOpen, external: true },
   { label: "База знаний", href: "/baza-znaniy", icon: BookOpen },
   { label: "Блог", href: "/blog", icon: Newspaper },
 ];
@@ -146,16 +146,31 @@ export const LandingHeader = () => {
                     >
                       <div className="bg-[hsl(240,10%,10%)] border border-white/10 rounded-xl p-2 shadow-xl">
                         {resourceItems.map((item) => (
-                          <Link
-                            key={item.href}
-                            to={item.href}
-                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
-                          >
-                            <item.icon className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
-                            <span className="text-sm text-white/70 group-hover:text-white transition-colors">
-                              {item.label}
-                            </span>
-                          </Link>
+                          item.external ? (
+                            <Link
+                              key={item.href}
+                              to={item.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                            >
+                              <item.icon className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
+                              <span className="text-sm text-white/70 group-hover:text-white transition-colors">
+                                {item.label}
+                              </span>
+                            </Link>
+                          ) : (
+                            <Link
+                              key={item.href}
+                              to={item.href}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                            >
+                              <item.icon className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
+                              <span className="text-sm text-white/70 group-hover:text-white transition-colors">
+                                {item.label}
+                              </span>
+                            </Link>
+                          )
                         ))}
                       </div>
                     </motion.div>

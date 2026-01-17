@@ -17,6 +17,7 @@ import {
   Image,
   Video,
 } from "lucide-react";
+import heroImage from "@/assets/service-barcode-hero.jpg";
 
 const features = [
   {
@@ -159,6 +160,7 @@ const BarcodeGenerator = () => {
         ctaText="Создать штрихкод"
         secondaryCtaText="Узнать больше"
         secondaryCtaLink="/baza-znaniy"
+        heroImage={heroImage}
       />
 
       <ServiceFeatures

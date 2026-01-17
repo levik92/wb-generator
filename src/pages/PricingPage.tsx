@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
-import { ServicePageLayout, ServiceHero, ServiceFAQ, ServiceCTA } from "@/components/services";
+import { ServicePageLayout, ServiceFAQ, ServiceCTA } from "@/components/services";
 import { PricingSection } from "@/components/landing/PricingSection";
+import { Breadcrumbs } from "@/components/services/Breadcrumbs";
 
 const faqItems = [
   { question: "Что такое токены?", answer: "Токены — внутренняя валюта сервиса. На генерацию карточек и описаний тратится определённое количество токенов в зависимости от сложности." },
@@ -21,16 +22,12 @@ const PricingPage = () => {
         <link rel="canonical" href="https://wbgen.ru/pricing" />
       </Helmet>
 
-      <ServiceHero
-        title="Тарифы"
-        subtitle="WBGen"
-        description="Простое ценообразование без подписок. Покупайте токены и используйте когда нужно — они не сгорают."
-        breadcrumbs={[{ label: "Тарифы" }]}
-        badge="Прозрачные цены"
-        ctaText="Начать бесплатно"
-        secondaryCtaText="Написать в поддержку"
-        secondaryCtaLink="https://t.me/wbgen_support"
-      />
+      {/* Simple header section without hero */}
+      <section className="relative pt-24 pb-8 sm:pt-32 sm:pb-12">
+        <div className="container mx-auto px-4 sm:px-6">
+          <Breadcrumbs items={[{ label: "Тарифы" }]} />
+        </div>
+      </section>
 
       <PricingSection />
 
