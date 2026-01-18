@@ -18,14 +18,7 @@ export const CasesPromoBanner = ({
   useEffect(() => {
     const checkDismissed = async () => {
       try {
-        // Показываем только при самом первом входе (loginCount === 1)
-        if (loginCount !== 1) {
-          setIsVisible(false);
-          setIsLoading(false);
-          return;
-        }
-        
-        // Check localStorage - если уже закрыли, не показываем
+        // Показываем всем пользователям, скрываем только если закрыли
         const localDismissed = localStorage.getItem(`${BANNER_DISMISSED_KEY}_${userId}`);
         if (localDismissed === "true") {
           setIsVisible(false);
@@ -40,7 +33,7 @@ export const CasesPromoBanner = ({
       setIsLoading(false);
     };
     checkDismissed();
-  }, [userId, loginCount]);
+  }, [userId]);
   const handleDismiss = () => {
     localStorage.setItem(`${BANNER_DISMISSED_KEY}_${userId}`, "true");
     setIsVisible(false);
