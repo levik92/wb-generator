@@ -10,3 +10,4 @@ export { BenefitsSection } from "./BenefitsSection";
 export { StepsSection } from "./StepsSection";
 export { TestimonialsSection } from "./TestimonialsSection";
 export { StatsSection } from "./StatsSection";
+export { StackedCardsShowcase } from "./StackedCardsShowcase";
