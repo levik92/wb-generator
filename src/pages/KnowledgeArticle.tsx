@@ -1409,49 +1409,184 @@ const KnowledgeArticle = () => {
     );
   }
 
-  // Convert markdown-like content to HTML
+  // Convert markdown-like content to formatted React elements
   const formatContent = (content: string) => {
-    return content
-      .split('\n')
-      .map((line, i) => {
-        // Headers
-        if (line.startsWith('## ')) {
-          return <h2 key={i} className="text-2xl font-bold text-white mt-10 mb-4">{line.replace('## ', '')}</h2>;
+    const lines = content.split('\n');
+    const elements: JSX.Element[] = [];
+    let inList = false;
+    let listItems: JSX.Element[] = [];
+    let listType: 'ul' | 'ol' = 'ul';
+    
+    const flushList = () => {
+      if (listItems.length > 0) {
+        if (listType === 'ul') {
+          elements.push(
+            <ul key={`list-${elements.length}`} className="space-y-2 my-6 ml-6">
+              {listItems}
+            </ul>
+          );
+        } else {
+          elements.push(
+            <ol key={`list-${elements.length}`} className="space-y-2 my-6 ml-6 list-decimal list-outside">
+              {listItems}
+            </ol>
+          );
         }
-        if (line.startsWith('### ')) {
-          return <h3 key={i} className="text-xl font-semibold text-white mt-8 mb-3">{line.replace('### ', '')}</h3>;
+        listItems = [];
+        inList = false;
+      }
+    };
+
+    lines.forEach((line, i) => {
+      // Headers
+      if (line.startsWith('## ')) {
+        flushList();
+        elements.push(
+          <h2 key={i} className="text-2xl sm:text-3xl font-bold text-white mt-12 mb-6 pb-3 border-b border-white/10">
+            {line.replace('## ', '')}
+          </h2>
+        );
+        return;
+      }
+      if (line.startsWith('### ')) {
+        flushList();
+        elements.push(
+          <h3 key={i} className="text-xl font-semibold text-white mt-10 mb-4">
+            {line.replace('### ', '')}
+          </h3>
+        );
+        return;
+      }
+      
+      // Unordered lists
+      if (line.startsWith('- ')) {
+        if (!inList || listType !== 'ul') {
+          flushList();
+          listType = 'ul';
         }
-        // Lists
-        if (line.startsWith('- ')) {
-          return <li key={i} className="text-white/70 ml-4 mb-1">{line.replace('- ', '')}</li>;
+        inList = true;
+        const content = line.replace('- ', '');
+        const formattedContent = content.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+        listItems.push(
+          <li key={`li-${i}`} className="flex items-start gap-3 text-white/70 leading-relaxed">
+            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(268,83%,55%)] mt-2.5 flex-shrink-0" />
+            <span dangerouslySetInnerHTML={{ __html: formattedContent }} />
+          </li>
+        );
+        return;
+      }
+      
+      // Ordered lists
+      if (line.match(/^\d+\. /)) {
+        if (!inList || listType !== 'ol') {
+          flushList();
+          listType = 'ol';
         }
-        if (line.match(/^\d+\. /)) {
-          return <li key={i} className="text-white/70 ml-4 mb-1 list-decimal">{line.replace(/^\d+\. /, '')}</li>;
+        inList = true;
+        const content = line.replace(/^\d+\. /, '');
+        const formattedContent = content.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+        listItems.push(
+          <li key={`li-${i}`} className="text-white/70 leading-relaxed pl-1" dangerouslySetInnerHTML={{ __html: formattedContent }} />
+        );
+        return;
+      }
+      
+      // If we were in a list and hit something else, flush it
+      if (inList && !line.startsWith('- ') && !line.match(/^\d+\. /)) {
+        flushList();
+      }
+      
+      // Checkmarks
+      if (line.startsWith('✅ ')) {
+        elements.push(
+          <div key={i} className="flex items-center gap-3 text-emerald-400 my-2">
+            <span className="text-lg">✅</span>
+            <span className="text-white/80">{line.replace('✅ ', '')}</span>
+          </div>
+        );
+        return;
+      }
+      if (line.startsWith('❌ ')) {
+        elements.push(
+          <div key={i} className="flex items-center gap-3 text-red-400 my-2">
+            <span className="text-lg">❌</span>
+            <span className="text-white/80">{line.replace('❌ ', '')}</span>
+          </div>
+        );
+        return;
+      }
+      
+      // Blockquotes
+      if (line.startsWith('> ')) {
+        elements.push(
+          <blockquote key={i} className="border-l-4 border-[hsl(268,83%,55%)] pl-6 py-3 my-6 bg-white/[0.02] rounded-r-lg">
+            <p className="text-white/80 italic text-lg">{line.replace('> ', '')}</p>
+          </blockquote>
+        );
+        return;
+      }
+      
+      // Code blocks - skip markers
+      if (line.startsWith('```')) {
+        return;
+      }
+      
+      // Empty lines
+      if (line.trim().length === 0) {
+        elements.push(<div key={i} className="h-4" />);
+        return;
+      }
+      
+      // Tables - render properly
+      if (line.startsWith('|')) {
+        // Skip separator lines
+        if (line.includes('---')) return;
+        
+        const cells = line.split('|').filter(cell => cell.trim());
+        const isHeader = lines[i + 1]?.includes('---');
+        
+        if (isHeader) {
+          elements.push(
+            <div key={i} className="overflow-x-auto my-6">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-white/20">
+                    {cells.map((cell, j) => (
+                      <th key={j} className="text-left py-3 px-4 text-white font-semibold text-sm">
+                        {cell.trim()}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              </table>
+            </div>
+          );
+        } else if (!lines[i - 1]?.includes('---') && !lines[i - 1]?.startsWith('|')) {
+          // Regular table row without header
+          elements.push(
+            <div key={i} className="border-b border-white/5">
+              <div className="grid grid-cols-3 gap-4 py-3">
+                {cells.map((cell, j) => (
+                  <span key={j} className="text-white/70 text-sm">{cell.trim()}</span>
+                ))}
+              </div>
+            </div>
+          );
         }
-        // Checkmarks
-        if (line.startsWith('✅ ') || line.startsWith('❌ ')) {
-          return <p key={i} className="text-white/70 mb-1">{line}</p>;
-        }
-        // Blockquotes
-        if (line.startsWith('> ')) {
-          return <blockquote key={i} className="border-l-4 border-[hsl(268,83%,55%)] pl-4 my-4 text-white/80 italic">{line.replace('> ', '')}</blockquote>;
-        }
-        // Code blocks
-        if (line.startsWith('```')) {
-          return null;
-        }
-        if (line.trim().length === 0) {
-          return <br key={i} />;
-        }
-        // Tables
-        if (line.startsWith('|')) {
-          return null; // Skip table rendering for now, too complex
-        }
-        // Bold text
-        const boldFormatted = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
-        // Regular paragraph
-        return <p key={i} className="text-white/70 mb-2" dangerouslySetInnerHTML={{ __html: boldFormatted }} />;
-      });
+        return;
+      }
+      
+      // Bold text and regular paragraphs
+      const boldFormatted = line.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+      elements.push(
+        <p key={i} className="text-white/70 leading-relaxed mb-4 text-lg" dangerouslySetInnerHTML={{ __html: boldFormatted }} />
+      );
+    });
+    
+    // Flush any remaining list
+    flushList();
+    
+    return elements;
   };
 
   return (

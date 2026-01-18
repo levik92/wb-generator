@@ -10,6 +10,7 @@ import {
   StepsSection,
   TestimonialsSection,
   StatsSection,
+  StackedCardsShowcase,
 } from "@/components/services";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -410,6 +411,26 @@ const CardDesign = () => {
         secondaryCtaLink="/cases"
         heroImage={heroImage}
       />
+
+      {/* Stacked Cards Showcase */}
+      <section className="py-20 sm:py-28 border-t border-white/10">
+        <div className="container mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Примеры карточек от WBGen
+            </h2>
+            <p className="text-white/60 max-w-2xl mx-auto">
+              Каждая карточка — уникальный дизайн, созданный ИИ специально для вашего товара
+            </p>
+          </motion.div>
+          <StackedCardsShowcase />
+        </div>
+      </section>
 
       <StatsSection stats={stats} />
 
