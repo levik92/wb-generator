@@ -16,7 +16,7 @@ interface StepsSectionProps {
 
 export const StepsSection = ({ title, subtitle, steps }: StepsSectionProps) => {
   return (
-    <section className="py-16 sm:py-24 relative">
+    <section className="py-16 sm:py-24 relative bg-gradient-to-b from-transparent via-[hsl(268,40%,8%)] to-transparent">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

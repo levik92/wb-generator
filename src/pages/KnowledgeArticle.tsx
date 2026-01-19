@@ -1614,18 +1614,18 @@ const KnowledgeArticle = () => {
             Назад к базе знаний
           </Link>
 
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Article header */}
-              <div className="mb-10">
-                <span className="inline-block px-3 py-1 rounded-full bg-[hsl(268,83%,55%)]/20 text-[hsl(268,83%,65%)] text-sm mb-4">
+              {/* Article header card */}
+              <div className="glass-card rounded-2xl p-8 sm:p-10 mb-8 border border-white/10">
+                <span className="inline-block px-4 py-1.5 rounded-full bg-[hsl(268,83%,55%)]/20 text-[hsl(268,83%,65%)] text-sm font-medium mb-6">
                   {article.category}
                 </span>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
                   {article.title}
                 </h1>
                 <div className="flex items-center gap-6 text-white/50 text-sm">
@@ -1640,18 +1640,20 @@ const KnowledgeArticle = () => {
                 </div>
               </div>
 
-              {/* Article content */}
-              <div className="prose prose-invert prose-lg max-w-none">
-                {formatContent(article.content)}
+              {/* Article content card */}
+              <div className="glass-card rounded-2xl p-8 sm:p-10 border border-white/10">
+                <div className="prose prose-invert prose-lg max-w-none">
+                  {formatContent(article.content)}
+                </div>
               </div>
 
-              {/* CTA */}
-              <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-[hsl(268,83%,55%)]/10 to-[hsl(280,90%,55%)]/5 border border-white/10">
+              {/* CTA card */}
+              <div className="mt-8 glass-card rounded-2xl p-8 sm:p-10 border border-[hsl(268,83%,55%)]/30 bg-gradient-to-br from-[hsl(268,83%,55%)]/10 to-[hsl(280,90%,55%)]/5">
                 <h3 className="text-xl font-bold text-white mb-3">Готовы попробовать?</h3>
-                <p className="text-white/60 mb-6">Зарегистрируйтесь и получите бесплатные токены для тестирования</p>
+                <p className="text-white/60 mb-6">Зарегистрируйтесь и получите токены для тестирования</p>
                 <Link to="/auth">
                   <Button className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] text-white border-0">
-                    Начать бесплатно
+                    Начать
                   </Button>
                 </Link>
               </div>

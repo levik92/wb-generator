@@ -16,6 +16,7 @@ interface BlogPost {
   published_at: string | null;
   created_at: string;
   views: number;
+  image_url: string | null;
 }
 
 const tagColors: Record<string, string> = {
@@ -38,7 +39,7 @@ const Blog = () => {
     try {
       const { data, error } = await supabase
         .from("blog_posts")
-        .select("id, title, excerpt, tag, slug, published_at, created_at, views")
+        .select("id, title, excerpt, tag, slug, published_at, created_at, views, image_url")
         .eq("is_published", true)
         .order("published_at", { ascending: false });
 
@@ -94,6 +95,15 @@ const Blog = () => {
                   transition={{ delay: index * 0.1 }}
                   className="glass-card rounded-2xl overflow-hidden group"
                 >
+                  {post.image_url && (
+                    <div className="aspect-video overflow-hidden">
+                      <img 
+                        src={post.image_url} 
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
                   <div className="p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${tagColors[post.tag] || 'bg-gray-500/20 text-gray-400'}`}>
@@ -153,7 +163,7 @@ const Blog = () => {
       <ServiceCTA
         title="Попробуйте WBGen уже сейчас"
         subtitle="Создавайте карточки с ИИ, пока мы готовим статьи"
-        ctaText="Начать бесплатно"
+        ctaText="Начать"
       />
     </ServicePageLayout>
   );
