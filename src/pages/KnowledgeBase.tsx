@@ -3,7 +3,7 @@ import { ServicePageLayout, ServiceHero, ServiceFAQ, ServiceCTA } from "@/compon
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Book, Image, FileText, Barcode, CreditCard, ArrowRight, Zap, Settings, HelpCircle, Users } from "lucide-react";
-import heroImage from "@/assets/service-knowledge-hero.jpg";
+import heroImage from "@/assets/service-knowledge-hero.png";
 
 // Категории статей
 const categories = [

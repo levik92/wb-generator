@@ -5,7 +5,7 @@ import { FileText, Clock, Eye, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import heroImage from "@/assets/service-blog-hero.jpg";
+import heroImage from "@/assets/service-blog-hero.png";
 
 interface BlogPost {
   id: string;

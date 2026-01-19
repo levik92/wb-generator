@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import heroImage from "@/assets/service-video-hero.jpg";
+import heroImage from "@/assets/service-video-hero.png";
 
 const features = [
   {
