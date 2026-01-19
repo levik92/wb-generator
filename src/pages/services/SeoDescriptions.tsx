@@ -445,9 +445,9 @@ const SeoDescriptions = () => {
       />
 
       <ServiceCTA
-        title="Создайте SEO-описание бесплатно"
+        title="Создайте SEO-описание прямо сейчас"
         subtitle="Получите токены при регистрации и протестируйте качество ИИ-генерации"
-        ctaText="Начать бесплатно"
+        ctaText="Начать"
         secondaryCtaText="Смотреть примеры"
         secondaryCtaLink="/cases"
       />
