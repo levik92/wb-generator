@@ -15,7 +15,7 @@ interface StatsSectionProps {
 
 export const StatsSection = ({ stats, title }: StatsSectionProps) => {
   return (
-    <section className="py-12 sm:py-16 relative">
+    <section className="py-8 sm:py-10 relative">
       <div className="container mx-auto px-4 sm:px-6">
         {title && (
           <motion.h2

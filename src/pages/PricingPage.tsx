@@ -23,7 +23,7 @@ const PricingPage = () => {
       </Helmet>
 
       {/* Simple header section without hero */}
-      <section className="relative pt-24 pb-8 sm:pt-32 sm:pb-12">
+      <section className="relative pt-20 pb-4 sm:pt-24 sm:pb-6">
         <div className="container mx-auto px-4 sm:px-6">
           <Breadcrumbs items={[{ label: "Тарифы" }]} />
         </div>

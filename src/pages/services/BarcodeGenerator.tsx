@@ -27,7 +27,7 @@ import {
   CheckCircle,
   Infinity,
 } from "lucide-react";
-import heroImage from "@/assets/service-barcode-hero.jpg";
+import heroImage from "@/assets/service-barcode-hero.png";
 
 const features = [
   {
