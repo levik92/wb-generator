@@ -15,8 +15,8 @@ interface ServiceCTAProps {
 
 export const ServiceCTA = ({
   title = "Готовы начать?",
-  subtitle = "Попробуйте WBGen бесплатно и создайте первые карточки уже сегодня",
-  ctaText = "Попробовать бесплатно",
+  subtitle = "Попробуйте WBGen и создайте первые карточки уже сегодня",
+  ctaText = "Попробовать",
   ctaLink = "/auth",
   secondaryCtaText,
   secondaryCtaLink,
