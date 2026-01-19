@@ -43,6 +43,7 @@ interface BlogPost {
   created_at: string;
   updated_at: string;
   views: number;
+  image_url: string | null;
 }
 
 const TAGS = ["Гайд", "Новости", "Советы", "Кейс", "Обновление"];
@@ -69,6 +70,7 @@ export const AdminBlog = () => {
     tag: "Гайд",
     slug: "",
     is_published: false,
+    image_url: "",
   });
 
   useEffect(() => {
@@ -129,6 +131,7 @@ export const AdminBlog = () => {
       tag: "Гайд",
       slug: "",
       is_published: false,
+      image_url: "",
     });
     setEditingPost(null);
   };
@@ -142,6 +145,7 @@ export const AdminBlog = () => {
       tag: post.tag,
       slug: post.slug,
       is_published: post.is_published,
+      image_url: post.image_url || "",
     });
     setDialogOpen(true);
   };
@@ -169,6 +173,7 @@ export const AdminBlog = () => {
         is_published: formData.is_published,
         published_at: formData.is_published ? new Date().toISOString() : null,
         author_id: user?.id,
+        image_url: formData.image_url || null,
       };
 
       if (editingPost) {
@@ -328,6 +333,19 @@ export const AdminBlog = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image_url">URL изображения (опционально)</Label>
+                <Input
+                  id="image_url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
+                  placeholder="https://example.com/image.jpg"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Изображение будет отображаться вверху статьи
+                </p>
               </div>
 
               <div className="space-y-2">

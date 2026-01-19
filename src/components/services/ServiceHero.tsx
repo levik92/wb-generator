@@ -101,7 +101,7 @@ export const ServiceHero = ({
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/50 mb-10 max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-white/50 mb-10 max-w-xl leading-relaxed">
               {description}
             </p>
 

@@ -16,7 +16,10 @@ interface StatsSectionProps {
 export const StatsSection = ({ stats, title }: StatsSectionProps) => {
   return (
     <section className="py-8 sm:py-10 relative">
-      <div className="container mx-auto px-4 sm:px-6">
+      {/* Subtle gradient accent */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[hsl(268,50%,12%)] to-transparent opacity-50" />
+      
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {title && (
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -28,7 +31,7 @@ export const StatsSection = ({ stats, title }: StatsSectionProps) => {
           </motion.h2>
         )}
         
-        <div className="glass-card rounded-2xl border border-white/5 p-8 sm:p-12">
+        <div className="glass-card rounded-2xl border border-white/5 p-8 sm:p-12 bg-gradient-to-br from-white/[0.03] to-transparent">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {stats.map((stat, index) => {
               const Icon = stat.icon;

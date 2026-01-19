@@ -17,7 +17,7 @@ interface TestimonialsSectionProps {
 
 export const TestimonialsSection = ({ title, subtitle, testimonials }: TestimonialsSectionProps) => {
   return (
-    <section className="py-16 sm:py-24 relative">
+    <section className="py-16 sm:py-24 relative bg-gradient-to-b from-transparent via-[hsl(260,30%,6%)] to-transparent">
       <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
