@@ -42,7 +42,7 @@ const Auth = () => {
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "hsl(240, 10%, 4%)";
+    document.body.style.backgroundColor = "#111111";
     
     return () => {
       document.documentElement.classList.remove("dark");
@@ -376,7 +376,7 @@ const Auth = () => {
     <>
       <YandexMetrika />
       
-      <div className="min-h-screen bg-[hsl(240,10%,4%)] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-[#111111] flex items-center justify-center p-4 relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />

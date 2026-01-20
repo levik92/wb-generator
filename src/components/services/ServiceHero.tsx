@@ -22,6 +22,7 @@ interface ServiceHeroProps {
   breadcrumbs: { label: string; href?: string }[];
   isComingSoon?: boolean;
   heroImage?: string;
+  heroImages?: string[];
 }
 
 export const ServiceHero = ({
@@ -37,9 +38,10 @@ export const ServiceHero = ({
   breadcrumbs,
   isComingSoon = false,
   heroImage,
+  heroImages,
 }: ServiceHeroProps) => {
   return (
-    <section className="relative pt-28 pb-20 sm:pt-36 sm:pb-32 lg:pt-44 lg:pb-40 overflow-hidden">
+    <section className="relative pt-20 pb-16 sm:pt-24 sm:pb-24 lg:pt-28 lg:pb-32 overflow-hidden">
       {/* Subtle gradient background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Base gradient overlay */}
@@ -74,7 +76,7 @@ export const ServiceHero = ({
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <Breadcrumbs items={breadcrumbs} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-8 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -93,7 +95,7 @@ export const ServiceHero = ({
               </span>
             )}
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
               {title}
               <br />
               <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)] bg-clip-text text-transparent">
@@ -167,16 +169,65 @@ export const ServiceHero = ({
             )}
           </motion.div>
 
-          {/* Hero Image - extending beyond the edge */}
-          {heroImage && (
+          {/* Hero Images - stacked cards showcase */}
+          {heroImages && heroImages.length >= 3 && (
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="hidden lg:block relative -mr-[15%] xl:-mr-[20%] 2xl:-mr-[25%]"
+              className="relative h-[380px] sm:h-[450px] mt-10 lg:mt-0 -mr-[10%] lg:-mr-[15%]"
+            >
+              {/* Back card */}
+              <motion.div
+                initial={{ opacity: 0, x: -50, rotate: -15 }}
+                animate={{ opacity: 1, x: 0, rotate: -12 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="absolute left-0 top-[10%] w-[160px] sm:w-[200px] h-[220px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl z-10"
+                style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+              >
+                <img src={heroImages[0]} alt="Card 1" className="w-full h-full object-cover opacity-80" />
+                <div className="absolute inset-0 bg-black/30" />
+              </motion.div>
+
+              {/* Middle card */}
+              <motion.div
+                initial={{ opacity: 0, x: -30, rotate: -8 }}
+                animate={{ opacity: 1, x: 0, rotate: -5 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="absolute left-[15%] top-[5%] w-[160px] sm:w-[200px] h-[220px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl z-20"
+                style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+              >
+                <img src={heroImages[1]} alt="Card 2" className="w-full h-full object-cover opacity-90" />
+                <div className="absolute inset-0 bg-black/20" />
+              </motion.div>
+
+              {/* Front card */}
+              <motion.div
+                initial={{ opacity: 0, x: -10, rotate: 0 }}
+                animate={{ opacity: 1, x: 0, rotate: 3 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="absolute left-[30%] top-0 w-[160px] sm:w-[200px] h-[220px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl z-30"
+                style={{ boxShadow: "0 30px 60px -15px rgba(139, 92, 246, 0.3), 0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+              >
+                <img src={heroImages[2]} alt="Card 3" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+              </motion.div>
+
+              {/* Decorative glow */}
+              <div className="absolute -bottom-10 left-1/4 w-64 h-64 bg-[hsl(268,83%,55%)]/10 rounded-full blur-3xl -z-10" />
+            </motion.div>
+          )}
+
+          {/* Hero Image - extending beyond the edge */}
+          {heroImage && !heroImages && (
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="relative -mr-[15%] xl:-mr-[20%] 2xl:-mr-[25%] mt-10 lg:mt-0"
             >
               {/* Browser-like frame */}
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[hsl(240,10%,6%)] shadow-2xl shadow-black/40">
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111111] shadow-2xl shadow-black/40">
                 {/* Window header */}
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
                   <div className="flex gap-1.5">
@@ -198,8 +249,8 @@ export const ServiceHero = ({
                     alt={title}
                     className="w-full h-auto"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(240,10%,4%)/50] via-transparent to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[hsl(240,10%,4%)/30]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#111111]/50 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#111111]/30" />
                 </div>
               </div>
               

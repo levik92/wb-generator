@@ -118,7 +118,7 @@ const PartnersPage = () => {
       </Helmet>
 
       {/* Hero Section with Partner Image */}
-      <section className="relative pt-28 pb-20 sm:pt-36 sm:pb-32 overflow-hidden">
+      <section className="relative pt-28 pb-0 sm:pt-36 overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,8%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
         <div 
@@ -195,17 +195,17 @@ const PartnersPage = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="hidden lg:flex justify-end items-end relative"
+              className="flex justify-center lg:justify-end items-end relative mt-8 lg:mt-0"
             >
-              <div className="relative">
+              <div className="relative w-full max-w-[400px] lg:max-w-none">
                 {/* Glow behind */}
-                <div className="absolute -inset-8 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-full blur-3xl" />
+                <div className="absolute -inset-8 bg-gradient-to-t from-emerald-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl" />
                 
-                {/* Partner image - anchored to bottom */}
+                {/* Partner image - anchored to bottom, no cropping feel */}
                 <img 
                   src={partnerImage}
                   alt="Партнёр WBGen"
-                  className="relative z-10 max-h-[500px] w-auto object-contain object-bottom"
+                  className="relative z-10 w-full h-auto lg:max-h-[550px] object-contain object-bottom"
                 />
               </div>
             </motion.div>
