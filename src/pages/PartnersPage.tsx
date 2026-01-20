@@ -174,7 +174,7 @@ const PartnersPage = () => {
                 <div className="absolute -inset-8 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-full blur-3xl" />
                 
                 {/* Partner image - anchored to bottom */}
-                <img src={partnerImage} alt="Партнёр WBGen" className="relative z-10 max-h-[500px] w-auto object-contain object-bottom" />
+                <img alt="Партнёр WBGen" className="relative z-10 max-h-[500px] w-auto object-contain object-bottom" src="/lovable-uploads/4f1d85b0-d418-42ad-8c06-17be4089f7b4.png" />
               </div>
             </motion.div>
           </div>
