@@ -109,7 +109,7 @@ const PartnersPage = () => {
             y: 0
           }} transition={{
             duration: 0.8
-          }} className="max-w-xl pb-[60px]">
+          }} className="max-w-xl pb-0">
               <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-400 mb-8">
                 💰 Зарабатывайте с WBGen
               </span>
