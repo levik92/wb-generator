@@ -17,7 +17,7 @@ const Landing = () => {
   useEffect(() => {
     // Force dark mode for landing page
     document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "hsl(240, 10%, 4%)";
+    document.body.style.backgroundColor = "#111111";
     
     return () => {
       document.documentElement.classList.remove("dark");
@@ -40,7 +40,7 @@ const Landing = () => {
       
       <YandexMetrika />
       
-      <div className="min-h-screen bg-[hsl(240,10%,4%)] text-white landing-dark">
+      <div className="min-h-screen bg-[#111111] text-white landing-dark">
         {/* Noise overlay for texture */}
         <div className="noise-overlay" />
         

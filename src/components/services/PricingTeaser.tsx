@@ -17,8 +17,8 @@ export const PricingTeaser = () => {
 
   return (
     <section ref={ref} className="py-16 sm:py-24 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[hsl(268,83%,50%)/10] rounded-full blur-3xl" />
+      {/* Background glow only - no static gradient */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[hsl(268,83%,50%)]/10 rounded-full blur-[120px]" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
