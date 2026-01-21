@@ -30,7 +30,7 @@ const legalLinks = [
 export const LandingFooter = () => {
   return (
     <footer className="relative py-16 border-t border-white/10">
-      <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
+      <div className="absolute inset-0 bg-[#111111]" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">

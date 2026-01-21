@@ -118,7 +118,7 @@ const PartnersPage = () => {
       </Helmet>
 
       {/* Hero Section with Partner Image */}
-      <section className="relative pt-28 pb-0 sm:pt-36 overflow-hidden">
+      <section className="relative pt-28 pb-0 sm:pt-36 overflow-hidden min-h-[80vh] flex items-end">
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,8%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
         <div 
@@ -126,14 +126,14 @@ const PartnersPage = () => {
           style={{ background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)' }}
         />
         
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 pb-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="max-w-xl"
+              className="max-w-xl pb-16 lg:pb-24"
             >
               <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-400 mb-8">
                 💰 Зарабатывайте с WBGen
@@ -182,7 +182,7 @@ const PartnersPage = () => {
                   <Button 
                     size="lg" 
                     variant="outline"
-                    className="w-full sm:w-auto border-white/15 text-white hover:bg-white/5 px-8 py-6 text-lg"
+                    className="w-full sm:w-auto border-white/20 bg-white/5 text-white hover:bg-white hover:text-black transition-all px-8 py-6 text-lg"
                   >
                     Условия соглашения
                   </Button>
@@ -190,22 +190,22 @@ const PartnersPage = () => {
               </div>
             </motion.div>
 
-            {/* Right - Partner Image */}
+            {/* Right - Partner Image - anchored to very bottom */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex justify-center lg:justify-end items-end relative mt-8 lg:mt-0"
+              className="flex justify-center lg:justify-end items-end relative"
             >
-              <div className="relative w-full max-w-[400px] lg:max-w-none">
+              <div className="relative w-full max-w-[500px] lg:max-w-[600px]">
                 {/* Glow behind */}
                 <div className="absolute -inset-8 bg-gradient-to-t from-emerald-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl" />
                 
-                {/* Partner image - anchored to bottom, no cropping feel */}
+                {/* Partner image - anchored to bottom, 2x larger, no cropping */}
                 <img 
                   src={partnerImage}
                   alt="Партнёр WBGen"
-                  className="relative z-10 w-full h-auto lg:max-h-[550px] object-contain object-bottom"
+                  className="relative z-10 w-full h-auto object-contain object-bottom"
                 />
               </div>
             </motion.div>

@@ -206,7 +206,7 @@ export const DashboardHeader = ({
                 <User className="mr-2 h-4 w-4" />
                 <span>Профиль</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={() => window.location.href = '/partner'}>
+              <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={() => window.location.href = '/partners/cabinet'}>
                 <Users className="mr-2 h-4 w-4" />
                 <span>Партнерам</span>
               </DropdownMenuItem>

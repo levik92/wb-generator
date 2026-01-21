@@ -157,7 +157,7 @@ export const CasesShowcase = ({
           className="text-center mt-8"
         >
           <Link to="/cases">
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+            <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white hover:text-black transition-all">
               Смотреть все кейсы
             </Button>
           </Link>

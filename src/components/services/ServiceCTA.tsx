@@ -58,7 +58,7 @@ export const ServiceCTA = ({
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 px-8 py-6 text-lg"
+                  className="w-full sm:w-auto border-white/20 bg-white/5 text-white hover:bg-white hover:text-black transition-all px-8 py-6 text-lg"
                 >
                   {secondaryCtaText}
                 </Button>
