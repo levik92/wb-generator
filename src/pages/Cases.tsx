@@ -271,7 +271,7 @@ const Cases = () => {
   useEffect(() => {
     // Force dark mode for cases page
     document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "hsl(240, 10%, 4%)";
+    document.body.style.backgroundColor = "#111111";
     
     return () => {
       document.documentElement.classList.remove("dark");
@@ -287,13 +287,13 @@ const Cases = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(240,10%,4%)] text-white landing-dark">
+    <div className="min-h-screen bg-[#111111] text-white landing-dark">
       {/* Noise overlay for texture */}
       <div className="noise-overlay" />
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="absolute inset-0 bg-[hsl(240,10%,4%)]/80 backdrop-blur-xl border-b border-white/5" />
+        <div className="absolute inset-0 bg-[#111111]/80 backdrop-blur-xl border-b border-white/5" />
         <div className="container mx-auto px-4 sm:px-6 relative">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <Link

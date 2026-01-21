@@ -42,7 +42,7 @@ Allow: /partner-agreement
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /admin-login
-Disallow: /partner
+Disallow: /partners/cabinet
 
 Sitemap: https://wbgen.ru/sitemap.xml
 Host: https://wbgen.ru

@@ -338,7 +338,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/partner')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
+                <DropdownMenuItem onClick={() => navigate('/partners/cabinet')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
                   <Handshake className="mr-2 h-4 w-4" />
                   <span>Партнёрам</span>
                 </DropdownMenuItem>

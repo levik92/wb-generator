@@ -124,7 +124,7 @@ export const ServiceHero = ({
                       <Button 
                         size="lg" 
                         variant="outline"
-                        className="w-full sm:w-auto border-white/15 text-white hover:bg-white/5 px-8 py-6 text-lg"
+                        className="w-full sm:w-auto border-white/20 bg-white/5 text-white hover:bg-white hover:text-black transition-all px-8 py-6 text-lg"
                       >
                         {secondaryCtaText}
                       </Button>
@@ -169,52 +169,55 @@ export const ServiceHero = ({
             )}
           </motion.div>
 
-          {/* Hero Images - stacked cards showcase */}
+          {/* Hero Images - stacked cards showcase - cascade from right to left */}
           {heroImages && heroImages.length >= 3 && (
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative h-[380px] sm:h-[450px] mt-10 lg:mt-0 -mr-[10%] lg:-mr-[15%]"
+              className="relative h-[500px] sm:h-[650px] lg:h-[700px] mt-10 lg:mt-0 -mr-[20%] lg:-mr-[30%] xl:-mr-[35%] overflow-visible"
             >
-              {/* Back card */}
+              {/* Front card (rightmost) */}
               <motion.div
-                initial={{ opacity: 0, x: -50, rotate: -15 }}
-                animate={{ opacity: 1, x: 0, rotate: -12 }}
+                initial={{ opacity: 0, x: 50, rotate: 0 }}
+                animate={{ opacity: 1, x: 0, rotate: 8 }}
+                whileHover={{ rotate: 5, scale: 1.02, y: -5 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="absolute left-0 top-[10%] w-[160px] sm:w-[200px] h-[220px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl z-10"
-                style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
-              >
-                <img src={heroImages[0]} alt="Card 1" className="w-full h-full object-cover opacity-80" />
-                <div className="absolute inset-0 bg-black/30" />
-              </motion.div>
-
-              {/* Middle card */}
-              <motion.div
-                initial={{ opacity: 0, x: -30, rotate: -8 }}
-                animate={{ opacity: 1, x: 0, rotate: -5 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="absolute left-[15%] top-[5%] w-[160px] sm:w-[200px] h-[220px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl z-20"
-                style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
-              >
-                <img src={heroImages[1]} alt="Card 2" className="w-full h-full object-cover opacity-90" />
-                <div className="absolute inset-0 bg-black/20" />
-              </motion.div>
-
-              {/* Front card */}
-              <motion.div
-                initial={{ opacity: 0, x: -10, rotate: 0 }}
-                animate={{ opacity: 1, x: 0, rotate: 3 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="absolute left-[30%] top-0 w-[160px] sm:w-[200px] h-[220px] sm:h-[280px] rounded-2xl overflow-hidden shadow-2xl z-30"
-                style={{ boxShadow: "0 30px 60px -15px rgba(139, 92, 246, 0.3), 0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+                className="absolute right-0 top-[5%] w-[280px] sm:w-[360px] lg:w-[400px] h-[380px] sm:h-[500px] lg:h-[560px] rounded-3xl overflow-hidden shadow-2xl z-30"
+                style={{ boxShadow: "0 40px 80px -20px rgba(139, 92, 246, 0.35), 0 30px 60px -15px rgba(0, 0, 0, 0.5)" }}
               >
                 <img src={heroImages[2]} alt="Card 3" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
               </motion.div>
 
+              {/* Middle card */}
+              <motion.div
+                initial={{ opacity: 0, x: 30, rotate: -5 }}
+                animate={{ opacity: 1, x: 0, rotate: 2 }}
+                whileHover={{ rotate: -1, scale: 1.02, y: -5 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="absolute right-[18%] lg:right-[20%] top-[10%] w-[280px] sm:w-[360px] lg:w-[400px] h-[380px] sm:h-[500px] lg:h-[560px] rounded-3xl overflow-hidden shadow-2xl z-20"
+                style={{ boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.5)" }}
+              >
+                <img src={heroImages[1]} alt="Card 2" className="w-full h-full object-cover opacity-90" />
+                <div className="absolute inset-0 bg-black/15" />
+              </motion.div>
+
+              {/* Back card (leftmost) */}
+              <motion.div
+                initial={{ opacity: 0, x: 10, rotate: -10 }}
+                animate={{ opacity: 1, x: 0, rotate: -5 }}
+                whileHover={{ rotate: -8, scale: 1.02, y: -5 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="absolute right-[36%] lg:right-[40%] top-[15%] w-[280px] sm:w-[360px] lg:w-[400px] h-[380px] sm:h-[500px] lg:h-[560px] rounded-3xl overflow-hidden shadow-2xl z-10"
+                style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+              >
+                <img src={heroImages[0]} alt="Card 1" className="w-full h-full object-cover opacity-80" />
+                <div className="absolute inset-0 bg-black/25" />
+              </motion.div>
+
               {/* Decorative glow */}
-              <div className="absolute -bottom-10 left-1/4 w-64 h-64 bg-[hsl(268,83%,55%)]/10 rounded-full blur-3xl -z-10" />
+              <div className="absolute -bottom-20 right-1/4 w-80 h-80 bg-[hsl(268,83%,55%)]/15 rounded-full blur-3xl -z-10" />
             </motion.div>
           )}
 

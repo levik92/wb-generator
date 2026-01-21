@@ -64,7 +64,7 @@ const App = () => (
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
-          <Route path="/partner" element={
+          <Route path="/partners/cabinet" element={
             <ProtectedRoute>
               <Partner />
             </ProtectedRoute>
