@@ -39,7 +39,7 @@ serve(async (req) => {
 
   const MAX_CONCURRENT_TASKS = 1; // Process one task at a time
   const MAX_RETRIES = 3;
-  const MAX_PROCESSING_TIME = 8 * 60 * 1000; // 8 minutes timeout
+  const MAX_PROCESSING_TIME = 5 * 60 * 1000; // 5 minutes timeout (safe margin before Supabase ~6.5min limit)
 
   try {
     const { jobId } = await req.json();

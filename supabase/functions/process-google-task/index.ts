@@ -383,8 +383,33 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           })
           .eq('id', taskId);
 
+        // Refund tokens for bad request errors too
+        console.log(`Refunding 1 token to user ${task.job.user_id} for bad request error`);
+        await supabase.rpc('refund_tokens', {
+          user_id_param: task.job.user_id,
+          tokens_amount: 1,
+          reason_text: 'Возврат за ошибку запроса к API'
+        });
+
         throw new Error(`Bad request: ${errorText}`);
       }
+
+      // Handle all other errors - also refund tokens
+      console.log(`Unknown API error (status ${status}), refunding 1 token to user ${task.job.user_id}`);
+      await supabase
+        .from('generation_tasks')
+        .update({
+          status: 'failed',
+          last_error: `google_api_error_${status}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', taskId);
+
+      await supabase.rpc('refund_tokens', {
+        user_id_param: task.job.user_id,
+        tokens_amount: 1,
+        reason_text: `Возврат за ошибку API: ${status}`
+      });
 
       throw new Error(`Google Gemini API error: ${errorText}`);
     }
