@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import JSZip from 'jszip';
 interface Generation {
   id: string;
   generation_type: string;
@@ -42,6 +42,8 @@ export const History = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const {
     toast
   } = useToast();
@@ -98,8 +100,8 @@ export const History = ({
     if (downloadingIds.has(generation.id)) return;
     setDownloadingIds(prev => new Set(prev).add(generation.id));
     try {
-      const zip = new JSZip();
       const safeProductName = (generation.input_data?.productName || 'generation').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+      
       if (generation.generation_type === 'cards') {
         if (generation.output_data?.images && Array.isArray(generation.output_data.images)) {
           const images = generation.output_data.images;
@@ -111,6 +113,8 @@ export const History = ({
             });
             return;
           }
+          
+          // Download images directly without archiving
           for (let i = 0; i < images.length; i++) {
             const image = images[i];
             if (image.image_url) {
@@ -118,7 +122,15 @@ export const History = ({
               const blob = await response.blob();
               const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
               const fileName = `${safeProductName}_${safeStageName}.png`;
-              zip.file(fileName, blob);
+              
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = fileName;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
             }
           }
         } else {
@@ -130,29 +142,27 @@ export const History = ({
           return;
         }
       } else {
+        // For descriptions, download as text file
         const description = generation.output_data?.description || 'Описание товара';
-        zip.file(`${safeProductName}_description.txt`, description);
+        const blob = new Blob([description], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${safeProductName}_description.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
       }
-      const zipBlob = await zip.generateAsync({
-        type: 'blob'
-      });
-      const url = window.URL.createObjectURL(zipBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      const safeZipName = (generation.input_data?.productName || 'generation').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-      link.download = `${safeZipName}_${generation.generation_type === 'cards' ? 'карточки' : 'описание'}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      
       toast({
         title: "Скачивание завершено",
-        description: "ZIP-архив успешно скачан"
+        description: generation.generation_type === 'cards' ? "Изображения скачаны" : "Описание скачано"
       });
     } catch (error) {
       toast({
-        title: "Ошибка создания архива",
-        description: "Не удалось создать ZIP-архив",
+        title: "Ошибка скачивания",
+        description: "Не удалось скачать файлы",
         variant: "destructive"
       });
     } finally {
@@ -162,6 +172,11 @@ export const History = ({
         return newSet;
       });
     }
+  };
+
+  const openImagePreview = (imageUrl: string) => {
+    setPreviewImage(imageUrl);
+    setPreviewOpen(true);
   };
   const deleteGeneration = async (generationId: string) => {
     try {
@@ -205,6 +220,30 @@ export const History = ({
       </div>;
   }
   return <div className="space-y-6 w-full min-w-0">
+      {/* Image Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-4xl p-0 bg-black/90 border-white/10">
+          <DialogTitle className="sr-only">Просмотр изображения</DialogTitle>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
+              onClick={() => setPreviewOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+            {previewImage && (
+              <img 
+                src={previewImage} 
+                alt="Превью карточки" 
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <motion.div initial={{
       opacity: 0,
@@ -291,11 +330,17 @@ export const History = ({
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 {/* Content */}
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden ring-2 ring-border/50 group-hover:ring-primary/30 transition-all">
+                  {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden ring-2 ring-border/50 group-hover:ring-primary/30 transition-all cursor-pointer relative group/preview"
+                      onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
+                    >
                       <img src={generation.output_data.images[0].image_url} alt="Превью" className="w-full h-full object-cover" onError={e => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-              }} />
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }} />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                        <ZoomIn className="w-5 h-5 text-white" />
+                      </div>
                     </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
                       {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
                     </div>}
@@ -323,10 +368,20 @@ export const History = ({
                 
                 {/* Actions */}
                 <div className="flex gap-2 flex-shrink-0">
+                  {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url && (
+                    <Button 
+                      onClick={() => openImagePreview(generation.output_data.images[0].image_url)} 
+                      size="sm" 
+                      variant="outline"
+                      className="hidden sm:flex"
+                    >
+                      <ZoomIn className="w-4 h-4 mr-2" />
+                      Смотреть
+                    </Button>
+                  )}
                   <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
                     {downloadingIds.has(generation.id) ? <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ZIP
                       </> : <>
                         <Download className="w-4 h-4 mr-2" />
                         Скачать

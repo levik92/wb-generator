@@ -1,17 +1,26 @@
 import "@/styles/landing-theme.css";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { ExamplesSection } from "@/components/landing/ExamplesSection";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { ComparisonSection } from "@/components/landing/ComparisonSection";
-import { FAQSection } from "@/components/landing/FAQSection";
-import { CTASection } from "@/components/landing/CTASection";
-import { LandingFooter } from "@/components/landing/LandingFooter";
-import { PricingTeaser } from "@/components/services/PricingTeaser";
 import YandexMetrika from "@/components/YandexMetrika";
+
+// Lazy load below-the-fold sections for better performance
+const FeaturesSection = lazy(() => import("@/components/landing/FeaturesSection").then(m => ({ default: m.FeaturesSection })));
+const ExamplesSection = lazy(() => import("@/components/landing/ExamplesSection").then(m => ({ default: m.ExamplesSection })));
+const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection").then(m => ({ default: m.HowItWorksSection })));
+const ComparisonSection = lazy(() => import("@/components/landing/ComparisonSection").then(m => ({ default: m.ComparisonSection })));
+const FAQSection = lazy(() => import("@/components/landing/FAQSection").then(m => ({ default: m.FAQSection })));
+const CTASection = lazy(() => import("@/components/landing/CTASection").then(m => ({ default: m.CTASection })));
+const LandingFooter = lazy(() => import("@/components/landing/LandingFooter").then(m => ({ default: m.LandingFooter })));
+const PricingTeaser = lazy(() => import("@/components/services/PricingTeaser").then(m => ({ default: m.PricingTeaser })));
+
+// Simple loading placeholder
+const SectionLoader = () => (
+  <div className="py-20 flex justify-center">
+    <div className="w-8 h-8 border-2 border-[hsl(268,83%,60%)] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const Landing = () => {
   useEffect(() => {
@@ -47,17 +56,33 @@ const Landing = () => {
         <LandingHeader />
         <main>
           <HeroSection />
-          <FeaturesSection />
-          <ExamplesSection />
-          <HowItWorksSection />
-          <ComparisonSection />
-          <section id="pricing">
-            <PricingTeaser />
-          </section>
-          <FAQSection />
-          <CTASection />
+          <Suspense fallback={<SectionLoader />}>
+            <FeaturesSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <ExamplesSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <HowItWorksSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <ComparisonSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <section id="pricing">
+              <PricingTeaser />
+            </section>
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <FAQSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <CTASection />
+          </Suspense>
         </main>
-        <LandingFooter />
+        <Suspense fallback={<SectionLoader />}>
+          <LandingFooter />
+        </Suspense>
       </div>
     </>
   );
