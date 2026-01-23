@@ -197,11 +197,11 @@ const PartnersPage = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="flex justify-center lg:justify-end items-end relative"
             >
-              <div className="relative w-full max-w-[500px] lg:max-w-[600px]">
+              <div className="relative w-full max-w-[320px] lg:max-w-[400px]">
                 {/* Glow behind */}
-                <div className="absolute -inset-8 bg-gradient-to-t from-emerald-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl" />
+                <div className="absolute -inset-6 bg-gradient-to-t from-emerald-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl" />
                 
-                {/* Partner image - anchored to bottom, 2x larger, no cropping */}
+                {/* Partner image - anchored to bottom, reduced size by 1.5x */}
                 <img 
                   src={partnerImage}
                   alt="Партнёр WBGen"

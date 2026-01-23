@@ -16,8 +16,8 @@ interface StatsSectionProps {
 export const StatsSection = ({ stats, title }: StatsSectionProps) => {
   return (
     <section className="py-8 sm:py-10 relative">
-      {/* Subtle gradient accent */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[hsl(268,50%,12%)] to-transparent opacity-50" />
+      {/* Matching site-wide dark background */}
+      <div className="absolute inset-0 bg-[#111111]" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {title && (
