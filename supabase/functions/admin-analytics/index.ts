@@ -6,6 +6,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Функция для получения всех записей с пагинацией (обход лимита 1000)
+async function fetchAllRows(supabase: any, table: string, selectFields: string, filters?: { field: string, op: string, value: any }[]) {
+  const allData: any[] = []
+  const pageSize = 1000
+  let offset = 0
+  let hasMore = true
+
+  while (hasMore) {
+    let query = supabase.from(table).select(selectFields).range(offset, offset + pageSize - 1)
+    
+    if (filters) {
+      for (const filter of filters) {
+        if (filter.op === 'eq') {
+          query = query.eq(filter.field, filter.value)
+        } else if (filter.op === 'gte') {
+          query = query.gte(filter.field, filter.value)
+        }
+      }
+    }
+
+    const { data, error } = await query
+    
+    if (error) {
+      console.error(`Error fetching ${table}:`, error)
+      break
+    }
+
+    if (data && data.length > 0) {
+      allData.push(...data)
+      offset += pageSize
+      hasMore = data.length === pageSize
+    } else {
+      hasMore = false
+    }
+  }
+
+  return allData
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -77,42 +116,37 @@ serve(async (req) => {
       }
     }
 
-    // Получаем данные о пользователях за период
-    const { data: usersData } = await supabase
-      .from('profiles')
-      .select('id, created_at')
-      .gte('created_at', startDate.toISOString())
+    // Получаем данные о пользователях за период (с пагинацией)
+    const usersData = await fetchAllRows(supabase, 'profiles', 'id, created_at', [
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+    ])
 
     // Получаем общее количество пользователей для расчета конверсии
     const { count: totalUsersCount } = await supabase
       .from('profiles')
       .select('id', { count: 'exact', head: true })
 
-    // Получаем данные о генерациях
-    const { data: generationsData } = await supabase
-      .from('generations')
-      .select('created_at')
-      .gte('created_at', startDate.toISOString())
+    // Получаем данные о генерациях (с пагинацией)
+    const generationsData = await fetchAllRows(supabase, 'generations', 'created_at', [
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+    ])
 
-    // Получаем данные о токенах (расход)
-    const { data: tokensData } = await supabase
-      .from('token_transactions')
-      .select('created_at, amount')
-      .eq('transaction_type', 'generation')
-      .gte('created_at', startDate.toISOString())
+    // Получаем данные о токенах (расход) (с пагинацией)
+    const tokensData = await fetchAllRows(supabase, 'token_transactions', 'created_at, amount', [
+      { field: 'transaction_type', op: 'eq', value: 'generation' },
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+    ])
 
-    // Получаем данные о платежах за период
-    const { data: paymentsData } = await supabase
-      .from('payments')
-      .select('id, user_id, created_at, amount')
-      .eq('status', 'succeeded')
-      .gte('created_at', startDate.toISOString())
+    // Получаем данные о платежах за период (с пагинацией)
+    const paymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, created_at, amount', [
+      { field: 'status', op: 'eq', value: 'succeeded' },
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+    ])
 
-    // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей
-    const { data: allPaymentsData } = await supabase
-      .from('payments')
-      .select('id, user_id, amount')
-      .eq('status', 'succeeded')
+    // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей (с пагинацией)
+    const allPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, amount', [
+      { field: 'status', op: 'eq', value: 'succeeded' }
+    ])
 
     // Группируем данные по временным интервалам
     const groupData = (data: any[], dateField: string, valueField?: string) => {
