@@ -3,13 +3,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
-import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+
 interface ChartData {
   date: string;
   value: number;
 }
+
+interface AdditionalMetrics {
+  paidUsers: number;
+  paidUsersTotal: number;
+  averageCheck: number;
+  averageCheckTotal: number;
+  repeatPayments: number;
+  repeatPaymentsTotal: number;
+  repeatPaymentUsers: number;
+}
+
 interface AnalyticsData {
   period: string;
   groupFormat: string;
@@ -25,10 +37,13 @@ interface AnalyticsData {
     tokens: number;
     revenue: number;
   };
+  additionalMetrics?: AdditionalMetrics;
 }
+
 interface AdminAnalyticsChartProps {
   type: 'users' | 'generations' | 'tokens' | 'revenue';
 }
+
 const periods = [{
   key: 'day',
   label: 'День',
@@ -50,9 +65,10 @@ const periods = [{
   label: 'Год',
   shortLabel: '1г'
 }];
+
 const chartConfig = {
   users: {
-    title: 'Пользователи',
+    title: 'Новые пользователи',
     icon: Users,
     color: '#8b5cf6',
     gradient: 'url(#purpleGradient)',
@@ -65,7 +81,7 @@ const chartConfig = {
     color: '#a855f7',
     gradient: 'url(#violetGradient)',
     formatValue: (value: number) => value.toLocaleString('ru-RU'),
-    formatTooltip: (value: number) => `${value} запросов к AI`
+    formatTooltip: (value: number) => `${value} запросов`
   },
   tokens: {
     title: 'Потрачено токенов',
@@ -84,6 +100,7 @@ const chartConfig = {
     formatTooltip: (value: number) => `${value.toLocaleString('ru-RU')}₽`
   }
 };
+
 export function AdminAnalyticsChart({
   type
 }: AdminAnalyticsChartProps) {
@@ -92,9 +109,11 @@ export function AdminAnalyticsChart({
   const [loading, setLoading] = useState(true);
   const config = chartConfig[type];
   const Icon = config.icon;
+
   useEffect(() => {
     loadAnalytics();
   }, [selectedPeriod]);
+
   const loadAnalytics = async () => {
     setLoading(true);
     try {
@@ -119,6 +138,7 @@ export function AdminAnalyticsChart({
       setLoading(false);
     }
   };
+
   const formatXAxisDate = (dateStr: string, groupFormat: string) => {
     const date = new Date(dateStr);
     switch (groupFormat) {
@@ -149,6 +169,7 @@ export function AdminAnalyticsChart({
         });
     }
   };
+
   const calculateTrend = () => {
     if (!data?.charts[type] || data.charts[type].length < 2) return {
       trend: 'neutral',
@@ -160,8 +181,8 @@ export function AdminAnalyticsChart({
     const firstAvg = firstHalf.reduce((sum, item) => sum + item.value, 0) / firstHalf.length;
     const secondAvg = secondHalf.reduce((sum, item) => sum + item.value, 0) / secondHalf.length;
     if (firstAvg === 0) return {
-      trend: 'neutral',
-      percentage: 0
+      trend: secondAvg > 0 ? 'up' : 'neutral',
+      percentage: secondAvg > 0 ? 100 : 0
     };
     const percentage = (secondAvg - firstAvg) / firstAvg * 100;
     if (Math.abs(percentage) < 5) return {
@@ -174,6 +195,7 @@ export function AdminAnalyticsChart({
     };
   };
   const trend = calculateTrend();
+
   const CustomTooltip = ({
     active,
     payload,
@@ -191,6 +213,7 @@ export function AdminAnalyticsChart({
     }
     return null;
   };
+
   if (loading) {
     return <Card className="animate-fade-in bg-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -206,6 +229,7 @@ export function AdminAnalyticsChart({
         </CardContent>
       </Card>;
   }
+
   return <Card className="animate-fade-in">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
@@ -226,7 +250,7 @@ export function AdminAnalyticsChart({
             <div className="text-2xl font-bold">
               {data ? config.formatValue(data.totals[type]) : '---'}
             </div>
-            {trend.trend !== 'neutral' && <Badge variant="outline" className={`gap-1 ${trend.trend === 'up' ? 'text-green-600 border-green-200 bg-green-50' : 'text-red-600 border-red-200 bg-red-50'}`}>
+            {trend.trend !== 'neutral' && <Badge variant="outline" className={`gap-1 ${trend.trend === 'up' ? 'text-green-600 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800' : 'text-red-600 border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800'}`}>
                 {trend.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {trend.percentage.toFixed(1)}%
               </Badge>}
@@ -274,4 +298,122 @@ export function AdminAnalyticsChart({
         </div>
       </CardContent>
     </Card>;
+}
+
+// Новый компонент для дополнительных метрик
+interface AdditionalMetricsCardProps {
+  selectedPeriod: string;
+  onPeriodChange: (period: string) => void;
+}
+
+export function AdminAdditionalMetrics() {
+  const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const [metrics, setMetrics] = useState<AdditionalMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMetrics();
+  }, [selectedPeriod]);
+
+  const loadMetrics = async () => {
+    setLoading(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('admin-analytics', {
+        body: { period: selectedPeriod }
+      });
+      if (error) throw error;
+      setMetrics(result?.additionalMetrics || null);
+    } catch (error) {
+      console.error('Error loading additional metrics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="animate-fade-in">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            Дополнительные метрики
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-24">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="animate-fade-in">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Calculator className="h-4 w-4 text-muted-foreground" />
+          Дополнительные метрики
+        </CardTitle>
+        <div className="flex gap-1">
+          {periods.map(period => (
+            <Button 
+              key={period.key} 
+              variant={selectedPeriod === period.key ? "default" : "ghost"} 
+              size="sm" 
+              className="h-6 px-2 text-xs" 
+              onClick={() => setSelectedPeriod(period.key)}
+            >
+              {period.shortLabel}
+            </Button>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Платные пользователи */}
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+            <div className="flex items-center gap-2 mb-2">
+              <CreditCard className="h-4 w-4 text-green-500" />
+              <span className="text-sm text-muted-foreground">Платные пользователи</span>
+            </div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {metrics?.paidUsers?.toLocaleString('ru-RU') || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Всего: {metrics?.paidUsersTotal?.toLocaleString('ru-RU') || 0}
+            </p>
+          </div>
+
+          {/* Средний чек */}
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="h-4 w-4 text-blue-500" />
+              <span className="text-sm text-muted-foreground">Средний чек</span>
+            </div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {metrics?.averageCheck?.toLocaleString('ru-RU') || 0}₽
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Общий: {metrics?.averageCheckTotal?.toLocaleString('ru-RU') || 0}₽
+            </p>
+          </div>
+
+          {/* Повторные оплаты */}
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+            <div className="flex items-center gap-2 mb-2">
+              <Repeat className="h-4 w-4 text-purple-500" />
+              <span className="text-sm text-muted-foreground">Повторные оплаты</span>
+            </div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              {metrics?.repeatPayments?.toLocaleString('ru-RU') || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Всего: {metrics?.repeatPaymentsTotal?.toLocaleString('ru-RU') || 0} ({metrics?.repeatPaymentUsers || 0} польз.)
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

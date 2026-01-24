@@ -1,4 +1,4 @@
-import { AdminAnalyticsChart } from "./AdminAnalyticsChart";
+import { AdminAnalyticsChart, AdminAdditionalMetrics } from "./AdminAnalyticsChart";
 import SecurityDashboard from "./SecurityDashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -158,6 +158,9 @@ export default function AdminAnalytics() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Additional Metrics */}
+          <AdminAdditionalMetrics />
 
           {/* Beautiful Analytics Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
