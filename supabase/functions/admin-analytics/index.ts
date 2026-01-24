@@ -77,11 +77,16 @@ serve(async (req) => {
       }
     }
 
-    // Получаем данные о пользователях
+    // Получаем данные о пользователях за период
     const { data: usersData } = await supabase
       .from('profiles')
       .select('id, created_at')
       .gte('created_at', startDate.toISOString())
+
+    // Получаем общее количество пользователей для расчета конверсии
+    const { count: totalUsersCount } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
 
     // Получаем данные о генерациях
     const { data: generationsData } = await supabase
@@ -233,7 +238,15 @@ serve(async (req) => {
           averageCheckTotal: averageCheck,
           repeatPayments: periodRepeatPayments,
           repeatPaymentsTotal: totalRepeatPayments,
-          repeatPaymentUsers: repeatPaymentUsers
+          repeatPaymentUsers: repeatPaymentUsers,
+          // Новые метрики
+          totalUsers: totalUsersCount || 0,
+          conversionRate: (totalUsersCount && totalUsersCount > 0) 
+            ? Math.round((paidUsersCount / totalUsersCount) * 1000) / 10 
+            : 0,
+          repeatPaymentRate: paidUsersCount > 0 
+            ? Math.round((repeatPaymentUsers / paidUsersCount) * 1000) / 10 
+            : 0
         }
       }),
       {

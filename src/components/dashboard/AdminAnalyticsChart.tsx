@@ -20,6 +20,9 @@ interface AdditionalMetrics {
   repeatPayments: number;
   repeatPaymentsTotal: number;
   repeatPaymentUsers: number;
+  totalUsers: number;
+  conversionRate: number;
+  repeatPaymentRate: number;
 }
 
 interface AnalyticsData {
@@ -333,15 +336,36 @@ export function AdminAdditionalMetrics() {
   if (loading) {
     return (
       <Card className="animate-fade-in">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-4 w-4" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Calculator className="h-4 w-4 text-muted-foreground" />
             Дополнительные метрики
           </CardTitle>
+          <div className="flex gap-1">
+            {periods.map(period => (
+              <Button 
+                key={period.key} 
+                variant={selectedPeriod === period.key ? "default" : "ghost"} 
+                size="sm" 
+                className="h-6 px-2 text-xs" 
+                onClick={() => setSelectedPeriod(period.key)}
+              >
+                {period.shortLabel}
+              </Button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-24">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
+                <div className="animate-pulse space-y-2">
+                  <div className="h-4 w-24 bg-muted rounded" />
+                  <div className="h-8 w-16 bg-muted rounded" />
+                  <div className="h-3 w-20 bg-muted rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -370,9 +394,9 @@ export function AdminAdditionalMetrics() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Платные пользователи */}
-          <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
               <CreditCard className="h-4 w-4 text-green-500" />
               <span className="text-sm text-muted-foreground">Платные пользователи</span>
@@ -386,7 +410,7 @@ export function AdminAdditionalMetrics() {
           </div>
 
           {/* Средний чек */}
-          <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="h-4 w-4 text-blue-500" />
               <span className="text-sm text-muted-foreground">Средний чек</span>
@@ -400,16 +424,30 @@ export function AdminAdditionalMetrics() {
           </div>
 
           {/* Повторные оплаты */}
-          <div className="p-4 rounded-lg bg-muted/50 border border-border/50">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
               <Repeat className="h-4 w-4 text-purple-500" />
               <span className="text-sm text-muted-foreground">Повторные оплаты</span>
             </div>
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              {metrics?.repeatPayments?.toLocaleString('ru-RU') || 0}
+              {metrics?.repeatPaymentRate || 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Всего: {metrics?.repeatPaymentsTotal?.toLocaleString('ru-RU') || 0} ({metrics?.repeatPaymentUsers || 0} польз.)
+              {metrics?.repeatPaymentUsers || 0} из {metrics?.paidUsersTotal || 0} польз. ({metrics?.repeatPaymentsTotal || 0} платежей)
+            </p>
+          </div>
+
+          {/* Конверсия в оплату */}
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="h-4 w-4 text-orange-500" />
+              <span className="text-sm text-muted-foreground">Конверсия в оплату</span>
+            </div>
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              {metrics?.conversionRate || 0}%
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {metrics?.paidUsersTotal || 0} из {metrics?.totalUsers || 0} пользователей
             </p>
           </div>
         </div>
