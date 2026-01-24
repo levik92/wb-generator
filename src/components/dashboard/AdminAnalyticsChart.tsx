@@ -2,10 +2,16 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
-import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator } from "lucide-react";
+import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 interface ChartData {
   date: string;
@@ -317,16 +323,29 @@ export function AdminAdditionalMetrics() {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
   const [metrics, setMetrics] = useState<AdditionalMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isCustomPeriod, setIsCustomPeriod] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return { from: weekAgo, to: now };
+  });
 
   useEffect(() => {
     loadMetrics();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, dateRange, isCustomPeriod]);
 
   const loadMetrics = async () => {
     setLoading(true);
     try {
+      const body: any = { period: selectedPeriod };
+      
+      if (isCustomPeriod && dateRange?.from && dateRange?.to) {
+        body.startDateCustom = dateRange.from.toISOString();
+        body.endDateCustom = dateRange.to.toISOString();
+      }
+      
       const { data: result, error } = await supabase.functions.invoke('admin-analytics', {
-        body: { period: selectedPeriod }
+        body
       });
       if (error) throw error;
       setMetrics(result?.additionalMetrics || null);
@@ -337,6 +356,24 @@ export function AdminAdditionalMetrics() {
     }
   };
 
+  const handlePeriodClick = (periodKey: string) => {
+    setIsCustomPeriod(false);
+    setSelectedPeriod(periodKey);
+  };
+
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from && range?.to) {
+      setIsCustomPeriod(true);
+    }
+  };
+
+  const formatDateRange = () => {
+    if (!dateRange?.from) return "Выбрать даты";
+    if (!dateRange?.to) return format(dateRange.from, "dd.MM.yy", { locale: ru });
+    return `${format(dateRange.from, "dd.MM.yy", { locale: ru })} - ${format(dateRange.to, "dd.MM.yy", { locale: ru })}`;
+  };
+
   if (loading) {
     return (
       <Card className="animate-fade-in">
@@ -345,18 +382,43 @@ export function AdminAdditionalMetrics() {
             <Calculator className="h-4 w-4 text-muted-foreground" />
             Дополнительные метрики
           </CardTitle>
-          <div className="flex gap-1">
-            {periods.map(period => (
-              <Button 
-                key={period.key} 
-                variant={selectedPeriod === period.key ? "default" : "ghost"} 
-                size="sm" 
-                className="h-6 px-2 text-xs" 
-                onClick={() => setSelectedPeriod(period.key)}
-              >
-                {period.shortLabel}
-              </Button>
-            ))}
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              {periods.map(period => (
+                <Button 
+                  key={period.key} 
+                  variant={!isCustomPeriod && selectedPeriod === period.key ? "default" : "ghost"} 
+                  size="sm" 
+                  className="h-6 px-2 text-xs" 
+                  onClick={() => handlePeriodClick(period.key)}
+                >
+                  {period.shortLabel}
+                </Button>
+              ))}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant={isCustomPeriod ? "default" : "outline"} 
+                  size="sm" 
+                  className="h-6 px-2 text-xs gap-1"
+                >
+                  <CalendarIcon className="h-3 w-3" />
+                  {isCustomPeriod ? formatDateRange() : "Период"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDateRangeSelect}
+                  numberOfMonths={2}
+                  locale={ru}
+                  disabled={(date) => date > new Date()}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
@@ -383,18 +445,43 @@ export function AdminAdditionalMetrics() {
           <Calculator className="h-4 w-4 text-muted-foreground" />
           Дополнительные метрики
         </CardTitle>
-        <div className="flex gap-1">
-          {periods.map(period => (
-            <Button 
-              key={period.key} 
-              variant={selectedPeriod === period.key ? "default" : "ghost"} 
-              size="sm" 
-              className="h-6 px-2 text-xs" 
-              onClick={() => setSelectedPeriod(period.key)}
-            >
-              {period.shortLabel}
-            </Button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            {periods.map(period => (
+              <Button 
+                key={period.key} 
+                variant={!isCustomPeriod && selectedPeriod === period.key ? "default" : "ghost"} 
+                size="sm" 
+                className="h-6 px-2 text-xs" 
+                onClick={() => handlePeriodClick(period.key)}
+              >
+                {period.shortLabel}
+              </Button>
+            ))}
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={isCustomPeriod ? "default" : "outline"} 
+                size="sm" 
+                className="h-6 px-2 text-xs gap-1"
+              >
+                <CalendarIcon className="h-3 w-3" />
+                {isCustomPeriod ? formatDateRange() : "Период"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={handleDateRangeSelect}
+                numberOfMonths={2}
+                locale={ru}
+                disabled={(date) => date > new Date()}
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </CardHeader>
       <CardContent>

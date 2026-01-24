@@ -57,38 +57,58 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { period } = await req.json()
+    const { period, startDateCustom, endDateCustom } = await req.json()
 
     // Определяем временные рамки
     const now = new Date()
     let startDate: Date
+    let endDate: Date = now
     let groupFormat: string
 
-    switch (period) {
-      case 'day':
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    // Если переданы кастомные даты
+    if (startDateCustom && endDateCustom) {
+      startDate = new Date(startDateCustom)
+      endDate = new Date(endDateCustom)
+      // Устанавливаем конец дня для endDate
+      endDate.setHours(23, 59, 59, 999)
+      
+      // Определяем формат группировки в зависимости от длины периода
+      const diffDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      if (diffDays <= 1) {
         groupFormat = 'hour'
-        break
-      case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      } else if (diffDays <= 31) {
         groupFormat = 'day'
-        break
-      case 'month':
-        // Исправлено: берем полный месяц назад, а не с 1-го числа текущего месяца
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-        groupFormat = 'day'
-        break
-      case '3months':
-        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+      } else if (diffDays <= 90) {
         groupFormat = 'week'
-        break
-      case 'year':
-        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+      } else {
         groupFormat = 'month'
-        break
-      default:
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-        groupFormat = 'day'
+      }
+    } else {
+      switch (period) {
+        case 'day':
+          startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+          groupFormat = 'hour'
+          break
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          groupFormat = 'day'
+          break
+        case 'month':
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          groupFormat = 'day'
+          break
+        case '3months':
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+          groupFormat = 'week'
+          break
+        case 'year':
+          startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+          groupFormat = 'month'
+          break
+        default:
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          groupFormat = 'day'
+      }
     }
 
     // Генерируем временные интервалы для графика
