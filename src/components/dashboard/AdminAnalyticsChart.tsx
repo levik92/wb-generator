@@ -383,7 +383,8 @@ export function AdminAdditionalMetrics() {
             Дополнительные метрики
           </CardTitle>
           <div className="flex items-center gap-2">
-            <div className="flex gap-1">
+            {/* Период кнопки - скрыты на мобильных */}
+            <div className="hidden md:flex gap-1">
               {periods.map(period => (
                 <Button 
                   key={period.key} 
@@ -404,7 +405,7 @@ export function AdminAdditionalMetrics() {
                   className="h-6 px-2 text-xs gap-1"
                 >
                   <CalendarIcon className="h-3 w-3" />
-                  {isCustomPeriod ? formatDateRange() : "Период"}
+                  {formatDateRange()}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
@@ -412,7 +413,7 @@ export function AdminAdditionalMetrics() {
                   mode="range"
                   selected={dateRange}
                   onSelect={handleDateRangeSelect}
-                  numberOfMonths={2}
+                  numberOfMonths={1}
                   locale={ru}
                   disabled={(date) => date > new Date()}
                   className={cn("p-3 pointer-events-auto")}
@@ -446,7 +447,8 @@ export function AdminAdditionalMetrics() {
           Дополнительные метрики
         </CardTitle>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1">
+          {/* Период кнопки - скрыты на мобильных */}
+          <div className="hidden md:flex gap-1">
             {periods.map(period => (
               <Button 
                 key={period.key} 
@@ -467,7 +469,7 @@ export function AdminAdditionalMetrics() {
                 className="h-6 px-2 text-xs gap-1"
               >
                 <CalendarIcon className="h-3 w-3" />
-                {isCustomPeriod ? formatDateRange() : "Период"}
+                {formatDateRange()}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
@@ -475,7 +477,7 @@ export function AdminAdditionalMetrics() {
                 mode="range"
                 selected={dateRange}
                 onSelect={handleDateRangeSelect}
-                numberOfMonths={2}
+                numberOfMonths={1}
                 locale={ru}
                 disabled={(date) => date > new Date()}
                 className={cn("p-3 pointer-events-auto")}
