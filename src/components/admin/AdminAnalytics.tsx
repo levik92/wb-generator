@@ -1,4 +1,4 @@
-import { AdminAnalyticsChart } from "@/components/dashboard/AdminAnalyticsChart";
+import { AdminAnalyticsChart, AdminAdditionalMetrics } from "@/components/dashboard/AdminAnalyticsChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface User {
   id: string;
@@ -17,6 +17,9 @@ export function AdminAnalytics({
   users
 }: AdminAnalyticsProps) {
   return <div className="space-y-4 md:space-y-6">
+      {/* Additional Metrics - Paid users, Average check, Repeat payments */}
+      <AdminAdditionalMetrics />
+
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
         <AdminAnalyticsChart type="users" />
