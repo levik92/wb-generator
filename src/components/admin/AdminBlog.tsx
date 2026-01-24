@@ -414,45 +414,57 @@ export const AdminBlog = () => {
                 />
                 
                 {imagePreview || formData.image_url ? (
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border">
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-primary/20 bg-muted/30">
                     <img 
                       src={imagePreview || formData.image_url} 
                       alt="Preview" 
                       className="w-full h-full object-cover"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
-                      className="absolute top-2 right-2"
+                      className="absolute top-3 right-3 h-8 w-8 shadow-lg"
                       onClick={removeImage}
                     >
                       <X className="w-4 h-4" />
                     </Button>
+                    <div className="absolute bottom-3 left-3 text-xs text-white/80 bg-black/40 px-2 py-1 rounded">
+                      Изображение загружено
+                    </div>
                   </div>
                 ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full h-32 border-dashed"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
+                  <div 
+                    onClick={() => !uploading && fileInputRef.current?.click()}
+                    className={`w-full h-40 border-2 border-dashed rounded-xl transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${
+                      uploading 
+                        ? 'border-muted-foreground/30 bg-muted/20 cursor-wait' 
+                        : 'border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 hover:border-primary/50 hover:bg-primary/15'
+                    }`}
                   >
                     {uploading ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                    ) : (
                       <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-8 h-8 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          Нажмите для загрузки изображения
-                        </span>
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">Загрузка...</span>
                       </div>
+                    ) : (
+                      <>
+                        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <Upload className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-foreground">
+                            Нажмите для загрузки
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            PNG, JPG, WEBP · Макс. 5 МБ
+                          </p>
+                        </div>
+                      </>
                     )}
-                  </Button>
+                  </div>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  Максимум 5 МБ. Изображение будет отображаться вверху статьи.
-                </p>
               </div>
 
               <div className="space-y-2">

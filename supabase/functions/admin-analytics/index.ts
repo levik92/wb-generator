@@ -35,15 +35,16 @@ serve(async (req) => {
         groupFormat = 'day'
         break
       case 'month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        // Исправлено: берем полный месяц назад, а не с 1-го числа текущего месяца
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
         groupFormat = 'day'
         break
       case '3months':
-        startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1)
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
         groupFormat = 'week'
         break
       case 'year':
-        startDate = new Date(now.getFullYear(), 0, 1)
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
         groupFormat = 'month'
         break
       default:
@@ -65,7 +66,9 @@ serve(async (req) => {
       } else if (groupFormat === 'week') {
         // Начало недели (понедельник)
         const weekStart = new Date(current)
-        weekStart.setDate(current.getDate() - current.getDay() + 1)
+        const dayOfWeek = weekStart.getDay()
+        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+        weekStart.setDate(weekStart.getDate() + diff)
         timeIntervals.push(weekStart.toISOString().slice(0, 10))
         current.setDate(current.getDate() + 7)
       } else if (groupFormat === 'month') {
@@ -77,7 +80,7 @@ serve(async (req) => {
     // Получаем данные о пользователях
     const { data: usersData } = await supabase
       .from('profiles')
-      .select('created_at')
+      .select('id, created_at')
       .gte('created_at', startDate.toISOString())
 
     // Получаем данные о генерациях
@@ -86,19 +89,25 @@ serve(async (req) => {
       .select('created_at')
       .gte('created_at', startDate.toISOString())
 
-    // Получаем данные о токенах
+    // Получаем данные о токенах (расход)
     const { data: tokensData } = await supabase
       .from('token_transactions')
       .select('created_at, amount')
       .eq('transaction_type', 'generation')
       .gte('created_at', startDate.toISOString())
 
-    // Получаем данные о платежах
+    // Получаем данные о платежах за период
     const { data: paymentsData } = await supabase
       .from('payments')
-      .select('created_at, amount')
+      .select('id, user_id, created_at, amount')
       .eq('status', 'succeeded')
       .gte('created_at', startDate.toISOString())
+
+    // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей
+    const { data: allPaymentsData } = await supabase
+      .from('payments')
+      .select('id, user_id, amount')
+      .eq('status', 'succeeded')
 
     // Группируем данные по временным интервалам
     const groupData = (data: any[], dateField: string, valueField?: string) => {
@@ -118,7 +127,9 @@ serve(async (req) => {
           key = itemDate.toISOString().slice(0, 10)
         } else if (groupFormat === 'week') {
           const weekStart = new Date(itemDate)
-          weekStart.setDate(itemDate.getDate() - itemDate.getDay() + 1)
+          const dayOfWeek = weekStart.getDay()
+          const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+          weekStart.setDate(weekStart.getDate() + diff)
           key = weekStart.toISOString().slice(0, 10)
         } else if (groupFormat === 'month') {
           key = itemDate.toISOString().slice(0, 7) + '-01'
@@ -147,32 +158,56 @@ serve(async (req) => {
     const tokensChart = groupData(tokensData || [], 'created_at', 'amount')
     const revenueChart = groupData(paymentsData || [], 'created_at', 'amount')
 
-    // Получаем статистику за выбранный период
-    const { count: totalUsers } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', startDate.toISOString())
+    // Получаем ОБЩИЕ totals (за всё время для основных метрик, за период для отображения)
+    const totalUsersInPeriod = usersData?.length || 0
+    const totalGenerationsInPeriod = generationsData?.length || 0
+    const totalTokensSpentInPeriod = tokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
+    const totalRevenueInPeriod = paymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
-    const { count: totalGenerations } = await supabase
-      .from('generations')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', startDate.toISOString())
+    // Расчет новых метрик
+    // 1. Платные пользователи (уникальные user_id с платежами)
+    const paidUsersSet = new Set<string>()
+    allPaymentsData?.forEach(p => {
+      if (p.user_id) paidUsersSet.add(p.user_id)
+    })
+    const paidUsersCount = paidUsersSet.size
 
-    const { data: periodTokensData } = await supabase
-      .from('token_transactions')
-      .select('amount')
-      .eq('transaction_type', 'generation')
-      .gte('created_at', startDate.toISOString())
+    // Платные пользователи за период
+    const periodPaidUsersSet = new Set<string>()
+    paymentsData?.forEach(p => {
+      if (p.user_id) periodPaidUsersSet.add(p.user_id)
+    })
+    const periodPaidUsersCount = periodPaidUsersSet.size
 
-    const totalTokensSpent = periodTokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
+    // 2. Средний чек
+    const totalPaymentsCount = allPaymentsData?.length || 0
+    const totalPaymentsSum = allPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+    const averageCheck = totalPaymentsCount > 0 ? Math.round(totalPaymentsSum / totalPaymentsCount) : 0
 
-    const { data: periodRevenueData } = await supabase
-      .from('payments')
-      .select('amount')
-      .eq('status', 'succeeded')
-      .gte('created_at', startDate.toISOString())
+    // Средний чек за период
+    const periodPaymentsCount = paymentsData?.length || 0
+    const periodAverageCheck = periodPaymentsCount > 0 ? Math.round(totalRevenueInPeriod / periodPaymentsCount) : 0
 
-    const totalRevenue = periodRevenueData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+    // 3. Повторные оплаты (пользователи с более чем 1 платежом)
+    const userPaymentCounts: { [key: string]: number } = {}
+    allPaymentsData?.forEach(p => {
+      if (p.user_id) {
+        userPaymentCounts[p.user_id] = (userPaymentCounts[p.user_id] || 0) + 1
+      }
+    })
+    const repeatPaymentUsers = Object.values(userPaymentCounts).filter(count => count > 1).length
+    const totalRepeatPayments = Object.entries(userPaymentCounts)
+      .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
+
+    // Повторные за период
+    const periodUserPaymentCounts: { [key: string]: number } = {}
+    paymentsData?.forEach(p => {
+      if (p.user_id) {
+        periodUserPaymentCounts[p.user_id] = (periodUserPaymentCounts[p.user_id] || 0) + 1
+      }
+    })
+    const periodRepeatPayments = Object.entries(periodUserPaymentCounts)
+      .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
 
     return new Response(
       JSON.stringify({
@@ -185,10 +220,20 @@ serve(async (req) => {
           revenue: revenueChart
         },
         totals: {
-          users: totalUsers || 0,
-          generations: totalGenerations || 0,
-          tokens: totalTokensSpent,
-          revenue: totalRevenue
+          users: totalUsersInPeriod,
+          generations: totalGenerationsInPeriod,
+          tokens: totalTokensSpentInPeriod,
+          revenue: totalRevenueInPeriod
+        },
+        // Новые метрики
+        additionalMetrics: {
+          paidUsers: periodPaidUsersCount,
+          paidUsersTotal: paidUsersCount,
+          averageCheck: periodAverageCheck,
+          averageCheckTotal: averageCheck,
+          repeatPayments: periodRepeatPayments,
+          repeatPaymentsTotal: totalRepeatPayments,
+          repeatPaymentUsers: repeatPaymentUsers
         }
       }),
       {

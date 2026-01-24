@@ -72,13 +72,8 @@ export const BenefitsSection = ({
 
   return (
     <section className="py-20 sm:py-28 relative">
-      {/* Background matching other sections */}
-      <div className="absolute inset-0 bg-[#111111]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(268,50%,8%)/30] via-transparent to-[hsl(268,50%,8%)/30]" />
-      <div 
-        className="absolute w-[800px] h-[800px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.04]"
-        style={{ background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)' }}
-      />
+      {/* Transparent background to show page animation */}
+      <div className="absolute inset-0 bg-transparent" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}

@@ -98,6 +98,7 @@ export const GenerateCards = ({
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isRefDragOver, setIsRefDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number>(0);
   const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
@@ -328,6 +329,10 @@ export const GenerateCards = ({
   };
   const handleReferenceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    processReferenceFile(file);
+  };
+
+  const processReferenceFile = (file: File | undefined) => {
     if (file && file.type.startsWith('image/')) {
       const maxSizeBytes = 3 * 1024 * 1024; // 3 MB
       if (file.size > maxSizeBytes) {
@@ -337,12 +342,47 @@ export const GenerateCards = ({
           description: `"${file.name}" (${sizeMB} МБ) превышает лимит 3 МБ. Пожалуйста, сожмите изображение.`,
           variant: "destructive"
         });
-        event.target.value = '';
         return;
       }
       setReferenceImage(file);
     }
   };
+
+  const handleRefDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRefDragOver(true);
+  };
+
+  const handleRefDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRefDragOver(true);
+  };
+
+  const handleRefDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRefDragOver(false);
+  };
+
+  const handleRefDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRefDragOver(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const imageFile = droppedFiles.find(file => file.type.startsWith('image/'));
+    if (!imageFile) {
+      toast({
+        title: "Неподдерживаемый файл",
+        description: "Можно загружать только изображения",
+        variant: "destructive"
+      });
+      return;
+    }
+    processReferenceFile(imageFile);
+  };
+
   const removeReference = () => {
     setReferenceImage(null);
   };
@@ -1266,13 +1306,19 @@ export const GenerateCards = ({
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}>
+                <label 
+                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}
+                  onDragOver={generating ? undefined : handleRefDragOver}
+                  onDragEnter={generating ? undefined : handleRefDragEnter}
+                  onDragLeave={generating ? undefined : handleRefDragLeave}
+                  onDrop={generating ? undefined : handleRefDrop}
+                >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                    <p className="mb-2 text-sm text-center text-muted-foreground">
-                      <span className="font-semibold">Загрузить</span>
+                    <Upload className={`w-8 h-8 mb-4 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`mb-2 text-sm text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите
                     </p>
-                    <p className="text-xs text-center text-muted-foreground">
+                    <p className={`text-xs text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                       PNG, JPG, JPEG
                     </p>
                   </div>
