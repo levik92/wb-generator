@@ -388,7 +388,7 @@ export const GenerateCards = ({
   };
   const canGenerate = () => {
     const tokensNeeded = selectedCards.length * photoGenerationPrice;
-    return files.length > 0 && productName.trim() && productName.trim().length <= 150 && description.trim() && description.trim().length <= 600 && selectedCards.length > 0 && profile.tokens_balance >= tokensNeeded && !generating && !priceLoading;
+    return files.length > 0 && productName.trim() && productName.trim().length <= 150 && description.trim() && description.trim().length <= 1200 && selectedCards.length > 0 && profile.tokens_balance >= tokensNeeded && !generating && !priceLoading;
   };
   const getGuardMessage = () => {
     const tokensNeeded = selectedCards.length * photoGenerationPrice;
@@ -397,7 +397,7 @@ export const GenerateCards = ({
     if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
     if (productName.trim().length < 3) return "Название товара должно содержать минимум 3 символа";
     if (!description.trim()) return "Добавьте описание товара";
-    if (description.trim().length > 600) return "Описание должно быть не более 600 символов";
+    if (description.trim().length > 1200) return "Описание должно быть не более 1200 символов";
     if (description.trim().length < 10) return "Описание должно содержать минимум 10 символов";
     if (selectedCards.length === 0) return "Выберите хотя бы один тип карточки";
     if (profile.tokens_balance < tokensNeeded) return `Недостаточно токенов (нужно ${tokensNeeded})`;
