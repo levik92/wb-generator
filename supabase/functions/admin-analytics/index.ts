@@ -238,15 +238,26 @@ serve(async (req) => {
     const totalRepeatPayments = Object.entries(userPaymentCounts)
       .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
 
-    // Повторные за период
+    // Повторные за период (пользователи с >1 платежом за период)
     const periodUserPaymentCounts: { [key: string]: number } = {}
     paymentsData?.forEach(p => {
       if (p.user_id) {
         periodUserPaymentCounts[p.user_id] = (periodUserPaymentCounts[p.user_id] || 0) + 1
       }
     })
+    const periodRepeatPaymentUsers = Object.values(periodUserPaymentCounts).filter(count => count > 1).length
     const periodRepeatPayments = Object.entries(periodUserPaymentCounts)
       .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
+
+    // Расчет конверсии за период (платящие за период / зарегистрированные за период)
+    const periodConversionRate = totalUsersInPeriod > 0 
+      ? Math.round((periodPaidUsersCount / totalUsersInPeriod) * 1000) / 10 
+      : 0
+
+    // Расчет % повторных оплат за период (повторно платящие / платящие за период)
+    const periodRepeatPaymentRate = periodPaidUsersCount > 0 
+      ? Math.round((periodRepeatPaymentUsers / periodPaidUsersCount) * 1000) / 10 
+      : 0
 
     return new Response(
       JSON.stringify({
@@ -273,12 +284,17 @@ serve(async (req) => {
           repeatPayments: periodRepeatPayments,
           repeatPaymentsTotal: totalRepeatPayments,
           repeatPaymentUsers: repeatPaymentUsers,
-          // Новые метрики
+          // Метрики за период
+          periodRepeatPaymentUsers: periodRepeatPaymentUsers,
+          periodUsersTotal: totalUsersInPeriod,
           totalUsers: totalUsersCount || 0,
-          conversionRate: (totalUsersCount && totalUsersCount > 0) 
+          // Проценты за период
+          conversionRate: periodConversionRate,
+          conversionRateTotal: (totalUsersCount && totalUsersCount > 0) 
             ? Math.round((paidUsersCount / totalUsersCount) * 1000) / 10 
             : 0,
-          repeatPaymentRate: paidUsersCount > 0 
+          repeatPaymentRate: periodRepeatPaymentRate,
+          repeatPaymentRateTotal: paidUsersCount > 0 
             ? Math.round((repeatPaymentUsers / paidUsersCount) * 1000) / 10 
             : 0
         }

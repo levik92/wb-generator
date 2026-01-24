@@ -20,9 +20,13 @@ interface AdditionalMetrics {
   repeatPayments: number;
   repeatPaymentsTotal: number;
   repeatPaymentUsers: number;
+  periodRepeatPaymentUsers: number;
+  periodUsersTotal: number;
   totalUsers: number;
   conversionRate: number;
+  conversionRateTotal: number;
   repeatPaymentRate: number;
+  repeatPaymentRateTotal: number;
 }
 
 interface AnalyticsData {
@@ -433,7 +437,8 @@ export function AdminAdditionalMetrics() {
               {metrics?.repeatPaymentRate || 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics?.repeatPaymentUsers || 0} из {metrics?.paidUsersTotal || 0} польз. ({metrics?.repeatPaymentsTotal || 0} платежей)
+              {metrics?.periodRepeatPaymentUsers || 0} из {metrics?.paidUsers || 0} польз.
+              <span className="text-muted-foreground/70"> (всего: {metrics?.repeatPaymentRateTotal || 0}%)</span>
             </p>
           </div>
 
@@ -447,7 +452,8 @@ export function AdminAdditionalMetrics() {
               {metrics?.conversionRate || 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics?.paidUsersTotal || 0} из {metrics?.totalUsers || 0} пользователей
+              {metrics?.paidUsers || 0} из {metrics?.periodUsersTotal || 0} польз.
+              <span className="text-muted-foreground/70"> (всего: {metrics?.conversionRateTotal || 0}%)</span>
             </p>
           </div>
         </div>
