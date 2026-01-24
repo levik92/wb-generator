@@ -383,8 +383,8 @@ export function AdminAdditionalMetrics() {
             Дополнительные метрики
           </CardTitle>
           <div className="flex items-center gap-2">
-            {/* Период кнопки - скрыты на мобильных */}
-            <div className="hidden md:flex gap-1">
+            {/* Период кнопки - скрыты на мобильных и планшетах */}
+            <div className="hidden lg:flex gap-1">
               {periods.map(period => (
                 <Button 
                   key={period.key} 
@@ -447,8 +447,8 @@ export function AdminAdditionalMetrics() {
           Дополнительные метрики
         </CardTitle>
         <div className="flex items-center gap-2">
-          {/* Период кнопки - скрыты на мобильных */}
-          <div className="hidden md:flex gap-1">
+          {/* Период кнопки - скрыты на мобильных и планшетах */}
+          <div className="hidden lg:flex gap-1">
             {periods.map(period => (
               <Button 
                 key={period.key} 
