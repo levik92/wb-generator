@@ -141,11 +141,12 @@ const Dashboard = () => {
           error: referrerError
         } = await supabase.from('profiles').select('id').eq('referral_code', pendingReferralCode).single();
         if (!referrerError && referrerData && referrerData.id !== userId) {
+          // Just save the referrer - no tokens on registration anymore
+          // Tokens will be awarded to BOTH users after first payment
           const {
             error: updateError
           } = await supabase.from('profiles').update({
-            referred_by: referrerData.id,
-            tokens_balance: profileData.tokens_balance + 10
+            referred_by: referrerData.id
           }).eq('id', userId);
           if (!updateError) {
             await supabase.from('referrals').insert({
@@ -153,15 +154,9 @@ const Dashboard = () => {
               referred_id: userId,
               status: 'pending'
             });
-            await supabase.from('token_transactions').insert({
-              user_id: userId,
-              amount: 10,
-              transaction_type: 'referral_bonus',
-              description: 'Бонус за регистрацию по реферальной ссылке'
-            });
             toast({
-              title: "Реферальный бонус начислен! 🎉",
-              description: "Вы получили дополнительные 10 токенов"
+              title: "Реферальная ссылка применена! 🎉",
+              description: "Вы и ваш друг получите по 15 токенов после вашей первой оплаты"
             });
           }
         }
