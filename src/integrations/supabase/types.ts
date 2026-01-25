@@ -43,18 +43,21 @@ export type Database = {
           active_model: string
           created_at: string | null
           id: string
+          image_resolution: string | null
           updated_at: string | null
         }
         Insert: {
           active_model: string
           created_at?: string | null
           id?: string
+          image_resolution?: string | null
           updated_at?: string | null
         }
         Update: {
           active_model?: string
           created_at?: string | null
           id?: string
+          image_resolution?: string | null
           updated_at?: string | null
         }
         Relationships: []

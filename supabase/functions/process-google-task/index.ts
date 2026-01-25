@@ -84,13 +84,14 @@ async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
   }
 }
 
-// Call Google Gemini API with specified API key
+// Call Google Gemini API with specified API key and resolution
 async function callGeminiApi(
   apiKey: string,
   contentParts: any[],
-  keyName: string
+  keyName: string,
+  imageResolution: string = '2K'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
-  console.log(`Calling Google Gemini API with ${keyName}...`);
+  console.log(`Calling Google Gemini API with ${keyName}, resolution: ${imageResolution}...`);
   
   try {
     const response = await fetch(
@@ -103,7 +104,14 @@ async function callGeminiApi(
         body: JSON.stringify({
           contents: [{
             parts: contentParts
-          }]
+          }],
+          config: {
+            response_modalities: ["image", "text"],
+            image_config: {
+              image_size: imageResolution,
+              aspect_ratio: "9:16"
+            }
+          }
         }),
       }
     );
@@ -264,6 +272,17 @@ serve(async (req) => {
 
     console.log(`Processing with ${productImageBase64.length} product images${referenceBase64 ? ' and 1 reference' : ''}`);
 
+    // Fetch image resolution setting from database
+    const { data: modelSettings } = await supabase
+      .from('ai_model_settings')
+      .select('image_resolution')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    const imageResolution = modelSettings?.image_resolution || '2K';
+    console.log(`Using image resolution: ${imageResolution}`);
+
     // Build content parts for Google Gemini API
     const contentParts: any[] = [];
     
@@ -305,14 +324,14 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     }
 
     // Try primary API key first
-    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY');
+    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution);
     
     // If primary key fails with 503/429/403, wait 2 seconds and try fallback key
     if (!aiResult.ok && (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
       if (geminiApiKey2) {
         console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
         await new Promise(resolve => setTimeout(resolve, FALLBACK_DELAY_MS));
-        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY');
+        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY', imageResolution);
         
         if (aiResult.ok) {
           console.log('Fallback API key succeeded!');
@@ -320,7 +339,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           // Fallback also failed, wait 10 seconds and try primary key one more time
           console.log(`Fallback API key also returned ${aiResult.status}, waiting ${FINAL_RETRY_DELAY_MS}ms before final retry on primary key...`);
           await new Promise(resolve => setTimeout(resolve, FINAL_RETRY_DELAY_MS));
-          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY');
+          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY', imageResolution);
           
           if (aiResult.ok) {
             console.log('Final retry on primary API key succeeded!');
