@@ -431,8 +431,8 @@ export const GenerateCards = ({
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
 
-    // Расчет времени: 25 секунд на изображение
-    const estimatedSecondsPerCard = 25;
+    // Расчет времени: 35 секунд на изображение
+    const estimatedSecondsPerCard = 35;
     const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
     setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
     setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
@@ -808,16 +808,24 @@ export const GenerateCards = ({
       const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
       console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
 
-      // Try to get source image from jobData or uploadedProductImages
-      let sourceImageUrl = null;
+      // Collect all product images and reference image for regeneration
+      let allProductImages: Array<{ url: string; name: string; type: string }> = [];
 
-      // First try jobData
+      // First try jobData (preserved from original generation)
       if (jobData?.productImages && jobData.productImages.length > 0) {
-        sourceImageUrl = jobData.productImages[0].url;
+        allProductImages = jobData.productImages.map((img: { url: string; name?: string; type?: string }, idx: number) => ({
+          url: img.url,
+          name: img.name || `product_${idx + 1}`,
+          type: img.type || 'product'
+        }));
       }
       // Fallback to uploadedProductImages
       else if (uploadedProductImages.length > 0) {
-        sourceImageUrl = uploadedProductImages[0].url;
+        allProductImages = uploadedProductImages.map((img, idx) => ({
+          url: img.url,
+          name: img.name || `product_${idx + 1}`,
+          type: 'product'
+        }));
       }
       // Last resort: try to fetch from current job in database
       else if (currentJobId) {
@@ -825,14 +833,16 @@ export const GenerateCards = ({
           data: job
         } = await supabase.from('generation_jobs').select('product_images').eq('id', currentJobId).single();
         if (job?.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
-          sourceImageUrl = (job.product_images as Array<{
-            url: string;
-          }>)[0].url;
+          allProductImages = job.product_images as Array<{ url: string; name: string; type: string }>;
         }
       }
-      if (!sourceImageUrl) {
-        throw new Error('Оригинальное изображение недоступно');
+      
+      if (allProductImages.length === 0) {
+        throw new Error('Оригинальные изображения недоступны');
       }
+      
+      // First product image URL for backward compatibility
+      const sourceImageUrl = allProductImages.find(img => img.type === 'product')?.url || allProductImages[0].url;
 
       // Use saved job data (fallback to form fields if needed)
       const productNameToUse = jobData?.productName || productName;
@@ -852,7 +862,8 @@ export const GenerateCards = ({
           userId: profile.id,
           cardIndex: image.stageIndex,
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
-          sourceImageUrl: sourceImageUrl
+          sourceImageUrl: sourceImageUrl,
+          productImages: allProductImages
         }
       });
       if (error) throw error;
