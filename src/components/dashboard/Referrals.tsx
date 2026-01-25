@@ -139,18 +139,18 @@ export const Referrals = ({
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-green-500/10 border-green-500/30 dark:bg-green-500/15 dark:border-green-500/30 rounded-xl shadow-sm border">
-                  <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">+20</div>
-                  <div className="text-sm text-green-700 dark:text-green-300 font-medium">токенов за первую покупку друга</div>
+                  <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">+15</div>
+                  <div className="text-sm text-green-700 dark:text-green-300 font-medium">токенов вам после оплаты друга</div>
                 </div>
                 <div className="text-center p-4 bg-blue-500/10 border-blue-500/30 dark:bg-blue-500/15 dark:border-blue-500/30 rounded-xl shadow-sm border">
-                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">+10</div>
-                  <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">токенов другу по вашей ссылке</div>
+                  <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">+15</div>
+                  <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">токенов другу после его первой оплаты</div>
                 </div>
               </div>
               
               <div className="bg-muted/40 p-4 rounded-lg border text-sm text-muted-foreground">
-                <strong>Как это работает:</strong> Ваш друг получает +10 токенов при регистрации по вашей ссылке. 
-                Вы получаете +20 токенов после его первого пополнения баланса.
+                <strong>Как это работает:</strong> Пригласите друга по вашей ссылке. После его первой оплаты 
+                вы оба получите по 15 токенов в подарок!
               </div>
             </CardContent>
           </Card>
