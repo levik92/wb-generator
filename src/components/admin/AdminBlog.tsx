@@ -571,7 +571,7 @@ export const AdminBlog = () => {
                       <TableCell>
                         <Badge
                           variant={post.is_published ? "default" : "secondary"}
-                          className={post.is_published ? "bg-green-500/20 text-green-400" : ""}
+                          className={post.is_published ? "bg-green-500/30 text-green-600 dark:text-green-400 border border-green-500/40 hover:bg-green-500/30" : ""}
                         >
                           {post.is_published ? "Опубликовано" : "Черновик"}
                         </Badge>
@@ -603,9 +603,9 @@ export const AdminBlog = () => {
                             size="sm"
                             onClick={() => togglePublish(post)}
                             title={post.is_published ? "Снять с публикации" : "Опубликовать"}
-                            className="h-7 w-7 md:h-8 md:w-8 p-0"
+                            className="h-7 w-7 md:h-8 md:w-8 p-0 hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-500"
                           >
-                            <Eye className={`w-3 h-3 ${post.is_published ? "text-green-400" : ""}`} />
+                            <Eye className={`w-3 h-3 ${post.is_published ? "text-green-600 dark:text-green-400" : ""}`} />
                           </Button>
                           <Button
                             variant="outline"
