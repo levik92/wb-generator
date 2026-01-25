@@ -56,6 +56,7 @@ serve(async (req) => {
       cardIndex,
       cardType,
       sourceImageUrl,
+      productImages,
     } = await req.json();
 
     // Validate inputs
@@ -127,6 +128,15 @@ serve(async (req) => {
       throw new Error('Failed to deduct tokens');
     }
 
+    // Use all product images if provided, otherwise fallback to single sourceImageUrl
+    const imagesToUse = productImages && Array.isArray(productImages) && productImages.length > 0
+      ? productImages
+      : [{
+          url: sourceImageUrl,
+          name: 'regeneration_source',
+          type: 'product'
+        }];
+
     // Create temporary job for tracking with product_images
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
@@ -138,11 +148,7 @@ serve(async (req) => {
         status: 'processing',
         total_cards: 1,
         tokens_cost: tokensCost,
-        product_images: [{
-          url: sourceImageUrl,
-          name: 'regeneration_source',
-          type: 'product'
-        }]
+        product_images: imagesToUse
       })
       .select()
       .single();
