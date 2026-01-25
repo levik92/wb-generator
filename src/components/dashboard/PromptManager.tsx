@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AdminImageSettings } from "@/components/admin/AdminImageSettings";
 interface Prompt {
   id: string;
   prompt_type: string;
@@ -488,5 +489,8 @@ export function PromptManager() {
           {renderPrompts('google')}
         </TabsContent>
       </Tabs>
+
+      {/* Настройки генерации изображений */}
+      <AdminImageSettings />
     </div>;
 }

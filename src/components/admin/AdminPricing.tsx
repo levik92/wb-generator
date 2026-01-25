@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
-import { AdminImageSettings } from "./AdminImageSettings";
 interface PaymentPackage {
   id: string;
   name: string;
@@ -210,9 +209,6 @@ export function AdminPricing() {
       </div>;
   }
   return <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
-      {/* Настройки генерации изображений */}
-      <AdminImageSettings />
-
       {/* Тарифы */}
       <Card className="overflow-hidden bg-card">
         <CardHeader className="p-4 sm:p-6">
