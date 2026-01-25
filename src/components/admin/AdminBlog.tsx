@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -522,105 +523,118 @@ export const AdminBlog = () => {
         </Dialog>
       </div>
 
-      {posts.length === 0 ? (
-        <div className="text-center py-12 bg-muted/30 rounded-lg">
-          <p className="text-muted-foreground mb-4">Статей пока нет</p>
-          <Button onClick={() => setDialogOpen(true)} variant="outline" className="gap-2">
-            <Plus className="w-4 h-4" />
-            Создать первую статью
-          </Button>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Статья</TableHead>
-                <TableHead>Категория</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead className="text-center">Просмотры</TableHead>
-                <TableHead>Дата</TableHead>
-                <TableHead className="text-right">Действия</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {posts.map((post) => (
-                <TableRow key={post.id}>
-                  <TableCell>
-                    <div className="max-w-md">
-                      <p className="font-medium truncate">{post.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        /blog/{post.slug}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={tagColors[post.tag]}>
-                      {post.tag}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={post.is_published ? "default" : "secondary"}
-                      className={post.is_published ? "bg-green-500/20 text-green-400" : ""}
-                    >
-                      {post.is_published ? "Опубликовано" : "Черновик"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                      <Eye className="w-3 h-3" />
-                      {post.views}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {formatDate(post.created_at)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      {post.is_published && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
-                          title="Открыть статью"
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle>Статьи блога</CardTitle>
+          <CardDescription>
+            Всего статей: {posts.length} | Опубликовано: {posts.filter(p => p.is_published).length}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-2 md:p-4">
+          {posts.length === 0 ? (
+            <div className="text-center py-12 bg-muted/30 rounded-lg">
+              <p className="text-muted-foreground mb-4">Статей пока нет</p>
+              <Button onClick={() => setDialogOpen(true)} variant="outline" className="gap-2">
+                <Plus className="w-4 h-4" />
+                Создать первую статью
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[200px]">Статья</TableHead>
+                    <TableHead className="min-w-[100px]">Категория</TableHead>
+                    <TableHead className="min-w-[100px]">Статус</TableHead>
+                    <TableHead className="text-center min-w-[80px]">Просмотры</TableHead>
+                    <TableHead className="min-w-[100px] hidden md:table-cell">Дата</TableHead>
+                    <TableHead className="text-right min-w-[120px]">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {posts.map((post) => (
+                    <TableRow key={post.id}>
+                      <TableCell>
+                        <div className="max-w-md">
+                          <p className="font-medium truncate text-sm">{post.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            /blog/{post.slug}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={tagColors[post.tag]}>
+                          {post.tag}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={post.is_published ? "default" : "secondary"}
+                          className={post.is_published ? "bg-green-500/20 text-green-400" : ""}
                         >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => togglePublish(post)}
-                        title={post.is_published ? "Снять с публикации" : "Опубликовать"}
-                      >
-                        <Eye className={`w-4 h-4 ${post.is_published ? "text-green-400" : ""}`} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(post)}
-                        title="Редактировать"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(post.id)}
-                        title="Удалить"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                          {post.is_published ? "Опубликовано" : "Черновик"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1 text-muted-foreground">
+                          <Eye className="w-3 h-3" />
+                          {post.views}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
+                        {formatDate(post.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-0.5 md:gap-1">
+                          {post.is_published && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+                              title="Открыть статью"
+                              className="h-7 w-7 md:h-8 md:w-8 p-0"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => togglePublish(post)}
+                            title={post.is_published ? "Снять с публикации" : "Опубликовать"}
+                            className="h-7 w-7 md:h-8 md:w-8 p-0"
+                          >
+                            <Eye className={`w-3 h-3 ${post.is_published ? "text-green-400" : ""}`} />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(post)}
+                            title="Редактировать"
+                            className="h-7 w-7 md:h-8 md:w-8 p-0"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(post.id)}
+                            title="Удалить"
+                            className="h-7 w-7 md:h-8 md:w-8 p-0"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
