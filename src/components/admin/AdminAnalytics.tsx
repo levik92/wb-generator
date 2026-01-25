@@ -17,9 +17,6 @@ export function AdminAnalytics({
   users
 }: AdminAnalyticsProps) {
   return <div className="space-y-4 md:space-y-6">
-      {/* Additional Metrics - Paid users, Average check, Repeat payments */}
-      <AdminAdditionalMetrics />
-
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
         <AdminAnalyticsChart type="users" />
@@ -27,6 +24,9 @@ export function AdminAnalytics({
         <AdminAnalyticsChart type="tokens" />
         <AdminAnalyticsChart type="revenue" />
       </div>
+
+      {/* Additional Metrics - Paid users, Average check, Repeat payments (moved below charts) */}
+      <AdminAdditionalMetrics />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
