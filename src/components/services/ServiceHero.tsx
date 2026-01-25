@@ -30,7 +30,7 @@ export const ServiceHero = ({
   subtitle,
   description,
   stats,
-  ctaText = "Попробовать бесплатно",
+  ctaText = "Попробовать",
   ctaLink = "/auth",
   secondaryCtaText,
   secondaryCtaLink,

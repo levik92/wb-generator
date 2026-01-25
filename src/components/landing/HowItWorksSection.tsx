@@ -136,7 +136,7 @@ export const HowItWorksSection = () => {
         <div className="text-center mt-16">
           <Link to="/auth?tab=signup">
             <Button className="btn-premium text-base sm:text-lg px-8 py-6 rounded-xl font-semibold group">
-              Попробовать бесплатно
+              Попробовать
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
