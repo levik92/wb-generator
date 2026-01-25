@@ -105,12 +105,9 @@ async function callGeminiApi(
           contents: [{
             parts: contentParts
           }],
-          config: {
-            response_modalities: ["image", "text"],
-            image_config: {
-              image_size: imageResolution,
-              aspect_ratio: "9:16"
-            }
+          generationConfig: {
+            responseModalities: ["image", "text"],
+            imageSizeHint: imageResolution === '2K' ? 'SIZE_2048' : 'SIZE_1024'
           }
         }),
       }
