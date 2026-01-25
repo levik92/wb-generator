@@ -109,7 +109,7 @@ async function callGeminiApi(
             responseModalities: ["IMAGE", "TEXT"],
             imageConfig: {
               imageSize: imageResolution,  // "1K" or "2K"
-              aspectRatio: "9:16"
+              aspectRatio: "3:4"
             }
           }
         }),
