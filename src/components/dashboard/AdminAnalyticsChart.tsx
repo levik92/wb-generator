@@ -55,29 +55,9 @@ interface AnalyticsData {
 
 interface AdminAnalyticsChartProps {
   type: 'users' | 'generations' | 'tokens' | 'revenue';
+  dateRange?: DateRange;
+  onDateRangeChange?: (range: DateRange | undefined) => void;
 }
-
-const periods = [{
-  key: 'day',
-  label: 'День',
-  shortLabel: '24ч'
-}, {
-  key: 'week',
-  label: 'Неделя',
-  shortLabel: '7д'
-}, {
-  key: 'month',
-  label: 'Месяц',
-  shortLabel: '30д'
-}, {
-  key: '3months',
-  label: '3 месяца',
-  shortLabel: '3м'
-}, {
-  key: 'year',
-  label: 'Год',
-  shortLabel: '1г'
-}];
 
 const chartConfig = {
   users: {
@@ -115,28 +95,43 @@ const chartConfig = {
 };
 
 export function AdminAnalyticsChart({
-  type
+  type,
+  dateRange,
+  onDateRangeChange
 }: AdminAnalyticsChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const [internalDateRange, setInternalDateRange] = useState<DateRange | undefined>(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return { from: weekAgo, to: now };
+  });
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const config = chartConfig[type];
   const Icon = config.icon;
 
+  // Use external dateRange if provided, otherwise use internal
+  const effectiveDateRange = dateRange ?? internalDateRange;
+  const handleDateRangeChange = onDateRangeChange ?? setInternalDateRange;
+
   useEffect(() => {
     loadAnalytics();
-  }, [selectedPeriod]);
+  }, [effectiveDateRange?.from, effectiveDateRange?.to]);
 
   const loadAnalytics = async () => {
     setLoading(true);
     try {
+      const body: any = { period: 'custom' };
+      
+      if (effectiveDateRange?.from && effectiveDateRange?.to) {
+        body.startDateCustom = effectiveDateRange.from.toISOString();
+        body.endDateCustom = effectiveDateRange.to.toISOString();
+      }
+      
       const {
         data: result,
         error
       } = await supabase.functions.invoke('admin-analytics', {
-        body: {
-          period: selectedPeriod
-        }
+        body
       });
       if (error) throw error;
       setData(result);
@@ -150,6 +145,12 @@ export function AdminAnalyticsChart({
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDateRange = () => {
+    if (!effectiveDateRange?.from) return "Выбрать даты";
+    if (!effectiveDateRange?.to) return format(effectiveDateRange.from, "dd.MM.yy", { locale: ru });
+    return `${format(effectiveDateRange.from, "dd.MM.yy", { locale: ru })} - ${format(effectiveDateRange.to, "dd.MM.yy", { locale: ru })}`;
   };
 
   const formatXAxisDate = (dateStr: string, groupFormat: string) => {
@@ -249,11 +250,29 @@ export function AdminAnalyticsChart({
           <Icon className="h-4 w-4 text-muted-foreground" />
           <CardTitle className="text-sm font-medium">{config.title}</CardTitle>
         </div>
-        <div className="flex gap-1">
-          {periods.map(period => <Button key={period.key} variant={selectedPeriod === period.key ? "default" : "ghost"} size="sm" className="h-6 px-2 text-xs" onClick={() => setSelectedPeriod(period.key)}>
-              {period.shortLabel}
-            </Button>)}
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-6 px-2 text-xs gap-1"
+            >
+              <CalendarIcon className="h-3 w-3" />
+              {formatDateRange()}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              mode="range"
+              selected={effectiveDateRange}
+              onSelect={handleDateRangeChange}
+              numberOfMonths={1}
+              locale={ru}
+              disabled={(date) => date > new Date()}
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
       </CardHeader>
       
       <CardContent>
@@ -306,24 +325,17 @@ export function AdminAnalyticsChart({
 
           {/* Period Description */}
           <p className="text-xs text-muted-foreground text-center">
-            {periods.find(p => p.key === selectedPeriod)?.label}
+            {formatDateRange()}
           </p>
         </div>
       </CardContent>
     </Card>;
 }
 
-// Новый компонент для дополнительных метрик
-interface AdditionalMetricsCardProps {
-  selectedPeriod: string;
-  onPeriodChange: (period: string) => void;
-}
-
+// Компонент для дополнительных метрик
 export function AdminAdditionalMetrics() {
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
   const [metrics, setMetrics] = useState<AdditionalMetrics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isCustomPeriod, setIsCustomPeriod] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -332,14 +344,14 @@ export function AdminAdditionalMetrics() {
 
   useEffect(() => {
     loadMetrics();
-  }, [selectedPeriod, dateRange, isCustomPeriod]);
+  }, [dateRange]);
 
   const loadMetrics = async () => {
     setLoading(true);
     try {
-      const body: any = { period: selectedPeriod };
+      const body: any = { period: 'custom' };
       
-      if (isCustomPeriod && dateRange?.from && dateRange?.to) {
+      if (dateRange?.from && dateRange?.to) {
         body.startDateCustom = dateRange.from.toISOString();
         body.endDateCustom = dateRange.to.toISOString();
       }
@@ -356,16 +368,8 @@ export function AdminAdditionalMetrics() {
     }
   };
 
-  const handlePeriodClick = (periodKey: string) => {
-    setIsCustomPeriod(false);
-    setSelectedPeriod(periodKey);
-  };
-
   const handleDateRangeSelect = (range: DateRange | undefined) => {
     setDateRange(range);
-    if (range?.from && range?.to) {
-      setIsCustomPeriod(true);
-    }
   };
 
   const formatDateRange = () => {
@@ -382,45 +386,29 @@ export function AdminAdditionalMetrics() {
             <Calculator className="h-4 w-4 text-muted-foreground" />
             Дополнительные метрики
           </CardTitle>
-          <div className="flex items-center gap-2">
-            {/* Период кнопки - скрыты на мобильных и планшетах */}
-            <div className="hidden lg:flex gap-1">
-              {periods.map(period => (
-                <Button 
-                  key={period.key} 
-                  variant={!isCustomPeriod && selectedPeriod === period.key ? "default" : "ghost"} 
-                  size="sm" 
-                  className="h-6 px-2 text-xs" 
-                  onClick={() => handlePeriodClick(period.key)}
-                >
-                  {period.shortLabel}
-                </Button>
-              ))}
-            </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant={isCustomPeriod ? "default" : "outline"} 
-                  size="sm" 
-                  className="h-6 px-2 text-xs gap-1"
-                >
-                  <CalendarIcon className="h-3 w-3" />
-                  {formatDateRange()}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateRangeSelect}
-                  numberOfMonths={1}
-                  locale={ru}
-                  disabled={(date) => date > new Date()}
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-6 px-2 text-xs gap-1"
+              >
+                <CalendarIcon className="h-3 w-3" />
+                {formatDateRange()}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={handleDateRangeSelect}
+                numberOfMonths={1}
+                locale={ru}
+                disabled={(date) => date > new Date()}
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -446,45 +434,29 @@ export function AdminAdditionalMetrics() {
           <Calculator className="h-4 w-4 text-muted-foreground" />
           Дополнительные метрики
         </CardTitle>
-        <div className="flex items-center gap-2">
-          {/* Период кнопки - скрыты на мобильных и планшетах */}
-          <div className="hidden lg:flex gap-1">
-            {periods.map(period => (
-              <Button 
-                key={period.key} 
-                variant={!isCustomPeriod && selectedPeriod === period.key ? "default" : "ghost"} 
-                size="sm" 
-                className="h-6 px-2 text-xs" 
-                onClick={() => handlePeriodClick(period.key)}
-              >
-                {period.shortLabel}
-              </Button>
-            ))}
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant={isCustomPeriod ? "default" : "outline"} 
-                size="sm" 
-                className="h-6 px-2 text-xs gap-1"
-              >
-                <CalendarIcon className="h-3 w-3" />
-                {formatDateRange()}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={handleDateRangeSelect}
-                numberOfMonths={1}
-                locale={ru}
-                disabled={(date) => date > new Date()}
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-6 px-2 text-xs gap-1"
+            >
+              <CalendarIcon className="h-3 w-3" />
+              {formatDateRange()}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              mode="range"
+              selected={dateRange}
+              onSelect={handleDateRangeSelect}
+              numberOfMonths={1}
+              locale={ru}
+              disabled={(date) => date > new Date()}
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
