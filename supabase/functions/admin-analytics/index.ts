@@ -14,7 +14,8 @@ async function fetchAllRows(supabase: any, table: string, selectFields: string, 
   let hasMore = true
 
   while (hasMore) {
-    let query = supabase.from(table).select(selectFields).range(offset, offset + pageSize - 1)
+    // Сначала применяем фильтры, потом range для корректной пагинации
+    let query = supabase.from(table).select(selectFields)
     
     if (filters) {
       for (const filter of filters) {
@@ -22,9 +23,14 @@ async function fetchAllRows(supabase: any, table: string, selectFields: string, 
           query = query.eq(filter.field, filter.value)
         } else if (filter.op === 'gte') {
           query = query.gte(filter.field, filter.value)
+        } else if (filter.op === 'lte') {
+          query = query.lte(filter.field, filter.value)
         }
       }
     }
+    
+    // Применяем range после фильтров
+    query = query.range(offset, offset + pageSize - 1)
 
     const { data, error } = await query
     
@@ -69,8 +75,11 @@ serve(async (req) => {
     if (startDateCustom && endDateCustom) {
       startDate = new Date(startDateCustom)
       endDate = new Date(endDateCustom)
-      // Устанавливаем конец дня для endDate
-      endDate.setHours(23, 59, 59, 999)
+      
+      // Нормализуем startDate к началу дня (00:00:00 UTC)
+      startDate.setUTCHours(0, 0, 0, 0)
+      // Устанавливаем конец дня для endDate (23:59:59.999 UTC)
+      endDate.setUTCHours(23, 59, 59, 999)
       
       // Определяем формат группировки в зависимости от длины периода
       const diffDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -91,22 +100,28 @@ serve(async (req) => {
           break
         case 'week':
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          // Нормализуем к началу дня
+          startDate.setUTCHours(0, 0, 0, 0)
           groupFormat = 'day'
           break
         case 'month':
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          startDate.setUTCHours(0, 0, 0, 0)
           groupFormat = 'day'
           break
         case '3months':
           startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+          startDate.setUTCHours(0, 0, 0, 0)
           groupFormat = 'week'
           break
         case 'year':
           startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+          startDate.setUTCHours(0, 0, 0, 0)
           groupFormat = 'month'
           break
         default:
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          startDate.setUTCHours(0, 0, 0, 0)
           groupFormat = 'day'
       }
     }
@@ -115,7 +130,10 @@ serve(async (req) => {
     const timeIntervals: string[] = []
     const current = new Date(startDate)
     
-    while (current <= now) {
+    // Используем endDate для ограничения, а не now
+    const limitDate = endDate > now ? now : endDate
+    
+    while (current <= limitDate) {
       if (groupFormat === 'hour') {
         timeIntervals.push(current.toISOString().slice(0, 13) + ':00:00.000Z')
         current.setHours(current.getHours() + 1)
@@ -138,7 +156,8 @@ serve(async (req) => {
 
     // Получаем данные о пользователях за период (с пагинацией)
     const usersData = await fetchAllRows(supabase, 'profiles', 'id, created_at', [
-      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
     // Получаем общее количество пользователей для расчета конверсии
@@ -148,19 +167,22 @@ serve(async (req) => {
 
     // Получаем данные о генерациях (с пагинацией)
     const generationsData = await fetchAllRows(supabase, 'generations', 'created_at', [
-      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
     // Получаем данные о токенах (расход) (с пагинацией)
     const tokensData = await fetchAllRows(supabase, 'token_transactions', 'created_at, amount', [
       { field: 'transaction_type', op: 'eq', value: 'generation' },
-      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
     // Получаем данные о платежах за период (с пагинацией)
     const paymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, created_at, amount', [
       { field: 'status', op: 'eq', value: 'succeeded' },
-      { field: 'created_at', op: 'gte', value: startDate.toISOString() }
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
     // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей (с пагинацией)
