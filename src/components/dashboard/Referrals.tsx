@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Users, ExternalLink, Link2, Calendar, Gift } from "lucide-react";
+import { Copy, Users, ExternalLink, Link2, Calendar, Gift, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
@@ -94,11 +94,15 @@ export const Referrals = ({
     });
   };
   return <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">Реферальная программа</h2>
-        <p className="text-muted-foreground text-sm">
-          Приглашайте друзей и получайте бонусы
-        </p>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
+          <UserPlus className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Реферальная программа</h2>
+          <p className="text-muted-foreground text-sm">Приглашайте друзей и получайте бонусы</p>
+        </div>
       </div>
 
       <Tabs defaultValue="program" className="space-y-4">

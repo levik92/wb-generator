@@ -263,15 +263,13 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
+          <Sparkles className="w-6 h-6 text-primary" />
+        </div>
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-2">
-            <Sparkles className="h-7 w-7 text-primary" />
-            Бонусная программа
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Получайте токены за контент о нашем сервисе
-          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Бонусная программа</h2>
+          <p className="text-muted-foreground text-sm">Получайте токены за контент о нашем сервисе</p>
         </div>
       </div>
 
@@ -353,7 +351,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-1">
                         <div>
                           <div className="font-medium text-sm">{program.title}</div>
-                          <div className="text-xs text-muted-foreground">{program.description}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{program.description}</div>
                         </div>
                         
                         {/* Reward Badge OR Status Badge */}
@@ -392,6 +390,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                             <Button 
                               onClick={() => handleOpenSubmission(program)}
                               size="sm"
+                              variant="secondary"
                               className="text-xs"
                             >
                               {program.button_text}
