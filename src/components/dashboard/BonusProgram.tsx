@@ -187,21 +187,21 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400">
+          <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 hover:bg-yellow-500/10">
             <Clock className="w-3 h-3 mr-1" />
             На проверке
           </Badge>
         );
       case 'approved':
         return (
-          <Badge className="bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400">
+          <Badge className="bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 hover:bg-green-500/10">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             +{tokensAwarded} токенов
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className="bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400">
+          <Badge className="bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 hover:bg-red-500/10">
             <XCircle className="w-3 h-3 mr-1" />
             Отклонено
           </Badge>
@@ -239,111 +239,131 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
         </div>
       </div>
 
-      {/* Instagram Info Card */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
-                <Instagram className="w-6 h-6 text-white" />
+      {/* Main Bonus Program Card */}
+      <Card className="border-border">
+        <CardContent className="p-0">
+          {/* Instagram Info Header */}
+          <div className="p-6 border-b border-border bg-gradient-to-br from-primary/5 to-primary/10">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
+                  <Instagram className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold">Наш Instagram</p>
+                  <a 
+                    href="https://instagram.com/wbgenerator" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline text-sm flex items-center gap-1"
+                  >
+                    @wbgenerator <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold">Наш Instagram</p>
-                <a 
-                  href="https://instagram.com/wbgenerator" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline text-sm flex items-center gap-1"
-                >
-                  @wbgenerator <ExternalLink className="w-3 h-3" />
-                </a>
+              <div className="sm:ml-auto">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Download className="w-4 h-4" />
+                  Скачать макет сторис
+                </Button>
               </div>
-            </div>
-            <div className="sm:ml-auto">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Download className="w-4 h-4" />
-                Скачать макет сторис
-              </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Bonus Tasks */}
-      <div className="grid gap-4">
-        {programs.map((program) => {
-          const submission = getSubmissionForProgram(program.id);
-          const Icon = getIcon(program.icon_name);
-          const isCompleted = submission?.status === 'approved';
-          const isPending = submission?.status === 'pending';
-          const isRejected = submission?.status === 'rejected';
-          const canSubmit = !submission || isRejected;
+          {/* Bonus Tasks as Sub-blocks */}
+          <div className="divide-y divide-border">
+            {programs.map((program) => {
+              const submission = getSubmissionForProgram(program.id);
+              const Icon = getIcon(program.icon_name);
+              const isCompleted = submission?.status === 'approved';
+              const isPending = submission?.status === 'pending';
+              const isRejected = submission?.status === 'rejected';
+              const canSubmit = !submission || isRejected;
 
-          return (
-            <Card 
-              key={program.id} 
-              className={`transition-all duration-200 ${
-                isCompleted 
-                  ? 'border-green-500/30 bg-green-500/5' 
-                  : isPending 
-                    ? 'border-yellow-500/30 bg-yellow-500/5'
-                    : 'hover:border-primary/30 hover:shadow-md'
-              }`}
-            >
-              <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {/* Icon */}
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
-                    program.icon_name === 'instagram' 
-                      ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500'
-                      : program.icon_name === 'crown'
-                        ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
-                        : 'bg-gradient-to-br from-primary/80 to-primary'
-                  }`}>
-                    <Icon className="w-7 h-7 text-white" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
-                      <div>
-                        <h3 className="font-semibold text-lg">{program.title}</h3>
-                        <p className="text-muted-foreground text-sm">{program.description}</p>
-                      </div>
-                      
-                      {/* Reward Badge */}
-                      {program.tokens_reward > 0 ? (
-                        <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 self-start text-base px-3 py-1">
-                          +{program.tokens_reward} токенов
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 shrink-0 self-start">
-                          Индивидуально
-                        </Badge>
-                      )}
+              return (
+                <div 
+                  key={program.id} 
+                  className={`p-6 ${
+                    isCompleted 
+                      ? 'bg-green-500/5' 
+                      : isPending 
+                        ? 'bg-yellow-500/5'
+                        : ''
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                      program.icon_name === 'instagram' 
+                        ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500'
+                        : program.icon_name === 'crown'
+                          ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
+                          : 'bg-gradient-to-br from-primary/80 to-primary'
+                    }`}>
+                      <Icon className="w-6 h-6 text-white" />
                     </div>
 
-                    {/* Status & Action */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
-                      {submission && getStatusBadge(submission.status, submission.tokens_awarded)}
-                      
-                      {canSubmit && (
-                        <Button 
-                          onClick={() => handleOpenSubmission(program)}
-                          variant={isRejected ? "outline" : "default"}
-                          className="sm:ml-auto"
-                        >
-                          {isRejected ? 'Повторить попытку' : program.button_text}
-                        </Button>
-                      )}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                        <div>
+                          <h3 className="font-semibold text-base">{program.title}</h3>
+                          <p className="text-muted-foreground text-sm">{program.description}</p>
+                        </div>
+                        
+                        {/* Reward Badge */}
+                        {program.tokens_reward > 0 ? (
+                          <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 self-start px-3 py-1 hover:bg-primary/10">
+                            +{program.tokens_reward} токенов
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 shrink-0 self-start hover:bg-amber-500/10">
+                            Индивидуально
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Status & Action */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3">
+                        {submission && (
+                          <div className="flex flex-col gap-1">
+                            {getStatusBadge(submission.status, submission.tokens_awarded)}
+                            {/* Show admin notes if available */}
+                            {submission.status !== 'pending' && submission.contact_info && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {submission.status === 'approved' ? '✅ ' : '❌ '}
+                                Ваша заявка была рассмотрена
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {canSubmit && (
+                          <Button 
+                            onClick={() => handleOpenSubmission(program)}
+                            variant={isRejected ? "outline" : "default"}
+                            size="sm"
+                            className="sm:ml-auto"
+                          >
+                            {isRejected ? 'Повторить попытку' : program.button_text}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+
+          {/* Disclaimer */}
+          <div className="p-4 border-t border-border bg-muted/30">
+            <p className="text-xs text-muted-foreground text-center">
+              Модераторы сервиса оставляют за собой право на любое принятие решения без объяснения причин отказ либо одобрение
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Submission Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
