@@ -219,28 +219,28 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
     }
   };
 
-  const getStatusBadge = (status: string, tokensAwarded?: number | null) => {
+  const getStatusBadge = (status: string, tokensAwarded?: number | null, tokensReward?: number) => {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="w-fit bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 text-[10px] px-2 py-0.5">
+          <div className="w-fit bg-yellow-500/10 text-yellow-700 border border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 text-[10px] px-2 py-0.5 rounded-full inline-flex items-center font-semibold">
             <Clock className="w-3 h-3 mr-1" />
             На проверке
-          </Badge>
+          </div>
         );
       case 'approved':
         return (
-          <Badge className="w-fit bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 text-[10px] px-2 py-0.5">
+          <div className="w-fit bg-green-500/10 text-green-700 border border-green-500/20 dark:bg-green-500/20 dark:text-green-400 text-[10px] px-2 py-0.5 rounded-full inline-flex items-center font-semibold">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             +{tokensAwarded} токенов
-          </Badge>
+          </div>
         );
       case 'rejected':
         return (
-          <Badge className="w-fit bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 text-[10px] px-2 py-0.5">
+          <div className="w-fit bg-red-500/10 text-red-700 border border-red-500/20 dark:bg-red-500/20 dark:text-red-400 text-[10px] px-2 py-0.5 rounded-full inline-flex items-center font-semibold">
             <XCircle className="w-3 h-3 mr-1" />
             Отклонено
-          </Badge>
+          </div>
         );
       default:
         return null;
@@ -332,7 +332,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                   key={program.id} 
                   className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4"
                 >
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-row gap-3">
                     {/* Icon */}
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       program.icon_name === 'instagram' 
@@ -356,33 +356,33 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                           <div className="text-xs text-muted-foreground">{program.description}</div>
                         </div>
                         
-                        {/* Reward Badge */}
+                        {/* Reward Badge OR Status Badge */}
                         <div className="shrink-0 self-start">
-                          {program.tokens_reward > 0 ? (
-                            <div className="bg-background/80 border border-border/50 px-2 py-0.5 rounded-md font-medium text-[10px] text-primary">
-                              +{program.tokens_reward} токенов
-                            </div>
+                          {submission ? (
+                            // Show status badge when user has submitted
+                            getStatusBadge(submission.status, submission.tokens_awarded, program.tokens_reward)
                           ) : (
-                            <div className="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md font-medium text-[10px] text-amber-600 dark:text-amber-400">
-                              Индивидуально
-                            </div>
+                            // Show token offer when user hasn't participated
+                            program.tokens_reward > 0 ? (
+                              <div className="bg-background/80 border border-border/50 px-2 py-0.5 rounded-md font-medium text-[10px] text-primary">
+                                +{program.tokens_reward} токенов
+                              </div>
+                            ) : (
+                              <div className="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md font-medium text-[10px] text-amber-600 dark:text-amber-400">
+                                Индивидуально
+                              </div>
+                            )
                           )}
                         </div>
                       </div>
 
-                      {/* Status & Action */}
+                      {/* Admin notes & Action */}
                       <div className="flex flex-col gap-2 mt-2">
-                        {submission && (
-                          <div className="flex flex-col gap-1">
-                            {getStatusBadge(submission.status, submission.tokens_awarded)}
-                            
-                            {/* Admin notes/message display */}
-                            {submission.admin_notes && (
-                              <div className="flex items-start gap-2 mt-2 p-2 rounded-lg text-xs bg-muted/50 text-muted-foreground">
-                                <MessageSquare className="w-3 h-3 shrink-0 mt-0.5" />
-                                <span>{submission.admin_notes}</span>
-                              </div>
-                            )}
+                        {/* Admin notes/message display */}
+                        {submission?.admin_notes && (
+                          <div className="flex items-start gap-2 p-2 rounded-lg text-xs bg-muted/50 text-muted-foreground">
+                            <MessageSquare className="w-3 h-3 shrink-0 mt-0.5" />
+                            <span>{submission.admin_notes}</span>
                           </div>
                         )}
                         
