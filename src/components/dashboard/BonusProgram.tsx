@@ -421,8 +421,8 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
           {/* Official Disclaimer */}
           <div className="mt-6 pt-4 border-t border-border/30">
             <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed">
-              Администрация сервиса оставляет за собой право принимать решение об одобрении или отклонении заявки по своему усмотрению. 
-              Решение является окончательным и не подлежит пересмотру.
+              Модераторы сервиса оставляют за собой право принимать решение об одобрении или отклонении заявки по своему усмотрению. 
+              Обработка запроса занимает до 24 часов.
             </p>
           </div>
         </CardContent>
