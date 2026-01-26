@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Zap, Image, FileText, History, CreditCard, Users, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun, X, ChevronRight } from "lucide-react";
+import { Zap, Image, FileText, History, CreditCard, Gift, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun, X, ChevronRight } from "lucide-react";
 import { useTheme } from "next-themes";
 interface Profile {
   id: string;
@@ -68,9 +68,9 @@ export const MobileSideMenu = ({
     label: 'Обучение',
     icon: GraduationCap
   }, {
-    id: 'referrals',
-    label: 'Рефералы',
-    icon: Users
+    id: 'bonuses',
+    label: 'Бонусы',
+    icon: Gift
   }, {
     id: 'settings',
     label: 'Настройки',

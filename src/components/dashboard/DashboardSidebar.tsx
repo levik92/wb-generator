@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Image, FileText, History, CreditCard, Users, Settings, Zap, Plus, ChevronLeft, ChevronRight, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
+import { Image, FileText, History, CreditCard, Gift, Settings, Zap, Plus, ChevronLeft, ChevronRight, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 interface Profile {
@@ -115,9 +115,9 @@ export const DashboardSidebar = ({
     label: 'Обучение',
     icon: GraduationCap
   }, {
-    id: 'referrals',
-    label: 'Рефералы',
-    icon: Users
+    id: 'bonuses',
+    label: 'Бонусы',
+    icon: Gift
   }, {
     id: 'settings',
     label: 'Настройки',

@@ -48,8 +48,8 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       icon: Bot,
     },
     {
-      id: 'promocodes',
-      label: 'Промокоды',
+      id: 'bonuses',
+      label: 'Бонусы',
       icon: Gift,
     },
     {
