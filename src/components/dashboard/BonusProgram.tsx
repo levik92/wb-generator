@@ -390,8 +390,8 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                             <Button 
                               onClick={() => handleOpenSubmission(program)}
                               size="sm"
-                              variant="secondary"
-                              className="text-xs"
+                              variant="ghost"
+                              className="text-xs bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground"
                             >
                               {program.button_text}
                             </Button>
