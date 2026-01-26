@@ -314,7 +314,7 @@ const BlogArticle = () => {
               </p>
               <Link to="/auth">
                 <Button size="lg" className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)]">
-                  Создать карточку бесплатно
+                  Создать карточку
                 </Button>
               </Link>
             </div>
