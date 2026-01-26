@@ -226,6 +226,110 @@ export type Database = {
         }
         Relationships: []
       }
+      bonus_programs: {
+        Row: {
+          button_text: string
+          contact_placeholder: string | null
+          created_at: string
+          description: string
+          display_order: number
+          icon_name: string | null
+          id: string
+          is_active: boolean
+          link_placeholder: string | null
+          requires_contact: boolean
+          requires_link: boolean
+          title: string
+          tokens_reward: number
+          updated_at: string
+        }
+        Insert: {
+          button_text?: string
+          contact_placeholder?: string | null
+          created_at?: string
+          description: string
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          link_placeholder?: string | null
+          requires_contact?: boolean
+          requires_link?: boolean
+          title: string
+          tokens_reward: number
+          updated_at?: string
+        }
+        Update: {
+          button_text?: string
+          contact_placeholder?: string | null
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          link_placeholder?: string | null
+          requires_contact?: boolean
+          requires_link?: boolean
+          title?: string
+          tokens_reward?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bonus_submissions: {
+        Row: {
+          admin_notes: string | null
+          contact_info: string | null
+          created_at: string
+          id: string
+          program_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submission_link: string | null
+          tokens_awarded: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          program_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submission_link?: string | null
+          tokens_awarded?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          contact_info?: string | null
+          created_at?: string
+          id?: string
+          program_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submission_link?: string | null
+          tokens_awarded?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bonus_submissions_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "bonus_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dashboard_banners: {
         Row: {
           created_at: string
@@ -1324,6 +1428,14 @@ export type Database = {
         Args: never
         Returns: undefined
       }
+      approve_bonus_submission: {
+        Args: {
+          admin_notes_param?: string
+          submission_id_param: string
+          tokens_amount: number
+        }
+        Returns: boolean
+      }
       can_access_payment: {
         Args: { payment_user_id: string }
         Returns: boolean
@@ -1402,6 +1514,10 @@ export type Database = {
           tokens_amount: number
           user_id_param: string
         }
+        Returns: boolean
+      }
+      reject_bonus_submission: {
+        Args: { admin_notes_param?: string; submission_id_param: string }
         Returns: boolean
       }
       spend_tokens: {

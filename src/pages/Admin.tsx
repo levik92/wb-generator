@@ -11,7 +11,7 @@ import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { PromptManager } from "@/components/dashboard/PromptManager";
 import { DataExportDialog } from "@/components/dashboard/DataExportDialog";
-import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
+import { AdminBonuses } from "@/components/admin/AdminBonuses";
 import { AdminNews } from "@/components/admin/AdminNews";
 import { AdminPartners } from "@/components/admin/AdminPartners";
 import { AdminPricing } from "@/components/admin/AdminPricing";
@@ -29,7 +29,7 @@ interface User {
   created_at: string;
   referral_code: string;
 }
-type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'promocodes' | 'news' | 'pricing' | 'banners' | 'blog';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog';
 export default function Admin() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
@@ -135,8 +135,8 @@ export default function Admin() {
         return <AdminPartners />;
       case 'prompts':
         return <PromptManager />;
-      case 'promocodes':
-        return <PromoCodeManager />;
+      case 'bonuses':
+        return <AdminBonuses />;
       case 'news':
         return <AdminNews />;
       case 'pricing':

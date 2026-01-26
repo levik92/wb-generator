@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, Zap, Image, FileText, History, CreditCard, Users, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun } from "lucide-react";
+import { Menu, Zap, Image, FileText, History, CreditCard, Gift, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 interface Profile {
   id: string;
@@ -60,9 +60,9 @@ export const MobileMenu = ({
     label: 'Обучение',
     icon: GraduationCap
   }, {
-    id: 'referrals',
-    label: 'Рефералы',
-    icon: Users
+    id: 'bonuses',
+    label: 'Бонусы',
+    icon: Gift
   }, {
     id: 'video-cards',
     label: 'Видео для карточек',

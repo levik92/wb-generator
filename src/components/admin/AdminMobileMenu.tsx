@@ -47,8 +47,8 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
       icon: FileText,
     },
     {
-      id: 'promocodes',
-      label: 'Промокоды',
+      id: 'bonuses',
+      label: 'Бонусы',
       icon: Gift,
     },
     {

@@ -14,7 +14,7 @@ import { GenerateCards } from "@/components/dashboard/GenerateCards";
 import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
 import { History } from "@/components/dashboard/History";
 import Balance from "@/components/dashboard/Balance";
-import { Referrals } from "@/components/dashboard/Referrals";
+import { Bonuses } from "@/components/dashboard/Bonuses";
 import { Settings } from "@/components/dashboard/Settings";
 import LabelGenerator from "@/components/dashboard/LabelGenerator";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
@@ -38,7 +38,7 @@ interface Profile {
   referral_code: string;
   login_count: number;
 }
-type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'referrals' | 'settings' | 'notifications' | 'news' | 'learning';
+type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning';
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -60,7 +60,7 @@ const Dashboard = () => {
   // Handle tab from URL query param
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['cards', 'description', 'labels', 'history', 'pricing', 'referrals', 'settings', 'notifications', 'news', 'learning'].includes(tabParam)) {
+    if (tabParam && ['cards', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'].includes(tabParam)) {
       setActiveTab(tabParam as ActiveTab);
       // Clear the query param after setting the tab
       setSearchParams({}, { replace: true });
@@ -264,8 +264,8 @@ const Dashboard = () => {
         return <History profile={profile} shouldRefresh={shouldRefreshHistory} onRefreshComplete={handleHistoryRefreshComplete} />;
       case 'pricing':
         return <Balance />;
-      case 'referrals':
-        return <Referrals profile={profile} />;
+      case 'bonuses':
+        return <Bonuses profile={profile} />;
       case 'news':
         return <News />;
       case 'learning':

@@ -7,15 +7,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Sparkles } from "lucide-react";
+import { Gift, Sparkles } from "lucide-react";
 
 interface TutorialDialogProps {
   userId: string;
   loginCount: number;
-  onNavigateToLearning: () => void;
+  onNavigateToBonuses: () => void;
 }
 
-export const TutorialDialog = ({ userId, loginCount, onNavigateToLearning }: TutorialDialogProps) => {
+export const TutorialDialog = ({ userId, loginCount, onNavigateToBonuses }: TutorialDialogProps) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -25,9 +25,9 @@ export const TutorialDialog = ({ userId, loginCount, onNavigateToLearning }: Tut
     }
   }, [loginCount]);
 
-  const handleGoToLearning = () => {
+  const handleGoToBonuses = () => {
     setOpen(false);
-    onNavigateToLearning();
+    onNavigateToBonuses();
   };
 
   const handleClose = () => {
@@ -41,28 +41,29 @@ export const TutorialDialog = ({ userId, loginCount, onNavigateToLearning }: Tut
           <div className="flex items-center justify-center mb-4">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
-              <BookOpen className="h-16 w-16 text-primary relative z-10" />
+              <Gift className="h-16 w-16 text-primary relative z-10" />
             </div>
           </div>
           <DialogTitle className="text-center text-2xl">
-            Добро пожаловать в сервис! 🎉
+            Получай токены бесплатно! 🎁
           </DialogTitle>
           <DialogDescription className="text-center text-base pt-4">
-            Перед началом работы рекомендуем изучить раздел{" "}
-            <span className="font-semibold text-foreground">Обучение</span>, где вы найдете
-            подробные инструкции и примеры использования всех возможностей платформы.
+            Участвуй в нашей{" "}
+            <span className="font-semibold text-foreground">бонусной программе</span> и получай 
+            токены за публикации о сервисе в социальных сетях. Размести сторис или рилс — 
+            и мы начислим бонусы на твой баланс!
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-3 mt-6">
           <Button
-            onClick={handleGoToLearning}
+            onClick={handleGoToBonuses}
             className="w-full relative overflow-hidden group border-0 ring-0 outline-none"
             size="lg"
           >
             <span className="relative z-10 flex items-center gap-2">
               <Sparkles className="h-5 w-5 animate-pulse" />
-              Перейти к обучению
+              Узнать подробнее
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
           </Button>
