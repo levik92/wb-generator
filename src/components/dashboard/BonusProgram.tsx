@@ -223,21 +223,21 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400">
+          <Badge className="w-fit bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 text-[10px] px-2 py-0.5">
             <Clock className="w-3 h-3 mr-1" />
             На проверке
           </Badge>
         );
       case 'approved':
         return (
-          <Badge className="bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400">
+          <Badge className="w-fit bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 text-[10px] px-2 py-0.5">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             +{tokensAwarded} токенов
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className="bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400">
+          <Badge className="w-fit bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 text-[10px] px-2 py-0.5">
             <XCircle className="w-3 h-3 mr-1" />
             Отклонено
           </Badge>
@@ -318,15 +318,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
               return (
                 <div 
                   key={program.id} 
-                  className={`bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 transition-colors ${
-                    isCompleted 
-                      ? 'bg-green-500/5 border-green-500/20' 
-                      : isPending 
-                        ? 'bg-yellow-500/5 border-yellow-500/20'
-                        : isRejected
-                          ? 'bg-red-500/5 border-red-500/20'
-                          : 'hover:border-primary/20'
-                  }`}
+                  className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4"
                 >
                   <div className="flex flex-col sm:flex-row gap-3">
                     {/* Icon */}
@@ -355,11 +347,11 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                         {/* Reward Badge */}
                         <div className="shrink-0 self-start">
                           {program.tokens_reward > 0 ? (
-                            <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm text-primary">
+                            <div className="bg-background/80 border border-border/50 px-2 py-0.5 rounded-md font-medium text-[10px] text-primary">
                               +{program.tokens_reward} токенов
                             </div>
                           ) : (
-                            <div className="bg-amber-500/10 border border-amber-500/20 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+                            <div className="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md font-medium text-[10px] text-amber-600 dark:text-amber-400">
                               Индивидуально
                             </div>
                           )}
@@ -374,13 +366,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                             
                             {/* Admin notes/message display */}
                             {submission.admin_notes && (
-                              <div className={`flex items-start gap-2 mt-2 p-2 rounded-lg text-xs ${
-                                submission.status === 'approved' 
-                                  ? 'bg-green-500/10 text-green-700 dark:text-green-400'
-                                  : submission.status === 'rejected'
-                                    ? 'bg-red-500/10 text-red-700 dark:text-red-400'
-                                    : 'bg-muted text-muted-foreground'
-                              }`}>
+                              <div className="flex items-start gap-2 mt-2 p-2 rounded-lg text-xs bg-muted/50 text-muted-foreground">
                                 <MessageSquare className="w-3 h-3 shrink-0 mt-0.5" />
                                 <span>{submission.admin_notes}</span>
                               </div>
