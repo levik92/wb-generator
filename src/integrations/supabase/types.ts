@@ -228,6 +228,7 @@ export type Database = {
       }
       bonus_programs: {
         Row: {
+          admin_tag: string | null
           button_text: string
           contact_placeholder: string | null
           created_at: string
@@ -244,6 +245,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_tag?: string | null
           button_text?: string
           contact_placeholder?: string | null
           created_at?: string
@@ -260,6 +262,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_tag?: string | null
           button_text?: string
           contact_placeholder?: string | null
           created_at?: string
