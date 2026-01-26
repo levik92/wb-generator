@@ -296,7 +296,19 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
               </div>
             </div>
             <div className="sm:ml-auto">
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = '/downloads/stories-template.png';
+                  link.download = 'stories-template-wbgen.png';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              >
                 <Download className="w-4 h-4" />
                 Скачать макет сторис
               </Button>
