@@ -41,6 +41,7 @@ interface BonusProgram {
   contact_placeholder: string;
   button_text: string;
   icon_name: string;
+  admin_tag: string | null;
   created_at: string;
 }
 
@@ -97,7 +98,8 @@ export const AdminBonuses = () => {
     contact_placeholder: 'Ваш Telegram для связи',
     button_text: 'Выполнил',
     icon_name: 'gift',
-    display_order: '0'
+    display_order: '0',
+    admin_tag: ''
   });
 
   useEffect(() => {
@@ -179,7 +181,8 @@ export const AdminBonuses = () => {
         contact_placeholder: programForm.contact_placeholder,
         button_text: programForm.button_text,
         icon_name: programForm.icon_name,
-        display_order: parseInt(programForm.display_order) || 0
+        display_order: parseInt(programForm.display_order) || 0,
+        admin_tag: programForm.admin_tag.trim() || null
       };
 
       let error;
@@ -324,7 +327,8 @@ export const AdminBonuses = () => {
       contact_placeholder: program.contact_placeholder,
       button_text: program.button_text,
       icon_name: program.icon_name,
-      display_order: program.display_order.toString()
+      display_order: program.display_order.toString(),
+      admin_tag: program.admin_tag || ''
     });
     setProgramDialogOpen(true);
   };
@@ -341,7 +345,8 @@ export const AdminBonuses = () => {
       contact_placeholder: 'Ваш Telegram для связи',
       button_text: 'Выполнил',
       icon_name: 'gift',
-      display_order: '0'
+      display_order: '0',
+      admin_tag: ''
     });
   };
 
@@ -458,7 +463,7 @@ export const AdminBonuses = () => {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Badge variant="secondary" className="text-xs">
-                                {submission.program?.title || 'Неизвестно'}
+                                {submission.program?.admin_tag || submission.program?.title || 'Неизвестно'}
                               </Badge>
                               <span className="text-primary text-xs font-semibold">
                                 +{submission.program?.tokens_reward || 0}
@@ -526,7 +531,7 @@ export const AdminBonuses = () => {
                           {submission.user_email}
                         </TableCell>
                         <TableCell className="text-sm">
-                          {submission.program?.title || 'Неизвестно'}
+                          {submission.program?.admin_tag || submission.program?.title || 'Неизвестно'}
                         </TableCell>
                         <TableCell>
                           {submission.status === 'pending' && (
@@ -587,6 +592,15 @@ export const AdminBonuses = () => {
                           onChange={(e) => setProgramForm({ ...programForm, title: e.target.value })}
                           placeholder="Сторис в Instagram"
                         />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Тег (внутренний, виден только в админке)</Label>
+                        <Input
+                          value={programForm.admin_tag}
+                          onChange={(e) => setProgramForm({ ...programForm, admin_tag: e.target.value })}
+                          placeholder="stories, reels-100k, etc."
+                        />
+                        <p className="text-xs text-muted-foreground">Отображается в списке заданий вместо названия</p>
                       </div>
                       <div className="space-y-2">
                         <Label>Описание</Label>
@@ -691,7 +705,7 @@ export const AdminBonuses = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Название</TableHead>
+                      <TableHead>Тег / Название</TableHead>
                       <TableHead>Токены</TableHead>
                       <TableHead>Статус</TableHead>
                       <TableHead>Действия</TableHead>
@@ -700,7 +714,16 @@ export const AdminBonuses = () => {
                   <TableBody>
                     {programs.map((program) => (
                       <TableRow key={program.id}>
-                        <TableCell className="font-medium">{program.title}</TableCell>
+                        <TableCell className="font-medium">
+                          {program.admin_tag ? (
+                            <div className="flex flex-col">
+                              <span className="text-primary font-semibold">{program.admin_tag}</span>
+                              <span className="text-xs text-muted-foreground">{program.title}</span>
+                            </div>
+                          ) : (
+                            program.title
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
                             +{program.tokens_reward}

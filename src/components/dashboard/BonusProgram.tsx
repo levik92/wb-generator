@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -19,7 +18,8 @@ import {
   CheckCircle2, 
   XCircle,
   Download,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from "lucide-react";
 
 interface BonusProgram {
@@ -45,6 +45,7 @@ interface BonusSubmission {
   submission_link: string | null;
   contact_info: string | null;
   tokens_awarded: number | null;
+  admin_notes: string | null;
   created_at: string;
 }
 
@@ -130,6 +131,41 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
     setDialogOpen(true);
   };
 
+  const handleRetrySubmission = async (program: BonusProgram, submissionId: string) => {
+    setIsSubmitting(true);
+    try {
+      // Update existing submission status back to pending
+      const { error } = await supabase
+        .from('bonus_submissions')
+        .update({
+          status: 'pending',
+          admin_notes: null,
+          reviewed_at: null,
+          reviewed_by: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', submissionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Заявка отправлена повторно",
+        description: "Мы проверим выполнение и начислим бонус в ближайшее время"
+      });
+
+      loadData();
+    } catch (error: any) {
+      console.error('Error retrying submission:', error);
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось отправить заявку повторно",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedProgram) return;
 
@@ -187,21 +223,21 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
     switch (status) {
       case 'pending':
         return (
-          <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 hover:bg-yellow-500/10">
+          <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400">
             <Clock className="w-3 h-3 mr-1" />
             На проверке
           </Badge>
         );
       case 'approved':
         return (
-          <Badge className="bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 hover:bg-green-500/10">
+          <Badge className="bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             +{tokensAwarded} токенов
           </Badge>
         );
       case 'rejected':
         return (
-          <Badge className="bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 hover:bg-red-500/10">
+          <Badge className="bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400">
             <XCircle className="w-3 h-3 mr-1" />
             Отклонено
           </Badge>
@@ -239,39 +275,38 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
         </div>
       </div>
 
-      {/* Main Bonus Program Card */}
-      <Card className="border-border">
-        <CardContent className="p-0">
-          {/* Instagram Info Header */}
-          <div className="p-6 border-b border-border bg-gradient-to-br from-primary/5 to-primary/10">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
-                  <Instagram className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold">Наш Instagram</p>
-                  <a 
-                    href="https://instagram.com/wbgenerator" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm flex items-center gap-1"
-                  >
-                    @wbgenerator <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
+      {/* Main Bonus Program Card - similar to Balance.tsx generation costs */}
+      <Card className="border-border/50 w-full overflow-hidden bg-card">
+        <CardHeader className="p-4 sm:p-6 border-b border-border/50">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
+                <Instagram className="w-6 h-6 text-white" />
               </div>
-              <div className="sm:ml-auto">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Скачать макет сторис
-                </Button>
+              <div>
+                <p className="font-semibold">Наш Instagram</p>
+                <a 
+                  href="https://instagram.com/wbgenerator" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline text-sm flex items-center gap-1"
+                >
+                  @wbgenerator <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
             </div>
+            <div className="sm:ml-auto">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Download className="w-4 h-4" />
+                Скачать макет сторис
+              </Button>
+            </div>
           </div>
+        </CardHeader>
 
-          {/* Bonus Tasks as Sub-blocks */}
-          <div className="divide-y divide-border">
+        <CardContent className="p-4 sm:p-6">
+          {/* Bonus Tasks Grid - similar to generation costs */}
+          <div className="grid grid-cols-1 gap-3">
             {programs.map((program) => {
               const submission = getSubmissionForProgram(program.id);
               const Icon = getIcon(program.icon_name);
@@ -283,71 +318,100 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
               return (
                 <div 
                   key={program.id} 
-                  className={`p-6 ${
+                  className={`bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 transition-colors ${
                     isCompleted 
-                      ? 'bg-green-500/5' 
+                      ? 'bg-green-500/5 border-green-500/20' 
                       : isPending 
-                        ? 'bg-yellow-500/5'
-                        : ''
+                        ? 'bg-yellow-500/5 border-yellow-500/20'
+                        : isRejected
+                          ? 'bg-red-500/5 border-red-500/20'
+                          : 'hover:border-primary/20'
                   }`}
                 >
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     {/* Icon */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       program.icon_name === 'instagram' 
                         ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500'
                         : program.icon_name === 'crown'
                           ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
-                          : 'bg-gradient-to-br from-primary/80 to-primary'
+                          : 'bg-primary/10'
                     }`}>
-                      <Icon className="w-6 h-6 text-white" />
+                      <Icon className={`w-5 h-5 ${
+                        program.icon_name === 'instagram' || program.icon_name === 'crown'
+                          ? 'text-white'
+                          : 'text-primary'
+                      }`} />
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-1">
                         <div>
-                          <h3 className="font-semibold text-base">{program.title}</h3>
-                          <p className="text-muted-foreground text-sm">{program.description}</p>
+                          <div className="font-medium text-sm">{program.title}</div>
+                          <div className="text-xs text-muted-foreground">{program.description}</div>
                         </div>
                         
                         {/* Reward Badge */}
-                        {program.tokens_reward > 0 ? (
-                          <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 self-start px-3 py-1 hover:bg-primary/10">
-                            +{program.tokens_reward} токенов
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400 shrink-0 self-start hover:bg-amber-500/10">
-                            Индивидуально
-                          </Badge>
-                        )}
+                        <div className="shrink-0 self-start">
+                          {program.tokens_reward > 0 ? (
+                            <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm text-primary">
+                              +{program.tokens_reward} токенов
+                            </div>
+                          ) : (
+                            <div className="bg-amber-500/10 border border-amber-500/20 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+                              Индивидуально
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Status & Action */}
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3">
+                      <div className="flex flex-col gap-2 mt-2">
                         {submission && (
                           <div className="flex flex-col gap-1">
                             {getStatusBadge(submission.status, submission.tokens_awarded)}
-                            {/* Show admin notes if available */}
-                            {submission.status !== 'pending' && submission.contact_info && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {submission.status === 'approved' ? '✅ ' : '❌ '}
-                                Ваша заявка была рассмотрена
-                              </p>
+                            
+                            {/* Admin notes/message display */}
+                            {submission.admin_notes && (
+                              <div className={`flex items-start gap-2 mt-2 p-2 rounded-lg text-xs ${
+                                submission.status === 'approved' 
+                                  ? 'bg-green-500/10 text-green-700 dark:text-green-400'
+                                  : submission.status === 'rejected'
+                                    ? 'bg-red-500/10 text-red-700 dark:text-red-400'
+                                    : 'bg-muted text-muted-foreground'
+                              }`}>
+                                <MessageSquare className="w-3 h-3 shrink-0 mt-0.5" />
+                                <span>{submission.admin_notes}</span>
+                              </div>
                             )}
                           </div>
                         )}
                         
-                        {canSubmit && (
-                          <Button 
-                            onClick={() => handleOpenSubmission(program)}
-                            variant={isRejected ? "outline" : "default"}
-                            size="sm"
-                            className="sm:ml-auto"
-                          >
-                            {isRejected ? 'Повторить попытку' : program.button_text}
-                          </Button>
-                        )}
+                        {/* Action buttons */}
+                        <div className="flex items-center gap-2">
+                          {!submission && (
+                            <Button 
+                              onClick={() => handleOpenSubmission(program)}
+                              size="sm"
+                              className="text-xs"
+                            >
+                              {program.button_text}
+                            </Button>
+                          )}
+                          
+                          {isRejected && (
+                            <Button 
+                              onClick={() => handleRetrySubmission(program, submission.id)}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                              disabled={isSubmitting}
+                            >
+                              {isSubmitting ? "Отправка..." : "Повторить попытку"}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -356,10 +420,11 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
             })}
           </div>
 
-          {/* Disclaimer */}
-          <div className="p-4 border-t border-border bg-muted/30">
-            <p className="text-xs text-muted-foreground text-center">
-              Модераторы сервиса оставляют за собой право на любое принятие решения без объяснения причин отказ либо одобрение
+          {/* Official Disclaimer */}
+          <div className="mt-6 pt-4 border-t border-border/30">
+            <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed">
+              Администрация сервиса оставляет за собой право принимать решение об одобрении или отклонении заявки по своему усмотрению. 
+              Решение является окончательным и не подлежит пересмотру.
             </p>
           </div>
         </CardContent>
