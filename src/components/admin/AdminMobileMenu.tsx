@@ -12,7 +12,8 @@ import {
   Megaphone,
   Handshake,
   DollarSign,
-  LayoutDashboard
+  LayoutDashboard,
+  BookOpen
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -64,6 +65,11 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
       id: 'news',
       label: 'Новости',
       icon: Megaphone,
+    },
+    {
+      id: 'blog',
+      label: 'Блог',
+      icon: BookOpen,
     }
   ];
 
