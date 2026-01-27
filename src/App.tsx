@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,33 +7,44 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
-import Landing from "./pages/Landing";
-import Auth from "./pages/Auth";
-import Cases from "./pages/Cases";
+
+// Critical pages loaded immediately
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import AdminLogin from "./pages/AdminLogin";
-import Partner from "./pages/Partner";
-import PartnerAgreement from "./pages/PartnerAgreement";
 
-// Service pages
-import CardDesign from "./pages/services/CardDesign";
-import SeoDescriptions from "./pages/services/SeoDescriptions";
-import BarcodeGenerator from "./pages/services/BarcodeGenerator";
-import VideoGeneration from "./pages/services/VideoGeneration";
+// Lazy load public pages for better performance
+const Landing = lazy(() => import("./pages/Landing"));
+const Cases = lazy(() => import("./pages/Cases"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const Partner = lazy(() => import("./pages/Partner"));
+const PartnerAgreement = lazy(() => import("./pages/PartnerAgreement"));
 
-// Resource pages
-import Blog from "./pages/Blog";
-import BlogArticle from "./pages/BlogArticle";
-import KnowledgeBase from "./pages/KnowledgeBase";
-import KnowledgeArticle from "./pages/KnowledgeArticle";
-import PricingPage from "./pages/PricingPage";
-import PartnersPage from "./pages/PartnersPage";
+// Service pages - lazy loaded
+const CardDesign = lazy(() => import("./pages/services/CardDesign"));
+const SeoDescriptions = lazy(() => import("./pages/services/SeoDescriptions"));
+const BarcodeGenerator = lazy(() => import("./pages/services/BarcodeGenerator"));
+const VideoGeneration = lazy(() => import("./pages/services/VideoGeneration"));
+
+// Resource pages - lazy loaded
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
+const KnowledgeBase = lazy(() => import("./pages/KnowledgeBase"));
+const KnowledgeArticle = lazy(() => import("./pages/KnowledgeArticle"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const PartnersPage = lazy(() => import("./pages/PartnersPage"));
 
 const queryClient = new QueryClient();
+
+// Minimal loading fallback for lazy pages
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -41,55 +53,57 @@ const App = () => (
       <Sonner />
       <CookieConsent />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            <AuthRedirect>
-              <Landing />
-            </AuthRedirect>
-          } />
-          <Route path="/auth" element={
-            <AuthRedirect>
-              <Auth />
-            </AuthRedirect>
-          } />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/partners/cabinet" element={
-            <ProtectedRoute>
-              <Partner />
-            </ProtectedRoute>
-          } />
-          <Route path="/partner-agreement" element={<PartnerAgreement />} />
-          <Route path="/cases" element={<Cases />} />
-          
-          {/* Product/Service pages */}
-          <Route path="/sozdanie-kartochek" element={<CardDesign />} />
-          <Route path="/seo-opisaniya" element={<SeoDescriptions />} />
-          <Route path="/generator-shk" element={<BarcodeGenerator />} />
-          <Route path="/video-generaciya" element={<VideoGeneration />} />
-          
-          {/* Resource pages */}
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogArticle />} />
-          <Route path="/baza-znaniy" element={<KnowledgeBase />} />
-          <Route path="/baza-znaniy/:articleId" element={<KnowledgeArticle />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/partners" element={<PartnersPage />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={
+              <AuthRedirect>
+                <Landing />
+              </AuthRedirect>
+            } />
+            <Route path="/auth" element={
+              <AuthRedirect>
+                <Auth />
+              </AuthRedirect>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/partners/cabinet" element={
+              <ProtectedRoute>
+                <Partner />
+              </ProtectedRoute>
+            } />
+            <Route path="/partner-agreement" element={<PartnerAgreement />} />
+            <Route path="/cases" element={<Cases />} />
+            
+            {/* Product/Service pages */}
+            <Route path="/sozdanie-kartochek" element={<CardDesign />} />
+            <Route path="/seo-opisaniya" element={<SeoDescriptions />} />
+            <Route path="/generator-shk" element={<BarcodeGenerator />} />
+            <Route path="/video-generaciya" element={<VideoGeneration />} />
+            
+            {/* Resource pages */}
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogArticle />} />
+            <Route path="/baza-znaniy" element={<KnowledgeBase />} />
+            <Route path="/baza-znaniy/:articleId" element={<KnowledgeArticle />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

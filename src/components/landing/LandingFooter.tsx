@@ -45,7 +45,7 @@ export const LandingFooter = () => {
               </span>
             </Link>
             <p className="text-white/50 text-sm">
-              ИИ-инструменты для селлеров маркетплейсов
+              ИИ-инструменты для селлеров WB, Ozon, Яндекс Маркет
             </p>
           </div>
 

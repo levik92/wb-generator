@@ -63,9 +63,9 @@ const Blog = () => {
   return (
     <ServicePageLayout>
       <Helmet>
-        <title>Блог WBGen — статьи для селлеров Wildberries</title>
-        <meta name="description" content="Полезные статьи, гайды и новости для продавцов Wildberries. Советы по оформлению карточек, SEO-продвижению и увеличению продаж." />
-        <meta property="og:title" content="Блог WBGen — статьи для селлеров" />
+        <title>Блог WBGen — статьи для селлеров Wildberries, Ozon, Яндекс Маркет</title>
+        <meta name="description" content="Полезные статьи, гайды и новости для продавцов Wildberries, Ozon и Яндекс Маркет. Советы по оформлению карточек, SEO-продвижению и увеличению продаж." />
+        <meta property="og:title" content="Блог WBGen — статьи для селлеров маркетплейсов" />
         <meta property="og:url" content="https://wbgen.ru/blog" />
         <link rel="canonical" href="https://wbgen.ru/blog" />
       </Helmet>
@@ -152,7 +152,7 @@ const Blog = () => {
                 Скоро здесь появятся статьи
               </h2>
               <p className="text-white/60 mb-8">
-                Мы готовим полезный контент для селлеров: гайды по оформлению карточек, 
+                Мы готовим полезный контент для селлеров WB, Ozon и Яндекс Маркет: гайды по оформлению карточек, 
                 секреты SEO-продвижения, разборы кейсов и новости маркетплейсов.
               </p>
             </motion.div>

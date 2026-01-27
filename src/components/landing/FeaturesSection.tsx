@@ -56,7 +56,7 @@ const capabilities = [
   {
     icon: Image,
     title: "Генерация карточек",
-    description: "Профессиональные карточки с инфографикой и дизайном для Wildberries",
+    description: "Профессиональные карточки с инфографикой для WB, Ozon, Яндекс Маркет",
     features: ["До 6 вариантов за раз", "Любой стиль дизайна", "Готовые PNG файлы"],
   },
   {
@@ -109,7 +109,7 @@ export const FeaturesSection = () => {
             </span>
           </h2>
           <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
-            ИИ-генератор карточек для Wildberries — профессиональный результат за минуты
+            ИИ-генератор карточек для WB, Ozon и Яндекс Маркет — профессиональный результат за минуты
           </p>
         </motion.div>
 

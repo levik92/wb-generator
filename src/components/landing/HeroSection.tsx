@@ -150,7 +150,7 @@ export const HeroSection = () => {
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-4 max-w-5xl mx-auto">
                 <span className="text-white">Дизайнерские карточки для </span>
                 <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] via-[hsl(280,90%,70%)] to-[hsl(268,83%,65%)] bg-clip-text text-transparent">
-                  Wildberries
+                  маркетплейсов
                 </span>
                 <span className="text-white"> за 3 минуты</span>
               </h1>
@@ -166,8 +166,8 @@ export const HeroSection = () => {
           }} transition={{
             duration: 0.8,
             delay: 0.2
-          }} className="text-sm sm:text-base md:text-lg text-white/60 text-center max-w-3xl mx-auto mb-8 leading-relaxed">
-              Генерируйте продающие карточки, инфографику, SEO-описания и этикетки.
+           }} className="text-sm sm:text-base md:text-lg text-white/60 text-center max-w-3xl mx-auto mb-8 leading-relaxed">
+              Генерируйте продающие карточки для Wildberries, Ozon и Яндекс Маркет.
               <span className="text-white/80"> Без дизайнера и опыта.</span>
             </motion.p>
 

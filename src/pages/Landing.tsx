@@ -37,13 +37,13 @@ const Landing = () => {
   return (
     <>
       <Helmet>
-        <title>Карточки Wildberries с ИИ — дизайн и инфографика за 3 минуты | WBGen</title>
+        <title>Карточки для маркетплейсов с ИИ — Wildberries, Ozon, Яндекс Маркет | WBGen</title>
         <meta
           name="description"
-          content="Создавайте продающие карточки для Wildberries за 3 минуты. ИИ-дизайн, инфографика, описания и этикетки без дизайнера."
+          content="Создавайте продающие карточки для Wildberries, Ozon и Яндекс Маркет за 3 минуты. ИИ-дизайн, инфографика, описания и этикетки без дизайнера."
         />
-        <meta property="og:title" content="Карточки Wildberries с ИИ — WBGen" />
-        <meta property="og:description" content="Создавайте продающие карточки для Wildberries за 3 минуты. ИИ-дизайн без дизайнера." />
+        <meta property="og:title" content="Карточки для маркетплейсов с ИИ — WBGen" />
+        <meta property="og:description" content="Создавайте продающие карточки для Wildberries, Ozon и Яндекс Маркет за 3 минуты." />
         <meta property="og:type" content="website" />
       </Helmet>
       
