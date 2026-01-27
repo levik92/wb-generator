@@ -489,7 +489,10 @@ export const GenerateCards = ({
               id: task.id,
               url: task.image_url,
               stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-              stageIndex: task.card_index
+              stageIndex: task.card_index,
+              // IMPORTANT: keep original card type so regeneration/edit flows don't fallback to 'cover'
+              // (e.g. for mainEdit / "Редактирование изображения")
+              cardType: task.card_type
             }));
             setGeneratedImages(images);
           }
