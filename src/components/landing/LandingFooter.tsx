@@ -128,9 +128,10 @@ export const LandingFooter = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
           <p className="text-sm text-white/40">© 2025 ООО "МАРКЕТШОП №1". Все права защищены.</p>
           <p className="text-sm text-white/40">ИНН: 6700002780</p>
+          <p className="text-sm text-white/40">Приём платежей: ИП Кот А.С., ИНН 502007134804</p>
         </div>
       </div>
     </footer>
