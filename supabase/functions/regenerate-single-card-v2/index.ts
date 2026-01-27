@@ -51,7 +51,16 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const requestBody = await req.json();
-    const { productName, category = '', description, userId, cardIndex, cardType, sourceImageUrl } = requestBody;
+    const {
+      productName,
+      category = '',
+      description,
+      userId,
+      cardIndex,
+      cardType,
+      sourceImageUrl,
+      productImages,
+    } = requestBody;
 
     // Input validation
     if (!productName || typeof productName !== 'string' || productName.length > 100) {
@@ -167,6 +176,15 @@ serve(async (req) => {
     // Generate prompt from database
     const prompt = await getPromptTemplate(supabase, cardType, sanitizedProductName, sanitizedCategory, sanitizedDescription);
 
+    // Use all original images (incl. optional reference) if provided, otherwise fallback to single sourceImageUrl
+    const imagesToUse = productImages && Array.isArray(productImages) && productImages.length > 0
+      ? productImages
+      : [{
+          url: sourceImageUrl,
+          name: 'regeneration_source',
+          type: 'product'
+        }];
+
     // Create a temporary job for this single regeneration
     const { data: tempJob, error: jobError } = await supabase
       .from('generation_jobs')
@@ -175,10 +193,11 @@ serve(async (req) => {
         product_name: sanitizedProductName,
         category: sanitizedCategory,
         description: sanitizedDescription,
-        product_images: [sourceImageUrl], // Add source image for process-openai-task
+        // IMPORTANT: keep full context so process-openai-task can use product + reference images
+        product_images: imagesToUse,
         status: 'processing',
         total_cards: 1,
-        tokens_cost: 5
+        tokens_cost: tokensRequired
       })
       .select()
       .single();
@@ -189,7 +208,7 @@ serve(async (req) => {
       // Refund token on failure
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
-        tokens_amount: 5,
+        tokens_amount: tokensRequired,
         reason_text: 'Возврат за ошибку создания задачи'
       });
       
@@ -215,7 +234,7 @@ serve(async (req) => {
       // Refund token on failure
       await supabase.rpc('refund_tokens', {
         user_id_param: userId,
-        tokens_amount: 5,
+        tokens_amount: tokensRequired,
         reason_text: 'Возврат за ошибку создания задачи'
       });
       
