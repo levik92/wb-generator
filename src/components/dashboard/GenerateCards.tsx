@@ -234,7 +234,8 @@ export const GenerateCards = ({
             url: task.image_url,
             stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
             stageIndex: task.card_index,
-            cardType: task.card_type
+            cardType: task.card_type,
+            jobId: latestJob.id  // Store jobId for regeneration even after currentJobId is cleared
           }));
           setGeneratedImages(images);
           setJobCompleted(true);
@@ -520,7 +521,8 @@ export const GenerateCards = ({
               stageIndex: task.card_index,
               // IMPORTANT: keep original card type so regeneration/edit flows don't fallback to 'cover'
               // (e.g. for mainEdit / "Редактирование изображения")
-              cardType: task.card_type
+              cardType: task.card_type,
+              jobId: job.id  // Store jobId for regeneration even after currentJobId is cleared
             }));
             setGeneratedImages(images);
           }
@@ -625,7 +627,8 @@ export const GenerateCards = ({
         } = supabase.storage.from('product-images').getPublicUrl(fileName);
         productImagesData.push({
           url: publicUrl,
-          name: `image_${i + 1}.${fileExt}`
+          name: `image_${i + 1}.${fileExt}`,
+          type: 'product'  // Mark as product image for consistency
         });
       }
 
@@ -863,7 +866,21 @@ export const GenerateCards = ({
       let descriptionToUse = '';
 
       // Find the job ID to query (current active job or the one this image belongs to)
-      const jobIdForRegeneration = currentJobId;
+      // CRITICAL: prioritize image.jobId since currentJobId is cleared after job completion
+      let jobIdForRegeneration = image.jobId || currentJobId;
+      
+      // Fallback: fetch job_id from generation_tasks if still not available
+      if (!jobIdForRegeneration && image.id) {
+        const { data: taskData } = await supabase
+          .from('generation_tasks')
+          .select('job_id')
+          .eq('id', image.id)
+          .maybeSingle();
+        
+        if (taskData?.job_id) {
+          jobIdForRegeneration = taskData.job_id;
+        }
+      }
       
       if (jobIdForRegeneration) {
         // BEST SOURCE: Fetch from database - contains complete data including reference
