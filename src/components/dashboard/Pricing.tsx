@@ -138,13 +138,13 @@ export default function Pricing({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
-        {packages.map((plan, index) => {
-        const isPopular = index === 1; // Mark second plan as popular
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        {packages.map((plan) => {
+        const isPopular = plan.is_popular;
         const pricePerToken = plan.price / plan.tokens;
         const photoCount = Math.floor(plan.tokens / photoPrice);
         const descCount = Math.floor(plan.tokens / descriptionPrice);
-        return <Card key={plan.id} className={isPopular ? "border-primary" : ""}>
+        return <Card key={plan.id} className={isPopular ? "border-primary relative" : ""}>
               <CardHeader className="pb-4">
                 {isPopular && <Badge className="w-fit mb-2 rounded-sm border-4">Популярный</Badge>}
                 <CardTitle className="text-lg">{plan.name}</CardTitle>
