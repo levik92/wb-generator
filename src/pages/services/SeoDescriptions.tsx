@@ -39,7 +39,7 @@ const features = [
   {
     icon: Search,
     title: "Автоматический подбор ключей",
-    description: "ИИ анализирует топовые карточки в вашей нише и собирает самые частотные поисковые запросы Wildberries",
+    description: "ИИ анализирует топовые карточки WB, Ozon, Яндекс Маркет и собирает самые частотные поисковые запросы",
     color: "from-blue-500 to-cyan-600",
   },
   {
@@ -57,7 +57,7 @@ const features = [
   {
     icon: ListChecks,
     title: "Оптимальная структура",
-    description: "Текст форматируется под требования алгоритмов WB: заголовки, списки, ключевые слова в нужных местах",
+    description: "Текст форматируется под требования алгоритмов WB, Ozon и Яндекс Маркет: заголовки, списки, ключевые слова",
     color: "from-emerald-500 to-green-600",
   },
   {
@@ -361,14 +361,14 @@ const SeoDescriptions = () => {
   return (
     <ServicePageLayout>
       <Helmet>
-        <title>SEO-описания для Wildberries — генерация продающих текстов с ключевыми словами | WBGen</title>
+        <title>SEO-описания для Wildberries, Ozon, Яндекс Маркет — генерация текстов с ИИ | WBGen</title>
         <meta
           name="description"
-          content="Автоматическая генерация SEO-описаний для карточек Wildberries и Ozon. Подбор ключевых слов, формула AIDA, +35% к конверсии. Готовый текст за 30 секунд."
+          content="Автоматическая генерация SEO-описаний для карточек Wildberries, Ozon и Яндекс Маркет. Подбор ключевых слов, формула AIDA, +35% к конверсии. Готовый текст за 30 секунд."
         />
-        <meta name="keywords" content="seo описания wildberries, описание товара wb, ключевые слова вб, текст для карточки, продающее описание, копирайтинг wildberries" />
-        <meta property="og:title" content="SEO-описания для Wildberries — WBGen" />
-        <meta property="og:description" content="ИИ-генерация продающих описаний с ключевыми словами для карточек Wildberries." />
+        <meta name="keywords" content="seo описания wildberries, описание товара ozon, ключевые слова маркетплейс, продающее описание, яндекс маркет описание" />
+        <meta property="og:title" content="SEO-описания для маркетплейсов — WBGen" />
+        <meta property="og:description" content="ИИ-генерация продающих описаний с ключевыми словами для WB, Ozon, Яндекс Маркет." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://wbgen.ru/seo-opisaniya" />
         <link rel="canonical" href="https://wbgen.ru/seo-opisaniya" />

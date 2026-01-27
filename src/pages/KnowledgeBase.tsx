@@ -23,7 +23,7 @@ const categories = [
   { 
     icon: Image, 
     title: "Генерация карточек", 
-    description: "Как создавать карточки с ИИ", 
+    description: "Как создавать карточки для WB, Ozon, Яндекс Маркет", 
     id: "cards",
     articles: [
       { title: "Загрузка фото товара", id: "upload-photo" },
@@ -345,8 +345,8 @@ const KnowledgeBase = () => {
   return (
     <ServicePageLayout>
       <Helmet>
-        <title>База знаний WBGen — инструкции и FAQ</title>
-        <meta name="description" content="Инструкции по работе с WBGen: создание карточек, SEO-описания, штрихкоды. Ответы на частые вопросы и руководства для селлеров." />
+        <title>База знаний WBGen — инструкции для селлеров Wildberries, Ozon, Яндекс Маркет</title>
+        <meta name="description" content="Инструкции по работе с WBGen: создание карточек для WB, Ozon и Яндекс Маркет, SEO-описания, штрихкоды. Ответы на частые вопросы и руководства." />
         <meta property="og:title" content="База знаний WBGen" />
         <meta property="og:url" content="https://wbgen.ru/baza-znaniy" />
         <link rel="canonical" href="https://wbgen.ru/baza-znaniy" />

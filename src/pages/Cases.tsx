@@ -347,7 +347,7 @@ const Cases = () => {
               </h1>
               
               <p className="text-base sm:text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10">
-                Посмотрите примеры генерации на нашем сервисе и их результаты
+                Карточки для Wildberries, Ozon и Яндекс Маркет — смотрите результаты наших клиентов
               </p>
 
               {/* Stats - simplified, no individual animations */}

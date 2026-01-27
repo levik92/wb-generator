@@ -15,9 +15,9 @@ const PricingPage = () => {
   return (
     <ServicePageLayout>
       <Helmet>
-        <title>Тарифы WBGen — цены на генерацию карточек</title>
-        <meta name="description" content="Тарифы WBGen: от 59₽ за карточку. Пакеты токенов без подписки, штрихкоды бесплатно. Выберите подходящий тариф." />
-        <meta property="og:title" content="Тарифы WBGen" />
+        <title>Тарифы WBGen — цены на генерацию карточек для Wildberries, Ozon, Яндекс Маркет</title>
+        <meta name="description" content="Тарифы WBGen: от 59₽ за карточку для WB, Ozon и Яндекс Маркет. Пакеты токенов без подписки, штрихкоды бесплатно. Выберите подходящий тариф." />
+        <meta property="og:title" content="Тарифы WBGen — цены на генерацию карточек" />
         <meta property="og:url" content="https://wbgen.ru/pricing" />
         <link rel="canonical" href="https://wbgen.ru/pricing" />
       </Helmet>
