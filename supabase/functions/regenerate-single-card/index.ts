@@ -169,7 +169,7 @@ serve(async (req) => {
       });
     }
 
-    const validCardTypes = ['cover', 'lifestyle', 'macro', 'beforeAfter', 'bundle', 'guarantee'];
+    const validCardTypes = ['cover', 'lifestyle', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'features', 'usage', 'comparison', 'clean', 'mainEdit'];
     if (!cardType || typeof cardType !== 'string' || !validCardTypes.includes(cardType)) {
       return new Response(JSON.stringify({ error: 'Invalid card type' }), {
         status: 400,
