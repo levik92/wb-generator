@@ -32,8 +32,8 @@ export const StackedCardsShowcase = ({
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-800" />
         <img 
-          src={cardImages[0]} 
-          alt="Card example 1"
+          src={cardImages[2]} 
+          alt="Card example 3"
           className="w-full h-full object-cover opacity-80"
         />
         <div className="absolute inset-0 bg-black/30" />
@@ -73,8 +73,8 @@ export const StackedCardsShowcase = ({
         }}
       >
         <img 
-          src={cardImages[2]} 
-          alt="Card example 3"
+          src={cardImages[0]} 
+          alt="Card example 1"
           className="w-full h-full object-cover"
         />
         {/* Subtle gradient overlay */}
