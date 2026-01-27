@@ -271,7 +271,7 @@ export const LandingHeader = () => {
 
                 <div className="p-4 border-t border-white/10 space-y-3">
                   <Link to="/auth?tab=signin" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 pb-0 mb-[10px]">
+                    <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 mb-3">
                       Войти
                     </Button>
                   </Link>
