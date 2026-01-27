@@ -789,13 +789,13 @@ export const AdminBonuses = () => {
                 <strong>Пользователь:</strong> {selectedSubmission?.user_email}
               </p>
               {selectedSubmission?.submission_link && (
-                <p className="text-sm">
+                <p className="text-sm break-all">
                   <strong>Ссылка:</strong>{' '}
                   <a 
                     href={selectedSubmission.submission_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                    className="text-primary hover:underline break-all"
                   >
                     {selectedSubmission.submission_link}
                   </a>
