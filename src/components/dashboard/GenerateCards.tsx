@@ -658,13 +658,29 @@ export const GenerateCards = ({
         }
       }
 
-      // Save uploaded images URLs and job data for regeneration
-      setUploadedProductImages(productImagesData);
+      // Build complete product images array including reference
+      const allImagesForJob: Array<{ url: string; name: string; type: string }> = productImagesData.map((img, idx) => ({
+        url: img.url,
+        name: img.name || `product_${idx + 1}`,
+        type: 'product'
+      }));
+      
+      // Add reference image if present
+      if (referenceImageUrl) {
+        allImagesForJob.push({
+          url: referenceImageUrl,
+          name: 'reference',
+          type: 'reference'
+        });
+      }
+      
+      // Save uploaded images URLs and job data for regeneration (includes reference!)
+      setUploadedProductImages(allImagesForJob);
       setJobData({
         productName: productName,
         category: category || 'товар',
         description: description,
-        productImages: productImagesData
+        productImages: allImagesForJob
       });
       setJobStatus('Создание задачи генерации...');
 
@@ -840,45 +856,76 @@ export const GenerateCards = ({
       console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
 
       // Collect all product images and reference image for regeneration
+      // PRIORITY: Database is the source of truth (has complete data incl. reference)
       let allProductImages: Array<{ url: string; name: string; type: string }> = [];
+      let productNameToUse = '';
+      let categoryToUse = '';
+      let descriptionToUse = '';
 
-      // First try jobData (preserved from original generation)
-      if (jobData?.productImages && jobData.productImages.length > 0) {
+      // Find the job ID to query (current active job or the one this image belongs to)
+      const jobIdForRegeneration = currentJobId;
+      
+      if (jobIdForRegeneration) {
+        // BEST SOURCE: Fetch from database - contains complete data including reference
+        const { data: job, error: jobError } = await supabase
+          .from('generation_jobs')
+          .select('product_name, category, description, product_images')
+          .eq('id', jobIdForRegeneration)
+          .single();
+        
+        if (!jobError && job) {
+          productNameToUse = job.product_name || '';
+          categoryToUse = job.category || 'товар';
+          descriptionToUse = job.description || '';
+          
+          if (job.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
+            allProductImages = (job.product_images as Array<{ url: string; name?: string; type?: string }>).map((img, idx) => ({
+              url: img.url,
+              name: img.name || `product_${idx + 1}`,
+              type: img.type || 'product'
+            }));
+          }
+        }
+      }
+      
+      // Fallback to jobData if DB fetch didn't work
+      if (allProductImages.length === 0 && jobData?.productImages && jobData.productImages.length > 0) {
         allProductImages = jobData.productImages.map((img: { url: string; name?: string; type?: string }, idx: number) => ({
           url: img.url,
           name: img.name || `product_${idx + 1}`,
           type: img.type || 'product'
         }));
+        productNameToUse = productNameToUse || jobData.productName || '';
+        categoryToUse = categoryToUse || jobData.category || 'товар';
+        descriptionToUse = descriptionToUse || jobData.description || '';
       }
-      // Fallback to uploadedProductImages
-      else if (uploadedProductImages.length > 0) {
+      
+      // Last fallback: uploadedProductImages state
+      if (allProductImages.length === 0 && uploadedProductImages.length > 0) {
         allProductImages = uploadedProductImages.map((img, idx) => ({
           url: img.url,
           name: img.name || `product_${idx + 1}`,
           type: img.type || 'product'
         }));
       }
-      // Last resort: try to fetch from current job in database
-      else if (currentJobId) {
-        const {
-          data: job
-        } = await supabase.from('generation_jobs').select('product_images').eq('id', currentJobId).single();
-        if (job?.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
-          allProductImages = job.product_images as Array<{ url: string; name: string; type: string }>;
-        }
-      }
+      
+      // Final fallback for text fields: form fields
+      if (!productNameToUse) productNameToUse = productName;
+      if (!categoryToUse || categoryToUse === 'товар') categoryToUse = category || 'товар';
+      if (!descriptionToUse) descriptionToUse = description;
       
       if (allProductImages.length === 0) {
         throw new Error('Оригинальные изображения недоступны');
       }
       
+      // Log regeneration context for debugging
+      const referenceCount = allProductImages.filter(img => img.type === 'reference').length;
+      const productCount = allProductImages.filter(img => img.type === 'product').length;
+      console.log(`[Regeneration] cardType: ${image.cardType}, images: ${allProductImages.length} (product: ${productCount}, reference: ${referenceCount})`);
+      
       // First product image URL for backward compatibility
       const sourceImageUrl = allProductImages.find(img => img.type === 'product')?.url || allProductImages[0].url;
 
-      // Use saved job data (fallback to form fields if needed)
-      const productNameToUse = jobData?.productName || productName;
-      const categoryToUse = (jobData?.category || category || 'товар').trim() || 'товар';
-      const descriptionToUse = jobData?.description || description;
       if (!productNameToUse?.trim()) {
         throw new Error('Название товара недоступно');
       }

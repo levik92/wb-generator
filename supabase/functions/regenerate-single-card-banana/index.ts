@@ -186,7 +186,13 @@ serve(async (req) => {
 
     // Get prompt template - map card type to actual prompt type in database
     const promptType = cardTypeToPromptType[cardType] || 'cover';
-    console.log(`Regenerating card type "${cardType}" using prompt type "${promptType}"`);
+    
+    // Diagnostic logging for regeneration context
+    const productImageCount = imagesToUse.filter((img: any) => img.type === 'product').length;
+    const referenceImageCount = imagesToUse.filter((img: any) => img.type === 'reference').length;
+    console.log(`[Regeneration] cardType: "${cardType}" -> promptType: "${promptType}"`);
+    console.log(`[Regeneration] images total: ${imagesToUse.length}, product: ${productImageCount}, reference: ${referenceImageCount}`);
+    console.log(`[Regeneration] productName: "${sanitizedProductName}", description length: ${sanitizedDescription.length}`);
     
     const prompt = await getPromptTemplate(
       supabase,
