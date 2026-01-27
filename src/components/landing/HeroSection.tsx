@@ -167,7 +167,7 @@ export const HeroSection = () => {
             duration: 0.8,
             delay: 0.2
            }} className="text-sm sm:text-base md:text-lg text-white/60 text-center max-w-3xl mx-auto mb-8 leading-relaxed">
-              Генерируйте продающие карточки для Wildberries, Ozon и Яндекс Маркет.
+              Генерируйте продающие карточки, инфографику и SEO-описания для Wildberries, Ozon и Яндекс Маркет.
               <span className="text-white/80"> Без дизайнера и опыта.</span>
             </motion.p>
 
