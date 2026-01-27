@@ -1,130 +1,182 @@
 
-## Что отправилось сейчас на перегенерацию (по вашим логам сети)
+# План исправления перегенерации с сохранением референса
 
-Я посмотрел последний запрос **POST** на edge function:
+## Корневая проблема
 
-**`/functions/v1/regenerate-single-card-banana`** (2026-01-27T11:02:40Z)
+При перегенерации карточки **референс и описание теряются** из-за следующей цепочки:
 
-В payload ушло:
+1. Когда job завершается, `setCurrentJobId(null)` обнуляет ID (строка 573)
+2. Функция `regenerateCard` проверяет `if (jobIdForRegeneration)` — это `null`!
+3. Код идёт в fallback на `jobData`, но после refresh страницы `jobData` тоже пустой
+4. **Главное**: массив `generatedImages` не содержит `jobId`, поэтому нельзя найти оригинальный job
 
-- `productName`: `"Коврик придверный"` ✅
-- `category`: `"товар"` ✅
-- `description`: `"поменяй товар мой местами..."` ✅
-- `userId`: `"000a02ee-..."` ✅
-- `cardIndex`: `6` ✅
-- `cardType`: `"mainEdit"` ✅ (тип “Редактирование изображения” сохранился в этом запросе)
-- `sourceImageUrl`: `.../1769511637796_0.jpeg` ✅
-- `productImages`: **только 2 картинки товара** ✅❌
-  - `[{ url: ...0.jpeg, type:"product" }, { url: ...1.jpeg, type:"product" }]`
-  - **Референс НЕ ушёл** ❌ (в `productImages` нет элемента `type:"reference"`)
+## Данные из базы (подтверждение проблемы)
 
-То есть в этой попытке проблема конкретно в том, что **в перегенерацию не передался reference** (хотя в `generation_jobs.product_images` референс у вас есть — это видно по предыдущим GET к `generation_jobs`, там третий элемент с `type:"reference"`).
+**Оригинальный job** `55b82345...` (первая генерация):
+```json
+product_images: [
+  {"name":"image_1.jpeg", "url":"..."},           // нет type, значит product
+  {"type":"reference", "url":"...reference.jpg"}  // референс ЕСТЬ ✅
+]
+```
 
----
+**Job перегенерации** `3f228175...`:
+```json
+product_images: [
+  {"name":"image_1.jpeg", "type":"product", "url":"..."}  // только 1 изображение ❌
+]
+```
 
-## Почему так происходит (корневая причина)
-
-В `src/components/dashboard/GenerateCards.tsx` в функции `simulateGeneration` после загрузки изображений в storage вы сохраняете `jobData` и `uploadedProductImages` так:
-
-- `productImagesData` содержит **только фото товара** (без `type`, и без reference)
-- `referenceImageUrl` хранится **отдельно**, и **не добавляется** в `jobData.productImages`
-
-Потом при перегенерации код делает:
-- “если есть `jobData.productImages` — используй его”
-- и **даже не доходит** до fallback-а “достать product_images из базы по `currentJobId`”
-
-Поэтому референс теряется именно в сценарии “сгенерировал → сразу нажал перегенерацию (без перезагрузки страницы)”.
-
-Отсюда же иногда “теряется описание/название”: если `jobData` по какой-то причине пустой, а поля формы вы не хотите сохранять между перезагрузками, то fallback идет не всегда или не полностью (сейчас из БД в regenerateCard подтягиваются только `product_images`, но не `product_name/description/category`).
+Референс не попал в перегенерацию, потому что код не смог получить данные из оригинального job'а.
 
 ---
 
-## Что сделаем, чтобы mainEdit работал так же стабильно как остальные 6 типов
+## План изменений
 
-### A) Сделать единый “канонический” набор исходных данных для перегенерации
-Для перегенерации всегда должны быть доступны:
-- `product_name`
-- `category`
-- `description`
-- `product_images` (включая `type:'reference'` если есть)
+### 1. Сохранять `jobId` в каждой сгенерированной картинке
 
-И лучше считать их **из базы по `currentJobId`**, если есть, потому что:
-- это точно исходные данные из “оригинальной генерации”
-- не зависит от того, что хранится в локальном React state
-- одинаково работает для всех типов и после refresh
+В `GenerateCards.tsx` при создании `generatedImages` добавить `jobId`:
 
-### B) Исправить сохранение `jobData` сразу после старта генерации
-Чтобы **перегенерация работала корректно даже мгновенно**, ещё до завершения job:
-- сохранять `productImagesData` как массив объектов с `type: 'product'`
-- если `referenceImageUrl` есть — добавлять в тот же массив объект `{ url, name:'reference', type:'reference' }`
-- и уже этот массив класть в:
-  - `setUploadedProductImages(...)`
-  - `setJobData({ ..., productImages: ... })`
+**Файл:** `src/components/dashboard/GenerateCards.tsx`
 
-Так вы получите ровно тот формат, который ожидает regenerate flow.
+**Строки 516-524** (при polling'е):
+```typescript
+const images = completedTasks.sort(...).map((task: any) => ({
+  id: task.id,
+  url: task.image_url,
+  stage: CARD_STAGES[task.card_index]?.name,
+  stageIndex: task.card_index,
+  cardType: task.card_type,
+  jobId: job.id  // ← ДОБАВИТЬ: сохраняем jobId для регенерации
+}));
+```
 
-### C) Сделать regenerateCard более “железобетонным”
-В `regenerateCard` изменить приоритеты данных:
+**Строки 232-238** (при загрузке из истории):
+```typescript
+// При загрузке активных job'ов — аналогично добавить jobId
+```
 
-1) Если есть `currentJobId`:
-   - запросить из `generation_jobs` **не только `product_images`, но и `product_name`, `category`, `description`**
-   - использовать это как главный источник истины
-2) Если `currentJobId` нет — fallback на `jobData`
-3) Если и его нет — fallback на поля формы (как сейчас)
+### 2. В `regenerateCard` использовать `image.jobId` вместо `currentJobId`
 
-Это закроет кейсы “сбрасывается описание/название”.
+**Файл:** `src/components/dashboard/GenerateCards.tsx`
 
-### D) Проверить параллельный компонент OptimizedGenerateCards (если он используется на /dashboard)
-У вас есть `src/components/dashboard/OptimizedGenerateCards.tsx`, который тоже:
-- грузит `referenceImageUrl`
-- но в `productImages` отправляет только товары, а reference отдельным полем
+**Строки 865-868**:
+```typescript
+// Было:
+const jobIdForRegeneration = currentJobId;
 
-Нужно посмотреть, используется ли он реально в `/dashboard` вместо `GenerateCards.tsx`. Если да — применить аналогичную логику хранения/передачи контекста и там, иначе вы будете ловить “то работает, то нет” в зависимости от того, какой компонент открыт пользователю.
+// Станет:
+const jobIdForRegeneration = image.jobId || currentJobId;
+```
+
+Теперь даже после обнуления `currentJobId` код возьмёт `jobId` из самой картинки.
+
+### 3. Добавить fallback через `generation_tasks` таблицу
+
+Если `image.jobId` отсутствует (старые картинки), можно получить `job_id` через запрос к `generation_tasks`:
+
+```typescript
+// Если jobId недоступен — получить его из таска по image.id
+if (!jobIdForRegeneration && image.id) {
+  const { data: taskData } = await supabase
+    .from('generation_tasks')
+    .select('job_id')
+    .eq('id', image.id)
+    .single();
+  
+  if (taskData?.job_id) {
+    jobIdForRegeneration = taskData.job_id;
+  }
+}
+```
+
+### 4. Убедиться что тип `product` сохраняется при создании job'а
+
+**Файл:** `src/components/dashboard/GenerateCards.tsx`
+
+**Строки 626-629** — добавить `type: 'product'`:
+```typescript
+productImagesData.push({
+  url: publicUrl,
+  name: `image_${i + 1}.${fileExt}`,
+  type: 'product'  // ← ДОБАВИТЬ
+});
+```
+
+Это нужно для консистентности: сейчас только локально (`allImagesForJob`) тип указывается, а на сервер идёт без типа.
 
 ---
 
-## План работ (что именно поменяем в коде)
+## Итоговые файлы для редактирования
 
-1) **GenerateCards.tsx**
-   - В `simulateGeneration`:
-     - формировать `productImagesData` в формате `{url,name,type}` для product
-     - при наличии `referenceImageUrl` добавить объект `{url: referenceImageUrl, name:'reference', type:'reference'}`
-     - сохранить это и в `jobData.productImages`, и в `uploadedProductImages`
-   - В `regenerateCard`:
-     - если `currentJobId` существует — запросить из БД `product_name, category, description, product_images`
-     - собирать `allProductImages` именно из `product_images` (и убедиться, что reference реально попадает)
-     - `sourceImageUrl` выбирать как первый `type==='product'`
-     - `productNameToUse/categoryToUse/descriptionToUse` брать из БД, а не из формы
-
-2) **(Опционально, но рекомендую) OptimizedGenerateCards.tsx**
-   - если используется в UI:
-     - при формировании payload/локального состояния тоже включать reference как `{type:'reference'}` (или обеспечить, что regenerate берёт из БД)
-
-3) **Диагностические улучшения (чтобы быстро ловить такие баги дальше)**
-   - Добавить `console.log` перед invoke regeneration: вывести `cardType`, `productImages.length`, `count(reference)`  
-   - (если нужно) добавить лог в edge function regenerate-single-card-banana: вывести сколько изображений пришло и есть ли reference.
+| Файл | Что меняется |
+|------|--------------|
+| `src/components/dashboard/GenerateCards.tsx` | 1. Добавить `jobId` в `generatedImages` (2 места)<br>2. В `regenerateCard` брать `image.jobId` вместо `currentJobId`<br>3. Fallback: запрос `job_id` через `generation_tasks`<br>4. Добавить `type:'product'` в `productImagesData` |
 
 ---
 
-## Как проверим после фикса
+## Как тестировать после исправления
 
-1) Создать карточку типа **mainEdit** с:
-   - 2 фото товара
+1. Создать карточку с:
+   - 1-2 фото товара
    - 1 референс
-   - заполненными названием и описанием
-2) Сразу (без refresh) нажать “Перегенерировать”
-3) В Network должен уйти payload где:
-   - `cardType: "mainEdit"`
-   - `productImages` содержит **3 элемента**, один из которых `type:"reference"`
-   - `description` не пустой и совпадает с исходным
-4) Повторить тест после refresh (чтобы убедиться, что fallback из БД тоже работает)
+   - Заполненным описанием
+
+2. Дождаться завершения генерации (job status = completed)
+
+3. Нажать "Перегенерировать" на любой карточке
+
+4. В Network → Request payload проверить:
+   - `productImages` содержит **ВСЕ** изображения (и product, и reference)
+   - `cardType` соответствует оригинальному типу
+   - `description` не пустое
+
+5. Перезагрузить страницу и повторить шаг 3-4 (проверить fallback)
 
 ---
 
-## Уточняющий вопрос (1 штука, критичный)
-Сейчас mainEdit у вас — это “редактирование изображения”, но в регенерации вы хотите:
-- всегда использовать **исходные фото товара** (product) + **референс** (reference) + **исходное описание**,
-- или для mainEdit регенерация должна использовать ещё и **source image = сгенерированную картинку**, как “edit”?  
-(По текущему payload `sourceImageUrl` берётся из product photo, то есть это именно “regenerate from original product context”, не “edit existing result”.)
+## Техническая схема потока данных после исправления
 
-Если подтвердите, я закреплю это поведение именно для mainEdit без двусмысленностей.
+```text
+┌─────────────────────┐
+│   Генерация job     │
+│   job.id = ABC123   │
+│   product_images:   │
+│   - product1.jpg    │
+│   - reference.jpg   │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  generatedImages[]  │
+│  { id, url, stage,  │
+│    cardType,        │
+│    jobId: ABC123 }  │  ← НОВОЕ ПОЛЕ
+└──────────┬──────────┘
+           │
+           ▼ (клик "Перегенерировать")
+           │
+┌─────────────────────┐
+│  regenerateCard()   │
+│  jobIdFor... =      │
+│  image.jobId ||     │  ← Берём из картинки!
+│  currentJobId       │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  Запрос к БД:       │
+│  SELECT product_..  │
+│  FROM generation_   │
+│  jobs               │
+│  WHERE id=ABC123    │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  allProductImages   │
+│  включает reference │
+│  → уходит на        │
+│  regenerate API     │
+└─────────────────────┘
+```
