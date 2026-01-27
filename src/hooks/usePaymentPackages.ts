@@ -9,6 +9,7 @@ export interface PaymentPackage {
   tokens: number;
   currency: string;
   is_active: boolean;
+  is_popular: boolean;
   created_at: string;
 }
 

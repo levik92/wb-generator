@@ -16,6 +16,7 @@ interface PaymentPackage {
   tokens: number;
   currency: string;
   is_active: boolean;
+  is_popular: boolean;
 }
 interface GenerationPrice {
   id: string;
@@ -82,7 +83,8 @@ export function AdminPricing() {
         name: pkg.name,
         price: pkg.price,
         tokens: pkg.tokens,
-        is_active: pkg.is_active
+        is_active: pkg.is_active,
+        is_popular: pkg.is_popular
       }).eq('id', pkg.id);
       if (error) throw error;
       toast({
@@ -117,7 +119,8 @@ export function AdminPricing() {
         price: 100,
         tokens: 10,
         currency: 'RUB',
-        is_active: true
+        is_active: true,
+        is_popular: false
       });
       if (error) throw error;
       toast({
@@ -234,6 +237,7 @@ export function AdminPricing() {
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
+                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Популярный</TableHead>
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
                     <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
                   </TableRow>
@@ -266,6 +270,19 @@ export function AdminPricing() {
                       } : p);
                       setPackages(updated);
                     }} className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9" />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Switch 
+                          checked={pkg.is_popular} 
+                          onCheckedChange={checked => {
+                            // When setting popular, unset all others (DB trigger handles this too)
+                            const updated = packages.map(p => ({
+                              ...p,
+                              is_popular: p.id === pkg.id ? checked : (checked ? false : p.is_popular)
+                            }));
+                            setPackages(updated);
+                          }} 
+                        />
                       </TableCell>
                       <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
                         <Switch checked={pkg.is_active} onCheckedChange={checked => {
