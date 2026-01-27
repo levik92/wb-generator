@@ -108,6 +108,7 @@ export const GenerateCards = ({
   const [uploadedProductImages, setUploadedProductImages] = useState<Array<{
     url: string;
     name: string;
+    type?: string;
   }>>([]);
   // Store original job data for regeneration/editing (not visible in form)
   const [jobData, setJobData] = useState<{
@@ -117,6 +118,7 @@ export const GenerateCards = ({
     productImages: Array<{
       url: string;
       name: string;
+      type?: string;
     }>;
   } | null>(null);
   const {
@@ -201,17 +203,30 @@ export const GenerateCards = ({
           setCurrentJobId(latestJob.id);
 
           // Save job data for regeneration/editing without showing in form
-          const productImages = latestJob.product_images as Array<{
+          const rawProductImages = latestJob.product_images as Array<{
             url: string;
-            name: string;
+            name?: string;
+            type?: string;
           }> || [];
+          const productImages = rawProductImages.map((img, idx) => ({
+            url: img.url,
+            name: img.name || `product_${idx + 1}`,
+            type: img.type,
+          }));
           setJobData({
             productName: latestJob.product_name || '',
             category: latestJob.category || '',
             description: latestJob.description || '',
             productImages: productImages
           });
-          setUploadedProductImages(productImages);
+          // Keep full image metadata (incl. reference type) for regeneration/edit flows
+          setUploadedProductImages(
+            productImages.map((img, idx) => ({
+              url: img.url,
+              name: img.name || `product_${idx + 1}`,
+              type: img.type,
+            }))
+          );
 
           // Show completed images from the latest job
           const images = completedTasks.sort((a: any, b: any) => a.card_index - b.card_index).map((task: any) => ({
@@ -232,17 +247,30 @@ export const GenerateCards = ({
         setCurrentJobId(latestJob.id);
 
         // Save job data but keep form fields empty during processing
-        const productImages = latestJob.product_images as Array<{
+        const rawProductImages = latestJob.product_images as Array<{
           url: string;
-          name: string;
+          name?: string;
+          type?: string;
         }> || [];
+        const productImages = rawProductImages.map((img, idx) => ({
+          url: img.url,
+          name: img.name || `product_${idx + 1}`,
+          type: img.type,
+        }));
         setJobData({
           productName: latestJob.product_name || '',
           category: latestJob.category || '',
           description: latestJob.description || '',
           productImages: productImages
         });
-        setUploadedProductImages(productImages);
+        // Keep full image metadata (incl. reference type) for regeneration/edit flows
+        setUploadedProductImages(
+          productImages.map((img, idx) => ({
+            url: img.url,
+            name: img.name || `product_${idx + 1}`,
+            type: img.type,
+          }))
+        );
 
         // Resume polling for active job
         startJobPolling(latestJob.id);
@@ -827,7 +855,7 @@ export const GenerateCards = ({
         allProductImages = uploadedProductImages.map((img, idx) => ({
           url: img.url,
           name: img.name || `product_${idx + 1}`,
-          type: 'product'
+          type: img.type || 'product'
         }));
       }
       // Last resort: try to fetch from current job in database
