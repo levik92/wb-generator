@@ -1,5 +1,3 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import { Check, X, Minus } from "lucide-react";
 
 const comparisonData = [
@@ -79,9 +77,6 @@ const renderValue = (value: boolean | string) => {
 };
 
 export const ComparisonSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
     <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
       {/* Background */}
@@ -89,13 +84,7 @@ export const ComparisonSection = () => {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-8 sm:mb-12 md:mb-16"
-        >
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-4 sm:mb-6">
             Сравнение
           </span>
@@ -105,15 +94,10 @@ export const ComparisonSection = () => {
           <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto">
             Объективное сравнение способов создания карточек для Wildberries
           </p>
-        </motion.div>
+        </div>
 
         {/* Comparison table */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-4xl mx-auto"
-        >
+        <div className="max-w-4xl mx-auto">
           <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-auto">
             {/* Header */}
             <div className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 border-b border-white/10 min-w-[400px]">
@@ -133,12 +117,9 @@ export const ComparisonSection = () => {
 
             {/* Rows */}
             <div className="divide-y divide-white/5 min-w-[400px]">
-              {comparisonData.map((row, index) => (
-                <motion.div
+              {comparisonData.map((row) => (
+                <div
                   key={row.feature}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.4, delay: 0.3 + index * 0.05 }}
                   className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 items-center hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="text-xs sm:text-sm text-white/70">{row.feature}</div>
@@ -153,7 +134,7 @@ export const ComparisonSection = () => {
                   <div className="flex justify-center">
                     {renderValue(row.constructor)}
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -164,7 +145,7 @@ export const ComparisonSection = () => {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

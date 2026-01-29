@@ -1,5 +1,4 @@
-import { useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const faqItems = [
@@ -46,8 +45,6 @@ const faqItems = [
 ];
 
 export const FAQSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
@@ -60,13 +57,7 @@ export const FAQSection = () => {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
+        <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
             FAQ
           </span>
@@ -76,51 +67,46 @@ export const FAQSection = () => {
           <p className="text-lg text-white/50 max-w-2xl mx-auto">
             Ответы на популярные вопросы о работе сервиса
           </p>
-        </motion.div>
+        </div>
 
-        {/* FAQ items */}
+        {/* FAQ items - CSS-based accordion */}
         <div className="max-w-3xl mx-auto space-y-4">
           {faqItems.map((item, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
               className="faq-item rounded-2xl overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="w-full flex items-center justify-between p-6 text-left"
+                aria-expanded={openIndex === index}
               >
                 <span className="text-base sm:text-lg font-medium text-white pr-8">
                   {item.question}
                 </span>
-                <motion.div
-                  animate={{ rotate: openIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex-shrink-0"
+                <div 
+                  className={`flex-shrink-0 transition-transform duration-300 ${
+                    openIndex === index ? "rotate-180" : ""
+                  }`}
                 >
                   <ChevronDown className="w-5 h-5 text-white/50" />
-                </motion.div>
+                </div>
               </button>
 
-              <AnimatePresence>
-                {openIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="px-6 pb-6">
-                      <p className="text-white/60 leading-relaxed">
-                        {item.answer}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+              <div 
+                className={`grid transition-all duration-300 ease-out ${
+                  openIndex === index ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="px-6 pb-6">
+                    <p className="text-white/60 leading-relaxed">
+                      {item.answer}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>

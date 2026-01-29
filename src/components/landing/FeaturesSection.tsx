@@ -1,5 +1,3 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import {
   Clock,
   TrendingUp,
@@ -80,9 +78,6 @@ const capabilities = [
 ];
 
 export const FeaturesSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
     <section id="features" className="relative py-24 sm:py-32 overflow-hidden">
       {/* Background effects */}
@@ -91,13 +86,7 @@ export const FeaturesSection = () => {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16 sm:mb-20"
-        >
+        <div className="text-center mb-16 sm:mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
             Почему WBGen
           </span>
@@ -111,11 +100,11 @@ export const FeaturesSection = () => {
           <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
             ИИ-генератор карточек для WB, Ozon и Яндекс Маркет — профессиональный результат за минуты
           </p>
-        </motion.div>
+        </div>
 
-        {/* Features grid */}
+        {/* Features grid - no framer-motion */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-24">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <div
               key={feature.title}
               className="glass-card rounded-2xl p-6 sm:p-8 group"

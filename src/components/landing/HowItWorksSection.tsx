@@ -1,5 +1,3 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import { Image, FileText, Sparkles, Check, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -36,29 +34,20 @@ const steps = [
 ];
 
 export const HowItWorksSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
       
-      {/* Grid pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
+      {/* Grid pattern - reduced on mobile */}
+      <div className="absolute inset-0 grid-pattern opacity-10 sm:opacity-20" />
 
       {/* Top border gradient */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <motion.div
-          ref={ref}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16 sm:mb-20"
-        >
+        <div className="text-center mb-16 sm:mb-20">
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
             Простой процесс
           </span>
@@ -72,7 +61,7 @@ export const HowItWorksSection = () => {
           <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
             Четыре простых шага до профессиональных карточек товара
           </p>
-        </motion.div>
+        </div>
 
         {/* Steps */}
         <div className="max-w-5xl mx-auto">

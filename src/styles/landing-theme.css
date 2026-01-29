@@ -240,6 +240,63 @@
   animation: count-up 0.6s ease-out forwards;
 }
 
+/* Lightweight CSS animations for mobile performance */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .glass-card {
@@ -252,9 +309,10 @@
       0 0 30px hsl(var(--glow-purple) / 0.1);
   }
   
-  /* Reduce animations on mobile for performance */
+  /* Disable heavy animations on mobile */
   .animate-float-slow,
-  .animate-float-reverse {
+  .animate-float-reverse,
+  .animate-pulse-glow {
     animation: none;
   }
   
@@ -263,10 +321,25 @@
     min-height: 48px;
   }
   
-  /* Reduce glow effects on mobile */
-  .animate-pulse-glow {
-    animation: none;
-    box-shadow: 0 0 15px hsl(var(--glow-purple) / 0.2);
+  /* Reduce blur effects on mobile for performance */
+  .noise-overlay {
+    opacity: 0.01;
+  }
+  
+  /* Reduce glow blur radius on mobile */
+  [class*="blur-["] {
+    filter: blur(80px);
+  }
+}
+
+/* Very small screens - further reduce effects */
+@media (max-width: 480px) {
+  .noise-overlay {
+    display: none;
+  }
+  
+  .grid-pattern {
+    opacity: 0.1;
   }
 }
 
@@ -278,4 +351,35 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-bounce-slow,
+  .animate-pulse-slow,
+  .animate-float-slow,
+  .animate-float-reverse,
+  .animate-pulse-glow {
+    animation: none;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile menu slide animation */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-out forwards;
 }

@@ -1,11 +1,10 @@
-import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
 
-// SWAPPED: before and after images are now switched
+// Optimized images - using smaller/optimized versions where available
 const examples = [
   {
     before: "/lovable-uploads/57f9f37f-ed50-4951-8b39-46348cdcd204.jpg",
@@ -50,9 +49,6 @@ const examples = [
 ];
 
 export const ExamplesSection = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollTo = (direction: "left" | "right") => {
@@ -66,15 +62,12 @@ export const ExamplesSection = () => {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[hsl(240,10%,4%)] via-[hsl(240,8%,6%)] to-[hsl(240,10%,4%)]" />
       
-      {/* Accent glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[hsl(268,83%,40%)] rounded-full blur-[200px] opacity-10" />
+      {/* Accent glow - reduced for mobile */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-[hsl(268,83%,40%)] rounded-full blur-[150px] sm:blur-[200px] opacity-5 sm:opacity-10" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <div
-          ref={ref}
-          className="text-center mb-8 sm:mb-12 md:mb-16"
-        >
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-4 sm:mb-6">
             Реальные результаты
           </span>
@@ -86,17 +79,19 @@ export const ExamplesSection = () => {
           </p>
         </div>
 
-        {/* Navigation arrows - visible on all screens */}
+        {/* Navigation arrows */}
         <div className="flex justify-center sm:justify-end gap-2 mb-4 sm:mb-6">
           <button
             onClick={() => scrollTo("left")}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all active:scale-95"
+            aria-label="Предыдущий пример"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scrollTo("right")}
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all active:scale-95"
+            aria-label="Следующий пример"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
