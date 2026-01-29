@@ -1371,7 +1371,7 @@ export const GenerateCards = ({
                       <Info className="w-4 h-4" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs text-sm">
+                  <TooltipContent side="top" className="max-w-xs text-sm font-normal text-foreground/70">
                     <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте фото без водяных знаков.</p>
                   </TooltipContent>
                 </Tooltip>
