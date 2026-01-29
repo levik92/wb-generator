@@ -1364,6 +1364,18 @@ export const GenerateCards = ({
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Изображения товара
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="ml-1 text-muted-foreground hover:text-foreground transition-colors">
+                      <Info className="w-4 h-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs text-sm">
+                    <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте фото без водяных знаков.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </CardTitle>
             <CardDescription>
               Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения)
