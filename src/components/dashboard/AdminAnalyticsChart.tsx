@@ -155,29 +155,36 @@ export function AdminAnalyticsChart({
 
   const formatXAxisDate = (dateStr: string, groupFormat: string) => {
     const date = new Date(dateStr);
+    const options: Intl.DateTimeFormatOptions = { timeZone: 'Europe/Moscow' };
+    
     switch (groupFormat) {
       case 'hour':
         return date.toLocaleTimeString('ru-RU', {
+          ...options,
           hour: '2-digit',
           minute: '2-digit'
         });
       case 'day':
         return date.toLocaleDateString('ru-RU', {
+          ...options,
           day: '2-digit',
           month: '2-digit'
         });
       case 'week':
-        return `${date.toLocaleDateString('ru-RU', {
+        return date.toLocaleDateString('ru-RU', {
+          ...options,
           day: '2-digit',
           month: '2-digit'
-        })}`;
+        });
       case 'month':
         return date.toLocaleDateString('ru-RU', {
+          ...options,
           month: 'short',
           year: '2-digit'
         });
       default:
         return date.toLocaleDateString('ru-RU', {
+          ...options,
           day: '2-digit',
           month: '2-digit'
         });
