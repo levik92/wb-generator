@@ -126,7 +126,53 @@ serve(async (req) => {
       }
     }
 
-    // Генерируем временные интервалы для графика
+    // Функция для конвертации UTC даты в Moscow timezone (UTC+3)
+    const MOSCOW_OFFSET_HOURS = 3
+    
+    const toMoscowDate = (date: Date): Date => {
+      // Добавляем 3 часа к UTC времени, чтобы получить московское время
+      return new Date(date.getTime() + MOSCOW_OFFSET_HOURS * 60 * 60 * 1000)
+    }
+    
+    const formatMoscowDate = (date: Date, format: 'hour' | 'day' | 'week' | 'month'): string => {
+      const moscowDate = toMoscowDate(date)
+      
+      if (format === 'hour') {
+        // Возвращаем ISO строку с московским часом
+        const year = moscowDate.getUTCFullYear()
+        const month = String(moscowDate.getUTCMonth() + 1).padStart(2, '0')
+        const day = String(moscowDate.getUTCDate()).padStart(2, '0')
+        const hour = String(moscowDate.getUTCHours()).padStart(2, '0')
+        return `${year}-${month}-${day}T${hour}:00:00.000+03:00`
+      } else if (format === 'day' || format === 'week') {
+        const year = moscowDate.getUTCFullYear()
+        const month = String(moscowDate.getUTCMonth() + 1).padStart(2, '0')
+        const day = String(moscowDate.getUTCDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      } else if (format === 'month') {
+        const year = moscowDate.getUTCFullYear()
+        const month = String(moscowDate.getUTCMonth() + 1).padStart(2, '0')
+        return `${year}-${month}-01`
+      }
+      const year = moscowDate.getUTCFullYear()
+      const month = String(moscowDate.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(moscowDate.getUTCDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+    
+    const getMoscowWeekStart = (date: Date): string => {
+      const moscowDate = toMoscowDate(date)
+      const dayOfWeek = moscowDate.getUTCDay()
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+      const weekStart = new Date(moscowDate)
+      weekStart.setUTCDate(weekStart.getUTCDate() + diff)
+      const year = weekStart.getUTCFullYear()
+      const month = String(weekStart.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(weekStart.getUTCDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+
+    // Генерируем временные интервалы для графика (в московском времени)
     const timeIntervals: string[] = []
     const current = new Date(startDate)
     
@@ -135,21 +181,17 @@ serve(async (req) => {
     
     while (current <= limitDate) {
       if (groupFormat === 'hour') {
-        timeIntervals.push(current.toISOString().slice(0, 13) + ':00:00.000Z')
+        timeIntervals.push(formatMoscowDate(current, 'hour'))
         current.setHours(current.getHours() + 1)
       } else if (groupFormat === 'day') {
-        timeIntervals.push(current.toISOString().slice(0, 10))
+        timeIntervals.push(formatMoscowDate(current, 'day'))
         current.setDate(current.getDate() + 1)
       } else if (groupFormat === 'week') {
-        // Начало недели (понедельник)
-        const weekStart = new Date(current)
-        const dayOfWeek = weekStart.getDay()
-        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
-        weekStart.setDate(weekStart.getDate() + diff)
-        timeIntervals.push(weekStart.toISOString().slice(0, 10))
+        // Начало недели (понедельник) в московском времени
+        timeIntervals.push(getMoscowWeekStart(current))
         current.setDate(current.getDate() + 7)
       } else if (groupFormat === 'month') {
-        timeIntervals.push(current.toISOString().slice(0, 7) + '-01')
+        timeIntervals.push(formatMoscowDate(current, 'month'))
         current.setMonth(current.getMonth() + 1)
       }
     }
@@ -190,7 +232,7 @@ serve(async (req) => {
       { field: 'status', op: 'eq', value: 'succeeded' }
     ])
 
-    // Группируем данные по временным интервалам
+    // Группируем данные по временным интервалам (в московском времени)
     const groupData = (data: any[], dateField: string, valueField?: string) => {
       const grouped: { [key: string]: number } = {}
       
@@ -203,19 +245,15 @@ serve(async (req) => {
         let key: string
 
         if (groupFormat === 'hour') {
-          key = itemDate.toISOString().slice(0, 13) + ':00:00.000Z'
+          key = formatMoscowDate(itemDate, 'hour')
         } else if (groupFormat === 'day') {
-          key = itemDate.toISOString().slice(0, 10)
+          key = formatMoscowDate(itemDate, 'day')
         } else if (groupFormat === 'week') {
-          const weekStart = new Date(itemDate)
-          const dayOfWeek = weekStart.getDay()
-          const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
-          weekStart.setDate(weekStart.getDate() + diff)
-          key = weekStart.toISOString().slice(0, 10)
+          key = getMoscowWeekStart(itemDate)
         } else if (groupFormat === 'month') {
-          key = itemDate.toISOString().slice(0, 7) + '-01'
+          key = formatMoscowDate(itemDate, 'month')
         } else {
-          key = itemDate.toISOString().slice(0, 10)
+          key = formatMoscowDate(itemDate, 'day')
         }
 
         if (grouped.hasOwnProperty(key)) {
