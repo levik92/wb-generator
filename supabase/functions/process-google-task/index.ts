@@ -14,7 +14,7 @@ const FALLBACK_DELAY_MS = 2000;
 const FINAL_RETRY_DELAY_MS = 10000;
 
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
-const MAX_IMAGE_BYTES = 5_000_000; // ~5MB
+const MAX_IMAGE_BYTES = 8_000_000; // ~8MB
 
 type FetchImageResult =
   | { ok: true; base64: string; bytes: number; mimeType: string }
