@@ -1,52 +1,182 @@
 
-# План: Увеличение лимита загрузки изображений
+# План исправления перегенерации с сохранением референса
 
-## Обзор
-Увеличим лимит загрузки изображений с 3 МБ до 5 МБ на фронтенде и с 5 МБ до 8 МБ на бэкенде. Это учитывает увеличение размера при Base64 кодировании (~33%), обеспечивая надёжную работу.
+## Корневая проблема
 
-## Почему это безопасно
-- Google Gemini API поддерживает до **20 МБ** для inline images
-- Base64 кодирование увеличивает размер на ~33% (5 МБ → ~6.7 МБ)
-- Запас до 8 МБ на бэкенде обеспечивает надёжную работу
+При перегенерации карточки **референс и описание теряются** из-за следующей цепочки:
 
-## Изменения
+1. Когда job завершается, `setCurrentJobId(null)` обнуляет ID (строка 573)
+2. Функция `regenerateCard` проверяет `if (jobIdForRegeneration)` — это `null`!
+3. Код идёт в fallback на `jobData`, но после refresh страницы `jobData` тоже пустой
+4. **Главное**: массив `generatedImages` не содержит `jobId`, поэтому нельзя найти оригинальный job
 
-### 1. Фронтенд: Увеличение лимита до 5 МБ
+## Данные из базы (подтверждение проблемы)
 
-**Файл: `src/components/dashboard/GenerateCards.tsx`**
-- Строка 297: изменить `3 * 1024 * 1024` → `5 * 1024 * 1024`
-- Строка 303: изменить текст ошибки "3 МБ" → "5 МБ"
-- Строка 366: изменить `3 * 1024 * 1024` → `5 * 1024 * 1024`
-- Строка 371: изменить текст ошибки "3 МБ" → "5 МБ"
+**Оригинальный job** `55b82345...` (первая генерация):
+```json
+product_images: [
+  {"name":"image_1.jpeg", "url":"..."},           // нет type, значит product
+  {"type":"reference", "url":"...reference.jpg"}  // референс ЕСТЬ ✅
+]
+```
 
-**Файл: `src/components/dashboard/OptimizedGenerateCards.tsx`**
-- Строка 14: изменить `3 * 1024 * 1024` → `5 * 1024 * 1024`
-- Строка 135: изменить текст ошибки "3 МБ" → "5 МБ"
-- Строка 205: изменить текст ошибки "3 МБ" → "5 МБ"
+**Job перегенерации** `3f228175...`:
+```json
+product_images: [
+  {"name":"image_1.jpeg", "type":"product", "url":"..."}  // только 1 изображение ❌
+]
+```
 
-### 2. Бэкенд: Увеличение лимита до 8 МБ
-
-**Файл: `supabase/functions/process-google-task/index.ts`**
-- Строка 17: изменить `MAX_IMAGE_BYTES = 5_000_000` → `MAX_IMAGE_BYTES = 8_000_000`
-- Обновить комментарий: `// ~8MB`
+Референс не попал в перегенерацию, потому что код не смог получить данные из оригинального job'а.
 
 ---
 
-## Техническая информация
+## План изменений
 
-### Расчёт размеров
-```text
-Исходный файл     Base64        Запас бэкенда
-    5 МБ     →    ~6.7 МБ    <    8 МБ ✓
+### 1. Сохранять `jobId` в каждой сгенерированной картинке
+
+В `GenerateCards.tsx` при создании `generatedImages` добавить `jobId`:
+
+**Файл:** `src/components/dashboard/GenerateCards.tsx`
+
+**Строки 516-524** (при polling'е):
+```typescript
+const images = completedTasks.sort(...).map((task: any) => ({
+  id: task.id,
+  url: task.image_url,
+  stage: CARD_STAGES[task.card_index]?.name,
+  stageIndex: task.card_index,
+  cardType: task.card_type,
+  jobId: job.id  // ← ДОБАВИТЬ: сохраняем jobId для регенерации
+}));
 ```
 
-### Файлы для изменения
-| Файл | Тип изменения |
-|------|---------------|
-| `src/components/dashboard/GenerateCards.tsx` | 4 изменения (лимит + тексты) |
-| `src/components/dashboard/OptimizedGenerateCards.tsx` | 3 изменения (лимит + тексты) |
-| `supabase/functions/process-google-task/index.ts` | 1 изменение (константа) |
+**Строки 232-238** (при загрузке из истории):
+```typescript
+// При загрузке активных job'ов — аналогично добавить jobId
+```
 
-### Места проверки размера
-- **Фронтенд**: Валидация при загрузке файлов (показывает toast с ошибкой)
-- **Бэкенд**: Проверка при скачивании изображений перед отправкой в Gemini API
+### 2. В `regenerateCard` использовать `image.jobId` вместо `currentJobId`
+
+**Файл:** `src/components/dashboard/GenerateCards.tsx`
+
+**Строки 865-868**:
+```typescript
+// Было:
+const jobIdForRegeneration = currentJobId;
+
+// Станет:
+const jobIdForRegeneration = image.jobId || currentJobId;
+```
+
+Теперь даже после обнуления `currentJobId` код возьмёт `jobId` из самой картинки.
+
+### 3. Добавить fallback через `generation_tasks` таблицу
+
+Если `image.jobId` отсутствует (старые картинки), можно получить `job_id` через запрос к `generation_tasks`:
+
+```typescript
+// Если jobId недоступен — получить его из таска по image.id
+if (!jobIdForRegeneration && image.id) {
+  const { data: taskData } = await supabase
+    .from('generation_tasks')
+    .select('job_id')
+    .eq('id', image.id)
+    .single();
+  
+  if (taskData?.job_id) {
+    jobIdForRegeneration = taskData.job_id;
+  }
+}
+```
+
+### 4. Убедиться что тип `product` сохраняется при создании job'а
+
+**Файл:** `src/components/dashboard/GenerateCards.tsx`
+
+**Строки 626-629** — добавить `type: 'product'`:
+```typescript
+productImagesData.push({
+  url: publicUrl,
+  name: `image_${i + 1}.${fileExt}`,
+  type: 'product'  // ← ДОБАВИТЬ
+});
+```
+
+Это нужно для консистентности: сейчас только локально (`allImagesForJob`) тип указывается, а на сервер идёт без типа.
+
+---
+
+## Итоговые файлы для редактирования
+
+| Файл | Что меняется |
+|------|--------------|
+| `src/components/dashboard/GenerateCards.tsx` | 1. Добавить `jobId` в `generatedImages` (2 места)<br>2. В `regenerateCard` брать `image.jobId` вместо `currentJobId`<br>3. Fallback: запрос `job_id` через `generation_tasks`<br>4. Добавить `type:'product'` в `productImagesData` |
+
+---
+
+## Как тестировать после исправления
+
+1. Создать карточку с:
+   - 1-2 фото товара
+   - 1 референс
+   - Заполненным описанием
+
+2. Дождаться завершения генерации (job status = completed)
+
+3. Нажать "Перегенерировать" на любой карточке
+
+4. В Network → Request payload проверить:
+   - `productImages` содержит **ВСЕ** изображения (и product, и reference)
+   - `cardType` соответствует оригинальному типу
+   - `description` не пустое
+
+5. Перезагрузить страницу и повторить шаг 3-4 (проверить fallback)
+
+---
+
+## Техническая схема потока данных после исправления
+
+```text
+┌─────────────────────┐
+│   Генерация job     │
+│   job.id = ABC123   │
+│   product_images:   │
+│   - product1.jpg    │
+│   - reference.jpg   │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  generatedImages[]  │
+│  { id, url, stage,  │
+│    cardType,        │
+│    jobId: ABC123 }  │  ← НОВОЕ ПОЛЕ
+└──────────┬──────────┘
+           │
+           ▼ (клик "Перегенерировать")
+           │
+┌─────────────────────┐
+│  regenerateCard()   │
+│  jobIdFor... =      │
+│  image.jobId ||     │  ← Берём из картинки!
+│  currentJobId       │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  Запрос к БД:       │
+│  SELECT product_..  │
+│  FROM generation_   │
+│  jobs               │
+│  WHERE id=ABC123    │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  allProductImages   │
+│  включает reference │
+│  → уходит на        │
+│  regenerate API     │
+└─────────────────────┘
+```

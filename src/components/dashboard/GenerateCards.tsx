@@ -294,13 +294,13 @@ export const GenerateCards = ({
       });
       return false;
     }
-    const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+    const maxSizeBytes = 3 * 1024 * 1024; // 3 MB
     const oversizedFiles = uploadedFiles.filter(file => file.size > maxSizeBytes);
     if (oversizedFiles.length > 0) {
       const fileNames = oversizedFiles.map(f => `"${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} МБ)`).join(', ');
       toast({
         title: "Файлы слишком большие",
-        description: `Максимальный размер файла: 5 МБ. Пожалуйста, сожмите или загрузите изображения меньшего размера. Превышен лимит: ${fileNames}`,
+        description: `Максимальный размер файла: 3 МБ. Пожалуйста, сожмите или загрузите изображения меньшего размера. Превышен лимит: ${fileNames}`,
         variant: "destructive"
       });
       return false;
@@ -363,12 +363,12 @@ export const GenerateCards = ({
 
   const processReferenceFile = (file: File | undefined) => {
     if (file && file.type.startsWith('image/')) {
-      const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+      const maxSizeBytes = 3 * 1024 * 1024; // 3 MB
       if (file.size > maxSizeBytes) {
         const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
         toast({
           title: "Файл слишком большой",
-          description: `"${file.name}" (${sizeMB} МБ) превышает лимит 5 МБ. Пожалуйста, сожмите изображение.`,
+          description: `"${file.name}" (${sizeMB} МБ) превышает лимит 3 МБ. Пожалуйста, сожмите изображение.`,
           variant: "destructive"
         });
         return;
