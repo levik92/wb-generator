@@ -242,50 +242,34 @@ export const DescriptionLoadingBar = ({ isLoading }: DescriptionLoadingBarProps)
   );
 };
 
-// Global page loader - Lightning worm animation
+// Global page loader - Lightning drawing animation
 export const PageLoader = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="flex items-center justify-center">
         <svg 
-          viewBox="0 0 64 64" 
+          viewBox="0 0 24 24" 
           className="w-16 h-16"
+          style={{
+            fill: 'transparent',
+            stroke: 'hsl(var(--primary))',
+            strokeWidth: 1.5,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+          }}
         >
-          <defs>
-            <linearGradient id="lightning-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary))" />
-              <stop offset="50%" stopColor="hsl(var(--primary) / 0.8)" />
-              <stop offset="100%" stopColor="hsl(var(--primary) / 0.5)" />
-            </linearGradient>
-          </defs>
-          
-          {/* Track - faded lightning shape */}
-          <path
-            d="M36 4L16 32h14l-4 28 22-36H32l4-20z"
-            fill="none"
-            stroke="hsl(var(--muted-foreground) / 0.15)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          
-          {/* Animated lightning stroke */}
           <motion.path
-            d="M36 4L16 32h14l-4 28 22-36H32l4-20z"
-            fill="none"
-            stroke="url(#lightning-grad)"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0, pathOffset: 0 }}
+            d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+            initial={{ pathLength: 0, opacity: 0 }}
             animate={{ 
-              pathLength: [0.15, 0.15],
-              pathOffset: [0, 1],
+              pathLength: [0, 1, 1, 0],
+              opacity: [0, 1, 1, 0],
             }}
             transition={{
-              duration: 1.2,
+              duration: 2,
               repeat: Infinity,
-              ease: "linear",
+              ease: "easeInOut",
+              times: [0, 0.4, 0.6, 1],
             }}
           />
         </svg>

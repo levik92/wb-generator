@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
-import { PageLoader } from "@/components/ui/lightning-loader";
 
 // Critical pages loaded immediately
 import Dashboard from "./pages/Dashboard";
@@ -39,6 +38,13 @@ const PricingPage = lazy(() => import("./pages/PricingPage"));
 const PartnersPage = lazy(() => import("./pages/PartnersPage"));
 
 const queryClient = new QueryClient();
+
+// Minimal loading fallback for lazy pages
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

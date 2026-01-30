@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
 import YandexMetrika from "@/components/YandexMetrika";
-import { LightningLoader } from "@/components/ui/lightning-loader";
 
 // Lazy load below-the-fold sections for better performance
 const FeaturesSection = lazy(() => import("@/components/landing/FeaturesSection").then(m => ({ default: m.FeaturesSection })));
@@ -16,10 +15,10 @@ const CTASection = lazy(() => import("@/components/landing/CTASection").then(m =
 const LandingFooter = lazy(() => import("@/components/landing/LandingFooter").then(m => ({ default: m.LandingFooter })));
 const PricingTeaser = lazy(() => import("@/components/services/PricingTeaser").then(m => ({ default: m.PricingTeaser })));
 
-// Simple loading placeholder with lightning animation
+// Simple loading placeholder
 const SectionLoader = () => (
   <div className="py-20 flex justify-center">
-    <LightningLoader size="sm" />
+    <div className="w-8 h-8 border-2 border-[hsl(268,83%,60%)] border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
