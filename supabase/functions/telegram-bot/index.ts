@@ -4,7 +4,8 @@ const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 
 // Mini app and support URLs
-const MINI_APP_URL = "https://wb-gen.lovable.app";
+const DASHBOARD_URL = "https://wbgen.ru/dashboard";
+const KNOWLEDGE_BASE_URL = "https://wbgen.ru/baza-znaniy";
 const SUPPORT_URL = "https://t.me/wbgen_support";
 
 const corsHeaders = {
@@ -48,9 +49,13 @@ async function setBotCommands() {
   const commands = [
     { command: "start", description: "🚀 Запустить бота" },
     { command: "app", description: "📱 Открыть приложение" },
-    { command: "help", description: "❓ Помощь" },
+    { command: "cards", description: "🎨 Создать карточки" },
+    { command: "description", description: "📝 Генерация описаний" },
+    { command: "pricing", description: "💎 Тарифы и баланс" },
+    { command: "learning", description: "📚 Обучение" },
+    { command: "bonuses", description: "🎁 Бонусы" },
+    { command: "faq", description: "❓ База знаний" },
     { command: "support", description: "💬 Поддержка" },
-    { command: "pricing", description: "💎 Тарифы" },
   ];
 
   await fetch(`${TELEGRAM_API}/setMyCommands`, {
@@ -69,7 +74,7 @@ async function setMenuButton() {
       menu_button: {
         type: "web_app",
         text: "📱 Открыть WB Generator",
-        web_app: { url: MINI_APP_URL },
+        web_app: { url: DASHBOARD_URL },
       },
     }),
   });
@@ -82,22 +87,41 @@ function getMainKeyboard() {
       [
         {
           text: "🚀 Открыть приложение",
-          web_app: { url: MINI_APP_URL },
+          web_app: { url: DASHBOARD_URL },
         },
       ],
       [
         {
-          text: "📸 Создать карточки",
-          web_app: { url: `${MINI_APP_URL}/dashboard` },
+          text: "🎨 Карточки",
+          web_app: { url: `${DASHBOARD_URL}#cards` },
         },
         {
           text: "📝 Описания",
-          web_app: { url: `${MINI_APP_URL}/dashboard` },
+          web_app: { url: `${DASHBOARD_URL}#description` },
+        },
+      ],
+      [
+        {
+          text: "💎 Баланс",
+          web_app: { url: `${DASHBOARD_URL}#pricing` },
+        },
+        {
+          text: "📚 Обучение",
+          web_app: { url: `${DASHBOARD_URL}#learning` },
+        },
+      ],
+      [
+        {
+          text: "🎁 Бонусы",
+          web_app: { url: `${DASHBOARD_URL}#bonuses` },
+        },
+        {
+          text: "❓ FAQ",
+          url: KNOWLEDGE_BASE_URL,
         },
       ],
       [
         { text: "💬 Поддержка", url: SUPPORT_URL },
-        { text: "💎 Тарифы", web_app: { url: `${MINI_APP_URL}/pricing` } },
       ],
     ],
   };
@@ -108,15 +132,21 @@ async function handleStart(chatId: number, firstName: string) {
   const welcomeText = `
 👋 <b>Привет, ${firstName}!</b>
 
-Добро пожаловать в <b>WB Generator</b> — твой AI-помощник для Wildberries!
+Добро пожаловать в <b>WB Generator</b> — нейросеть для продавцов Wildberries!
 
-🎨 <b>Что я умею:</b>
-• Создавать продающие карточки товаров
-• Генерировать SEO-описания
-• Создавать инфографику и этикетки
-• Работать с ИИ-технологиями
+🔥 <b>Что умеет этот бот:</b>
 
-⚡️ Нажми кнопку ниже, чтобы открыть приложение и начать создавать!
+🎨 <b>Карточки товаров</b> — создавай продающий визуал за минуты. AI генерирует профессиональные изображения с инфографикой
+
+📝 <b>SEO-описания</b> — умные тексты, которые поднимают товар в поиске. Учитываем ключевые слова и требования WB
+
+🏷 <b>Этикетки и ШК</b> — генератор штрих-кодов и этикеток для маркировки товаров
+
+📚 <b>База знаний</b> — гайды и обучение по работе с маркетплейсами
+
+🎁 <b>Бонусная программа</b> — получай токены за активность
+
+⚡️ <b>Готов начать?</b> Нажми кнопку ниже!
   `.trim();
 
   await sendMessage(chatId, welcomeText, {
@@ -138,11 +168,15 @@ async function handleHelp(chatId: number) {
 <b>Команды бота:</b>
 /start — Запустить бота
 /app — Открыть приложение
-/help — Эта справка
+/cards — Создать карточки
+/description — Генерация описаний
+/pricing — Баланс и тарифы
+/learning — Обучение
+/bonuses — Бонусы
+/faq — База знаний
 /support — Связаться с поддержкой
-/pricing — Посмотреть тарифы
 
-💡 <b>Совет:</b> Используйте кнопку меню внизу для быстрого доступа к приложению!
+💡 <b>Совет:</b> Используйте кнопку меню внизу для быстрого доступа!
   `.trim();
 
   await sendMessage(chatId, helpText, {
@@ -164,9 +198,124 @@ async function handleApp(chatId: number) {
         [
           {
             text: "🚀 Открыть приложение",
-            web_app: { url: MINI_APP_URL },
+            web_app: { url: DASHBOARD_URL },
           },
         ],
+      ],
+    },
+  });
+}
+
+// Handle /cards command
+async function handleCards(chatId: number) {
+  const text = `
+🎨 <b>Генерация карточек товаров</b>
+
+Создавай продающие карточки с помощью AI:
+• Профессиональный дизайн
+• Инфографика и иконки
+• Готовые шаблоны для WB
+
+Нажми кнопку, чтобы начать:
+  `.trim();
+
+  await sendMessage(chatId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "🎨 Создать карточки", web_app: { url: `${DASHBOARD_URL}#cards` } }],
+        [{ text: "📱 Открыть приложение", web_app: { url: DASHBOARD_URL } }],
+      ],
+    },
+  });
+}
+
+// Handle /description command
+async function handleDescription(chatId: number) {
+  const text = `
+📝 <b>Генерация SEO-описаний</b>
+
+AI создаёт оптимизированные тексты:
+• Ключевые слова для поиска WB
+• Продающие характеристики
+• Уникальный контент
+
+Нажми кнопку, чтобы начать:
+  `.trim();
+
+  await sendMessage(chatId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "📝 Создать описание", web_app: { url: `${DASHBOARD_URL}#description` } }],
+        [{ text: "📱 Открыть приложение", web_app: { url: DASHBOARD_URL } }],
+      ],
+    },
+  });
+}
+
+// Handle /learning command
+async function handleLearning(chatId: number) {
+  const text = `
+📚 <b>Обучение</b>
+
+Изучай материалы по работе с маркетплейсами:
+• Видео-уроки
+• Гайды по оформлению
+• Секреты продаж на WB
+
+Нажми кнопку, чтобы перейти:
+  `.trim();
+
+  await sendMessage(chatId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "📚 Открыть обучение", web_app: { url: `${DASHBOARD_URL}#learning` } }],
+        [{ text: "❓ База знаний", url: KNOWLEDGE_BASE_URL }],
+      ],
+    },
+  });
+}
+
+// Handle /bonuses command
+async function handleBonuses(chatId: number) {
+  const text = `
+🎁 <b>Бонусная программа</b>
+
+Получай токены за активность:
+• Делись в соцсетях
+• Приглашай друзей
+• Выполняй задания
+
+Нажми кнопку, чтобы узнать больше:
+  `.trim();
+
+  await sendMessage(chatId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "🎁 Получить бонусы", web_app: { url: `${DASHBOARD_URL}#bonuses` } }],
+        [{ text: "📱 Открыть приложение", web_app: { url: DASHBOARD_URL } }],
+      ],
+    },
+  });
+}
+
+// Handle /faq command
+async function handleFAQ(chatId: number) {
+  const text = `
+❓ <b>База знаний</b>
+
+Ответы на популярные вопросы:
+• Как создавать карточки
+• Как пользоваться сервисом
+• Решение проблем
+
+Нажми кнопку, чтобы открыть:
+  `.trim();
+
+  await sendMessage(chatId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "❓ Открыть базу знаний", url: KNOWLEDGE_BASE_URL }],
+        [{ text: "💬 Написать в поддержку", url: SUPPORT_URL }],
       ],
     },
   });
@@ -192,12 +341,7 @@ async function handleSupport(chatId: number) {
     reply_markup: {
       inline_keyboard: [
         [{ text: "💬 Написать в поддержку", url: SUPPORT_URL }],
-        [
-          {
-            text: "📱 Открыть приложение",
-            web_app: { url: MINI_APP_URL },
-          },
-        ],
+        [{ text: "❓ База знаний", url: KNOWLEDGE_BASE_URL }],
       ],
     },
   });
@@ -206,13 +350,10 @@ async function handleSupport(chatId: number) {
 // Handle /pricing command
 async function handlePricing(chatId: number) {
   const pricingText = `
-💎 <b>Тарифы WB Generator</b>
-
-🎁 <b>Стартовый бонус:</b>
-После первой оплаты вы получаете токены для генерации!
+💎 <b>Баланс и тарифы</b>
 
 💰 <b>Пакеты токенов:</b>
-• Базовый — для старта
+• Стартер — для первых шагов
 • Стандарт — для активной работы  
 • Про — максимум возможностей
 
@@ -221,24 +362,16 @@ async function handlePricing(chatId: number) {
 • SEO-описание — 1 токен
 • Этикетка — 1 токен
 
-👉 Нажмите кнопку ниже, чтобы посмотреть актуальные цены!
+🎁 <b>Бонусы:</b> получай токены бесплатно за активность!
+
+👉 Нажми кнопку, чтобы пополнить баланс:
   `.trim();
 
   await sendMessage(chatId, pricingText, {
     reply_markup: {
       inline_keyboard: [
-        [
-          {
-            text: "💎 Посмотреть тарифы",
-            web_app: { url: `${MINI_APP_URL}/pricing` },
-          },
-        ],
-        [
-          {
-            text: "📱 Открыть приложение",
-            web_app: { url: MINI_APP_URL },
-          },
-        ],
+        [{ text: "💎 Пополнить баланс", web_app: { url: `${DASHBOARD_URL}#pricing` } }],
+        [{ text: "🎁 Получить бонусы", web_app: { url: `${DASHBOARD_URL}#bonuses` } }],
       ],
     },
   });
@@ -275,6 +408,16 @@ async function processUpdate(update: any) {
     await handleHelp(chatId);
   } else if (text === "/app") {
     await handleApp(chatId);
+  } else if (text === "/cards") {
+    await handleCards(chatId);
+  } else if (text === "/description") {
+    await handleDescription(chatId);
+  } else if (text === "/learning") {
+    await handleLearning(chatId);
+  } else if (text === "/bonuses") {
+    await handleBonuses(chatId);
+  } else if (text === "/faq") {
+    await handleFAQ(chatId);
   } else if (text === "/support") {
     await handleSupport(chatId);
   } else if (text === "/pricing") {
