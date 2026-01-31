@@ -86,3 +86,6 @@ verify_jwt = true
 
 [functions.cleanup-stale-jobs]
 verify_jwt = false
+
+[functions.telegram-bot]
+verify_jwt = false
