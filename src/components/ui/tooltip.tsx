@@ -5,7 +5,42 @@ import { cn } from "@/lib/utils"
 
 const TooltipProvider = TooltipPrimitive.Provider
 
-const Tooltip = TooltipPrimitive.Root
+// Custom Tooltip that supports both hover and click (for mobile)
+const Tooltip = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>
+>(({ children, ...props }, ref) => {
+  const [open, setOpen] = React.useState(false)
+
+  return (
+    <TooltipPrimitive.Root 
+      open={open} 
+      onOpenChange={setOpen}
+      {...props}
+    >
+      {React.Children.map(children, child => {
+        if (React.isValidElement(child) && child.type === TooltipTrigger) {
+          return React.cloneElement(child as React.ReactElement<any>, {
+            onClick: (e: React.MouseEvent) => {
+              // Toggle on click for mobile support
+              setOpen(prev => !prev)
+              // Call original onClick if exists
+              const originalOnClick = (child as React.ReactElement<any>).props.onClick
+              if (originalOnClick) originalOnClick(e)
+            },
+            onTouchEnd: (e: React.TouchEvent) => {
+              // Prevent default to avoid double-triggering
+              e.preventDefault()
+              setOpen(prev => !prev)
+            }
+          })
+        }
+        return child
+      })}
+    </TooltipPrimitive.Root>
+  )
+})
+Tooltip.displayName = "Tooltip"
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 

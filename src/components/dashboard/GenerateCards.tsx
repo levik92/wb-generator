@@ -1364,10 +1364,14 @@ export const GenerateCards = ({
             <CardTitle className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Изображения товара
-              <TooltipProvider delayDuration={100}>
+              <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="ml-1 text-muted-foreground hover:text-foreground transition-colors">
+                    <button 
+                      type="button" 
+                      className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                      onClick={(e) => e.preventDefault()}
+                    >
                       <Info className="w-4 h-4" />
                     </button>
                   </TooltipTrigger>
