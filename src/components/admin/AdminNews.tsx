@@ -153,6 +153,27 @@ export const AdminNews = () => {
     }
   };
 
+  const sendToTelegram = async (newsItem: NewsItem) => {
+    try {
+      const response = await supabase.functions.invoke('telegram-bot', {
+        body: {
+          action: 'send_news',
+          news: {
+            title: newsItem.title,
+            content: newsItem.content,
+            tag: newsItem.tag
+          }
+        }
+      });
+
+      if (response.error) throw response.error;
+      return true;
+    } catch (error) {
+      console.error('Error sending to Telegram:', error);
+      return false;
+    }
+  };
+
   const publishNews = async (newsId: string, isPublished: boolean) => {
     try {
       const { error } = await (supabase as any)
@@ -165,10 +186,24 @@ export const AdminNews = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Успешно",
-        description: isPublished ? "Новость опубликована" : "Новость снята с публикации",
-      });
+      // If publishing, also send to Telegram
+      if (isPublished) {
+        const newsItem = news.find(n => n.id === newsId);
+        if (newsItem) {
+          const telegramSent = await sendToTelegram(newsItem);
+          toast({
+            title: "Успешно",
+            description: telegramSent 
+              ? "Новость опубликована и отправлена в Telegram" 
+              : "Новость опубликована (отправка в Telegram не удалась)",
+          });
+        }
+      } else {
+        toast({
+          title: "Успешно",
+          description: "Новость снята с публикации",
+        });
+      }
 
       loadNews();
     } catch (error: any) {
