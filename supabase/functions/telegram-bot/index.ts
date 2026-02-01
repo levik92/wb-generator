@@ -7,7 +7,7 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 const DASHBOARD_URL = "https://wbgen.ru/dashboard";
 const KNOWLEDGE_BASE_URL = "https://wbgen.ru/baza-znaniy";
 const SUPPORT_URL = "https://t.me/wbgen_support";
-const GROUP_URL = "https://t.me/wbgen_community";
+const GROUP_URL = "https://t.me/wbgen_official";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
