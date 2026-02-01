@@ -57,15 +57,44 @@ const Dashboard = () => {
     hasCompletedJobs,
     resetCompletedJobsFlag
   } = useActiveJobs(profile?.id || '');
-  // Handle tab from URL query param
+  // Handle tab from URL query param or hash anchor
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['cards', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'].includes(tabParam)) {
-      setActiveTab(tabParam as ActiveTab);
+    const hashParam = window.location.hash.replace('#', '');
+    
+    const validTabs = ['cards', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+    
+    // Priority: query param > hash anchor
+    const targetTab = tabParam || hashParam;
+    
+    if (targetTab && validTabs.includes(targetTab)) {
+      setActiveTab(targetTab as ActiveTab);
       // Clear the query param after setting the tab
-      setSearchParams({}, { replace: true });
+      if (tabParam) {
+        setSearchParams({}, { replace: true });
+      }
+      // Clear the hash
+      if (hashParam) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
     }
   }, [searchParams, setSearchParams]);
+
+  // Listen for hash changes (for Telegram Mini App deep links)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hashParam = window.location.hash.replace('#', '');
+      const validTabs = ['cards', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+      
+      if (hashParam && validTabs.includes(hashParam)) {
+        setActiveTab(hashParam as ActiveTab);
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({

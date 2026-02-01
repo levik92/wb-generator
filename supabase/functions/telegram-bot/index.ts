@@ -7,6 +7,7 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 const DASHBOARD_URL = "https://wbgen.ru/dashboard";
 const KNOWLEDGE_BASE_URL = "https://wbgen.ru/baza-znaniy";
 const SUPPORT_URL = "https://t.me/wbgen_support";
+const GROUP_URL = "https://t.me/wbgen_community";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -122,9 +123,68 @@ function getMainKeyboard() {
       ],
       [
         { text: "💬 Поддержка", url: SUPPORT_URL },
+        { text: "👥 Наша группа", url: GROUP_URL },
       ],
     ],
   };
+}
+
+// Send news to channel/group
+async function sendNewsToChannel(news: { title: string; content: string; tag: string }) {
+  const channelId = Deno.env.get("TELEGRAM_CHANNEL_ID");
+  
+  if (!channelId) {
+    console.log("No TELEGRAM_CHANNEL_ID configured");
+    return { ok: false, description: "No channel ID configured" };
+  }
+
+  const tagEmojis: Record<string, string> = {
+    "Новости": "📰",
+    "Обновления": "🆕",
+    "Технические работы": "🔧",
+    "Исправления": "🐛",
+    "Инструкции": "📖",
+    "Советы": "💡",
+    "Аналитика": "📊",
+    "Кейсы": "📈",
+  };
+
+  const emoji = tagEmojis[news.tag] || "📢";
+
+  const message = `${emoji} <b>${news.tag}</b>
+
+<b>${news.title}</b>
+
+${news.content}`;
+
+  const keyboard = {
+    inline_keyboard: [
+      [
+        { text: "🚀 Открыть приложение", web_app: { url: DASHBOARD_URL } },
+        { text: "👥 Наша группа", url: GROUP_URL },
+      ],
+    ],
+  };
+
+  try {
+    const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: channelId,
+        text: message,
+        parse_mode: "HTML",
+        reply_markup: keyboard,
+      }),
+    });
+    
+    const result = await response.json();
+    console.log("Send news result:", result);
+    return result;
+  } catch (error) {
+    console.error("Error sending news to channel:", error);
+    return { ok: false, description: error.message };
+  }
 }
 
 // Handle /start command
@@ -481,8 +541,21 @@ serve(async (req) => {
 
     // Handle webhook updates from Telegram
     if (req.method === "POST") {
-      const update = await req.json();
-      await processUpdate(update);
+      const body = await req.json();
+      
+      // Check if this is a send_news action from admin
+      if (body.action === "send_news" && body.news) {
+        console.log("Sending news to Telegram:", body.news);
+        const result = await sendNewsToChannel(body.news);
+        
+        return new Response(
+          JSON.stringify({ success: result.ok, result }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Otherwise, it's a webhook update from Telegram
+      await processUpdate(body);
       
       return new Response(JSON.stringify({ ok: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -496,6 +569,8 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
