@@ -1248,6 +1248,42 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_bot_subscribers: {
+        Row: {
+          chat_id: number
+          first_name: string | null
+          id: string
+          is_active: boolean
+          last_name: string | null
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          chat_id: number
+          first_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_name?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          chat_id?: number
+          first_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_name?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       token_transactions: {
         Row: {
           amount: number
