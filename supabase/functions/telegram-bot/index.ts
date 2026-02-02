@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+const SUPABASE_URL = "https://xguiyabpngjkavyosbza.supabase.co";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 // Mini app and support URLs
 const DASHBOARD_URL = "https://wbgen.ru/dashboard";
@@ -13,6 +16,40 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Create Supabase client
+function getSupabaseClient() {
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+}
+
+// Save subscriber to database
+async function saveSubscriber(chatId: number, username?: string, firstName?: string, lastName?: string) {
+  try {
+    const supabase = getSupabaseClient();
+    
+    const { error } = await supabase
+      .from("telegram_bot_subscribers")
+      .upsert({
+        chat_id: chatId,
+        username: username || null,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        is_active: true,
+        unsubscribed_at: null,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: "chat_id",
+      });
+    
+    if (error) {
+      console.error("Error saving subscriber:", error);
+    } else {
+      console.log("Subscriber saved:", chatId);
+    }
+  } catch (error) {
+    console.error("Error in saveSubscriber:", error);
+  }
+}
 
 // Send message to Telegram
 async function sendMessage(chatId: number, text: string, options: any = {}) {
@@ -129,13 +166,24 @@ function getMainKeyboard() {
   };
 }
 
-// Send news to channel/group
-async function sendNewsToChannel(news: { title: string; content: string; tag: string }) {
-  const channelId = Deno.env.get("TELEGRAM_CHANNEL_ID");
+// Send news to all bot subscribers
+async function sendNewsToSubscribers(news: { title: string; content: string; tag: string }) {
+  const supabase = getSupabaseClient();
   
-  if (!channelId) {
-    console.log("No TELEGRAM_CHANNEL_ID configured");
-    return { ok: false, description: "No channel ID configured" };
+  // Get all active subscribers
+  const { data: subscribers, error } = await supabase
+    .from("telegram_bot_subscribers")
+    .select("chat_id")
+    .eq("is_active", true);
+  
+  if (error) {
+    console.error("Error fetching subscribers:", error);
+    return { ok: false, description: error.message, sent: 0, failed: 0 };
+  }
+  
+  if (!subscribers || subscribers.length === 0) {
+    console.log("No active subscribers found");
+    return { ok: true, description: "No subscribers", sent: 0, failed: 0 };
   }
 
   const tagEmojis: Record<string, string> = {
@@ -166,29 +214,62 @@ ${news.content}`;
     ],
   };
 
-  try {
-    const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: channelId,
-        text: message,
-        parse_mode: "HTML",
-        reply_markup: keyboard,
-      }),
-    });
-    
-    const result = await response.json();
-    console.log("Send news result:", result);
-    return result;
-  } catch (error) {
-    console.error("Error sending news to channel:", error);
-    return { ok: false, description: error.message };
+  let sent = 0;
+  let failed = 0;
+  const failedChatIds: number[] = [];
+
+  // Send to all subscribers
+  for (const subscriber of subscribers) {
+    try {
+      const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: subscriber.chat_id,
+          text: message,
+          parse_mode: "HTML",
+          reply_markup: keyboard,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.ok) {
+        sent++;
+      } else {
+        failed++;
+        failedChatIds.push(subscriber.chat_id);
+        console.log(`Failed to send to ${subscriber.chat_id}:`, result.description);
+        
+        // If user blocked the bot, mark as inactive
+        if (result.description?.includes("blocked") || result.description?.includes("deactivated")) {
+          await supabase
+            .from("telegram_bot_subscribers")
+            .update({ 
+              is_active: false, 
+              unsubscribed_at: new Date().toISOString() 
+            })
+            .eq("chat_id", subscriber.chat_id);
+        }
+      }
+      
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 50));
+    } catch (error) {
+      failed++;
+      console.error(`Error sending to ${subscriber.chat_id}:`, error);
+    }
   }
+
+  console.log(`News broadcast complete: ${sent} sent, ${failed} failed`);
+  return { ok: true, sent, failed, total: subscribers.length };
 }
 
 // Handle /start command
-async function handleStart(chatId: number, firstName: string) {
+async function handleStart(chatId: number, firstName: string, username?: string, lastName?: string) {
+  // Save subscriber to database
+  await saveSubscriber(chatId, username, firstName, lastName);
+  
   const welcomeText = `
 👋 <b>Привет, ${firstName}!</b>
 
@@ -460,10 +541,12 @@ async function processUpdate(update: any) {
   const chatId = message.chat.id;
   const text = message.text || "";
   const firstName = message.from?.first_name || "друг";
+  const lastName = message.from?.last_name;
+  const username = message.from?.username;
 
   // Handle commands
   if (text.startsWith("/start")) {
-    await handleStart(chatId, firstName);
+    await handleStart(chatId, firstName, username, lastName);
   } else if (text === "/help") {
     await handleHelp(chatId);
   } else if (text === "/app") {
@@ -545,8 +628,8 @@ serve(async (req) => {
       
       // Check if this is a send_news action from admin
       if (body.action === "send_news" && body.news) {
-        console.log("Sending news to Telegram:", body.news);
-        const result = await sendNewsToChannel(body.news);
+        console.log("Sending news to all bot subscribers:", body.news);
+        const result = await sendNewsToSubscribers(body.news);
         
         return new Response(
           JSON.stringify({ success: result.ok, result }),
