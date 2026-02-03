@@ -126,6 +126,13 @@ serve(async (req) => {
       }
     }
 
+    // Вычисляем предыдущий период для сравнения (такой же длины)
+    const periodDuration = endDate.getTime() - startDate.getTime()
+    const prevEndDate = new Date(startDate.getTime() - 1) // Конец предыдущего периода - за 1 мс до начала текущего
+    prevEndDate.setUTCHours(23, 59, 59, 999)
+    const prevStartDate = new Date(prevEndDate.getTime() - periodDuration)
+    prevStartDate.setUTCHours(0, 0, 0, 0)
+
     // Функция для конвертации UTC даты в Moscow timezone (UTC+3)
     const MOSCOW_OFFSET_HOURS = 3
     
@@ -283,6 +290,51 @@ serve(async (req) => {
     const totalTokensSpentInPeriod = tokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
     const totalRevenueInPeriod = paymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
+    // ===== ДАННЫЕ ЗА ПРЕДЫДУЩИЙ ПЕРИОД ДЛЯ СРАВНЕНИЯ =====
+    const prevUsersData = await fetchAllRows(supabase, 'profiles', 'id, created_at', [
+      { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
+    ])
+    
+    const prevGenerationsData = await fetchAllRows(supabase, 'generations', 'created_at', [
+      { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
+    ])
+    
+    const prevTokensData = await fetchAllRows(supabase, 'token_transactions', 'created_at, amount', [
+      { field: 'transaction_type', op: 'eq', value: 'generation' },
+      { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
+    ])
+    
+    const prevPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, created_at, amount', [
+      { field: 'status', op: 'eq', value: 'succeeded' },
+      { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
+    ])
+
+    // Totals за предыдущий период
+    const prevTotalUsersInPeriod = prevUsersData?.length || 0
+    const prevTotalGenerationsInPeriod = prevGenerationsData?.length || 0
+    const prevTotalTokensSpentInPeriod = prevTokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
+    const prevTotalRevenueInPeriod = prevPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
+    // Функция для расчета процента изменения
+    const calculateChangePercent = (current: number, previous: number): number | null => {
+      if (previous === 0) {
+        return current > 0 ? 100 : null // 100% рост если было 0, или null если всё равно 0
+      }
+      return Math.round(((current - previous) / previous) * 1000) / 10
+    }
+
+    // Расчет процентов изменения
+    const changePercents = {
+      users: calculateChangePercent(totalUsersInPeriod, prevTotalUsersInPeriod),
+      generations: calculateChangePercent(totalGenerationsInPeriod, prevTotalGenerationsInPeriod),
+      tokens: calculateChangePercent(totalTokensSpentInPeriod, prevTotalTokensSpentInPeriod),
+      revenue: calculateChangePercent(totalRevenueInPeriod, prevTotalRevenueInPeriod)
+    }
+
     // Расчет новых метрик
     // 1. Платные пользователи (уникальные user_id с платежами)
     const paidUsersSet = new Set<string>()
@@ -355,6 +407,15 @@ serve(async (req) => {
           tokens: totalTokensSpentInPeriod,
           revenue: totalRevenueInPeriod
         },
+        // Данные за предыдущий период для сравнения
+        previousTotals: {
+          users: prevTotalUsersInPeriod,
+          generations: prevTotalGenerationsInPeriod,
+          tokens: prevTotalTokensSpentInPeriod,
+          revenue: prevTotalRevenueInPeriod
+        },
+        // Проценты изменения относительно предыдущего периода
+        changePercents,
         // Новые метрики
         additionalMetrics: {
           paidUsers: periodPaidUsersCount,
