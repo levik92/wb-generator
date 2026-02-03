@@ -8,6 +8,7 @@ const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 // Mini app and support URLs
 const DASHBOARD_URL = "https://wbgen.ru/dashboard";
+const CASES_URL = "https://wbgen.ru/cases";
 const KNOWLEDGE_BASE_URL = "https://wbgen.ru/baza-znaniy";
 const SUPPORT_URL = "https://t.me/wbgen_support";
 const GROUP_URL = "https://t.me/wbgen_official";
@@ -130,28 +131,8 @@ function getMainKeyboard() {
       ],
       [
         {
-          text: "🎨 Карточки",
-          web_app: { url: `${DASHBOARD_URL}#cards` },
-        },
-        {
-          text: "📝 Описания",
-          web_app: { url: `${DASHBOARD_URL}#description` },
-        },
-      ],
-      [
-        {
-          text: "💎 Баланс",
-          web_app: { url: `${DASHBOARD_URL}#pricing` },
-        },
-        {
-          text: "📚 Обучение",
-          web_app: { url: `${DASHBOARD_URL}#learning` },
-        },
-      ],
-      [
-        {
-          text: "🎁 Бонусы",
-          web_app: { url: `${DASHBOARD_URL}#bonuses` },
+          text: "🎨 Примеры генераций",
+          url: CASES_URL,
         },
         {
           text: "❓ FAQ",
