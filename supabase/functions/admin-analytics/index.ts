@@ -284,6 +284,66 @@ serve(async (req) => {
     const tokensChart = groupData(tokensData || [], 'created_at', 'amount')
     const revenueChart = groupData(paymentsData || [], 'created_at', 'amount')
 
+    // Генерируем временные интервалы для предыдущего периода
+    const prevTimeIntervals: string[] = []
+    const prevCurrent = new Date(prevStartDate)
+    
+    while (prevCurrent <= prevEndDate) {
+      if (groupFormat === 'hour') {
+        prevTimeIntervals.push(formatMoscowDate(prevCurrent, 'hour'))
+        prevCurrent.setHours(prevCurrent.getHours() + 1)
+      } else if (groupFormat === 'day') {
+        prevTimeIntervals.push(formatMoscowDate(prevCurrent, 'day'))
+        prevCurrent.setDate(prevCurrent.getDate() + 1)
+      } else if (groupFormat === 'week') {
+        prevTimeIntervals.push(getMoscowWeekStart(prevCurrent))
+        prevCurrent.setDate(prevCurrent.getDate() + 7)
+      } else if (groupFormat === 'month') {
+        prevTimeIntervals.push(formatMoscowDate(prevCurrent, 'month'))
+        prevCurrent.setMonth(prevCurrent.getMonth() + 1)
+      }
+    }
+
+    // Функция группировки для предыдущего периода (маппим на индексы текущего периода)
+    const groupDataForPrevPeriod = (data: any[], dateField: string, valueField?: string) => {
+      const grouped: { [key: string]: number } = {}
+      
+      prevTimeIntervals.forEach(interval => {
+        grouped[interval] = 0
+      })
+
+      data?.forEach(item => {
+        const itemDate = new Date(item[dateField])
+        let key: string
+
+        if (groupFormat === 'hour') {
+          key = formatMoscowDate(itemDate, 'hour')
+        } else if (groupFormat === 'day') {
+          key = formatMoscowDate(itemDate, 'day')
+        } else if (groupFormat === 'week') {
+          key = getMoscowWeekStart(itemDate)
+        } else if (groupFormat === 'month') {
+          key = formatMoscowDate(itemDate, 'month')
+        } else {
+          key = formatMoscowDate(itemDate, 'day')
+        }
+
+        if (grouped.hasOwnProperty(key)) {
+          if (valueField) {
+            grouped[key] += Math.abs(Number(item[valueField]))
+          } else {
+            grouped[key] += 1
+          }
+        }
+      })
+
+      // Возвращаем данные с индексами текущего периода для наложения графиков
+      return timeIntervals.map((interval, index) => ({
+        date: interval,
+        value: prevTimeIntervals[index] ? grouped[prevTimeIntervals[index]] || 0 : 0
+      }))
+    }
+
     // Получаем ОБЩИЕ totals (за всё время для основных метрик, за период для отображения)
     const totalUsersInPeriod = usersData?.length || 0
     const totalGenerationsInPeriod = generationsData?.length || 0
@@ -318,6 +378,12 @@ serve(async (req) => {
     const prevTotalGenerationsInPeriod = prevGenerationsData?.length || 0
     const prevTotalTokensSpentInPeriod = prevTokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
     const prevTotalRevenueInPeriod = prevPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
+
+    // Формируем графики для предыдущего периода
+    const prevUsersChart = groupDataForPrevPeriod(prevUsersData || [], 'created_at')
+    const prevGenerationsChart = groupDataForPrevPeriod(prevGenerationsData || [], 'created_at')
+    const prevTokensChart = groupDataForPrevPeriod(prevTokensData || [], 'created_at', 'amount')
+    const prevRevenueChart = groupDataForPrevPeriod(prevPaymentsData || [], 'created_at', 'amount')
 
     // Функция для расчета процента изменения
     const calculateChangePercent = (current: number, previous: number): number | null => {
@@ -400,6 +466,13 @@ serve(async (req) => {
           generations: generationsChart,
           tokens: tokensChart,
           revenue: revenueChart
+        },
+        // Графики за предыдущий период для сравнения
+        previousCharts: {
+          users: prevUsersChart,
+          generations: prevGenerationsChart,
+          tokens: prevTokensChart,
+          revenue: prevRevenueChart
         },
         totals: {
           users: totalUsersInPeriod,

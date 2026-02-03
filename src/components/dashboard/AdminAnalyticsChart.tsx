@@ -44,6 +44,12 @@ interface AnalyticsData {
     tokens: ChartData[];
     revenue: ChartData[];
   };
+  previousCharts?: {
+    users: ChartData[];
+    generations: ChartData[];
+    tokens: ChartData[];
+    revenue: ChartData[];
+  };
   totals: {
     users: number;
     generations: number;
@@ -76,7 +82,9 @@ const chartConfig = {
     title: 'Новые пользователи',
     icon: Users,
     color: '#8b5cf6',
+    prevColor: '#8b5cf6',
     gradient: 'url(#purpleGradient)',
+    prevGradient: 'url(#purplePrevGradient)',
     formatValue: (value: number) => value.toLocaleString('ru-RU'),
     formatTooltip: (value: number) => `${value} пользователей`
   },
@@ -84,7 +92,9 @@ const chartConfig = {
     title: 'Запросы к AI',
     icon: Activity,
     color: '#a855f7',
+    prevColor: '#a855f7',
     gradient: 'url(#violetGradient)',
+    prevGradient: 'url(#violetPrevGradient)',
     formatValue: (value: number) => value.toLocaleString('ru-RU'),
     formatTooltip: (value: number) => `${value} запросов`
   },
@@ -92,7 +102,9 @@ const chartConfig = {
     title: 'Потрачено токенов',
     icon: Coins,
     color: '#9333ea',
+    prevColor: '#9333ea',
     gradient: 'url(#purpleTokenGradient)',
+    prevGradient: 'url(#purpleTokenPrevGradient)',
     formatValue: (value: number) => value.toLocaleString('ru-RU'),
     formatTooltip: (value: number) => `${value} токенов`
   },
@@ -100,7 +112,9 @@ const chartConfig = {
     title: 'Доход',
     icon: DollarSign,
     color: '#7c3aed',
+    prevColor: '#7c3aed',
     gradient: 'url(#purpleRevenueGradient)',
+    prevGradient: 'url(#purpleRevenuePrevGradient)',
     formatValue: (value: number) => `${value.toLocaleString('ru-RU')}₽`,
     formatTooltip: (value: number) => `${value.toLocaleString('ru-RU')}₽`
   }
@@ -227,6 +241,13 @@ export function AdminAnalyticsChart({
   
   const trend = getTrendFromApi();
 
+  // Объединяем данные текущего и предыдущего периода для графика
+  const combinedChartData = data?.charts[type]?.map((item, index) => ({
+    date: item.date,
+    value: item.value,
+    prevValue: data?.previousCharts?.[type]?.[index]?.value ?? 0
+  })) || [];
+
   const CustomTooltip = ({
     active,
     payload,
@@ -237,9 +258,14 @@ export function AdminAnalyticsChart({
           <p className="text-sm font-medium text-foreground">
             {formatXAxisDate(label, data?.groupFormat || 'day')}
           </p>
-          <p className="text-sm text-muted-foreground">
-            {config.formatTooltip(payload[0].value)}
+          <p className="text-sm text-foreground">
+            <span className="font-medium">Текущий:</span> {config.formatTooltip(payload[0]?.value || 0)}
           </p>
+          {payload[1] !== undefined && (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium">Прошлый:</span> {config.formatTooltip(payload[1]?.value || 0)}
+            </p>
+          )}
         </div>;
     }
     return null;
@@ -308,22 +334,38 @@ export function AdminAnalyticsChart({
           {/* Chart */}
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data?.charts[type] || []}>
+              <AreaChart data={combinedChartData}>
                 <defs>
                   <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="purplePrevGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.08} />
                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="violetGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
+                  <linearGradient id="violetPrevGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                  </linearGradient>
                   <linearGradient id="purpleTokenGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#9333ea" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
                   </linearGradient>
+                  <linearGradient id="purpleTokenPrevGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
+                  </linearGradient>
                   <linearGradient id="purpleRevenueGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="purpleRevenuePrevGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.08} />
                     <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -335,7 +377,30 @@ export function AdminAnalyticsChart({
                 fontSize: 12
               }} tickFormatter={value => value.toLocaleString('ru-RU')} />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="value" stroke={config.color} fillOpacity={1} fill={config.gradient} strokeWidth={2} animationDuration={1500} animationEasing="ease-out" />
+                {/* Линия предыдущего периода - полупрозрачная, на заднем плане */}
+                <Area 
+                  type="monotone" 
+                  dataKey="prevValue" 
+                  stroke={config.prevColor} 
+                  strokeOpacity={0.3}
+                  strokeDasharray="4 4"
+                  fillOpacity={1} 
+                  fill={config.prevGradient} 
+                  strokeWidth={1.5} 
+                  animationDuration={1500} 
+                  animationEasing="ease-out" 
+                />
+                {/* Линия текущего периода - основная */}
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke={config.color} 
+                  fillOpacity={1} 
+                  fill={config.gradient} 
+                  strokeWidth={2} 
+                  animationDuration={1500} 
+                  animationEasing="ease-out" 
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
