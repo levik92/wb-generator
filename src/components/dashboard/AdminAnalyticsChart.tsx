@@ -50,6 +50,18 @@ interface AnalyticsData {
     tokens: number;
     revenue: number;
   };
+  previousTotals?: {
+    users: number;
+    generations: number;
+    tokens: number;
+    revenue: number;
+  };
+  changePercents?: {
+    users: number | null;
+    generations: number | null;
+    tokens: number | null;
+    revenue: number | null;
+  };
   additionalMetrics?: AdditionalMetrics;
 }
 
@@ -191,31 +203,29 @@ export function AdminAnalyticsChart({
     }
   };
 
-  const calculateTrend = () => {
-    if (!data?.charts[type] || data.charts[type].length < 2) return {
-      trend: 'neutral',
-      percentage: 0
-    };
-    const chartData = data.charts[type];
-    const firstHalf = chartData.slice(0, Math.floor(chartData.length / 2));
-    const secondHalf = chartData.slice(Math.floor(chartData.length / 2));
-    const firstAvg = firstHalf.reduce((sum, item) => sum + item.value, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((sum, item) => sum + item.value, 0) / secondHalf.length;
-    if (firstAvg === 0) return {
-      trend: secondAvg > 0 ? 'up' : 'neutral',
-      percentage: secondAvg > 0 ? 100 : 0
-    };
-    const percentage = (secondAvg - firstAvg) / firstAvg * 100;
-    if (Math.abs(percentage) < 5) return {
-      trend: 'neutral',
-      percentage: 0
-    };
+  const getTrendFromApi = () => {
+    // Используем данные сравнения с предыдущим периодом от API
+    if (!data?.changePercents) {
+      return { trend: 'neutral' as const, percentage: 0 };
+    }
+    
+    const changePercent = data.changePercents[type];
+    
+    if (changePercent === null) {
+      return { trend: 'neutral' as const, percentage: 0 };
+    }
+    
+    if (Math.abs(changePercent) < 1) {
+      return { trend: 'neutral' as const, percentage: 0 };
+    }
+    
     return {
-      trend: percentage > 0 ? 'up' : 'down',
-      percentage: Math.abs(percentage)
+      trend: changePercent > 0 ? 'up' as const : 'down' as const,
+      percentage: Math.abs(changePercent)
     };
   };
-  const trend = calculateTrend();
+  
+  const trend = getTrendFromApi();
 
   const CustomTooltip = ({
     active,
