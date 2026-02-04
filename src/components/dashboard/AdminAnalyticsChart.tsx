@@ -254,19 +254,26 @@ export function AdminAnalyticsChart({
     label
   }: any) => {
     if (active && payload && payload.length) {
-      return <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium text-foreground">
+      // Находим значения по dataKey для корректного отображения
+      const currentEntry = payload.find((p: any) => p.dataKey === 'value');
+      const prevEntry = payload.find((p: any) => p.dataKey === 'prevValue');
+      
+      const currentValue = typeof currentEntry?.value === 'number' ? currentEntry.value : 0;
+      const prevValue = typeof prevEntry?.value === 'number' ? prevEntry.value : 0;
+      
+      return (
+        <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-3 shadow-lg">
+          <p className="text-sm font-medium text-foreground mb-1">
             {formatXAxisDate(label, data?.groupFormat || 'day')}
           </p>
           <p className="text-sm text-foreground">
-            <span className="font-medium">Текущий:</span> {config.formatTooltip(payload[0]?.value || 0)}
+            <span className="font-medium">Текущий:</span> {config.formatTooltip(currentValue)}
           </p>
-          {payload[1] !== undefined && (
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Прошлый:</span> {config.formatTooltip(payload[1]?.value || 0)}
-            </p>
-          )}
-        </div>;
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium">Прошлый:</span> {config.formatTooltip(prevValue)}
+          </p>
+        </div>
+      );
     }
     return null;
   };
