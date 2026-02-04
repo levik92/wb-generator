@@ -342,22 +342,24 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
   } catch (error) {
     console.error(`Error processing task ${task.id}:`, error);
 
-    // Read current task state from DB (to get accurate retry_count)
+    // Read current task state from DB (to get accurate status and retry_count)
     const { data: currentTask } = await supabase
       .from('generation_tasks')
-      .select('status, retry_count')
+      .select('status, retry_count, last_error')
       .eq('id', task.id)
       .single();
     
     const actualRetryCount = currentTask?.retry_count || task.retry_count || 0;
     const currentStatus = currentTask?.status;
+    const currentLastError = currentTask?.last_error || '';
     
-    // If task is already handled (completed, failed, or retrying with new count), skip
+    // If task is already in final state (completed or failed), skip - process-google-task already handled it
     if (currentStatus === 'completed' || currentStatus === 'failed') {
-      console.log(`Task ${task.id} already in final state: ${currentStatus}`);
+      console.log(`Task ${task.id} already in final state: ${currentStatus} (handled by process-google-task)`);
       return;
     }
     
+    // If task is already scheduled for retry, skip
     if (currentStatus === 'retrying' && actualRetryCount > (task.retry_count || 0)) {
       console.log(`Task ${task.id} already scheduled for retry (count: ${actualRetryCount})`);
       return;
@@ -365,11 +367,14 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
 
     const errorMessage = error.message || 'Unknown error';
     
-    // Check if it's a model overloaded error
+    // Check if it's a model overloaded error or edge function error
     const isModelOverloaded = errorMessage.includes('503') || 
                                errorMessage.includes('overloaded') ||
                                errorMessage.includes('UNAVAILABLE') ||
                                errorMessage.includes('google_503');
+    
+    const isEdgeFunctionError = errorMessage.includes('Edge Function') || 
+                                 errorMessage.includes('non-2xx');
     
     if (actualRetryCount < MAX_RETRIES) {
       // Retry delays: 10s, 20s, 25s
@@ -384,7 +389,7 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
           status: 'retrying',
           retry_count: actualRetryCount + 1,
           retry_after: retryDelay,
-          last_error: isModelOverloaded ? 'google_503_overloaded' : errorMessage,
+          last_error: isModelOverloaded ? 'google_503_overloaded' : (isEdgeFunctionError ? 'edge_function_error' : errorMessage),
           updated_at: new Date().toISOString(),
         })
         .eq('id', task.id);
@@ -392,7 +397,19 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     } else {
       const finalError = isModelOverloaded 
         ? 'Сервис временно перегружен. Попробуйте через несколько минут.'
-        : errorMessage;
+        : (isEdgeFunctionError ? 'Ошибка при обработке задачи.' : errorMessage);
+      
+      // Check if task was already marked as failed (to avoid double refund)
+      const { data: taskBeforeUpdate } = await supabase
+        .from('generation_tasks')
+        .select('status')
+        .eq('id', task.id)
+        .single();
+      
+      if (taskBeforeUpdate?.status === 'failed') {
+        console.log(`Task ${task.id} was already marked as failed, skipping duplicate processing`);
+        return;
+      }
         
       await supabase
         .from('generation_tasks')
@@ -403,13 +420,21 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
         })
         .eq('id', task.id);
 
-      // Refund tokens for failed task
+      // Refund tokens for failed task (only if we're the ones marking it as failed)
       const tokensToRefund = 1;
       console.log(`Refunding ${tokensToRefund} tokens to user ${job.user_id} for failed task ${task.id}`);
       await supabase.rpc('refund_tokens', {
         user_id_param: job.user_id,
         tokens_amount: tokensToRefund,
         reason_text: `Возврат за неудачную генерацию: ${finalError}`
+      });
+      
+      // Send notification
+      await supabase.from('notifications').insert({
+        user_id: job.user_id,
+        type: 'error',
+        title: 'Ошибка генерации',
+        message: `Не удалось сгенерировать карточку "${job.product_name}". ${finalError} Токены возвращены на баланс.`
       });
     }
   }
