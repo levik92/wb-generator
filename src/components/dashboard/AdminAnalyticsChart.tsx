@@ -132,19 +132,45 @@ export function AdminAnalyticsChart({
   });
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSelectingRange, setIsSelectingRange] = useState(false);
+  const [pendingRange, setPendingRange] = useState<DateRange | undefined>(undefined);
   const config = chartConfig[type];
   const Icon = config.icon;
 
   // Use external dateRange if provided, otherwise use internal
   const effectiveDateRange = dateRange ?? internalDateRange;
-  const handleDateRangeChange = onDateRangeChange ?? setInternalDateRange;
+  const setEffectiveDateRange = onDateRangeChange ?? setInternalDateRange;
+
+  // Обработчик выбора даты в календаре
+  const handleCalendarSelect = (range: DateRange | undefined) => {
+    if (!range) {
+      setPendingRange(undefined);
+      setIsSelectingRange(false);
+      return;
+    }
+
+    // Если выбрана только начальная дата (from есть, to нет или from === to)
+    if (range.from && (!range.to || range.from.getTime() === range.to.getTime())) {
+      // Первый клик - начинаем выбор диапазона
+      setPendingRange(range);
+      setIsSelectingRange(true);
+    } else if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
+      // Второй клик - диапазон полностью выбран
+      setPendingRange(undefined);
+      setIsSelectingRange(false);
+      setEffectiveDateRange(range);
+    }
+  };
+
+  // Отображаемый диапазон в календаре (либо pending, либо effective)
+  const displayedRange = isSelectingRange ? pendingRange : effectiveDateRange;
 
   useEffect(() => {
-    // Загружаем данные только когда выбраны ОБЕ даты (начало и конец)
-    if (effectiveDateRange?.from && effectiveDateRange?.to) {
+    // Загружаем данные только когда выбран полный диапазон и мы не в процессе выбора
+    if (!isSelectingRange && effectiveDateRange?.from && effectiveDateRange?.to) {
       loadAnalytics();
     }
-  }, [effectiveDateRange?.from, effectiveDateRange?.to]);
+  }, [effectiveDateRange?.from?.getTime(), effectiveDateRange?.to?.getTime(), isSelectingRange]);
 
   const loadAnalytics = async () => {
     setLoading(true);
@@ -317,8 +343,8 @@ export function AdminAnalyticsChart({
           <PopoverContent className="w-auto p-0" align="end">
             <Calendar
               mode="range"
-              selected={effectiveDateRange}
-              onSelect={handleDateRangeChange}
+              selected={displayedRange}
+              onSelect={handleCalendarSelect}
               numberOfMonths={1}
               locale={ru}
               disabled={(date) => date > new Date()}
@@ -433,10 +459,15 @@ export function AdminAdditionalMetrics() {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return { from: weekAgo, to: now };
   });
+  const [isSelectingRange, setIsSelectingRange] = useState(false);
+  const [pendingRange, setPendingRange] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
-    loadMetrics();
-  }, [dateRange]);
+    // Загружаем данные только когда выбран полный диапазон и мы не в процессе выбора
+    if (!isSelectingRange && dateRange?.from && dateRange?.to) {
+      loadMetrics();
+    }
+  }, [dateRange?.from?.getTime(), dateRange?.to?.getTime(), isSelectingRange]);
 
   const loadMetrics = async () => {
     setLoading(true);
@@ -460,9 +491,29 @@ export function AdminAdditionalMetrics() {
     }
   };
 
-  const handleDateRangeSelect = (range: DateRange | undefined) => {
-    setDateRange(range);
+  // Обработчик выбора даты в календаре
+  const handleCalendarSelect = (range: DateRange | undefined) => {
+    if (!range) {
+      setPendingRange(undefined);
+      setIsSelectingRange(false);
+      return;
+    }
+
+    // Если выбрана только начальная дата (from есть, to нет или from === to)
+    if (range.from && (!range.to || range.from.getTime() === range.to.getTime())) {
+      // Первый клик - начинаем выбор диапазона
+      setPendingRange(range);
+      setIsSelectingRange(true);
+    } else if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
+      // Второй клик - диапазон полностью выбран
+      setPendingRange(undefined);
+      setIsSelectingRange(false);
+      setDateRange(range);
+    }
   };
+
+  // Отображаемый диапазон в календаре
+  const displayedRange = isSelectingRange ? pendingRange : dateRange;
 
   const formatDateRange = () => {
     if (!dateRange?.from) return "Выбрать даты";
@@ -492,8 +543,8 @@ export function AdminAdditionalMetrics() {
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar
                 mode="range"
-                selected={dateRange}
-                onSelect={handleDateRangeSelect}
+                selected={displayedRange}
+                onSelect={handleCalendarSelect}
                 numberOfMonths={1}
                 locale={ru}
                 disabled={(date) => date > new Date()}
@@ -540,8 +591,8 @@ export function AdminAdditionalMetrics() {
           <PopoverContent className="w-auto p-0" align="end">
             <Calendar
               mode="range"
-              selected={dateRange}
-              onSelect={handleDateRangeSelect}
+              selected={displayedRange}
+              onSelect={handleCalendarSelect}
               numberOfMonths={1}
               locale={ru}
               disabled={(date) => date > new Date()}
