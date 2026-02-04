@@ -140,7 +140,10 @@ export function AdminAnalyticsChart({
   const handleDateRangeChange = onDateRangeChange ?? setInternalDateRange;
 
   useEffect(() => {
-    loadAnalytics();
+    // Загружаем данные только когда выбраны ОБЕ даты (начало и конец)
+    if (effectiveDateRange?.from && effectiveDateRange?.to) {
+      loadAnalytics();
+    }
   }, [effectiveDateRange?.from, effectiveDateRange?.to]);
 
   const loadAnalytics = async () => {
