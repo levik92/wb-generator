@@ -92,7 +92,7 @@ export const AdminBonuses = () => {
     title: '',
     description: '',
     tokens_reward: '',
-    requires_link: true,
+    requires_link: false,
     requires_contact: false,
     link_placeholder: 'Вставьте ссылку на публикацию',
     contact_placeholder: 'Ваш Telegram для связи',
@@ -339,7 +339,7 @@ export const AdminBonuses = () => {
       title: '',
       description: '',
       tokens_reward: '',
-      requires_link: true,
+      requires_link: false,
       requires_contact: false,
       link_placeholder: 'Вставьте ссылку на публикацию',
       contact_placeholder: 'Ваш Telegram для связи',
@@ -639,11 +639,22 @@ export const AdminBonuses = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="gift">Подарок</SelectItem>
-                            <SelectItem value="instagram">Instagram</SelectItem>
-                            <SelectItem value="video">Видео</SelectItem>
-                            <SelectItem value="trending-up">Тренд</SelectItem>
-                            <SelectItem value="crown">Корона</SelectItem>
+                            <SelectItem value="gift">🎁 Подарок</SelectItem>
+                            <SelectItem value="instagram">📸 Instagram</SelectItem>
+                            <SelectItem value="telegram">✈️ Telegram</SelectItem>
+                            <SelectItem value="video">🎬 Видео</SelectItem>
+                            <SelectItem value="trending-up">📈 Тренд</SelectItem>
+                            <SelectItem value="crown">👑 Корона</SelectItem>
+                            <SelectItem value="star">⭐ Звезда</SelectItem>
+                            <SelectItem value="heart">❤️ Сердце</SelectItem>
+                            <SelectItem value="zap">⚡ Молния</SelectItem>
+                            <SelectItem value="camera">📷 Камера</SelectItem>
+                            <SelectItem value="users">👥 Пользователи</SelectItem>
+                            <SelectItem value="share">🔗 Поделиться</SelectItem>
+                            <SelectItem value="megaphone">📢 Мегафон</SelectItem>
+                            <SelectItem value="award">🏆 Награда</SelectItem>
+                            <SelectItem value="target">🎯 Цель</SelectItem>
+                            <SelectItem value="flame">🔥 Огонь</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

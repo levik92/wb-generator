@@ -19,8 +19,19 @@ import {
   XCircle,
   Download,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Star,
+  Heart,
+  Zap,
+  Camera,
+  Users,
+  Share2,
+  Megaphone,
+  Award,
+  Target,
+  Flame
 } from "lucide-react";
+import { FaTelegram } from "react-icons/fa";
 
 interface BonusProgram {
   id: string;
@@ -68,6 +79,17 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   video: Video,
   'trending-up': TrendingUp,
   crown: Crown,
+  telegram: FaTelegram,
+  star: Star,
+  heart: Heart,
+  zap: Zap,
+  camera: Camera,
+  users: Users,
+  share: Share2,
+  megaphone: Megaphone,
+  award: Award,
+  target: Target,
+  flame: Flame,
 };
 
 export const BonusProgram = ({ profile }: BonusProgramProps) => {
@@ -276,24 +298,46 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
       {/* Main Bonus Program Card - similar to Balance.tsx generation costs */}
       <Card className="border-border/50 w-full overflow-hidden bg-card">
         <CardHeader className="p-4 sm:p-6 border-b border-border/50">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
-                <Instagram className="w-6 h-6 text-white" />
+          <div className="flex flex-col gap-4">
+            {/* Social links row */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
+                  <Instagram className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Instagram</p>
+                  <a 
+                    href="https://instagram.com/wbgenerator" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline text-xs flex items-center gap-1"
+                  >
+                    @wbgenerator <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold">Наш Instagram</p>
-                <a 
-                  href="https://instagram.com/wbgenerator" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline text-sm flex items-center gap-1"
-                >
-                  @wbgenerator <ExternalLink className="w-3 h-3" />
-                </a>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#229ED9] to-[#0088cc] flex items-center justify-center">
+                  <FaTelegram className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Telegram</p>
+                  <a 
+                    href="https://t.me/wbgen_official" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline text-xs flex items-center gap-1"
+                  >
+                    @wbgen_official <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
             </div>
-            <div className="sm:ml-auto">
+            
+            {/* Download button */}
+            <div>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -335,12 +379,16 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       program.icon_name === 'instagram' 
                         ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500'
-                        : program.icon_name === 'crown'
-                          ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
-                          : 'bg-primary/10'
+                        : program.icon_name === 'telegram'
+                          ? 'bg-gradient-to-br from-[#229ED9] to-[#0088cc]'
+                          : program.icon_name === 'crown'
+                            ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
+                            : program.icon_name === 'flame'
+                              ? 'bg-gradient-to-br from-orange-500 to-red-500'
+                              : 'bg-primary/10'
                     }`}>
                       <Icon className={`w-5 h-5 ${
-                        program.icon_name === 'instagram' || program.icon_name === 'crown'
+                        ['instagram', 'telegram', 'crown', 'flame'].includes(program.icon_name)
                           ? 'text-white'
                           : 'text-primary'
                       }`} />
