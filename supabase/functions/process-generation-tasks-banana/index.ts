@@ -7,6 +7,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function calcRefundTokensPerCard(job: any): number {
+  const tokensCost = Number(job?.tokens_cost ?? 1);
+  const totalCards = Number(job?.total_cards ?? 1);
+  if (!Number.isFinite(tokensCost) || tokensCost <= 0) return 1;
+  if (!Number.isFinite(totalCards) || totalCards <= 0) return Math.max(1, Math.round(tokensCost));
+  return Math.max(1, Math.round(tokensCost / totalCards));
+}
+
+function waitUntil(promise: Promise<unknown>) {
+  try {
+    // Supabase Edge Runtime supports EdgeRuntime.waitUntil for background work
+    (globalThis as any).EdgeRuntime?.waitUntil?.(promise);
+  } catch (_) {
+    // ignore
+  }
+}
+
 // Helper function to get prompt template
 async function getPromptTemplate(
   supabase: any,
@@ -75,10 +92,12 @@ serve(async (req) => {
       })
       .eq('id', jobId);
 
-    // Start background processing
-    processTasks(supabase, jobId, job, MAX_CONCURRENT_TASKS, MAX_RETRIES, MAX_PROCESSING_TIME).catch(error => {
-      console.error('Background processing error:', error);
-    });
+    // Start background processing (keep alive with waitUntil to avoid random aborts)
+    const bg = processTasks(supabase, jobId, job, MAX_CONCURRENT_TASKS, MAX_RETRIES, MAX_PROCESSING_TIME)
+      .catch((error) => {
+        console.error('Background processing error:', error);
+      });
+    waitUntil(bg);
 
     return new Response(
       JSON.stringify({ message: 'Processing started in background', jobId }),
@@ -249,7 +268,7 @@ async function processTasks(
           .not('status', 'in', '("completed","failed")');
         
         // Refund tokens for timed out tasks
-        const tokensToRefund = incompleteTasks.length;
+        const tokensToRefund = incompleteTasks.length * calcRefundTokensPerCard(job);
         console.log(`Refunding ${tokensToRefund} tokens for ${incompleteTasks.length} timed out tasks`);
         await supabase.rpc('refund_tokens', {
           user_id_param: job.user_id,
@@ -421,7 +440,7 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
         .eq('id', task.id);
 
       // Refund tokens for failed task (only if we're the ones marking it as failed)
-      const tokensToRefund = 1;
+      const tokensToRefund = calcRefundTokensPerCard(job);
       console.log(`Refunding ${tokensToRefund} tokens to user ${job.user_id} for failed task ${task.id}`);
       await supabase.rpc('refund_tokens', {
         user_id_param: job.user_id,

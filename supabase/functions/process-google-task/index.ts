@@ -16,6 +16,15 @@ const FINAL_RETRY_DELAY_MS = 10000;
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
 const MAX_IMAGE_BYTES = 8_000_000; // ~8MB
 
+function calcRefundTokensForTask(job: any): number {
+  const tokensCost = Number(job?.tokens_cost ?? 1);
+  const totalCards = Number(job?.total_cards ?? 1);
+  if (!Number.isFinite(tokensCost) || tokensCost <= 0) return 1;
+  if (!Number.isFinite(totalCards) || totalCards <= 0) return Math.max(1, Math.round(tokensCost));
+  // Per-card cost; keep it integer to match token system
+  return Math.max(1, Math.round(tokensCost / totalCards));
+}
+
 type FetchImageResult =
   | { ok: true; base64: string; bytes: number; mimeType: string }
   | { ok: false; reason: string };
@@ -372,8 +381,8 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           })
           .eq('id', taskId);
 
-        // Refund tokens
-        const tokensToRefund = 1;
+        // Refund tokens (refund full per-card cost, not hardcoded 1)
+        const tokensToRefund = calcRefundTokensForTask(task.job);
         console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for failed task ${taskId}`);
         await supabase.rpc('refund_tokens', {
           user_id_param: task.job.user_id,
@@ -403,10 +412,11 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           .eq('id', taskId);
 
         // Refund tokens for bad request errors too
-        console.log(`Refunding 1 token to user ${task.job.user_id} for bad request error`);
+        const tokensToRefund = calcRefundTokensForTask(task.job);
+        console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for bad request error`);
         await supabase.rpc('refund_tokens', {
           user_id_param: task.job.user_id,
-          tokens_amount: 1,
+          tokens_amount: tokensToRefund,
           reason_text: 'Возврат за ошибку запроса к API'
         });
 
@@ -414,7 +424,8 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       }
 
       // Handle all other errors - also refund tokens
-      console.log(`Unknown API error (status ${status}), refunding 1 token to user ${task.job.user_id}`);
+      const tokensToRefund = calcRefundTokensForTask(task.job);
+      console.log(`Unknown API error (status ${status}), refunding ${tokensToRefund} token(s) to user ${task.job.user_id}`);
       await supabase
         .from('generation_tasks')
         .update({
@@ -426,7 +437,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
 
       await supabase.rpc('refund_tokens', {
         user_id_param: task.job.user_id,
-        tokens_amount: 1,
+        tokens_amount: tokensToRefund,
         reason_text: `Возврат за ошибку API: ${status}`
       });
 
@@ -467,10 +478,11 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         .eq('id', taskId);
       
       // CRITICAL: Refund tokens when no image is generated
-      console.log(`Refunding 1 token to user ${task.job.user_id} for empty AI response (finishReason: ${finishReason})`);
+      const tokensToRefund = calcRefundTokensForTask(task.job);
+      console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for empty AI response (finishReason: ${finishReason})`);
       await supabase.rpc('refund_tokens', {
         user_id_param: task.job.user_id,
-        tokens_amount: 1,
+        tokens_amount: tokensToRefund,
         reason_text: `Возврат за пустой ответ AI: ${failMessage}`
       });
       
@@ -509,10 +521,11 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         })
         .eq('id', taskId);
       
-      console.log(`Refunding 1 token to user ${task.job.user_id} for upload failure`);
+      const tokensToRefund = calcRefundTokensForTask(task.job);
+      console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for upload failure`);
       await supabase.rpc('refund_tokens', {
         user_id_param: task.job.user_id,
-        tokens_amount: 1,
+        tokens_amount: tokensToRefund,
         reason_text: 'Возврат за ошибку загрузки изображения'
       });
       
@@ -535,10 +548,11 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         })
         .eq('id', taskId);
       
-      console.log(`Refunding 1 token to user ${task.job.user_id} for URL generation failure`);
+      const tokensToRefund = calcRefundTokensForTask(task.job);
+      console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for URL generation failure`);
       await supabase.rpc('refund_tokens', {
         user_id_param: task.job.user_id,
-        tokens_amount: 1,
+        tokens_amount: tokensToRefund,
         reason_text: 'Возврат за ошибку получения URL изображения'
       });
       
