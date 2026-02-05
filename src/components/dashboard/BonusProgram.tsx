@@ -488,7 +488,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
           <div className="space-y-4 py-4">
             {selectedProgram?.requires_link && (
               <div className="space-y-2">
-                <Label>Ссылка на публикацию</Label>
+                <Label>Подтверждение выполнения</Label>
                 <Input
                   placeholder={selectedProgram.link_placeholder}
                   value={submissionLink}
