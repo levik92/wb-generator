@@ -30,13 +30,10 @@ const Terms = () => {
             <div>
               <h3 className="font-semibold mb-3">1. Общие положения</h3>
               <p className="mb-4 text-muted-foreground leading-relaxed">
-                1.1. Настоящий Договор-оферта (далее — «Договор») является официальным предложением ООО «МАРКЕТШОП №1» (далее — «Исполнитель») на оказание услуг по генерации карточек товаров, SEO-описаний и иных сервисов для маркетплейсов.
+                1.1. Настоящий Договор-оферта (далее — «Договор») является официальным предложением Индивидуального предпринимателя Чупина Антона Дмитриевича (далее — «Исполнитель») на оказание услуг по генерации карточек товаров, SEO-описаний и иных сервисов для маркетплейсов.
               </p>
               <p className="mb-4 text-muted-foreground leading-relaxed">
                 1.2. Акцептом настоящей оферты является регистрация на сайте wbgen.ru и/или оплата услуг. С момента акцепта настоящий Договор считается заключённым.
-              </p>
-              <p className="mb-4 text-muted-foreground leading-relaxed">
-                1.3. Приём платежей осуществляется агентом — Индивидуальный предприниматель Левицкий Владислав Сергеевич (УНП 192485539) от имени и в интересах Исполнителя.
               </p>
             </div>
 
@@ -87,9 +84,6 @@ const Terms = () => {
               </p>
               <p className="mt-3 text-muted-foreground">
                 4.3. Пополнение баланса токенов осуществляется путём оплаты одного из тарифных планов, представленных на сайте.
-              </p>
-              <p className="mt-3 text-muted-foreground">
-                4.4. Приём платежей осуществляет ИП Левицкий В.С. (УНП 192485539) в качестве платёжного агента.
               </p>
             </div>
 
@@ -142,18 +136,14 @@ const Terms = () => {
             <div className="p-4 rounded-xl bg-secondary/50">
               <p className="font-medium mb-3 text-sm">Реквизиты Исполнителя:</p>
               <ul className="list-none space-y-1 text-xs text-muted-foreground">
-                <li><strong>Наименование:</strong> ООО «МАРКЕТШОП №1»</li>
-                <li><strong>ИНН:</strong> 6700002780</li>
+                <li><strong>Наименование:</strong> Индивидуальный предприниматель Чупин Антон Дмитриевич</li>
+                <li><strong>ИНН:</strong> 723013381128</li>
+                <li><strong>Расчётный счёт:</strong> 40802810120000608278</li>
+                <li><strong>Банк:</strong> ООО «Банк Точка»</li>
+                <li><strong>БИК:</strong> 044525104</li>
+                <li><strong>Корр. счёт:</strong> 30101810745374525104</li>
                 <li><strong>Email:</strong> info@wbgen.ru</li>
                 <li><strong>Сайт:</strong> wbgen.ru</li>
-              </ul>
-            </div>
-
-            <div className="p-4 rounded-xl bg-secondary/50">
-              <p className="font-medium mb-3 text-sm">Реквизиты платёжного агента:</p>
-              <ul className="list-none space-y-1 text-xs text-muted-foreground">
-                <li><strong>Наименование:</strong> ИП Левицкий Владислав Сергеевич</li>
-                <li><strong>УНП:</strong> 192485539</li>
               </ul>
             </div>
           </CardContent>

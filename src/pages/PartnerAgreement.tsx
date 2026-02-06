@@ -29,7 +29,7 @@ const PartnerAgreement = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-sm sm:text-base">
               <p className="text-muted-foreground leading-relaxed">
-                1.1. Настоящий текст является официальным предложением (публичной офертой) ОБЩЕСТВА С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ «МАРКЕТШОП №1» при использовании онлайн-сервиса WBGen, доступного в сети Интернет по адресу: https://wbgen.ru (далее — «Организатор»).
+                1.1. Настоящий текст является официальным предложением (публичной офертой) Индивидуального предпринимателя Чупина Антона Дмитриевича при использовании онлайн-сервиса WBGen, доступного в сети Интернет по адресу: https://wbgen.ru (далее — «Организатор»).
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 1.2. Каждая Сторона гарантирует другой Стороне, что обладает необходимой право- и дееспособностью, а равно всеми правами и полномочиями, необходимыми для заключения и исполнения Публичной оферты.
@@ -155,9 +155,12 @@ const PartnerAgreement = () => {
             <CardContent className="text-sm">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2 text-muted-foreground">
-                  <p><strong className="text-foreground">Наименование:</strong> ООО «МАРКЕТШОП №1»</p>
-                  <p><strong className="text-foreground">ИНН:</strong> 6700002780</p>
-                  <p><strong className="text-foreground">ОГРН:</strong> 1236700010678</p>
+                  <p><strong className="text-foreground">Наименование:</strong> ИП Чупин Антон Дмитриевич</p>
+                  <p><strong className="text-foreground">ИНН:</strong> 723013381128</p>
+                  <p><strong className="text-foreground">Расчётный счёт:</strong> 40802810120000608278</p>
+                  <p><strong className="text-foreground">Банк:</strong> ООО «Банк Точка»</p>
+                  <p><strong className="text-foreground">БИК:</strong> 044525104</p>
+                  <p><strong className="text-foreground">Корр. счёт:</strong> 30101810745374525104</p>
                 </div>
                 <div className="space-y-2 text-muted-foreground">
                   <p><strong className="text-foreground">Сайт:</strong> https://wbgen.ru</p>

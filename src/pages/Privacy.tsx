@@ -30,7 +30,7 @@ const Privacy = () => {
             <div>
               <h3 className="font-semibold mb-3">1. Общие положения</h3>
               <p className="mb-4 text-muted-foreground leading-relaxed">
-                1.1. Настоящая Политика конфиденциальности персональных данных (далее — «Политика») действует в отношении всей информации, которую сервис WB Генератор (wbgen.ru), принадлежащий ООО «МАРКЕТШОП №1», может получить о Пользователе во время использования сайта и сервисов.
+                1.1. Настоящая Политика конфиденциальности персональных данных (далее — «Политика») действует в отношении всей информации, которую сервис WB Генератор (wbgen.ru), принадлежащий ИП Чупину Антону Дмитриевичу, может получить о Пользователе во время использования сайта и сервисов.
               </p>
               <p className="mb-4 text-muted-foreground leading-relaxed">
                 1.2. Использование сервисов WB Генератор означает безоговорочное согласие Пользователя с настоящей Политикой и указанными в ней условиями обработки персональных данных.
@@ -94,9 +94,6 @@ const Privacy = () => {
                 <li>По требованию законодательства РФ</li>
                 <li>Для защиты прав и законных интересов Оператора</li>
               </ul>
-              <p className="mt-3 text-muted-foreground">
-                5.2. Приём платежей осуществляется ИП Левицкий Владислав Сергеевич (УНП 192485539) в качестве платёжного агента. Ему передаются только данные, необходимые для проведения платежа.
-              </p>
             </div>
 
             <div>
@@ -141,17 +138,14 @@ const Privacy = () => {
               <div className="p-4 rounded-xl bg-secondary/50">
                 <p className="font-medium mb-3 text-sm">Реквизиты Оператора:</p>
                 <ul className="list-none space-y-1 text-xs text-muted-foreground">
-                  <li><strong>Наименование:</strong> ООО «МАРКЕТШОП №1»</li>
-                  <li><strong>ИНН:</strong> 6700002780</li>
+                  <li><strong>Наименование:</strong> Индивидуальный предприниматель Чупин Антон Дмитриевич</li>
+                  <li><strong>ИНН:</strong> 723013381128</li>
+                  <li><strong>Расчётный счёт:</strong> 40802810120000608278</li>
+                  <li><strong>Банк:</strong> ООО «Банк Точка»</li>
+                  <li><strong>БИК:</strong> 044525104</li>
+                  <li><strong>Корр. счёт:</strong> 30101810745374525104</li>
                   <li><strong>Email:</strong> info@wbgen.ru</li>
                   <li><strong>Сайт:</strong> wbgen.ru</li>
-                </ul>
-              </div>
-              <div className="p-4 rounded-xl bg-secondary/50 mt-4">
-                <p className="font-medium mb-3 text-sm">Реквизиты платёжного агента:</p>
-                <ul className="list-none space-y-1 text-xs text-muted-foreground">
-                  <li><strong>Наименование:</strong> ИП Левицкий Владислав Сергеевич</li>
-                  <li><strong>УНП:</strong> 192485539</li>
                 </ul>
               </div>
             </div>

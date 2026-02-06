@@ -80,13 +80,10 @@ const Footer = () => {
         <div className="border-t border-border pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-2">
             <p className="text-sm text-muted-foreground">
-              © 2025 ООО "МАРКЕТШОП №1". Все права защищены.
+              © 2025 ИП Чупин Антон Дмитриевич. Все права защищены.
             </p>
             <p className="text-sm text-muted-foreground">
-              ИНН: 6700002780
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Приём платежей: ИП Левицкий В.С., УНП 192485539
+              ИНН: 723013381128
             </p>
           </div>
         </div>
