@@ -1382,7 +1382,7 @@ export const GenerateCards = ({
               </TooltipProvider>
             </CardTitle>
             <CardDescription>
-              Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения)
+              Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения, до 3 МБ каждое)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -1422,7 +1422,7 @@ export const GenerateCards = ({
               Референс
             </CardTitle>
             <CardDescription>
-              WB Генератор может взять за основу прикрепленный дизайн (не обязательно)
+              WB Генератор может взять за основу прикрепленный дизайн (не обязательно, до 3 МБ)
             </CardDescription>
           </CardHeader>
           <CardContent>
