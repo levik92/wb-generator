@@ -6,6 +6,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Calculate tokens to refund per card based on job cost
+function calcRefundTokensPerCard(job: any): number {
+  const tokensCost = Number(job?.tokens_cost ?? 1);
+  const totalCards = Number(job?.total_cards ?? 1);
+  if (!Number.isFinite(tokensCost) || tokensCost <= 0) return 1;
+  if (!Number.isFinite(totalCards) || totalCards <= 0) return Math.max(1, Math.round(tokensCost));
+  return Math.max(1, Math.round(tokensCost / totalCards));
+}
+
 // Cleanup stale generation jobs that are stuck in 'processing' status
 // This function should be called periodically via pg_cron (every 5 minutes)
 serve(async (req) => {
@@ -24,19 +33,41 @@ serve(async (req) => {
   console.log(`[cleanup-stale-jobs] Starting cleanup, threshold: ${staleThreshold}`);
 
   try {
-    // Find stale jobs
-    const { data: staleJobs, error: jobsError } = await supabase
+    // Find stale jobs - check both started_at AND created_at (for jobs that never got started_at)
+    // Using raw SQL via rpc would be cleaner, but we'll use multiple queries for safety
+    const { data: staleJobsByStarted, error: jobsError1 } = await supabase
       .from('generation_jobs')
-      .select('id, user_id, product_name, tokens_cost, started_at')
+      .select('id, user_id, product_name, tokens_cost, total_cards, started_at, created_at')
       .eq('status', 'processing')
       .lt('started_at', staleThreshold);
 
-    if (jobsError) {
-      console.error('[cleanup-stale-jobs] Error fetching stale jobs:', jobsError);
-      throw jobsError;
+    if (jobsError1) {
+      console.error('[cleanup-stale-jobs] Error fetching stale jobs by started_at:', jobsError1);
     }
 
-    if (!staleJobs || staleJobs.length === 0) {
+    // Also find jobs where started_at is NULL but created_at is old (orphaned jobs)
+    const { data: staleJobsByCreated, error: jobsError2 } = await supabase
+      .from('generation_jobs')
+      .select('id, user_id, product_name, tokens_cost, total_cards, started_at, created_at')
+      .eq('status', 'processing')
+      .is('started_at', null)
+      .lt('created_at', staleThreshold);
+
+    if (jobsError2) {
+      console.error('[cleanup-stale-jobs] Error fetching stale jobs by created_at:', jobsError2);
+    }
+
+    // Combine and deduplicate
+    const staleJobsMap = new Map();
+    for (const job of (staleJobsByStarted || [])) {
+      staleJobsMap.set(job.id, job);
+    }
+    for (const job of (staleJobsByCreated || [])) {
+      staleJobsMap.set(job.id, job);
+    }
+    const staleJobs = Array.from(staleJobsMap.values());
+
+    if (staleJobs.length === 0) {
       console.log('[cleanup-stale-jobs] No stale jobs found');
       return new Response(
         JSON.stringify({ message: 'No stale jobs found', cleaned: 0 }),
@@ -86,9 +117,11 @@ serve(async (req) => {
             .eq('job_id', job.id)
             .not('status', 'in', '("completed","failed")');
 
-          // Refund tokens for incomplete tasks
-          const tokensToRefund = incompleteCount;
-          console.log(`[cleanup-stale-jobs] Refunding ${tokensToRefund} tokens to user ${job.user_id}`);
+          // Calculate proper token refund based on job cost per card
+          const tokensPerCard = calcRefundTokensPerCard(job);
+          const tokensToRefund = incompleteCount * tokensPerCard;
+          
+          console.log(`[cleanup-stale-jobs] Refunding ${tokensToRefund} tokens (${incompleteCount} cards × ${tokensPerCard} tokens) to user ${job.user_id}`);
           
           await supabase.rpc('refund_tokens', {
             user_id_param: job.user_id,
@@ -102,8 +135,9 @@ serve(async (req) => {
         // Determine final job status
         const hasCompleted = (completedCount || 0) > 0;
         const finalStatus = hasCompleted ? 'completed' : 'failed';
+        const totalCards = (completedCount || 0) + incompleteCount;
         const errorMessage = incompleteCount > 0 
-          ? `Не удалось сгенерировать ${incompleteCount} из ${(completedCount || 0) + incompleteCount} карточек (таймаут)`
+          ? `Не удалось сгенерировать ${incompleteCount} из ${totalCards} карточек (таймаут)`
           : null;
 
         // Update job status
@@ -118,9 +152,9 @@ serve(async (req) => {
 
         // Send notification to user
         const notificationMessage = hasCompleted && incompleteCount > 0
-          ? `Генерация "${job.product_name}" частично завершена: ${completedCount} из ${(completedCount || 0) + incompleteCount} карточек. Токены за незавершённые карточки возвращены.`
+          ? `Генерация "${job.product_name}" частично завершена: ${completedCount} из ${totalCards} карточек. Токены за незавершённые карточки возвращены.`
           : incompleteCount > 0
-            ? `Генерация "${job.product_name}" не удалась (таймаут сервиса). ${incompleteCount} токенов возвращено на баланс.`
+            ? `Генерация "${job.product_name}" не удалась (таймаут сервиса). Токены возвращены на баланс.`
             : `Генерация "${job.product_name}" завершена.`;
 
         await supabase.from('notifications').insert({
@@ -131,7 +165,7 @@ serve(async (req) => {
         });
 
         totalCleaned++;
-        console.log(`[cleanup-stale-jobs] Cleaned job ${job.id}, refunded ${incompleteCount} tokens`);
+        console.log(`[cleanup-stale-jobs] Cleaned job ${job.id}, refunded ${incompleteCount > 0 ? incompleteCount * calcRefundTokensPerCard(job) : 0} tokens`);
 
       } catch (jobError) {
         console.error(`[cleanup-stale-jobs] Error processing job ${job.id}:`, jobError);
