@@ -397,7 +397,10 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           message: `Не удалось сгенерировать карточку "${task.job.product_name}". ${failMessage} Токены возвращены на баланс.`
         });
 
-        throw new Error(failMessage);
+        return new Response(
+          JSON.stringify({ success: false, handled: true, error: failMessage }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       // Handle bad request
@@ -420,7 +423,10 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           reason_text: 'Возврат за ошибку запроса к API'
         });
 
-        throw new Error(`Bad request: ${errorText}`);
+        return new Response(
+          JSON.stringify({ success: false, handled: true, error: `Bad request: ${errorText}` }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
 
       // Handle all other errors - also refund tokens
@@ -441,7 +447,10 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         reason_text: `Возврат за ошибку API: ${status}`
       });
 
-      throw new Error(`Google Gemini API error: ${errorText}`);
+      return new Response(
+        JSON.stringify({ success: false, handled: true, error: `Google Gemini API error: ${errorText}` }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Success - extract image
@@ -493,7 +502,10 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         message: `Не удалось сгенерировать карточку "${task.job.product_name}". ${failMessage} Токены возвращены на баланс.`
       });
       
-      throw new Error(failMessage);
+      return new Response(
+        JSON.stringify({ success: false, handled: true, error: failMessage }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Convert base64 to blob for storage
@@ -529,7 +541,10 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         reason_text: 'Возврат за ошибку загрузки изображения'
       });
       
-      throw new Error('Failed to upload generated image');
+      return new Response(
+        JSON.stringify({ success: false, handled: true, error: 'Failed to upload generated image' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Get public URL
@@ -556,7 +571,10 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         reason_text: 'Возврат за ошибку получения URL изображения'
       });
       
-      throw new Error('Failed to get public URL');
+      return new Response(
+        JSON.stringify({ success: false, handled: true, error: 'Failed to get public URL' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Update task as completed

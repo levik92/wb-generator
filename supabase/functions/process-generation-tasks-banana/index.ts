@@ -351,7 +351,7 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     }
 
     // Call Google task processor
-    const { error: processError } = await supabase.functions.invoke('process-google-task', {
+    const result = await supabase.functions.invoke('process-google-task', {
       body: {
         taskId: task.id,
         sourceImageUrl: sourceImageUrl,
@@ -359,8 +359,14 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       },
     });
 
-    if (processError) {
-      throw processError;
+    // Check if error was already handled by process-google-task
+    if (result.data?.handled === true) {
+      console.log(`Task ${task.id} error already handled by process-google-task: ${result.data?.error}`);
+      return;
+    }
+
+    if (result.error) {
+      throw result.error;
     }
 
     // After invoke, read actual task status from DB
@@ -377,6 +383,9 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
   } catch (error) {
     console.error(`Error processing task ${task.id}:`, error);
 
+    // Wait for DB to sync before reading task state
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Read current task state from DB (to get accurate status and retry_count)
     const { data: currentTask } = await supabase
       .from('generation_tasks')
@@ -391,6 +400,15 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     // If task is already in final state (completed or failed), skip - process-google-task already handled it
     if (currentStatus === 'completed' || currentStatus === 'failed') {
       console.log(`Task ${task.id} already in final state: ${currentStatus} (handled by process-google-task)`);
+      return;
+    }
+    
+    // Non-retryable errors - retry won't help, stop immediately
+    const NON_RETRYABLE = ['google_400', 'no_image_generated', 'IMAGE_SAFETY', 
+                            'upload_failed', 'MALFORMED_FUNCTION_CALL', 'too_large',
+                            'url_generation_failed'];
+    if (NON_RETRYABLE.some(e => currentLastError.includes(e))) {
+      console.log(`Task ${task.id} has non-retryable error: ${currentLastError}, skipping retry`);
       return;
     }
     
