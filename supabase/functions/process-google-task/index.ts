@@ -14,7 +14,7 @@ const FALLBACK_DELAY_MS = 2000;
 const FINAL_RETRY_DELAY_MS = 10000;
 
 const IMAGE_FETCH_TIMEOUT_MS = 60_000;
-const MAX_IMAGE_BYTES = 8_000_000; // ~8MB
+const MAX_IMAGE_BYTES = 5_000_000; // ~5MB
 
 function calcRefundTokensForTask(job: any): number {
   const tokensCost = Number(job?.tokens_cost ?? 1);
@@ -84,6 +84,7 @@ async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
     }
 
     const base64 = base64Encode(merged);
+    chunks.length = 0; // Free memory
     return { ok: true, base64, bytes: received, mimeType };
   } catch (e) {
     const msg = (e as any)?.name === 'AbortError' ? 'timeout' : ((e as any)?.message || 'unknown');
