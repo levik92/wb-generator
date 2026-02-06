@@ -180,7 +180,7 @@ serve(async (req) => {
           {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${btoa(`1150875:${yookassaSecretKey}`)}`,
+              'Authorization': `Basic ${btoa(`1267489:${yookassaSecretKey}`)}`,
               'Content-Type': 'application/json',
               'Idempotence-Key': idempotenceKey,
               'Connection': 'close', // Force connection close to avoid TLS issues
