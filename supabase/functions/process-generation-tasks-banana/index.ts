@@ -72,7 +72,23 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get job details
+    // IMMEDIATELY mark job as processing with started_at - this ensures cleanup can find it
+    // Do this BEFORE fetching job details to minimize the window where job could be orphaned
+    const { error: updateError } = await supabase
+      .from('generation_jobs')
+      .update({
+        status: 'processing',
+        started_at: new Date().toISOString(),
+      })
+      .eq('id', jobId)
+      .eq('status', 'pending'); // Only update if still pending (prevents race conditions)
+
+    if (updateError) {
+      console.error('Failed to mark job as processing:', updateError);
+      // Continue anyway - the job might already be processing from another invocation
+    }
+
+    // Get job details (now with started_at set)
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
       .select('*')
@@ -83,14 +99,14 @@ serve(async (req) => {
       throw new Error('Job not found');
     }
 
-    // Mark job as processing
-    await supabase
-      .from('generation_jobs')
-      .update({
-        status: 'processing',
-        started_at: new Date().toISOString(),
-      })
-      .eq('id', jobId);
+    // Verify job is in processing state (it should be after our update above)
+    if (job.status !== 'processing') {
+      console.log(`Job ${jobId} is in state ${job.status}, not processing. Skipping.`);
+      return new Response(
+        JSON.stringify({ message: 'Job already processed or in unexpected state', status: job.status }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Start background processing (keep alive with waitUntil to avoid random aborts)
     const bg = processTasks(supabase, jobId, job, MAX_CONCURRENT_TASKS, MAX_RETRIES, MAX_PROCESSING_TIME)
