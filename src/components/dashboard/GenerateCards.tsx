@@ -1422,7 +1422,7 @@ export const GenerateCards = ({
               Референс
             </CardTitle>
             <CardDescription>
-              WB Генератор может взять за основу прикрепленный дизайн (не обязательно, до 3 МБ)
+              WBGen может взять за основу прикрепленный дизайн (не обязательно, до 3 МБ)
             </CardDescription>
           </CardHeader>
           <CardContent>
