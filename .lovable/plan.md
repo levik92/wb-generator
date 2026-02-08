@@ -1,114 +1,89 @@
 
 
-# Исправление ошибок генерации: двойные retry и "Failed to fetch"
+# Диагностика и исправление работы Telegram Mini App
 
-## Что происходит сейчас
+## Обнаруженные проблемы
 
-На скриншотах видны две ошибки:
-- "Ошибка загрузки изображения: Failed to fetch" (десктоп, 21:25)
-- "Генерация не удалась" (мобильный, 13:20)
+После анализа кодовой базы и документации Telegram Mini Apps выявлены **4 ключевых проблемы**, из-за которых генерация может не работать внутри Telegram:
 
-Анализ базы данных за последние 7 дней показывает:
+### 1. localStorage может быть недоступен или очищаться в WebView
+Supabase клиент настроен с `storage: localStorage` для хранения авторизации. В Telegram WebView localStorage может:
+- Очищаться при закрытии Mini App
+- Быть недоступным в некоторых версиях Android
+- Терять сессию между открытиями приложения
 
-| Тип ошибки | Количество |
-|------------|-----------|
-| Edge Function non-2xx (бессмысленные retry) | 36 |
-| timeout_cleanup (зависшие задания - уже починено) | 30 |
-| "Ошибка при обработке задачи" (финал бессмысленных retry) | 24 |
-| google_400_bad_request | 16 |
-| IMAGE_SAFETY (фильтр безопасности) | 3 |
-| upload_failed / MALFORMED_FUNCTION_CALL | 2 |
+Это означает, что пользователь может быть разлогинен при каждом открытии Mini App, и генерация не будет работать без авторизации.
 
-Один пользователь (user_id: 09121bcb) пытался сгенерировать "Металлическая машинка" **8 раз подряд** -- и каждый раз получал ошибку с 3 бесполезными retry. Скорее всего, Google API отклоняет его изображение (ошибка 400), но из-за бага система делает 3 повторные попытки вместо мгновенного отказа.
+### 2. Загрузка файлов через `<input type="file">` может не работать в WebView
+На некоторых Android-устройствах (особенно Pixel с Android 14+) `<input type="file">` не вызывает диалог выбора файлов или камеры. Это известная проблема Telegram WebView.
 
-## Корневая причина
+### 3. Скачивание файлов через `document.createElement('a').click()` не работает в WebView
+Функции `downloadSingle` и `downloadAll` создают элемент `<a>` с атрибутом `download` и вызывают `click()`. В Telegram WebView этот метод скачивания **не поддерживается** -- файлы просто не скачиваются.
 
-Конфликт между двумя edge-функциями:
+### 4. `window.URL.createObjectURL` и Blob-операции могут быть ограничены
+ZIP-генерация через JSZip и Blob URL могут работать некорректно в ограниченном WebView.
 
-1. `process-google-task` получает ошибку от Google API
-2. Он помечает задачу как `failed` в БД, возвращает токены
-3. Но затем делает `throw new Error(...)`, что возвращает HTTP 500
-4. `process-generation-tasks-banana` (оркестратор) видит HTTP 500
-5. Из-за гонки состояний он может не увидеть, что задача уже `failed`
-6. Оркестратор делает 3 retry -- бессмысленно, тратя время пользователя (~1 минута)
-7. После 3 retry записывает "Ошибка при обработке задачи" -- и может сделать двойной возврат токенов
+---
 
-## Что будет исправлено
+## План исправлений
 
-### 1. `process-google-task/index.ts` -- не бросать исключение после обработки ошибки
+### Шаг 1: Определение среды Telegram Mini App
+Создать утилиту `src/lib/telegram.ts` для определения, работает ли приложение внутри Telegram WebView. Telegram добавляет `window.Telegram.WebApp` объект в свои Mini Apps.
 
-Во всех 6 местах, где ошибка уже обработана (задача помечена failed, токены возвращены), заменить `throw new Error(...)` на `return new Response(JSON.stringify({ success: false, handled: true }), { status: 200 })`.
+### Шаг 2: Исправить хранение сессии Supabase
+В `src/integrations/supabase/client.ts` добавить проверку доступности localStorage с fallback на memoryStorage. Это предотвратит потерю сессии и ошибки.
 
-Это затрагивает обработчики:
-- Google API 429/403/503 (строка ~400)
-- Google API 400 (строка ~423)
-- Общая ошибка API (строка ~444)
-- Пустой ответ AI / IMAGE_SAFETY (строка ~496)
-- Ошибка загрузки в Storage (строка ~532)
-- Ошибка получения URL (строка ~559)
+### Шаг 3: Добавить альтернативу для скачивания в Telegram
+Для `downloadSingle` и `downloadAll` -- при обнаружении Telegram WebView открывать изображение/ссылку через `window.open()` вместо программного скачивания через `<a download>`, так как Telegram WebView может перехватить открытие ссылки и предложить скачать.
 
-### 2. `process-generation-tasks-banana/index.ts` -- умная обработка ответа
+### Шаг 4: Обработка проблем с загрузкой файлов
+Добавить пользовательское уведомление, если `<input type="file">` не сработал в Telegram, с предложением открыть приложение в браузере.
 
-В функции `processTask`:
-- После вызова `process-google-task`, проверять `result.data?.handled` -- если true, не делать retry
-- В блоке catch добавить задержку 500мс и перечитать статус задачи из БД перед retry
-- Добавить список нерешаемых ошибок (google_400, IMAGE_SAFETY, upload_failed, no_image_generated, MALFORMED_FUNCTION_CALL) -- не делать retry для них
+### Шаг 5: Viewport и стили для Telegram WebView
+Telegram Mini Apps имеют собственные инсеты (safe area). Добавить CSS-переменные Telegram для корректного отображения.
 
-## Ожидаемый результат
-
-- Устранение ~60 ложных ошибок в неделю
-- Мгновенный отказ вместо ~1 минуты ожидания при нерешаемых ошибках
-- Исключение риска двойного возврата токенов
-- Пользователи быстрее получают понятное сообщение об ошибке
+---
 
 ## Технические детали
 
-### Файл: `supabase/functions/process-google-task/index.ts`
+### Файл: `src/lib/telegram.ts` (новый)
+```typescript
+export const isTelegramWebApp = (): boolean => {
+  return !!(window as any).Telegram?.WebApp;
+};
 
-В 6 местах заменяем паттерн:
-
-```text
-// БЫЛО (после пометки задачи failed и возврата токенов):
-throw new Error(failMessage);
-
-// СТАЛО:
-return new Response(
-  JSON.stringify({ success: false, handled: true, error: failMessage }),
-  { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-);
+export const getTelegramWebApp = () => {
+  return (window as any).Telegram?.WebApp;
+};
 ```
 
-### Файл: `supabase/functions/process-generation-tasks-banana/index.ts`
-
-В функции `processTask` (строки 326-475):
-
-1. После вызова `supabase.functions.invoke(...)` -- проверяем `handled`:
-
-```text
-const result = await supabase.functions.invoke('process-google-task', { body: {...} });
-if (result.data?.handled === true) {
-  console.log(`Task ${task.id} error already handled by processor`);
-  return; // Не retry
-}
-if (result.error) throw result.error;
+### Файл: `src/integrations/supabase/client.ts` (изменение)
+Добавить безопасный storage wrapper:
+```typescript
+const safeStorage = (() => {
+  try {
+    localStorage.setItem('__test__', '1');
+    localStorage.removeItem('__test__');
+    return localStorage;
+  } catch {
+    // Fallback to in-memory storage for Telegram WebView
+    const store: Record<string, string> = {};
+    return {
+      getItem: (key: string) => store[key] ?? null,
+      setItem: (key: string, value: string) => { store[key] = value; },
+      removeItem: (key: string) => { delete store[key]; },
+    };
+  }
+})();
 ```
 
-2. В блоке catch добавляем проверку нерешаемых ошибок:
+### Файл: `src/components/dashboard/GenerateCards.tsx` (изменение)
+В функциях `downloadSingle` и `downloadAll` -- добавить проверку `isTelegramWebApp()` и использовать `window.open(image.url, '_blank')` для прямого открытия изображения вместо blob-скачивания.
 
-```text
-// Задержка 500мс для синхронизации БД
-await new Promise(resolve => setTimeout(resolve, 500));
-
-// Перечитываем статус задачи
-const { data: currentTask } = await supabase
-  .from('generation_tasks').select('status, last_error').eq('id', task.id).single();
-
-// Если уже обработано -- выходим
-if (currentTask?.status === 'completed' || currentTask?.status === 'failed') return;
-
-// Список ошибок, при которых retry бесполезен
-const NON_RETRYABLE = ['google_400', 'no_image_generated', 'IMAGE_SAFETY', 
-                        'upload_failed', 'MALFORMED_FUNCTION_CALL', 'too_large'];
-if (NON_RETRYABLE.some(e => currentTask?.last_error?.includes(e))) return;
+### Файл: `index.html` (изменение)
+Добавить скрипт Telegram Web App SDK:
+```html
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 ```
+Это необходимо для корректной работы Mini App и определения среды.
 
