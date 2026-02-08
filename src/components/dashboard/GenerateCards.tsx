@@ -1690,13 +1690,10 @@ export const GenerateCards = ({
                     </div>
                     
                     <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="sm" variant="outline" onClick={e => {
+                      <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         openEditDialog(image, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
                               {editingCards.has(`edit_${image.id}_${index}`) ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
                                   <span className="md:hidden ml-1">Редактируется...</span>
@@ -1704,21 +1701,12 @@ export const GenerateCards = ({
                                   <Edit className="w-3 h-3 md:w-4 md:h-4" />
                                   <span className="md:hidden ml-1">Редактировать</span>
                                 </>}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="hidden md:block">
-                            <p>Редактировать карточку</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      </Button>
                       
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="sm" variant="outline" onClick={e => {
+                      <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                      }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Перегенерировать карточку">
                               {isRegenerating ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
                                   <span className="md:hidden ml-1">Перегенерация...</span>
@@ -1726,30 +1714,15 @@ export const GenerateCards = ({
                                   <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
                                   <span className="md:hidden ml-1">Перегенерировать</span>
                                 </>}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="hidden md:block">
-                            <p>Перегенерировать карточку</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      </Button>
                       
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="sm" variant="outline" onClick={async e => {
+                      <Button size="sm" variant="outline" onClick={async e => {
                         e.stopPropagation();
                         await downloadSingle(index);
-                      }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3">
+                      }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Скачать изображение">
                               <Download className="w-3 h-3 md:w-4 md:h-4" />
                               <span className="md:hidden ml-1">Скачать</span>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className="hidden md:block">
-                            <p>Скачать изображение</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      </Button>
                     </div>
                   </div>;
           })}
