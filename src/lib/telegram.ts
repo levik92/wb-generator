@@ -5,7 +5,12 @@
  */
 
 export const isTelegramWebApp = (): boolean => {
-  return !!(window as any).Telegram?.WebApp;
+  const tg = (window as any).Telegram?.WebApp;
+  // The SDK script creates window.Telegram.WebApp even in regular browsers.
+  // To distinguish real TMA usage, check for initData or platform which are
+  // only populated when launched from Telegram.
+  if (!tg) return false;
+  return !!(tg.initData || tg.initDataUnsafe?.user || tg.platform === 'android' || tg.platform === 'ios' || tg.platform === 'android_x');
 };
 
 export const getTelegramWebApp = () => {
@@ -18,10 +23,8 @@ export const getTelegramWebApp = () => {
  */
 export const telegramSafeDownload = (url: string, filename?: string): void => {
   if (isTelegramWebApp()) {
-    // In Telegram WebView, window.open triggers the built-in browser/download
     window.open(url, '_blank');
   } else {
-    // Standard browser download via blob
     const link = document.createElement('a');
     link.href = url;
     if (filename) link.download = filename;
