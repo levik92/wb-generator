@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { isTelegramWebApp } from "@/lib/telegram";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -335,6 +336,16 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
 
   const downloadCard = async (imageUrl: string, cardType: string) => {
     try {
+      // In Telegram WebView, open image directly
+      if (isTelegramWebApp()) {
+        window.open(imageUrl, '_blank');
+        toast({
+          title: "Изображение открыто",
+          description: `Сохраните "${cardType}" из открывшегося окна`,
+        });
+        return;
+      }
+
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

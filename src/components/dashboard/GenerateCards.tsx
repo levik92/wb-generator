@@ -18,6 +18,7 @@ import { CasesPromoBlock } from "./CasesPromoBlock";
 import { CasesPromoBanner } from "./CasesPromoBanner";
 import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
+import { isTelegramWebApp } from "@/lib/telegram";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -750,6 +751,21 @@ export const GenerateCards = ({
     if (downloadingAll || generatedImages.length === 0) return;
     setDownloadingAll(true);
     try {
+      // In Telegram WebView, open each image in a new tab instead of ZIP
+      if (isTelegramWebApp()) {
+        for (const image of generatedImages) {
+          if (image.url) {
+            window.open(image.url, '_blank');
+          }
+        }
+        toast({
+          title: "Изображения открыты",
+          description: `${generatedImages.length} изображений открыто — сохраните их вручную`
+        });
+        setDownloadingAll(false);
+        return;
+      }
+
       const zip = new JSZip();
       const safeProductName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       toast({
@@ -805,22 +821,29 @@ export const GenerateCards = ({
     const image = generatedImages[index];
     if (!image) return;
     try {
-      // Fetch the image as blob to ensure proper download
+      // In Telegram WebView, open image directly instead of blob download
+      if (isTelegramWebApp()) {
+        window.open(image.url, '_blank');
+        toast({
+          title: "Изображение открыто",
+          description: `Сохраните "${image.stage}" из открывшегося окна`
+        });
+        return;
+      }
+
+      // Standard browser: fetch as blob for proper download
       const response = await fetch(image.url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       const safeProductName = productName.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-      // Use original Russian stage name, only replace problematic characters for file system
       const safeStageName = image.stage.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       link.download = `${safeProductName}_${safeStageName}.png`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // Clean up the blob URL
       window.URL.revokeObjectURL(url);
       toast({
         title: "Скачивание началось",
