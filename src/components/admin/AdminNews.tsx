@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,6 +49,7 @@ export const AdminNews = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
+  const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -175,6 +176,8 @@ export const AdminNews = () => {
   };
 
   const publishNews = async (newsId: string, isPublished: boolean) => {
+    if (publishingIds.has(newsId)) return;
+    setPublishingIds(prev => new Set(prev).add(newsId));
     try {
       const { error } = await (supabase as any)
         .from('news')
@@ -186,7 +189,6 @@ export const AdminNews = () => {
 
       if (error) throw error;
 
-      // If publishing, also send to Telegram
       if (isPublished) {
         const newsItem = news.find(n => n.id === newsId);
         if (newsItem) {
@@ -212,6 +214,8 @@ export const AdminNews = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setPublishingIds(prev => { const s = new Set(prev); s.delete(newsId); return s; });
     }
   };
 
@@ -415,11 +419,12 @@ export const AdminNews = () => {
                       variant={item.is_published ? "outline" : "default"}
                       size="sm"
                       onClick={() => publishNews(item.id, !item.is_published)}
+                      disabled={publishingIds.has(item.id)}
                       className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2 ${!item.is_published ? "bg-green-600 hover:bg-green-700" : ""}`}
                     >
-                      {item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
+                      {publishingIds.has(item.id) ? <Loader2 className="w-3 h-3 lg:w-4 lg:h-4 animate-spin" /> : item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
                       <span className="hidden lg:inline ml-2">
-                        {item.is_published ? "Скрыть" : "Опубликовать"}
+                        {publishingIds.has(item.id) ? "Ждите..." : item.is_published ? "Скрыть" : "Опубликовать"}
                       </span>
                     </Button>
                     <AlertDialog>
