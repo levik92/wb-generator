@@ -405,8 +405,8 @@ export const History = ({
         duration: 0.4,
         delay: 0.1 + index * 0.05
       }} className="group rounded-2xl border border-border/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all bg-card">
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col gap-3 min-w-0 overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 min-w-0">
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
                     {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
@@ -464,13 +464,15 @@ export const History = ({
                     )}
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
                       {downloadingIds.has(generation.id) ? <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
                         </> : (generation.output_data?.images?.length || 0) > 1 ? <>
-                          <Archive className="w-4 h-4 mr-2" />
-                          Скачать ZIP ({generation.output_data.images.length})
+                          <Archive className="w-4 h-4 sm:mr-2" />
+                          <span className="hidden sm:inline">Скачать ZIP ({generation.output_data.images.length})</span>
+                          <span className="sm:hidden">ZIP ({generation.output_data.images.length})</span>
                         </> : <>
-                          <Download className="w-4 h-4 mr-2" />
-                          Скачать
+                          <Download className="w-4 h-4 sm:mr-2" />
+                          <span className="hidden sm:inline">Скачать</span>
+                          <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
                     <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
@@ -481,7 +483,7 @@ export const History = ({
 
                 {/* Expanded images grid */}
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-3 border-t border-border/30">
+                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
                       <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border border-border/50 aspect-[3/4]">
                         <img 
