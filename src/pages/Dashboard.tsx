@@ -290,7 +290,7 @@ const Dashboard = () => {
       case 'labels':
         return <LabelGenerator />;
       case 'history':
-        return <History profile={profile} shouldRefresh={shouldRefreshHistory} onRefreshComplete={handleHistoryRefreshComplete} />;
+        return <History profile={profile} shouldRefresh={shouldRefreshHistory} onRefreshComplete={handleHistoryRefreshComplete} onTokensUpdate={refreshProfile} />;
       case 'pricing':
         return <Balance />;
       case 'bonuses':

@@ -6,9 +6,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog as EditDialog, DialogContent as EditDialogContent, DialogHeader as EditDialogHeader, DialogTitle as EditDialogTitle, DialogDescription as EditDialogDescription, DialogFooter as EditDialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
+import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
 interface Generation {
   id: string;
@@ -32,11 +36,13 @@ interface HistoryProps {
   profile: Profile;
   shouldRefresh?: boolean;
   onRefreshComplete?: () => void;
+  onTokensUpdate?: () => void;
 }
 export const History = ({
   profile,
   shouldRefresh,
-  onRefreshComplete
+  onRefreshComplete,
+  onTokensUpdate
 }: HistoryProps) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +53,12 @@ export const History = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editInstructions, setEditInstructions] = useState("");
+  const [editingImageData, setEditingImageData] = useState<{ imageUrl: string; productName: string; cardType: string; cardIndex: number } | null>(null);
+  const [editingInProgress, setEditingInProgress] = useState<Set<string>>(new Set());
+  const { data: activeModel } = useActiveAiModel();
+  const { price: editPrice } = useGenerationPrice('photo_edit');
   const {
     toast
   } = useToast();
@@ -256,6 +268,45 @@ export const History = ({
     setPreviewImage(imageUrl);
     setPreviewOpen(true);
   };
+
+  const openHistoryEditDialog = (imageUrl: string, productName: string, cardType: string, cardIndex: number) => {
+    setEditingImageData({ imageUrl, productName, cardType, cardIndex });
+    setEditInstructions("");
+    setEditDialogOpen(true);
+  };
+
+  const editHistoryCard = async () => {
+    if (!editingImageData || !editInstructions.trim()) return;
+    const editKey = editingImageData.imageUrl;
+    setEditingInProgress(prev => new Set(prev).add(editKey));
+    setEditDialogOpen(false);
+    try {
+      const model = activeModel || 'openai';
+      const editFunction = getImageEdgeFunctionName('edit-card', model);
+      const { data, error } = await supabase.functions.invoke(editFunction, {
+        body: {
+          productName: editingImageData.productName,
+          userId: profile.id,
+          cardIndex: editingImageData.cardIndex,
+          cardType: editingImageData.cardType,
+          sourceImageUrl: editingImageData.imageUrl,
+          editInstructions: editInstructions
+        }
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: "Редактирование запущено", description: "Результат появится в истории через несколько минут" });
+        onTokensUpdate?.();
+      } else {
+        throw new Error(data?.error || 'Ошибка');
+      }
+    } catch (error: any) {
+      toast({ title: "Ошибка редактирования", description: error.message, variant: "destructive" });
+    } finally {
+      setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
+    }
+  };
+
   const deleteGeneration = async (generationId: string) => {
     try {
       const {
@@ -321,6 +372,31 @@ export const History = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Dialog */}
+      <EditDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <EditDialogContent className="sm:max-w-md">
+          <EditDialogHeader>
+            <EditDialogTitle>Редактировать карточку</EditDialogTitle>
+            <EditDialogDescription>
+              Опишите, что нужно изменить. Стоимость: {editPrice} токенов
+            </EditDialogDescription>
+          </EditDialogHeader>
+          <Textarea
+            placeholder="Например: сделай фон белым, добавь тень, измени ракурс..."
+            value={editInstructions}
+            onChange={e => setEditInstructions(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <EditDialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Отмена</Button>
+            <Button onClick={editHistoryCard} disabled={!editInstructions.trim()}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Редактировать
+            </Button>
+          </EditDialogFooter>
+        </EditDialogContent>
+      </EditDialog>
 
       {/* Header */}
       <motion.div initial={{
@@ -501,6 +577,23 @@ export const History = ({
                             onClick={(e) => { e.stopPropagation(); openImagePreview(img.image_url); }}
                           >
                             <ZoomIn className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-white hover:bg-white/20"
+                            disabled={editingInProgress.has(img.image_url)}
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              openHistoryEditDialog(
+                                img.image_url, 
+                                generation.input_data?.productName || 'Товар', 
+                                img.type || `card_${imgIndex}`, 
+                                imgIndex
+                              );
+                            }}
+                          >
+                            {editingInProgress.has(img.image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
                           </Button>
                           <Button 
                             size="icon" 
