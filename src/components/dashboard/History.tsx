@@ -406,7 +406,7 @@ export const History = ({
         delay: 0.1 + index * 0.05
       }} className="group rounded-2xl border border-border/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all bg-card">
               <div className="flex flex-col gap-3 min-w-0 overflow-hidden">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 min-w-0">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 min-w-0">
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
                     {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
