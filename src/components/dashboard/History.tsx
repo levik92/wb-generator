@@ -6,8 +6,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
 interface Generation {
   id: string;
   generation_type: string;
@@ -44,6 +45,7 @@ export const History = ({
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const {
     toast
   } = useToast();
@@ -114,23 +116,35 @@ export const History = ({
             return;
           }
           
-          // Download images directly without archiving
-          for (let i = 0; i < images.length; i++) {
-            const image = images[i];
-            if (image.image_url) {
-              const response = await fetch(image.image_url);
-              const blob = await response.blob();
-              const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-              const fileName = `${safeProductName}_${safeStageName}.png`;
-              
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(url);
+          if (isTelegramWebApp()) {
+            // In Telegram, open each image in new tab
+            for (const image of images) {
+              if (image.image_url) {
+                telegramSafeDownload(image.image_url, `${safeProductName}.png`);
+              }
+            }
+          } else {
+            // Download images with delay to prevent browser blocking
+            for (let i = 0; i < images.length; i++) {
+              const image = images[i];
+              if (image.image_url) {
+                if (i > 0) {
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                const response = await fetch(image.image_url);
+                const blob = await response.blob();
+                const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+                const fileName = `${safeProductName}_${safeStageName}.png`;
+                
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+              }
             }
           }
         } else {
@@ -155,9 +169,12 @@ export const History = ({
         window.URL.revokeObjectURL(url);
       }
       
+      const imagesCount = generation.output_data?.images?.length || 0;
       toast({
         title: "Скачивание завершено",
-        description: generation.generation_type === 'cards' ? "Изображения скачаны" : "Описание скачано"
+        description: generation.generation_type === 'cards' 
+          ? `Скачано ${imagesCount} ${imagesCount === 1 ? 'изображение' : 'изображений'}` 
+          : "Описание скачано"
       });
     } catch (error) {
       toast({
@@ -172,6 +189,36 @@ export const History = ({
         return newSet;
       });
     }
+  };
+
+  const downloadSingleImage = async (imageUrl: string, fileName: string) => {
+    if (isTelegramWebApp()) {
+      telegramSafeDownload(imageUrl, fileName);
+      return;
+    }
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast({ title: "Ошибка скачивания", variant: "destructive" });
+    }
+  };
+
+  const toggleExpanded = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const openImagePreview = (imageUrl: string) => {
@@ -327,70 +374,118 @@ export const History = ({
         duration: 0.4,
         delay: 0.1 + index * 0.05
       }} className="group rounded-2xl border border-border/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all bg-card">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                {/* Content */}
-                <div className="flex items-start gap-4 flex-1 min-w-0">
-                  {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
-                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden ring-2 ring-border/50 group-hover:ring-primary/30 transition-all cursor-pointer relative group/preview"
-                      onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
-                    >
-                      <img src={generation.output_data.images[0].image_url} alt="Превью" className="w-full h-full object-cover" onError={e => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }} />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                        <ZoomIn className="w-5 h-5 text-white" />
-                      </div>
-                    </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
-                      {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
-                    </div>}
-                  
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <h3 className="font-semibold">
-                        {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
-                      </h3>
-                      <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                        {generation.status === 'completed' ? 'Готово' : 'В процессе'}
-                      </Badge>
-                    </div>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  {/* Content */}
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                    {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden ring-2 ring-border/50 group-hover:ring-primary/30 transition-all cursor-pointer relative group/preview"
+                        onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
+                      >
+                        <img src={generation.output_data.images[0].image_url} alt="Превью" className="w-full h-full object-cover" onError={e => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }} />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                          <ZoomIn className="w-5 h-5 text-white" />
+                        </div>
+                      </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
+                        {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
+                      </div>}
                     
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(generation.created_at)}
-                      </span>
-                      <span>{generation.tokens_used} токенов</span>
-                      {generation.input_data?.productName && <span className="truncate max-w-[200px]">• {generation.input_data.productName}</span>}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h3 className="font-semibold">
+                          {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
+                        </h3>
+                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                          {generation.status === 'completed' ? 'Готово' : 'В процессе'}
+                        </Badge>
+                        {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) > 1 && (
+                          <Badge variant="outline" className="text-xs">
+                            {generation.output_data.images.length} изобр.
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(generation.created_at)}
+                        </span>
+                        <span>{generation.tokens_used} токенов</span>
+                        {generation.input_data?.productName && <span className="truncate max-w-[200px]">• {generation.input_data.productName}</span>}
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* Actions */}
-                <div className="flex gap-2 flex-shrink-0">
-                  {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url && (
-                    <Button 
-                      onClick={() => openImagePreview(generation.output_data.images[0].image_url)} 
-                      size="sm" 
-                      variant="outline"
-                      className="hidden sm:flex"
-                    >
-                      <ZoomIn className="w-4 h-4 mr-2" />
-                      Смотреть
+                  
+                  {/* Actions */}
+                  <div className="flex gap-2 flex-shrink-0">
+                    {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) > 1 && (
+                      <Button 
+                        onClick={() => toggleExpanded(generation.id)} 
+                        size="sm" 
+                        variant="outline"
+                      >
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
+                        {expandedIds.has(generation.id) ? 'Свернуть' : 'Все фото'}
+                      </Button>
+                    )}
+                    <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
+                      {downloadingIds.has(generation.id) ? <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        </> : <>
+                          <Download className="w-4 h-4 mr-2" />
+                          Скачать{(generation.output_data?.images?.length || 0) > 1 ? ` (${generation.output_data.images.length})` : ''}
+                        </>}
                     </Button>
-                  )}
-                  <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
-                    {downloadingIds.has(generation.id) ? <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      </> : <>
-                        <Download className="w-4 h-4 mr-2" />
-                        Скачать
-                      </>}
-                  </Button>
-                  <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                    <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Expanded images grid */}
+                {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-3 border-t border-border/30">
+                    {generation.output_data.images.map((img: any, imgIndex: number) => (
+                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border border-border/50 aspect-[3/4]">
+                        <img 
+                          src={img.image_url} 
+                          alt={`Карточка ${imgIndex + 1}`} 
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => openImagePreview(img.image_url)}
+                          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={(e) => { e.stopPropagation(); openImagePreview(img.image_url); }}
+                          >
+                            <ZoomIn className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              const name = (generation.input_data?.productName || 'card').replace(/[<>:"/\\|?*]/g, '').trim();
+                              downloadSingleImage(img.image_url, `${name}_${img.type || imgIndex + 1}.png`); 
+                            }}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs px-2 py-1 text-center truncate">
+                          {img.type || `Карточка ${imgIndex + 1}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>)}
         </div>}
