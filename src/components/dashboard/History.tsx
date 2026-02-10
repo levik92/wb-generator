@@ -247,7 +247,7 @@ export const History = ({
       usage: 'Примен.',
       mainEdit: 'Ред. фото',
       comparison: 'Сравн.',
-      lifestyle: 'Лайфстайл',
+      lifestyle: 'Свойства',
       clean: 'Чистый фон',
       beforeAfter: 'До/После',
       bundle: 'Комплект',
@@ -295,7 +295,7 @@ export const History = ({
       });
       if (error) throw error;
       if (data?.success) {
-        toast({ title: "Редактирование запущено", description: "Результат появится в истории через несколько минут" });
+        toast({ title: "Редактирование завершено", description: "Обновите страницу, чтобы увидеть результат" });
         onTokensUpdate?.();
       } else {
         throw new Error(data?.error || 'Ошибка');
@@ -493,8 +493,23 @@ export const History = ({
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                          <ZoomIn className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                          <ZoomIn className="w-4 h-4 text-white" />
+                          <button
+                            className="text-white hover:text-primary-foreground"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const img = generation.output_data.images[0];
+                              openHistoryEditDialog(
+                                img.image_url,
+                                generation.input_data?.productName || 'Товар',
+                                img.type || 'card_0',
+                                0
+                              );
+                            }}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
                         </div>
                       </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
                         {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
@@ -561,7 +576,7 @@ export const History = ({
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
                   <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
-                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border border-border/50 aspect-[3/4]">
+                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4]">
                         <img 
                           src={img.image_url} 
                           alt={`Карточка ${imgIndex + 1}`} 
