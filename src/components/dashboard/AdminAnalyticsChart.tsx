@@ -149,16 +149,22 @@ export function AdminAnalyticsChart({
       return;
     }
 
-    // Если выбрана только начальная дата (from есть, to нет или from === to)
-    if (range.from && (!range.to || range.from.getTime() === range.to.getTime())) {
-      // Первый клик - начинаем выбор диапазона
-      setPendingRange(range);
+    if (!isSelectingRange) {
+      // Первый клик — запоминаем начало диапазона, ждём второй клик
+      setPendingRange({ from: range.from, to: undefined });
       setIsSelectingRange(true);
-    } else if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
-      // Второй клик - диапазон полностью выбран
+    } else {
+      // Второй клик — диапазон выбран
+      const from = pendingRange?.from || range.from;
+      const to = range.to || range.from;
       setPendingRange(undefined);
       setIsSelectingRange(false);
-      setEffectiveDateRange(range);
+      if (from && to) {
+        // Убеждаемся что from < to
+        const finalFrom = from <= to ? from : to;
+        const finalTo = from <= to ? to : from;
+        setEffectiveDateRange({ from: finalFrom, to: finalTo });
+      }
     }
   };
 
