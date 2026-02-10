@@ -6,9 +6,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
+import JSZip from "jszip";
 interface Generation {
   id: string;
   generation_type: string;
@@ -117,35 +118,48 @@ export const History = ({
           }
           
           if (isTelegramWebApp()) {
-            // In Telegram, open each image in new tab
             for (const image of images) {
               if (image.image_url) {
                 telegramSafeDownload(image.image_url, `${safeProductName}.png`);
               }
             }
+          } else if (images.length === 1) {
+            // Single image — download directly
+            const image = images[0];
+            if (image.image_url) {
+              const response = await fetch(image.image_url);
+              const blob = await response.blob();
+              const fileName = `${safeProductName}_${image.type || 'card'}.png`;
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = fileName;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            }
           } else {
-            // Download images with delay to prevent browser blocking
+            // Multiple images — pack into ZIP archive
+            const zip = new JSZip();
             for (let i = 0; i < images.length; i++) {
               const image = images[i];
               if (image.image_url) {
-                if (i > 0) {
-                  await new Promise(resolve => setTimeout(resolve, 500));
-                }
                 const response = await fetch(image.image_url);
                 const blob = await response.blob();
                 const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-                const fileName = `${safeProductName}_${safeStageName}.png`;
-                
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
+                zip.file(`${safeProductName}_${safeStageName}.png`, blob);
               }
             }
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const url = window.URL.createObjectURL(zipBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${safeProductName}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
           }
         } else {
           toast({
@@ -451,9 +465,12 @@ export const History = ({
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
                       {downloadingIds.has(generation.id) ? <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        </> : (generation.output_data?.images?.length || 0) > 1 ? <>
+                          <Archive className="w-4 h-4 mr-2" />
+                          Скачать ZIP ({generation.output_data.images.length})
                         </> : <>
                           <Download className="w-4 h-4 mr-2" />
-                          Скачать{(generation.output_data?.images?.length || 0) > 1 ? ` (${generation.output_data.images.length})` : ''}
+                          Скачать
                         </>}
                     </Button>
                     <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
