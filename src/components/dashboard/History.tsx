@@ -212,6 +212,23 @@ export const History = ({
     }
   };
 
+  const getCardTypeLabel = (type: string | undefined): string => {
+    const labels: Record<string, string> = {
+      cover: 'Обложка',
+      features: 'Характ.',
+      guarantee: 'Гарантия',
+      macro: 'Макро',
+      usage: 'Примен.',
+      mainEdit: 'Ред. фото',
+      comparison: 'Сравн.',
+      lifestyle: 'Лайфстайл',
+      clean: 'Чистый фон',
+      beforeAfter: 'До/После',
+      bundle: 'Комплект',
+    };
+    return type ? labels[type] || type : '';
+  };
+
   const toggleExpanded = (id: string) => {
     setExpandedIds(prev => {
       const next = new Set(prev);
@@ -479,8 +496,8 @@ export const History = ({
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs px-2 py-1 text-center truncate">
-                          {img.type || `Карточка ${imgIndex + 1}`}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
+                          {getCardTypeLabel(img.type) || `Карточка ${imgIndex + 1}`}
                         </div>
                       </div>
                     ))}
