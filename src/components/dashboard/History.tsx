@@ -493,23 +493,8 @@ export const History = ({
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                          <ZoomIn className="w-4 h-4 text-white" />
-                          <button
-                            className="text-white hover:text-primary-foreground"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const img = generation.output_data.images[0];
-                              openHistoryEditDialog(
-                                img.image_url,
-                                generation.input_data?.productName || 'Товар',
-                                img.type || 'card_0',
-                                0
-                              );
-                            }}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                          <ZoomIn className="w-5 h-5 text-white" />
                         </div>
                       </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
                         {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
@@ -551,6 +536,26 @@ export const History = ({
                       >
                         {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
                         {expandedIds.has(generation.id) ? 'Свернуть' : 'Все фото'}
+                      </Button>
+                    )}
+                    {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) === 1 && generation.output_data?.images?.[0]?.image_url && (
+                      <Button 
+                        onClick={() => {
+                          const img = generation.output_data.images[0];
+                          openHistoryEditDialog(
+                            img.image_url,
+                            generation.input_data?.productName || 'Товар',
+                            img.type || 'card_0',
+                            0
+                          );
+                        }}
+                        size="sm" 
+                        variant="outline"
+                        disabled={editingInProgress.has(generation.output_data.images[0].image_url)}
+                        title={`Редактировать (${editPrice} токенов)`}
+                      >
+                        {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 sm:mr-1" />}
+                        <span className="hidden sm:inline">Ред.</span>
                       </Button>
                     )}
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
