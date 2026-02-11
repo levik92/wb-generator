@@ -337,7 +337,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution);
     
     // If primary key fails with 503/429/403, wait 2 seconds and try fallback key
-    if (!aiResult.ok && (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
+    if (!aiResult.ok && (aiResult.status === 500 || aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
       if (geminiApiKey2) {
         console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
         await new Promise(resolve => setTimeout(resolve, FALLBACK_DELAY_MS));
@@ -345,7 +345,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         
         if (aiResult.ok) {
           console.log('Fallback API key succeeded!');
-        } else if (aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403) {
+        } else if (aiResult.status === 500 || aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403) {
           // Fallback also failed, wait 10 seconds and try primary key one more time
           console.log(`Fallback API key also returned ${aiResult.status}, waiting ${FINAL_RETRY_DELAY_MS}ms before final retry on primary key...`);
           await new Promise(resolve => setTimeout(resolve, FINAL_RETRY_DELAY_MS));
@@ -366,8 +366,8 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       const errorText = aiResult.error || 'Unknown error';
       
       // Handle rate limit, quota exceeded, or service unavailable - both API keys failed
-      if (status === 429 || status === 403 || status === 503) {
-        const failMessage = status === 503 
+      if (status === 500 || status === 429 || status === 403 || status === 503) {
+        const failMessage = (status === 503 || status === 500)
           ? 'Сервис временно перегружен. Попробуйте через несколько минут.' 
           : 'Превышена квота API. Попробуйте позже.';
         
