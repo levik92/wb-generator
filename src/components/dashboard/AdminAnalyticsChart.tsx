@@ -184,8 +184,14 @@ export function AdminAnalyticsChart({
       const body: any = { period: 'custom' };
       
       if (effectiveDateRange?.from && effectiveDateRange?.to) {
-        body.startDateCustom = effectiveDateRange.from.toISOString();
-        body.endDateCustom = effectiveDateRange.to.toISOString();
+        const formatLocalDate = (d: Date) => {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        body.startDateCustom = formatLocalDate(effectiveDateRange.from);
+        body.endDateCustom = formatLocalDate(effectiveDateRange.to);
       }
       
       const {
@@ -481,8 +487,14 @@ export function AdminAdditionalMetrics() {
       const body: any = { period: 'custom' };
       
       if (dateRange?.from && dateRange?.to) {
-        body.startDateCustom = dateRange.from.toISOString();
-        body.endDateCustom = dateRange.to.toISOString();
+        const formatLocalDate = (d: Date) => {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        body.startDateCustom = formatLocalDate(dateRange.from);
+        body.endDateCustom = formatLocalDate(dateRange.to);
       }
       
       const { data: result, error } = await supabase.functions.invoke('admin-analytics', {
