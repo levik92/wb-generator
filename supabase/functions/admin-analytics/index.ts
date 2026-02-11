@@ -65,21 +65,23 @@ serve(async (req) => {
 
     const { period, startDateCustom, endDateCustom } = await req.json()
 
+    // Moscow timezone offset
+    const MOSCOW_OFFSET_HOURS = 3
+
     // Определяем временные рамки
     const now = new Date()
     let startDate: Date
     let endDate: Date = now
     let groupFormat: string
 
-    // Если переданы кастомные даты
+    // Если переданы кастомные даты (формат YYYY-MM-DD, интерпретируем как московское время)
     if (startDateCustom && endDateCustom) {
-      startDate = new Date(startDateCustom)
-      endDate = new Date(endDateCustom)
-      
-      // Нормализуем startDate к началу дня (00:00:00 UTC)
-      startDate.setUTCHours(0, 0, 0, 0)
-      // Устанавливаем конец дня для endDate (23:59:59.999 UTC)
-      endDate.setUTCHours(23, 59, 59, 999)
+      // Парсим как московскую дату: 00:00 МСК = 21:00 UTC предыдущего дня
+      const [sy, sm, sd] = startDateCustom.split('-').map(Number)
+      const [ey, em, ed] = endDateCustom.split('-').map(Number)
+      startDate = new Date(Date.UTC(sy, sm - 1, sd, 0 - MOSCOW_OFFSET_HOURS, 0, 0, 0))
+      // 23:59:59.999 МСК = 20:59:59.999 UTC
+      endDate = new Date(Date.UTC(ey, em - 1, ed, 23 - MOSCOW_OFFSET_HOURS, 59, 59, 999))
       
       // Определяем формат группировки в зависимости от длины периода
       const diffDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -134,7 +136,6 @@ serve(async (req) => {
     prevStartDate.setUTCHours(0, 0, 0, 0)
 
     // Функция для конвертации UTC даты в Moscow timezone (UTC+3)
-    const MOSCOW_OFFSET_HOURS = 3
     
     const toMoscowDate = (date: Date): Date => {
       // Добавляем 3 часа к UTC времени, чтобы получить московское время
