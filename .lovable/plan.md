@@ -1,89 +1,30 @@
 
 
-# Диагностика и исправление работы Telegram Mini App
+## Добавление фоллбэка на API2 при ошибке 500
 
-## Обнаруженные проблемы
+### Проблема
+Когда Google Gemini API возвращает ошибку 500 (Internal Server Error), генерация сразу помечается как неудачная. Фоллбэк на второй API-ключ (API2) не срабатывает, потому что в условии проверяются только статусы 503, 429 и 403.
 
-После анализа кодовой базы и документации Telegram Mini Apps выявлены **4 ключевых проблемы**, из-за которых генерация может не работать внутри Telegram:
+### Решение
+Добавить статус `500` в условие фоллбэка в файле `supabase/functions/process-google-task/index.ts`.
 
-### 1. localStorage может быть недоступен или очищаться в WebView
-Supabase клиент настроен с `storage: localStorage` для хранения авторизации. В Telegram WebView localStorage может:
-- Очищаться при закрытии Mini App
-- Быть недоступным в некоторых версиях Android
-- Терять сессию между открытиями приложения
+### Технические детали
 
-Это означает, что пользователь может быть разлогинен при каждом открытии Mini App, и генерация не будет работать без авторизации.
+**Файл:** `supabase/functions/process-google-task/index.ts`
 
-### 2. Загрузка файлов через `<input type="file">` может не работать в WebView
-На некоторых Android-устройствах (особенно Pixel с Android 14+) `<input type="file">` не вызывает диалог выбора файлов или камеры. Это известная проблема Telegram WebView.
+1. **Строка ~340** — добавить `500` в условие переключения на API2:
+   - Было: `aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403`
+   - Станет: `aiResult.status === 500 || aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403`
 
-### 3. Скачивание файлов через `document.createElement('a').click()` не работает в WebView
-Функции `downloadSingle` и `downloadAll` создают элемент `<a>` с атрибутом `download` и вызывают `click()`. В Telegram WebView этот метод скачивания **не поддерживается** -- файлы просто не скачиваются.
+2. **Строка ~348** — аналогично в проверке после фоллбэка (если API2 тоже вернул ошибку, перед финальным ретраем):
+   - Добавить `aiResult.status === 500` в условие
 
-### 4. `window.URL.createObjectURL` и Blob-операции могут быть ограничены
-ZIP-генерация через JSZip и Blob URL могут работать некорректно в ограниченном WebView.
+3. **Строка ~369** — в блоке обработки ошибок после исчерпания всех попыток:
+   - Добавить `status === 500` в условие, чтобы пользователь получал понятное сообщение о временной проблеме сервера
 
----
-
-## План исправлений
-
-### Шаг 1: Определение среды Telegram Mini App
-Создать утилиту `src/lib/telegram.ts` для определения, работает ли приложение внутри Telegram WebView. Telegram добавляет `window.Telegram.WebApp` объект в свои Mini Apps.
-
-### Шаг 2: Исправить хранение сессии Supabase
-В `src/integrations/supabase/client.ts` добавить проверку доступности localStorage с fallback на memoryStorage. Это предотвратит потерю сессии и ошибки.
-
-### Шаг 3: Добавить альтернативу для скачивания в Telegram
-Для `downloadSingle` и `downloadAll` -- при обнаружении Telegram WebView открывать изображение/ссылку через `window.open()` вместо программного скачивания через `<a download>`, так как Telegram WebView может перехватить открытие ссылки и предложить скачать.
-
-### Шаг 4: Обработка проблем с загрузкой файлов
-Добавить пользовательское уведомление, если `<input type="file">` не сработал в Telegram, с предложением открыть приложение в браузере.
-
-### Шаг 5: Viewport и стили для Telegram WebView
-Telegram Mini Apps имеют собственные инсеты (safe area). Добавить CSS-переменные Telegram для корректного отображения.
-
----
-
-## Технические детали
-
-### Файл: `src/lib/telegram.ts` (новый)
-```typescript
-export const isTelegramWebApp = (): boolean => {
-  return !!(window as any).Telegram?.WebApp;
-};
-
-export const getTelegramWebApp = () => {
-  return (window as any).Telegram?.WebApp;
-};
-```
-
-### Файл: `src/integrations/supabase/client.ts` (изменение)
-Добавить безопасный storage wrapper:
-```typescript
-const safeStorage = (() => {
-  try {
-    localStorage.setItem('__test__', '1');
-    localStorage.removeItem('__test__');
-    return localStorage;
-  } catch {
-    // Fallback to in-memory storage for Telegram WebView
-    const store: Record<string, string> = {};
-    return {
-      getItem: (key: string) => store[key] ?? null,
-      setItem: (key: string, value: string) => { store[key] = value; },
-      removeItem: (key: string) => { delete store[key]; },
-    };
-  }
-})();
-```
-
-### Файл: `src/components/dashboard/GenerateCards.tsx` (изменение)
-В функциях `downloadSingle` и `downloadAll` -- добавить проверку `isTelegramWebApp()` и использовать `window.open(image.url, '_blank')` для прямого открытия изображения вместо blob-скачивания.
-
-### Файл: `index.html` (изменение)
-Добавить скрипт Telegram Web App SDK:
-```html
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-```
-Это необходимо для корректной работы Mini App и определения среды.
+Таким образом цепочка при ошибке 500 станет:
+1. Попытка с PRIMARY_KEY
+2. Ждём 2 секунды, попытка с FALLBACK_KEY (API2)
+3. Если API2 тоже вернул ошибку — ждём 10 секунд, финальная попытка с PRIMARY_KEY
+4. Только если все 3 попытки провалились — помечаем как failed и возвращаем токены
 
