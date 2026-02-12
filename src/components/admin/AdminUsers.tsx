@@ -198,13 +198,13 @@ export function AdminUsers({
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={paymentFilter === 'all' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground' : ''}>
+            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'all' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
               Все пользователи
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={paymentFilter === 'paid' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground' : ''}>
+            <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'paid' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
               Платные
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={paymentFilter === 'free' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground' : ''}>
+            <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'free' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
               Бесплатные
             </DropdownMenuItem>
           </DropdownMenuContent>
