@@ -134,7 +134,7 @@ export function AdminAnalytics({
               {loading ? '...' : paidUsersCount.toLocaleString('ru-RU')}
             </div>
             <p className="text-xs md:text-sm text-muted-foreground">
-              {totalUsers > 0 ? (paidUsersCount / totalUsers * 100).toFixed(1) : 0}% от всех · Повторно: {loading ? '...' : repeatPaidCount.toLocaleString('ru-RU')} ({paidUsersCount > 0 ? (repeatPaidCount / paidUsersCount * 100).toFixed(1) : 0}%)
+              Повторно: {loading ? '...' : repeatPaidCount.toLocaleString('ru-RU')} ({paidUsersCount > 0 ? (repeatPaidCount / paidUsersCount * 100).toFixed(1) : 0}%)
             </p>
           </CardContent>
         </Card>
