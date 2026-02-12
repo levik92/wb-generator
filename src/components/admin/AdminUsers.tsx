@@ -252,7 +252,7 @@ export function AdminUsers({
                       <Badge variant="secondary" className="text-xs">{user.tokens_balance}</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant="secondary" className={`text-xs ${isPaid ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}`}>
+                      <Badge variant="secondary" className={`text-xs ${isPaid ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30' : ''}`}>
                         {paidDataLoading ? '...' : isPaid ? 'Да' : 'Нет'}
                       </Badge>
                     </TableCell>
