@@ -6,9 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Ban, Shield, Pencil, Search, UserCheck, Eye, Coins, ChevronLeft, ChevronRight } from "lucide-react";
+import { Ban, Pencil, Search, UserCheck, Eye, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 interface User {
   id: string;
   email: string;
@@ -33,6 +36,9 @@ interface AdminUsersProps {
   users: User[];
   onUsersUpdate: () => void;
 }
+
+type PaymentFilter = 'all' | 'paid' | 'free';
+
 export function AdminUsers({
   users,
   onUsersUpdate
@@ -45,146 +51,164 @@ export function AdminUsers({
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [paidUserIds, setPaidUserIds] = useState<Set<string>>(new Set());
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
+  const [paidDataLoading, setPaidDataLoading] = useState(true);
+  const isMobile = useIsMobile();
   const usersPerPage = 20;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
   const endIndex = startIndex + usersPerPage;
   const currentUsers = filteredUsers.slice(startIndex, endIndex);
 
-  // Update filtered users when users prop changes or search changes
+  // Load paid user IDs
   useEffect(() => {
-    const filtered = users.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase()));
+    const loadPaidUsers = async () => {
+      setPaidDataLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('payments')
+          .select('user_id')
+          .eq('status', 'succeeded');
+        
+        if (error) throw error;
+        const ids = new Set((data || []).map(p => p.user_id));
+        setPaidUserIds(ids);
+      } catch (error) {
+        console.error('Error loading paid users:', error);
+      } finally {
+        setPaidDataLoading(false);
+      }
+    };
+    loadPaidUsers();
+  }, []);
+
+  // Update filtered users when users prop, search, or filter changes
+  useEffect(() => {
+    let filtered = users.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase()));
+    
+    if (paymentFilter === 'paid') {
+      filtered = filtered.filter(user => paidUserIds.has(user.id));
+    } else if (paymentFilter === 'free') {
+      filtered = filtered.filter(user => !paidUserIds.has(user.id));
+    }
+    
     setFilteredUsers(filtered);
     setCurrentPage(1);
-  }, [users, searchEmail]);
+  }, [users, searchEmail, paymentFilter, paidUserIds]);
+
   const loadUserDetails = async (user: User) => {
     setDetailsLoading(true);
     try {
-      // Get referrals without the join (avoid RLS issues)
       const referralsRes = await supabase.from('referrals').select('*').eq('referrer_id', user.id);
-
-      // For each referral, get the email using the secure function
       const referralsWithEmails = await Promise.all((referralsRes.data || []).map(async ref => {
-        const {
-          data: refData
-        } = await supabase.rpc('admin_get_profile', {
+        const { data: refData } = await supabase.rpc('admin_get_profile', {
           target_user_id: ref.referred_id,
           access_reason: 'View referral details'
         });
-        return {
-          ...ref,
-          referred: {
-            email: refData?.[0]?.email || 'Unknown'
-          }
-        };
+        return { ...ref, referred: { email: refData?.[0]?.email || 'Unknown' } };
       }));
-      const [paymentsRes, tokensRes, generationsRes] = await Promise.all([supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'), supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'), supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', {
-        ascending: false
-      }).limit(10)]);
+      const [paymentsRes, tokensRes, generationsRes] = await Promise.all([
+        supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
+        supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
+        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10)
+      ]);
       const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
       const generationsCount = generationsRes.data?.length || 0;
       const referralsCount = referralsWithEmails.length;
       const referralsEarnings = referralsWithEmails.reduce((sum, r) => sum + (r.tokens_awarded || 0), 0);
       setUserDetails({
-        totalPaid,
-        tokensSpent,
-        generationsCount,
-        referralsCount,
-        referralsEarnings,
+        totalPaid, tokensSpent, generationsCount, referralsCount, referralsEarnings,
         recentGenerations: generationsRes.data || [],
         paymentHistory: paymentsRes.data || [],
         referrals: referralsWithEmails
       });
     } catch (error) {
       console.error('Error loading user details:', error);
-      toast({
-        title: "Ошибка",
-        description: "Не удалось загрузить детали пользователя",
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка", description: "Не удалось загрузить детали пользователя", variant: "destructive" });
     } finally {
       setDetailsLoading(false);
     }
   };
+
   const toggleUserBlock = async (userId: string, currentStatus: boolean) => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.rpc('admin_toggle_user_block', {
+      const { error } = await supabase.rpc('admin_toggle_user_block', {
         target_user_id: userId,
         block_status: !currentStatus
       });
-      if (error) {
-        throw error;
-      }
-      toast({
-        title: "Успешно",
-        description: `Пользователь ${!currentStatus ? 'заблокирован' : 'разблокирован'}`
-      });
-
-      // Give database time to update and force refresh
+      if (error) throw error;
+      toast({ title: "Успешно", description: `Пользователь ${!currentStatus ? 'заблокирован' : 'разблокирован'}` });
       setTimeout(async () => {
         await onUsersUpdate();
-        // Force re-render by updating the local state
-        const updatedUsers = users.map(u => u.id === userId ? {
-          ...u,
-          is_blocked: !currentStatus
-        } : u);
+        const updatedUsers = users.map(u => u.id === userId ? { ...u, is_blocked: !currentStatus } : u);
         setFilteredUsers(updatedUsers.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase())));
       }, 300);
     } catch (error: any) {
       console.error('Error toggling user block:', error);
-      toast({
-        title: "Ошибка",
-        description: error.message || "Не удалось изменить статус пользователя",
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка", description: error.message || "Не удалось изменить статус пользователя", variant: "destructive" });
     }
   };
+
   const updateTokenBalance = async () => {
     if (!editingUser || !newTokenBalance) return;
     const newBalance = parseInt(newTokenBalance);
     if (isNaN(newBalance) || newBalance < 0) {
-      toast({
-        title: "Ошибка",
-        description: "Введите корректное количество токенов",
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка", description: "Введите корректное количество токенов", variant: "destructive" });
       return;
     }
-    const {
-      data,
-      error
-    } = await supabase.rpc('admin_update_user_tokens', {
+    const { error } = await supabase.rpc('admin_update_user_tokens', {
       target_user_id: editingUser.id,
       new_balance: newBalance,
       reason: 'Корректировка баланса администратором'
     });
     if (error) {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось обновить баланс токенов",
-        variant: "destructive"
-      });
+      toast({ title: "Ошибка", description: "Не удалось обновить баланс токенов", variant: "destructive" });
     } else {
-      toast({
-        title: "Успешно",
-        description: "Баланс токенов обновлен"
-      });
+      toast({ title: "Успешно", description: "Баланс токенов обновлен" });
       setEditingUser(null);
       setNewTokenBalance("");
       onUsersUpdate();
     }
   };
+
+  const filterLabel = paymentFilter === 'all' ? 'Все' : paymentFilter === 'paid' ? 'Платные' : 'Бесплатные';
+
   return <div className="space-y-6">
-      {/* Search */}
+      {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input placeholder="Поиск по email..." value={searchEmail} onChange={e => setSearchEmail(e.target.value)} className="pl-10" />
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {isMobile ? (
+              <Button variant="outline" size="sm" className="h-9 w-9 p-0 shrink-0">
+                <Filter className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+                <Filter className="h-3.5 w-3.5" />
+                {filterLabel}
+              </Button>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={paymentFilter === 'all' ? 'bg-accent' : ''}>
+              Все пользователи
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={paymentFilter === 'paid' ? 'bg-accent' : ''}>
+              Платные
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={paymentFilter === 'free' ? 'bg-accent' : ''}>
+              Бесплатные
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
           Найдено: {filteredUsers.length} из {users.length}
         </div>
@@ -206,18 +230,20 @@ export function AdminUsers({
                   <TableHead className="min-w-[180px]">Email</TableHead>
                   <TableHead className="min-w-[100px] hidden lg:table-cell">Имя</TableHead>
                   <TableHead className="min-w-[70px]">Токены</TableHead>
-                  <TableHead className="min-w-[90px] hidden md:table-cell">WB</TableHead>
+                  <TableHead className="min-w-[90px] hidden md:table-cell">Тип</TableHead>
                   <TableHead className="min-w-[80px]">Статус</TableHead>
                   <TableHead className="min-w-[110px] hidden lg:table-cell">Дата регистрации</TableHead>
                   <TableHead className="min-w-[100px]">Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentUsers.map(user => <TableRow key={user.id}>
+                {currentUsers.map(user => {
+                  const isPaid = paidUserIds.has(user.id);
+                  return <TableRow key={user.id}>
                     <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[180px] truncate text-xs md:text-sm" onClick={() => {
-                  setSelectedUser(user);
-                  loadUserDetails(user);
-                }}>
+                      setSelectedUser(user);
+                      loadUserDetails(user);
+                    }}>
                       {user.email}
                     </TableCell>
                     <TableCell className="max-w-[100px] truncate text-xs hidden lg:table-cell">{user.full_name || 'Не указано'}</TableCell>
@@ -225,8 +251,8 @@ export function AdminUsers({
                       <Badge variant="secondary" className="text-xs">{user.tokens_balance}</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant={user.wb_connected ? "default" : "secondary"} className="text-xs">
-                        {user.wb_connected ? 'Да' : 'Нет'}
+                      <Badge variant={isPaid ? "default" : "secondary"} className="text-xs">
+                        {paidDataLoading ? '...' : isPaid ? 'Платный' : 'Бесплатный'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -240,18 +266,18 @@ export function AdminUsers({
                     <TableCell>
                       <div className="flex gap-0.5 md:gap-1">
                         <Button variant="outline" size="sm" onClick={() => {
-                      setSelectedUser(user);
-                      loadUserDetails(user);
-                    }} className="h-7 w-7 md:h-8 md:w-8 p-0">
+                          setSelectedUser(user);
+                          loadUserDetails(user);
+                        }} className="h-7 w-7 md:h-8 md:w-8 p-0">
                           <Eye className="h-3 w-3" />
                         </Button>
                         
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => {
-                          setEditingUser(user);
-                          setNewTokenBalance(user.tokens_balance.toString());
-                        }} className="h-7 w-7 md:h-8 md:w-8 p-0">
+                              setEditingUser(user);
+                              setNewTokenBalance(user.tokens_balance.toString());
+                            }} className="h-7 w-7 md:h-8 md:w-8 p-0">
                               <Pencil className="h-3 w-3" />
                             </Button>
                           </DialogTrigger>
@@ -279,7 +305,8 @@ export function AdminUsers({
                         </Button>
                       </div>
                     </TableCell>
-                  </TableRow>)}
+                  </TableRow>;
+                })}
               </TableBody>
             </Table>
           </div>
@@ -347,7 +374,7 @@ export function AdminUsers({
                 </div>
               </div>
 
-              {/* Tabs or sections for different data */}
+              {/* Payment History */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">История платежей</h3>
                 <div className="max-h-48 overflow-auto border rounded">
@@ -366,46 +393,56 @@ export function AdminUsers({
                             <TableCell className="text-xs">
                               {new Date(payment.created_at).toLocaleDateString('ru-RU')}
                             </TableCell>
-                            <TableCell>{payment.amount}₽</TableCell>
-                            <TableCell>{payment.tokens_amount}</TableCell>
+                            <TableCell className="text-xs">{payment.amount}₽</TableCell>
+                            <TableCell className="text-xs">{payment.tokens_amount}</TableCell>
                             <TableCell>
-                              <Badge variant="default" className="text-xs">{payment.status}</Badge>
+                              <Badge variant={payment.status === 'succeeded' ? 'default' : 'secondary'} className="text-xs">
+                                {payment.status === 'succeeded' ? 'Оплачен' : payment.status}
+                              </Badge>
                             </TableCell>
                           </TableRow>)}
+                        {userDetails.paymentHistory.length === 0 && <TableRow>
+                            <TableCell colSpan={4} className="text-center text-muted-foreground text-xs">
+                              Нет платежей
+                            </TableCell>
+                          </TableRow>}
                       </TableBody>
                     </Table>
                   </div>
                 </div>
               </div>
 
+              {/* Referrals */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Рефералы</h3>
-                <div className="max-h-48 overflow-auto border rounded">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="min-w-[150px]">Email реферала</TableHead>
-                          <TableHead className="min-w-[100px]">Дата</TableHead>
-                          <TableHead className="min-w-[80px]">Награда</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {userDetails.referrals.map((referral: any) => <TableRow key={referral.id}>
-                             <TableCell className="truncate max-w-[150px]">{referral.referred?.email}</TableCell>
-                            <TableCell className="text-xs">
-                              {new Date(referral.created_at).toLocaleDateString('ru-RU')}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="secondary" className="text-xs">
-                                {referral.tokens_awarded} токенов
-                              </Badge>
-                            </TableCell>
-                          </TableRow>)}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold">Рефералы ({userDetails.referralsCount})</h3>
+                {userDetails.referrals.length > 0 ? <div className="max-h-48 overflow-auto border rounded">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="min-w-[150px]">Email</TableHead>
+                            <TableHead className="min-w-[100px]">Дата</TableHead>
+                            <TableHead className="min-w-[80px]">Статус</TableHead>
+                            <TableHead className="min-w-[80px]">Токенов</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {userDetails.referrals.map((ref: any) => <TableRow key={ref.id}>
+                              <TableCell className="text-xs">{ref.referred?.email || 'Unknown'}</TableCell>
+                              <TableCell className="text-xs">
+                                {new Date(ref.created_at).toLocaleDateString('ru-RU')}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={ref.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                                  {ref.status === 'completed' ? 'Завершен' : 'Ожидание'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs">{ref.tokens_awarded || 0}</TableCell>
+                            </TableRow>)}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div> : <p className="text-sm text-muted-foreground">Нет рефералов</p>}
               </div>
             </div>}
         </DialogContent>
