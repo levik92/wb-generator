@@ -21,6 +21,7 @@ interface User {
   is_blocked: boolean;
   created_at: string;
   referral_code: string;
+  updated_at: string;
 }
 interface UserDetails {
   totalPaid: number;
@@ -251,14 +252,22 @@ export function AdminUsers({
                       <Badge variant="secondary" className="text-xs">{user.tokens_balance}</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <Badge variant={isPaid ? "default" : "secondary"} className="text-xs">
+                      <Badge variant="secondary" className={`text-xs ${isPaid ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : ''}`}>
                         {paidDataLoading ? '...' : isPaid ? 'Да' : 'Нет'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.is_blocked ? "destructive" : "default"} className="text-xs">
-                        {user.is_blocked ? 'Блок' : 'Актив'}
-                      </Badge>
+                      {(() => {
+                        if (user.is_blocked) {
+                          return <Badge variant="destructive" className="text-xs">Блок</Badge>;
+                        }
+                        const thirtyDaysAgo = new Date();
+                        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                        const isActive = new Date(user.updated_at) > thirtyDaysAgo;
+                        return isActive
+                          ? <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30">Актив.</Badge>
+                          : <Badge variant="secondary" className="text-xs">Не актив.</Badge>;
+                      })()}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-xs">
                       {new Date(user.created_at).toLocaleDateString('ru-RU')}
