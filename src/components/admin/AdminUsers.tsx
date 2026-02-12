@@ -177,7 +177,7 @@ export function AdminUsers({
 
   return <div className="space-y-6">
       {/* Search & Filter */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input placeholder="Поиск по email..." value={searchEmail} onChange={e => setSearchEmail(e.target.value)} className="pl-10" />
@@ -230,7 +230,7 @@ export function AdminUsers({
                   <TableHead className="min-w-[180px]">Email</TableHead>
                   <TableHead className="min-w-[100px] hidden lg:table-cell">Имя</TableHead>
                   <TableHead className="min-w-[70px]">Токены</TableHead>
-                  <TableHead className="min-w-[90px] hidden md:table-cell">Тип</TableHead>
+                  <TableHead className="min-w-[90px] hidden md:table-cell">Оплата</TableHead>
                   <TableHead className="min-w-[80px]">Статус</TableHead>
                   <TableHead className="min-w-[110px] hidden lg:table-cell">Дата регистрации</TableHead>
                   <TableHead className="min-w-[100px]">Действия</TableHead>
@@ -252,7 +252,7 @@ export function AdminUsers({
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <Badge variant={isPaid ? "default" : "secondary"} className="text-xs">
-                        {paidDataLoading ? '...' : isPaid ? 'Платный' : 'Бесплатный'}
+                        {paidDataLoading ? '...' : isPaid ? 'Да' : 'Нет'}
                       </Badge>
                     </TableCell>
                     <TableCell>
