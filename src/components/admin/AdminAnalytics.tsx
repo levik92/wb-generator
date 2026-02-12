@@ -48,23 +48,38 @@ export function AdminAnalytics({
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
 
-        // Users who logged in (updated_at within 30 days as proxy for login activity)
-        const { data: recentLogins } = await supabase
+        // Active users: use count queries + paginated token transactions to avoid 1000 row limit
+        // Count profiles updated in last 30 days
+        const { count: recentLoginCount } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id', { count: 'exact', head: true })
           .gte('updated_at', thirtyDaysAgoISO);
 
-        // Users who spent tokens in last 30 days
-        const { data: recentTokens } = await supabase
-          .from('token_transactions')
-          .select('user_id')
-          .eq('transaction_type', 'generation')
-          .gte('created_at', thirtyDaysAgoISO);
+        // Get distinct user_ids from token_transactions (paginated to avoid 1000 limit)
+        const tokenUserIds = new Set<string>();
+        let offset = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+        while (hasMore) {
+          const { data: tokenPage } = await supabase
+            .from('token_transactions')
+            .select('user_id')
+            .eq('transaction_type', 'generation')
+            .gte('created_at', thirtyDaysAgoISO)
+            .range(offset, offset + pageSize - 1);
+          if (tokenPage && tokenPage.length > 0) {
+            tokenPage.forEach(t => tokenUserIds.add(t.user_id));
+            offset += pageSize;
+            hasMore = tokenPage.length === pageSize;
+          } else {
+            hasMore = false;
+          }
+        }
 
-        const activeIds = new Set<string>();
-        (recentLogins || []).forEach(u => activeIds.add(u.id));
-        (recentTokens || []).forEach(t => activeIds.add(t.user_id));
-        setActiveUsersCount(activeIds.size);
+        // Best estimate: max of login count and token users (they overlap)
+        // recentLoginCount already counts all via head:true (no 1000 limit)
+        const activeEstimate = Math.max(recentLoginCount || 0, tokenUserIds.size);
+        setActiveUsersCount(activeEstimate);
       } catch (error) {
         console.error('Error fetching analytics stats:', error);
         setTotalUsers(users.length);
@@ -119,7 +134,7 @@ export function AdminAnalytics({
               {loading ? '...' : paidUsersCount.toLocaleString('ru-RU')}
             </div>
             <p className="text-xs md:text-sm text-muted-foreground">
-              Повторно: {loading ? '...' : repeatPaidCount.toLocaleString('ru-RU')}
+              {totalUsers > 0 ? (paidUsersCount / totalUsers * 100).toFixed(1) : 0}% от всех · Повторно: {loading ? '...' : repeatPaidCount.toLocaleString('ru-RU')} ({paidUsersCount > 0 ? (repeatPaidCount / paidUsersCount * 100).toFixed(1) : 0}%)
             </p>
           </CardContent>
         </Card>
@@ -136,7 +151,7 @@ export function AdminAnalytics({
               {loading ? '...' : activeUsersCount.toLocaleString('ru-RU')}
             </div>
             <p className="text-xs md:text-sm text-muted-foreground">
-              За последние 30 дней
+              {totalUsers > 0 ? (activeUsersCount / totalUsers * 100).toFixed(1) : 0}% от всех (30 дней)
             </p>
           </CardContent>
         </Card>
