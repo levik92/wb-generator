@@ -198,13 +198,13 @@ export function AdminUsers({
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={paymentFilter === 'all' ? 'bg-accent' : ''}>
+            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={paymentFilter === 'all' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground' : ''}>
               Все пользователи
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={paymentFilter === 'paid' ? 'bg-accent' : ''}>
+            <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={paymentFilter === 'paid' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground' : ''}>
               Платные
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={paymentFilter === 'free' ? 'bg-accent' : ''}>
+            <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={paymentFilter === 'free' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground' : ''}>
               Бесплатные
             </DropdownMenuItem>
           </DropdownMenuContent>
