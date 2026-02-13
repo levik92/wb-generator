@@ -46,7 +46,7 @@ export const MobileSideMenu = ({
     label: 'Видеообложки',
     icon: Video,
     badge: 'New',
-    badgeColor: 'bg-primary text-primary-foreground'
+    badgeColor: 'bg-emerald-500 text-white'
   }, {
     id: 'description',
     label: 'Генерация описаний',

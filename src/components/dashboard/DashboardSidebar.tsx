@@ -93,7 +93,7 @@ export const DashboardSidebar = ({
     label: 'Видеообложки',
     icon: Video,
     badge: 'New',
-    badgeColor: 'bg-primary text-primary-foreground border-primary'
+    badgeColor: 'bg-emerald-500 text-white border-emerald-500'
   }, {
     id: 'description',
     label: 'Генерация описаний',
