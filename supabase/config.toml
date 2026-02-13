@@ -89,3 +89,9 @@ verify_jwt = false
 
 [functions.telegram-bot]
 verify_jwt = false
+
+[functions.create-video-job]
+verify_jwt = false
+
+[functions.check-video-status]
+verify_jwt = false

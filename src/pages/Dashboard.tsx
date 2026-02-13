@@ -19,6 +19,7 @@ import { Settings } from "@/components/dashboard/Settings";
 import LabelGenerator from "@/components/dashboard/LabelGenerator";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import News from "@/pages/News";
+import { VideoCovers } from "@/components/dashboard/VideoCovers";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
@@ -38,7 +39,7 @@ interface Profile {
   referral_code: string;
   login_count: number;
 }
-type ActiveTab = 'cards' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning';
+type ActiveTab = 'cards' | 'video' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning';
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -62,7 +63,7 @@ const Dashboard = () => {
     const tabParam = searchParams.get('tab');
     const hashParam = window.location.hash.replace('#', '');
     
-    const validTabs = ['cards', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+    const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
     
     // Priority: query param > hash anchor
     const targetTab = tabParam || hashParam;
@@ -84,7 +85,7 @@ const Dashboard = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hashParam = window.location.hash.replace('#', '');
-      const validTabs = ['cards', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+      const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
       
       if (hashParam && validTabs.includes(hashParam)) {
         setActiveTab(hashParam as ActiveTab);
@@ -283,6 +284,8 @@ const Dashboard = () => {
           onNavigateToBalance={() => handleTabChange('pricing')}
           onNavigateToLearning={() => handleTabChange('learning')}
         />;
+      case 'video':
+        return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'notifications':
