@@ -44,7 +44,9 @@ export const MobileSideMenu = ({
   }, {
     id: 'video',
     label: 'Видеообложки',
-    icon: Video
+    icon: Video,
+    badge: 'New',
+    badgeColor: 'bg-primary text-primary-foreground'
   }, {
     id: 'description',
     label: 'Генерация описаний',
