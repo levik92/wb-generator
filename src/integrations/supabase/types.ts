@@ -1425,6 +1425,45 @@ export type Database = {
           },
         ]
       }
+      video_generation_jobs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          kling_task_id: string | null
+          result_video_url: string | null
+          source_image_url: string | null
+          status: string
+          tokens_cost: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          kling_task_id?: string | null
+          result_video_url?: string | null
+          source_image_url?: string | null
+          status?: string
+          tokens_cost?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          kling_task_id?: string | null
+          result_video_url?: string | null
+          source_image_url?: string | null
+          status?: string
+          tokens_cost?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
