@@ -69,9 +69,9 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
 
   const { price: videoCost, isLoading: priceLoading } = useGenerationPrice("video_generation");
 
-  // Load history
+  // Load history and resume active jobs on mount
   useEffect(() => {
-    loadHistory();
+    loadHistoryAndResume();
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
       if (timerRef.current) clearInterval(timerRef.current);
@@ -137,7 +137,25 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const loadHistory = async () => {
+  // Only refreshes history list, does NOT resume polling or set active job
+  const refreshHistory = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from("video_generation_jobs")
+        .select("*")
+        .eq("user_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setHistory(data || []);
+    } catch (error) {
+      console.error("Error loading video history:", error);
+    }
+  };
+
+  // Full load: refresh history + resume active jobs (only on mount)
+  const loadHistoryAndResume = async () => {
     try {
       const { data, error } = await (supabase as any)
         .from("video_generation_jobs")
@@ -216,7 +234,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
           setCurrentJob((prev) => prev ? { ...prev, status: "completed", video_url: data.video_url } : null);
           setIsGenerating(false);
           onTokensUpdate();
-          loadHistory();
+          refreshHistory();
           toast({ title: "Видео готово! 🎬", description: "Видеообложка успешно сгенерирована" });
         } else if (data.status === "failed") {
           if (pollingRef.current) clearInterval(pollingRef.current);
@@ -224,7 +242,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
           setCurrentJob((prev) => prev ? { ...prev, status: "failed", error_message: data.error_message } : null);
           setIsGenerating(false);
           onTokensUpdate();
-          loadHistory();
+          refreshHistory();
           toast({
             title: "Ошибка генерации",
             description: `${data.error_message || "Неизвестная ошибка"}. Токены возвращены на баланс.`,
