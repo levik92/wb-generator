@@ -89,6 +89,10 @@ export const DashboardSidebar = ({
     label: 'Генерация карточек',
     icon: Image
   }, {
+    id: 'video',
+    label: 'Видеообложки',
+    icon: Video
+  }, {
     id: 'description',
     label: 'Генерация описаний',
     icon: FileText

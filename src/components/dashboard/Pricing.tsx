@@ -37,6 +37,7 @@ export default function Pricing({
   // Get pricing for calculations
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
+  const videoPrice = generationPrices?.find(p => p.price_type === 'video_generation')?.tokens_cost || 10;
   const handlePayment = async (packageName: string, amount: number, tokens: number) => {
     try {
       setLoading(packageName);
@@ -166,6 +167,9 @@ export default function Pricing({
                   </div>
                   <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1.5 rounded-md">
                     1 фото = {(pricePerToken * photoPrice).toFixed(2)}₽
+                  </div>
+                  <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1.5 rounded-md">
+                    1 видео = {(pricePerToken * videoPrice).toFixed(2)}₽
                   </div>
                 </div>
               </CardHeader>
