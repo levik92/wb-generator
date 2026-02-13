@@ -1747,8 +1747,7 @@ export const GenerateCards = ({
           <Button onClick={simulateGeneration} disabled={!canGenerate()} className="w-full bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base" size="lg">
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                <span className="hidden sm:inline">Генерация... (выполняется в фоне)</span>
-                <span className="sm:hidden">Генерация...</span>
+                Генерация...
               </> : <>
                 <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               <span className="hidden sm:inline">
