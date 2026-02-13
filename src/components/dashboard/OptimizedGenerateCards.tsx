@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { compressImage, compressImages } from "@/lib/imageCompression";
 import { isTelegramWebApp } from "@/lib/telegram";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -252,10 +253,13 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
     setProgress(0);
 
     try {
+      // Compress images before upload
+      const compressedFiles = await compressImages(files);
+
       // Upload product images first
       const imageUrls: string[] = [];
       
-      for (const file of files) {
+      for (const file of compressedFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
@@ -275,12 +279,13 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
       // Upload reference image if provided
       let referenceImageUrl: string | null = null;
       if (referenceImage) {
-        const fileExt = referenceImage.name.split('.').pop();
+        const compressedRef = await compressImage(referenceImage);
+        const fileExt = compressedRef.name.split('.').pop();
         const fileName = `${profile.id}/reference_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('product-images')
-          .upload(fileName, referenceImage);
+          .upload(fileName, compressedRef);
 
         if (uploadError) {
           console.error('Reference upload error:', uploadError);

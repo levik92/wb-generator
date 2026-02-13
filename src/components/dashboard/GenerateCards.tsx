@@ -23,6 +23,7 @@ import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { compressImage, compressImages } from "@/lib/imageCompression";
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 interface Profile {
   id: string;
@@ -603,13 +604,17 @@ export const GenerateCards = ({
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
     try {
+      // Compress images before upload
+      setJobStatus('Оптимизация изображений...');
+      const compressedFiles = await compressImages(files);
+
       // Upload files to Supabase Storage first
       const productImagesData = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      for (let i = 0; i < compressedFiles.length; i++) {
+        const file = compressedFiles[i];
         const fileExt = file.name.split('.').pop();
         const fileName = `${profile.id}/${Date.now()}_${i}.${fileExt}`;
-        setJobStatus(`Загрузка изображения ${i + 1} из ${files.length}...`);
+        setJobStatus(`Загрузка изображения ${i + 1} из ${compressedFiles.length}...`);
         const {
           data: uploadData,
           error: uploadError
@@ -636,13 +641,15 @@ export const GenerateCards = ({
       // Upload reference image if provided
       let referenceImageUrl: string | null = null;
       if (referenceImage) {
+        setJobStatus('Оптимизация референса...');
+        const compressedRef = await compressImage(referenceImage);
         setJobStatus('Загрузка референса дизайна...');
-        const fileExt = referenceImage.name.split('.').pop();
+        const fileExt = compressedRef.name.split('.').pop();
         const fileName = `${profile.id}/reference_${Date.now()}.${fileExt}`;
         const {
           data: uploadData,
           error: uploadError
-        } = await supabase.storage.from('product-images').upload(fileName, referenceImage, {
+        } = await supabase.storage.from('product-images').upload(fileName, compressedRef, {
           upsert: true
         });
         if (uploadError) {
