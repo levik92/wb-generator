@@ -336,8 +336,11 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     // Try primary API key first
     let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution);
     
-    // If primary key fails with 503/429/403, wait 2 seconds and try fallback key
-    if (!aiResult.ok && (aiResult.status === 500 || aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403)) {
+    // Retryable statuses (including 400 which can be transient with Gemini)
+    const RETRYABLE_STATUSES = [400, 403, 429, 500, 503];
+    
+    // If primary key fails, wait 2 seconds and try fallback key
+    if (!aiResult.ok && RETRYABLE_STATUSES.includes(aiResult.status || 0)) {
       if (geminiApiKey2) {
         console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
         await new Promise(resolve => setTimeout(resolve, FALLBACK_DELAY_MS));
@@ -345,7 +348,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         
         if (aiResult.ok) {
           console.log('Fallback API key succeeded!');
-        } else if (aiResult.status === 500 || aiResult.status === 503 || aiResult.status === 429 || aiResult.status === 403) {
+        } else if (RETRYABLE_STATUSES.includes(aiResult.status || 0)) {
           // Fallback also failed, wait 10 seconds and try primary key one more time
           console.log(`Fallback API key also returned ${aiResult.status}, waiting ${FINAL_RETRY_DELAY_MS}ms before final retry on primary key...`);
           await new Promise(resolve => setTimeout(resolve, FINAL_RETRY_DELAY_MS));
@@ -365,10 +368,12 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       const status = aiResult.status || 500;
       const errorText = aiResult.error || 'Unknown error';
       
-      // Handle rate limit, quota exceeded, or service unavailable - both API keys failed
-      if (status === 500 || status === 429 || status === 403 || status === 503) {
+      // Handle rate limit, quota exceeded, service unavailable, or transient bad request
+      if (status === 400 || status === 500 || status === 429 || status === 403 || status === 503) {
         const failMessage = (status === 503 || status === 500)
-          ? 'Сервис временно перегружен. Попробуйте через несколько минут.' 
+          ? 'Сервис временно перегружен. Попробуйте через несколько минут.'
+          : status === 400
+          ? 'Ошибка обработки запроса. Попробуйте снова или измените изображение.'
           : 'Превышена квота API. Попробуйте позже.';
         
         console.log(`Both API keys failed with status ${status}, marking task as failed`);
@@ -404,31 +409,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
         );
       }
 
-      // Handle bad request
-      if (status === 400) {
-        await supabase
-          .from('generation_tasks')
-          .update({
-            status: 'failed',
-            last_error: 'google_400_bad_request',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', taskId);
 
-        // Refund tokens for bad request errors too
-        const tokensToRefund = calcRefundTokensForTask(task.job);
-        console.log(`Refunding ${tokensToRefund} tokens to user ${task.job.user_id} for bad request error`);
-        await supabase.rpc('refund_tokens', {
-          user_id_param: task.job.user_id,
-          tokens_amount: tokensToRefund,
-          reason_text: 'Возврат за ошибку запроса к API'
-        });
-
-        return new Response(
-          JSON.stringify({ success: false, handled: true, error: `Bad request: ${errorText}` }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
 
       // Handle all other errors - also refund tokens
       const tokensToRefund = calcRefundTokensForTask(task.job);
