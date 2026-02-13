@@ -35,6 +35,21 @@ interface VideoCoversProps {
 }
 
 const ESTIMATED_TIME_SECONDS = 4 * 60; // 4 minutes
+const MAX_WAIT_SECONDS = 8 * 60; // 8 minutes absolute max
+
+const WAITING_MESSAGES = [
+  "Ещё чуть-чуть, ИИ дорабатывает детали…",
+  "Почти готово! Финальные штрихи…",
+  "Нейросеть старается сделать идеально…",
+  "Скоро будет готово, подождите немного…",
+  "Обработка занимает чуть больше времени…",
+  "ИИ создаёт плавную анимацию — это требует времени…",
+];
+
+const UPLOAD_MESSAGES = [
+  "Загружаем изображение на сервер…",
+  "Подготавливаем файл для обработки…",
+];
 
 export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -45,8 +60,9 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
   const [currentJob, setCurrentJob] = useState<VideoJob | null>(null);
   const [history, setHistory] = useState<VideoJob[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [remainingSeconds, setRemainingSeconds] = useState(ESTIMATED_TIME_SECONDS);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
+  const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,26 +78,58 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     };
   }, []);
 
-  // Countdown timer
+  // Elapsed timer
   useEffect(() => {
-    if (isGenerating || (currentJob && (currentJob.status === "processing" || currentJob.status === "pending"))) {
+    const isActive = isUploading || isGenerating || (currentJob && (currentJob.status === "processing" || currentJob.status === "pending"));
+    if (isActive) {
       const startTime = generationStartTime || Date.now();
       if (!generationStartTime) setGenerationStartTime(startTime);
 
       timerRef.current = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const remaining = Math.max(0, ESTIMATED_TIME_SECONDS - elapsed);
-        setRemainingSeconds(remaining);
+        setElapsedSeconds(elapsed);
+
+        // Rotate waiting messages every 20 seconds after 4 min
+        if (elapsed > ESTIMATED_TIME_SECONDS) {
+          const msgIdx = Math.floor((elapsed - ESTIMATED_TIME_SECONDS) / 20) % WAITING_MESSAGES.length;
+          setWaitingMessageIndex(msgIdx);
+        }
+
+        // Timeout at 8 minutes — reset
+        if (elapsed >= MAX_WAIT_SECONDS) {
+          handleTimeout();
+        }
       }, 1000);
 
       return () => {
         if (timerRef.current) clearInterval(timerRef.current);
       };
     } else {
-      setRemainingSeconds(ESTIMATED_TIME_SECONDS);
+      setElapsedSeconds(0);
       setGenerationStartTime(null);
+      setWaitingMessageIndex(0);
     }
-  }, [isGenerating, currentJob?.status]);
+  }, [isUploading, isGenerating, currentJob?.status]);
+
+  const handleTimeout = () => {
+    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    setIsGenerating(false);
+    setIsUploading(false);
+    setCurrentJob(null);
+    setElapsedSeconds(0);
+    setGenerationStartTime(null);
+    onTokensUpdate();
+    toast({
+      title: "Превышено время ожидания",
+      description: "Генерация заняла слишком много времени. Токены будут возвращены, если результат не будет получен.",
+      variant: "destructive",
+    });
+  };
+
+  const remainingSeconds = Math.max(0, ESTIMATED_TIME_SECONDS - elapsedSeconds);
+  const isInExtendedWait = elapsedSeconds > ESTIMATED_TIME_SECONDS;
+  const progressPercent = Math.min(100, (elapsedSeconds / ESTIMATED_TIME_SECONDS) * 100);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -105,10 +153,8 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
       if (activeJob) {
         setCurrentJob(activeJob);
         setIsGenerating(true);
-        // Estimate remaining time based on created_at
         const elapsed = Math.floor((Date.now() - new Date(activeJob.created_at).getTime()) / 1000);
-        const remaining = Math.max(0, ESTIMATED_TIME_SECONDS - elapsed);
-        setRemainingSeconds(remaining);
+        setElapsedSeconds(elapsed);
         setGenerationStartTime(Date.now() - elapsed * 1000);
         startPolling(activeJob.id);
       }
@@ -204,6 +250,8 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     }
 
     setIsUploading(true);
+    setGenerationStartTime(Date.now());
+    setElapsedSeconds(0);
 
     try {
       const fileExt = selectedImage.name.split(".").pop();
@@ -224,7 +272,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
       setIsUploading(false);
       setIsGenerating(true);
       setGenerationStartTime(Date.now());
-      setRemainingSeconds(ESTIMATED_TIME_SECONDS);
+      setElapsedSeconds(0);
 
       const { data, error } = await supabase.functions.invoke("create-video-job", {
         body: { image_url: imageUrl, user_prompt: userPrompt.trim() || undefined },
@@ -363,20 +411,28 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
       {/* Upload & Generation */}
       <Card>
         <CardContent className="p-4 sm:p-6 space-y-4">
-          {/* Warning during processing */}
-          {isProcessing && (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20 animate-pulse">
-              <AlertTriangle className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-sm font-medium text-primary">
-                {isUploading
-                  ? "Загрузка изображения… Не закрывайте страницу"
-                  : "Генерация видео… Не закрывайте и не сворачивайте страницу"}
-              </span>
+          {/* Upload phase — spinner with message */}
+          {isUploading && (
+            <div className="flex flex-col items-center gap-4 py-8">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+              </div>
+              <div className="text-center space-y-2">
+                <p className="font-medium">Подготовка к генерации…</p>
+                <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
+              </div>
+              {/* Progress bar placeholder */}
+              <div className="w-full max-w-xs">
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Active job progress - with timer and loading animation */}
-          {hasActiveJob && (
+          {/* Active job progress - timer or extended wait messages */}
+          {hasActiveJob && !isUploading && (
             <div className="flex flex-col items-center gap-4 py-8">
               {/* Loading animation */}
               <div className="relative">
@@ -384,15 +440,48 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                 <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
               </div>
               <div className="text-center space-y-2">
-                <p className="font-medium">Генерация видеообложки…</p>
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <Clock className="h-4 w-4" />
-                  <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+                {!isInExtendedWait ? (
+                  <>
+                    <p className="font-medium">Генерация видеообложки…</p>
+                    <div className="flex items-center justify-center gap-2 text-primary">
+                      <Clock className="h-4 w-4" />
+                      <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Расчётное время ~4 минуты. Можете переключиться на другие вкладки.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Генерация занимает немного больше времени, чем обычно
+                    </p>
+                  </>
+                )}
+              </div>
+              {/* Progress bar */}
+              <div className="w-full max-w-xs">
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${Math.min(progressPercent, 95)}%` }}
+                  />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Расчётное время ~4 минуты. Вы можете переключиться на другие вкладки.
+                <p className="text-[10px] text-muted-foreground text-center mt-1">
+                  {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Warning during processing */}
+          {isProcessing && (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20 animate-pulse">
+              <AlertTriangle className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-xs font-medium text-primary">
+                Не закрывайте и не сворачивайте страницу
+              </span>
             </div>
           )}
 
