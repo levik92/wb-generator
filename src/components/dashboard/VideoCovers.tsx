@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock } from "lucide-react";
+import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -24,6 +26,7 @@ interface VideoJob {
   error_message: string | null;
   tokens_cost: number;
   created_at: string;
+  user_prompt?: string | null;
 }
 
 interface VideoCoversProps {
@@ -31,15 +34,21 @@ interface VideoCoversProps {
   onTokensUpdate: () => void;
 }
 
+const ESTIMATED_TIME_SECONDS = 4 * 60; // 4 minutes
+
 export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [userPrompt, setUserPrompt] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentJob, setCurrentJob] = useState<VideoJob | null>(null);
   const [history, setHistory] = useState<VideoJob[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [remainingSeconds, setRemainingSeconds] = useState(ESTIMATED_TIME_SECONDS);
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { price: videoCost, isLoading: priceLoading } = useGenerationPrice("video_generation");
@@ -49,8 +58,36 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     loadHistory();
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  // Countdown timer
+  useEffect(() => {
+    if (isGenerating || (currentJob && (currentJob.status === "processing" || currentJob.status === "pending"))) {
+      const startTime = generationStartTime || Date.now();
+      if (!generationStartTime) setGenerationStartTime(startTime);
+
+      timerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = Math.max(0, ESTIMATED_TIME_SECONDS - elapsed);
+        setRemainingSeconds(remaining);
+      }, 1000);
+
+      return () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+      };
+    } else {
+      setRemainingSeconds(ESTIMATED_TIME_SECONDS);
+      setGenerationStartTime(null);
+    }
+  }, [isGenerating, currentJob?.status]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   const loadHistory = async () => {
     try {
@@ -59,15 +96,20 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
         .select("*")
         .eq("user_id", profile.id)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(20);
 
       if (error) throw error;
       setHistory(data || []);
 
-      // Check if there's an active job
       const activeJob = data?.find((j: VideoJob) => j.status === "processing" || j.status === "pending");
       if (activeJob) {
         setCurrentJob(activeJob);
+        setIsGenerating(true);
+        // Estimate remaining time based on created_at
+        const elapsed = Math.floor((Date.now() - new Date(activeJob.created_at).getTime()) / 1000);
+        const remaining = Math.max(0, ESTIMATED_TIME_SECONDS - elapsed);
+        setRemainingSeconds(remaining);
+        setGenerationStartTime(Date.now() - elapsed * 1000);
         startPolling(activeJob.id);
       }
     } catch (error) {
@@ -164,7 +206,6 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     setIsUploading(true);
 
     try {
-      // Upload image to storage (no compression!)
       const fileExt = selectedImage.name.split(".").pop();
       const fileName = `${profile.id}/video-${Date.now()}.${fileExt}`;
 
@@ -182,10 +223,11 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
 
       setIsUploading(false);
       setIsGenerating(true);
+      setGenerationStartTime(Date.now());
+      setRemainingSeconds(ESTIMATED_TIME_SECONDS);
 
-      // Create video job
       const { data, error } = await supabase.functions.invoke("create-video-job", {
-        body: { image_url: imageUrl },
+        body: { image_url: imageUrl, user_prompt: userPrompt.trim() || undefined },
       });
 
       if (error) throw error;
@@ -219,6 +261,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
       onTokensUpdate();
       startPolling(data.job_id);
       removeImage();
+      setUserPrompt("");
     } catch (error: any) {
       console.error("Generation error:", error);
       toast({
@@ -248,19 +291,77 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
   };
 
   const isProcessing = isUploading || isGenerating;
+  const hasActiveJob = currentJob && (currentJob.status === "processing" || currentJob.status === "pending");
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl md:text-3xl font-bold">Видеообложки</h2>
-        <p className="text-muted-foreground mt-1">
-          Загрузите фото товара и получите 5-секундную видеообложку
-        </p>
+      {/* Header - matching other pages */}
+      <div className="flex items-center gap-3">
+        <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+          <Video className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+            Видеообложки
+            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 animate-pulse">
+              New
+            </Badge>
+          </h2>
+          <p className="text-muted-foreground text-sm">Загрузите фото товара и получите 5-секундную видеообложку</p>
+        </div>
       </div>
+
+      {/* Benefits block */}
+      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
+        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-xl sm:text-2xl font-bold">
+                Живые обложки, которые привлекают внимание
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Анимированные обложки увеличивают CTR карточек на маркетплейсах. Просто загрузите фото товара — ИИ создаст плавную 5-секундную анимацию премиального уровня.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Рост CTR до +35%</p>
+                  <p className="text-[10px] text-muted-foreground">за счёт анимации</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Готово за ~4 минуты</p>
+                  <p className="text-[10px] text-muted-foreground">вместо часов работы</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Eye className="w-4 h-4 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">Выделение в выдаче</p>
+                  <p className="text-[10px] text-muted-foreground">среди статичных карточек</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Upload & Generation */}
       <Card>
-        <CardContent className="p-6 space-y-4">
+        <CardContent className="p-4 sm:p-6 space-y-4">
           {/* Warning during processing */}
           {isProcessing && (
             <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20 animate-pulse">
@@ -268,18 +369,28 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
               <span className="text-sm font-medium text-primary">
                 {isUploading
                   ? "Загрузка изображения… Не закрывайте страницу"
-                  : "Генерация видео… Это может занять 1–3 минуты. Не закрывайте страницу"}
+                  : "Генерация видео… Не закрывайте и не сворачивайте страницу"}
               </span>
             </div>
           )}
 
-          {/* Current job progress */}
-          {currentJob && (currentJob.status === "processing" || currentJob.status === "pending") && (
+          {/* Active job progress - with timer and loading animation */}
+          {hasActiveJob && (
             <div className="flex flex-col items-center gap-4 py-8">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <div className="text-center">
-                <p className="font-medium">Генерация видео…</p>
-                <p className="text-sm text-muted-foreground mt-1">Обычно занимает 1–3 минуты</p>
+              {/* Loading animation */}
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+              </div>
+              <div className="text-center space-y-2">
+                <p className="font-medium">Генерация видеообложки…</p>
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Расчётное время ~4 минуты. Вы можете переключиться на другие вкладки.
+                </p>
               </div>
             </div>
           )}
@@ -300,7 +411,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                 className="w-full max-w-md mx-auto rounded-xl border border-border"
                 style={{ aspectRatio: "3/4" }}
               />
-              <div className="flex justify-center gap-3">
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2">
                   <Download className="h-4 w-4" />
                   Скачать видео
@@ -334,15 +445,16 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
             </div>
           )}
 
-          {/* Upload zone - only when no active job */}
+          {/* Upload zone and form - only when no active job */}
           {!currentJob && !isProcessing && (
-            <>
+            <div className="space-y-4">
+              {/* Image upload */}
               {!selectedImage ? (
                 <div
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                  className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
                   <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                   <p className="font-medium">Загрузите фото товара</p>
@@ -372,22 +484,43 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={priceLoading}
-                    className="gap-2"
-                    size="lg"
-                  >
-                    <Video className="h-5 w-5" />
-                    Сгенерировать видеообложку
-                    <Badge variant="secondary" className="ml-1">
-                      {videoCost} токенов
-                    </Badge>
-                  </Button>
                 </div>
               )}
-            </>
+
+              {/* User wishes field */}
+              <div className="space-y-2">
+                <Label htmlFor="userPrompt">
+                  Пожелания к видео
+                  <span className="text-muted-foreground text-xs ml-2">(необязательно)</span>
+                </Label>
+                <Textarea
+                  id="userPrompt"
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
+                  placeholder="Опишите ваши персональные пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма и т.д. Если оставить поле пустым — нейросеть подберёт лучший вариант автоматически."
+                  className="min-h-[80px]"
+                  maxLength={600}
+                  disabled={isProcessing}
+                />
+                <div className="flex justify-end text-xs text-muted-foreground">
+                  <span>{userPrompt.length}/600 символов</span>
+                </div>
+              </div>
+
+              {/* Generate button */}
+              <Button
+                onClick={handleGenerate}
+                disabled={!selectedImage || priceLoading}
+                className="gap-2 w-full sm:w-auto"
+                size="lg"
+              >
+                <Video className="h-5 w-5" />
+                Сгенерировать видеообложку
+                <Badge variant="secondary" className="ml-1">
+                  {videoCost} токенов
+                </Badge>
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -404,7 +537,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
               .filter((j) => j.id !== currentJob?.id)
               .map((job) => (
                 <Card key={job.id} className="overflow-hidden">
-                  <CardContent className="p-4 space-y-3">
+                  <CardContent className="p-3 sm:p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <Badge
                         variant={
@@ -441,6 +574,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                             v.pause();
                             v.currentTime = 0;
                           }}
+                          onTouchStart={(e) => (e.target as HTMLVideoElement).play()}
                         />
                         <Button
                           size="sm"

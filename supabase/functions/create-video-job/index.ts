@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { image_url } = await req.json();
+    const { image_url, user_prompt } = await req.json();
     if (!image_url) {
       return new Response(JSON.stringify({ error: "image_url is required" }), {
         status: 400,
@@ -132,7 +132,11 @@ Deno.serve(async (req) => {
       .eq("prompt_type", "video_cover")
       .eq("model_type", "kling")
       .single();
-    const prompt = promptData?.prompt_template || "A smooth, cinematic product showcase animation.";
+    let prompt = promptData?.prompt_template || "A smooth, cinematic product showcase animation.";
+    // Append user wishes if provided
+    if (user_prompt && typeof user_prompt === "string" && user_prompt.trim().length > 0) {
+      prompt = `${prompt} User wishes: ${user_prompt.trim().slice(0, 600)}`;
+    }
 
     // Generate JWT for Kling API
     let klingJwt: string;
