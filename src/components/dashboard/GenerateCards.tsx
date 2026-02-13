@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle } from "lucide-react";
 import { CasesPromoBlock } from "./CasesPromoBlock";
 import { CasesPromoBanner } from "./CasesPromoBanner";
 import { GenerationPopups } from "./GenerationPopups";
@@ -97,6 +97,7 @@ export const GenerateCards = ({
   const [regeneratingCards, setRegeneratingCards] = useState<Set<string>>(new Set());
   const [completionNotificationShown, setCompletionNotificationShown] = useState(false);
   const [jobCompleted, setJobCompleted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -605,6 +606,7 @@ export const GenerateCards = ({
     setJobStatus('Создание задачи генерации...');
     try {
       // Compress images before upload
+      setIsUploading(true);
       setJobStatus('Оптимизация изображений...');
       const compressedFiles = await compressImages(files);
 
@@ -732,6 +734,7 @@ export const GenerateCards = ({
         return;
       }
       if (data.success && data.jobId) {
+        setIsUploading(false);
         // Start polling for job progress
         startJobPolling(data.jobId);
         toast({
@@ -749,6 +752,7 @@ export const GenerateCards = ({
         variant: "destructive"
       });
       setGenerating(false);
+      setIsUploading(false);
       setProgress(0);
       setCurrentStage(0);
       setJobStatus('');
@@ -1610,6 +1614,12 @@ export const GenerateCards = ({
                   <Clock className="w-3 h-3" />
                   {jobStatus}
                 </div>}
+              {isUploading && (
+                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-sm mt-2 animate-pulse">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span>Не закрывайте и не сворачивайте страницу до завершения загрузки</span>
+                </div>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
