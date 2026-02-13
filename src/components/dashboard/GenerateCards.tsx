@@ -1610,14 +1610,15 @@ export const GenerateCards = ({
               Генерация карточек
             </CardTitle>
             <CardDescription>
-              {jobStatus && <div className="flex items-center gap-2 text-sm">
+              {isUploading ? (
+                <div className="flex items-center gap-2 text-primary text-sm animate-pulse">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <span>Не закрывайте и не сворачивайте страницу — {jobStatus?.toLowerCase() || 'идёт загрузка'}</span>
+                </div>
+              ) : (
+                jobStatus && <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-3 h-3" />
                   {jobStatus}
-                </div>}
-              {isUploading && (
-                <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-sm mt-2 animate-pulse">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                  <span>Не закрывайте и не сворачивайте страницу до завершения загрузки</span>
                 </div>
               )}
             </CardDescription>
