@@ -303,9 +303,10 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
             Видеообложки
-            <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 animate-pulse">
-              New
-            </Badge>
+            <span className="relative flex h-5 w-5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-5 w-5 bg-emerald-500 items-center justify-center text-[8px] font-bold text-white">N</span>
+            </span>
           </h2>
           <p className="text-muted-foreground text-sm">Загрузите фото товара и получите 5-секундную видеообложку</p>
         </div>
