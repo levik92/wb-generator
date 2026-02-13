@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil, Video, Play } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog as EditDialog, DialogContent as EditDialogContent, DialogHeader as EditDialogHeader, DialogTitle as EditDialogTitle, DialogDescription as EditDialogDescription, DialogFooter as EditDialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,12 +46,14 @@ export const History = ({
 }: HistoryProps) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'cards' | 'description'>('all');
+  const [filter, setFilter] = useState<'all' | 'cards' | 'description' | 'video'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
+  const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editInstructions, setEditInstructions] = useState("");
@@ -76,31 +78,83 @@ export const History = ({
   const loadHistory = async () => {
     try {
       setLoading(true);
-      let countQuery = supabase.from('generations').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('user_id', profile.id);
-      if (filter !== 'all') {
-        countQuery = countQuery.eq('generation_type', filter);
+
+      if (filter === 'video') {
+        // Only video jobs
+        const { data: vData, error: vError, count: vCount } = await (supabase as any)
+          .from('video_generation_jobs')
+          .select('*', { count: 'exact' })
+          .eq('user_id', profile.id)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+
+        if (vError) throw vError;
+        setTotalPages(Math.ceil((vCount || 0) / ITEMS_PER_PAGE) || 1);
+
+        const mapped = (vData || []).map((vj: any) => ({
+          id: vj.id,
+          generation_type: 'video',
+          input_data: { productName: 'Видеообложка', source_image: vj.product_image_url },
+          output_data: { video_url: vj.result_video_url, source_image: vj.product_image_url },
+          tokens_used: vj.tokens_cost,
+          status: 'completed',
+          created_at: vj.created_at,
+          updated_at: vj.updated_at || vj.created_at,
+        }));
+        setGenerations(mapped);
+      } else {
+        let countQuery = supabase.from('generations').select('*', {
+          count: 'exact',
+          head: true
+        }).eq('user_id', profile.id);
+        if (filter !== 'all') {
+          countQuery = countQuery.eq('generation_type', filter);
+        }
+        const { count } = await countQuery;
+        const totalItems = count || 0;
+        const calculatedTotalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        setTotalPages(calculatedTotalPages || 1);
+
+        let query = supabase.from('generations').select('*').eq('user_id', profile.id).order('created_at', {
+          ascending: false
+        }).range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+        if (filter !== 'all') {
+          query = query.eq('generation_type', filter);
+        }
+        const { data, error } = await query;
+        if (error) throw error;
+
+        let allGenerations = data || [];
+
+        // For 'all' filter on page 1, also fetch recent video jobs
+        if (filter === 'all' && currentPage === 1) {
+          const { data: vData } = await (supabase as any)
+            .from('video_generation_jobs')
+            .select('*')
+            .eq('user_id', profile.id)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+          const mappedVideos = (vData || []).map((vj: any) => ({
+            id: vj.id,
+            generation_type: 'video',
+            input_data: { productName: 'Видеообложка', source_image: vj.product_image_url },
+            output_data: { video_url: vj.result_video_url, source_image: vj.product_image_url },
+            tokens_used: vj.tokens_cost,
+            status: 'completed',
+            created_at: vj.created_at,
+            updated_at: vj.updated_at || vj.created_at,
+          }));
+
+          allGenerations = [...allGenerations, ...mappedVideos].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        }
+
+        setGenerations(allGenerations);
       }
-      const {
-        count
-      } = await countQuery;
-      const totalItems = count || 0;
-      const calculatedTotalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-      setTotalPages(calculatedTotalPages);
-      let query = supabase.from('generations').select('*').eq('user_id', profile.id).order('created_at', {
-        ascending: false
-      }).range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
-      if (filter !== 'all') {
-        query = query.eq('generation_type', filter);
-      }
-      const {
-        data,
-        error
-      } = await query;
-      if (error) throw error;
-      setGenerations(data || []);
     } catch (error: any) {
       toast({
         title: "Ошибка загрузки истории",
@@ -181,6 +235,24 @@ export const History = ({
           });
           return;
         }
+      } else if (generation.generation_type === 'video') {
+        const videoUrl = generation.output_data?.video_url;
+        if (videoUrl) {
+          try {
+            const response = await fetch(videoUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${safeProductName}_video.mp4`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } catch {
+            window.open(videoUrl, '_blank');
+          }
+        }
       } else {
         // For descriptions, download as text file
         const description = generation.output_data?.description || 'Описание товара';
@@ -200,6 +272,8 @@ export const History = ({
         title: "Скачивание завершено",
         description: generation.generation_type === 'cards' 
           ? `Скачано ${imagesCount} ${imagesCount === 1 ? 'изображение' : 'изображений'}` 
+          : generation.generation_type === 'video'
+          ? "Видео скачано"
           : "Описание скачано"
       });
     } catch (error) {
@@ -306,6 +380,48 @@ export const History = ({
       setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
     }
   };
+
+      {/* Video Preview Dialog */}
+      <Dialog open={videoPreviewOpen} onOpenChange={setVideoPreviewOpen}>
+        <DialogContent className="max-w-lg p-0 bg-black/90 border-white/10">
+          <DialogTitle className="sr-only">Просмотр видео</DialogTitle>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
+              onClick={() => setVideoPreviewOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+            {videoPreviewUrl && (
+              <video src={videoPreviewUrl} controls autoPlay muted loop className="w-full rounded-t-lg" style={{ aspectRatio: "3/4" }} />
+            )}
+            {videoPreviewUrl && (
+              <div className="p-3">
+                <Button className="w-full gap-2" onClick={async () => {
+                  try {
+                    const response = await fetch(videoPreviewUrl);
+                    const blob = await response.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `video-cover-${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                  } catch {
+                    window.open(videoPreviewUrl, '_blank');
+                  }
+                }}>
+                  <Download className="h-4 w-4" />
+                  Скачать видео
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
   const deleteGeneration = async (generationId: string) => {
     try {
@@ -428,6 +544,7 @@ export const History = ({
               <SelectItem value="all">Все генерации</SelectItem>
               <SelectItem value="cards">Карточки</SelectItem>
               <SelectItem value="description">Описания</SelectItem>
+              <SelectItem value="video">Видеообложки</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -485,7 +602,26 @@ export const History = ({
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 min-w-0">
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
-                    {generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
+                    {generation.generation_type === 'video' ? <div 
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
+                        onClick={() => {
+                          if (generation.output_data?.video_url) {
+                            setVideoPreviewUrl(generation.output_data.video_url);
+                            setVideoPreviewOpen(true);
+                          }
+                        }}
+                      >
+                        {generation.output_data?.source_image ? (
+                          <img src={generation.output_data.source_image} alt="Превью" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                            <Video className="w-6 h-6 text-primary" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="w-5 h-5 text-white" />
+                        </div>
+                      </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
@@ -503,7 +639,7 @@ export const History = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="font-semibold">
-                          {generation.generation_type === 'cards' ? 'Карточки товара' : 'Описание товара'}
+                          {generation.generation_type === 'cards' ? 'Карточки товара' : generation.generation_type === 'video' ? 'Видеообложка' : 'Описание товара'}
                         </h3>
                         <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                           {generation.status === 'completed' ? 'Готово' : 'В процессе'}
@@ -561,6 +697,10 @@ export const History = ({
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
                       {downloadingIds.has(generation.id) ? <>
                           <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
+                        </> : generation.generation_type === 'video' ? <>
+                          <Download className="w-4 h-4 sm:mr-2" />
+                          <span className="hidden sm:inline">Скачать</span>
+                          <span className="sm:hidden">MP4</span>
                         </> : (generation.output_data?.images?.length || 0) > 1 ? <>
                           <Archive className="w-4 h-4 sm:mr-2" />
                           <span className="hidden sm:inline">Скачать ZIP ({generation.output_data.images.length})</span>
@@ -571,9 +711,11 @@ export const History = ({
                           <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
-                    <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {generation.generation_type !== 'video' && (
+                      <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
 

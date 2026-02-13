@@ -64,11 +64,11 @@ export const MobileMenu = ({
     label: 'Бонусы',
     icon: Gift
   }, {
-    id: 'video-cards',
-    label: 'Видео для карточек',
+    id: 'video',
+    label: 'Видеообложки',
     icon: Video,
-    disabled: true,
-    badge: 'Скоро'
+    badge: 'Beta',
+    badgeColor: 'bg-muted text-muted-foreground'
   }, {
     id: 'settings',
     label: 'Настройки',
@@ -116,7 +116,7 @@ export const MobileMenu = ({
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return <div key={item.id} className="relative">
-                    <Button variant={isActive ? "secondary" : "ghost"} className={`w-full justify-start text-left ${isActive ? 'bg-wb-purple/10 text-wb-purple' : ''} ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={() => !item.disabled && handleTabChange(item.id)} disabled={item.disabled}>
+                    <Button variant={isActive ? "secondary" : "ghost"} className={`w-full justify-start text-left ${isActive ? 'bg-wb-purple/10 text-wb-purple' : ''}`} onClick={() => handleTabChange(item.id)}>
                       <Icon className="w-4 h-4 mr-2" />
                       {item.label}
                     </Button>
