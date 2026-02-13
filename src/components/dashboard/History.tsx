@@ -381,47 +381,6 @@ export const History = ({
     }
   };
 
-      {/* Video Preview Dialog */}
-      <Dialog open={videoPreviewOpen} onOpenChange={setVideoPreviewOpen}>
-        <DialogContent className="max-w-lg p-0 bg-black/90 border-white/10">
-          <DialogTitle className="sr-only">Просмотр видео</DialogTitle>
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
-              onClick={() => setVideoPreviewOpen(false)}
-            >
-              <X className="w-5 h-5" />
-            </Button>
-            {videoPreviewUrl && (
-              <video src={videoPreviewUrl} controls autoPlay muted loop className="w-full rounded-t-lg" style={{ aspectRatio: "3/4" }} />
-            )}
-            {videoPreviewUrl && (
-              <div className="p-3">
-                <Button className="w-full gap-2" onClick={async () => {
-                  try {
-                    const response = await fetch(videoPreviewUrl);
-                    const blob = await response.blob();
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `video-cover-${Date.now()}.mp4`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(a.href);
-                  } catch {
-                    window.open(videoPreviewUrl, '_blank');
-                  }
-                }}>
-                  <Download className="h-4 w-4" />
-                  Скачать видео
-                </Button>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
   const deleteGeneration = async (generationId: string) => {
     try {
@@ -484,6 +443,48 @@ export const History = ({
                 alt="Превью карточки" 
                 className="w-full h-auto max-h-[80vh] object-contain"
               />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Preview Dialog */}
+      <Dialog open={videoPreviewOpen} onOpenChange={setVideoPreviewOpen}>
+        <DialogContent className="max-w-lg p-0 bg-black/90 border-white/10">
+          <DialogTitle className="sr-only">Просмотр видео</DialogTitle>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
+              onClick={() => setVideoPreviewOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+            {videoPreviewUrl && (
+              <video src={videoPreviewUrl} controls autoPlay muted loop className="w-full rounded-t-lg" style={{ aspectRatio: "3/4" }} />
+            )}
+            {videoPreviewUrl && (
+              <div className="p-3">
+                <Button className="w-full gap-2" onClick={async () => {
+                  try {
+                    const response = await fetch(videoPreviewUrl);
+                    const blob = await response.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `video-cover-${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                  } catch {
+                    window.open(videoPreviewUrl, '_blank');
+                  }
+                }}>
+                  <Download className="h-4 w-4" />
+                  Скачать видео
+                </Button>
+              </div>
             )}
           </div>
         </DialogContent>

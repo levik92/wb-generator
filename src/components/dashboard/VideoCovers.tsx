@@ -515,10 +515,10 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
 
           {/* Warning during processing */}
           {isProcessing && (
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20 animate-pulse">
-              <AlertTriangle className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-xs font-medium text-primary">
-                Не закрывайте и не сворачивайте страницу
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/60 border border-border">
+              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                Результат создаёт нейросеть. В случае неудовлетворительного результата токены не возвращаются. Пожалуйста, внимательно составляйте описание и пожелания к генерации.
               </span>
             </div>
           )}
@@ -547,10 +547,14 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                 className="w-full max-w-md mx-auto rounded-xl border border-border"
                 style={{ aspectRatio: "3/4" }}
               />
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-3">
                 <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2">
                   <Download className="h-4 w-4" />
                   Скачать видео
+                </Button>
+                <Button variant="outline" onClick={() => setCurrentJob(null)} className="gap-2">
+                  <Video className="h-4 w-4" />
+                  Сгенерировать новое
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground text-center">
