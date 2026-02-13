@@ -297,7 +297,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     <div className="space-y-6">
       {/* Header - matching other pages */}
       <div className="flex items-center gap-3">
-        <div className="shrink-0 w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
           <Video className="w-6 h-6 text-primary" />
         </div>
         <div>
