@@ -1431,6 +1431,8 @@ export type Database = {
           error_message: string | null
           id: string
           kling_task_id: string | null
+          product_image_url: string | null
+          prompt: string | null
           result_video_url: string | null
           source_image_url: string | null
           status: string
@@ -1443,6 +1445,8 @@ export type Database = {
           error_message?: string | null
           id?: string
           kling_task_id?: string | null
+          product_image_url?: string | null
+          prompt?: string | null
           result_video_url?: string | null
           source_image_url?: string | null
           status?: string
@@ -1455,6 +1459,8 @@ export type Database = {
           error_message?: string | null
           id?: string
           kling_task_id?: string | null
+          product_image_url?: string | null
+          prompt?: string | null
           result_video_url?: string | null
           source_image_url?: string | null
           status?: string
