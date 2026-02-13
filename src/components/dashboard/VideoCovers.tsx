@@ -112,6 +112,8 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
   }, [isUploading, isGenerating, currentJob?.status]);
 
   const handleTimeout = () => {
+    // Don't timeout if job already completed
+    if (currentJob?.status === "completed" || currentJob?.status === "failed") return;
     if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     setIsGenerating(false);
@@ -169,9 +171,28 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
 
       const activeJob = data?.find((j: VideoJob) => j.status === "processing" || j.status === "pending");
       if (activeJob) {
+        const elapsed = Math.floor((Date.now() - new Date(activeJob.created_at).getTime()) / 1000);
+        if (elapsed >= MAX_WAIT_SECONDS) return;
+
+        // Immediately check actual status before showing loading UI
+        try {
+          const { data: statusData } = await supabase.functions.invoke("check-video-status", {
+            body: { job_id: activeJob.id },
+          });
+          if (statusData?.status === "completed") {
+            setCurrentJob({ ...activeJob, status: "completed", video_url: statusData.video_url });
+            refreshHistory();
+            return;
+          } else if (statusData?.status === "failed") {
+            setCurrentJob({ ...activeJob, status: "failed", error_message: statusData.error_message });
+            return;
+          }
+        } catch (e) {
+          // Status check failed, proceed with polling
+        }
+
         setCurrentJob(activeJob);
         setIsGenerating(true);
-        const elapsed = Math.floor((Date.now() - new Date(activeJob.created_at).getTime()) / 1000);
         setElapsedSeconds(elapsed);
         setGenerationStartTime(Date.now() - elapsed * 1000);
         startPolling(activeJob.id);
@@ -369,10 +390,9 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
             Видеообложки
-            <span className="relative flex h-5 w-5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-5 w-5 bg-emerald-500 items-center justify-center text-[8px] font-bold text-white">N</span>
-            </span>
+            <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium">
+              Beta
+            </Badge>
           </h2>
           <p className="text-muted-foreground text-sm">Загрузите фото товара и получите 5-секундную видеообложку</p>
         </div>
@@ -505,7 +525,15 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
 
           {/* Completed video */}
           {currentJob?.status === "completed" && currentJob.video_url && (
-            <div className="space-y-4">
+            <div className="space-y-4 relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-muted z-10"
+                onClick={() => setCurrentJob(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
               <div className="flex items-center gap-2 text-primary">
                 <Play className="h-5 w-5" />
                 <span className="font-medium">Видео готово!</span>
@@ -519,20 +547,15 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                 className="w-full max-w-md mx-auto rounded-xl border border-border"
                 style={{ aspectRatio: "3/4" }}
               />
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <div className="flex justify-center">
                 <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2">
                   <Download className="h-4 w-4" />
                   Скачать видео
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setCurrentJob(null);
-                  }}
-                >
-                  Создать новое
-                </Button>
               </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Результат сохранён на странице «История генераций»
+              </p>
             </div>
           )}
 
@@ -633,80 +656,6 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
         </CardContent>
       </Card>
 
-      {/* History */}
-      {history.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            История генераций
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {history
-              .filter((j) => j.id !== currentJob?.id)
-              .map((job) => (
-                <Card key={job.id} className="overflow-hidden">
-                  <CardContent className="p-3 sm:p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Badge
-                        variant={
-                          job.status === "completed"
-                            ? "default"
-                            : job.status === "failed"
-                            ? "destructive"
-                            : "secondary"
-                        }
-                      >
-                        {job.status === "completed"
-                          ? "Готово"
-                          : job.status === "failed"
-                          ? "Ошибка"
-                          : "В процессе"}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(job.created_at).toLocaleDateString("ru-RU")}
-                      </span>
-                    </div>
-
-                    {job.status === "completed" && job.video_url && (
-                      <>
-                        <video
-                          src={job.video_url}
-                          muted
-                          loop
-                          playsInline
-                          className="w-full rounded-lg border border-border"
-                          style={{ aspectRatio: "3/4" }}
-                          onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
-                          onMouseLeave={(e) => {
-                            const v = e.target as HTMLVideoElement;
-                            v.pause();
-                            v.currentTime = 0;
-                          }}
-                          onTouchStart={(e) => (e.target as HTMLVideoElement).play()}
-                        />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full gap-2"
-                          onClick={() => downloadVideo(job.video_url!)}
-                        >
-                          <Download className="h-4 w-4" />
-                          Скачать
-                        </Button>
-                      </>
-                    )}
-
-                    {job.status === "failed" && (
-                      <p className="text-xs text-destructive">
-                        {job.error_message || "Ошибка генерации"}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -92,8 +92,8 @@ export const DashboardSidebar = ({
     id: 'video',
     label: 'Видеообложки',
     icon: Video,
-    badge: 'New',
-    badgeColor: 'bg-emerald-500 text-white border-emerald-500'
+    badge: 'Beta',
+    badgeColor: 'bg-muted text-muted-foreground border-border'
   }, {
     id: 'description',
     label: 'Генерация описаний',
@@ -184,9 +184,8 @@ export const DashboardSidebar = ({
                   <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
-                {item.badge && !isCollapsed && <div className="absolute top-1/2 -translate-y-1/2 right-3 flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                    <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${item.badgeColor || 'bg-muted text-muted-foreground border-border'} rounded-full shadow-sm pointer-events-none font-semibold`}>
+                {item.badge && !isCollapsed && <div className="absolute top-1/2 -translate-y-1/2 right-3">
+                    <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/90 text-emerald-600 border-white/90' : item.badgeColor || 'bg-muted text-muted-foreground border-border'} rounded-full shadow-sm pointer-events-none font-semibold`}>
                       {item.badge}
                     </Badge>
                   </div>}
