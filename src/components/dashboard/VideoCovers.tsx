@@ -390,7 +390,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
             Видеообложки
-            <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium">
+            <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium rounded-md">
               Beta
             </Badge>
           </h2>
