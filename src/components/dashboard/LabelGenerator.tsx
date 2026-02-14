@@ -63,7 +63,7 @@ export default function LabelGenerator() {
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
             Генератор этикеток
-            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0 text-[10px] font-medium rounded-md hover:bg-emerald-500/15 size-7 flex items-center justify-center p-0 shrink-0">
+            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0 text-[10px] font-medium rounded hover:bg-emerald-500/15 size-7 flex items-center justify-center p-0 shrink-0">
               Free
             </Badge>
           </h2>
