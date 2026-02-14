@@ -629,66 +629,85 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         >
         <Card>
           <CardContent className="p-4 sm:p-6 space-y-4">
-            {/* Upload phase — spinner with message */}
-            {isUploading && (
-              <div className="flex flex-col items-center gap-4 py-8">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                  <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                </div>
-                <div className="text-center space-y-2">
-                  <p className="font-medium">Подготовка к генерации…</p>
-                  <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
-                </div>
-                <div className="w-full max-w-xs">
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Active job progress */}
-            {hasActiveJob && !isUploading && (
-              <div className="flex flex-col items-center gap-4 py-8">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                  <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                </div>
-                <div className="text-center space-y-2">
-                  {!isInExtendedWait ? (
-                    <>
-                      <p className="font-medium">Генерация видеообложки…</p>
-                      <div className="flex items-center justify-center gap-2 text-primary">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+            {/* Unified processing area with fixed height to prevent layout jumps */}
+            <div className="min-h-[280px] flex flex-col items-center justify-center">
+              <AnimatePresence mode="wait">
+                {/* Upload phase — spinner with message */}
+                {isUploading && (
+                  <motion.div
+                    key="uploading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex flex-col items-center gap-4 py-8 w-full"
+                  >
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                      <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="font-medium">Подготовка к генерации…</p>
+                      <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
+                    </div>
+                    <div className="w-full max-w-xs">
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Active job progress */}
+                {hasActiveJob && !isUploading && (
+                  <motion.div
+                    key="generating"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex flex-col items-center gap-4 py-8 w-full"
+                  >
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                      <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+                    </div>
+                    <div className="text-center space-y-2">
+                      {!isInExtendedWait ? (
+                        <>
+                          <p className="font-medium">Генерация видеообложки…</p>
+                          <div className="flex items-center justify-center gap-2 text-primary">
+                            <Clock className="h-4 w-4" />
+                            <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Генерация занимает немного больше времени, чем обычно
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    <div className="w-full max-w-xs">
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                          style={{ width: `${Math.min(progressPercent, 95)}%` }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground text-center mt-1">
+                        {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
                       </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Генерация занимает немного больше времени, чем обычно
-                      </p>
-                    </>
-                  )}
-                </div>
-                <div className="w-full max-w-xs">
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                      style={{ width: `${Math.min(progressPercent, 95)}%` }}
-                    />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground text-center mt-1">
-                    {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
-                  </p>
-                </div>
-              </div>
-            )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Warning during processing */}
             {isProcessing && (
