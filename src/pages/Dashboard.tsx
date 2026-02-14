@@ -328,7 +328,7 @@ const Dashboard = () => {
           <DashboardSidebar activeTab={activeTab} onTabChange={handleTabChange} profile={profile} />
         </div>}
       
-      <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
+      <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Mobile Header */}
         {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
             <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20" onClick={() => setMobileMenuOpen(true)}>
