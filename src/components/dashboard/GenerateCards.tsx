@@ -1681,7 +1681,7 @@ export const GenerateCards = ({
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="px-2 sm:px-4 lg:px-6">
+          <CardContent>
             <div className="grid gap-2 sm:gap-3 w-full">
               {generatedImages.map((image, index) => {
             const cardKey = `${image.id}_${index}`;
