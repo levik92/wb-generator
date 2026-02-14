@@ -457,7 +457,7 @@ const NotifySection = () => (
           <Zap className="w-10 h-10 text-white" />
         </div>
         <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-          Единственный сервис с ИИ-видеообложками
+          Сервис №1 в СНГ по ИИ-видеообложкам
         </h2>
         <p className="text-muted-foreground text-lg mb-8">
           Загрузите карточку — получите анимированную обложку за 2 минуты. Без видеооператора, без монтажа, без студии. Только вы и нейросеть.
