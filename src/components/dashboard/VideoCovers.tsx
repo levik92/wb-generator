@@ -479,7 +479,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       </div>
 
       {/* Beta Alert */}
-      <Alert className="border-border bg-muted/50 flex items-center gap-2 [&>svg+div]:ml-0 [&>svg~*]:pl-0 [&>svg]:static [&>svg]:shrink-0">
+      <Alert className="border-border bg-muted/50 flex items-center gap-2 [&>svg+div]:ml-0 [&>svg+div]:translate-y-0 [&>svg~*]:pl-0 [&>svg]:static [&>svg]:shrink-0 py-3">
         <Info className="h-4 w-4 text-muted-foreground !static !translate-y-0 shrink-0" />
         <AlertDescription className="text-xs sm:text-sm text-muted-foreground pr-2 sm:pr-0">
           Функция находится в <span className="font-medium">бета-доступе</span>. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в{" "}
