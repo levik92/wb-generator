@@ -1770,9 +1770,7 @@ export const GenerateCards = ({
                 <span className="hidden sm:inline">
                   Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
                 </span>
-                <span className="sm:hidden">
-                  {generatedImages.length > 0 ? 'Новый комплект' : 'Генерация'}
-                </span>
+                <span className="sm:hidden">Сгенерировать</span>
                 <Badge variant="secondary" className="ml-1">
                   {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} токенов
                 </Badge>
