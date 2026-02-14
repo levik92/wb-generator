@@ -442,6 +442,15 @@ button[role="combobox"]:focus,
   .animate-shimmer {
     animation: shimmer 3s ease-in-out infinite;
   }
+
+  @keyframes border-pulse {
+    0%, 100% {
+      border-color: hsl(var(--primary) / 0.15);
+    }
+    50% {
+      border-color: hsl(var(--primary) / 0.5);
+    }
+  }
 }
 
 /* Telegram Mini App safe area support */

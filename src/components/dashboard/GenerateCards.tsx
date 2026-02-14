@@ -1610,45 +1610,51 @@ export const GenerateCards = ({
 
       {/* Progress */}
       {generating && <Card>
-          <CardContent className="p-4 sm:p-6 space-y-5">
-            {/* Spinner + Status */}
-            <div className="flex flex-col items-center gap-4 pt-4">
-              <div className="relative">
-                <div className="w-14 h-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            {/* Header: Spinner + Title + Status — left aligned */}
+            <div className="flex items-start gap-3 pt-2">
+              <div className="relative shrink-0">
+                <div className="w-9 h-9 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
                 {isUploading 
-                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
-                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
+                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
                 }
               </div>
-              <div className="text-center space-y-1">
+              <div className="space-y-0.5">
                 {isUploading ? (
                   <>
-                    <p className="font-medium text-sm">Подготовка к генерации…</p>
+                    <p className="font-semibold text-sm">Подготовка к генерации…</p>
                     <p className="text-xs text-muted-foreground">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
                   </>
                 ) : estimatedTimeRemaining > 0 ? (
                   <>
-                    <p className="font-medium text-sm">Генерация карточек…</p>
-                    <div className="flex items-center justify-center gap-2 text-primary mt-1">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-lg font-bold tabular-nums">
-                        {estimatedTimeRemaining >= 60 
-                          ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
-                          : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm">Генерация карточек</p>
+                      <div className="flex items-center gap-1 text-primary">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span className="text-sm font-bold tabular-nums">
+                          {estimatedTimeRemaining >= 60 
+                            ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
+                            : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
+                        </span>
+                      </div>
                     </div>
+                    <p className="text-xs text-muted-foreground">{currentStage} из {selectedCards.length} карточек готово</p>
                   </>
                 ) : (
-                  <p className="font-medium text-sm text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                  <>
+                    <p className="font-semibold text-sm">Генерация карточек</p>
+                    <p className="text-xs text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                  </>
                 )}
               </div>
             </div>
 
-            {/* Progress bar */}
-            <div className="w-full max-w-sm mx-auto space-y-1">
+            {/* Progress bar — full width */}
+            <div className="w-full space-y-1">
               <div className="h-2 rounded-full bg-muted overflow-hidden">
                 {isUploading ? (
-                  <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+                  <div className="h-full bg-primary/60 rounded-full animate-pulse" style={{ width: "30%" }} />
                 ) : (
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
@@ -1662,7 +1668,7 @@ export const GenerateCards = ({
               </div>
             </div>
 
-            {/* Card stages grid */}
+            {/* Card stages grid — left aligned */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {selectedCards.map(cardIndex => {
                 const stage = CARD_STAGES[cardIndex];
@@ -1670,18 +1676,19 @@ export const GenerateCards = ({
                 const currentCardPosition = selectedCards.indexOf(cardIndex);
                 const isCompleted = currentCardPosition < completedCount;
                 const isCurrent = currentCardPosition === completedCount;
-                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg border transition-all duration-300 ${isCompleted ? 'bg-primary/10 border-primary/20 text-primary' : isCurrent ? 'bg-primary/5 border-primary/10 text-primary animate-pulse' : 'bg-muted/30 border-border text-muted-foreground'}`}>
+                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-primary/10 border border-primary/20 text-primary' : isCurrent ? 'bg-transparent border border-primary/30 text-primary [animation:border-pulse_2s_ease-in-out_infinite]' : 'bg-muted/30 border border-border text-muted-foreground'}`}
+                    style={isCurrent ? { animation: 'border-pulse 2s ease-in-out infinite' } : undefined}>
                     {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : isCurrent ? <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" /> : <Clock className="w-3.5 h-3.5 shrink-0 opacity-40" />}
                     <span className="truncate">{stage.name}</span>
                   </div>;
               })}
             </div>
 
-            {/* Warning */}
+            {/* Info hint */}
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/50 border border-border">
               <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <span className="text-[11px] text-muted-foreground leading-relaxed">
-                Не закрывайте и не сворачивайте страницу до завершения генерации
+                Не закрывайте страницу до завершения. Если результат не понравится или будут ошибки — вы сможете перегенерировать карточку за 1 токен
               </span>
             </div>
           </CardContent>
