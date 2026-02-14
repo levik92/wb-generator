@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { Download, QrCode, BarChart3, Package } from "lucide-react";
+import { Download, QrCode, BarChart3, Package, Info } from "lucide-react";
 import { toast } from "sonner";
 import QRCodeGenerator from 'qrcode';
 import UnifiedLabelMaker from './UnifiedLabelMaker';
@@ -69,6 +69,13 @@ export default function LabelGenerator() {
           </h2>
           <p className="text-muted-foreground text-sm mt-0.5">Создавайте этикетки, штрихкоды и QR-коды</p>
         </div>
+      </div>
+
+      <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <Info className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <p className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-400">
+          Этот раздел <span className="font-semibold">бесплатный навсегда</span> для всех пользователей WBGen. Генерируйте любые типы штрихкодов и QR-кодов для формирования поставок без ограничений.
+        </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
