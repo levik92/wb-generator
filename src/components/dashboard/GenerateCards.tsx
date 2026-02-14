@@ -1596,8 +1596,8 @@ export const GenerateCards = ({
         <CardContent>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {CARD_STAGES.map((stage, index) => <div key={index} className={`border rounded-lg p-3 sm:p-4 transition-all ${generating ? 'opacity-60 cursor-not-allowed' : selectedCards.includes(index) ? 'border-primary bg-primary/5 cursor-pointer' : 'border-border hover:border-muted-foreground/50 cursor-pointer'}`} onClick={generating ? undefined : () => handleCardToggle(index)}>
-                <div className="flex items-start gap-3">
-                  <Checkbox checked={selectedCards.includes(index)} onChange={() => handleCardToggle(index)} className="mt-0.5" disabled={generating} />
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={selectedCards.includes(index)} onChange={() => handleCardToggle(index)} disabled={generating} />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
