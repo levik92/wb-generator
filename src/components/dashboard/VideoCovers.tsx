@@ -475,11 +475,11 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       </div>
 
       {/* Beta Alert */}
-      <Alert className="border-primary/20 bg-primary/5">
-        <Info className="h-4 w-4 text-primary" />
-        <AlertDescription className="text-sm">
-          Функция находится в <span className="font-semibold">бета-доступе</span>. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в{" "}
-          <a href="https://t.me/wbgen_support" target="_blank" rel="noopener noreferrer" className="underline text-primary font-medium">поддержку</a>.
+      <Alert className="border-border bg-muted/50 flex items-center">
+        <Info className="h-4 w-4 text-muted-foreground !static !translate-y-0 shrink-0" />
+        <AlertDescription className="text-sm text-muted-foreground">
+          Функция находится в <span className="font-medium">бета-доступе</span>. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в{" "}
+          <a href="https://t.me/wbgen_support" target="_blank" rel="noopener noreferrer" className="underline font-medium text-muted-foreground hover:text-foreground transition-colors">поддержку</a>.
         </AlertDescription>
       </Alert>
 
