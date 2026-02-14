@@ -1610,61 +1610,55 @@ export const GenerateCards = ({
 
       {/* Progress */}
       {generating && <Card>
-          <CardContent className="p-4 sm:p-6 space-y-4">
-            <div className="min-h-[280px] flex flex-col items-center justify-center">
-              <div className="flex flex-col items-center gap-4 py-8 w-full">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                  {isUploading 
-                    ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                    : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                  }
-                </div>
-                <div className="text-center space-y-2">
-                  {isUploading ? (
-                    <>
-                      <p className="font-medium">Подготовка к генерации…</p>
-                      <p className="text-sm text-muted-foreground">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
-                    </>
-                  ) : estimatedTimeRemaining > 0 ? (
-                    <>
-                      <p className="font-medium">Генерация карточек…</p>
-                      <div className="flex items-center justify-center gap-2 text-primary">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-lg font-bold tabular-nums">
-                          {estimatedTimeRemaining >= 60 
-                            ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
-                            : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {currentStage} из {selectedCards.length} карточек готово
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {currentStage} из {selectedCards.length} карточек готово
-                      </p>
-                    </>
-                  )}
-                </div>
-                <div className="w-full max-w-xs">
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    {isUploading ? (
-                      <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
-                    ) : (
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                        style={{ width: `${Math.min(smoothProgress, 95)}%` }}
-                      />
-                    )}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground text-center mt-1">
-                    {isUploading ? 'Подготовка…' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}
-                  </p>
-                </div>
+          <CardContent className="p-4 sm:p-6 space-y-5">
+            {/* Spinner + Status */}
+            <div className="flex flex-col items-center gap-4 pt-4">
+              <div className="relative">
+                <div className="w-14 h-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                {isUploading 
+                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+                }
+              </div>
+              <div className="text-center space-y-1">
+                {isUploading ? (
+                  <>
+                    <p className="font-medium text-sm">Подготовка к генерации…</p>
+                    <p className="text-xs text-muted-foreground">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
+                  </>
+                ) : estimatedTimeRemaining > 0 ? (
+                  <>
+                    <p className="font-medium text-sm">Генерация карточек…</p>
+                    <div className="flex items-center justify-center gap-2 text-primary mt-1">
+                      <Clock className="h-4 w-4" />
+                      <span className="text-lg font-bold tabular-nums">
+                        {estimatedTimeRemaining >= 60 
+                          ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
+                          : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="font-medium text-sm text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full max-w-sm mx-auto space-y-1">
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                {isUploading ? (
+                  <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+                ) : (
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${Math.min(smoothProgress, 95)}%` }}
+                  />
+                )}
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>{isUploading ? 'Подготовка…' : `${currentStage} из ${selectedCards.length} карточек`}</span>
+                <span>{isUploading ? '' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
               </div>
             </div>
 
@@ -1674,10 +1668,21 @@ export const GenerateCards = ({
                 const stage = CARD_STAGES[cardIndex];
                 const completedCount = Math.min(currentStage, selectedCards.length);
                 const currentCardPosition = selectedCards.indexOf(cardIndex);
-                return <div key={cardIndex} className={`text-xs p-2 rounded-lg border ${currentCardPosition < completedCount ? 'bg-primary/10 border-primary/20 text-primary' : currentCardPosition === completedCount ? 'bg-primary/5 border-primary/10 text-primary animate-pulse' : 'bg-muted/30 border-border text-muted-foreground'}`}>
-                    {stage.name}
+                const isCompleted = currentCardPosition < completedCount;
+                const isCurrent = currentCardPosition === completedCount;
+                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg border transition-all duration-300 ${isCompleted ? 'bg-primary/10 border-primary/20 text-primary' : isCurrent ? 'bg-primary/5 border-primary/10 text-primary animate-pulse' : 'bg-muted/30 border-border text-muted-foreground'}`}>
+                    {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : isCurrent ? <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" /> : <Clock className="w-3.5 h-3.5 shrink-0 opacity-40" />}
+                    <span className="truncate">{stage.name}</span>
                   </div>;
               })}
+            </div>
+
+            {/* Warning */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/50 border border-border">
+              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <span className="text-[11px] text-muted-foreground leading-relaxed">
+                Не закрывайте и не сворачивайте страницу до завершения генерации
+              </span>
             </div>
           </CardContent>
         </Card>}
