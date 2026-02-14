@@ -1751,9 +1751,9 @@ export const GenerateCards = ({
                   </div>;
           })}
             </div>
-            <div className="mt-4 pt-4 text-xs text-muted-foreground border-t flex items-center justify-start gap-2">
-              <Info className="w-4 h-4 flex-shrink-0" />
-              <span className="text-left">Перегенерация 1 изображения: <span className="font-bold">{priceLoading ? '...' : photoRegenerationPrice} токена</span>. Редактирование: <span className="font-bold">{priceLoading ? '...' : photoEditPrice} токена</span>.</span>
+            <div className="mt-4 pt-4 border-t flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <span>Перегенерация 1 изображения: <strong>{priceLoading ? '...' : photoRegenerationPrice} токена</strong>. Редактирование: <strong>{priceLoading ? '...' : photoEditPrice} токена</strong>.</span>
             </div>
           </CardContent>
         </Card>}
