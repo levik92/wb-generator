@@ -726,7 +726,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
 
             {/* Warning during processing */}
             {isProcessing && (
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/60 border border-border">
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
                 <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <span className="text-xs text-muted-foreground leading-relaxed">
                   Результат создаёт нейросеть. В случае неудовлетворительного результата токены не возвращаются. Пожалуйста, внимательно составляйте описание и пожелания к генерации.
