@@ -1415,7 +1415,7 @@ export const GenerateCards = ({
                 </Tooltip>
               </TooltipProvider>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения, до 3 МБ каждое)
             </CardDescription>
           </CardHeader>
@@ -1455,7 +1455,7 @@ export const GenerateCards = ({
               <Upload className="w-4 h-4 shrink-0" />
               Референс
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               WBGen может взять за основу прикрепленный дизайн (не обязательно, до 3 МБ)
             </CardDescription>
           </CardHeader>
@@ -1519,7 +1519,7 @@ export const GenerateCards = ({
                 <Info className="w-4 h-4 shrink-0" />
                 Информация о товаре
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Укажите детали товара для генерации оптимальных карточек
               </CardDescription>
             </div>
@@ -1543,7 +1543,7 @@ export const GenerateCards = ({
               <Info className="w-4 h-4 shrink-0" />
               Информация о товаре
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Укажите детали товара для генерации оптимальных карточек
             </CardDescription>
           </div>
@@ -1589,7 +1589,7 @@ export const GenerateCards = ({
             <Images className="w-4 h-4 shrink-0" />
             Выбор карточек для генерации
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Выберите какие типы карточек вам нужны
           </CardDescription>
         </CardHeader>
@@ -1665,7 +1665,7 @@ export const GenerateCards = ({
                   <Images className="w-4 h-4 shrink-0" />
                   <span className="truncate">Готовые карточки ({generatedImages.length}/{selectedCards.length})</span>
                 </CardTitle>
-                <CardDescription className="text-sm">
+                <CardDescription className="text-xs sm:text-sm">
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
