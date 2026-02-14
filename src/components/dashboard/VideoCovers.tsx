@@ -627,8 +627,21 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-        <Card>
-          <CardContent className="p-4 sm:p-6 space-y-4">
+        <Card className="relative overflow-hidden">
+          {/* Animated radial gradient backgrounds */}
+          {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
+            <>
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+                animation: 'glow-drift 6s ease-in-out infinite alternate',
+              }} />
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
+                animation: 'glow-drift-top 8s ease-in-out infinite alternate',
+              }} />
+            </>
+          )}
+          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
             {/* Unified processing area - visible during all processing phases */}
             {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
               <div className="min-h-[280px] flex flex-col items-center justify-center">
