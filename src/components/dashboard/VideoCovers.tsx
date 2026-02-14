@@ -76,6 +76,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
   const { price: regenCost } = useGenerationPrice("video_regeneration");
   const [regenPrompt, setRegenPrompt] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenAutoOptimize, setRegenAutoOptimize] = useState(false);
   const [autoOptimize, setAutoOptimize] = useState(false);
   const AUTO_PROMPT_TEXT = "Самостоятельно придумай и определи наилучшие параметры анимации для достижения максимально качественного результата.";
 
@@ -444,6 +445,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       setIsRegenerating(false);
       setIsGenerating(true);
       setRegenPrompt("");
+      setRegenAutoOptimize(false);
       onTokensUpdate();
       startPolling(data.job_id);
     } catch (error: any) {
@@ -742,14 +744,37 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   <div className="space-y-2">
                     <Textarea
                       value={regenPrompt}
-                      onChange={(e) => setRegenPrompt(e.target.value.slice(0, 600))}
-                      placeholder="Новые пожелания к анимации (необязательно)"
+                      onChange={(e) => { if (e.target.value.length <= 1200) setRegenPrompt(e.target.value); }}
+                      placeholder="Опишите пожелания к анимации"
                       className="min-h-[60px] text-sm"
-                      maxLength={600}
+                      maxLength={1200}
+                      disabled={isRegenerating || regenAutoOptimize}
                     />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
+                        <Checkbox
+                          id="regenAutoOptimize"
+                          checked={regenAutoOptimize}
+                          onCheckedChange={(checked) => {
+                            const isChecked = checked === true;
+                            setRegenAutoOptimize(isChecked);
+                            if (isChecked) {
+                              setRegenPrompt(AUTO_PROMPT_TEXT);
+                            } else {
+                              setRegenPrompt("");
+                            }
+                          }}
+                          disabled={isRegenerating}
+                        />
+                        <Label htmlFor="regenAutoOptimize" className="text-sm font-normal cursor-pointer">
+                          Придумай сам
+                        </Label>
+                      </div>
+                      <span className={`text-xs ${regenPrompt.length >= 1200 ? 'text-destructive' : 'text-muted-foreground'}`}>{regenPrompt.length}/1200</span>
+                    </div>
                     <Button
                       onClick={handleRegenerate}
-                      disabled={isRegenerating}
+                      disabled={isRegenerating || (!regenPrompt.trim() && !regenAutoOptimize)}
                       variant="outline"
                       className="gap-2 w-full sm:w-auto"
                     >
