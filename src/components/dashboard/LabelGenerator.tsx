@@ -56,18 +56,18 @@ export default function LabelGenerator() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Генератор этикеток
-          </h1>
-          <p className="text-muted-foreground mt-1">Создавайте этикетки, штрихкоды и QR-коды</p>
+      <div className="flex items-center gap-3">
+        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
+          <BarChart3 className="w-6 h-6 text-primary" />
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-          <Badge className="bg-emerald-500 text-white px-2 py-1 text-xs hover:bg-emerald-500 pointer-events-none">
-            БЕСПЛАТНО
-          </Badge>
-          <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">для всех</span>
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            Генератор этикеток
+            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0 text-[10px] px-2 py-0.5 font-medium rounded-md hover:bg-emerald-500/15">
+              Free
+            </Badge>
+          </h2>
+          <p className="text-muted-foreground text-sm mt-0.5">Создавайте этикетки, штрихкоды и QR-коды</p>
         </div>
       </div>
 
