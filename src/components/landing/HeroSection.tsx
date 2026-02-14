@@ -159,7 +159,7 @@ export const HeroSection = () => {
                   <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/40 to-pink-500/40 rounded-2xl blur-xl opacity-70" />
                   <div className="relative transform rotate-2 sm:rotate-4 hover:rotate-0 hover:scale-105 transition-transform duration-300">
                     <img 
-                      src="/lovable-uploads/4f805d4a-42df-4fcd-b504-90b42e93f85f.jpg" 
+                      src="/lovable-uploads/after-hero.jpg" 
                       alt="После обработки" 
                       className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border-2 border-purple-500/40 shadow-2xl" 
                       loading="eager" 
