@@ -629,12 +629,12 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         >
         <Card>
           <CardContent className="p-4 sm:p-6 space-y-4">
-            {/* Unified processing area - min height only during active processing */}
-            {(isUploading || hasActiveJob) && (
+            {/* Unified processing area - visible during all processing phases */}
+            {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
               <div className="min-h-[280px] flex flex-col items-center justify-center">
                 <AnimatePresence mode="wait">
-                  {/* Upload phase — spinner with message */}
-                  {isUploading && (
+                  {/* Upload/preparation phase — covers upload AND the gap before job is created */}
+                  {(isUploading || (isGenerating && !hasActiveJob)) && (
                     <motion.div
                       key="uploading"
                       initial={{ opacity: 0 }}
