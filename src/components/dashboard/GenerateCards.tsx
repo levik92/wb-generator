@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -1699,6 +1699,30 @@ export const GenerateCards = ({
           </CardContent>
         </Card>}
 
+      {/* Image Preview Dialog — same style as History */}
+      <Dialog open={!!fullscreenImage} onOpenChange={(open) => { if (!open) setFullscreenImage(null); }}>
+        <DialogContent className="max-w-4xl p-0 bg-black/90 border-white/10">
+          <DialogTitle className="sr-only">Просмотр изображения</DialogTitle>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
+              onClick={() => setFullscreenImage(null)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+            {fullscreenImage && (
+              <img 
+                src={fullscreenImage.url} 
+                alt="Превью карточки" 
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Generated Images */}
       {generatedImages.length > 0 && <Card className="bg-card">
           <CardHeader>
@@ -1736,17 +1760,8 @@ export const GenerateCards = ({
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md">
                         <Eye className="w-5 h-5 text-white" />
                       </div>
-                      {/* Dialog trigger (invisible but covers the image) */}
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <div className="absolute inset-0 cursor-pointer" onClick={() => setFullscreenImage(image)} />
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] p-2">
-                          <div className="flex items-center justify-center">
-                            <img src={image.url} alt={`Generated card ${index + 1} - Fullscreen`} className="max-w-full max-h-[80vh] object-contain rounded-lg cursor-pointer" onClick={() => window.open(image.url, '_blank')} title="Кликните чтобы открыть в новом окне" />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      {/* Click to preview */}
+                      <div className="absolute inset-0 cursor-pointer" onClick={() => setFullscreenImage(image)} />
                     </div>
                     
                     <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
