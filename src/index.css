@@ -469,6 +469,24 @@ button[role="combobox"]:focus,
     inherits: false;
     initial-value: 30%;
   }
+
+  @keyframes glow-drift-top {
+    0% {
+      --glow-x2: 75%;
+    }
+    50% {
+      --glow-x2: 25%;
+    }
+    100% {
+      --glow-x2: 75%;
+    }
+  }
+
+  @property --glow-x2 {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 70%;
+  }
 }
 
 /* Telegram Mini App safe area support */

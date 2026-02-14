@@ -1610,10 +1610,15 @@ export const GenerateCards = ({
 
       {/* Progress */}
       {generating && <Card className="relative overflow-hidden">
-          {/* Animated radial gradient background */}
+          {/* Animated radial gradient background — bottom */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
             animation: 'glow-drift 6s ease-in-out infinite alternate',
+          }} />
+          {/* Animated radial gradient background — top */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
+            animation: 'glow-drift-top 8s ease-in-out infinite alternate',
           }} />
           <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
             {/* Header: Spinner + Title + Status — left aligned */}
