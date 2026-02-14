@@ -411,9 +411,9 @@ const CardDesign = () => {
         secondaryCtaText="Смотреть примеры работ"
         secondaryCtaLink="/cases"
         heroImages={[
-          "/lovable-uploads/case-after-01.jpg",
-          "/lovable-uploads/case-after-02.jpg",
-          "/lovable-uploads/case-after-03.jpg",
+          "/lovable-uploads/hero-card-1.jpg",
+          "/lovable-uploads/hero-card-2.jpg",
+          "/lovable-uploads/hero-card-3.jpg",
         ]}
       />
 
