@@ -786,13 +786,6 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
           {/* Upload zone and form - only when no active job */}
           {!currentJob && !isProcessing && (
             <div className="space-y-4">
-              {/* Step-by-step hint */}
-              <Alert className="bg-primary/5 border-primary/20">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <AlertDescription className="text-sm text-foreground/80">
-                  Прикрепите карточку товара, напишите пожелания к видео или включите «Придумай сам» — и нажмите «Сгенерировать».
-                </AlertDescription>
-              </Alert>
 
               {/* Image upload card */}
               <Card className="border-border/50 shadow-sm bg-card">
