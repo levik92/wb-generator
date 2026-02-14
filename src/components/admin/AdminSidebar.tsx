@@ -75,7 +75,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 hidden md:flex sticky top-0 h-screen`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 hidden md:flex h-screen`}>
       {/* Logo / Collapse Toggle */}
       <div className={`${isCollapsed ? 'p-3' : 'p-5'}`}>
         <div className="flex items-center justify-between">
