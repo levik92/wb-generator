@@ -470,7 +470,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
             Видеообложки
-            <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium rounded-md">
+            <Badge variant="secondary" className="text-[10px] font-medium rounded-[10px] hover:bg-secondary size-7 flex items-center justify-center p-0 shrink-0">
               Beta
             </Badge>
           </h2>
