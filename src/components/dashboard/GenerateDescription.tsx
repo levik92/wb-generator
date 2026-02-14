@@ -187,16 +187,10 @@ export const GenerateDescription = ({
       }} className="relative overflow-hidden rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
           {/* Animated gradient backgrounds during generation */}
           {generating && (
-            <>
-              <div className="absolute inset-0 pointer-events-none" style={{
-                background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
-                animation: 'glow-drift 6s ease-in-out infinite alternate',
-              }} />
-              <div className="absolute inset-0 pointer-events-none" style={{
-                background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
-                animation: 'glow-drift-top 8s ease-in-out infinite alternate',
-              }} />
-            </>
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+              animation: 'glow-drift 6s ease-in-out infinite alternate',
+            }} />
           )}
           <div>
             <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><Settings className="w-4 h-4 shrink-0" />Параметры генерации</h3>
