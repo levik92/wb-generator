@@ -75,9 +75,9 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-16 md:w-20' : 'w-64'} shrink-0 border-r border-border bg-sidebar flex flex-col transition-all duration-300 hidden md:flex`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 hidden md:flex sticky top-0 h-screen overflow-y-auto`}>
       {/* Logo / Collapse Toggle */}
-      <div className={`${isCollapsed ? 'p-2' : 'p-6'} shrink-0`}>
+      <div className={`${isCollapsed ? 'p-3' : 'p-5'}`}>
         <div className="flex items-center justify-between">
           {isCollapsed ? (
             <div className="flex justify-center w-full">
@@ -85,24 +85,24 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground"
+                className="h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-accent/10 text-muted-foreground hover:text-accent"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           ) : (
             <>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center shrink-0">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 rounded-lg">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-semibold truncate">WB Генератор</span>
+                <span className="text-sm font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Админ</span>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="h-8 w-8 p-0 bg-muted/50 hover:bg-wb-purple/20 text-muted-foreground hover:text-muted-foreground shrink-0"
+                className="h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-accent/10 text-muted-foreground hover:text-accent"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -114,7 +114,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       <Separator />
 
       {/* Navigation */}
-      <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2' : 'p-4'}`}>
+      <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'p-3'}`}>
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -123,15 +123,15 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             return (
               <li key={item.id} className="relative">
                 <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full ${isCollapsed ? 'justify-center p-2' : 'justify-start'} ${
-                    isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
+                  variant="ghost"
+                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[17px] transition-all duration-200 ${
+                    isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                   }`}
                   onClick={() => onTabChange(item.id)}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${!isCollapsed ? 'mr-3' : ''}`} />
-                  {!isCollapsed && <span className="flex-1 text-left truncate">{item.label}</span>}
+                  <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
+                  {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
               </li>
             );
