@@ -75,7 +75,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 hidden md:flex sticky top-0 h-screen overflow-y-auto`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 hidden md:flex sticky top-0 h-screen`}>
       {/* Logo / Collapse Toggle */}
       <div className={`${isCollapsed ? 'p-3' : 'p-5'}`}>
         <div className="flex items-center justify-between">
@@ -114,7 +114,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       <Separator />
 
       {/* Navigation */}
-      <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'p-3'}`}>
+      <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2' : 'p-3'}`}>
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
