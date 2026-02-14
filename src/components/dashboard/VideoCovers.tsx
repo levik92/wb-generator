@@ -629,85 +629,87 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         >
         <Card>
           <CardContent className="p-4 sm:p-6 space-y-4">
-            {/* Unified processing area with fixed height to prevent layout jumps */}
-            <div className="min-h-[280px] flex flex-col items-center justify-center">
-              <AnimatePresence mode="wait">
-                {/* Upload phase — spinner with message */}
-                {isUploading && (
-                  <motion.div
-                    key="uploading"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex flex-col items-center gap-4 py-8 w-full"
-                  >
-                    <div className="relative">
-                      <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                      <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                    </div>
-                    <div className="text-center space-y-2">
-                      <p className="font-medium">Подготовка к генерации…</p>
-                      <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
-                    </div>
-                    <div className="w-full max-w-xs">
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+            {/* Unified processing area - min height only during active processing */}
+            {(isUploading || (hasActiveJob && !currentJob?.status)) && (
+              <div className="min-h-[280px] flex flex-col items-center justify-center">
+                <AnimatePresence mode="wait">
+                  {/* Upload phase — spinner with message */}
+                  {isUploading && (
+                    <motion.div
+                      key="uploading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex flex-col items-center gap-4 py-8 w-full"
+                    >
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                        <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
                       </div>
-                    </div>
-                  </motion.div>
-                )}
+                      <div className="text-center space-y-2">
+                        <p className="font-medium">Подготовка к генерации…</p>
+                        <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
+                      </div>
+                      <div className="w-full max-w-xs">
+                        <div className="h-2 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
 
-                {/* Active job progress */}
-                {hasActiveJob && !isUploading && (
-                  <motion.div
-                    key="generating"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex flex-col items-center gap-4 py-8 w-full"
-                  >
-                    <div className="relative">
-                      <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                      <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                    </div>
-                    <div className="text-center space-y-2">
-                      {!isInExtendedWait ? (
-                        <>
-                          <p className="font-medium">Генерация видеообложки…</p>
-                          <div className="flex items-center justify-center gap-2 text-primary">
-                            <Clock className="h-4 w-4" />
-                            <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Генерация занимает немного больше времени, чем обычно
-                          </p>
-                        </>
-                      )}
-                    </div>
-                    <div className="w-full max-w-xs">
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                          style={{ width: `${Math.min(progressPercent, 95)}%` }}
-                        />
+                  {/* Active job progress */}
+                  {hasActiveJob && !isUploading && (
+                    <motion.div
+                      key="generating"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex flex-col items-center gap-4 py-8 w-full"
+                    >
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                        <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
                       </div>
-                      <p className="text-[10px] text-muted-foreground text-center mt-1">
-                        {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      <div className="text-center space-y-2">
+                        {!isInExtendedWait ? (
+                          <>
+                            <p className="font-medium">Генерация видеообложки…</p>
+                            <div className="flex items-center justify-center gap-2 text-primary">
+                              <Clock className="h-4 w-4" />
+                              <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Генерация занимает немного больше времени, чем обычно
+                            </p>
+                          </>
+                        )}
+                      </div>
+                      <div className="w-full max-w-xs">
+                        <div className="h-2 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                            style={{ width: `${Math.min(progressPercent, 95)}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground text-center mt-1">
+                          {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Warning during processing */}
             {isProcessing && (
@@ -721,7 +723,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
 
             {/* Completed video */}
             {currentJob?.status === "completed" && currentJob.video_url && (
-              <div className="space-y-4 relative">
+              <div className="space-y-3 sm:space-y-4 relative">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -731,8 +733,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   <X className="h-4 w-4" />
                 </Button>
                 <div className="flex items-center gap-2 text-primary">
-                  <Play className="h-5 w-5" />
-                  <span className="font-medium">Видео готово!</span>
+                  <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="font-medium text-sm sm:text-base">Видео готово! 🎬</span>
                 </div>
                 <video
                   src={currentJob.video_url}
@@ -743,22 +745,22 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   className="w-full max-w-md mx-auto rounded-xl border border-border"
                   style={{ aspectRatio: "3/4" }}
                 />
-                <div className="flex justify-center gap-3">
-                  <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2">
+                <div className="flex flex-col xs:flex-row justify-center gap-2 sm:gap-3">
+                  <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2 w-full xs:w-auto">
                     <Download className="h-4 w-4" />
                     Скачать видео
                   </Button>
-                  <Button variant="outline" onClick={() => setCurrentJob(null)} className="gap-2">
+                  <Button variant="outline" onClick={() => setCurrentJob(null)} className="gap-2 w-full xs:w-auto">
                     <Video className="h-4 w-4" />
                     Сгенерировать новое
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
                   Результат сохранён на странице «История генераций»
                 </p>
 
                 {/* Regeneration block */}
-                <div className="mt-6 p-4 rounded-xl border border-border bg-muted/30 space-y-3">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border border-border bg-muted/30 space-y-3">
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm flex items-center gap-2">
                       <RefreshCw className="h-4 w-4 text-primary" />
