@@ -1463,19 +1463,19 @@ export const GenerateCards = ({
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label 
-                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}
+                  className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}
                   onDragOver={generating ? undefined : handleRefDragOver}
                   onDragEnter={generating ? undefined : handleRefDragEnter}
                   onDragLeave={generating ? undefined : handleRefDragLeave}
                   onDrop={generating ? undefined : handleRefDrop}
                 >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                    <Upload className={`w-8 h-8 mb-4 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`mb-2 text-sm text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <Upload className={`w-8 h-8 mb-3 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Загрузите референс
                     </p>
-                    <p className={`text-xs text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      PNG, JPG, JPEG
+                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Перетащите или нажмите для выбора. PNG, JPG, JPEG
                     </p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleReferenceUpload} disabled={generating} />
