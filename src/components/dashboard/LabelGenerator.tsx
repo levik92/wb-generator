@@ -16,7 +16,7 @@ export default function LabelGenerator() {
 
   // QR code state
   const [qrText, setQrText] = useState("");
-  const [qrSize, setQrSize] = useState([100]);
+  const [qrSize, setQrSize] = useState([500]);
   const [qrFormat, setQrFormat] = useState("PNG");
   const [qrPreview, setQrPreview] = useState("");
 
@@ -150,7 +150,7 @@ export default function LabelGenerator() {
                   <Slider
                     value={qrSize}
                     onValueChange={setQrSize}
-                    max={500}
+                    max={1000}
                     min={100}
                     step={50}
                     className="mt-3"
