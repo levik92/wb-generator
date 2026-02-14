@@ -577,8 +577,8 @@ export const History = ({
       duration: 0.5,
       delay: 0.1
     }}>
-        <Alert className="border-primary/20 bg-primary/5">
-          <Info className="h-4 w-4 text-primary" />
+        <Alert className="border-primary/20 bg-primary/5 flex items-center">
+          <Info className="h-4 w-4 text-primary !static !translate-y-0 shrink-0" />
           <AlertDescription>
             Данные хранятся <span className="font-semibold">1 месяц</span> и затем автоматически удаляются.
           </AlertDescription>
