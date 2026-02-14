@@ -852,7 +852,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   disabled={isProcessing || autoOptimize}
                 />
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
                     <Checkbox
                       id="autoOptimizeVideo"
                       checked={autoOptimize}
