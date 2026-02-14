@@ -185,6 +185,10 @@ export default function Pricing({
                   </div>
                   <div className="flex items-center">
                     <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                    <span className="text-xs">{Math.floor(plan.tokens / videoPrice)} видеообложек</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
                     <span className="text-xs">Поддержка в чате</span>
                   </div>
                 </div>

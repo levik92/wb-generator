@@ -5,9 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye } from "lucide-react";
+import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -32,9 +33,10 @@ interface VideoJob {
 interface VideoCoversProps {
   profile: Profile;
   onTokensUpdate: () => void;
+  onNavigate?: (tab: string) => void;
 }
 
-const ESTIMATED_TIME_SECONDS = 4 * 60; // 4 minutes
+const ESTIMATED_TIME_SECONDS = 2 * 60; // 2 minutes
 const MAX_WAIT_SECONDS = 8 * 60; // 8 minutes absolute max
 
 const WAITING_MESSAGES = [
@@ -51,7 +53,7 @@ const UPLOAD_MESSAGES = [
   "Подготавливаем файл для обработки…",
 ];
 
-export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
+export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCoversProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
@@ -68,6 +70,9 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { price: videoCost, isLoading: priceLoading } = useGenerationPrice("video_generation");
+  const { price: regenCost } = useGenerationPrice("video_regeneration");
+  const [regenPrompt, setRegenPrompt] = useState("");
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // Load history and resume active jobs on mount
   useEffect(() => {
@@ -377,7 +382,67 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
     }
   };
 
-  const isProcessing = isUploading || isGenerating;
+  const handleRegenerate = async () => {
+    if (!currentJob) return;
+    if (profile.tokens_balance < regenCost) {
+      toast({
+        title: "Недостаточно токенов",
+        description: `Для перегенерации нужно ${regenCost} токенов. Пополните баланс.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRegenerating(true);
+    setGenerationStartTime(Date.now());
+    setElapsedSeconds(0);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("regenerate-video-job", {
+        body: { original_job_id: currentJob.id, user_prompt: regenPrompt.trim() || undefined },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast({
+          title: "Ошибка",
+          description: `${data.error}${data.refunded ? ". Токены возвращены." : ""}`,
+          variant: "destructive",
+        });
+        setIsRegenerating(false);
+        onTokensUpdate();
+        return;
+      }
+
+      const newJob: VideoJob = {
+        id: data.job_id,
+        status: "processing",
+        product_image_url: currentJob.product_image_url,
+        video_url: null,
+        error_message: null,
+        tokens_cost: regenCost,
+        created_at: new Date().toISOString(),
+      };
+
+      setCurrentJob(newJob);
+      setIsRegenerating(false);
+      setIsGenerating(true);
+      setRegenPrompt("");
+      onTokensUpdate();
+      startPolling(data.job_id);
+    } catch (error: any) {
+      console.error("Regeneration error:", error);
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось перегенерировать видео",
+        variant: "destructive",
+      });
+      setIsRegenerating(false);
+    }
+  };
+
+  const isProcessing = isUploading || isGenerating || isRegenerating;
   const hasActiveJob = currentJob && (currentJob.status === "processing" || currentJob.status === "pending");
 
   return (
@@ -397,6 +462,15 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
           <p className="text-muted-foreground text-sm">Загрузите фото товара и получите 5-секундную видеообложку</p>
         </div>
       </div>
+
+      {/* Beta Alert */}
+      <Alert className="border-primary/20 bg-primary/5">
+        <Info className="h-4 w-4 text-primary" />
+        <AlertDescription className="text-sm">
+          Функция находится в <span className="font-semibold">бета-доступе</span>. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в{" "}
+          <a href="https://t.me/wbgen_support" target="_blank" rel="noopener noreferrer" className="underline text-primary font-medium">поддержку</a>.
+        </AlertDescription>
+      </Alert>
 
       {/* Benefits block */}
       <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
@@ -427,7 +501,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                   <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium">Готово за ~4 минуты</p>
+                  <p className="text-xs font-medium">Готово за ~2 минуты</p>
                   <p className="text-[10px] text-muted-foreground">вместо часов работы</p>
                 </div>
               </div>
@@ -486,7 +560,7 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                       <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Расчётное время ~4 минуты. Можете переключиться на другие вкладки.
+                      Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
                     </p>
                   </>
                 ) : (
@@ -560,6 +634,40 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
               <p className="text-xs text-muted-foreground text-center">
                 Результат сохранён на странице «История генераций»
               </p>
+
+              {/* Regeneration block */}
+              <div className="mt-6 p-4 rounded-xl border border-border bg-muted/30 space-y-3">
+                <div className="space-y-1">
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-primary" />
+                    Не нравится результат?
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Вы можете перегенерировать видео за {regenCost} токенов. Фото останется прежним, но вы можете изменить описание пожеланий.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Textarea
+                    value={regenPrompt}
+                    onChange={(e) => setRegenPrompt(e.target.value.slice(0, 600))}
+                    placeholder="Новые пожелания к анимации (необязательно)"
+                    className="min-h-[60px] text-sm"
+                    maxLength={600}
+                  />
+                  <Button
+                    onClick={handleRegenerate}
+                    disabled={isRegenerating}
+                    variant="outline"
+                    className="gap-2 w-full sm:w-auto"
+                  >
+                    {isRegenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                    Перегенерировать
+                    <Badge variant="secondary" className="ml-1">
+                      {regenCost} токенов
+                    </Badge>
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -655,8 +763,39 @@ export function VideoCovers({ profile, onTokensUpdate }: VideoCoversProps) {
                   {videoCost} токенов
                 </Badge>
               </Button>
+
+              {/* Hint under generate button */}
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
+              </p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* CTA / Promo block */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1">
+              <h3 className="font-semibold">Посмотрите, какие видеообложки можно создавать</h3>
+              <p className="text-sm text-muted-foreground">Примеры работ и возможности нейросети</p>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {onNavigate && (
+                <Button variant="default" size="sm" className="gap-2" onClick={() => onNavigate("pricing")}>
+                  <CreditCard className="h-4 w-4" />
+                  Пополнить баланс
+                </Button>
+              )}
+              <Button variant="outline" size="sm" className="gap-2" asChild>
+                <a href="/services/video-generation" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4" />
+                  Посмотреть примеры
+                </a>
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

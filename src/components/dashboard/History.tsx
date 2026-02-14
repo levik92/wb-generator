@@ -382,6 +382,21 @@ export const History = ({
   };
 
 
+  const deleteVideoGeneration = async (jobId: string) => {
+    try {
+      const { error } = await (supabase as any)
+        .from('video_generation_jobs')
+        .delete()
+        .eq('id', jobId)
+        .eq('user_id', profile.id);
+      if (error) throw error;
+      setGenerations(prev => prev.filter(gen => gen.id !== jobId));
+      toast({ title: "Удалено", description: "Видео успешно удалено" });
+    } catch (error: any) {
+      toast({ title: "Ошибка удаления", description: error.message, variant: "destructive" });
+    }
+  };
+
   const deleteGeneration = async (generationId: string) => {
     try {
       const {
@@ -712,11 +727,9 @@ export const History = ({
                           <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
-                    {generation.generation_type !== 'video' && (
-                      <Button onClick={() => deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
+                    <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation.id) : deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 

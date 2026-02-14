@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           status: job.status,
-          video_url: job.video_url,
+          video_url: job.result_video_url,
           error_message: job.error_message,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
         .from("video_generation_jobs")
         .update({
           status: "completed",
-          video_url: videoUrl,
+          result_video_url: videoUrl,
         })
         .eq("id", job_id);
 

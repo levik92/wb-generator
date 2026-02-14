@@ -285,7 +285,7 @@ const Dashboard = () => {
           onNavigateToLearning={() => handleTabChange('learning')}
         />;
       case 'video':
-        return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} />;
+        return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} onNavigate={handleTabChange} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'notifications':

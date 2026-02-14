@@ -95,3 +95,6 @@ verify_jwt = false
 
 [functions.check-video-status]
 verify_jwt = false
+
+[functions.regenerate-video-job]
+verify_jwt = false
