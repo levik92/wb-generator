@@ -172,13 +172,72 @@ serve(async (req) => {
       }
     }
 
-    console.log(`[cleanup-stale-jobs] Cleanup complete. Cleaned ${totalCleaned} jobs, refunded ${totalTokensRefunded} tokens`);
+    console.log(`[cleanup-stale-jobs] Card jobs cleanup complete. Cleaned ${totalCleaned} jobs, refunded ${totalTokensRefunded} tokens`);
+
+    // === VIDEO GENERATION JOBS CLEANUP ===
+    let videosCleaned = 0;
+    let videoTokensRefunded = 0;
+
+    const { data: staleVideoJobs, error: videoJobsError } = await supabase
+      .from('video_generation_jobs')
+      .select('id, user_id, tokens_cost, prompt, created_at')
+      .eq('status', 'processing')
+      .lt('created_at', staleThreshold);
+
+    if (videoJobsError) {
+      console.error('[cleanup-stale-jobs] Error fetching stale video jobs:', videoJobsError);
+    }
+
+    if (staleVideoJobs && staleVideoJobs.length > 0) {
+      console.log(`[cleanup-stale-jobs] Found ${staleVideoJobs.length} stale video jobs`);
+
+      for (const vJob of staleVideoJobs) {
+        try {
+          console.log(`[cleanup-stale-jobs] Processing stale video job ${vJob.id} for user ${vJob.user_id}`);
+
+          await supabase
+            .from('video_generation_jobs')
+            .update({
+              status: 'failed',
+              error_message: 'Таймаут генерации видео',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', vJob.id);
+
+          const tokensToRefund = Number(vJob.tokens_cost) || 10;
+          await supabase.rpc('refund_tokens', {
+            user_id_param: vJob.user_id,
+            tokens_amount: tokensToRefund,
+            reason_text: 'Возврат за незавершённую видеогенерацию (таймаут)',
+          });
+
+          await supabase.from('notifications').insert({
+            user_id: vJob.user_id,
+            type: 'error',
+            title: 'Ошибка видеогенерации',
+            message: `Генерация видео не завершилась вовремя (таймаут). ${tokensToRefund} токенов возвращены на баланс.`,
+          });
+
+          videosCleaned++;
+          videoTokensRefunded += tokensToRefund;
+          console.log(`[cleanup-stale-jobs] Cleaned video job ${vJob.id}, refunded ${tokensToRefund} tokens`);
+        } catch (vJobError) {
+          console.error(`[cleanup-stale-jobs] Error processing video job ${vJob.id}:`, vJobError);
+        }
+      }
+    } else {
+      console.log('[cleanup-stale-jobs] No stale video jobs found');
+    }
+
+    console.log(`[cleanup-stale-jobs] Full cleanup complete. Cards: ${totalCleaned}, Videos: ${videosCleaned}, Total tokens refunded: ${totalTokensRefunded + videoTokensRefunded}`);
 
     return new Response(
       JSON.stringify({ 
         message: 'Cleanup complete', 
         cleaned: totalCleaned,
-        tokensRefunded: totalTokensRefunded
+        tokensRefunded: totalTokensRefunded,
+        videosCleaned,
+        videoTokensRefunded,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
