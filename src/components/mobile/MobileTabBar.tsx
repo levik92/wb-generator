@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Image, FileText, History, Settings, CreditCard } from "lucide-react";
+import { Image, FileText, History, Video, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MobileTabBarProps {
@@ -8,11 +8,11 @@ interface MobileTabBarProps {
 }
 
 const tabs = [
-  { id: 'pricing', icon: CreditCard, label: 'Баланс' },
   { id: 'description', icon: FileText, label: 'Описания' },
+  { id: 'video', icon: Video, label: 'Видео' },
   { id: 'cards', icon: Image, label: 'Карточки' },
   { id: 'history', icon: History, label: 'История' },
-  { id: 'settings', icon: Settings, label: 'Настройки' },
+  { id: 'pricing', icon: CreditCard, label: 'Баланс' },
 ];
 
 export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
@@ -35,7 +35,7 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
       {/* Background with blur */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-border/50" />
+      <div className="absolute inset-0 bg-white dark:bg-background backdrop-blur-xl border-t border-border/50" />
       
       {/* Safe area padding for iOS */}
       <div className="relative pb-safe">
