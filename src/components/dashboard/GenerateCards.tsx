@@ -1395,8 +1395,8 @@ export const GenerateCards = ({
         {/* Product Images - Takes 3/5 width on desktop */}
         <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="w-4 h-4" />
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Upload className="w-4 h-4 shrink-0" />
               Изображения товара
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
@@ -1451,8 +1451,8 @@ export const GenerateCards = ({
         {/* Reference Image - Takes 2/5 width on desktop */}
         <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="w-4 h-4" />
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Upload className="w-4 h-4 shrink-0" />
               Референс
             </CardTitle>
             <CardDescription>
@@ -1515,7 +1515,10 @@ export const GenerateCards = ({
           {/* Desktop/Tablet layout */}
           <div className="hidden sm:flex sm:items-start sm:justify-between gap-2">
             <div className="flex-1 space-y-1.5">
-              <CardTitle>Информация о товаре</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Info className="w-4 h-4 shrink-0" />
+                Информация о товаре
+              </CardTitle>
               <CardDescription>
                 Укажите детали товара для генерации оптимальных карточек
               </CardDescription>
@@ -1536,7 +1539,10 @@ export const GenerateCards = ({
           
           {/* Mobile title - below clear button */}
           <div className="sm:hidden space-y-1.5">
-            <CardTitle>Информация о товаре</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Info className="w-4 h-4 shrink-0" />
+              Информация о товаре
+            </CardTitle>
             <CardDescription>
               Укажите детали товара для генерации оптимальных карточек
             </CardDescription>
@@ -1579,8 +1585,8 @@ export const GenerateCards = ({
       {/* Card Selection */}
       <Card className="bg-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Images className="w-4 h-4" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Images className="w-4 h-4 shrink-0" />
             Выбор карточек для генерации
           </CardTitle>
           <CardDescription>
