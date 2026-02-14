@@ -618,7 +618,15 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       </AnimatePresence>
 
       {/* Processing states */}
+      <AnimatePresence mode="wait">
       {(isProcessing || currentJob) && (
+        <motion.div
+          key="processing"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+        >
         <Card>
           <CardContent className="p-4 sm:p-6 space-y-4">
             {/* Upload phase — spinner with message */}
@@ -807,11 +815,19 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
             )}
           </CardContent>
         </Card>
+        </motion.div>
       )}
 
       {/* Upload zone and form - only when no active job */}
       {!currentJob && !isProcessing && (
-        <>
+        <motion.div
+          key="form"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-4"
+        >
           {/* Block 1: Upload + wishes */}
           <Card>
             <CardContent className="p-4 sm:p-6 space-y-4">
@@ -965,8 +981,9 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
               )}
             </CardContent>
           </Card>
-        </>
+        </motion.div>
       )}
+      </AnimatePresence>
 
     </div>
   );
