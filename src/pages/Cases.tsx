@@ -63,8 +63,8 @@ const allCases = [
   },
   {
     id: 5,
-    before: "/lovable-uploads/case-before-05.jpg",
-    after: "/lovable-uploads/case-after-05.jpg",
+    before: "/lovable-uploads/case-after-05.jpg",
+    after: "/lovable-uploads/case-before-05.jpg",
     category: "Обувь",
     title: "Кроссовки Nike Air Force",
     conversionGrowth: "+210%",
