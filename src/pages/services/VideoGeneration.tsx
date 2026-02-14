@@ -39,13 +39,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
 import heroImage from "@/assets/service-video-hero.png";
 
 const features = [
   {
     icon: Video,
-    title: "Анимация карточки до 8 сек",
-    description: "Превращаем статичную обложку в «живую» карточку с плавной анимацией. Автовоспроизведение в каталоге WB привлекает внимание",
+    title: "Анимация карточки до 5 сек",
+    description: "Превращаем статичную обложку в «живую» карточку с плавной анимацией до 5 секунд. Автовоспроизведение в каталоге WB привлекает внимание",
     color: "from-purple-500 to-violet-600",
   },
   {
@@ -62,7 +64,7 @@ const features = [
   },
   {
     icon: Clock,
-    title: "До 8 секунд — идеальный хронометраж",
+    title: "До 5 секунд — идеальный хронометраж",
     description: "Оптимальная длительность для автовоспроизведения в каталоге. Успевает привлечь внимание, не замедляя скролл покупателя",
     color: "from-blue-500 to-cyan-600",
   },
@@ -102,7 +104,7 @@ const steps = [
   {
     number: "04",
     title: "Скачайте готовый MP4",
-    description: "Получите видеообложку до 8 секунд в формате MP4 HD для загрузки на Wildberries",
+    description: "Получите видеообложку до 5 секунд в формате MP4 HD для загрузки на Wildberries",
     icon: Download,
   },
 ];
@@ -186,7 +188,7 @@ const faqItems = [
   },
   {
     question: "Какая длительность анимации?",
-    answer: "До 8 секунд — оптимальный хронометраж для автовоспроизведения в каталоге Wildberries. Достаточно, чтобы привлечь внимание, но не замедлять скролл покупателя.",
+    answer: "До 5 секунд — оптимальный хронометраж для автовоспроизведения в каталоге Wildberries. Достаточно, чтобы привлечь внимание, но не замедлять скролл покупателя.",
   },
   {
     question: "Какой формат и разрешение?",
@@ -231,120 +233,116 @@ const relatedServices = [
 const videoCases = [
   {
     id: 1,
-    beforeImage: "/lovable-uploads/case-before-01.webp",
-    afterGif: "/lovable-uploads/case-after-01.jpg", // Will be replaced with GIF
-    title: "Косметика премиум",
-    description: "+47% кликов в первую неделю. Анимация акцентировала блеск упаковки и привлекла внимание в каталоге.",
+    afterImage: "/lovable-uploads/video-case-after-jeans.jpg",
+    videoUrl: "/lovable-uploads/video-case-jeans.mp4",
+    title: "Джинсы — Одежда",
+    description: "+47% кликов в первую неделю. Анимация привлекла внимание к посадке и деталям ткани.",
     metric: "+47% CTR",
   },
   {
     id: 2,
-    beforeImage: "/lovable-uploads/case-before-02.webp",
-    afterGif: "/lovable-uploads/case-after-02.jpg", // Will be replaced with GIF
-    title: "Электроника",
-    description: "+52% конверсии. Плавный zoom на товар показал детали, которые не видны на статичной карточке.",
+    afterImage: "/lovable-uploads/video-case-after-headphones.jpg",
+    videoUrl: "/lovable-uploads/video-case-headphones.mp4",
+    title: "Гарнитура — Электроника",
+    description: "+52% конверсии. Динамичная обложка подчеркнула премиальность и технологичность.",
     metric: "+52% CR",
   },
   {
     id: 3,
-    beforeImage: "/lovable-uploads/case-before-03.webp",
-    afterGif: "/lovable-uploads/case-after-03.jpg", // Will be replaced with GIF
-    title: "Одежда lifestyle",
-    description: "+38% времени просмотра. Параллакс-эффект создал ощущение объёма и премиальности.",
+    afterImage: "/lovable-uploads/video-case-after-laptop.jpg",
+    videoUrl: "/lovable-uploads/video-case-laptop.mp4",
+    title: "Ноутбук — Техника",
+    description: "+38% времени просмотра. Анимация показала мощь и дизайн устройства.",
     metric: "+38% время",
+  },
+  {
+    id: 4,
+    afterImage: "/lovable-uploads/video-case-after-headphones2.jpg",
+    videoUrl: "/lovable-uploads/video-case-headphones2.mp4",
+    title: "Наушники — Аудио",
+    description: "+44% к кликабельности. Премиальный стиль анимации усилил восприятие качества.",
+    metric: "+44% CTR",
   },
 ];
 
 // Video Cases Section with before/after
-const VideoCasesSection = () => (
-  <section className="py-20 sm:py-28 border-t border-white/10 bg-gradient-to-b from-[hsl(268,83%,55%)]/5 to-transparent">
-    <div className="container mx-auto px-4 sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-16"
-      >
-        <span className="inline-block px-4 py-2 rounded-full bg-amber-500/10 text-amber-400 text-sm font-medium mb-4">
-          Кейсы
-        </span>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-          Было статично → Стало живым
-        </h2>
-        <p className="text-white/60 text-lg max-w-2xl mx-auto">
-          Реальные примеры, как анимация карточек увеличивает продажи
-        </p>
-      </motion.div>
+const VideoCasesSection = () => {
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
-      <div className="grid md:grid-cols-3 gap-8">
-        {videoCases.map((caseItem, index) => (
-          <motion.div
-            key={caseItem.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.15 }}
-            className="group"
-          >
-            <div className="glass-card rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/30 transition-all duration-300">
-              {/* Before/After comparison */}
-              <div className="relative">
-                <div className="grid grid-cols-2 gap-px bg-white/10">
-                  {/* Before - static image */}
-                  <div className="relative aspect-[3/4] overflow-hidden">
-                    <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-xs text-white/80">
-                      До
+  return (
+    <section id="examples" className="py-20 sm:py-28 border-t border-white/10 bg-gradient-to-b from-[hsl(var(--primary))]/5 to-transparent">
+      <div className="container mx-auto px-4 sm:px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <span className="inline-block px-4 py-2 rounded-full bg-amber-500/10 text-amber-400 text-sm font-medium mb-4">
+            Кейсы
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            Карточка → Видеообложка до 5 сек
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Нажмите на карточку, чтобы посмотреть готовую видеообложку
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {videoCases.map((caseItem, index) => (
+            <motion.div
+              key={caseItem.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="group cursor-pointer"
+              onClick={() => setActiveVideo(caseItem.videoUrl)}
+            >
+              <div className="glass-card rounded-2xl overflow-hidden border border-white/5 hover:border-amber-500/30 transition-all duration-300">
+                <div className="relative aspect-[3/4] overflow-hidden">
+                  <img
+                    src={caseItem.afterImage}
+                    alt={caseItem.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="w-7 h-7 text-white fill-white" />
                     </div>
-                    <img 
-                      src={caseItem.beforeImage} 
-                      alt="До анимации"
-                      className="w-full h-full object-cover"
-                    />
                   </div>
-                  {/* After - will be GIF */}
-                  <div className="relative aspect-[3/4] overflow-hidden">
-                    <div className="absolute top-3 right-3 z-10 px-2 py-1 bg-amber-500/80 backdrop-blur-sm rounded text-xs text-white font-medium">
-                      После
-                    </div>
-                    <img 
-                      src={caseItem.afterGif} 
-                      alt="После анимации"
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Play overlay to indicate it will be animated */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <Play className="w-6 h-6 text-white fill-white" />
-                      </div>
-                    </div>
+                  <div className="absolute top-3 right-3 px-2 py-1 bg-amber-500/80 backdrop-blur-sm rounded text-xs text-white font-medium">
+                    {caseItem.metric}
                   </div>
                 </div>
-              </div>
-              
-              {/* Content */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold text-white">{caseItem.title}</h3>
-                  <span className="text-amber-400 font-bold text-sm">{caseItem.metric}</span>
+                <div className="p-4">
+                  <h3 className="text-sm sm:text-base font-bold text-foreground mb-1">{caseItem.title}</h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed line-clamp-2">{caseItem.description}</p>
                 </div>
-                <p className="text-white/60 text-sm leading-relaxed">{caseItem.description}</p>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        className="text-center text-white/40 text-sm mt-8"
-      >
-        * Здесь будут анимированные GIF-примеры после запуска функции
-      </motion.p>
-    </div>
-  </section>
-);
+      <Dialog open={!!activeVideo} onOpenChange={() => setActiveVideo(null)}>
+        <DialogContent className="max-w-md p-0 bg-black border-white/10 overflow-hidden">
+          {activeVideo && (
+            <video
+              src={activeVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full aspect-[3/4] object-cover"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+};
 
 // Benefits section with cards layout
 const BenefitsCards = () => (
@@ -492,7 +490,7 @@ const StatsSection = () => (
         {[
           { value: "+60%", label: "к кликабельности", icon: TrendingUp },
           { value: "×2", label: "время просмотра", icon: Clock },
-          { value: "8 сек", label: "хронометраж", icon: Film },
+          { value: "5 сек", label: "хронометраж", icon: Film },
           { value: "2 мин", label: "на создание", icon: Zap },
         ].map((stat, index) => (
           <motion.div
@@ -553,18 +551,21 @@ const VideoGeneration = () => {
       <ServiceHero
         title="Анимация карточек"
         subtitle="«Живые» обложки для WB"
-        description="Превратите готовую карточку в анимированную обложку до 8 секунд. Нейросеть добавляет движение, эффекты и динамику — карточка выделяется в каталоге и привлекает больше кликов."
-        badge="🎬 Скоро"
+        description="Превратите готовую карточку в анимированную обложку до 5 секунд. Нейросеть добавляет движение, эффекты и динамику — карточка выделяется в каталоге и привлекает больше кликов."
+        badge="🎬 Видеообложки"
         stats={[
           { value: "+60%", label: "к CTR" },
-          { value: "до 8 сек", label: "хронометраж" },
+          { value: "до 5 сек", label: "хронометраж" },
           { value: "MP4 HD", label: "формат" },
         ]}
         breadcrumbs={[
           { label: "Продукт" },
           { label: "Анимация карточек" },
         ]}
-        isComingSoon={true}
+        ctaText="Попробовать"
+        ctaLink="/auth"
+        secondaryCtaText="Примеры"
+        secondaryCtaLink="#examples"
         heroImage={heroImage}
       />
 
@@ -603,12 +604,12 @@ const VideoGeneration = () => {
       />
 
       <ServiceCTA
-        title="Пока ждёте — создайте карточки с ИИ"
-        subtitle="Генерация дизайна карточек и SEO-описаний уже доступна"
-        ctaText="Создать карточку"
-        ctaLink="/sozdanie-kartochek"
-        secondaryCtaText="Смотреть все инструменты"
-        secondaryCtaLink="/pricing"
+        title="Создайте видеообложку прямо сейчас"
+        subtitle="Загрузите карточку и получите анимированную обложку за 2 минуты"
+        ctaText="Создать видеообложку"
+        ctaLink="/auth"
+        secondaryCtaText="Смотреть примеры"
+        secondaryCtaLink="#examples"
       />
     </ServicePageLayout>
   );
