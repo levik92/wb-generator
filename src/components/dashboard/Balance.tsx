@@ -125,7 +125,7 @@ export default function Balance() {
       delay: 0.2
     }}>
         <Card className="border-border/50 w-full overflow-hidden bg-card">
-          <CardHeader className="p-4 sm:p-6">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
             <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
             <CardDescription>Стоимость указана в токенах</CardDescription>
           </CardHeader>
