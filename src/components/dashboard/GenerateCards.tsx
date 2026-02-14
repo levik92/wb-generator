@@ -1802,10 +1802,10 @@ export const GenerateCards = ({
       
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-2xl">
+        <DialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
           <DialogHeader className="space-y-2">
             <DialogTitle className="flex items-center gap-2 text-lg">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                 <Edit className="w-4 h-4 text-primary" />
               </div>
               Редактировать карточку
@@ -1819,7 +1819,7 @@ export const GenerateCards = ({
               <Label htmlFor="edit-instructions" className="font-semibold">
                 Что нужно изменить?
               </Label>
-              <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => setEditInstructions(e.target.value)} className="min-h-[120px] bg-background/50 border-border/50 rounded-xl focus:border-primary/50" />
+              <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => setEditInstructions(e.target.value)} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 rounded-lg bg-muted/50">
               <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
@@ -1827,10 +1827,10 @@ export const GenerateCards = ({
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-xl">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
               Отмена
             </Button>
-            <Button onClick={editCard} disabled={!editInstructions.trim()} className="rounded-xl gap-2">
+            <Button onClick={editCard} disabled={!editInstructions.trim()} className="rounded-lg gap-2">
               <Sparkles className="w-4 h-4" />
               Начать редактирование
             </Button>
