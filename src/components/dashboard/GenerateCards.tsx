@@ -1422,14 +1422,14 @@ export const GenerateCards = ({
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                    <Upload className={`w-8 h-8 mb-4 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`mb-2 text-sm text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
+                <label className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <Upload className={`w-8 h-8 mb-3 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`text-sm font-semibold ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Загрузите изображения товара
                     </p>
-                    <p className={`text-xs text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      PNG, JPG, JPEG (МАКС. 3 изображения)
+                    <p className={`text-xs mt-1 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Перетащите или нажмите для выбора. PNG, JPG, JPEG (макс. 3)
                     </p>
                   </div>
                   <input type="file" className="hidden" multiple accept="image/*" onChange={handleFileUpload} disabled={generating} />
