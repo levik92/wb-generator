@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, FileText, Images, Loader2, Pencil, Zap } from "lucide-react";
+import { Coins, FileText, Images, Loader2, Pencil, Video, RefreshCw, Zap } from "lucide-react";
 import Pricing from "./Pricing";
 import PaymentHistory from "./PaymentHistory";
 import { PromoCodeInput } from "./PromoCodeInput";
@@ -31,6 +31,8 @@ export default function Balance() {
   const regenPrice = generationPrices?.find(p => p.price_type === 'photo_regeneration')?.tokens_cost ?? 0;
   const descPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost ?? 0;
   const editPrice = generationPrices?.find(p => p.price_type === 'photo_edit')?.tokens_cost ?? 0;
+  const videoPrice = generationPrices?.find(p => p.price_type === 'video_generation')?.tokens_cost ?? 0;
+  const videoRegenPrice = generationPrices?.find(p => p.price_type === 'video_regeneration')?.tokens_cost ?? 0;
   useEffect(() => {
     loadBalance();
   }, []);
@@ -176,6 +178,30 @@ export default function Balance() {
                   </div>
                   <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
                     {editPrice}
+                  </div>
+                </div>
+                <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Video className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">Видеообложка</div>
+                    <div className="text-xs text-muted-foreground">Генерация</div>
+                  </div>
+                  <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
+                    {videoPrice}
+                  </div>
+                </div>
+                <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <RefreshCw className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">Перегенерация</div>
+                    <div className="text-xs text-muted-foreground">Видеообложки</div>
+                  </div>
+                  <div className="bg-background/80 border border-border/50 px-2 sm:px-3 py-1 rounded-lg font-semibold text-xs sm:text-sm">
+                    {videoRegenPrice}
                   </div>
                 </div>
               </div>}
