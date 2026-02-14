@@ -126,7 +126,7 @@ export default function LabelGenerator() {
         </TabsContent>
 
         <TabsContent value="qr" className="space-y-6">
-          <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6">
+          <div className="rounded-2xl border border-border/50 bg-card p-6">
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-1">Генератор QR-кодов</h3>
               <p className="text-sm text-muted-foreground">Создавайте QR-коды для любых данных</p>
