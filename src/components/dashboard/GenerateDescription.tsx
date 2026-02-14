@@ -221,34 +221,40 @@ export const GenerateDescription = ({
               </div>
             </div>
 
-            <Button onClick={simulateGeneration} disabled={!canGenerate() || generating} className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-xl">
+            <Button onClick={simulateGeneration} disabled={!canGenerate() || generating} className="gap-2 w-full sm:w-auto" size="lg">
               {generating ? <span className="flex items-center gap-3">
                   <LightningLoader size="sm" className="text-white fill-white" />
                   <span>Генерирую описание...</span>
                 </span> : <>
-                  <Zap className="w-4 h-4 mr-2" />
-                  {generatedText ? 'Сгенерировать еще' : 'Сгенерировать описание'}
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">{generatedText ? 'Сгенерировать еще' : 'Сгенерировать описание'}</span>
+                  <span className="sm:hidden">Сгенерировать</span>
+                  <Badge variant="secondary" className="ml-1">
+                    {priceLoading ? '...' : descriptionPrice} токенов
+                  </Badge>
                 </>}
             </Button>
 
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Info className="w-3.5 h-3.5" />
-              <span>Стоимость: <strong className="text-foreground">{priceLoading ? '...' : descriptionPrice} токенов</strong></span>
+            <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed mt-1">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <p>Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токенов</strong>. Описание генерирует нейросеть на основе введённых данных.</p>
             </div>
             
-            {!canGenerate() && <Alert className="mt-4 bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
+            {!canGenerate() && !generating && (
+              <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
                 <AlertCircle className="h-4 w-4 text-amber-500" />
                 <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
                   {getGuardMessage()}
                 </AlertDescription>
-              </Alert>}
+              </Alert>
+            )}
             
-            {generating && <Alert className="border-primary/30 bg-primary/10">
-                <AlertCircle className="h-4 w-4 text-primary" />
-                <AlertDescription>
-                  <strong>Важно:</strong> Генерация может занять несколько минут. Не закрывайте страницу.
-                </AlertDescription>
-              </Alert>}
+            {generating && (
+              <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
+                <p><strong>Важно:</strong> Генерация может занять несколько минут. Не закрывайте страницу.</p>
+              </div>
+            )}
           </div>
         </motion.div>
 
