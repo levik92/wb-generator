@@ -1760,7 +1760,7 @@ export const GenerateCards = ({
 
       {/* Generate Button */}
       <Card>
-        <CardContent className="space-y-3">
+        <CardContent className="pt-6 space-y-3">
           <Button onClick={simulateGeneration} disabled={!canGenerate()} className="gap-2 w-full sm:w-auto" size="lg">
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
