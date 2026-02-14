@@ -12,7 +12,7 @@ const allCases = [
   {
     id: 1,
     before: "/lovable-uploads/case-after-01.jpg",
-    after: "/lovable-uploads/case-before-01.webp",
+    after: "/lovable-uploads/case-before-01.jpg",
     category: "Продукты",
     title: "Чипсы Lay's",
     conversionGrowth: "+195%",
@@ -25,7 +25,7 @@ const allCases = [
   {
     id: 2,
     before: "/lovable-uploads/case-after-02.jpg",
-    after: "/lovable-uploads/case-before-02.webp",
+    after: "/lovable-uploads/case-before-02.jpg",
     category: "Игрушки",
     title: "LEGO Technic Porsche",
     conversionGrowth: "+230%",
@@ -38,7 +38,7 @@ const allCases = [
   {
     id: 3,
     before: "/lovable-uploads/case-after-03.jpg",
-    after: "/lovable-uploads/case-before-03.webp",
+    after: "/lovable-uploads/case-before-03.jpg",
     category: "Электроника",
     title: "Игровые наушники HyperX",
     conversionGrowth: "+183%",
@@ -64,7 +64,7 @@ const allCases = [
   {
     id: 5,
     before: "/lovable-uploads/case-after-05.jpg",
-    after: "/lovable-uploads/case-before-05.webp",
+    after: "/lovable-uploads/case-before-05.jpg",
     category: "Обувь",
     title: "Кроссовки Nike Air Force",
     conversionGrowth: "+210%",
