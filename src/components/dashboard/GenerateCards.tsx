@@ -1695,7 +1695,7 @@ export const GenerateCards = ({
             </div>
 
             {/* Info hint */}
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/50 border border-border">
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
               <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <span className="text-[11px] text-muted-foreground leading-relaxed">
                 Генерация проходит в фоновом режиме. Если результат не понравится или будут ошибки — вы сможете перегенерировать карточку за 1 токен
