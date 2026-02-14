@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard, Coins } from "lucide-react";
+import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard, Coins, HelpCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Profile {
   id: string;
@@ -74,6 +76,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
   const { price: regenCost } = useGenerationPrice("video_regeneration");
   const [regenPrompt, setRegenPrompt] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [autoOptimize, setAutoOptimize] = useState(false);
+  const AUTO_PROMPT_TEXT = "Самостоятельно придумай и определи наилучшие параметры анимации для достижения максимально качественного результата.";
 
   // Video promo banner dismissal
   const VIDEO_PROMO_KEY = `video_promo_banner_dismissed_${profile.id}`;
@@ -823,18 +827,50 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
 
               {/* User wishes field */}
               <div className="space-y-2">
-                <Label htmlFor="userPrompt">
-                  Пожелания к видео
-                  <span className="text-muted-foreground text-xs ml-2">(необязательно)</span>
-                </Label>
+                <div className="flex items-center justify-between flex-wrap gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <Label htmlFor="userPrompt">
+                      Пожелания к видео
+                    </Label>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[260px] text-xs">
+                          Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="autoOptimizeVideo"
+                      checked={autoOptimize}
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        setAutoOptimize(isChecked);
+                        if (isChecked) {
+                          setUserPrompt(AUTO_PROMPT_TEXT);
+                        } else {
+                          setUserPrompt("");
+                        }
+                      }}
+                      disabled={isProcessing}
+                    />
+                    <Label htmlFor="autoOptimizeVideo" className="text-sm font-normal cursor-pointer">
+                      Придумай сам
+                    </Label>
+                  </div>
+                </div>
                 <Textarea
                   id="userPrompt"
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
-                  placeholder="Опишите ваши персональные пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма и т.д. Если оставить поле пустым — нейросеть подберёт лучший вариант автоматически."
+                  placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
                   className="min-h-[80px]"
                   maxLength={600}
-                  disabled={isProcessing}
+                  disabled={isProcessing || autoOptimize}
                 />
                 <div className="flex justify-end text-xs text-muted-foreground">
                   <span>{userPrompt.length}/600 символов</span>
@@ -844,7 +880,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
               {/* Generate button */}
               <Button
                 onClick={handleGenerate}
-                disabled={!selectedImage || priceLoading}
+                disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
                 className="gap-2 w-full sm:w-auto"
                 size="lg"
               >
