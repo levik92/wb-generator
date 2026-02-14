@@ -922,6 +922,10 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                 </Badge>
               </Button>
 
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
+              </p>
+
               {/* Guard message */}
               {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
                 <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
@@ -933,10 +937,6 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   </AlertDescription>
                 </Alert>
               )}
-
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
-              </p>
             </CardContent>
           </Card>
         </>
