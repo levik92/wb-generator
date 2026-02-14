@@ -214,7 +214,7 @@ export const GenerateCards = ({
           const productImages = rawProductImages.map((img, idx) => ({
             url: img.url,
             name: img.name || `product_${idx + 1}`,
-            type: img.type,
+            type: img.type
           }));
           setJobData({
             productName: latestJob.product_name || '',
@@ -227,7 +227,7 @@ export const GenerateCards = ({
             productImages.map((img, idx) => ({
               url: img.url,
               name: img.name || `product_${idx + 1}`,
-              type: img.type,
+              type: img.type
             }))
           );
 
@@ -238,7 +238,7 @@ export const GenerateCards = ({
             stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
             stageIndex: task.card_index,
             cardType: task.card_type,
-            jobId: latestJob.id  // Store jobId for regeneration even after currentJobId is cleared
+            jobId: latestJob.id // Store jobId for regeneration even after currentJobId is cleared
           }));
           setGeneratedImages(images);
           setJobCompleted(true);
@@ -259,7 +259,7 @@ export const GenerateCards = ({
         const productImages = rawProductImages.map((img, idx) => ({
           url: img.url,
           name: img.name || `product_${idx + 1}`,
-          type: img.type,
+          type: img.type
         }));
         setJobData({
           productName: latestJob.product_name || '',
@@ -272,7 +272,7 @@ export const GenerateCards = ({
           productImages.map((img, idx) => ({
             url: img.url,
             name: img.name || `product_${idx + 1}`,
-            type: img.type,
+            type: img.type
           }))
         );
 
@@ -298,9 +298,9 @@ export const GenerateCards = ({
       return false;
     }
     const maxSizeBytes = 3 * 1024 * 1024; // 3 MB
-    const oversizedFiles = uploadedFiles.filter(file => file.size > maxSizeBytes);
+    const oversizedFiles = uploadedFiles.filter((file) => file.size > maxSizeBytes);
     if (oversizedFiles.length > 0) {
-      const fileNames = oversizedFiles.map(f => `"${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} МБ)`).join(', ');
+      const fileNames = oversizedFiles.map((f) => `"${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)} МБ)`).join(', ');
       toast({
         title: "Файлы слишком большие",
         description: `Максимальный размер файла: 3 МБ. Пожалуйста, сожмите или загрузите изображения меньшего размера. Превышен лимит: ${fileNames}`,
@@ -309,7 +309,7 @@ export const GenerateCards = ({
       return false;
     }
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const invalidFiles = uploadedFiles.filter(file => !allowedTypes.includes(file.type));
+    const invalidFiles = uploadedFiles.filter((file) => !allowedTypes.includes(file.type));
     if (invalidFiles.length > 0) {
       toast({
         title: "Неподдерживаемый формат",
@@ -318,7 +318,7 @@ export const GenerateCards = ({
       });
       return false;
     }
-    setFiles(prev => [...prev, ...uploadedFiles]);
+    setFiles((prev) => [...prev, ...uploadedFiles]);
     return true;
   };
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,7 +345,7 @@ export const GenerateCards = ({
     e.stopPropagation();
     setIsDragOver(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
-    const imageFiles = droppedFiles.filter(file => file.type.startsWith('image/'));
+    const imageFiles = droppedFiles.filter((file) => file.type.startsWith('image/'));
     if (imageFiles.length === 0) {
       toast({
         title: "Неподдерживаемые файлы",
@@ -403,7 +403,7 @@ export const GenerateCards = ({
     e.stopPropagation();
     setIsRefDragOver(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
-    const imageFile = droppedFiles.find(file => file.type.startsWith('image/'));
+    const imageFile = droppedFiles.find((file) => file.type.startsWith('image/'));
     if (!imageFile) {
       toast({
         title: "Неподдерживаемый файл",
@@ -437,10 +437,10 @@ export const GenerateCards = ({
     return null;
   };
   const handleCardToggle = (cardIndex: number) => {
-    setSelectedCards(prev => {
+    setSelectedCards((prev) => {
       if (prev.includes(cardIndex)) {
         if (prev.length === 1) return prev;
-        return prev.filter(i => i !== cardIndex);
+        return prev.filter((i) => i !== cardIndex);
       } else {
         return [...prev, cardIndex].sort((a, b) => a - b);
       }
@@ -525,7 +525,7 @@ export const GenerateCards = ({
               // IMPORTANT: keep original card type so regeneration/edit flows don't fallback to 'cover'
               // (e.g. for mainEdit / "Редактирование изображения")
               cardType: task.card_type,
-              jobId: job.id  // Store jobId for regeneration even after currentJobId is cleared
+              jobId: job.id // Store jobId for regeneration even after currentJobId is cleared
             }));
             setGeneratedImages(images);
           }
@@ -581,9 +581,9 @@ export const GenerateCards = ({
           }
         }
       } catch (error) {
+
         // Log error but continue polling
-      }
-    };
+      }};
 
     // Poll immediately and then every 5 seconds
     pollJob();
@@ -636,7 +636,7 @@ export const GenerateCards = ({
         productImagesData.push({
           url: publicUrl,
           name: `image_${i + 1}.${fileExt}`,
-          type: 'product'  // Mark as product image for consistency
+          type: 'product' // Mark as product image for consistency
         });
       }
 
@@ -672,12 +672,12 @@ export const GenerateCards = ({
       }
 
       // Build complete product images array including reference
-      const allImagesForJob: Array<{ url: string; name: string; type: string }> = productImagesData.map((img, idx) => ({
+      const allImagesForJob: Array<{url: string;name: string;type: string;}> = productImagesData.map((img, idx) => ({
         url: img.url,
         name: img.name || `product_${idx + 1}`,
         type: 'product'
       }));
-      
+
       // Add reference image if present
       if (referenceImageUrl) {
         allImagesForJob.push({
@@ -686,7 +686,7 @@ export const GenerateCards = ({
           type: 'reference'
         });
       }
-      
+
       // Save uploaded images URLs and job data for regeneration (includes reference!)
       setUploadedProductImages(allImagesForJob);
       setJobData({
@@ -871,7 +871,7 @@ export const GenerateCards = ({
   };
   const regenerateCard = async (image: any, index: number) => {
     const cardKey = `${image.id}_${index}`;
-    setRegeneratingCards(prev => new Set([...prev, cardKey]));
+    setRegeneratingCards((prev) => new Set([...prev, cardKey]));
     try {
       // Check if model is loaded
       if (!activeModel) {
@@ -880,7 +880,7 @@ export const GenerateCards = ({
           description: "Загрузка настроек модели...",
           variant: "destructive"
         });
-        setRegeneratingCards(prev => {
+        setRegeneratingCards((prev) => {
           const newSet = new Set(prev);
           newSet.delete(cardKey);
           return newSet;
@@ -894,7 +894,7 @@ export const GenerateCards = ({
 
       // Collect all product images and reference image for regeneration
       // PRIORITY: Database is the source of truth (has complete data incl. reference)
-      let allProductImages: Array<{ url: string; name: string; type: string }> = [];
+      let allProductImages: Array<{url: string;name: string;type: string;}> = [];
       let productNameToUse = '';
       let categoryToUse = '';
       let descriptionToUse = '';
@@ -902,35 +902,35 @@ export const GenerateCards = ({
       // Find the job ID to query (current active job or the one this image belongs to)
       // CRITICAL: prioritize image.jobId since currentJobId is cleared after job completion
       let jobIdForRegeneration = image.jobId || currentJobId;
-      
+
       // Fallback: fetch job_id from generation_tasks if still not available
       if (!jobIdForRegeneration && image.id) {
-        const { data: taskData } = await supabase
-          .from('generation_tasks')
-          .select('job_id')
-          .eq('id', image.id)
-          .maybeSingle();
-        
+        const { data: taskData } = await supabase.
+        from('generation_tasks').
+        select('job_id').
+        eq('id', image.id).
+        maybeSingle();
+
         if (taskData?.job_id) {
           jobIdForRegeneration = taskData.job_id;
         }
       }
-      
+
       if (jobIdForRegeneration) {
         // BEST SOURCE: Fetch from database - contains complete data including reference
-        const { data: job, error: jobError } = await supabase
-          .from('generation_jobs')
-          .select('product_name, category, description, product_images')
-          .eq('id', jobIdForRegeneration)
-          .single();
-        
+        const { data: job, error: jobError } = await supabase.
+        from('generation_jobs').
+        select('product_name, category, description, product_images').
+        eq('id', jobIdForRegeneration).
+        single();
+
         if (!jobError && job) {
           productNameToUse = job.product_name || '';
           categoryToUse = job.category || 'товар';
           descriptionToUse = job.description || '';
-          
+
           if (job.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
-            allProductImages = (job.product_images as Array<{ url: string; name?: string; type?: string }>).map((img, idx) => ({
+            allProductImages = (job.product_images as Array<{url: string;name?: string;type?: string;}>).map((img, idx) => ({
               url: img.url,
               name: img.name || `product_${idx + 1}`,
               type: img.type || 'product'
@@ -938,10 +938,10 @@ export const GenerateCards = ({
           }
         }
       }
-      
+
       // Fallback to jobData if DB fetch didn't work
       if (allProductImages.length === 0 && jobData?.productImages && jobData.productImages.length > 0) {
-        allProductImages = jobData.productImages.map((img: { url: string; name?: string; type?: string }, idx: number) => ({
+        allProductImages = jobData.productImages.map((img: {url: string;name?: string;type?: string;}, idx: number) => ({
           url: img.url,
           name: img.name || `product_${idx + 1}`,
           type: img.type || 'product'
@@ -950,7 +950,7 @@ export const GenerateCards = ({
         categoryToUse = categoryToUse || jobData.category || 'товар';
         descriptionToUse = descriptionToUse || jobData.description || '';
       }
-      
+
       // Last fallback: uploadedProductImages state
       if (allProductImages.length === 0 && uploadedProductImages.length > 0) {
         allProductImages = uploadedProductImages.map((img, idx) => ({
@@ -959,23 +959,23 @@ export const GenerateCards = ({
           type: img.type || 'product'
         }));
       }
-      
+
       // Final fallback for text fields: form fields
       if (!productNameToUse) productNameToUse = productName;
       if (!categoryToUse || categoryToUse === 'товар') categoryToUse = category || 'товар';
       if (!descriptionToUse) descriptionToUse = description;
-      
+
       if (allProductImages.length === 0) {
         throw new Error('Оригинальные изображения недоступны');
       }
-      
+
       // Log regeneration context for debugging
-      const referenceCount = allProductImages.filter(img => img.type === 'reference').length;
-      const productCount = allProductImages.filter(img => img.type === 'product').length;
+      const referenceCount = allProductImages.filter((img) => img.type === 'reference').length;
+      const productCount = allProductImages.filter((img) => img.type === 'product').length;
       console.log(`[Regeneration] cardType: ${image.cardType}, images: ${allProductImages.length} (product: ${productCount}, reference: ${referenceCount})`);
-      
+
       // First product image URL for backward compatibility
-      const sourceImageUrl = allProductImages.find(img => img.type === 'product')?.url || allProductImages[0].url;
+      const sourceImageUrl = allProductImages.find((img) => img.type === 'product')?.url || allProductImages[0].url;
 
       if (!productNameToUse?.trim()) {
         throw new Error('Название товара недоступно');
@@ -1019,7 +1019,7 @@ export const GenerateCards = ({
       });
 
       // Remove from regenerating set on error
-      setRegeneratingCards(prev => {
+      setRegeneratingCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(cardKey);
         return newSet;
@@ -1036,7 +1036,7 @@ export const GenerateCards = ({
         if (error) {
           console.error('Error polling regeneration task:', error);
           clearInterval(pollInterval);
-          setRegeneratingCards(prev => {
+          setRegeneratingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardKey);
             return newSet;
@@ -1045,7 +1045,7 @@ export const GenerateCards = ({
         }
         if (task.status === 'completed' && task.image_url) {
           // Update the generated image with new URL
-          setGeneratedImages(prev => prev.map((img, i) => i === imageIndex ? {
+          setGeneratedImages((prev) => prev.map((img, i) => i === imageIndex ? {
             ...img,
             url: task.image_url
           } : img));
@@ -1054,7 +1054,7 @@ export const GenerateCards = ({
             description: `Карточка успешно перегенерирована`
           });
           clearInterval(pollInterval);
-          setRegeneratingCards(prev => {
+          setRegeneratingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardKey);
             return newSet;
@@ -1066,7 +1066,7 @@ export const GenerateCards = ({
             variant: "destructive"
           });
           clearInterval(pollInterval);
-          setRegeneratingCards(prev => {
+          setRegeneratingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardKey);
             return newSet;
@@ -1076,7 +1076,7 @@ export const GenerateCards = ({
       } catch (error) {
         console.error('Error polling regeneration task:', error);
         clearInterval(pollInterval);
-        setRegeneratingCards(prev => {
+        setRegeneratingCards((prev) => {
           const newSet = new Set(prev);
           newSet.delete(cardKey);
           return newSet;
@@ -1087,7 +1087,7 @@ export const GenerateCards = ({
     // Cleanup after 5 minutes max
     setTimeout(() => {
       clearInterval(pollInterval);
-      setRegeneratingCards(prev => {
+      setRegeneratingCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(cardKey);
         return newSet;
@@ -1110,7 +1110,7 @@ export const GenerateCards = ({
       return;
     }
     const cardKey = `edit_${editingImage.id}_${editingIndex}`;
-    setEditingCards(prev => new Set([...prev, cardKey]));
+    setEditingCards((prev) => new Set([...prev, cardKey]));
     setEditDialogOpen(false);
     try {
       // Check if model is loaded
@@ -1120,7 +1120,7 @@ export const GenerateCards = ({
           description: "Загрузка настроек модели...",
           variant: "destructive"
         });
-        setEditingCards(prev => {
+        setEditingCards((prev) => {
           const newSet = new Set(prev);
           newSet.delete(cardKey);
           return newSet;
@@ -1174,7 +1174,7 @@ export const GenerateCards = ({
       });
 
       // Remove from editing set on error
-      setEditingCards(prev => {
+      setEditingCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(cardKey);
         return newSet;
@@ -1191,7 +1191,7 @@ export const GenerateCards = ({
         if (error) {
           console.error('Error polling edit task:', error);
           clearInterval(pollInterval);
-          setEditingCards(prev => {
+          setEditingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardKey);
             return newSet;
@@ -1200,7 +1200,7 @@ export const GenerateCards = ({
         }
         if (task.status === 'completed' && task.image_url) {
           // Update the generated image with new URL
-          setGeneratedImages(prev => prev.map((img, i) => i === imageIndex ? {
+          setGeneratedImages((prev) => prev.map((img, i) => i === imageIndex ? {
             ...img,
             url: task.image_url
           } : img));
@@ -1209,7 +1209,7 @@ export const GenerateCards = ({
             description: `Карточка успешно отредактирована`
           });
           clearInterval(pollInterval);
-          setEditingCards(prev => {
+          setEditingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardKey);
             return newSet;
@@ -1221,7 +1221,7 @@ export const GenerateCards = ({
             variant: "destructive"
           });
           clearInterval(pollInterval);
-          setEditingCards(prev => {
+          setEditingCards((prev) => {
             const newSet = new Set(prev);
             newSet.delete(cardKey);
             return newSet;
@@ -1231,7 +1231,7 @@ export const GenerateCards = ({
       } catch (error) {
         console.error('Error polling edit task:', error);
         clearInterval(pollInterval);
-        setEditingCards(prev => {
+        setEditingCards((prev) => {
           const newSet = new Set(prev);
           newSet.delete(cardKey);
           return newSet;
@@ -1242,7 +1242,7 @@ export const GenerateCards = ({
     // Cleanup after 5 minutes max
     setTimeout(() => {
       clearInterval(pollInterval);
-      setEditingCards(prev => {
+      setEditingCards((prev) => {
         const newSet = new Set(prev);
         newSet.delete(cardKey);
         return newSet;
@@ -1257,7 +1257,7 @@ export const GenerateCards = ({
       return;
     }
     const interval = setInterval(() => {
-      setSmoothProgress(prev => {
+      setSmoothProgress((prev) => {
         // Прогресс на основе реальных завершенных карточек
         const realProgress = progress;
 
@@ -1280,7 +1280,7 @@ export const GenerateCards = ({
   useEffect(() => {
     if (!generating || estimatedTimeRemaining <= 0) return;
     const interval = setInterval(() => {
-      setEstimatedTimeRemaining(prev => Math.max(0, prev - 1));
+      setEstimatedTimeRemaining((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(interval);
   }, [generating, estimatedTimeRemaining]);
@@ -1292,7 +1292,7 @@ export const GenerateCards = ({
       return;
     }
     const interval = setInterval(() => {
-      setWaitingMessageIndex(prev => {
+      setWaitingMessageIndex((prev) => {
         // Останавливаемся на последней фразе, не зацикливаем
         if (prev >= WAITING_MESSAGES.length - 1) {
           return prev;
@@ -1373,39 +1373,39 @@ export const GenerateCards = ({
       </Card>
 
       {/* Dismissible Cases Promo Banner */}
-      {onNavigateToBalance && (
-        <CasesPromoBanner 
-          userId={profile.id} 
-          loginCount={profile.login_count || 0} 
-          onNavigateToBalance={onNavigateToBalance} 
-        />
-      )}
+      {onNavigateToBalance &&
+    <CasesPromoBanner
+      userId={profile.id}
+      loginCount={profile.login_count || 0}
+      onNavigateToBalance={onNavigateToBalance} />
+
+    }
 
       {/* Generation Popups */}
-      {onNavigateToLearning && (
-        <GenerationPopups 
-          userId={profile.id} 
-          generationCount={generationCount} 
-          onNavigateToLearning={onNavigateToLearning} 
-        />
-      )}
+      {onNavigateToLearning &&
+    <GenerationPopups
+      userId={profile.id}
+      generationCount={generationCount}
+      onNavigateToLearning={onNavigateToLearning} />
+
+    }
 
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
         <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Upload className="w-4 h-4 shrink-0" />
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
               Изображения товара
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button 
-                      type="button" 
-                      className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                      onClick={(e) => e.preventDefault()}
-                    >
+                    <button
+                    type="button"
+                    className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                    onClick={(e) => e.preventDefault()}>
+
                       <Info className="w-4 h-4" />
                     </button>
                   </TooltipTrigger>
@@ -1415,21 +1415,21 @@ export const GenerateCards = ({
                 </Tooltip>
               </TooltipProvider>
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
+            <CardDescription>
               Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения, до 3 МБ каждое)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className={`w-8 h-8 mb-3 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`text-sm font-semibold ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Загрузите изображения товара
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <Upload className={`w-8 h-8 mb-4 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`mb-2 text-sm text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите файлы
                     </p>
-                    <p className={`text-xs mt-1 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Перетащите или нажмите для выбора. PNG, JPG, JPEG (макс. 3)
+                    <p className={`text-xs text-center ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      PNG, JPG, JPEG (МАКС. 3 изображения)
                     </p>
                   </div>
                   <input type="file" className="hidden" multiple accept="image/*" onChange={handleFileUpload} disabled={generating} />
@@ -1451,32 +1451,32 @@ export const GenerateCards = ({
         {/* Reference Image - Takes 2/5 width on desktop */}
         <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Upload className="w-4 h-4 shrink-0" />
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
               Референс
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              WBGen может взять за основу прикрепленный дизайн (не обязательно, до 3 МБ)
-            </CardDescription>
+            <CardDescription>WBGen может взять за основу прикрепленный дизайн (не обязательно)
+
+          </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label 
-                  className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}
-                  onDragOver={generating ? undefined : handleRefDragOver}
-                  onDragEnter={generating ? undefined : handleRefDragEnter}
-                  onDragLeave={generating ? undefined : handleRefDragLeave}
-                  onDrop={generating ? undefined : handleRefDrop}
-                >
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className={`w-8 h-8 mb-3 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Загрузите референс
+                <label
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border bg-muted/30 hover:bg-muted/50 cursor-pointer'}`}
+                onDragOver={generating ? undefined : handleRefDragOver}
+                onDragEnter={generating ? undefined : handleRefDragEnter}
+                onDragLeave={generating ? undefined : handleRefDragLeave}
+                onDrop={generating ? undefined : handleRefDrop}>
+
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <Upload className={`w-8 h-8 mb-4 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`mb-2 text-sm text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите
                     </p>
-                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Перетащите или нажмите для выбора. PNG, JPG, JPEG
-                    </p>
+                    <p className={`text-xs text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>1 изобр. до 3 мб.
+
+                  </p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleReferenceUpload} disabled={generating} />
                 </label>
@@ -1497,7 +1497,7 @@ export const GenerateCards = ({
       <Card className="border-border/50 shadow-sm bg-card">
         <CardHeader>
           {/* Mobile clear button - above title */}
-          <div className="flex justify-start mb-2 sm:hidden">
+          <div className="flex justify-end mb-2 sm:hidden">
             <Button variant="outline" size="sm" onClick={() => {
             setFiles([]);
             setReferenceImage(null);
@@ -1515,11 +1515,8 @@ export const GenerateCards = ({
           {/* Desktop/Tablet layout */}
           <div className="hidden sm:flex sm:items-start sm:justify-between gap-2">
             <div className="flex-1 space-y-1.5">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Info className="w-4 h-4 shrink-0" />
-                Информация о товаре
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardTitle>Информация о товаре</CardTitle>
+              <CardDescription>
                 Укажите детали товара для генерации оптимальных карточек
               </CardDescription>
             </div>
@@ -1539,11 +1536,8 @@ export const GenerateCards = ({
           
           {/* Mobile title - below clear button */}
           <div className="sm:hidden space-y-1.5">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Info className="w-4 h-4 shrink-0" />
-              Информация о товаре
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
+            <CardTitle>Информация о товаре</CardTitle>
+            <CardDescription>
               Укажите детали товара для генерации оптимальных карточек
             </CardDescription>
           </div>
@@ -1551,7 +1545,7 @@ export const GenerateCards = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
-            <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
+            <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={(e) => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
             <div className="flex justify-end text-xs text-muted-foreground">
               <span>{productName.length}/150 символов</span>
             </div>
@@ -1559,10 +1553,10 @@ export const GenerateCards = ({
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
+            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={(e) => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
-                <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
+                <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={(checked) => {
                 setAutoDescription(!!checked);
                 if (checked) {
                   setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
@@ -1585,11 +1579,11 @@ export const GenerateCards = ({
       {/* Card Selection */}
       <Card className="bg-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Images className="w-4 h-4 shrink-0" />
-            Выбор типа карточек
+          <CardTitle className="flex items-center gap-2">
+            <Images className="w-4 h-4" />
+            Выбор карточек для генерации
           </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
+          <CardDescription>
             Выберите какие типы карточек вам нужны
           </CardDescription>
         </CardHeader>
@@ -1616,17 +1610,17 @@ export const GenerateCards = ({
               Генерация карточек
             </CardTitle>
             <CardDescription>
-              {isUploading ? (
-                <div className="flex items-center gap-2 text-primary text-sm animate-pulse">
+              {isUploading ?
+          <div className="flex items-center gap-2 text-primary text-sm animate-pulse">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                   <span>Не закрывайте и не сворачивайте страницу — {jobStatus?.toLowerCase() || 'идёт загрузка'}</span>
-                </div>
-              ) : (
-                jobStatus && <div className="flex items-center gap-2 text-sm">
+                </div> :
+
+          jobStatus && <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-3 h-3" />
                   {jobStatus}
                 </div>
-              )}
+          }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -1643,7 +1637,7 @@ export const GenerateCards = ({
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {selectedCards.map(cardIndex => {
+                {selectedCards.map((cardIndex) => {
               const stage = CARD_STAGES[cardIndex];
               const completedCount = Math.min(currentStage, selectedCards.length);
               const currentCardPosition = selectedCards.indexOf(cardIndex);
@@ -1665,7 +1659,7 @@ export const GenerateCards = ({
                   <Images className="w-4 h-4 shrink-0" />
                   <span className="truncate">Готовые карточки ({generatedImages.length}/{selectedCards.length})</span>
                 </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
+                <CardDescription className="text-sm">
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
@@ -1714,10 +1708,10 @@ export const GenerateCards = ({
                     </div>
                     
                     <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
-                      <Button size="sm" variant="outline" onClick={e => {
-                        e.stopPropagation();
-                        openEditDialog(image, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
+                      <Button size="sm" variant="outline" onClick={(e) => {
+                  e.stopPropagation();
+                  openEditDialog(image, index);
+                }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
                               {editingCards.has(`edit_${image.id}_${index}`) ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
                                   <span className="md:hidden ml-1">Редактируется...</span>
@@ -1727,10 +1721,10 @@ export const GenerateCards = ({
                                 </>}
                       </Button>
                       
-                      <Button size="sm" variant="outline" onClick={e => {
-                        e.stopPropagation();
-                        regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Перегенерировать карточку">
+                      <Button size="sm" variant="outline" onClick={(e) => {
+                  e.stopPropagation();
+                  regenerateCard(image, index);
+                }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Перегенерировать карточку">
                               {isRegenerating ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
                                   <span className="md:hidden ml-1">Перегенерация...</span>
@@ -1740,10 +1734,10 @@ export const GenerateCards = ({
                                 </>}
                       </Button>
                       
-                      <Button size="sm" variant="outline" onClick={async e => {
-                        e.stopPropagation();
-                        await downloadSingle(index);
-                      }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Скачать изображение">
+                      <Button size="sm" variant="outline" onClick={async (e) => {
+                  e.stopPropagation();
+                  await downloadSingle(index);
+                }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Скачать изображение">
                               <Download className="w-3 h-3 md:w-4 md:h-4" />
                               <span className="md:hidden ml-1">Скачать</span>
                       </Button>
@@ -1813,7 +1807,7 @@ export const GenerateCards = ({
               <Label htmlFor="edit-instructions">
                 Что нужно изменить?
               </Label>
-              <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => setEditInstructions(e.target.value)} className="min-h-[120px]" />
+              <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={(e) => setEditInstructions(e.target.value)} className="min-h-[120px]" />
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Info className="w-4 h-4" />
