@@ -1779,7 +1779,7 @@ export const GenerateCards = ({
 
           <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed mt-1">
             <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            <p>Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : selectedCards.length * photoGenerationPrice % 10 >= 2 && selectedCards.length * photoGenerationPrice % 10 <= 4 && (selectedCards.length * photoGenerationPrice % 100 < 10 || selectedCards.length * photoGenerationPrice % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}. Не понравилось? Перегенерация в 5 раз дешевле!</p>
+            <p>Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : selectedCards.length * photoGenerationPrice % 10 >= 2 && selectedCards.length * photoGenerationPrice % 10 <= 4 && (selectedCards.length * photoGenerationPrice % 100 < 10 || selectedCards.length * photoGenerationPrice % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}. Не понравилось либо есть ошибки? Перегенерация в 5 раз дешевле!</p>
           </div>
           
           {!canGenerate() && !generating && (
