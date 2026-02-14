@@ -481,7 +481,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       {/* Beta Alert */}
       <Alert className="border-border bg-muted/50 flex items-center">
         <Info className="h-4 w-4 text-muted-foreground !static !translate-y-0 shrink-0" />
-        <AlertDescription className="text-sm text-muted-foreground">
+        <AlertDescription className="text-xs sm:text-sm text-muted-foreground pr-2 sm:pr-0">
           Функция находится в <span className="font-medium">бета-доступе</span>. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в{" "}
           <a href="https://t.me/wbgen_support" target="_blank" rel="noopener noreferrer" className="underline font-medium text-muted-foreground hover:text-foreground transition-colors">поддержку</a>.
         </AlertDescription>
