@@ -1791,12 +1791,6 @@ export const GenerateCards = ({
             </Alert>
           )}
           
-          {!generating && (
-            <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
-              <p>Результат создает нейросеть. Не понравилось либо заметили ошибки? Нажмите "перегенерировать" - это в 5 раз дешевле!</p>
-            </div>
-          )}
         </CardContent>
       </Card>
       
