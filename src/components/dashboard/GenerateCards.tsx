@@ -1813,7 +1813,10 @@ export const GenerateCards = ({
               <Label htmlFor="edit-instructions" className="font-semibold">
                 Что нужно изменить?
               </Label>
-              <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => setEditInstructions(e.target.value)} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+              <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+              <div className="flex justify-end text-xs text-muted-foreground">
+                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+              </div>
             </div>
             <div className="inline-flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 rounded-lg bg-muted/50 w-fit">
               <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
@@ -1824,7 +1827,7 @@ export const GenerateCards = ({
             <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
               Отмена
             </Button>
-            <Button onClick={editCard} disabled={!editInstructions.trim()} className="rounded-lg gap-2">
+            <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
               <Sparkles className="w-4 h-4" />
               Начать редактирование
             </Button>
