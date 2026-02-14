@@ -158,11 +158,13 @@ export default function Admin() {
   if (!isAdmin) {
     return null;
   }
-  return <div className="min-h-screen bg-background flex flex-col md:flex-row w-full overflow-hidden">
+  return <div className="min-h-screen bg-background flex">
       {/* Desktop Sidebar */}
-      {!isMobile && <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />}
+      {!isMobile && <div className="sticky top-0 h-screen">
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>}
       
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-3 md:p-4 border-b border-border bg-card/50 backdrop-blur-xl shrink-0 sticky top-0 z-20 py-[18px]">
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
