@@ -849,7 +849,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                 size="lg"
               >
                 <Video className="h-5 w-5" />
-                Сгенерировать видеообложку
+                <span className="sm:hidden">Сгенерировать</span>
+                <span className="hidden sm:inline">Сгенерировать видеообложку</span>
                 <Badge variant="secondary" className="ml-1">
                   {videoCost} токенов
                 </Badge>
