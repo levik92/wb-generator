@@ -706,7 +706,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-muted z-10"
+                  className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary z-10"
                   onClick={() => setCurrentJob(null)}
                 >
                   <X className="h-4 w-4" />
