@@ -1821,7 +1821,7 @@ export const GenerateCards = ({
               </Label>
               <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => setEditInstructions(e.target.value)} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 rounded-lg bg-muted/50">
+            <div className="inline-flex items-center gap-2 text-xs text-muted-foreground px-3 py-2 rounded-lg bg-muted/50 w-fit">
               <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
               <span>Стоимость: <span className="font-semibold">{photoEditPrice} {photoEditPrice === 1 ? 'токен' : 'токена'}</span></span>
             </div>
