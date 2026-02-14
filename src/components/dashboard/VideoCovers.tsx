@@ -827,22 +827,31 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
 
               {/* User wishes field */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between flex-wrap gap-1">
-                  <div className="flex items-center gap-1.5">
-                    <Label htmlFor="userPrompt">
-                      Пожелания к видео
-                    </Label>
-                    <TooltipProvider delayDuration={200}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[260px] text-xs">
-                          Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <Label htmlFor="userPrompt">
+                    Пожелания к видео
+                  </Label>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[260px] text-xs">
+                        Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Textarea
+                  id="userPrompt"
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
+                  placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
+                  className="min-h-[80px]"
+                  maxLength={600}
+                  disabled={isProcessing || autoOptimize}
+                />
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="autoOptimizeVideo"
@@ -862,18 +871,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                       Придумай сам
                     </Label>
                   </div>
-                </div>
-                <Textarea
-                  id="userPrompt"
-                  value={userPrompt}
-                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
-                  placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
-                  className="min-h-[80px]"
-                  maxLength={600}
-                  disabled={isProcessing || autoOptimize}
-                />
-                <div className="flex justify-end text-xs text-muted-foreground">
-                  <span>{userPrompt.length}/600 символов</span>
+                  <span className="text-xs text-muted-foreground">{userPrompt.length}/600 символов</span>
                 </div>
               </div>
 
