@@ -787,71 +787,69 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
           {!currentJob && !isProcessing && (
             <div className="space-y-4">
 
-              {/* Image upload card */}
-              <Card className="border-border/50 shadow-sm bg-card">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Upload className="w-4 h-4" />
-                    Карточка товара
-                    <TooltipProvider delayDuration={0}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button 
-                            type="button" 
-                            className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            <Info className="w-4 h-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                          <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Загрузите карточку товара для создания видеообложки (до 5 МБ)
+              {/* Image upload header */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  <span className="font-semibold text-base">Карточка товара</span>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          type="button" 
+                          className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                        <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Загрузите карточку товара для создания видеообложки (до 5 МБ)
+                </p>
+              </div>
+
+              {/* Image upload zone */}
+              {!selectedImage ? (
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="font-medium">Загрузите карточку товара</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
                   </p>
-                </CardHeader>
-                <CardContent>
-                  {!selectedImage ? (
-                    <div
-                      onDrop={handleDrop}
-                      onDragOver={(e) => e.preventDefault()}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    >
-                      <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                      <p className="font-medium">Загрузите карточку товара</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
-                      </p>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                    </div>
-                  ) : (
-                    <div className="relative inline-block">
-                      <img
-                        src={imagePreview!}
-                        alt="Preview"
-                        className="max-h-64 rounded-xl border border-border"
-                      />
-                      <button
-                        onClick={removeImage}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview!}
+                    alt="Preview"
+                    className="max-h-64 rounded-xl border border-border"
+                  />
+                  <button
+                    onClick={removeImage}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
 
               {/* User wishes field */}
               <div className="space-y-2">
