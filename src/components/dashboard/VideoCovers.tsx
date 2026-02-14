@@ -793,8 +793,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
               {/* Image upload header */}
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  <span className="font-semibold text-base">Карточка товара</span>
+                  <Upload className="w-4 h-4 shrink-0" />
+                  <span className="font-semibold text-base sm:text-lg">Карточка товара</span>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -812,7 +812,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Загрузите карточку товара для создания видеообложки (до 5 МБ)
                 </p>
               </div>
@@ -825,9 +825,9 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   onClick={() => fileInputRef.current?.click()}
                   className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                 >
-                  <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="font-medium">Загрузите карточку товара</p>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm font-medium">Загрузите карточку товара</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
                   </p>
                   <input
@@ -858,7 +858,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4" />
-                  <span className="font-semibold text-base">Пожелания к видео</span>
+                  <span className="font-semibold text-base sm:text-lg">Пожелания к видео</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
