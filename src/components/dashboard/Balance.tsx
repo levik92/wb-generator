@@ -127,6 +127,7 @@ export default function Balance() {
         <Card className="border-border/50 w-full overflow-hidden bg-card">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
+            <CardDescription>Стоимость указана в токенах</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
             {pricesLoading ? <div className="flex items-center justify-center py-8">
