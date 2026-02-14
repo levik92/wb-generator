@@ -922,9 +922,10 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                 </Badge>
               </Button>
 
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
-              </p>
+              <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <p>Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.</p>
+              </div>
 
               {/* Guard message */}
               {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
