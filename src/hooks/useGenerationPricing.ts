@@ -8,7 +8,7 @@ export interface GenerationPrice {
   description: string;
 }
 
-export type PriceType = 'photo_generation' | 'photo_regeneration' | 'description_generation' | 'photo_edit' | 'video_generation';
+export type PriceType = 'photo_generation' | 'photo_regeneration' | 'description_generation' | 'photo_edit' | 'video_generation' | 'video_regeneration';
 
 export const useGenerationPricing = () => {
   return useQuery({
