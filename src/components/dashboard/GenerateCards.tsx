@@ -1804,7 +1804,7 @@ export const GenerateCards = ({
               </div>
               Редактировать карточку
             </DialogTitle>
-            <DialogDescription className="text-sm">
+            <DialogDescription className="text-sm text-left">
               Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
             </DialogDescription>
           </DialogHeader>
