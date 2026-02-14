@@ -453,30 +453,35 @@ const NotifySection = () => (
         viewport={{ once: true }}
         className="max-w-3xl mx-auto text-center"
       >
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] flex items-center justify-center mx-auto mb-8">
-          <Bell className="w-10 h-10 text-white" />
+        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(280,90%,55%)] flex items-center justify-center mx-auto mb-8">
+          <Zap className="w-10 h-10 text-white" />
         </div>
-        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-          Узнайте о запуске первыми
+        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+          Единственный сервис с ИИ-видеообложками
         </h2>
-        <p className="text-white/60 text-lg mb-8">
-          Оставьте email и получите уведомление о старте анимации карточек + бонусные токены для тестирования
+        <p className="text-muted-foreground text-lg mb-8">
+          Загрузите карточку — получите анимированную обложку за 2 минуты. Без видеооператора, без монтажа, без студии. Только вы и нейросеть.
         </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-          <Input 
-            type="email" 
-            placeholder="Ваш email" 
-            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-          />
-          <Button className="h-12 px-8 bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] text-white border-0 whitespace-nowrap">
-            Уведомить меня
-          </Button>
+
+        <div className="grid grid-cols-3 gap-4 mb-10 max-w-lg mx-auto">
+          {[
+            { value: "10₽", label: "за обложку" },
+            { value: "2 мин", label: "генерация" },
+            { value: "MP4", label: "готовый файл" },
+          ].map((s, i) => (
+            <div key={i} className="glass-card rounded-xl p-4 border border-white/5">
+              <div className="text-2xl font-bold text-[hsl(var(--primary))]">{s.value}</div>
+              <div className="text-muted-foreground text-xs mt-1">{s.label}</div>
+            </div>
+          ))}
         </div>
         
-        <p className="text-white/40 text-sm mt-4">
-          Никакого спама. Только одно письмо при запуске.
-        </p>
+        <Link to="/auth">
+          <Button className="h-12 px-10 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(280,90%,55%)] text-white border-0 text-base">
+            Создать видеообложку
+            <ArrowRight className="w-5 h-5 ml-2" />
+          </Button>
+        </Link>
       </motion.div>
     </div>
   </section>
