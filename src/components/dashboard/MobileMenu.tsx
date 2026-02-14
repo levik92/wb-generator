@@ -29,15 +29,15 @@ export const MobileMenu = ({
   const isDark = resolvedTheme === "dark";
   const menuItems = [{
     id: 'cards',
-    label: 'Генерация карточек',
+    label: 'Карточки товара',
     icon: Image
   }, {
     id: 'description',
-    label: 'Генерация описаний',
+    label: 'Описания товара',
     icon: FileText
   }, {
     id: 'labels',
-    label: 'Генератор этикеток',
+    label: 'Этикетки и QR',
     icon: Tags,
     badge: 'FREE',
     badgeColor: 'bg-green-500'
