@@ -7,8 +7,8 @@ import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
 // Optimized images - using smaller/optimized versions where available
 const examples = [
   {
-    before: "/lovable-uploads/example-before-lego.jpg",
-    after: "/lovable-uploads/example-after-lego.jpg",
+    before: "/lovable-uploads/example-after-lego.jpg",
+    after: "/lovable-uploads/example-before-lego.jpg",
     category: "Игрушки",
     conversionGrowth: "+210%",
     ordersChange: "3 → 10",
@@ -17,8 +17,8 @@ const examples = [
     savings: "1 741₽",
   },
   {
-    before: "/lovable-uploads/example-before-dyson.jpg",
-    after: "/lovable-uploads/example-after-dyson.jpg",
+    before: "/lovable-uploads/example-after-dyson.jpg",
+    after: "/lovable-uploads/example-before-dyson.jpg",
     category: "Техника",
     conversionGrowth: "+235%",
     ordersChange: "4 → 14",
@@ -27,8 +27,8 @@ const examples = [
     savings: "2 141₽",
   },
   {
-    before: "/lovable-uploads/example-before-dreamies.jpg",
-    after: "/lovable-uploads/example-after-dreamies.jpg",
+    before: "/lovable-uploads/example-after-dreamies.jpg",
+    after: "/lovable-uploads/example-before-dreamies.jpg",
     category: "Зоотовары",
     conversionGrowth: "+175%",
     ordersChange: "5 → 14",
@@ -37,8 +37,8 @@ const examples = [
     savings: "1 341₽",
   },
   {
-    before: "/lovable-uploads/example-before-jeans.jpg",
-    after: "/lovable-uploads/example-after-jeans.jpg",
+    before: "/lovable-uploads/example-after-jeans.jpg",
+    after: "/lovable-uploads/example-before-jeans.jpg",
     category: "Одежда",
     conversionGrowth: "+250%",
     ordersChange: "3 → 11",
