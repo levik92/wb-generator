@@ -1456,7 +1456,7 @@ export const GenerateCards = ({
               Референс
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              WBGen может взять за основу прикрепленный дизайн (не обязательно, до 3 МБ)
+              WBGen может взять за основу прикрепленный дизайн (не обязательно)
             </CardDescription>
           </CardHeader>
           <CardContent>
