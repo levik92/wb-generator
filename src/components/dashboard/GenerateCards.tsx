@@ -1587,7 +1587,7 @@ export const GenerateCards = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Images className="w-4 h-4 shrink-0" />
-            Выбор карточек для генерации
+            Выбор типа карточек
           </CardTitle>
           <CardDescription className="text-xs sm:text-sm">
             Выберите какие типы карточек вам нужны
