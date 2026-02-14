@@ -921,6 +921,19 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                       {videoCost} токенов
                     </Badge>
                   </Button>
+
+                  {/* Guard message */}
+                  {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
+                    <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
+                      <Info className="h-4 w-4" />
+                      <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
+                        {!selectedImage
+                          ? "Загрузите карточку товара"
+                          : "Напишите пожелания или включите «Придумай сам»"}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
                   </p>
