@@ -132,7 +132,7 @@ export const HeroSection = () => {
                   <div className="absolute -inset-3 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-lg opacity-50" />
                   <div className="relative transform -rotate-2 sm:-rotate-4 hover:rotate-0 hover:scale-105 transition-transform duration-300">
                     <img 
-                      src="/lovable-uploads/5b5d4b79-6091-48ff-a998-27342d80f69d.jpg" 
+                      src="/lovable-uploads/before-hero.jpg" 
                       alt="До обработки" 
                       className="w-52 sm:w-64 md:w-80 h-auto rounded-2xl border border-white/10 shadow-2xl" 
                       loading="eager" 
