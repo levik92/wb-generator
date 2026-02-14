@@ -1497,7 +1497,7 @@ export const GenerateCards = ({
       <Card className="border-border/50 shadow-sm bg-card">
         <CardHeader>
           {/* Mobile clear button - above title */}
-          <div className="flex justify-end mb-2 sm:hidden">
+          <div className="flex justify-start mb-2 sm:hidden">
             <Button variant="outline" size="sm" onClick={() => {
             setFiles([]);
             setReferenceImage(null);
