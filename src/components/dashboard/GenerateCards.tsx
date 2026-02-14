@@ -1609,49 +1609,75 @@ export const GenerateCards = ({
       </Card>
 
       {/* Progress */}
-      {generating && <Card className="bg-primary/5 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Генерация карточек
-            </CardTitle>
-            <CardDescription>
-              {isUploading ? (
-                <div className="flex items-center gap-2 text-primary text-sm animate-pulse">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                  <span>Не закрывайте и не сворачивайте страницу — {jobStatus?.toLowerCase() || 'идёт загрузка'}</span>
+      {generating && <Card>
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            <div className="min-h-[280px] flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center gap-4 py-8 w-full">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                  {isUploading 
+                    ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+                    : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+                  }
                 </div>
-              ) : (
-                jobStatus && <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-3 h-3" />
-                  {jobStatus}
+                <div className="text-center space-y-2">
+                  {isUploading ? (
+                    <>
+                      <p className="font-medium">Подготовка к генерации…</p>
+                      <p className="text-sm text-muted-foreground">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
+                    </>
+                  ) : estimatedTimeRemaining > 0 ? (
+                    <>
+                      <p className="font-medium">Генерация карточек…</p>
+                      <div className="flex items-center justify-center gap-2 text-primary">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-lg font-bold tabular-nums">
+                          {estimatedTimeRemaining >= 60 
+                            ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
+                            : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {currentStage} из {selectedCards.length} карточек готово
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {currentStage} из {selectedCards.length} карточек готово
+                      </p>
+                    </>
+                  )}
                 </div>
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Прогресс: {currentStage} из {selectedCards.length} карточек</span>
-                  <span>{Math.round(smoothProgress)}%</span>
+                <div className="w-full max-w-xs">
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    {isUploading ? (
+                      <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+                    ) : (
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                        style={{ width: `${Math.min(smoothProgress, 95)}%` }}
+                      />
+                    )}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground text-center mt-1">
+                    {isUploading ? 'Подготовка…' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}
+                  </p>
                 </div>
-                <Progress value={smoothProgress} className="w-full" />
-                {generating && <div className="text-xs text-muted-foreground text-center">
-                    {estimatedTimeRemaining > 0 ? `Обрабатываю... ${estimatedTimeRemaining >= 60 ? `~${Math.ceil(estimatedTimeRemaining / 60)} мин` : `~${estimatedTimeRemaining} сек`}` : WAITING_MESSAGES[waitingMessageIndex]}
-                  </div>}
               </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {selectedCards.map(cardIndex => {
-              const stage = CARD_STAGES[cardIndex];
-              const completedCount = Math.min(currentStage, selectedCards.length);
-              const currentCardPosition = selectedCards.indexOf(cardIndex);
-              return <div key={cardIndex} className={`text-xs p-2 rounded border ${currentCardPosition < completedCount ? 'bg-primary/10 border-primary/20 text-primary' : currentCardPosition === completedCount ? 'bg-primary/5 border-primary/10 text-primary animate-pulse' : 'bg-muted/30 border-border text-muted-foreground'}`}>
-                      {stage.name}
-                    </div>;
-            })}
-              </div>
+            </div>
+
+            {/* Card stages grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {selectedCards.map(cardIndex => {
+                const stage = CARD_STAGES[cardIndex];
+                const completedCount = Math.min(currentStage, selectedCards.length);
+                const currentCardPosition = selectedCards.indexOf(cardIndex);
+                return <div key={cardIndex} className={`text-xs p-2 rounded-lg border ${currentCardPosition < completedCount ? 'bg-primary/10 border-primary/20 text-primary' : currentCardPosition === completedCount ? 'bg-primary/5 border-primary/10 text-primary animate-pulse' : 'bg-muted/30 border-border text-muted-foreground'}`}>
+                    {stage.name}
+                  </div>;
+              })}
             </div>
           </CardContent>
         </Card>}
