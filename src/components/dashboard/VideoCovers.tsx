@@ -787,138 +787,145 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
           {!currentJob && !isProcessing && (
             <div className="space-y-4">
 
-              {/* Image upload header */}
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  <span className="font-semibold text-base">Карточка товара</span>
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <Info className="w-4 h-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                        <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Загрузите карточку товара для создания видеообложки (до 5 МБ)
-                </p>
-              </div>
-
-              {/* Image upload zone */}
-              {!selectedImage ? (
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                >
-                  <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="font-medium">Загрузите карточку товара</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </div>
-              ) : (
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview!}
-                    alt="Preview"
-                    className="max-h-64 rounded-xl border border-border"
-                  />
-                  <button
-                    onClick={removeImage}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-
-              {/* User wishes field */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="font-semibold text-base">Пожелания к видео</span>
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[260px] text-xs">
-                        Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <Textarea
-                  id="userPrompt"
-                  value={userPrompt}
-                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
-                  placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
-                  className="min-h-[80px]"
-                  maxLength={600}
-                  disabled={isProcessing || autoOptimize}
-                />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
-                    <Checkbox
-                      id="autoOptimizeVideo"
-                      checked={autoOptimize}
-                      onCheckedChange={(checked) => {
-                        const isChecked = checked === true;
-                        setAutoOptimize(isChecked);
-                        if (isChecked) {
-                          setUserPrompt(AUTO_PROMPT_TEXT);
-                        } else {
-                          setUserPrompt("");
-                        }
-                      }}
-                      disabled={isProcessing}
-                    />
-                    <Label htmlFor="autoOptimizeVideo" className="text-sm font-normal cursor-pointer">
-                      Придумай сам
-                    </Label>
+              {/* Upper block: upload + wishes */}
+              <Card className="border-border/50 shadow-sm bg-card">
+                <CardContent className="pt-6 space-y-4">
+                  {/* Image upload header */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      <span className="font-semibold text-base">Карточка товара</span>
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button 
+                              type="button" 
+                              className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              <Info className="w-4 h-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                            <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Загрузите карточку товара для создания видеообложки (до 5 МБ)
+                    </p>
                   </div>
-                  <span className="text-xs text-muted-foreground">{userPrompt.length}/600 символов</span>
-                </div>
-              </div>
 
-              {/* Generate button */}
-              <Button
-                onClick={handleGenerate}
-                disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
-                className="gap-2 w-full sm:w-auto"
-                size="lg"
-              >
-                <Video className="h-5 w-5" />
-                <span className="sm:hidden">Сгенерировать</span>
-                <span className="hidden sm:inline">Сгенерировать видеообложку</span>
-                <Badge variant="secondary" className="ml-1">
-                  {videoCost} токенов
-                </Badge>
-              </Button>
+                  {/* Image upload zone */}
+                  {!selectedImage ? (
+                    <div
+                      onDrop={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                    >
+                      <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                      <p className="font-medium">Загрузите карточку товара</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
+                      </p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative inline-block">
+                      <img
+                        src={imagePreview!}
+                        alt="Preview"
+                        className="max-h-64 rounded-xl border border-border"
+                      />
+                      <button
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
 
-              {/* Hint under generate button */}
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
-              </p>
+                  {/* User wishes field */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="font-semibold text-base">Пожелания к видео</span>
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[260px] text-xs">
+                            Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <Textarea
+                      id="userPrompt"
+                      value={userPrompt}
+                      onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
+                      placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
+                      className="min-h-[80px]"
+                      maxLength={600}
+                      disabled={isProcessing || autoOptimize}
+                    />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
+                        <Checkbox
+                          id="autoOptimizeVideo"
+                          checked={autoOptimize}
+                          onCheckedChange={(checked) => {
+                            const isChecked = checked === true;
+                            setAutoOptimize(isChecked);
+                            if (isChecked) {
+                              setUserPrompt(AUTO_PROMPT_TEXT);
+                            } else {
+                              setUserPrompt("");
+                            }
+                          }}
+                          disabled={isProcessing}
+                        />
+                        <Label htmlFor="autoOptimizeVideo" className="text-sm font-normal cursor-pointer">
+                          Придумай сам
+                        </Label>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{userPrompt.length}/600 символов</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lower block: generate button + hint */}
+              <Card className="border-border/50 shadow-sm bg-card">
+                <CardContent className="pt-6 space-y-3">
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
+                    className="gap-2 w-full sm:w-auto"
+                    size="lg"
+                  >
+                    <Video className="h-5 w-5" />
+                    <span className="sm:hidden">Сгенерировать</span>
+                    <span className="hidden sm:inline">Сгенерировать видеообложку</span>
+                    <Badge variant="secondary" className="ml-1">
+                      {videoCost} токенов
+                    </Badge>
+                  </Button>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           )}
         </CardContent>
