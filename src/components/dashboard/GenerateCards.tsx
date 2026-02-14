@@ -1609,8 +1609,13 @@ export const GenerateCards = ({
       </Card>
 
       {/* Progress */}
-      {generating && <Card>
-          <CardContent className="p-4 sm:p-6 space-y-4">
+      {generating && <Card className="relative overflow-hidden">
+          {/* Animated radial gradient background */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+            animation: 'glow-drift 6s ease-in-out infinite alternate',
+          }} />
+          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
             {/* Header: Spinner + Title + Status — left aligned */}
             <div className="flex items-start gap-3 pt-2">
               <div className="relative shrink-0">
@@ -1668,7 +1673,7 @@ export const GenerateCards = ({
               </div>
             </div>
 
-            {/* Card stages grid — left aligned */}
+            {/* Card stages grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {selectedCards.map(cardIndex => {
                 const stage = CARD_STAGES[cardIndex];
@@ -1676,7 +1681,7 @@ export const GenerateCards = ({
                 const currentCardPosition = selectedCards.indexOf(cardIndex);
                 const isCompleted = currentCardPosition < completedCount;
                 const isCurrent = currentCardPosition === completedCount;
-                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-primary/10 border border-primary/20 text-primary' : isCurrent ? 'bg-transparent border border-primary/30 text-primary [animation:border-pulse_2s_ease-in-out_infinite]' : 'bg-muted/30 border border-border text-muted-foreground'}`}
+                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-primary/10 border border-primary/20 text-primary' : isCurrent ? 'bg-primary/10 border border-primary/30 text-primary' : 'bg-muted/30 border border-border text-muted-foreground'}`}
                     style={isCurrent ? { animation: 'border-pulse 2s ease-in-out infinite' } : undefined}>
                     {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : isCurrent ? <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" /> : <Clock className="w-3.5 h-3.5 shrink-0 opacity-40" />}
                     <span className="truncate">{stage.name}</span>
@@ -1688,7 +1693,7 @@ export const GenerateCards = ({
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/50 border border-border">
               <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
               <span className="text-[11px] text-muted-foreground leading-relaxed">
-                Не закрывайте страницу до завершения. Если результат не понравится или будут ошибки — вы сможете перегенерировать карточку за 1 токен
+                Генерация проходит в фоновом режиме. Если результат не понравится или будут ошибки — вы сможете перегенерировать карточку за 1 токен
               </span>
             </div>
           </CardContent>
