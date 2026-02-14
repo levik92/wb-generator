@@ -826,7 +826,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   className="border border-dashed border-border/50 rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all bg-muted/30"
                 >
                   <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-xs font-medium text-muted-foreground">Загрузите карточку товара</p>
+                  <p className="text-sm font-semibold text-muted-foreground">Загрузите карточку товара</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
                   </p>
