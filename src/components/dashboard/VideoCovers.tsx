@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard } from "lucide-react";
+import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard, Coins } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -73,6 +74,16 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
   const { price: regenCost } = useGenerationPrice("video_regeneration");
   const [regenPrompt, setRegenPrompt] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
+
+  // Video promo banner dismissal
+  const VIDEO_PROMO_KEY = `video_promo_banner_dismissed_${profile.id}`;
+  const [isPromoBannerVisible, setIsPromoBannerVisible] = useState(() => {
+    return localStorage.getItem(VIDEO_PROMO_KEY) !== "true";
+  });
+  const handleDismissPromo = () => {
+    localStorage.setItem(VIDEO_PROMO_KEY, "true");
+    setIsPromoBannerVisible(false);
+  };
 
   // Load history and resume active jobs on mount
   useEffect(() => {
@@ -520,6 +531,86 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         </CardContent>
       </Card>
 
+      {/* Video Promo Banner */}
+      <AnimatePresence>
+        {isPromoBannerVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative overflow-hidden rounded-2xl"
+          >
+            {/* Animated gradient background — video-themed blue-purple */}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-primary to-fuchsia-500 animate-gradient-x" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
+
+            {/* Floating video icons */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <Video className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
+              <Play className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
+              <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
+              <Sparkles className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
+              <Video className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
+              <Play className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
+            </div>
+
+            {/* Shimmer */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+
+            <div className="relative p-4 sm:p-6">
+              <button
+                onClick={handleDismissPromo}
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-10"
+                aria-label="Закрыть"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 pr-8">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Video className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
+                    Посмотрите, какие видеообложки можно создавать
+                  </h3>
+                  <p className="text-sm text-white/80 line-clamp-2">
+                    Примеры работ и возможности нейросети — живые обложки для ваших товаров
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-shrink-0">
+                  <Button
+                    className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
+                    asChild
+                  >
+                    <a href="/services/video-generation" target="_blank" rel="noopener noreferrer">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Посмотреть
+                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                    </a>
+                  </Button>
+                  {onNavigate && (
+                    <Button
+                      variant="outline"
+                      onClick={() => onNavigate("pricing")}
+                      className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <Coins className="w-4 h-4 mr-2" />
+                      Пополнить баланс
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Upload & Generation */}
       <Card>
         <CardContent className="p-4 sm:p-6 space-y-4">
@@ -770,32 +861,6 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* CTA / Promo block */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="space-y-1">
-              <h3 className="font-semibold">Посмотрите, какие видеообложки можно создавать</h3>
-              <p className="text-sm text-muted-foreground">Примеры работ и возможности нейросети</p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {onNavigate && (
-                <Button variant="default" size="sm" className="gap-2" onClick={() => onNavigate("pricing")}>
-                  <CreditCard className="h-4 w-4" />
-                  Пополнить баланс
-                </Button>
-              )}
-              <Button variant="outline" size="sm" className="gap-2" asChild>
-                <a href="/services/video-generation" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                  Посмотреть примеры
-                </a>
-              </Button>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
