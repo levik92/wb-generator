@@ -1475,7 +1475,7 @@ export const GenerateCards = ({
                       Загрузите референс
                     </p>
                     <p className={`text-xs mt-1 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Перетащите или нажмите для выбора. PNG, JPG, JPEG
+                      1 изобр. до 3 МБ
                     </p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleReferenceUpload} disabled={generating} />
