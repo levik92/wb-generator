@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap, Settings } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { LightningLoader } from "@/components/ui/lightning-loader";
@@ -186,7 +186,7 @@ export const GenerateDescription = ({
         delay: 0.2
       }} className="rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
           <div>
-            <h3 className="text-lg font-semibold mb-1">Параметры генерации</h3>
+            <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><Settings className="w-4 h-4 shrink-0" />Параметры генерации</h3>
             <p className="text-sm text-muted-foreground">Заполните данные для создания уникального описания</p>
           </div>
 
@@ -265,7 +265,7 @@ export const GenerateDescription = ({
       }} className="rounded-2xl border border-border/50 p-6 space-y-4 shadow-sm bg-card">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold mb-1">Готовое описание</h3>
+              <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><FileText className="w-4 h-4 shrink-0" />Готовое описание</h3>
               <p className="text-sm text-muted-foreground">
                 {generatedText ? `${generatedText.length} символов` : "Результат появится здесь"}
               </p>
