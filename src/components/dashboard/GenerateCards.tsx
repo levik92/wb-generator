@@ -1474,7 +1474,7 @@ export const GenerateCards = ({
                     <p className={`mb-2 text-sm text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                       <span className="font-semibold">Нажмите для загрузки</span> или перетащите
                     </p>
-                    <p className={`text-xs text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>1 изобр. до 3 мб.
+                    <p className={`text-xs text-center ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>1 изобр. до 3 МБ
 
                   </p>
                   </div>
