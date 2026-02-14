@@ -615,334 +615,332 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         )}
       </AnimatePresence>
 
-      {/* Upload & Generation */}
-      <Card>
-        <CardContent className="p-4 sm:p-6 space-y-4">
-          {/* Upload phase — spinner with message */}
-          {isUploading && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-              </div>
-              <div className="text-center space-y-2">
-                <p className="font-medium">Подготовка к генерации…</p>
-                <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
-              </div>
-              {/* Progress bar placeholder */}
-              <div className="w-full max-w-xs">
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
+      {/* Processing states */}
+      {(isProcessing || currentJob) && (
+        <Card>
+          <CardContent className="p-4 sm:p-6 space-y-4">
+            {/* Upload phase — spinner with message */}
+            {isUploading && (
+              <div className="flex flex-col items-center gap-4 py-8">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                  <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Active job progress - timer or extended wait messages */}
-          {hasActiveJob && !isUploading && (
-            <div className="flex flex-col items-center gap-4 py-8">
-              {/* Loading animation */}
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-              </div>
-              <div className="text-center space-y-2">
-                {!isInExtendedWait ? (
-                  <>
-                    <p className="font-medium">Генерация видеообложки…</p>
-                    <div className="flex items-center justify-center gap-2 text-primary">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Генерация занимает немного больше времени, чем обычно
-                    </p>
-                  </>
-                )}
-              </div>
-              {/* Progress bar */}
-              <div className="w-full max-w-xs">
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                    style={{ width: `${Math.min(progressPercent, 95)}%` }}
-                  />
+                <div className="text-center space-y-2">
+                  <p className="font-medium">Подготовка к генерации…</p>
+                  <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center mt-1">
-                  {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Warning during processing */}
-          {isProcessing && (
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/60 border border-border">
-              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <span className="text-xs text-muted-foreground leading-relaxed">
-                Результат создаёт нейросеть. В случае неудовлетворительного результата токены не возвращаются. Пожалуйста, внимательно составляйте описание и пожелания к генерации.
-              </span>
-            </div>
-          )}
-
-          {/* Completed video */}
-          {currentJob?.status === "completed" && currentJob.video_url && (
-            <div className="space-y-4 relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-muted z-10"
-                onClick={() => setCurrentJob(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center gap-2 text-primary">
-                <Play className="h-5 w-5" />
-                <span className="font-medium">Видео готово!</span>
-              </div>
-              <video
-                src={currentJob.video_url}
-                controls
-                autoPlay
-                muted
-                loop
-                className="w-full max-w-md mx-auto rounded-xl border border-border"
-                style={{ aspectRatio: "3/4" }}
-              />
-              <div className="flex justify-center gap-3">
-                <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Скачать видео
-                </Button>
-                <Button variant="outline" onClick={() => setCurrentJob(null)} className="gap-2">
-                  <Video className="h-4 w-4" />
-                  Сгенерировать новое
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground text-center">
-                Результат сохранён на странице «История генераций»
-              </p>
-
-              {/* Regeneration block */}
-              <div className="mt-6 p-4 rounded-xl border border-border bg-muted/30 space-y-3">
-                <div className="space-y-1">
-                  <h4 className="font-semibold text-sm flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 text-primary" />
-                    Не нравится результат?
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    Вы можете перегенерировать видео за {regenCost} токенов. Фото останется прежним, но вы можете изменить описание пожеланий.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Textarea
-                    value={regenPrompt}
-                    onChange={(e) => setRegenPrompt(e.target.value.slice(0, 600))}
-                    placeholder="Новые пожелания к анимации (необязательно)"
-                    className="min-h-[60px] text-sm"
-                    maxLength={600}
-                  />
-                  <Button
-                    onClick={handleRegenerate}
-                    disabled={isRegenerating}
-                    variant="outline"
-                    className="gap-2 w-full sm:w-auto"
-                  >
-                    {isRegenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                    Перегенерировать
-                    <Badge variant="secondary" className="ml-1">
-                      {regenCost} токенов
-                    </Badge>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Failed job */}
-          {currentJob?.status === "failed" && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-center">
-                <p className="text-sm text-destructive font-medium">
-                  Ошибка: {currentJob.error_message || "Неизвестная ошибка"}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Токены возвращены на баланс</p>
-              </div>
-              <div className="flex justify-center">
-                <Button variant="outline" onClick={() => setCurrentJob(null)}>
-                  Попробовать снова
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Upload zone and form - only when no active job */}
-          {!currentJob && !isProcessing && (
-            <div className="space-y-4">
-
-              {/* Upper block: upload + wishes */}
-              <Card className="border-border/50 shadow-sm bg-card">
-                <CardContent className="pt-6 space-y-4">
-                  {/* Image upload header */}
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Upload className="w-4 h-4" />
-                      <span className="font-semibold text-base">Карточка товара</span>
-                      <TooltipProvider delayDuration={0}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button 
-                              type="button" 
-                              className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <Info className="w-4 h-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                            <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Загрузите карточку товара для создания видеообложки (до 5 МБ)
-                    </p>
+                <div className="w-full max-w-xs">
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
                   </div>
+                </div>
+              </div>
+            )}
 
-                  {/* Image upload zone */}
-                  {!selectedImage ? (
-                    <div
-                      onDrop={handleDrop}
-                      onDragOver={(e) => e.preventDefault()}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    >
-                      <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                      <p className="font-medium">Загрузите карточку товара</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
-                      </p>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                    </div>
-                  ) : (
-                    <div className="relative inline-block">
-                      <img
-                        src={imagePreview!}
-                        alt="Preview"
-                        className="max-h-64 rounded-xl border border-border"
-                      />
-                      <button
-                        onClick={removeImage}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* User wishes field */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      <span className="font-semibold text-base">Пожелания к видео</span>
-                      <TooltipProvider delayDuration={200}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[260px] text-xs">
-                            Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <Textarea
-                      id="userPrompt"
-                      value={userPrompt}
-                      onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
-                      placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
-                      className="min-h-[80px]"
-                      maxLength={600}
-                      disabled={isProcessing || autoOptimize}
-                    />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
-                        <Checkbox
-                          id="autoOptimizeVideo"
-                          checked={autoOptimize}
-                          onCheckedChange={(checked) => {
-                            const isChecked = checked === true;
-                            setAutoOptimize(isChecked);
-                            if (isChecked) {
-                              setUserPrompt(AUTO_PROMPT_TEXT);
-                            } else {
-                              setUserPrompt("");
-                            }
-                          }}
-                          disabled={isProcessing}
-                        />
-                        <Label htmlFor="autoOptimizeVideo" className="text-sm font-normal cursor-pointer">
-                          Придумай сам
-                        </Label>
+            {/* Active job progress */}
+            {hasActiveJob && !isUploading && (
+              <div className="flex flex-col items-center gap-4 py-8">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                  <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
+                </div>
+                <div className="text-center space-y-2">
+                  {!isInExtendedWait ? (
+                    <>
+                      <p className="font-medium">Генерация видеообложки…</p>
+                      <div className="flex items-center justify-center gap-2 text-primary">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{userPrompt.length}/600 символов</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Lower block: generate button + hint */}
-              <Card className="border-border/50 shadow-sm bg-card">
-                <CardContent className="pt-6 space-y-3">
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
-                    className="gap-2 w-full sm:w-auto"
-                    size="lg"
-                  >
-                    <Video className="h-5 w-5" />
-                    <span className="sm:hidden">Сгенерировать</span>
-                    <span className="hidden sm:inline">Сгенерировать видеообложку</span>
-                    <Badge variant="secondary" className="ml-1">
-                      {videoCost} токенов
-                    </Badge>
-                  </Button>
-
-                  {/* Guard message */}
-                  {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
-                    <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
-                      <Info className="h-4 w-4" />
-                      <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
-                        {!selectedImage
-                          ? "Загрузите карточку товара"
-                          : "Напишите пожелания или включите «Придумай сам»"}
-                      </AlertDescription>
-                    </Alert>
+                      <p className="text-xs text-muted-foreground">
+                        Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Генерация занимает немного больше времени, чем обычно
+                      </p>
+                    </>
                   )}
-
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
+                </div>
+                <div className="w-full max-w-xs">
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${Math.min(progressPercent, 95)}%` }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground text-center mt-1">
+                    {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
                   </p>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              </div>
+            )}
+
+            {/* Warning during processing */}
+            {isProcessing && (
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/60 border border-border">
+                <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  Результат создаёт нейросеть. В случае неудовлетворительного результата токены не возвращаются. Пожалуйста, внимательно составляйте описание и пожелания к генерации.
+                </span>
+              </div>
+            )}
+
+            {/* Completed video */}
+            {currentJob?.status === "completed" && currentJob.video_url && (
+              <div className="space-y-4 relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-muted z-10"
+                  onClick={() => setCurrentJob(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <div className="flex items-center gap-2 text-primary">
+                  <Play className="h-5 w-5" />
+                  <span className="font-medium">Видео готово!</span>
+                </div>
+                <video
+                  src={currentJob.video_url}
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                  className="w-full max-w-md mx-auto rounded-xl border border-border"
+                  style={{ aspectRatio: "3/4" }}
+                />
+                <div className="flex justify-center gap-3">
+                  <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Скачать видео
+                  </Button>
+                  <Button variant="outline" onClick={() => setCurrentJob(null)} className="gap-2">
+                    <Video className="h-4 w-4" />
+                    Сгенерировать новое
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Результат сохранён на странице «История генераций»
+                </p>
+
+                {/* Regeneration block */}
+                <div className="mt-6 p-4 rounded-xl border border-border bg-muted/30 space-y-3">
+                  <div className="space-y-1">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 text-primary" />
+                      Не нравится результат?
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Вы можете перегенерировать видео за {regenCost} токенов. Фото останется прежним, но вы можете изменить описание пожеланий.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Textarea
+                      value={regenPrompt}
+                      onChange={(e) => setRegenPrompt(e.target.value.slice(0, 600))}
+                      placeholder="Новые пожелания к анимации (необязательно)"
+                      className="min-h-[60px] text-sm"
+                      maxLength={600}
+                    />
+                    <Button
+                      onClick={handleRegenerate}
+                      disabled={isRegenerating}
+                      variant="outline"
+                      className="gap-2 w-full sm:w-auto"
+                    >
+                      {isRegenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                      Перегенерировать
+                      <Badge variant="secondary" className="ml-1">
+                        {regenCost} токенов
+                      </Badge>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Failed job */}
+            {currentJob?.status === "failed" && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-center">
+                  <p className="text-sm text-destructive font-medium">
+                    Ошибка: {currentJob.error_message || "Неизвестная ошибка"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Токены возвращены на баланс</p>
+                </div>
+                <div className="flex justify-center">
+                  <Button variant="outline" onClick={() => setCurrentJob(null)}>
+                    Попробовать снова
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Upload zone and form - only when no active job */}
+      {!currentJob && !isProcessing && (
+        <>
+          {/* Block 1: Upload + wishes */}
+          <Card>
+            <CardContent className="p-4 sm:p-6 space-y-4">
+              {/* Image upload header */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  <span className="font-semibold text-base">Карточка товара</span>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          type="button" 
+                          className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                        <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Загрузите карточку товара для создания видеообложки (до 5 МБ)
+                </p>
+              </div>
+
+              {/* Image upload zone */}
+              {!selectedImage ? (
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-border rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                >
+                  <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="font-medium">Загрузите карточку товара</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <div className="relative inline-block">
+                  <img
+                    src={imagePreview!}
+                    alt="Preview"
+                    className="max-h-64 rounded-xl border border-border"
+                  />
+                  <button
+                    onClick={removeImage}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* User wishes field */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="font-semibold text-base">Пожелания к видео</span>
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[260px] text-xs">
+                        Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Textarea
+                  id="userPrompt"
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
+                  placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
+                  className="min-h-[80px]"
+                  maxLength={600}
+                  disabled={isProcessing || autoOptimize}
+                />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
+                    <Checkbox
+                      id="autoOptimizeVideo"
+                      checked={autoOptimize}
+                      onCheckedChange={(checked) => {
+                        const isChecked = checked === true;
+                        setAutoOptimize(isChecked);
+                        if (isChecked) {
+                          setUserPrompt(AUTO_PROMPT_TEXT);
+                        } else {
+                          setUserPrompt("");
+                        }
+                      }}
+                      disabled={isProcessing}
+                    />
+                    <Label htmlFor="autoOptimizeVideo" className="text-sm font-normal cursor-pointer">
+                      Придумай сам
+                    </Label>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{userPrompt.length}/600 символов</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Block 2: Generate button + hint */}
+          <Card>
+            <CardContent className="p-4 sm:p-6 space-y-3">
+              <Button
+                onClick={handleGenerate}
+                disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
+                className="gap-2 w-full sm:w-auto"
+                size="lg"
+              >
+                <Video className="h-5 w-5" />
+                <span className="sm:hidden">Сгенерировать</span>
+                <span className="hidden sm:inline">Сгенерировать видеообложку</span>
+                <Badge variant="secondary" className="ml-1">
+                  {videoCost} токенов
+                </Badge>
+              </Button>
+
+              {/* Guard message */}
+              {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
+                <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
+                    {!selectedImage
+                      ? "Загрузите карточку товара"
+                      : "Напишите пожелания или включите «Придумай сам»"}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.
+              </p>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
     </div>
   );
