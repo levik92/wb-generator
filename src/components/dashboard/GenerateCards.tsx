@@ -1759,43 +1759,46 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card className="bg-card px-0 py-0">
-        <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
-          <Button onClick={simulateGeneration} disabled={!canGenerate()} className="w-full bg-wb-purple hover:bg-wb-purple-dark text-sm sm:text-base" size="lg">
+      <Card>
+        <CardContent className="p-4 sm:p-6 space-y-3">
+          <Button onClick={simulateGeneration} disabled={!canGenerate()} className="gap-2 w-full sm:w-auto" size="lg">
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Генерация...
               </> : <>
-                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              <span className="hidden sm:inline">
-                Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
-              </span>
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">
+                  Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
+                </span>
                 <span className="sm:hidden">
                   {generatedImages.length > 0 ? 'Новый комплект' : 'Генерация'}
                 </span>
+                <Badge variant="secondary" className="ml-1">
+                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} токенов
+                </Badge>
               </>}
           </Button>
-          
-          <div className="flex items-center justify-center gap-2 mt-3 px-2 text-xs sm:text-sm text-muted-foreground">
-            <Info className="w-4 h-4 flex-shrink-0" />
-            <span className="text-left text-xs">Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : selectedCards.length * photoGenerationPrice % 10 >= 2 && selectedCards.length * photoGenerationPrice % 10 <= 4 && (selectedCards.length * photoGenerationPrice % 100 < 10 || selectedCards.length * photoGenerationPrice % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}</span>
+
+          <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed mt-1">
+            <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <p>Стоимость: <strong>{priceLoading ? '...' : selectedCards.length * photoGenerationPrice} {selectedCards.length * photoGenerationPrice === 1 ? 'токен' : selectedCards.length * photoGenerationPrice % 10 >= 2 && selectedCards.length * photoGenerationPrice % 10 <= 4 && (selectedCards.length * photoGenerationPrice % 100 < 10 || selectedCards.length * photoGenerationPrice % 100 >= 20) ? 'токена' : 'токенов'}</strong> за {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}. Не понравилось? Перегенерация в 5 раз дешевле!</p>
           </div>
           
-          {!canGenerate() && !generating && <Alert className="mt-4 bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
+          {!canGenerate() && !generating && (
+            <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
               <Info className="h-4 w-4" />
               <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
                 {getGuardMessage()}
               </AlertDescription>
-            </Alert>}
+            </Alert>
+          )}
           
-          {generating && <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4 mt-4">
-              <p className="text-muted-foreground text-xs sm:text-sm flex items-start sm:items-center gap-2">
-                <Info className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5 sm:mt-0 text-primary" />
-                <span className="leading-relaxed">
-                  Результат создает нейросеть. Не понравилось либо заметили ошибки? Нажмите "перегенерировать" - это в 5 раз дешевле!
-                </span>
-              </p>
-            </div>}
+          {generating && (
+            <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
+              <p>Результат создает нейросеть. Не понравилось либо заметили ошибки? Нажмите "перегенерировать" - это в 5 раз дешевле!</p>
+            </div>
+          )}
         </CardContent>
       </Card>
       
