@@ -853,10 +853,9 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
 
               {/* User wishes field */}
               <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <Label htmlFor="userPrompt">
-                    Пожелания к видео
-                  </Label>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="font-semibold text-base">Пожелания к видео</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
