@@ -247,7 +247,7 @@ export default function UnifiedLabelMaker({ mode }: UnifiedLabelMakerProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* LEFT: Form */}
-      <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 sm:p-6 space-y-4">
+      <div className="rounded-2xl border border-border/50 bg-card p-4 sm:p-6 space-y-4">
         <div className="space-y-1.5">
           <Label className="font-semibold">
             Штрих-код (Code-128) <span className="text-destructive">*</span>
@@ -346,7 +346,7 @@ export default function UnifiedLabelMaker({ mode }: UnifiedLabelMakerProps) {
       </div>
 
       {/* RIGHT: Preview */}
-      <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 sm:p-6 flex flex-col gap-3">
+      <div className="rounded-2xl border border-border/50 bg-card p-4 sm:p-6 flex flex-col gap-3">
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-lg">Превью макета</h3>
           <Badge variant="outline" className="font-bold text-xs">
