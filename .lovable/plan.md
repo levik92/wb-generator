@@ -1,168 +1,138 @@
 
 
-# Генерация видеообложек через Kling AI
+# План: Улучшения видеообложек, перегенерация, история и админка
 
 ## Обзор
 
-Добавляем полноценный раздел "Видеообложки" в дашборд. Пользователь загружает одно изображение товара (без сжатия, сохраняя качество), нажимает кнопку -- получает 5-секундное видео через Kling AI API (модель kling-v2-6, image-to-video, формат 3:4, без аудио). Стоимость -- 10 токенов (настраивается в админке). При ошибке токены возвращаются.
+Реализация 7 направлений: исправление багов с историей видео, функция перегенерации (2 токена), таймер 2 минуты, промо-блок, бета-уведомление, подсказки, отображение видео в прайсах и админке.
 
 ---
 
-## Про ключи Kling AI
+## 1. Исправление критического бага: колонка в БД
 
-Kling использует JWT-аутентификацию (HS256):
+**Проблема:** В таблице `video_generation_jobs` колонка называется `result_video_url`, но edge function `check-video-status` записывает в `video_url` (строки 112, 177). Из-за этого видео не сохраняется в БД и не отображается в истории.
 
-- **Access Key (AK)** -- используется как `iss` (issuer) в JWT-токене. Это твой идентификатор.
-- **Secret Key (SK)** -- используется для **подписи** JWT-токена. Это секрет.
-
-Оба ключа нужны одновременно в edge function. Они будут сохранены как Supabase secrets:
-- `KLING_ACCESS_KEY`
-- `KLING_SECRET_KEY`
+**Исправление:**
+- В `check-video-status/index.ts`: заменить `video_url` на `result_video_url` в обоих `.update()` вызовах (строки 112 и 177)
+- В `check-video-status/index.ts`: в ответе для уже завершённых задач (строка 112) тоже читать `result_video_url`
 
 ---
 
-## Техническая реализация
+## 2. Удаление видео из истории
 
-### 1. Supabase Secrets
+**Проблема:** Кнопка удаления скрыта для видео (строка 715 History.tsx: `generation_type !== 'video'`).
 
-Добавить два секрета через интерфейс:
-- `KLING_ACCESS_KEY` -- Access Key из Kling AI
-- `KLING_SECRET_KEY` -- Secret Key из Kling AI
-
-### 2. Миграция базы данных
-
-**Таблица `video_generation_jobs`:**
-- `id` (uuid, PK)
-- `user_id` (uuid, NOT NULL)
-- `status` (text: pending, processing, completed, failed)
-- `product_image_url` (text) -- URL загруженного изображения
-- `kling_task_id` (text) -- ID задачи в Kling API
-- `video_url` (text, nullable) -- URL готового видео
-- `error_message` (text, nullable)
-- `tokens_cost` (integer, default 10)
-- `prompt` (text) -- промт, отправленный в Kling
-- `created_at`, `updated_at` (timestamptz)
-
-RLS: пользователь видит/создаёт/обновляет только свои записи.
-
-**Вставка в `generation_pricing`:**
-- `price_type = 'video_generation'`, `tokens_cost = 10`, `description = 'Генерация видеообложки'`
-
-**Вставка в `ai_prompts`:**
-- `prompt_type = 'video_cover'`, `model_type = 'kling'`, `prompt_template = 'A smooth, cinematic product showcase animation with subtle camera movement...'`
-
-### 3. Edge Functions
-
-#### `create-video-job` (verify_jwt: true)
-1. Проверяет авторизацию пользователя
-2. Загружает стоимость из `generation_pricing` (тип `video_generation`)
-3. Проверяет баланс токенов
-4. Списывает токены
-5. Загружает промт из `ai_prompts` (prompt_type = 'video_cover')
-6. Генерирует JWT из AK + SK (HS256, exp = 30 мин)
-7. POST на `https://api.klingai.com/v1/videos/image2video`:
-
-```text
-{
-  model_name: "kling-v2-6",
-  image: <URL изображения>,
-  prompt: <промт из БД>,
-  duration: "5",
-  aspect_ratio: "3:4",
-  mode: "std"
-}
-```
-
-8. Сохраняет задачу в `video_generation_jobs`
-9. Возвращает `job_id`
-
-#### `check-video-status` (verify_jwt: true)
-1. Получает `job_id`, проверяет принадлежность пользователю
-2. Генерирует JWT
-3. GET на `https://api.klingai.com/v1/videos/image2video/{task_id}`
-4. Обновляет статус в БД
-5. При ошибке -- **возвращает токены** пользователю (UPDATE profiles + INSERT token_transactions)
-6. Возвращает статус и video_url
-
-### 4. Фронтенд
-
-#### Новый компонент `VideoCovers.tsx`
-Простой интерфейс (по аналогии с GenerateCards, но значительно проще):
-- Зона загрузки **одного** изображения (drag-and-drop), **без сжатия**
-- Кнопка "Сгенерировать видеообложку" с отображением стоимости (10 токенов)
-- Прогресс-блок с polling каждые 10 секунд:
-  - Статусы: "Загрузка изображения...", "Создание задачи...", "Генерация видео...", "Готово!"
-  - Предупреждение "Не закрывайте страницу" во время загрузки (как у карточек)
-- Видеоплеер для просмотра результата (тег `<video>`)
-- Кнопка скачивания видео
-- История предыдущих генераций (последние 10)
-
-#### Обновление Dashboard.tsx
-- Добавить `'video'` в тип `ActiveTab`
-- Добавить case в `renderContent()`:
-  ```text
-  case 'video':
-    return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} />;
-  ```
-
-#### Обновление DashboardSidebar.tsx
-- Добавить пункт "Видеообложки" с иконкой `Video` между "Генерация карточек" и "Генерация описаний"
-
-#### Обновление MobileSideMenu.tsx
-- Аналогично добавить пункт "Видеообложки"
-
-#### Обновление useGenerationPricing.ts
-- Добавить `'video_generation'` в тип `PriceType`
-
-#### Обновление Pricing.tsx
-- Добавить строку с ценой видеогенерации рядом с фото и описаниями
-
-### 5. Админ-панель
-
-#### Обновление PromptManager.tsx
-- Добавить верхний уровень табов: **"Изображения"** | **"Видео"**
-- Вкладка "Изображения" -- текущий интерфейс (OpenAI / Gemini модели + промты)
-- Вкладка "Видео":
-  - Выбор модели (пока только Kling)
-  - Редактируемый промт для видеогенерации (из `ai_prompts` с `prompt_type='video_cover'`)
-
-#### AdminPricing.tsx
-- Строка `video_generation` из `generation_pricing` отобразится автоматически (уже подтягивает все строки)
-
-### 6. Обновление supabase/config.toml
-```text
-[functions.create-video-job]
-verify_jwt = true
-
-[functions.check-video-status]
-verify_jwt = true
-```
+**Исправление:**
+- Убрать условие `generation_type !== 'video'`
+- Добавить отдельный обработчик удаления для видео: `supabase.from('video_generation_jobs').delete().eq('id', id).eq('user_id', profile.id)`
+- Добавить RLS политику DELETE для `video_generation_jobs` (пользователь может удалять свои записи)
 
 ---
 
-## Список файлов
+## 3. Перегенерация видео (2 токена)
 
-**Новые:**
-- `src/components/dashboard/VideoCovers.tsx`
-- `supabase/functions/create-video-job/index.ts`
-- `supabase/functions/check-video-status/index.ts`
+### 3.1 Запись в generation_pricing
+- Добавить строку: `price_type = 'video_regeneration'`, `tokens_cost = 2`, `description = 'Перегенерация видеообложки'`
+- Эта строка автоматически появится в AdminPricing и будет редактируемой
 
-**Изменяемые:**
-- `src/pages/Dashboard.tsx` -- вкладка 'video'
-- `src/components/dashboard/DashboardSidebar.tsx` -- пункт меню
-- `src/components/mobile/MobileSideMenu.tsx` -- пункт меню
-- `src/components/dashboard/PromptManager.tsx` -- табы Изображения/Видео
-- `src/components/dashboard/Pricing.tsx` -- отображение цены видео
-- `src/hooks/useGenerationPricing.ts` -- тип PriceType
-- `supabase/config.toml` -- 2 новые функции
+### 3.2 Обновить useGenerationPricing.ts
+- Добавить `'video_regeneration'` в тип `PriceType`
 
-**Миграция БД:** таблица video_generation_jobs + данные pricing + промт
+### 3.3 Новая edge function: `regenerate-video-job`
+- Принимает `original_job_id` и опциональный `user_prompt`
+- Читает `product_image_url` из оригинальной задачи (фото не меняется)
+- Использует стоимость `video_regeneration` из `generation_pricing` (2 токена)
+- Далее идентично `create-video-job`: проверка баланса, списание, вызов Kling API, сохранение новой задачи
+
+### 3.4 Обновить config.toml
+- Добавить `[functions.regenerate-video-job]` с `verify_jwt = false`
+
+### 3.5 UI блок перегенерации (VideoCovers.tsx)
+- Под результатом видео добавить блок "Не нравится результат?"
+- Текст: можно перегенерировать за 2 токена
+- Поле описания (опционально, можно переписать пожелания)
+- Кнопка "Перегенерировать" с бейджем стоимости
+- При нажатии: вызов `regenerate-video-job`, запуск polling
 
 ---
 
-## Обработка ошибок
+## 4. Таймер: 4 минуты -> 2 минуты
 
-- Если Kling API возвращает ошибку при создании задачи -- токены возвращаются сразу в edge function
-- Если при polling задача получает статус `failed` -- edge function возвращает токены и записывает причину в `error_message`
-- На фронтенде показывается toast с текстом ошибки и информацией о возврате токенов
+**VideoCovers.tsx:**
+- `ESTIMATED_TIME_SECONDS` = `2 * 60` вместо `4 * 60`
+- Тексты "~4 минуты" заменить на "~2 минуты"
+
+---
+
+## 5. Подсказки и уведомления
+
+### 5.1 Под кнопкой генерации
+- Серый текст: "Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле."
+
+### 5.2 Бета-уведомление
+- Alert-компонент вверху страницы с иконкой Info:
+  "Функция находится в бета-доступе. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в поддержку."
+
+---
+
+## 6. Промо/CTA блок
+
+- Карточка после основной формы генерации (аналогично блоку в изображениях)
+- Заголовок: "Посмотрите, какие видеообложки можно создавать"
+- Кнопка "Пополнить баланс" -- переход на вкладку тарифов
+- Кнопка "Посмотреть примеры" -- ссылка на лендинг видео (в новой вкладке)
+
+---
+
+## 7. Стоимость видео в прайсах и админке
+
+### Pricing.tsx (страница тарифов)
+- Видео уже отображается в прайсах (строка 171-173). Нужно добавить строку с количеством видео: `Math.floor(tokens / videoPrice)` видео
+
+### AdminPricing.tsx
+- Строка `video_generation` уже автоматически подтягивается из `generation_pricing`
+- После добавления `video_regeneration` она тоже появится автоматически -- **никаких изменений в AdminPricing не нужно**, всё работает через общий цикл `generationPrices.map()`
+
+---
+
+## 8. Автоочистка через 30 дней
+
+- Миграция: обновить функцию `cleanup_old_generations()` (или создать новую), чтобы также удалять из `video_generation_jobs` записи старше 30 дней
+
+---
+
+## Технические детали
+
+### Новые файлы
+| Файл | Назначение |
+|------|-----------|
+| `supabase/functions/regenerate-video-job/index.ts` | Edge function перегенерации видео |
+
+### Изменяемые файлы
+| Файл | Изменения |
+|------|-----------|
+| `supabase/functions/check-video-status/index.ts` | Исправить `video_url` -> `result_video_url` |
+| `src/components/dashboard/VideoCovers.tsx` | Таймер 2 мин, подсказки, бета-алерт, блок перегенерации, CTA-блок |
+| `src/components/dashboard/History.tsx` | Разрешить удаление видео, обработчик удаления для video_generation_jobs |
+| `src/hooks/useGenerationPricing.ts` | Добавить `video_regeneration` в PriceType |
+| `src/components/dashboard/Pricing.tsx` | Добавить строку "X видеообложек" в расчёт тарифов |
+| `supabase/config.toml` | Добавить `regenerate-video-job` |
+
+### Миграция БД
+- RLS политика DELETE для `video_generation_jobs`: пользователь может удалять свои записи
+- Обновление функции автоочистки для включения `video_generation_jobs`
+
+### Вставка данных (не миграция)
+- INSERT в `generation_pricing`: `video_regeneration`, 2 токена, "Перегенерация видеообложки"
+
+### Порядок реализации
+1. Исправить баг с колонкой `result_video_url` в `check-video-status`
+2. Миграция: RLS DELETE + автоочистка
+3. Вставить строку `video_regeneration` в `generation_pricing`
+4. Создать `regenerate-video-job` edge function
+5. Обновить `VideoCovers.tsx` (таймер, подсказки, перегенерация, бета, CTA)
+6. Обновить `History.tsx` (удаление видео)
+7. Обновить `useGenerationPricing.ts` и `Pricing.tsx`
+8. Обновить `config.toml`
+9. Задеплоить и протестировать
 
