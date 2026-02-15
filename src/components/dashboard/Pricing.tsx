@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Check, Loader2, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
+import { useQuery } from "@tanstack/react-query";
 
 interface PromoCodeInfo {
   id: string;
@@ -33,6 +34,30 @@ export default function Pricing({
     data: generationPrices,
     isLoading: pricesLoading
   } = useGenerationPricing();
+
+  // Check if user has already purchased a trial package
+  const { data: trialPurchased } = useQuery({
+    queryKey: ['trial-purchased'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return false;
+      const { data, error } = await supabase
+        .from('payments')
+        .select('id, package_name')
+        .eq('user_id', session.user.id)
+        .eq('status', 'succeeded')
+        .limit(1000);
+      if (error || !data) return false;
+      // Get trial package names
+      const { data: trialPackages } = await supabase
+        .from('payment_packages')
+        .select('name')
+        .eq('is_trial', true);
+      if (!trialPackages) return false;
+      const trialNames = trialPackages.map(p => p.name);
+      return data.some(p => trialNames.includes(p.package_name));
+    },
+  });
 
   // Get pricing for calculations
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
@@ -142,12 +167,17 @@ export default function Pricing({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {packages.map((plan) => {
         const isPopular = plan.is_popular;
+        const isTrial = plan.is_trial;
+        const isTrialUsed = isTrial && trialPurchased;
         const pricePerToken = plan.price / plan.tokens;
         const photoCount = Math.floor(plan.tokens / photoPrice);
         const descCount = Math.floor(plan.tokens / descriptionPrice);
-        return <Card key={plan.id} className={isPopular ? "border-primary relative" : ""}>
+        return <Card key={plan.id} className={`${isPopular ? "border-primary relative" : ""} ${isTrialUsed ? "opacity-60" : ""}`}>
               <CardHeader className="pb-4">
-                {isPopular && <Badge className="w-fit mb-2 rounded-sm border-4">Популярный</Badge>}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {isPopular && <Badge className="w-fit rounded-sm border-4">Популярный</Badge>}
+                  {isTrial && <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border">Триал</Badge>}
+                </div>
                 <CardTitle className="text-lg">{plan.name}</CardTitle>
                 <div className="text-2xl lg:text-3xl font-bold">
                   {appliedPromo?.type === 'discount' ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` : `${plan.price}₽`}
@@ -192,8 +222,8 @@ export default function Pricing({
                     <span className="text-xs">Поддержка в чате</span>
                   </div>
                 </div>
-                <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name}>
-                  {loading === plan.name ? "Создание..." : "Выбрать"}
+                <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name || !!isTrialUsed}>
+                  {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
                 </Button>
               </CardContent>
             </Card>;
