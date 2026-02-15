@@ -10,6 +10,7 @@ export interface PaymentPackage {
   currency: string;
   is_active: boolean;
   is_popular: boolean;
+  is_trial: boolean;
   created_at: string;
 }
 

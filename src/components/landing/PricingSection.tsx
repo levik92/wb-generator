@@ -64,6 +64,7 @@ export function PricingSection() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {packages.slice(0, 6).map((plan, index) => {
               const isPopular = plan.is_popular;
+              const isTrial = plan.is_trial;
               const pricePerToken = plan.price / plan.tokens;
               const photoCount = Math.floor(plan.tokens / photoPrice);
               const descCount = Math.floor(plan.tokens / descriptionPrice);
@@ -102,7 +103,14 @@ export function PricingSection() {
 
                     <div className="relative p-6 sm:p-8">
                       {/* Plan name */}
-                      <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                        {isTrial && (
+                          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-[11px] text-white/60 font-medium">
+                            Триал
+                          </span>
+                        )}
+                      </div>
                       
                       {/* Price */}
                       <div className="mb-4">

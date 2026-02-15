@@ -902,6 +902,7 @@ export type Database = {
           id: string
           is_active: boolean
           is_popular: boolean
+          is_trial: boolean
           name: string
           price: number
           tokens: number
@@ -912,6 +913,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_popular?: boolean
+          is_trial?: boolean
           name: string
           price: number
           tokens: number
@@ -922,6 +924,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_popular?: boolean
+          is_trial?: boolean
           name?: string
           price?: number
           tokens?: number

@@ -17,6 +17,7 @@ interface PaymentPackage {
   currency: string;
   is_active: boolean;
   is_popular: boolean;
+  is_trial: boolean;
 }
 interface GenerationPrice {
   id: string;
@@ -84,7 +85,8 @@ export function AdminPricing() {
         price: pkg.price,
         tokens: pkg.tokens,
         is_active: pkg.is_active,
-        is_popular: pkg.is_popular
+        is_popular: pkg.is_popular,
+        is_trial: pkg.is_trial
       }).eq('id', pkg.id);
       if (error) throw error;
       toast({
@@ -238,6 +240,7 @@ export function AdminPricing() {
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Популярный</TableHead>
+                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Триал</TableHead>
                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
                     <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
                   </TableRow>
@@ -283,6 +286,15 @@ export function AdminPricing() {
                             setPackages(updated);
                           }} 
                         />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Switch checked={pkg.is_trial} onCheckedChange={checked => {
+                      const updated = packages.map(p => p.id === pkg.id ? {
+                        ...p,
+                        is_trial: checked
+                      } : p);
+                      setPackages(updated);
+                    }} />
                       </TableCell>
                       <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
                         <Switch checked={pkg.is_active} onCheckedChange={checked => {
