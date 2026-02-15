@@ -342,8 +342,8 @@ export const Settings = ({
                   )}
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Тема оформления</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-base">Тема оформления</CardTitle>
+                  <CardDescription className="text-xs">
                     {mounted && resolvedTheme === 'dark' ? 'Тёмная тема' : 'Светлая тема'}
                   </CardDescription>
                 </div>
