@@ -208,10 +208,9 @@ const relatedServices = [
   },
   {
     title: "Видео-генерация",
-    description: "ИИ-создание видеообложек для карточек товаров (скоро)",
+    description: "ИИ-создание видеообложек для карточек товаров",
     href: "/video-generaciya",
     icon: Video,
-    isComingSoon: true,
   },
 ];
 

@@ -7,7 +7,7 @@ const productItems = [
   { label: "Создание карточек", href: "/sozdanie-kartochek", icon: Image, description: "ИИ-дизайн за 3 минуты" },
   { label: "SEO-описания", href: "/seo-opisaniya", icon: FileText, description: "Продающие тексты с ключами" },
   { label: "Генератор ШК", href: "/generator-shk", icon: Barcode, description: "Штрихкоды бесплатно" },
-  { label: "Видео-генерация", href: "/video-generaciya", icon: Video, description: "Скоро", isComingSoon: true },
+  { label: "Видео-генерация", href: "/video-generaciya", icon: Video, description: "Видеообложки для карточек" },
 ];
 
 const resourceItems = [
@@ -89,9 +89,6 @@ export const LandingHeader = () => {
                               <span className="text-sm font-medium text-white group-hover:text-[hsl(268,83%,65%)] transition-colors">
                                 {item.label}
                               </span>
-                              {item.isComingSoon && (
-                                <span className="px-1.5 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded">Скоро</span>
-                              )}
                             </div>
                             <span className="text-xs text-white/50">{item.description}</span>
                           </div>
@@ -196,9 +193,6 @@ export const LandingHeader = () => {
                       >
                         <item.icon className="w-5 h-5 text-white/50" />
                         <span>{item.label}</span>
-                        {item.isComingSoon && (
-                          <span className="ml-auto px-1.5 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded">Скоро</span>
-                        )}
                       </Link>
                     ))}
                   </div>
