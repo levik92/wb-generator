@@ -1,47 +1,63 @@
 
-# Исправление очистки зависших видео-задач
 
-## Проблема
+## Plan: Breakdown Charts for AI Requests and Tokens by Type
 
-Функция `cleanup-stale-jobs` очищает только таблицу `generation_jobs` (карточки), но полностью игнорирует `video_generation_jobs`. Из-за этого:
-- 5 задач зависли навсегда в статусе `processing` с потерей 50 токенов
-- Пользователи не получили возврат токенов
-- При возврате на страницу видят бесконечную загрузку
+### Overview
+Replace the current single-line "Запросы к AI" and "Потрачено токенов" charts with multi-line breakdown charts showing data split by category (images, descriptions, video). Each chart will show:
+- Total number at the top (sum of all types)
+- Three colored lines with a legend at the bottom
+- No comparison period (previous period lines removed)
 
-## План исправления
+### Data Sources
+The breakdown will come from:
+- **Images (cards)**: `generations` table where `generation_type = 'cards'` + `generation_jobs` for token costs
+- **Descriptions**: `generations` table where `generation_type = 'description'`
+- **Video**: `video_generation_jobs` table (separate table)
 
-### 1. Обновить cleanup-stale-jobs
+For tokens:
+- **Images tokens**: `generation_jobs.tokens_cost` (linked to card generations)
+- **Description tokens**: `generations.tokens_used` where type = 'description'
+- **Video tokens**: `video_generation_jobs.tokens_cost`
 
-Добавить в edge-функцию `cleanup-stale-jobs` блок для обработки зависших видео-задач из `video_generation_jobs`:
+### Changes
 
-- Найти задачи со статусом `processing`, созданные более 10 минут назад
-- Пометить их как `failed` с сообщением об ошибке таймаута
-- Вернуть токены через `refund_tokens`
-- Отправить уведомление пользователю
+#### 1. Edge Function: `supabase/functions/admin-analytics/index.ts`
+- Fetch `generations` split by `generation_type` ('cards' vs 'description') for the period
+- Fetch `video_generation_jobs` for the period
+- Return new breakdown fields in response:
+  - `generationsByType`: `{ cards: ChartData[], descriptions: ChartData[], video: ChartData[] }`
+  - `tokensByType`: `{ cards: ChartData[], descriptions: ChartData[], video: ChartData[] }`
+  - `totalsByType`: `{ generationsCards, generationsDescriptions, generationsVideo, tokensCards, tokensDescriptions, tokensVideo }`
+- Keep existing `generations` and `tokens` charts unchanged for backward compatibility
+- Skip fetching previous period data for these new breakdown charts
 
-### 2. Одноразовая очистка существующих задач
+#### 2. Frontend: `src/components/dashboard/AdminAnalyticsChart.tsx`
+- Add a new component `AdminBreakdownChart` that:
+  - Accepts `type: 'generations' | 'tokens'`
+  - Uses `AreaChart` with 3 `Area` lines in different colors:
+    - Images: `#8b5cf6` (purple)
+    - Descriptions: `#06b6d4` (cyan)  
+    - Video: `#f59e0b` (amber)
+  - Shows total sum at the top as the main number
+  - Has a legend at the bottom with colored dots + labels
+  - Has its own date range picker (same pattern as existing charts)
+  - No previous period comparison line
+  - Custom tooltip showing all 3 values
 
-Выполнить SQL-миграцию для исправления 5 текущих зависших задач:
+#### 3. Frontend: `src/components/admin/AdminAnalytics.tsx`
+- Replace the existing `AdminAnalyticsChart type="generations"` and `type="tokens"` with the new `AdminBreakdownChart` components
+- Keep `AdminAnalyticsChart type="users"` and `type="revenue"` as they are
 
-- Обновить их статус на `failed`
-- Вернуть токены пользователям (50 токенов суммарно)
+### Colors
+| Category | Color | Label |
+|---|---|---|
+| Изображения | #8b5cf6 (purple) | Изображения |
+| Описания | #06b6d4 (cyan) | Описания |
+| Видео | #f59e0b (amber) | Видео |
 
-### Технические детали
+### Technical Notes
+- The edge function uses `fetchAllRows` for pagination (existing pattern)
+- Video data comes from `video_generation_jobs` table (not in `generations`)
+- Token amounts: for cards use `generation_jobs.tokens_cost`, for descriptions use `generations.tokens_used`, for video use `video_generation_jobs.tokens_cost`
+- Since `token_transactions` has no type breakdown in description, we derive token costs from the source tables directly
 
-В `cleanup-stale-jobs/index.ts` после основного блока очистки `generation_jobs` добавляется аналогичный блок:
-
-```text
-1. Запрос зависших video_generation_jobs (status=processing, created_at < threshold)
-2. Для каждой задачи:
-   - UPDATE status = 'failed', error_message = 'Таймаут генерации'
-   - Вызов refund_tokens(user_id, tokens_cost)
-   - INSERT notification для пользователя
-3. Логирование количества очищенных задач
-```
-
-SQL-миграция для текущих зависших задач:
-
-```text
-- UPDATE video_generation_jobs SET status='failed', error_message='Таймаут генерации (очистка)' WHERE status='processing' AND created_at < now() - interval '1 hour'
-- Для каждого уникального user_id: вызов refund_tokens с суммой tokens_cost
-```
