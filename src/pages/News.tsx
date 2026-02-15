@@ -251,10 +251,10 @@ const News = () => {
             onClick={markAllAsRead}
             variant="outline"
             size="icon"
-            className="shrink-0 border-primary/20 hover:bg-primary/10 w-10 h-10"
+            className="shrink-0 border-primary/20 hover:bg-primary/10 w-10 h-10 group"
             title="Прочитать все"
           >
-            <CheckCheck className="w-5 h-5" />
+            <CheckCheck className="w-5 h-5 transition-colors group-hover:text-primary" />
           </Button>
         )}
       </div>
