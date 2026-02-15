@@ -221,6 +221,30 @@ serve(async (req) => {
       { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
+    // === BREAKDOWN: генерации по типам ===
+    const generationsCardsData = await fetchAllRows(supabase, 'generations', 'created_at', [
+      { field: 'generation_type', op: 'eq', value: 'cards' },
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+    ])
+
+    const generationsDescData = await fetchAllRows(supabase, 'generations', 'created_at, tokens_used', [
+      { field: 'generation_type', op: 'eq', value: 'description' },
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+    ])
+
+    const videoJobsData = await fetchAllRows(supabase, 'video_generation_jobs', 'created_at, tokens_cost', [
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+    ])
+
+    // Токены по карточкам (generation_jobs.tokens_cost)
+    const cardTokensData = await fetchAllRows(supabase, 'generation_jobs', 'created_at, tokens_cost', [
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+    ])
+
     // Получаем данные о токенах (расход) (с пагинацией)
     const tokensData = await fetchAllRows(supabase, 'token_transactions', 'created_at, amount', [
       { field: 'transaction_type', op: 'eq', value: 'generation' },
@@ -458,6 +482,24 @@ serve(async (req) => {
       ? Math.round((periodRepeatPaymentUsers / periodPaidUsersCount) * 1000) / 10 
       : 0
 
+    // === BREAKDOWN CHARTS ===
+    const generationsCardsChart = groupData(generationsCardsData || [], 'created_at')
+    const generationsDescChart = groupData(generationsDescData || [], 'created_at')
+    const generationsVideoChart = groupData(videoJobsData || [], 'created_at')
+
+    const tokensCardsChart = groupData(cardTokensData || [], 'created_at', 'tokens_cost')
+    const tokensDescChart = groupData(generationsDescData || [], 'created_at', 'tokens_used')
+    const tokensVideoChart = groupData(videoJobsData || [], 'created_at', 'tokens_cost')
+
+    const totalsByType = {
+      generationsCards: generationsCardsData?.length || 0,
+      generationsDescriptions: generationsDescData?.length || 0,
+      generationsVideo: videoJobsData?.length || 0,
+      tokensCards: cardTokensData?.reduce((sum, t) => sum + (t.tokens_cost || 0), 0) || 0,
+      tokensDescriptions: generationsDescData?.reduce((sum, t) => sum + (t.tokens_used || 0), 0) || 0,
+      tokensVideo: videoJobsData?.reduce((sum, t) => sum + (t.tokens_cost || 0), 0) || 0,
+    }
+
     return new Response(
       JSON.stringify({
         period,
@@ -490,6 +532,18 @@ serve(async (req) => {
         },
         // Проценты изменения относительно предыдущего периода
         changePercents,
+        // Разбивка по типам
+        generationsByType: {
+          cards: generationsCardsChart,
+          descriptions: generationsDescChart,
+          video: generationsVideoChart,
+        },
+        tokensByType: {
+          cards: tokensCardsChart,
+          descriptions: tokensDescChart,
+          video: tokensVideoChart,
+        },
+        totalsByType,
         // Новые метрики
         additionalMetrics: {
           paidUsers: periodPaidUsersCount,
