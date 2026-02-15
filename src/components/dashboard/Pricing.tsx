@@ -178,15 +178,15 @@ export default function Pricing({
                 <div className="flex items-center gap-2 flex-wrap">
                   {isPopular && <Badge className="w-fit rounded-sm border-4">Популярный</Badge>}
                   {isTrial && (
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={0}>
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border gap-1 cursor-help">
+                        <TooltipTrigger className="cursor-help">
+                          <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border gap-1">
                             Триал
                             <HelpCircle className="w-3 h-3" />
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="top">
                           <p>Этот тариф можно приобрести только один раз</p>
                         </TooltipContent>
                       </Tooltip>
