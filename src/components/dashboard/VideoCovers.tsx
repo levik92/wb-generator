@@ -695,7 +695,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                               <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              Расчётное время ~2 минуты. Можете переключиться на другие вкладки.
+                              Расчётное время 1-2 минуты. Можете переключиться на другие вкладки.
                             </p>
                           </>
                         ) : (
