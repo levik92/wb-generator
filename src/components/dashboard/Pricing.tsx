@@ -186,7 +186,7 @@ export default function Pricing({
                             <HelpCircle className="w-3 h-3" />
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent side="top" className="max-w-[200px] text-center">
                           <p>Этот тариф можно приобрести только один раз</p>
                         </TooltipContent>
                       </Tooltip>
