@@ -402,8 +402,8 @@ export const Settings = ({
       <Card className="border border-border/50 bg-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <User className="w-4.5 h-4.5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <User className="w-5 h-5 text-primary" />
             </div>
             <div>
               <CardTitle className="text-base">Профиль</CardTitle>
@@ -431,8 +431,8 @@ export const Settings = ({
       <Card className="border border-border/50 bg-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <Mail className="w-4.5 h-4.5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
               <CardTitle className="text-base">Смена email</CardTitle>
@@ -456,8 +456,8 @@ export const Settings = ({
       <Card className="border border-border/50 bg-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <Lock className="w-4.5 h-4.5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-primary" />
             </div>
             <div>
               <CardTitle className="text-base">Смена пароля</CardTitle>
@@ -492,8 +492,8 @@ export const Settings = ({
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                <KeyRound className="w-4.5 h-4.5 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <KeyRound className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-base">Wildberries API</CardTitle>
@@ -520,8 +520,8 @@ export const Settings = ({
       <Card className="border border-border/50 bg-card">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 flex items-center justify-center">
-              <LogOut className="w-4.5 h-4.5 text-red-500" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 flex items-center justify-center">
+              <LogOut className="w-5 h-5 text-red-500" />
             </div>
             <CardTitle className="text-base">Действия</CardTitle>
           </div>
