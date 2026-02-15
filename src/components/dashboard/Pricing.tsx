@@ -175,13 +175,14 @@ export default function Pricing({
         const descCount = Math.floor(plan.tokens / descriptionPrice);
         return <Card key={plan.id} className={`${isPopular ? "border-primary relative" : ""} ${isTrialUsed ? "opacity-60" : ""}`}>
               <CardHeader className="pb-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  {isPopular && <Badge className="w-fit rounded-sm border-4">Популярный</Badge>}
+                {isPopular && <Badge className="w-fit mb-2 rounded-sm border-4">Популярный</Badge>}
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-lg">{plan.name}</CardTitle>
                   {isTrial && (
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger className="cursor-help">
-                          <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border gap-1">
+                          <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border gap-1 shrink-0">
                             Триал
                             <HelpCircle className="w-3 h-3" />
                           </Badge>
@@ -193,7 +194,6 @@ export default function Pricing({
                     </TooltipProvider>
                   )}
                 </div>
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
                 <div className="text-2xl lg:text-3xl font-bold">
                   {appliedPromo?.type === 'discount' ? `${Math.round(plan.price * (1 - appliedPromo.value / 100))}₽` : `${plan.price}₽`}
                   {appliedPromo?.type === 'discount' && <span className="text-base text-muted-foreground line-through ml-2">
