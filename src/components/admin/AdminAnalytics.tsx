@@ -1,4 +1,5 @@
 import { AdminAnalyticsChart, AdminAdditionalMetrics } from "@/components/dashboard/AdminAnalyticsChart";
+import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -95,8 +96,8 @@ export function AdminAnalytics({
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
         <AdminAnalyticsChart type="users" />
-        <AdminAnalyticsChart type="generations" />
-        <AdminAnalyticsChart type="tokens" />
+        <AdminBreakdownChart type="generations" />
+        <AdminBreakdownChart type="tokens" />
         <AdminAnalyticsChart type="revenue" />
       </div>
 
