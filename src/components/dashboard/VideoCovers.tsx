@@ -786,10 +786,10 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                   <div className="space-y-2">
                     <Textarea
                       value={regenPrompt}
-                      onChange={(e) => { if (e.target.value.length <= 1200) setRegenPrompt(e.target.value); }}
+                      onChange={(e) => { if (e.target.value.length <= 150) setRegenPrompt(e.target.value); }}
                       placeholder="Опишите пожелания к анимации"
                       className="min-h-[60px] text-sm"
-                      maxLength={1200}
+                      maxLength={150}
                       disabled={isRegenerating || regenAutoOptimize}
                     />
                     <div className="flex items-center justify-between">
@@ -812,7 +812,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                           Придумай сам
                         </Label>
                       </div>
-                      <span className={`text-xs ${regenPrompt.length >= 1200 ? 'text-destructive' : 'text-muted-foreground'}`}>{regenPrompt.length}/1200</span>
+                      <span className={`text-xs ${regenPrompt.length >= 150 ? 'text-destructive' : 'text-muted-foreground'}`}>{regenPrompt.length}/150</span>
                     </div>
                     <Button
                       onClick={handleRegenerate}
@@ -948,7 +948,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                 <Textarea
                   id="userPrompt"
                   value={userPrompt}
-                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 600))}
+                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 150))}
                   placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
                   className="min-h-[80px]"
                   maxLength={600}
@@ -974,7 +974,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
                       Придумай сам
                     </Label>
                   </div>
-                  <span className="text-xs text-muted-foreground">{userPrompt.length}/600 символов</span>
+                  <span className={`text-xs ${userPrompt.length >= 150 ? 'text-red-500' : 'text-muted-foreground'}`}>{userPrompt.length}/150 символов</span>
                 </div>
               </div>
             </CardContent>
