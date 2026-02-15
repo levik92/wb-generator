@@ -1758,7 +1758,19 @@ export const GenerateCards = ({
               {generatedImages.map((image, index) => {
             const cardKey = `${image.id}_${index}`;
             const isRegenerating = regeneratingCards.has(cardKey);
-            return <div key={image.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden">
+            const isEditingCard = editingCards.has(`edit_${image.id}_${index}`);
+            const isProcessingCard = isRegenerating || isEditingCard;
+            return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden ${isProcessingCard ? 'border-primary/30' : ''}`}>
+                    {isProcessingCard && <>
+                      <div className="absolute inset-0 pointer-events-none" style={{
+                        background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+                        animation: 'glow-drift 6s ease-in-out infinite alternate',
+                      }} />
+                      <div className="absolute inset-0 pointer-events-none" style={{
+                        background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
+                        animation: 'glow-drift-top 8s ease-in-out infinite alternate',
+                      }} />
+                    </>}
                     <div className="relative group shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
                       <img src={image.url} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover:brightness-75" />
                       {/* Hover overlay */}
