@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, MessageCircle, AlertCircle } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { useQuery } from "@tanstack/react-query";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PromoCodeInfo {
   id: string;
@@ -176,7 +177,21 @@ export default function Pricing({
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-2 flex-wrap">
                   {isPopular && <Badge className="w-fit rounded-sm border-4">Популярный</Badge>}
-                  {isTrial && <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border">Триал</Badge>}
+                  {isTrial && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="secondary" className="w-fit rounded-sm bg-muted text-muted-foreground border border-border gap-1 cursor-help">
+                            Триал
+                            <HelpCircle className="w-3 h-3" />
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Этот тариф можно приобрести только один раз</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
                 <CardTitle className="text-lg">{plan.name}</CardTitle>
                 <div className="text-2xl lg:text-3xl font-bold">
