@@ -156,7 +156,11 @@ Deno.serve(async (req) => {
       .single();
     let prompt = promptData?.prompt_template || "A smooth, cinematic product showcase animation.";
     if (user_prompt && typeof user_prompt === "string" && user_prompt.trim().length > 0) {
-      prompt = `${prompt} User wishes: ${user_prompt.trim().slice(0, 600)}`;
+      prompt = `${prompt} User wishes: ${user_prompt.trim().slice(0, 150)}`;
+    }
+    // Truncate to Kling API limit of 2500 characters
+    if (prompt.length > 2500) {
+      prompt = prompt.slice(0, 2500);
     }
 
     // Generate JWT for Kling API
