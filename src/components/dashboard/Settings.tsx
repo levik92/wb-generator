@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon, Sun, Moon } from "lucide-react";
+import { LogOut, Link as LinkIcon, Save, Lock, Mail, MessageCircle, Headphones, Eye, EyeOff, Trash2, Settings as SettingsIcon, Sun, Moon, User, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 interface Profile {
@@ -401,8 +401,15 @@ export const Settings = ({
 
       <Card className="border border-border/50 bg-card">
         <CardHeader>
-          <CardTitle>Профиль</CardTitle>
-          <CardDescription>Основная информация аккаунта</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <User className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Профиль</CardTitle>
+              <CardDescription className="text-xs">Основная информация аккаунта</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -423,8 +430,15 @@ export const Settings = ({
 
       <Card className="border border-border/50 bg-card">
         <CardHeader>
-          <CardTitle>Смена email</CardTitle>
-          <CardDescription>Изменить адрес электронной почты</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Mail className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Смена email</CardTitle>
+              <CardDescription className="text-xs">Изменить адрес электронной почты</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -441,8 +455,15 @@ export const Settings = ({
 
       <Card className="border border-border/50 bg-card">
         <CardHeader>
-          <CardTitle>Смена пароля</CardTitle>
-          <CardDescription>Изменить пароль для входа</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <Lock className="w-4.5 h-4.5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Смена пароля</CardTitle>
+              <CardDescription className="text-xs">Изменить пароль для входа</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -470,9 +491,14 @@ export const Settings = ({
       <Card className="border border-border/50 relative bg-card">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Wildberries API</CardTitle>
-              <CardDescription>Безопасное хранение API ключа для интеграции</CardDescription>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <KeyRound className="w-4.5 h-4.5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Wildberries API</CardTitle>
+                <CardDescription className="text-xs">Безопасное хранение API ключа для интеграции</CardDescription>
+              </div>
             </div>
             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
               Скоро
@@ -493,7 +519,12 @@ export const Settings = ({
 
       <Card className="border border-border/50 bg-card">
         <CardHeader>
-          <CardTitle>Действия</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 flex items-center justify-center">
+              <LogOut className="w-4.5 h-4.5 text-red-500" />
+            </div>
+            <CardTitle className="text-base">Действия</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <Button variant="destructive" onClick={onSignOut}>
