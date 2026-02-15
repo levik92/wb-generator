@@ -39,7 +39,7 @@ interface VideoCoversProps {
   onNavigate?: (tab: string) => void;
 }
 
-const ESTIMATED_TIME_SECONDS = 2 * 60; // 2 minutes
+const ESTIMATED_TIME_SECONDS = 60; // 1 minute
 const MAX_WAIT_SECONDS = 8 * 60; // 8 minutes absolute max
 
 const WAITING_MESSAGES = [
