@@ -106,8 +106,12 @@ export function PricingSection() {
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                         {isTrial && (
-                          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-[11px] text-white/60 font-medium">
+                          <span className="group/trial relative px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-[11px] text-white/60 font-medium inline-flex items-center gap-1 cursor-help">
                             Триал
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-white text-black text-xs font-normal whitespace-nowrap opacity-0 group-hover/trial:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                              Этот тариф можно приобрести только один раз
+                            </span>
                           </span>
                         )}
                       </div>
