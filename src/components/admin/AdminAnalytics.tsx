@@ -1,17 +1,16 @@
 import { AdminAnalyticsChart, AdminAdditionalMetrics } from "@/components/dashboard/AdminAnalyticsChart";
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CreditCard, Users, Activity } from "lucide-react";
+import { StatCard } from "@/components/dashboard/GlassCard";
+import { motion } from "framer-motion";
 
 interface AdminAnalyticsProps {
   users: { id: string; is_blocked: boolean; wb_connected: boolean }[];
 }
 
-export function AdminAnalytics({
-  users
-}: AdminAnalyticsProps) {
+export function AdminAnalytics({ users }: AdminAnalyticsProps) {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [paidUsersCount, setPaidUsersCount] = useState<number>(0);
   const [repeatPaidCount, setRepeatPaidCount] = useState<number>(0);
@@ -21,13 +20,11 @@ export function AdminAnalytics({
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Total users
         const { count: totalCount } = await supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true });
         setTotalUsers(totalCount || 0);
 
-        // Paid users: distinct user_ids with succeeded payments
         const { data: paidData } = await supabase
           .from('payments')
           .select('user_id')
@@ -36,7 +33,6 @@ export function AdminAnalytics({
         const paidUserIds = new Set((paidData || []).map(p => p.user_id));
         setPaidUsersCount(paidUserIds.size);
 
-        // Repeat paid users: users with 2+ succeeded payments
         const paymentCounts: Record<string, number> = {};
         (paidData || []).forEach(p => {
           paymentCounts[p.user_id] = (paymentCounts[p.user_id] || 0) + 1;
@@ -44,19 +40,15 @@ export function AdminAnalytics({
         const repeatCount = Object.values(paymentCounts).filter(c => c >= 2).length;
         setRepeatPaidCount(repeatCount);
 
-        // Active users: logged in or spent tokens in last 30 days
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
 
-        // Active users: use count queries + paginated token transactions to avoid 1000 row limit
-        // Count profiles updated in last 30 days
         const { count: recentLoginCount } = await supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true })
           .gte('updated_at', thirtyDaysAgoISO);
 
-        // Get distinct user_ids from token_transactions (paginated to avoid 1000 limit)
         const tokenUserIds = new Set<string>();
         let offset = 0;
         const pageSize = 1000;
@@ -77,8 +69,6 @@ export function AdminAnalytics({
           }
         }
 
-        // Best estimate: max of login count and token users (they overlap)
-        // recentLoginCount already counts all via head:true (no 1000 limit)
         const activeEstimate = Math.max(recentLoginCount || 0, tokenUserIds.size);
         setActiveUsersCount(activeEstimate);
       } catch (error) {
@@ -92,70 +82,55 @@ export function AdminAnalytics({
     fetchStats();
   }, [users.length]);
 
-  return <div className="space-y-4 md:space-y-6">
+  return (
+    <div className="space-y-4 md:space-y-6">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <StatCard
+          icon={<Users className="w-5 h-5" />}
+          label="Всего пользователей"
+          value={loading ? '...' : totalUsers.toLocaleString('ru-RU')}
+          delay={0}
+        />
+        <StatCard
+          icon={<CreditCard className="w-5 h-5" />}
+          label="Платные пользователи"
+          value={loading ? '...' : paidUsersCount.toLocaleString('ru-RU')}
+          trend={paidUsersCount > 0 ? `${repeatPaidCount} повт.` : undefined}
+          trendUp={repeatPaidCount > 0}
+          delay={0.1}
+        />
+        <StatCard
+          icon={<Activity className="w-5 h-5" />}
+          label="Активные (30 дней)"
+          value={loading ? '...' : activeUsersCount.toLocaleString('ru-RU')}
+          trend={totalUsers > 0 ? `${(activeUsersCount / totalUsers * 100).toFixed(1)}%` : undefined}
+          trendUp={true}
+          delay={0.2}
+        />
+      </div>
+
       {/* Analytics Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.15 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6"
+      >
         <AdminAnalyticsChart type="users" />
         <AdminBreakdownChart type="generations" />
         <AdminBreakdownChart type="tokens" />
         <AdminAnalyticsChart type="revenue" />
-      </div>
+      </motion.div>
 
       {/* Additional Metrics */}
-      <AdminAdditionalMetrics />
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base md:text-lg flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              Пользователей
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pb-3">
-            <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">
-              {loading ? '...' : totalUsers.toLocaleString('ru-RU')}
-            </div>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Всего на платформе
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base md:text-lg flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-              Платные пользователи
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pb-3">
-            <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">
-              {loading ? '...' : paidUsersCount.toLocaleString('ru-RU')}
-            </div>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Повторно: {loading ? '...' : repeatPaidCount.toLocaleString('ru-RU')} ({paidUsersCount > 0 ? (repeatPaidCount / paidUsersCount * 100).toFixed(1) : 0}%)
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base md:text-lg flex items-center gap-2">
-              <Activity className="h-4 w-4 text-muted-foreground" />
-              Активные пользователи
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pb-3">
-            <div className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-              {loading ? '...' : activeUsersCount.toLocaleString('ru-RU')}
-            </div>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              {totalUsers > 0 ? (activeUsersCount / totalUsers * 100).toFixed(1) : 0}% от всех (30 дней)
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>;
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+      >
+        <AdminAdditionalMetrics />
+      </motion.div>
+    </div>
+  );
 }
