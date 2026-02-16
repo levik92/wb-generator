@@ -1,47 +1,49 @@
 
 
-## Исправление: создание защитного триггера tokens_balance
+## Исправление: админ не может обновить баланс токенов
 
-### Проблема
-Предыдущая миграция с защитным триггером `protect_tokens_balance` **не была применена**. Проверка показала:
-- Функция `protect_tokens_balance()` не существует в БД
-- Триггер `protect_tokens_on_update` не создан на таблице `profiles`
-- Ни одна из функций (`spend_tokens`, `process_payment_success`, `admin_update_user_tokens` и т.д.) не содержит флаг `bypass_token_protection`
-- Уязвимость остается открытой: пользователь по-прежнему может изменить `tokens_balance` через консоль браузера
+### Корневая причина
 
-### Решение
-Одна SQL-миграция, которая:
+При обновлении баланса через `admin_update_user_tokens` срабатывает AFTER-триггер `track_token_balance_change`, который пытается записать транзакцию с типом `direct_sql_update`. Этот тип **отсутствует** в CHECK-constraint таблицы `token_transactions`, что приводит к ошибке и откату всей операции.
 
-**1. Создаст триггерную функцию `protect_tokens_balance()`**
-- BEFORE UPDATE на `profiles`
-- Если `tokens_balance` изменился и флаг `app.bypass_token_protection` не установлен:
-  - Сбрасывает значение к OLD (блокирует изменение)
-  - Логирует попытку в `security_events`
+Дополнительно: триггер не проверяет флаг `app.bypass_token_protection`, поэтому он срабатывает даже при легитимных изменениях через защищённые функции.
 
-**2. Создаст триггер `protect_tokens_on_update`**
-- Тип: BEFORE UPDATE
-- Срабатывает до аудит-триггера `on_tokens_balance_change`
+### Решение (одна SQL-миграция)
 
-**3. Обновит 7 функций, добавив `SET LOCAL app.bypass_token_protection = 'true'`:**
-- `spend_tokens` -- списание за генерации
-- `refund_tokens` -- возврат токенов
-- `process_payment_success` -- зачисление после оплаты
-- `process_referral_bonus_on_payment` -- реферальный бонус
-- `approve_bonus_submission` -- одобрение бонусной заявки
-- `admin_update_user_tokens` -- ручное изменение админом
-- `track_token_balance_change` -- аудит-триггер (чтобы не блокировал сам себя)
+**1. Исправить триггерную функцию `track_token_balance_change()`**
+- Добавить проверку: если `app.bypass_token_protection = 'true'`, значит изменение идёт через легитимную функцию -- пропускаем (RETURN NEW без записи)
+- Логика `direct_sql_update` срабатывает только при реальном обходе системы (когда флаг НЕ установлен)
 
-Функция `use_promocode` уже обновлена в предыдущей миграции.
+**2. Добавить `direct_sql_update` в CHECK-constraint**
+- На случай, если кто-то действительно обойдёт систему напрямую через SQL, тип `direct_sql_update` должен быть разрешён в constraint
 
-### Результат после применения
+### Техническая реализация
 
-| Сценарий | Результат |
-|---|---|
-| Пользователь через консоль: `update({ tokens_balance: 9999 })` | Заблокировано, залогировано |
-| Оплата через YooKassa (webhook) | Работает через `process_payment_success` |
-| Генерация карточек | Работает через `spend_tokens` |
-| Админ меняет баланс | Работает через `admin_update_user_tokens` |
-| Промокод | Работает через `use_promocode` |
-| Реферальный бонус | Работает через `process_referral_bonus_on_payment` |
-| Бонусная программа | Работает через `approve_bonus_submission` |
+```sql
+-- 1. Обновить CHECK-constraint: добавить 'direct_sql_update'
+ALTER TABLE token_transactions DROP CONSTRAINT token_transactions_transaction_type_check;
+ALTER TABLE token_transactions ADD CONSTRAINT token_transactions_transaction_type_check
+  CHECK (transaction_type = ANY (ARRAY[
+    'purchase', 'generation', 'refund', 'promocode',
+    'referral_bonus', 'bonus', 'direct_sql_update'
+  ]));
 
+-- 2. Обновить триггерную функцию: пропускать если bypass установлен
+CREATE OR REPLACE FUNCTION track_token_balance_change() ...
+  -- Если bypass_token_protection = 'true', значит легитимная функция
+  -- уже сама записала транзакцию -- просто выходим
+  IF current_setting('app.bypass_token_protection', true) = 'true' THEN
+    RETURN NEW;
+  END IF;
+  -- Иначе: прямое изменение, логируем как direct_sql_update
+```
+
+### Результат
+
+| Сценарий | До исправления | После исправления |
+|---|---|---|
+| Админ меняет баланс | Ошибка constraint, откат | Работает, записывается как `bonus` |
+| Оплата через вебхук | Ошибка constraint, откат | Работает, записывается как `purchase` |
+| Прямое изменение через SQL | Ошибка constraint | Записывается как `direct_sql_update` + лог в security_events |
+
+Это также исправит повторяющиеся ошибки `token_transactions_transaction_type_check` в логах PostgreSQL.
