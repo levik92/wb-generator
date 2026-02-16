@@ -244,8 +244,8 @@ const Partner = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
         <div className="flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="shrink-0 rounded-xl hover:bg-secondary">
-              <ArrowLeft className="h-[18px] w-[18px]" />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="shrink-0 rounded-xl hover:bg-secondary group">
+              <ArrowLeft className="h-[18px] w-[18px] group-hover:text-primary transition-colors" />
             </Button>
             <div className="hidden sm:flex w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
               <Handshake className="w-5 h-5 text-primary" />
