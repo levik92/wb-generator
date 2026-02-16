@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, Loader2, ExternalLink, Upload, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface BlogPost {
   id: string;
@@ -523,7 +524,7 @@ export const AdminBlog = () => {
         </Dialog>
       </div>
 
-      <Card className="bg-card">
+      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
         <CardHeader>
           <CardTitle>Статьи блога</CardTitle>
           <CardDescription>
@@ -571,7 +572,7 @@ export const AdminBlog = () => {
                       <TableCell>
                         <Badge
                           variant={post.is_published ? "default" : "secondary"}
-                          className={post.is_published ? "bg-green-500/30 text-green-600 dark:text-green-400 border border-green-500/40 hover:bg-green-500/30" : ""}
+                          className={post.is_published ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/10" : ""}
                         >
                           {post.is_published ? "Опубликовано" : "Черновик"}
                         </Badge>
@@ -603,9 +604,9 @@ export const AdminBlog = () => {
                             size="sm"
                             onClick={() => togglePublish(post)}
                             title={post.is_published ? "Снять с публикации" : "Опубликовать"}
-                            className="h-7 w-7 md:h-8 md:w-8 p-0 hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-500"
+                            className="h-7 w-7 md:h-8 md:w-8 p-0 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-500"
                           >
-                            <Eye className={`w-3 h-3 ${post.is_published ? "text-green-600 dark:text-green-400" : ""}`} />
+                            <Eye className={`w-3 h-3 ${post.is_published ? "text-emerald-500" : ""}`} />
                           </Button>
                           <Button
                             variant="outline"

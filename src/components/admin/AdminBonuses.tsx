@@ -26,6 +26,7 @@ import {
   Eye,
   ExternalLink
 } from "lucide-react";
+import { StatCard } from "@/components/dashboard/GlassCard";
 import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
 
 interface BonusProgram {
@@ -369,51 +370,31 @@ export const AdminBonuses = () => {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">На проверке</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pendingSubmissions}</p>
-              </div>
-              <Clock className="h-8 w-8 text-yellow-500/20" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Одобрено</p>
-                <p className="text-2xl font-bold text-green-600">{stats.approvedSubmissions}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-500/20" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Отклонено</p>
-                <p className="text-2xl font-bold text-red-600">{stats.rejectedSubmissions}</p>
-              </div>
-              <XCircle className="h-8 w-8 text-red-500/20" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Выдано токенов</p>
-                <p className="text-2xl font-bold text-primary">{stats.totalTokensAwarded}</p>
-              </div>
-              <Coins className="h-8 w-8 text-primary/20" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <StatCard
+          icon={<Clock className="w-5 h-5" />}
+          label="На проверке"
+          value={stats.pendingSubmissions}
+          delay={0}
+        />
+        <StatCard
+          icon={<CheckCircle className="w-5 h-5" />}
+          label="Одобрено"
+          value={stats.approvedSubmissions}
+          delay={0.05}
+        />
+        <StatCard
+          icon={<XCircle className="w-5 h-5" />}
+          label="Отклонено"
+          value={stats.rejectedSubmissions}
+          delay={0.1}
+        />
+        <StatCard
+          icon={<Coins className="w-5 h-5" />}
+          label="Выдано токенов"
+          value={stats.totalTokensAwarded}
+          delay={0.15}
+        />
       </div>
 
       <Tabs defaultValue="submissions" className="space-y-4">

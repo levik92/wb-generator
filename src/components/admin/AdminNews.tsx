@@ -367,7 +367,7 @@ export const AdminNews = () => {
           </Card>
         ) : (
           news.map((item) => (
-            <Card key={item.id} className={item.is_published ? '' : 'border-orange-200 bg-orange-50/30'}>
+            <Card key={item.id} className={`rounded-2xl border-border/50 ${item.is_published ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
               <CardHeader className="pb-3">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -376,12 +376,12 @@ export const AdminNews = () => {
                         {item.tag}
                       </Badge>
                       {item.is_published ? (
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/10">
                           <Eye className="w-3 h-3 mr-1" />
                           Опубликовано
                         </Badge>
                       ) : (
-                        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/10">
                           <EyeOff className="w-3 h-3 mr-1" />
                           Черновик
                         </Badge>
@@ -420,7 +420,7 @@ export const AdminNews = () => {
                       size="sm"
                       onClick={() => publishNews(item.id, !item.is_published)}
                       disabled={publishingIds.has(item.id)}
-                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2 ${!item.is_published ? "bg-green-600 hover:bg-green-700" : ""}`}
+                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2 ${!item.is_published ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
                     >
                       {publishingIds.has(item.id) ? <Loader2 className="w-3 h-3 lg:w-4 lg:h-4 animate-spin" /> : item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
                       <span className="hidden lg:inline ml-2">
@@ -429,7 +429,7 @@ export const AdminNews = () => {
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
+                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
                           <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
                           <span className="hidden lg:inline ml-2">Удалить</span>
                         </Button>
@@ -445,7 +445,7 @@ export const AdminNews = () => {
                           <AlertDialogCancel>Отмена</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={() => deleteNews(item.id)}
-                            className="bg-red-600 hover:bg-red-700"
+                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                           >
                             Удалить
                           </AlertDialogAction>

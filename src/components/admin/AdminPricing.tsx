@@ -210,12 +210,12 @@ export function AdminPricing() {
   };
   if (loading) {
     return <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-8 h-8 animate-spin text-wb-purple" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
   return <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
       {/* Тарифы */}
-      <Card className="overflow-hidden bg-card">
+      <Card className="overflow-hidden bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
@@ -324,7 +324,7 @@ export function AdminPricing() {
       </Card>
 
       {/* Цены генерации */}
-      <Card className="bg-card">
+      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-lg sm:text-xl">Стоимость генерации</CardTitle>
           <CardDescription className="text-xs sm:text-sm mt-1">
