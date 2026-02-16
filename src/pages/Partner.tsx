@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BankDetailsForm } from "@/components/partner/BankDetailsForm";
 import { WithdrawalButton } from "@/components/partner/WithdrawalButton";
+import Footer from "@/components/Footer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -661,6 +662,7 @@ const Partner = () => {
           )}
         </div>
       </main>
+      {!isMobile && <Footer />}
     </div>
   );
 };
