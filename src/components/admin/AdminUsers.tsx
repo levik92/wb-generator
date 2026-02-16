@@ -219,9 +219,9 @@ export function AdminUsers({
       </div>
 
       {/* Users Table */}
-      <Card className="bg-card">
+      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
         <CardHeader>
-          <CardTitle>Управление пользователями</CardTitle>
+          <CardTitle className="text-lg">Управление пользователями</CardTitle>
           <CardDescription>
             Просмотр и управление всеми пользователями системы
           </CardDescription>

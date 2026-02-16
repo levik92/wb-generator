@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, TrendingUp, CreditCard, DollarSign, AlertCircle, Check } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { StatCard } from "@/components/dashboard/GlassCard";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -238,71 +240,42 @@ export const AdminPartners = () => {
   }
   return <div className="space-y-6">
       {/* Overall Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Всего партнеров
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStats.totalPartners}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Сумма вознаграждений
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStats.totalEarnings.toLocaleString()} ₽</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Привлечено клиентов
-            </CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStats.totalClients}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ожидают выплаты
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStats.pendingWithdrawals}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Выплачено партнерам
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalPaidOut.toLocaleString()} ₽</div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <StatCard
+          icon={<Users className="w-5 h-5" />}
+          label="Всего партнеров"
+          value={totalStats.totalPartners}
+          delay={0}
+        />
+        <StatCard
+          icon={<TrendingUp className="w-5 h-5" />}
+          label="Вознаграждения"
+          value={`${totalStats.totalEarnings.toLocaleString()} ₽`}
+          delay={0.05}
+        />
+        <StatCard
+          icon={<CreditCard className="w-5 h-5" />}
+          label="Привлечено клиентов"
+          value={totalStats.totalClients}
+          delay={0.1}
+        />
+        <StatCard
+          icon={<AlertCircle className="w-5 h-5" />}
+          label="Ожидают выплаты"
+          value={totalStats.pendingWithdrawals}
+          delay={0.15}
+        />
+        <StatCard
+          icon={<DollarSign className="w-5 h-5" />}
+          label="Выплачено"
+          value={`${totalPaidOut.toLocaleString()} ₽`}
+          delay={0.2}
+        />
       </div>
 
       {/* Partners List */}
-      <Card className="bg-card">
-        <CardHeader className="">
+      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+        <CardHeader>
           <CardTitle>Активные партнеры</CardTitle>
         </CardHeader>
         <CardContent>
