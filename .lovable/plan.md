@@ -1,63 +1,58 @@
 
 
-## Plan: Breakdown Charts for AI Requests and Tokens by Type
+## Защита от обхода системы начисления токенов
 
-### Overview
-Replace the current single-line "Запросы к AI" and "Потрачено токенов" charts with multi-line breakdown charts showing data split by category (images, descriptions, video). Each chart will show:
-- Total number at the top (sum of all types)
-- Three colored lines with a legend at the bottom
-- No comparison period (previous period lines removed)
+### Проблема
+Любой, у кого есть доступ к SQL Editor в Supabase (или service_role ключ), может напрямую изменить `tokens_balance` в таблице `profiles`, минуя функцию `admin_update_user_tokens()` и всю систему логирования. Именно так пользователю `artemgm2@gmail.com` были начислены ~1399 токенов без записи в `token_transactions`.
 
-### Data Sources
-The breakdown will come from:
-- **Images (cards)**: `generations` table where `generation_type = 'cards'` + `generation_jobs` for token costs
-- **Descriptions**: `generations` table where `generation_type = 'description'`
-- **Video**: `video_generation_jobs` table (separate table)
+### Решение
+Создать PostgreSQL-триггер на таблице `profiles`, который **автоматически** записывает любое изменение `tokens_balance` в `token_transactions` и `security_events`, независимо от того, как это изменение было сделано.
 
-For tokens:
-- **Images tokens**: `generation_jobs.tokens_cost` (linked to card generations)
-- **Description tokens**: `generations.tokens_used` where type = 'description'
-- **Video tokens**: `video_generation_jobs.tokens_cost`
+### Что будет реализовано
 
-### Changes
+**1. Триггерная функция `track_token_balance_change()`**
+- Срабатывает при любом UPDATE на `profiles`, если `tokens_balance` изменился
+- Проверяет, была ли уже создана запись в `token_transactions` за последние 2 секунды с таким же изменением (чтобы не дублировать записи от `admin_update_user_tokens`)
+- Если записи нет -- создаёт запись с типом `direct_sql_update` и описанием "Прямое изменение баланса"
+- Логирует событие в `security_events` как подозрительную активность
 
-#### 1. Edge Function: `supabase/functions/admin-analytics/index.ts`
-- Fetch `generations` split by `generation_type` ('cards' vs 'description') for the period
-- Fetch `video_generation_jobs` for the period
-- Return new breakdown fields in response:
-  - `generationsByType`: `{ cards: ChartData[], descriptions: ChartData[], video: ChartData[] }`
-  - `tokensByType`: `{ cards: ChartData[], descriptions: ChartData[], video: ChartData[] }`
-  - `totalsByType`: `{ generationsCards, generationsDescriptions, generationsVideo, tokensCards, tokensDescriptions, tokensVideo }`
-- Keep existing `generations` and `tokens` charts unchanged for backward compatibility
-- Skip fetching previous period data for these new breakdown charts
+**2. Триггер `on_tokens_balance_change`**
+- Привязан к таблице `profiles`
+- Срабатывает AFTER UPDATE
+- Условие: `OLD.tokens_balance IS DISTINCT FROM NEW.tokens_balance`
 
-#### 2. Frontend: `src/components/dashboard/AdminAnalyticsChart.tsx`
-- Add a new component `AdminBreakdownChart` that:
-  - Accepts `type: 'generations' | 'tokens'`
-  - Uses `AreaChart` with 3 `Area` lines in different colors:
-    - Images: `#8b5cf6` (purple)
-    - Descriptions: `#06b6d4` (cyan)  
-    - Video: `#f59e0b` (amber)
-  - Shows total sum at the top as the main number
-  - Has a legend at the bottom with colored dots + labels
-  - Has its own date range picker (same pattern as existing charts)
-  - No previous period comparison line
-  - Custom tooltip showing all 3 values
+### Как это работает
 
-#### 3. Frontend: `src/components/admin/AdminAnalytics.tsx`
-- Replace the existing `AdminAnalyticsChart type="generations"` and `type="tokens"` with the new `AdminBreakdownChart` components
-- Keep `AdminAnalyticsChart type="users"` and `type="revenue"` as they are
+```text
+Сценарий A: Админ меняет баланс через интерфейс
++------------------------------------------+
+| 1. AdminUsers.tsx вызывает               |
+|    admin_update_user_tokens()            |
+| 2. Функция пишет в token_transactions   |
+| 3. Функция делает UPDATE profiles       |
+| 4. Триггер видит: запись уже есть       |
+|    -> ничего не делает (нет дубля)       |
++------------------------------------------+
 
-### Colors
-| Category | Color | Label |
-|---|---|---|
-| Изображения | #8b5cf6 (purple) | Изображения |
-| Описания | #06b6d4 (cyan) | Описания |
-| Видео | #f59e0b (amber) | Видео |
+Сценарий B: Кто-то делает прямой SQL UPDATE
++------------------------------------------+
+| 1. UPDATE profiles SET tokens_balance=X  |
+| 2. Триггер видит: записи нет            |
+|    -> создает запись в token_transactions |
+|    -> логирует в security_events         |
++------------------------------------------+
+```
 
-### Technical Notes
-- The edge function uses `fetchAllRows` for pagination (existing pattern)
-- Video data comes from `video_generation_jobs` table (not in `generations`)
-- Token amounts: for cards use `generation_jobs.tokens_cost`, for descriptions use `generations.tokens_used`, for video use `video_generation_jobs.tokens_cost`
-- Since `token_transactions` has no type breakdown in description, we derive token costs from the source tables directly
+### Совместимость с админ-панелью
+- Функция `admin_update_user_tokens()` продолжит работать как раньше
+- Триггер проверяет наличие недавней записи, чтобы избежать дублирования
+- Никакие изменения в коде фронтенда не нужны
+
+### Технические детали
+
+Одна SQL-миграция, которая создаст:
+1. Функцию `track_token_balance_change()` (SECURITY DEFINER, search_path = public)
+2. Триггер `on_tokens_balance_change` на таблице `profiles` (AFTER UPDATE, WHEN tokens_balance changed)
+
+Дедупликация: функция ищет в `token_transactions` запись с тем же `user_id` и `amount`, созданную за последние 2 секунды -- если найдена, триггер не создаёт дубль.
 
