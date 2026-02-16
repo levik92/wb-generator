@@ -78,7 +78,7 @@ export const StatCard = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay }}
-      className="relative p-4 rounded-xl bg-gradient-to-br from-muted/50 to-muted/20 border border-border/30 hover:border-primary/20 transition-all duration-300"
+      className="relative p-4 rounded-xl bg-background border border-border/30 hover:border-primary/20 transition-all duration-300 shadow-sm"
     >
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">

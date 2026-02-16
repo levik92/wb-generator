@@ -84,6 +84,28 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
 
   return (
     <div className="space-y-4 md:space-y-6">
+      {/* Analytics Charts */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.15 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6"
+      >
+        <AdminAnalyticsChart type="users" />
+        <AdminBreakdownChart type="generations" />
+        <AdminBreakdownChart type="tokens" />
+        <AdminAnalyticsChart type="revenue" />
+      </motion.div>
+
+      {/* Additional Metrics */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+      >
+        <AdminAdditionalMetrics />
+      </motion.div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <StatCard
@@ -109,28 +131,6 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
           delay={0.2}
         />
       </div>
-
-      {/* Analytics Charts */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-6"
-      >
-        <AdminAnalyticsChart type="users" />
-        <AdminBreakdownChart type="generations" />
-        <AdminBreakdownChart type="tokens" />
-        <AdminAnalyticsChart type="revenue" />
-      </motion.div>
-
-      {/* Additional Metrics */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.25 }}
-      >
-        <AdminAdditionalMetrics />
-      </motion.div>
     </div>
   );
 }
