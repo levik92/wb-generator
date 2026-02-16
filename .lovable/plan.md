@@ -1,58 +1,72 @@
 
 
-## Защита от обхода системы начисления токенов
+## Закрытие уязвимости: запрет самостоятельного изменения tokens_balance
 
-### Проблема
-Любой, у кого есть доступ к SQL Editor в Supabase (или service_role ключ), может напрямую изменить `tokens_balance` в таблице `profiles`, минуя функцию `admin_update_user_tokens()` и всю систему логирования. Именно так пользователю `artemgm2@gmail.com` были начислены ~1399 токенов без записи в `token_transactions`.
+### Корневая причина
+RLS-политика `secure_profiles_update` разрешает пользователю обновлять **любые поля** своего профиля, включая `tokens_balance`. Пользователь `artemgm2@gmail.com` воспользовался этим: через консоль браузера отправил `supabase.from('profiles').update({ tokens_balance: 1400 })` и получил бесплатные токены.
+
+Доказательство из аудита: запись `self_update` с `fields_accessed: [tokens_balance]` в `2026-02-15 00:22:06`, за минуту до первых генераций.
 
 ### Решение
-Создать PostgreSQL-триггер на таблице `profiles`, который **автоматически** записывает любое изменение `tokens_balance` в `token_transactions` и `security_events`, независимо от того, как это изменение было сделано.
+Создать `BEFORE UPDATE` триггер на таблице `profiles`, который **блокирует** изменение `tokens_balance` для обычных пользователей. Только системные функции (SECURITY DEFINER) смогут менять баланс.
 
 ### Что будет реализовано
 
-**1. Триггерная функция `track_token_balance_change()`**
-- Срабатывает при любом UPDATE на `profiles`, если `tokens_balance` изменился
-- Проверяет, была ли уже создана запись в `token_transactions` за последние 2 секунды с таким же изменением (чтобы не дублировать записи от `admin_update_user_tokens`)
-- Если записи нет -- создаёт запись с типом `direct_sql_update` и описанием "Прямое изменение баланса"
-- Логирует событие в `security_events` как подозрительную активность
+**1. Триггерная функция `protect_tokens_balance()`**
+- Срабатывает BEFORE UPDATE на `profiles`
+- Если `tokens_balance` изменился:
+  - Проверяет, вызвана ли функция из SECURITY DEFINER контекста (через `current_setting`)
+  - Если нет -- откатывает изменение `tokens_balance` к старому значению (не блокирует весь UPDATE, только сбрасывает поле)
+  - Логирует попытку в `security_events`
 
-**2. Триггер `on_tokens_balance_change`**
-- Привязан к таблице `profiles`
-- Срабатывает AFTER UPDATE
-- Условие: `OLD.tokens_balance IS DISTINCT FROM NEW.tokens_balance`
+**2. Обновление всех легитимных функций**
+Следующие функции уже являются SECURITY DEFINER и будут устанавливать флаг `app.bypass_token_protection = true` перед изменением баланса:
+- `spend_tokens()`
+- `refund_tokens()`
+- `process_payment_success()`
+- `process_referral_bonus_on_payment()`
+- `approve_bonus_submission()`
+- `admin_update_user_tokens()`
+- `use_promocode()`
+- `track_token_balance_change()` (наш триггер аудита тоже нужно обновить)
 
 ### Как это работает
 
 ```text
-Сценарий A: Админ меняет баланс через интерфейс
-+------------------------------------------+
-| 1. AdminUsers.tsx вызывает               |
-|    admin_update_user_tokens()            |
-| 2. Функция пишет в token_transactions   |
-| 3. Функция делает UPDATE profiles       |
-| 4. Триггер видит: запись уже есть       |
-|    -> ничего не делает (нет дубля)       |
-+------------------------------------------+
+Сценарий A: Пользователь пытается обновить баланс через API
++--------------------------------------------------+
+| 1. supabase.update({ tokens_balance: 9999 })     |
+| 2. RLS пропускает (auth.uid() = id)              |
+| 3. BEFORE UPDATE триггер проверяет:              |
+|    - tokens_balance изменился? Да                 |
+|    - app.bypass_token_protection = true? Нет      |
+|    -> Сбрасывает tokens_balance к OLD значению    |
+|    -> Логирует попытку в security_events          |
+| 4. UPDATE выполняется, но баланс не меняется     |
++--------------------------------------------------+
 
-Сценарий B: Кто-то делает прямой SQL UPDATE
-+------------------------------------------+
-| 1. UPDATE profiles SET tokens_balance=X  |
-| 2. Триггер видит: записи нет            |
-|    -> создает запись в token_transactions |
-|    -> логирует в security_events         |
-+------------------------------------------+
+Сценарий B: Система списывает токены через spend_tokens()
++--------------------------------------------------+
+| 1. spend_tokens() -- SECURITY DEFINER            |
+| 2. SET LOCAL app.bypass_token_protection = 'true' |
+| 3. UPDATE profiles SET tokens_balance = ...       |
+| 4. BEFORE UPDATE триггер проверяет:              |
+|    - bypass = true? Да                            |
+|    -> Пропускает, баланс меняется нормально      |
++--------------------------------------------------+
 ```
-
-### Совместимость с админ-панелью
-- Функция `admin_update_user_tokens()` продолжит работать как раньше
-- Триггер проверяет наличие недавней записи, чтобы избежать дублирования
-- Никакие изменения в коде фронтенда не нужны
 
 ### Технические детали
 
-Одна SQL-миграция, которая создаст:
-1. Функцию `track_token_balance_change()` (SECURITY DEFINER, search_path = public)
-2. Триггер `on_tokens_balance_change` на таблице `profiles` (AFTER UPDATE, WHEN tokens_balance changed)
+Одна SQL-миграция:
 
-Дедупликация: функция ищет в `token_transactions` запись с тем же `user_id` и `amount`, созданную за последние 2 секунды -- если найдена, триггер не создаёт дубль.
+1. Создание функции `protect_tokens_balance()` (BEFORE UPDATE триггер)
+2. Создание триггера `protect_tokens_on_update` на `profiles`
+3. Обновление всех 7+ функций, которые легитимно меняют баланс -- добавление `SET LOCAL app.bypass_token_protection = 'true'` в начало каждой
+
+Порядок триггеров: `protect_tokens_on_update` (BEFORE) сработает до `track_token_balance_change` (AFTER), поэтому нелегитимные изменения будут заблокированы ещё до логирования.
+
+### Дополнительно
+- Заблокированному пользователю вы уже обнулили баланс (-269 токенов запись видна)
+- После этого исправления подобная атака станет невозможной
 
