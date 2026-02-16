@@ -32,6 +32,7 @@ interface UserDetails {
   recentGenerations: any[];
   paymentHistory: any[];
   referrals: any[];
+  tokenTransactions: any[];
 }
 interface AdminUsersProps {
   users: User[];
@@ -109,10 +110,11 @@ export function AdminUsers({
         });
         return { ...ref, referred: { email: refData?.[0]?.email || 'Unknown' } };
       }));
-      const [paymentsRes, tokensRes, generationsRes] = await Promise.all([
+      const [paymentsRes, tokensRes, generationsRes, allTransactionsRes] = await Promise.all([
         supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
-        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10)
+        supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+        supabase.from('token_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
       ]);
       const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
@@ -123,7 +125,8 @@ export function AdminUsers({
         totalPaid, tokensSpent, generationsCount, referralsCount, referralsEarnings,
         recentGenerations: generationsRes.data || [],
         paymentHistory: paymentsRes.data || [],
-        referrals: referralsWithEmails
+        referrals: referralsWithEmails,
+        tokenTransactions: allTransactionsRes.data || []
       });
     } catch (error) {
       console.error('Error loading user details:', error);
@@ -415,6 +418,64 @@ export function AdminUsers({
                               Нет платежей
                             </TableCell>
                           </TableRow>}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Token Transactions */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">История токенов</h3>
+                <div className="max-h-64 overflow-auto border rounded">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[100px]">Дата</TableHead>
+                          <TableHead className="min-w-[80px]">Кол-во</TableHead>
+                          <TableHead className="min-w-[100px]">Тип</TableHead>
+                          <TableHead className="min-w-[150px]">Описание</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {userDetails.tokenTransactions.map((tx: any) => {
+                          const typeLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+                            purchase: { label: 'Оплата', variant: 'default' },
+                            bonus: { label: 'Бонус', variant: 'secondary' },
+                            generation: { label: 'Генерация', variant: 'outline' },
+                            referral_bonus: { label: 'Реферал', variant: 'secondary' },
+                            promocode: { label: 'Промокод', variant: 'secondary' },
+                            refund: { label: 'Возврат', variant: 'secondary' },
+                            direct_sql_update: { label: 'Прямой SQL', variant: 'destructive' },
+                          };
+                          const typeInfo = typeLabels[tx.transaction_type] || { label: tx.transaction_type, variant: 'outline' as const };
+                          return (
+                            <TableRow key={tx.id}>
+                              <TableCell className="text-xs">
+                                {new Date(tx.created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                              </TableCell>
+                              <TableCell className={`text-xs font-medium ${tx.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {tx.amount > 0 ? '+' : ''}{tx.amount}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={typeInfo.variant} className="text-xs">
+                                  {typeInfo.label}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
+                                {tx.description || '—'}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                        {userDetails.tokenTransactions.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center text-muted-foreground text-xs">
+                              Нет транзакций
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     </Table>
                   </div>
