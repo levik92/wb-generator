@@ -2,18 +2,19 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
   Menu, 
   Zap, 
   BarChart3, 
   Users, 
-  FileText, 
+  Bot, 
   Gift, 
   Megaphone,
   Handshake,
   DollarSign,
   LayoutDashboard,
-  BookOpen
+  FileText
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -26,51 +27,15 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
   const [isOpen, setIsOpen] = useState(false);
   
   const menuItems = [
-    {
-      id: 'analytics',
-      label: 'Аналитика',
-      icon: BarChart3,
-    },
-    {
-      id: 'users',
-      label: 'Пользователи',
-      icon: Users,
-    },
-    {
-      id: 'partners',
-      label: 'Партнеры',
-      icon: Handshake,
-    },
-    {
-      id: 'prompts',
-      label: 'Промты',
-      icon: FileText,
-    },
-    {
-      id: 'bonuses',
-      label: 'Бонусы',
-      icon: Gift,
-    },
-    {
-      id: 'pricing',
-      label: 'Цены',
-      icon: DollarSign,
-    },
-    {
-      id: 'banners',
-      label: 'Баннеры',
-      icon: LayoutDashboard,
-    },
-    {
-      id: 'news',
-      label: 'Новости',
-      icon: Megaphone,
-    },
-    {
-      id: 'blog',
-      label: 'Блог',
-      icon: BookOpen,
-    }
+    { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
+    { id: 'users', label: 'Пользователи', icon: Users },
+    { id: 'partners', label: 'Партнеры', icon: Handshake },
+    { id: 'prompts', label: 'Модель', icon: Bot },
+    { id: 'bonuses', label: 'Бонусы', icon: Gift },
+    { id: 'pricing', label: 'Цены', icon: DollarSign },
+    { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
+    { id: 'news', label: 'Новости', icon: Megaphone },
+    { id: 'blog', label: 'Блог', icon: FileText },
   ];
 
   const handleTabChange = (tabId: string) => {
@@ -82,60 +47,64 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="icon" 
-          className="md:hidden bg-wb-purple/10 hover:bg-wb-purple/20 border-wb-purple/20"
+          className="md:hidden h-9 w-9 rounded-xl hover:bg-secondary"
         >
-          <Menu className="h-5 w-5 text-wb-purple" />
+          <Menu className="h-5 w-5 text-muted-foreground" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 p-0">
+      <SheetContent side="left" className="w-80 p-0 bg-card/95 backdrop-blur-xl">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-border">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-hero rounded-[12px] flex items-center justify-center">
+          <div className="p-5 border-b border-border">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 rounded-lg">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-semibold">WB Генератор</span>
+              <span className="text-sm font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">WBGen</span>
             </div>
             
-            <div className="bg-wb-purple/5 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-wb-purple">Админ-панель</span>
-                <Badge variant="secondary" className="bg-wb-purple hover:bg-wb-purple-light text-white text-xs">
+            <div className="rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-primary">Админ-панель</span>
+                <Badge className="bg-primary hover:bg-primary text-primary-foreground font-bold px-2.5 py-0.5 text-xs">
                   Admin
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                Управление системой WB Генератор
+                Управление системой WBGen
               </p>
             </div>
           </div>
 
+          <Separator className="opacity-50" />
+
           {/* Menu Items */}
-          <nav className="flex-1 p-4">
-            <div className="space-y-2">
+          <nav className="flex-1 p-3">
+            <ul className="space-y-2">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 
                 return (
-                  <div key={item.id} className="relative">
+                  <li key={item.id}>
                     <Button
-                      variant={isActive ? "secondary" : "ghost"}
-                      className={`w-full justify-start text-left ${
-                        isActive ? 'bg-wb-purple/10 text-wb-purple' : ''
+                      variant="ghost"
+                      className={`w-full justify-start px-3 h-11 rounded-[17px] transition-all duration-200 ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                       }`}
                       onClick={() => handleTabChange(item.id)}
                     >
-                      <Icon className="w-4 h-4 mr-3" />
-                      {item.label}
+                      <Icon className={`w-[18px] h-[18px] mr-3 ${isActive ? 'text-primary-foreground' : ''}`} />
+                      <span className="flex-1 text-left text-sm">{item.label}</span>
                     </Button>
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           </nav>
 
           {/* Theme Toggle */}
