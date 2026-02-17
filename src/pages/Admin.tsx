@@ -216,7 +216,7 @@ export default function Admin() {
           </div>
         </header>
 
-        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden overflow-y-auto min-w-0">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 12 }}

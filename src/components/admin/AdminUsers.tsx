@@ -222,15 +222,15 @@ export function AdminUsers({
       </div>
 
       {/* Users Table */}
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl min-w-0 overflow-hidden">
         <CardHeader>
           <CardTitle className="text-lg">Управление пользователями</CardTitle>
           <CardDescription>
             Просмотр и управление всеми пользователями системы
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-2 md:p-4">
-          <div className="rounded-md border overflow-x-auto">
+        <CardContent className="p-2 md:p-4 min-w-0">
+          <div className="rounded-md border overflow-x-auto max-w-full">
             <Table>
               <TableHeader>
                 <TableRow>
