@@ -429,7 +429,7 @@ export const AdminNews = () => {
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
+                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
                           <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
                           <span className="hidden lg:inline ml-2">Удалить</span>
                         </Button>
