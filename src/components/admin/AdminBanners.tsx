@@ -238,8 +238,8 @@ export const AdminBanners = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-xl md:text-2xl font-bold">Баннеры дашборда</h2>
           <p className="text-sm text-muted-foreground">
             Управление баннерами, отображаемыми в личном кабинете пользователей
@@ -411,10 +411,10 @@ export const AdminBanners = () => {
               className={`transition-opacity ${!banner.is_active ? 'opacity-60' : ''}`}
             >
               <CardContent className="p-4">
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   {/* Color preview */}
                   <div
-                    className="w-16 h-16 rounded-lg shrink-0"
+                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg shrink-0"
                     style={{
                       background: `linear-gradient(135deg, ${banner.gradient_start}, ${banner.gradient_end})`,
                     }}

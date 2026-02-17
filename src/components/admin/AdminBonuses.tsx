@@ -516,19 +516,19 @@ export const AdminBonuses = () => {
                         </TableCell>
                         <TableCell>
                           {submission.status === 'pending' && (
-                            <Badge className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20">
+                             <Badge className="bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20">
                               <Clock className="w-3 h-3 mr-1" />На проверке
-                            </Badge>
+                             </Badge>
                           )}
                           {submission.status === 'approved' && (
-                            <Badge className="bg-green-500/10 text-green-700 border-green-500/20">
+                             <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">
                               <CheckCircle className="w-3 h-3 mr-1" />+{submission.tokens_awarded}
-                            </Badge>
+                             </Badge>
                           )}
                           {submission.status === 'rejected' && (
-                            <Badge className="bg-red-500/10 text-red-700 border-red-500/20">
+                             <Badge className="bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20">
                               <XCircle className="w-3 h-3 mr-1" />Отклонено
-                            </Badge>
+                             </Badge>
                           )}
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-xs text-muted-foreground">

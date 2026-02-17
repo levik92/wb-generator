@@ -343,10 +343,10 @@ export const AdminBlog = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Управление блогом</h2>
-          <p className="text-muted-foreground">Создавайте и редактируйте статьи для SEO</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl md:text-2xl font-bold">Управление блогом</h2>
+          <p className="text-sm text-muted-foreground">Создавайте и редактируйте статьи для SEO</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
@@ -358,7 +358,7 @@ export const AdminBlog = () => {
               Новая статья
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto mx-2">
             <DialogHeader>
               <DialogTitle>
                 {editingPost ? "Редактирование статьи" : "Новая статья"}
@@ -375,7 +375,7 @@ export const AdminBlog = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="slug">URL-адрес (slug) *</Label>
                   <Input
