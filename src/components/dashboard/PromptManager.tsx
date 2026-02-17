@@ -443,7 +443,7 @@ export function PromptManager() {
   return <div className="space-y-4 md:space-y-6 overflow-x-hidden">
       {/* Top-level tabs: Images / Video */}
       <Tabs defaultValue="images">
-        <TabsList className="grid w-full max-w-xs grid-cols-2 mb-6">
+        <TabsList className="grid w-full max-w-[280px] sm:max-w-xs grid-cols-2 mb-6">
           <TabsTrigger value="images">Изображения</TabsTrigger>
           <TabsTrigger value="video">Видео</TabsTrigger>
         </TabsList>
