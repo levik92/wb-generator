@@ -157,14 +157,14 @@ export default function Admin() {
   const currentTab = TAB_TITLES[activeTab];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
           <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden md:overflow-y-auto">
         {/* Header - matches DashboardHeader */}
         <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
