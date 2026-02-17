@@ -180,41 +180,43 @@ export function AdminUsers({
 
   const filterLabel = paymentFilter === 'all' ? 'Все' : paymentFilter === 'paid' ? 'Платные' : 'Бесплатные';
 
-  return <div className="space-y-6">
+  return <div className="space-y-6 min-w-0 overflow-hidden">
       {/* Search & Filter */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-full sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input placeholder="Поиск по email..." value={searchEmail} onChange={e => setSearchEmail(e.target.value)} className="pl-10" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input placeholder="Поиск по email..." value={searchEmail} onChange={e => setSearchEmail(e.target.value)} className="pl-10" />
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              {isMobile ? (
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0 shrink-0">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
+                  <Filter className="h-3.5 w-3.5" />
+                  {filterLabel}
+                </Button>
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'all' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
+                Все пользователи
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'paid' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
+                Платные
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'free' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
+                Бесплатные
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {isMobile ? (
-              <Button variant="outline" size="sm" className="h-9 w-9 p-0 shrink-0">
-                <Filter className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
-                <Filter className="h-3.5 w-3.5" />
-                {filterLabel}
-              </Button>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setPaymentFilter('all')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'all' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
-              Все пользователи
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPaymentFilter('paid')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'paid' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
-              Платные
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setPaymentFilter('free')} className={`hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary ${paymentFilter === 'free' ? 'bg-primary text-primary-foreground focus:bg-primary focus:text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}`}>
-              Бесплатные
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+        <div className="text-xs text-muted-foreground">
           Найдено: {filteredUsers.length} из {users.length}
         </div>
       </div>
