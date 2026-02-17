@@ -110,15 +110,16 @@ export function AdminUsers({
         });
         return { ...ref, referred: { email: refData?.[0]?.email || 'Unknown' } };
       }));
-      const [paymentsRes, tokensRes, generationsRes, allTransactionsRes] = await Promise.all([
+      const [paymentsRes, tokensRes, generationsCountRes, generationsRes, allTransactionsRes] = await Promise.all([
         supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
+        supabase.from('generations').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
       ]);
       const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
-      const generationsCount = generationsRes.data?.length || 0;
+      const generationsCount = generationsCountRes.count ?? 0;
       const referralsCount = referralsWithEmails.length;
       const referralsEarnings = referralsWithEmails.reduce((sum, r) => sum + (r.tokens_awarded || 0), 0);
       setUserDetails({
