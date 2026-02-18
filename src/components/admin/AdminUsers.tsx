@@ -350,7 +350,7 @@ export function AdminUsers({
 
       {/* User Details Modal */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] lg:max-w-4xl max-h-[85vh] overflow-y-auto mx-auto p-4 sm:p-6">
+        <DialogContent className="w-[calc(100vw-2rem)] !max-w-[calc(100vw-2rem)] lg:!max-w-4xl max-h-[85vh] overflow-y-auto p-3 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-base md:text-lg">Детали пользователя</DialogTitle>
             <DialogDescription className="break-all text-xs md:text-sm">
@@ -360,7 +360,7 @@ export function AdminUsers({
 
           {detailsLoading ? <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div> : userDetails && <div className="space-y-6">
+            </div> : userDetails && <div className="space-y-6 w-full min-w-0 overflow-hidden">
               {/* Stats Cards */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-2.5 sm:p-3">
@@ -392,8 +392,8 @@ export function AdminUsers({
               {/* Payment History */}
               <div className="space-y-3 sm:space-y-4">
                 <h3 className="text-sm sm:text-lg font-semibold">История платежей</h3>
-                <div className="max-h-48 overflow-auto border rounded">
-                  <div className="overflow-x-auto">
+                <div className="max-h-48 overflow-auto border rounded w-full">
+                  <div className="overflow-x-auto w-full">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -430,8 +430,8 @@ export function AdminUsers({
               {/* Token Transactions */}
               <div className="space-y-3 sm:space-y-4">
                 <h3 className="text-sm sm:text-lg font-semibold">История токенов</h3>
-                <div className="max-h-64 overflow-auto border rounded">
-                  <div className="overflow-x-auto">
+                <div className="max-h-64 overflow-auto border rounded w-full">
+                  <div className="overflow-x-auto w-full">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -488,8 +488,8 @@ export function AdminUsers({
               {/* Referrals */}
               <div className="space-y-3 sm:space-y-4">
                 <h3 className="text-sm sm:text-lg font-semibold">Рефералы ({userDetails.referralsCount})</h3>
-                {userDetails.referrals.length > 0 ? <div className="max-h-48 overflow-auto border rounded">
-                    <div className="overflow-x-auto">
+                {userDetails.referrals.length > 0 ? <div className="max-h-48 overflow-auto border rounded w-full">
+                    <div className="overflow-x-auto w-full">
                       <Table>
                         <TableHeader>
                           <TableRow>
