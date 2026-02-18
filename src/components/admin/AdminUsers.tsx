@@ -237,7 +237,7 @@ export function AdminUsers({
                   <TableHead className="min-w-[180px]">Email</TableHead>
                   <TableHead className="min-w-[100px] hidden lg:table-cell">Имя</TableHead>
                   <TableHead className="min-w-[70px]">Токены</TableHead>
-                  <TableHead className="min-w-[90px] hidden md:table-cell">Оплата</TableHead>
+                  <TableHead className="min-w-[70px]">Оплата</TableHead>
                   <TableHead className="min-w-[80px]">Статус</TableHead>
                   <TableHead className="min-w-[110px] hidden lg:table-cell">Дата регистрации</TableHead>
                   <TableHead className="min-w-[100px]">Действия</TableHead>
@@ -257,7 +257,7 @@ export function AdminUsers({
                     <TableCell>
                       <Badge variant="secondary" className="text-xs">{user.tokens_balance}</Badge>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell>
                       <Badge variant="secondary" className={`text-xs ${isPaid ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30' : ''}`}>
                         {paidDataLoading ? '...' : isPaid ? 'Да' : 'Нет'}
                       </Badge>
@@ -350,7 +350,7 @@ export function AdminUsers({
 
       {/* User Details Modal */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] lg:max-w-4xl max-h-[90vh] overflow-y-auto mx-2">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] lg:max-w-4xl max-h-[85vh] overflow-y-auto mx-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-base md:text-lg">Детали пользователя</DialogTitle>
             <DialogDescription className="break-all text-xs md:text-sm">
@@ -362,36 +362,36 @@ export function AdminUsers({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div> : userDetails && <div className="space-y-6">
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-green-600 dark:text-green-400">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-2.5 sm:p-3">
+                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-green-600 dark:text-green-400 truncate">
                     {userDetails.totalPaid}₽
                   </div>
-                  <div className="text-xs text-green-600/80 dark:text-green-400/80">Всего оплачено</div>
+                  <div className="text-[10px] sm:text-xs text-green-600/80 dark:text-green-400/80">Всего оплачено</div>
                 </div>
-                <div className="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-blue-600 dark:text-blue-400">
+                <div className="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-lg p-2.5 sm:p-3">
+                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-blue-600 dark:text-blue-400 truncate">
                     {userDetails.tokensSpent}
                   </div>
-                  <div className="text-xs text-blue-600/80 dark:text-blue-400/80">Потрачено токенов</div>
+                  <div className="text-[10px] sm:text-xs text-blue-600/80 dark:text-blue-400/80">Потрачено токенов</div>
                 </div>
-                <div className="bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-purple-600 dark:text-purple-400">
+                <div className="bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 rounded-lg p-2.5 sm:p-3">
+                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-purple-600 dark:text-purple-400 truncate">
                     {userDetails.generationsCount}
                   </div>
-                  <div className="text-xs text-purple-600/80 dark:text-purple-400/80">Генераций</div>
+                  <div className="text-[10px] sm:text-xs text-purple-600/80 dark:text-purple-400/80">Генераций</div>
                 </div>
-                <div className="bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 rounded-lg p-3">
-                  <div className="text-base lg:text-lg font-semibold text-orange-600 dark:text-orange-400">
+                <div className="bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 rounded-lg p-2.5 sm:p-3">
+                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-orange-600 dark:text-orange-400 truncate">
                     {userDetails.referralsCount}
                   </div>
-                  <div className="text-xs text-orange-600/80 dark:text-orange-400/80">Рефералов</div>
+                  <div className="text-[10px] sm:text-xs text-orange-600/80 dark:text-orange-400/80">Рефералов</div>
                 </div>
               </div>
 
               {/* Payment History */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">История платежей</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-sm sm:text-lg font-semibold">История платежей</h3>
                 <div className="max-h-48 overflow-auto border rounded">
                   <div className="overflow-x-auto">
                     <Table>
@@ -428,8 +428,8 @@ export function AdminUsers({
               </div>
 
               {/* Token Transactions */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">История токенов</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-sm sm:text-lg font-semibold">История токенов</h3>
                 <div className="max-h-64 overflow-auto border rounded">
                   <div className="overflow-x-auto">
                     <Table>
@@ -486,8 +486,8 @@ export function AdminUsers({
               </div>
 
               {/* Referrals */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Рефералы ({userDetails.referralsCount})</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-sm sm:text-lg font-semibold">Рефералы ({userDetails.referralsCount})</h3>
                 {userDetails.referrals.length > 0 ? <div className="max-h-48 overflow-auto border rounded">
                     <div className="overflow-x-auto">
                       <Table>
