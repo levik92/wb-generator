@@ -162,7 +162,7 @@ export default function Admin() {
         <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
       )}
 
-      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-y-auto">
         {/* Header - matches DashboardHeader */}
         <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
