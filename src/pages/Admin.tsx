@@ -157,12 +157,14 @@ export default function Admin() {
   const currentTab = TAB_TITLES[activeTab];
 
   return (
-    <div className="h-screen bg-background flex w-full max-w-full overflow-hidden">
+    <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
       {!isMobile && (
-        <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+        <div className="sticky top-0 h-screen">
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+        </div>
       )}
 
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Header - matches DashboardHeader */}
         <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
@@ -214,7 +216,7 @@ export default function Admin() {
           </div>
         </header>
 
-        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden overflow-y-auto min-w-0">
+        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 12 }}
