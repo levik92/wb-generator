@@ -157,7 +157,7 @@ export default function Admin() {
   const currentTab = TAB_TITLES[activeTab];
 
   return (
-    <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
           <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
