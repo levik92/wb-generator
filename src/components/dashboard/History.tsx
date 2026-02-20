@@ -606,7 +606,9 @@ export const History = ({
             </p>
           </div>
         </motion.div> : <div className="grid gap-4">
-          {generations.map((generation, index) => <motion.div key={generation.id} initial={{
+          {generations.map((generation, index) => {
+            const isCardEditing = generation.generation_type === 'cards' && generation.output_data?.images?.some((img: any) => editingInProgress.has(img.image_url));
+            return <motion.div key={generation.id} initial={{
         opacity: 0,
         y: 20
       }} animate={{
@@ -615,8 +617,26 @@ export const History = ({
       }} transition={{
         duration: 0.4,
         delay: 0.1 + index * 0.05
-      }} className="group rounded-2xl border border-border/50 backdrop-blur-sm p-4 sm:p-6 hover:border-primary/30 transition-all bg-card">
-              <div className="flex flex-col gap-3 min-w-0 overflow-hidden">
+      }} className={`group rounded-2xl border backdrop-blur-sm p-4 sm:p-6 transition-all relative overflow-hidden ${
+        isCardEditing
+          ? 'bg-primary/10 border-primary/40'
+          : 'border-border/50 hover:border-primary/30 bg-card'
+      }`}
+      style={isCardEditing ? { animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' } : undefined}
+      >
+              {isCardEditing && (
+                <>
+                  <div className="absolute inset-0 pointer-events-none z-0">
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[60%] rounded-full bg-primary/15 blur-3xl animate-[pulse_3s_ease-in-out_infinite]" />
+                    <div className="absolute top-0 right-0 w-[40%] h-[40%] rounded-full bg-accent/10 blur-3xl animate-[pulse_3s_ease-in-out_infinite_1s]" />
+                  </div>
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Редактирование...
+                  </div>
+                </>
+              )}
+              <div className={`flex flex-col gap-3 min-w-0 overflow-hidden ${isCardEditing ? 'relative z-[1]' : ''}`}>
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 min-w-0">
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -794,7 +814,8 @@ export const History = ({
                   </div>
                 )}
               </div>
-            </motion.div>)}
+            </motion.div>;
+          })}
         </div>}
 
       {/* Pagination */}
