@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +57,7 @@ export const History = ({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editInstructions, setEditInstructions] = useState("");
-  const [editingImageData, setEditingImageData] = useState<{ imageUrl: string; productName: string; cardType: string; cardIndex: number } | null>(null);
+  const [editingImageData, setEditingImageData] = useState<{ imageUrl: string; productName: string; cardType: string; cardIndex: number; generationId?: string } | null>(null);
   const [editingInProgress, setEditingInProgress] = useState<Set<string>>(new Set());
   const { data: activeModel } = useActiveAiModel();
   const { price: editPrice } = useGenerationPrice('photo_edit');
@@ -343,15 +343,96 @@ export const History = ({
     setPreviewOpen(true);
   };
 
-  const openHistoryEditDialog = (imageUrl: string, productName: string, cardType: string, cardIndex: number) => {
-    setEditingImageData({ imageUrl, productName, cardType, cardIndex });
+  const openHistoryEditDialog = (imageUrl: string, productName: string, cardType: string, cardIndex: number, generationId?: string) => {
+    setEditingImageData({ imageUrl, productName, cardType, cardIndex, generationId });
     setEditInstructions("");
     setEditDialogOpen(true);
   };
 
+  const pollingRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      pollingRefs.current.forEach(interval => clearInterval(interval));
+      pollingRefs.current.clear();
+    };
+  }, []);
+
+  const startPollingTask = useCallback((taskId: string, generationId: string, editKey: string, tokensCost: number) => {
+    let attempts = 0;
+    const maxAttempts = 100; // 5 min at 3s interval
+
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        pollingRefs.current.delete(taskId);
+        setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
+        return;
+      }
+
+      try {
+        const { data: taskData, error } = await supabase
+          .from('generation_tasks')
+          .select('status, image_url, card_type, card_index')
+          .eq('id', taskId)
+          .single();
+
+        if (error) return;
+
+        if (taskData?.status === 'completed' && taskData?.image_url) {
+          clearInterval(interval);
+          pollingRefs.current.delete(taskId);
+
+          // Update local state: append new image to the generation
+          setGenerations(prev => prev.map(gen => {
+            if (gen.id !== generationId) return gen;
+            const currentImages = gen.output_data?.images || [];
+            const newImage = {
+              index: taskData.card_index,
+              type: taskData.card_type,
+              image_url: taskData.image_url,
+              is_edited: true
+            };
+            return {
+              ...gen,
+              output_data: {
+                ...gen.output_data,
+                images: [...currentImages, newImage]
+              },
+              tokens_used: gen.tokens_used + tokensCost
+            };
+          }));
+
+          // Auto-expand if now has multiple images
+          setExpandedIds(prev => {
+            const next = new Set(prev);
+            next.add(generationId);
+            return next;
+          });
+
+          setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
+          onTokensUpdate?.();
+          toast({ title: "Редактирование завершено", description: "Результат добавлен в карточку" });
+        } else if (taskData?.status === 'failed') {
+          clearInterval(interval);
+          pollingRefs.current.delete(taskId);
+          setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
+          toast({ title: "Ошибка редактирования", description: "Не удалось обработать изображение", variant: "destructive" });
+        }
+      } catch {
+        // Ignore polling errors, will retry
+      }
+    }, 3000);
+
+    pollingRefs.current.set(taskId, interval);
+  }, [onTokensUpdate, toast]);
+
   const editHistoryCard = async () => {
     if (!editingImageData || !editInstructions.trim()) return;
     const editKey = editingImageData.imageUrl;
+    const generationId = editingImageData.generationId;
     setEditingInProgress(prev => new Set(prev).add(editKey));
     setEditDialogOpen(false);
     try {
@@ -364,19 +445,27 @@ export const History = ({
           cardIndex: editingImageData.cardIndex,
           cardType: editingImageData.cardType,
           sourceImageUrl: editingImageData.imageUrl,
-          editInstructions: editInstructions
+          editInstructions: editInstructions,
+          sourceGenerationId: generationId || undefined
         }
       });
       if (error) throw error;
       if (data?.success) {
-        toast({ title: "Редактирование завершено", description: "Обновите страницу, чтобы увидеть результат" });
-        onTokensUpdate?.();
+        if (generationId && data.taskId) {
+          // Start polling for result — will update state reactively
+          const tokensCost = data.tokensUsed || 2;
+          startPollingTask(data.taskId, generationId, editKey, tokensCost);
+          onTokensUpdate?.();
+        } else {
+          toast({ title: "Редактирование запущено", description: "Обновите страницу, чтобы увидеть результат" });
+          onTokensUpdate?.();
+          setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
+        }
       } else {
         throw new Error(data?.error || 'Ошибка');
       }
     } catch (error: any) {
       toast({ title: "Ошибка редактирования", description: error.message, variant: "destructive" });
-    } finally {
       setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
     }
   };
@@ -720,7 +809,8 @@ export const History = ({
                             img.image_url,
                             generation.input_data?.productName || 'Товар',
                             img.type || 'card_0',
-                            0
+                            0,
+                            generation.id
                           );
                         }}
                         size="sm" 
@@ -787,7 +877,8 @@ export const History = ({
                                 img.image_url, 
                                 generation.input_data?.productName || 'Товар', 
                                 img.type || `card_${imgIndex}`, 
-                                imgIndex
+                                imgIndex,
+                                generation.id
                               );
                             }}
                           >
@@ -806,6 +897,11 @@ export const History = ({
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
+                        {img.is_edited && (
+                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded font-medium">
+                            Ред.
+                          </div>
+                        )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
                           {getCardTypeLabel(img.type) || `Карточка ${imgIndex + 1}`}
                         </div>
