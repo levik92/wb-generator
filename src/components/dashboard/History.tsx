@@ -715,10 +715,14 @@ export const History = ({
       >
               {isCardEditing && (
                 <>
-                  <div className="absolute inset-0 pointer-events-none z-0">
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[60%] rounded-full bg-primary/15 blur-3xl animate-[pulse_3s_ease-in-out_infinite]" />
-                    <div className="absolute top-0 right-0 w-[40%] h-[40%] rounded-full bg-accent/10 blur-3xl animate-[pulse_3s_ease-in-out_infinite_1s]" />
-                  </div>
+                  <div className="absolute inset-0 pointer-events-none z-0" style={{
+                    background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+                    animation: 'glow-drift 6s ease-in-out infinite alternate',
+                  }} />
+                  <div className="absolute inset-0 pointer-events-none z-0" style={{
+                    background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
+                    animation: 'glow-drift-top 8s ease-in-out infinite alternate',
+                  }} />
                   <div className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
                     <Loader2 className="w-3 h-3 animate-spin" />
                     Редактирование...
