@@ -30,7 +30,7 @@ serve(async (req) => {
   }
 
   try {
-    const { productName, userId, cardIndex, cardType, sourceImageUrl, editInstructions } = await req.json();
+    const { productName, userId, cardIndex, cardType, sourceImageUrl, editInstructions, sourceGenerationId } = await req.json();
 
     if (!productName || !userId || cardIndex === undefined || !cardType || !sourceImageUrl || !editInstructions) {
       throw new Error('Missing required fields');
@@ -70,7 +70,9 @@ serve(async (req) => {
         user_id: userId,
         product_name: productName,
         category: 'edit',
-        description: `Редактирование: ${editInstructions}`,
+        description: sourceGenerationId 
+          ? `Редактирование: ${editInstructions} [sourceGenerationId:${sourceGenerationId}]`
+          : `Редактирование: ${editInstructions}`,
         status: 'processing',
         total_cards: 1,
         tokens_cost: tokensCost
