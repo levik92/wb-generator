@@ -33,9 +33,9 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { productName, userId, cardIndex, cardType, sourceImageUrl, editInstructions } = body;
+    const { productName, userId, cardIndex, cardType, sourceImageUrl, editInstructions, sourceGenerationId } = body;
 
-    console.log('Edit card request:', { productName, userId, cardIndex, cardType, sourceImageUrl: sourceImageUrl?.substring(0, 50), editInstructions });
+    console.log('Edit card request:', { productName, userId, cardIndex, cardType, sourceImageUrl: sourceImageUrl?.substring(0, 50), editInstructions, sourceGenerationId });
 
     if (!productName || !userId || cardIndex === undefined || !cardType || !sourceImageUrl || !editInstructions) {
       console.error('Missing required fields:', { productName, userId, cardIndex, cardType, sourceImageUrl: !!sourceImageUrl, editInstructions });
@@ -90,7 +90,9 @@ serve(async (req) => {
         user_id: userId,
         product_name: productName,
         category: 'edit',
-        description: `Редактирование: ${editInstructions}`,
+        description: sourceGenerationId 
+          ? `Редактирование: ${editInstructions} [sourceGenerationId:${sourceGenerationId}]`
+          : `Редактирование: ${editInstructions}`,
         status: 'processing',
         total_cards: 1,
         tokens_cost: tokensCost,
