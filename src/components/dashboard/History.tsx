@@ -742,9 +742,9 @@ export const History = ({
                     background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
                     animation: 'glow-drift-top 8s ease-in-out infinite alternate',
                   }} />
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-primary/90 text-primary-foreground px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
                     <Loader2 className="w-3 h-3 animate-spin" />
-                    Редактирование...
+                    <span className="hidden sm:inline">Редактирование...</span>
                   </div>
                 </>
               )}
