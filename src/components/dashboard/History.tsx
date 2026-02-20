@@ -706,12 +706,7 @@ export const History = ({
       }} transition={{
         duration: 0.4,
         delay: 0.1 + index * 0.05
-      }} className={`group rounded-2xl border backdrop-blur-sm p-4 sm:p-6 transition-all relative overflow-hidden ${
-        isCardEditing
-          ? 'bg-primary/10 border-primary/40'
-          : 'border-border/50 hover:border-primary/30 bg-card'
-      }`}
-      style={isCardEditing ? { animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' } : undefined}
+      }} className="group rounded-2xl border backdrop-blur-sm p-4 sm:p-6 transition-all relative overflow-hidden border-border/50 hover:border-primary/30 bg-card"
       >
               {isCardEditing && (
                 <>
