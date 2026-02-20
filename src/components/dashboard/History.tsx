@@ -6,10 +6,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil, Video, Play } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil, Video, Play, Sparkles, Edit } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog as EditDialog, DialogContent as EditDialogContent, DialogHeader as EditDialogHeader, DialogTitle as EditDialogTitle, DialogDescription as EditDialogDescription, DialogFooter as EditDialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -596,24 +597,47 @@ export const History = ({
 
       {/* Edit Dialog */}
       <EditDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <EditDialogContent className="sm:max-w-md">
-          <EditDialogHeader>
-            <EditDialogTitle>Редактировать карточку</EditDialogTitle>
-            <EditDialogDescription>
-              Опишите, что нужно изменить. Стоимость: {editPrice} токенов
+        <EditDialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
+          <EditDialogHeader className="space-y-2">
+            <EditDialogTitle className="flex items-center gap-2 text-lg">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <Edit className="w-4 h-4 text-primary" />
+              </div>
+              Редактировать карточку
+            </EditDialogTitle>
+            <EditDialogDescription className="text-sm text-left">
+              Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
             </EditDialogDescription>
           </EditDialogHeader>
-          <Textarea
-            placeholder="Например: сделай фон белым, добавь тень, измени ракурс..."
-            value={editInstructions}
-            onChange={e => setEditInstructions(e.target.value)}
-            className="min-h-[100px]"
-          />
-          <EditDialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Отмена</Button>
-            <Button onClick={editHistoryCard} disabled={!editInstructions.trim()}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Редактировать
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="history-edit-instructions" className="font-semibold">
+                Что нужно изменить?
+              </Label>
+              <Textarea
+                id="history-edit-instructions"
+                placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..."
+                value={editInstructions}
+                onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }}
+                maxLength={1200}
+                className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50"
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                <span>Стоимость: <span className="font-semibold">{editPrice} {editPrice === 1 ? 'токен' : 'токена'}</span></span>
+              </div>
+              <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+            </div>
+          </div>
+          <EditDialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
+              Отмена
+            </Button>
+            <Button onClick={editHistoryCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+              <Sparkles className="w-4 h-4" />
+              Начать редактирование
             </Button>
           </EditDialogFooter>
         </EditDialogContent>
