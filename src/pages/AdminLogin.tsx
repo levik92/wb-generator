@@ -56,9 +56,16 @@ export default function AdminLogin() {
       });
 
       if (error) {
+        const localizeAuthError = (msg: string): string => {
+          const map: Record<string, string> = {
+            'Invalid login credentials': 'Неверный email или пароль',
+            'Email not confirmed': 'Подтвердите email перед входом. Проверьте почту.',
+          };
+          return map[msg] || msg;
+        };
         toast({
           title: "Ошибка входа",
-          description: error.message,
+          description: localizeAuthError(error.message),
           variant: "destructive",
         });
         return;

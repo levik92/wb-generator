@@ -246,7 +246,14 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      toast({ title: "Ошибка входа", description: error.message, variant: "destructive" });
+      const localizeAuthError = (msg: string): string => {
+        const map: Record<string, string> = {
+          'Invalid login credentials': 'Неверный email или пароль',
+          'Email not confirmed': 'Подтвердите email перед входом. Проверьте почту.',
+        };
+        return map[msg] || msg;
+      };
+      toast({ title: "Ошибка входа", description: localizeAuthError(error.message), variant: "destructive" });
       setCaptchaToken(null);
       captchaRef.current?.resetCaptcha();
     } finally {
