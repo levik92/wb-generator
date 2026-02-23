@@ -38,7 +38,7 @@ export const PWAInstallPrompt = ({ userId, loginCount }: PWAInstallPromptProps) 
 
     // Show prompt on first/second login, not in PWA mode
     const dismissed = localStorage.getItem(`pwa_install_dismissed_${userId}`);
-    if (!dismissed && !isStandalone && (loginCount === 1 || loginCount === 2) && (ios || android)) {
+    if (!dismissed && !isStandalone && loginCount >= 3 && (ios || android)) {
       // Small delay to let the page load
       setTimeout(() => setIsOpen(true), 1500);
     }

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SurveyStats } from "./SurveyStats";
 
 interface User {
   id: string;
@@ -520,5 +521,8 @@ export function AdminUsers({
             </div>}
         </DialogContent>
       </Dialog>
+
+      {/* Survey Statistics */}
+      <SurveyStats />
     </div>;
 }

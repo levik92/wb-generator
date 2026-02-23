@@ -1428,6 +1428,30 @@ export type Database = {
           },
         ]
       }
+      user_survey_responses: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question_key: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question_key: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_generation_jobs: {
         Row: {
           created_at: string

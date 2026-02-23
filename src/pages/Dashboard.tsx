@@ -29,7 +29,7 @@ import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu }
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
 import { MobileSideMenu } from "@/components/mobile/MobileSideMenu";
 import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
-import { OnboardingWizard } from "@/components/mobile/OnboardingWizard";
+import { OnboardingSurvey } from "@/components/dashboard/OnboardingSurvey";
 interface Profile {
   id: string;
   email: string;
@@ -317,8 +317,8 @@ const Dashboard = () => {
       {/* PWA Install Prompt - Mobile only */}
       {profile && isMobile && <PWAInstallPrompt userId={profile.id} loginCount={profile.login_count || 0} />}
       
-      {/* Onboarding Wizard */}
-      {profile && <OnboardingWizard userId={profile.id} loginCount={profile.login_count || 0} onComplete={() => {}} onSkip={() => {}} />}
+      {/* Onboarding Survey - shows once on first login */}
+      {profile && <OnboardingSurvey userId={profile.id} onComplete={() => {}} />}
       
       {/* Mobile Side Menu */}
       {isMobile && <MobileSideMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} activeTab={activeTab} onTabChange={handleTabChange} profile={profile} hasUnreadNews={hasUnreadNews} />}
