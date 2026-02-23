@@ -1,40 +1,30 @@
 
 
-## Локализация ошибок входа в систему
+## Квиз для всех пользователей + данные квиза в профиле админки
 
-### Что будет сделано
+### 1. Квиз для существующих пользователей
 
-В файлах `src/pages/Auth.tsx` и `src/pages/AdminLogin.tsx` добавим маппинг английских ошибок Supabase на русские сообщения.
+Текущая логика уже работает правильно: компонент `OnboardingSurvey` проверяет, есть ли записи в `user_survey_responses` для данного `user_id`. Если записей нет -- квиз показывается. Это значит, что все существующие пользователи, которые ещё не проходили квиз, увидят его при следующем входе. Никаких изменений здесь не требуется.
 
-### Ошибки для локализации
+### 2. Данные квиза в профиле пользователя (админка)
 
-| Supabase (англ.) | Русский перевод |
-|---|---|
-| `Invalid login credentials` | Неверный email или пароль |
-| `Email not confirmed` | Подтвердите email перед входом. Проверьте почту. |
+В модальном окне деталей пользователя (`AdminUsers.tsx`) добавим блок с ответами на квиз.
 
-### Технические детали
+#### Изменения в `AdminUsers.tsx`:
 
-1. **Создать функцию-маппер** `localizeAuthError(message: string): string` в обоих файлах (или вынести в утилиту):
+**a) Расширить интерфейс `UserDetails`:**
+- Добавить поле `surveyResponses: { question_key: string; answer: string }[]`
 
-```typescript
-const localizeAuthError = (msg: string): string => {
-  const map: Record<string, string> = {
-    'Invalid login credentials': 'Неверный email или пароль',
-    'Email not confirmed': 'Подтвердите email перед входом. Проверьте почту.',
-  };
-  return map[msg] || msg;
-};
-```
+**b) В функции `loadUserDetails`:**
+- Добавить запрос к `user_survey_responses` по `user_id` выбранного пользователя
+- Загрузить все ответы и сохранить в `userDetails.surveyResponses`
 
-2. **Auth.tsx (строка ~249)** -- в `catch` блоке заменить `error.message` на `localizeAuthError(error.message)`:
-```typescript
-toast({ title: "Ошибка входа", description: localizeAuthError(error.message), variant: "destructive" });
-```
-
-3. **AdminLogin.tsx (строка ~63)** -- аналогично локализовать `error.message` в toast при ошибке входа.
+**c) В модальном окне деталей пользователя:**
+- Добавить новый блок "Результаты опроса" после статистических карточек (перед историей платежей)
+- Если ответы есть -- показать 3 строки с вопросом и ответом в виде компактных бейджей
+- Если ответов нет -- показать текст "Опрос не пройден"
+- Маппинг ключей вопросов на русские названия: `who_are_you` -> "Кто вы?", `monthly_volume` -> "Объём в месяц", `acquisition_channel` -> "Откуда узнали?"
 
 ### Файлы для изменения
-- `src/pages/Auth.tsx`
-- `src/pages/AdminLogin.tsx`
+- `src/components/admin/AdminUsers.tsx` -- единственный файл, добавление загрузки и отображения ответов квиза в профиле пользователя
 
