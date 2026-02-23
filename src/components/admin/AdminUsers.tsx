@@ -34,6 +34,7 @@ interface UserDetails {
   paymentHistory: any[];
   referrals: any[];
   tokenTransactions: any[];
+  surveyResponses: { question_key: string; answer: string }[];
 }
 interface AdminUsersProps {
   users: User[];
@@ -111,12 +112,13 @@ export function AdminUsers({
         });
         return { ...ref, referred: { email: refData?.[0]?.email || 'Unknown' } };
       }));
-      const [paymentsRes, tokensRes, generationsCountRes, generationsRes, allTransactionsRes] = await Promise.all([
+      const [paymentsRes, tokensRes, generationsCountRes, generationsRes, allTransactionsRes, surveyRes] = await Promise.all([
         supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
         supabase.from('generations').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
-        supabase.from('token_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
+        supabase.from('token_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
+        (supabase as any).from('user_survey_responses').select('question_key, answer').eq('user_id', user.id)
       ]);
       const totalPaid = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const tokensSpent = tokensRes.data?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
@@ -128,7 +130,8 @@ export function AdminUsers({
         recentGenerations: generationsRes.data || [],
         paymentHistory: paymentsRes.data || [],
         referrals: referralsWithEmails,
-        tokenTransactions: allTransactionsRes.data || []
+        tokenTransactions: allTransactionsRes.data || [],
+        surveyResponses: surveyRes.data || []
       });
     } catch (error) {
       console.error('Error loading user details:', error);
@@ -388,6 +391,35 @@ export function AdminUsers({
                   </div>
                   <div className="text-[10px] sm:text-xs text-orange-600/80 dark:text-orange-400/80">Рефералов</div>
                 </div>
+              </div>
+
+              {/* Survey Responses */}
+              <div className="space-y-2">
+                <h3 className="text-sm sm:text-lg font-semibold">Результаты опроса</h3>
+                {userDetails.surveyResponses.length > 0 ? (
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {(() => {
+                      const labels: Record<string, string> = {
+                        who_are_you: "Кто вы?",
+                        monthly_volume: "Объём в месяц",
+                        acquisition_channel: "Откуда узнали?"
+                      };
+                      const order = ["who_are_you", "monthly_volume", "acquisition_channel"];
+                      return order.map(key => {
+                        const resp = userDetails.surveyResponses.find(r => r.question_key === key);
+                        if (!resp) return null;
+                        return (
+                          <div key={key} className="bg-muted/50 rounded-lg p-2.5 space-y-1">
+                            <div className="text-[10px] sm:text-xs text-muted-foreground">{labels[key] || key}</div>
+                            <Badge variant="secondary" className="text-xs">{resp.answer}</Badge>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Опрос не пройден</p>
+                )}
               </div>
 
               {/* Payment History */}
