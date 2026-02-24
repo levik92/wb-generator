@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil, Video, Play, Sparkles, Edit } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog as EditDialog, DialogContent as EditDialogContent, DialogHeader as EditDialogHeader, DialogTitle as EditDialogTitle, DialogDescription as EditDialogDescription, DialogFooter as EditDialogFooter } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
@@ -67,6 +69,7 @@ export const History = ({
   const [videoEditInstructions, setVideoEditInstructions] = useState("");
   const [videoEditingData, setVideoEditingData] = useState<{ originalJobId: string; generationId: string; productImageUrl: string } | null>(null);
   const [videoEditingInProgress, setVideoEditingInProgress] = useState<Set<string>>(new Set());
+  const isMobile = useIsMobile();
   const {
     toast
   } = useToast();
@@ -723,101 +726,155 @@ export const History = ({
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
-      <EditDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <EditDialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
-          <EditDialogHeader className="space-y-2">
-            <EditDialogTitle className="flex items-center gap-2 text-lg">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                <Edit className="w-4 h-4 text-primary" />
+      {/* Photo Edit - Responsive */}
+      {isMobile ? (
+        <Drawer open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DrawerContent className="bg-card border-border/50">
+            <DrawerHeader className="text-left space-y-2">
+              <DrawerTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Edit className="w-4 h-4 text-primary" />
+                </div>
+                Редактировать карточку
+              </DrawerTitle>
+              <DrawerDescription className="text-sm">
+                Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="space-y-4 px-4 pb-2">
+              <div className="space-y-2">
+                <Label htmlFor="history-edit-instructions-m" className="font-semibold">Что нужно изменить?</Label>
+                <Textarea id="history-edit-instructions-m" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg" />
               </div>
-              Редактировать карточку
-            </EditDialogTitle>
-            <EditDialogDescription className="text-sm text-left">
-              Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
-            </EditDialogDescription>
-          </EditDialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="history-edit-instructions" className="font-semibold">
-                Что нужно изменить?
-              </Label>
-              <Textarea
-                id="history-edit-instructions"
-                placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..."
-                value={editInstructions}
-                onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }}
-                maxLength={1200}
-                className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50"
-              />
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
-                <span>Стоимость: <span className="font-semibold">{editPrice} {editPrice === 1 ? 'токен' : 'токена'}</span></span>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                  <span>Стоимость: <span className="font-semibold">{editPrice} {editPrice === 1 ? 'токен' : 'токена'}</span></span>
+                </div>
+                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
               </div>
-              <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
             </div>
-          </div>
-          <EditDialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
-              Отмена
-            </Button>
-            <Button onClick={editHistoryCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
-              <Sparkles className="w-4 h-4" />
-              Начать редактирование
-            </Button>
-          </EditDialogFooter>
-        </EditDialogContent>
-      </EditDialog>
+            <DrawerFooter className="gap-2">
+              <Button onClick={editHistoryCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+                <Sparkles className="w-4 h-4" />
+                Начать редактирование
+              </Button>
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">Отмена</Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <EditDialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <EditDialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
+            <EditDialogHeader className="space-y-2">
+              <EditDialogTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Edit className="w-4 h-4 text-primary" />
+                </div>
+                Редактировать карточку
+              </EditDialogTitle>
+              <EditDialogDescription className="text-sm text-left">
+                Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
+              </EditDialogDescription>
+            </EditDialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="history-edit-instructions" className="font-semibold">Что нужно изменить?</Label>
+                <Textarea id="history-edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                  <span>Стоимость: <span className="font-semibold">{editPrice} {editPrice === 1 ? 'токен' : 'токена'}</span></span>
+                </div>
+                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+              </div>
+            </div>
+            <EditDialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">Отмена</Button>
+              <Button onClick={editHistoryCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+                <Sparkles className="w-4 h-4" />
+                Начать редактирование
+              </Button>
+            </EditDialogFooter>
+          </EditDialogContent>
+        </EditDialog>
+      )}
 
-      {/* Video Edit Dialog */}
-      <EditDialog open={videoEditDialogOpen} onOpenChange={setVideoEditDialogOpen}>
-        <EditDialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
-          <EditDialogHeader className="space-y-2">
-            <EditDialogTitle className="flex items-center gap-2 text-lg">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                <Video className="w-4 h-4 text-primary" />
+      {/* Video Edit - Responsive */}
+      {isMobile ? (
+        <Drawer open={videoEditDialogOpen} onOpenChange={setVideoEditDialogOpen}>
+          <DrawerContent className="bg-card border-border/50">
+            <DrawerHeader className="text-left space-y-2">
+              <DrawerTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Video className="w-4 h-4 text-primary" />
+                </div>
+                Редактировать видеообложку
+              </DrawerTitle>
+              <DrawerDescription className="text-sm">
+                Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="space-y-4 px-4 pb-2">
+              <div className="space-y-2">
+                <Label htmlFor="video-edit-instructions-m" className="font-semibold">Что нужно изменить?</Label>
+                <Textarea id="video-edit-instructions-m" placeholder="Например: добавить плавное вращение товара, изменить освещение..." value={videoEditInstructions} onChange={e => { if (e.target.value.length <= 300) setVideoEditInstructions(e.target.value); }} maxLength={300} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg" />
               </div>
-              Редактировать видеообложку
-            </EditDialogTitle>
-            <EditDialogDescription className="text-sm text-left">
-              Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом.
-            </EditDialogDescription>
-          </EditDialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="video-edit-instructions" className="font-semibold">
-                Что нужно изменить?
-              </Label>
-              <Textarea
-                id="video-edit-instructions"
-                placeholder="Например: добавить плавное вращение товара, изменить освещение..."
-                value={videoEditInstructions}
-                onChange={e => { if (e.target.value.length <= 300) setVideoEditInstructions(e.target.value); }}
-                maxLength={300}
-                className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50"
-              />
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
-                <span>Стоимость: <span className="font-semibold">{videoRegenPrice || 2} {(videoRegenPrice || 2) === 1 ? 'токен' : 'токена'}</span></span>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                  <span>Стоимость: <span className="font-semibold">{videoRegenPrice || 2} {(videoRegenPrice || 2) === 1 ? 'токен' : 'токена'}</span></span>
+                </div>
+                <span className={videoEditInstructions.length >= 300 ? 'text-destructive' : ''}>{videoEditInstructions.length}/300</span>
               </div>
-              <span className={videoEditInstructions.length >= 300 ? 'text-destructive' : ''}>{videoEditInstructions.length}/300</span>
             </div>
-          </div>
-          <EditDialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setVideoEditDialogOpen(false)} className="rounded-lg">
-              Отмена
-            </Button>
-            <Button onClick={editVideoCard} disabled={!videoEditInstructions.trim() || videoEditInstructions.length > 300} className="rounded-lg gap-2">
-              <Sparkles className="w-4 h-4" />
-              Начать редактирование
-            </Button>
-          </EditDialogFooter>
-        </EditDialogContent>
-      </EditDialog>
+            <DrawerFooter className="gap-2">
+              <Button onClick={editVideoCard} disabled={!videoEditInstructions.trim() || videoEditInstructions.length > 300} className="rounded-lg gap-2">
+                <Sparkles className="w-4 h-4" />
+                Начать редактирование
+              </Button>
+              <Button variant="outline" onClick={() => setVideoEditDialogOpen(false)} className="rounded-lg">Отмена</Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <EditDialog open={videoEditDialogOpen} onOpenChange={setVideoEditDialogOpen}>
+          <EditDialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
+            <EditDialogHeader className="space-y-2">
+              <EditDialogTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Video className="w-4 h-4 text-primary" />
+                </div>
+                Редактировать видеообложку
+              </EditDialogTitle>
+              <EditDialogDescription className="text-sm text-left">
+                Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом.
+              </EditDialogDescription>
+            </EditDialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="video-edit-instructions" className="font-semibold">Что нужно изменить?</Label>
+                <Textarea id="video-edit-instructions" placeholder="Например: добавить плавное вращение товара, изменить освещение..." value={videoEditInstructions} onChange={e => { if (e.target.value.length <= 300) setVideoEditInstructions(e.target.value); }} maxLength={300} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                  <span>Стоимость: <span className="font-semibold">{videoRegenPrice || 2} {(videoRegenPrice || 2) === 1 ? 'токен' : 'токена'}</span></span>
+                </div>
+                <span className={videoEditInstructions.length >= 300 ? 'text-destructive' : ''}>{videoEditInstructions.length}/300</span>
+              </div>
+            </div>
+            <EditDialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setVideoEditDialogOpen(false)} className="rounded-lg">Отмена</Button>
+              <Button onClick={editVideoCard} disabled={!videoEditInstructions.trim() || videoEditInstructions.length > 300} className="rounded-lg gap-2">
+                <Sparkles className="w-4 h-4" />
+                Начать редактирование
+              </Button>
+            </EditDialogFooter>
+          </EditDialogContent>
+        </EditDialog>
+      )}
 
       {/* Header */}
       <motion.div initial={{
