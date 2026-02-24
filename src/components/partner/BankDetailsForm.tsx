@@ -84,7 +84,7 @@ export const BankDetailsForm = ({
       console.error("Error saving bank details:", error);
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось сохранить реквизиты. Попробуйте снова",
         variant: "destructive"
       });
     } finally {

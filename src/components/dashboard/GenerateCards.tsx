@@ -728,7 +728,7 @@ export const GenerateCards = ({
         console.error('Job creation error:', error);
         toast({
           title: "Ошибка создания задачи",
-          description: error.message || "Произошла ошибка при создании задачи генерации",
+          description: "Не удалось создать задачу генерации. Попробуйте позже",
           variant: "destructive"
         });
         return;
@@ -748,7 +748,7 @@ export const GenerateCards = ({
       console.error('Generation error:', error);
       toast({
         title: "Ошибка генерации",
-        description: error.message || "Произошла ошибка при создании задачи",
+        description: "Не удалось запустить генерацию. Попробуйте позже",
         variant: "destructive"
       });
       setGenerating(false);
@@ -1014,7 +1014,7 @@ export const GenerateCards = ({
       console.error('Error regenerating card:', error);
       toast({
         title: "Ошибка перегенерации",
-        description: error.message || 'Произошла ошибка при перегенерации',
+        description: "Не удалось перегенерировать карточку. Попробуйте позже",
         variant: "destructive"
       });
 
@@ -1169,7 +1169,7 @@ export const GenerateCards = ({
       console.error('Error editing card:', error);
       toast({
         title: "Ошибка редактирования",
-        description: error.message || 'Произошла ошибка при редактировании',
+        description: "Не удалось отредактировать карточку. Попробуйте позже",
         variant: "destructive"
       });
 

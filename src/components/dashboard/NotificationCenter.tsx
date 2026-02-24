@@ -145,7 +145,7 @@ export const NotificationCenter = ({ profile }: NotificationCenterProps) => {
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось загрузить уведомления",
         variant: "destructive",
       });
     }

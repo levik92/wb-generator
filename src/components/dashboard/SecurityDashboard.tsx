@@ -75,7 +75,7 @@ export default function SecurityDashboard() {
       })));
     } catch (error: any) {
       console.error('Error fetching security data:', error);
-      toast(`Ошибка загрузки данных безопасности: ${error.message}`, { 
+      toast("Не удалось загрузить данные безопасности", { 
         style: { background: '#ef4444' } 
       });
     } finally {

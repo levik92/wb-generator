@@ -159,7 +159,7 @@ export const History = ({
     } catch (error: any) {
       toast({
         title: "Ошибка загрузки истории",
-        description: error.message,
+        description: "Не удалось загрузить историю генераций",
         variant: "destructive"
       });
     } finally {
@@ -466,7 +466,7 @@ export const History = ({
         throw new Error(data?.error || 'Ошибка');
       }
     } catch (error: any) {
-      toast({ title: "Ошибка редактирования", description: error.message, variant: "destructive" });
+      toast({ title: "Ошибка редактирования", description: "Не удалось отредактировать изображение", variant: "destructive" });
       setEditingInProgress(prev => { const s = new Set(prev); s.delete(editKey); return s; });
     }
   };
@@ -483,7 +483,7 @@ export const History = ({
       setGenerations(prev => prev.filter(gen => gen.id !== jobId));
       toast({ title: "Удалено", description: "Видео успешно удалено" });
     } catch (error: any) {
-      toast({ title: "Ошибка удаления", description: error.message, variant: "destructive" });
+      toast({ title: "Ошибка удаления", description: "Не удалось удалить видео", variant: "destructive" });
     }
   };
 
@@ -501,7 +501,7 @@ export const History = ({
     } catch (error: any) {
       toast({
         title: "Ошибка удаления",
-        description: error.message,
+        description: "Не удалось удалить генерацию",
         variant: "destructive"
       });
     }

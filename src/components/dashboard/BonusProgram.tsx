@@ -180,7 +180,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
       console.error('Error retrying submission:', error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось отправить заявку повторно",
+        description: "Не удалось отправить заявку. Попробуйте позже",
         variant: "destructive"
       });
     } finally {
@@ -233,7 +233,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
       console.error('Error submitting bonus:', error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось отправить заявку",
+        description: "Не удалось отправить заявку. Попробуйте позже",
         variant: "destructive"
       });
     } finally {

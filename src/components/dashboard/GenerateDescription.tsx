@@ -99,7 +99,7 @@ export const GenerateDescription = ({
     } catch (error: any) {
       toast({
         title: "Ошибка генерации",
-        description: error.message || "Не удалось создать описание",
+        description: "Не удалось создать описание. Попробуйте позже",
         variant: "destructive"
       });
     } finally {

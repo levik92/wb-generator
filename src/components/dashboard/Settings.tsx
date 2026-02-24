@@ -130,7 +130,7 @@ export const Settings = ({
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось сохранить API ключ",
         variant: "destructive"
       });
     } finally {
@@ -155,7 +155,7 @@ export const Settings = ({
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось удалить API ключ",
         variant: "destructive"
       });
     } finally {
@@ -180,7 +180,7 @@ export const Settings = ({
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось обновить профиль",
         variant: "destructive"
       });
     } finally {
@@ -205,7 +205,7 @@ export const Settings = ({
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось обновить email. Попробуйте позже",
         variant: "destructive"
       });
     } finally {
@@ -258,7 +258,7 @@ export const Settings = ({
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось изменить пароль. Попробуйте позже",
         variant: "destructive"
       });
     } finally {

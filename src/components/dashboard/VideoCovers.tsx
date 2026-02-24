@@ -287,7 +287,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
           refreshHistory();
           toast({
             title: "Ошибка генерации",
-            description: `${data.error_message || "Неизвестная ошибка"}. Токены возвращены на баланс.`,
+            description: "Генерация видео не удалась. Токены возвращены на баланс.",
             variant: "destructive",
           });
         }
@@ -344,11 +344,11 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
         if (data.refunded) {
           toast({
             title: "Ошибка",
-            description: `${data.error}. Токены возвращены.`,
+            description: "Не удалось создать видео. Токены возвращены.",
             variant: "destructive",
           });
         } else {
-          toast({ title: "Ошибка", description: data.error, variant: "destructive" });
+          toast({ title: "Ошибка", description: "Не удалось создать видео. Попробуйте позже", variant: "destructive" });
         }
         setIsGenerating(false);
         onTokensUpdate();
@@ -374,7 +374,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       console.error("Generation error:", error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось создать задачу",
+        description: "Не удалось создать задачу. Попробуйте позже",
         variant: "destructive",
       });
       setIsUploading(false);
@@ -423,7 +423,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       if (data.error) {
         toast({
           title: "Ошибка",
-          description: `${data.error}${data.refunded ? ". Токены возвращены." : ""}`,
+          description: data.refunded ? "Не удалось перегенерировать видео. Токены возвращены." : "Не удалось перегенерировать видео",
           variant: "destructive",
         });
         setIsRegenerating(false);
@@ -452,7 +452,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       console.error("Regeneration error:", error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось перегенерировать видео",
+        description: "Не удалось перегенерировать видео. Попробуйте позже",
         variant: "destructive",
       });
       setIsRegenerating(false);
