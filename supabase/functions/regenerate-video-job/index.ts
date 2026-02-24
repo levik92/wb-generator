@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     // Get original job and verify ownership
     const { data: originalJob, error: jobError } = await adminClient
       .from("video_generation_jobs")
-      .select("product_image_url, user_id")
+      .select("product_image_url, user_id, parent_job_id")
       .eq("id", original_job_id)
       .eq("user_id", userId)
       .single();
@@ -211,6 +211,9 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Determine root parent for clustering
+    const rootParentId = originalJob.parent_job_id || original_job_id;
+
     // Save new job to DB
     const { data: job, error: saveError } = await adminClient
       .from("video_generation_jobs")
@@ -221,6 +224,7 @@ Deno.serve(async (req) => {
         kling_task_id: klingResult.data.task_id,
         tokens_cost: tokensCost,
         prompt,
+        parent_job_id: rootParentId,
       })
       .select("id")
       .single();
