@@ -54,6 +54,7 @@ const QUESTIONS: Question[] = [
       "YouTube",
       "TikTok / Reels / Shorts",
       "Telegram (канал/чат)",
+      "Реклама (у блогера / в соцсетях)",
       "Рекомендация знакомых",
       "Wildberries / чаты селлеров",
       "Другое",
