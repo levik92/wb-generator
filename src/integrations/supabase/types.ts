@@ -1458,6 +1458,7 @@ export type Database = {
           error_message: string | null
           id: string
           kling_task_id: string | null
+          parent_job_id: string | null
           product_image_url: string | null
           prompt: string | null
           result_video_url: string | null
@@ -1472,6 +1473,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           kling_task_id?: string | null
+          parent_job_id?: string | null
           product_image_url?: string | null
           prompt?: string | null
           result_video_url?: string | null
@@ -1486,6 +1488,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           kling_task_id?: string | null
+          parent_job_id?: string | null
           product_image_url?: string | null
           prompt?: string | null
           result_video_url?: string | null
@@ -1495,7 +1498,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "video_generation_jobs_parent_job_id_fkey"
+            columns: ["parent_job_id"]
+            isOneToOne: false
+            referencedRelation: "video_generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

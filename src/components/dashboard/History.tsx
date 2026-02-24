@@ -62,6 +62,11 @@ export const History = ({
   const [editingInProgress, setEditingInProgress] = useState<Set<string>>(new Set());
   const { data: activeModel } = useActiveAiModel();
   const { price: editPrice } = useGenerationPrice('photo_edit');
+  const { price: videoRegenPrice } = useGenerationPrice('video_regeneration');
+  const [videoEditDialogOpen, setVideoEditDialogOpen] = useState(false);
+  const [videoEditInstructions, setVideoEditInstructions] = useState("");
+  const [videoEditingData, setVideoEditingData] = useState<{ originalJobId: string; generationId: string; productImageUrl: string } | null>(null);
+  const [videoEditingInProgress, setVideoEditingInProgress] = useState<Set<string>>(new Set());
   const {
     toast
   } = useToast();
@@ -76,34 +81,90 @@ export const History = ({
       });
     }
   }, [shouldRefresh]);
+  // Helper: cluster video jobs into generation-like objects
+  const clusterVideoJobs = (videoJobs: any[]): Generation[] => {
+    const clusterMap = new Map<string, any[]>();
+
+    // First pass: group children by parent_job_id
+    for (const vj of videoJobs) {
+      if (vj.parent_job_id) {
+        if (!clusterMap.has(vj.parent_job_id)) clusterMap.set(vj.parent_job_id, []);
+        clusterMap.get(vj.parent_job_id)!.push(vj);
+      }
+    }
+
+    // Second pass: place roots into their clusters or create standalone
+    for (const vj of videoJobs) {
+      if (!vj.parent_job_id) {
+        if (clusterMap.has(vj.id)) {
+          clusterMap.get(vj.id)!.unshift(vj);
+        } else {
+          // Backward compat: group by product_image_url
+          let foundKey: string | null = null;
+          if (vj.product_image_url) {
+            for (const [key, jobs] of clusterMap) {
+              if (jobs[0] && !jobs[0].parent_job_id && jobs[0].product_image_url === vj.product_image_url && key !== vj.id) {
+                foundKey = key;
+                break;
+              }
+            }
+          }
+          if (foundKey) {
+            clusterMap.get(foundKey)!.push(vj);
+          } else {
+            clusterMap.set(vj.id, [vj]);
+          }
+        }
+      }
+    }
+
+    const result: Generation[] = [];
+    for (const [, jobs] of clusterMap) {
+      jobs.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      const root = jobs[0];
+      const totalTokens = jobs.reduce((sum: number, j: any) => sum + (j.tokens_cost || 0), 0);
+      const videos = jobs.map((j: any, idx: number) => ({
+        id: j.id,
+        url: j.result_video_url,
+        tokens_cost: j.tokens_cost,
+        created_at: j.created_at,
+        version_label: idx === 0 ? null : `Ред. (в. ${idx})`,
+      }));
+
+      result.push({
+        id: root.id,
+        generation_type: 'video',
+        input_data: { productName: 'Видеообложка', source_image: root.product_image_url },
+        output_data: { video_url: root.result_video_url, source_image: root.product_image_url, videos },
+        tokens_used: totalTokens,
+        status: 'completed',
+        created_at: root.created_at,
+        updated_at: jobs[jobs.length - 1].updated_at || jobs[jobs.length - 1].created_at,
+      });
+    }
+
+    result.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    return result;
+  };
+
   const loadHistory = async () => {
     try {
       setLoading(true);
 
       if (filter === 'video') {
-        // Only video jobs
-        const { data: vData, error: vError, count: vCount } = await (supabase as any)
+        const { data: vData, error: vError } = await (supabase as any)
           .from('video_generation_jobs')
-          .select('*', { count: 'exact' })
+          .select('*')
           .eq('user_id', profile.id)
           .eq('status', 'completed')
           .order('created_at', { ascending: false })
-          .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+          .limit(200);
 
         if (vError) throw vError;
-        setTotalPages(Math.ceil((vCount || 0) / ITEMS_PER_PAGE) || 1);
-
-        const mapped = (vData || []).map((vj: any) => ({
-          id: vj.id,
-          generation_type: 'video',
-          input_data: { productName: 'Видеообложка', source_image: vj.product_image_url },
-          output_data: { video_url: vj.result_video_url, source_image: vj.product_image_url },
-          tokens_used: vj.tokens_cost,
-          status: 'completed',
-          created_at: vj.created_at,
-          updated_at: vj.updated_at || vj.created_at,
-        }));
-        setGenerations(mapped);
+        const clustered = clusterVideoJobs(vData || []);
+        setTotalPages(Math.ceil(clustered.length / ITEMS_PER_PAGE) || 1);
+        const pageItems = clustered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+        setGenerations(pageItems);
       } else {
         let countQuery = supabase.from('generations').select('*', {
           count: 'exact',
@@ -126,9 +187,9 @@ export const History = ({
         const { data, error } = await query;
         if (error) throw error;
 
-        let allGenerations = data || [];
+        let allGenerations: Generation[] = (data || []) as any;
 
-        // For 'all' filter on page 1, also fetch recent video jobs
+        // For 'all' filter on page 1, also fetch recent video jobs and cluster them
         if (filter === 'all' && currentPage === 1) {
           const { data: vData } = await (supabase as any)
             .from('video_generation_jobs')
@@ -136,20 +197,10 @@ export const History = ({
             .eq('user_id', profile.id)
             .eq('status', 'completed')
             .order('created_at', { ascending: false })
-            .limit(20);
+            .limit(100);
 
-          const mappedVideos = (vData || []).map((vj: any) => ({
-            id: vj.id,
-            generation_type: 'video',
-            input_data: { productName: 'Видеообложка', source_image: vj.product_image_url },
-            output_data: { video_url: vj.result_video_url, source_image: vj.product_image_url },
-            tokens_used: vj.tokens_cost,
-            status: 'completed',
-            created_at: vj.created_at,
-            updated_at: vj.updated_at || vj.created_at,
-          }));
-
-          allGenerations = [...allGenerations, ...mappedVideos].sort(
+          const clusteredVideos = clusterVideoJobs(vData || []);
+          allGenerations = [...(allGenerations as Generation[]), ...clusteredVideos].sort(
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
         }
@@ -472,15 +523,108 @@ export const History = ({
   };
 
 
-  const deleteVideoGeneration = async (jobId: string) => {
+  const openVideoEditDialog = (originalJobId: string, generationId: string, productImageUrl: string) => {
+    setVideoEditingData({ originalJobId, generationId, productImageUrl });
+    setVideoEditInstructions("");
+    setVideoEditDialogOpen(true);
+  };
+
+  const startVideoEditPolling = useCallback((jobId: string, generationId: string) => {
+    let attempts = 0;
+    const maxAttempts = 48; // 8 min at 10s
+
+    const interval = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(interval);
+        pollingRefs.current.delete(jobId);
+        setVideoEditingInProgress(prev => { const s = new Set(prev); s.delete(generationId); return s; });
+        toast({ title: "Таймаут", description: "Генерация видео заняла слишком много времени", variant: "destructive" });
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.functions.invoke('check-video-status', {
+          body: { job_id: jobId }
+        });
+        if (error) return;
+
+        if (data?.status === 'completed' && data?.video_url) {
+          clearInterval(interval);
+          pollingRefs.current.delete(jobId);
+
+          setGenerations(prev => prev.map(gen => {
+            if (gen.id !== generationId) return gen;
+            const currentVideos = gen.output_data?.videos || [];
+            const newVideo = {
+              id: jobId,
+              url: data.video_url,
+              tokens_cost: videoRegenPrice || 2,
+              created_at: new Date().toISOString(),
+              version_label: `Ред. (в. ${currentVideos.length})`,
+            };
+            return {
+              ...gen,
+              output_data: { ...gen.output_data, videos: [...currentVideos, newVideo] },
+              tokens_used: gen.tokens_used + (videoRegenPrice || 2),
+            };
+          }));
+
+          setExpandedIds(prev => { const next = new Set(prev); next.add(generationId); return next; });
+          setVideoEditingInProgress(prev => { const s = new Set(prev); s.delete(generationId); return s; });
+          onTokensUpdate?.();
+          toast({ title: "Редактирование завершено", description: "Новая версия видео добавлена" });
+        } else if (data?.status === 'failed') {
+          clearInterval(interval);
+          pollingRefs.current.delete(jobId);
+          setVideoEditingInProgress(prev => { const s = new Set(prev); s.delete(generationId); return s; });
+          toast({ title: "Ошибка", description: data?.refunded ? "Генерация видео не удалась. Токены возвращены." : "Не удалось создать видео", variant: "destructive" });
+        }
+      } catch {
+        // Ignore polling errors
+      }
+    }, 10000);
+
+    pollingRefs.current.set(jobId, interval);
+  }, [onTokensUpdate, toast, videoRegenPrice]);
+
+  const editVideoCard = async () => {
+    if (!videoEditingData || !videoEditInstructions.trim()) return;
+    const { originalJobId, generationId } = videoEditingData;
+    setVideoEditingInProgress(prev => new Set(prev).add(generationId));
+    setVideoEditDialogOpen(false);
+
     try {
+      const { data, error } = await supabase.functions.invoke('regenerate-video-job', {
+        body: { original_job_id: originalJobId, user_prompt: videoEditInstructions.trim() }
+      });
+      if (error) throw error;
+      if (data?.job_id) {
+        startVideoEditPolling(data.job_id, generationId);
+        onTokensUpdate?.();
+      } else {
+        throw new Error(data?.error || 'Ошибка');
+      }
+    } catch (error: any) {
+      toast({ title: "Ошибка", description: "Не удалось перегенерировать видео. Попробуйте позже", variant: "destructive" });
+      setVideoEditingInProgress(prev => { const s = new Set(prev); s.delete(generationId); return s; });
+    }
+  };
+
+  const deleteVideoGeneration = async (generation: Generation) => {
+    try {
+      const videoIds = (generation.output_data?.videos || []).map((v: any) => v.id).filter(Boolean);
+      if (videoIds.length > 1) {
+        const childIds = videoIds.slice(1);
+        await (supabase as any).from('video_generation_jobs').delete().in('id', childIds).eq('user_id', profile.id);
+      }
       const { error } = await (supabase as any)
         .from('video_generation_jobs')
         .delete()
-        .eq('id', jobId)
+        .eq('id', generation.id)
         .eq('user_id', profile.id);
       if (error) throw error;
-      setGenerations(prev => prev.filter(gen => gen.id !== jobId));
+      setGenerations(prev => prev.filter(gen => gen.id !== generation.id));
       toast({ title: "Удалено", description: "Видео успешно удалено" });
     } catch (error: any) {
       toast({ title: "Ошибка удаления", description: "Не удалось удалить видео", variant: "destructive" });
@@ -643,6 +787,54 @@ export const History = ({
         </EditDialogContent>
       </EditDialog>
 
+      {/* Video Edit Dialog */}
+      <EditDialog open={videoEditDialogOpen} onOpenChange={setVideoEditDialogOpen}>
+        <EditDialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
+          <EditDialogHeader className="space-y-2">
+            <EditDialogTitle className="flex items-center gap-2 text-lg">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <Video className="w-4 h-4 text-primary" />
+              </div>
+              Редактировать видеообложку
+            </EditDialogTitle>
+            <EditDialogDescription className="text-sm text-left">
+              Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом.
+            </EditDialogDescription>
+          </EditDialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="video-edit-instructions" className="font-semibold">
+                Что нужно изменить?
+              </Label>
+              <Textarea
+                id="video-edit-instructions"
+                placeholder="Например: добавить плавное вращение товара, изменить освещение..."
+                value={videoEditInstructions}
+                onChange={e => { if (e.target.value.length <= 300) setVideoEditInstructions(e.target.value); }}
+                maxLength={300}
+                className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50"
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                <span>Стоимость: <span className="font-semibold">{videoRegenPrice || 2} {(videoRegenPrice || 2) === 1 ? 'токен' : 'токена'}</span></span>
+              </div>
+              <span className={videoEditInstructions.length >= 300 ? 'text-destructive' : ''}>{videoEditInstructions.length}/300</span>
+            </div>
+          </div>
+          <EditDialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setVideoEditDialogOpen(false)} className="rounded-lg">
+              Отмена
+            </Button>
+            <Button onClick={editVideoCard} disabled={!videoEditInstructions.trim() || videoEditInstructions.length > 300} className="rounded-lg gap-2">
+              <Sparkles className="w-4 h-4" />
+              Начать редактирование
+            </Button>
+          </EditDialogFooter>
+        </EditDialogContent>
+      </EditDialog>
+
       {/* Header */}
       <motion.div initial={{
       opacity: 0,
@@ -721,6 +913,8 @@ export const History = ({
         </motion.div> : <div className="grid gap-4">
           {generations.map((generation, index) => {
             const isCardEditing = generation.generation_type === 'cards' && generation.output_data?.images?.some((img: any) => editingInProgress.has(img.image_url));
+            const isVideoEditing = generation.generation_type === 'video' && videoEditingInProgress.has(generation.id);
+            const isEditing = isCardEditing || isVideoEditing;
             return <motion.div key={generation.id} initial={{
         opacity: 0,
         y: 20
@@ -732,7 +926,7 @@ export const History = ({
         delay: 0.1 + index * 0.05
       }} className="group rounded-2xl border backdrop-blur-sm p-4 sm:p-6 transition-all relative overflow-hidden border-border/50 hover:border-primary/30 bg-card"
       >
-              {isCardEditing && (
+              {isEditing && (
                 <>
                   <div className="absolute inset-0 pointer-events-none z-0" style={{
                     background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -748,7 +942,7 @@ export const History = ({
                   </div>
                 </>
               )}
-              <div className={`flex flex-col gap-3 min-w-0 overflow-hidden ${isCardEditing ? 'relative z-[1]' : ''}`}>
+              <div className={`flex flex-col gap-3 min-w-0 overflow-hidden ${isEditing ? 'relative z-[1]' : ''}`}>
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 min-w-0">
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -771,6 +965,11 @@ export const History = ({
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                           <Play className="w-5 h-5 text-white" />
                         </div>
+                        {(generation.output_data?.videos?.length || 0) > 1 && (
+                          <div className="absolute top-0.5 right-0.5 bg-primary/90 text-primary-foreground text-[9px] px-1 py-0.5 rounded font-medium leading-none">
+                            {generation.output_data.videos.length}
+                          </div>
+                        )}
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
@@ -845,6 +1044,28 @@ export const History = ({
                         <span className="hidden sm:inline">Ред.</span>
                       </Button>
                     )}
+                    {generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
+                      <Button 
+                        onClick={() => toggleExpanded(generation.id)} 
+                        size="sm" 
+                        variant="outline"
+                      >
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
+                        {expandedIds.has(generation.id) ? 'Свернуть' : 'Все видео'}
+                      </Button>
+                    )}
+                    {generation.generation_type === 'video' && (
+                      <Button 
+                        onClick={() => openVideoEditDialog(generation.id, generation.id, generation.output_data?.source_image)}
+                        size="sm" 
+                        variant="outline"
+                        disabled={videoEditingInProgress.has(generation.id)}
+                        title={`Редактировать (${videoRegenPrice || 2} токенов)`}
+                      >
+                        {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 sm:mr-1" />}
+                        <span className="hidden sm:inline">Ред.</span>
+                      </Button>
+                    )}
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
                       {downloadingIds.has(generation.id) ? <>
                           <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
@@ -862,7 +1083,7 @@ export const History = ({
                           <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
-                    <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation.id) : deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                    <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation) : deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -927,6 +1148,63 @@ export const History = ({
                         )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
                           {getCardTypeLabel(img.type) || `Карточка ${imgIndex + 1}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Expanded videos grid */}
+                {expandedIds.has(generation.id) && generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
+                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 pt-3 border-t border-border/30">
+                    {generation.output_data.videos.map((video: any, vidIndex: number) => (
+                      <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4]">
+                        {generation.output_data?.source_image ? (
+                          <img src={generation.output_data.source_image} alt={`Видео ${vidIndex + 1}`} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                            <Video className="w-8 h-8 text-primary" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/vid:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
+                            <Play className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
+                            disabled={videoEditingInProgress.has(generation.id)}
+                            onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
+                            {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
+                            onClick={async (e) => { 
+                              e.stopPropagation(); 
+                              if (video.url) {
+                                try {
+                                  const response = await fetch(video.url);
+                                  const blob = await response.blob();
+                                  const a = document.createElement('a');
+                                  a.href = URL.createObjectURL(blob);
+                                  a.download = `video-cover-${vidIndex + 1}.mp4`;
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  document.body.removeChild(a);
+                                  URL.revokeObjectURL(a.href);
+                                } catch {
+                                  window.open(video.url, '_blank');
+                                }
+                              }
+                            }}>
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        {video.version_label && (
+                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded font-medium">
+                            {video.version_label}
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center">
+                          {video.version_label || 'Оригинал'}
                         </div>
                       </div>
                     ))}
