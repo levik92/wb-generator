@@ -675,17 +675,9 @@ export const History = ({
   return <div className="space-y-6 w-full min-w-0">
       {/* Image Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl p-0 bg-black/90 border-white/10">
+        <DialogContent className="max-w-4xl p-0 bg-black/90 border-white/10 [&>button.absolute]:bg-white/20 [&>button.absolute]:text-white [&>button.absolute]:hover:bg-white/30">
           <DialogTitle className="sr-only">Просмотр изображения</DialogTitle>
           <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
-              onClick={() => setPreviewOpen(false)}
-            >
-              <X className="w-5 h-5" />
-            </Button>
             {previewImage && (
               <img 
                 src={previewImage} 
@@ -699,17 +691,9 @@ export const History = ({
 
       {/* Video Preview Dialog */}
       <Dialog open={videoPreviewOpen} onOpenChange={setVideoPreviewOpen}>
-        <DialogContent className="max-w-lg p-0 bg-black/90 border-white/10">
+        <DialogContent className="max-w-lg p-0 bg-black/90 border-white/10 [&>button.absolute]:bg-white/20 [&>button.absolute]:text-white [&>button.absolute]:hover:bg-white/30">
           <DialogTitle className="sr-only">Просмотр видео</DialogTitle>
           <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
-              onClick={() => setVideoPreviewOpen(false)}
-            >
-              <X className="w-5 h-5" />
-            </Button>
             {videoPreviewUrl && (
               <video src={videoPreviewUrl} controls autoPlay muted loop className="w-full rounded-t-lg" style={{ aspectRatio: "3/4" }} />
             )}
