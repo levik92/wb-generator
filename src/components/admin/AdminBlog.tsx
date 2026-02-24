@@ -189,7 +189,7 @@ export const AdminBlog = () => {
       console.error("Error uploading image:", error);
       toast({
         title: "Ошибка загрузки",
-        description: error.message || "Не удалось загрузить изображение",
+        description: "Не удалось загрузить изображение",
         variant: "destructive",
       });
     } finally {
@@ -270,7 +270,7 @@ export const AdminBlog = () => {
       console.error("Error saving post:", error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось сохранить статью",
+        description: "Не удалось сохранить статью",
         variant: "destructive",
       });
     } finally {

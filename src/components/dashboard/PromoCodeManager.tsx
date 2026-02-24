@@ -101,7 +101,7 @@ export const PromoCodeManager = () => {
       console.error('Error saving promocode:', error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось сохранить промокод",
+        description: "Не удалось сохранить промокод",
         variant: "destructive"
       });
     }

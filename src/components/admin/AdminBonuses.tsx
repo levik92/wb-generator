@@ -210,7 +210,7 @@ export const AdminBonuses = () => {
       console.error('Error saving program:', error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось сохранить программу",
+        description: "Не удалось сохранить программу",
         variant: "destructive"
       });
     }
@@ -276,7 +276,7 @@ export const AdminBonuses = () => {
       console.error('Error approving:', error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось одобрить заявку",
+        description: "Не удалось одобрить заявку",
         variant: "destructive"
       });
     }
@@ -303,7 +303,7 @@ export const AdminBonuses = () => {
       console.error('Error rejecting:', error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось отклонить заявку",
+        description: "Не удалось отклонить заявку",
         variant: "destructive"
       });
     }

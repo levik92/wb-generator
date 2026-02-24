@@ -154,7 +154,7 @@ const Dashboard = () => {
     } catch (error: any) {
       toast({
         title: "Ошибка загрузки профиля",
-        description: error.message,
+        description: "Не удалось загрузить данные профиля",
         variant: "destructive"
       });
     } finally {
@@ -245,7 +245,7 @@ const Dashboard = () => {
     } catch (error: any) {
       toast({
         title: "Ошибка выхода",
-        description: error.message,
+        description: "Не удалось выйти из системы. Попробуйте снова",
         variant: "destructive"
       });
     }

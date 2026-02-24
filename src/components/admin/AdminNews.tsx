@@ -148,7 +148,7 @@ export const AdminNews = () => {
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось сохранить новость",
         variant: "destructive",
       });
     }
@@ -211,7 +211,7 @@ export const AdminNews = () => {
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось опубликовать новость",
         variant: "destructive",
       });
     } finally {
@@ -237,7 +237,7 @@ export const AdminNews = () => {
     } catch (error: any) {
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось удалить новость",
         variant: "destructive",
       });
     }

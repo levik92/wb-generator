@@ -95,7 +95,7 @@ export default function AdminAnalytics() {
       toast(`Экспорт ${type === 'users' ? 'пользователей' : type === 'payments' ? 'платежей' : 'генераций'} завершен!`);
     } catch (error: any) {
       console.error('Export error:', error);
-      toast(`Ошибка экспорта: ${error.message}`, { style: { background: '#ef4444' } });
+      toast("Не удалось экспортировать данные. Попробуйте позже", { style: { background: '#ef4444' } });
     } finally {
       setExporting(false);
     }

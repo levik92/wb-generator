@@ -156,7 +156,7 @@ export function AdminUsers({
       }, 300);
     } catch (error: any) {
       console.error('Error toggling user block:', error);
-      toast({ title: "Ошибка", description: error.message || "Не удалось изменить статус пользователя", variant: "destructive" });
+      toast({ title: "Ошибка", description: "Не удалось изменить статус пользователя", variant: "destructive" });
     }
   };
 

@@ -164,7 +164,7 @@ export const AdminPartners = () => {
       console.error("Error approving withdrawal:", error);
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось обработать вывод средств",
         variant: "destructive"
       });
     }
@@ -222,7 +222,7 @@ export const AdminPartners = () => {
       console.error("Error processing manual payment:", error);
       toast({
         title: "Ошибка",
-        description: error.message,
+        description: "Не удалось обработать выплату",
         variant: "destructive"
       });
     }

@@ -66,7 +66,7 @@ export const WithdrawalButton = ({
       console.error("Error creating withdrawal:", error);
       toast({
         title: "Ошибка",
-        description: error.message || "Не удалось создать запрос на вывод",
+        description: "Не удалось создать запрос на вывод. Попробуйте позже",
         variant: "destructive"
       });
     } finally {

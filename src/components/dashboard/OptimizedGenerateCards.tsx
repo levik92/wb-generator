@@ -291,7 +291,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
           console.error('Reference upload error:', uploadError);
           toast({
             title: "Ошибка загрузки референса",
-            description: `Не удалось загрузить референс: ${uploadError.message}`,
+            description: "Не удалось загрузить референс. Попробуйте снова",
             variant: "destructive"
           });
         } else {
@@ -333,7 +333,7 @@ export function OptimizedGenerateCards({ profile, onTokensUpdate }: OptimizedGen
       setIsGenerating(false);
       toast({
         title: "Ошибка генерации",
-        description: error.message || "Произошла ошибка при генерации карточек",
+        description: "Не удалось запустить генерацию. Попробуйте позже",
         variant: "destructive",
       });
     }

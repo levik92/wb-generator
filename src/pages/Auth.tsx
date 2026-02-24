@@ -201,7 +201,7 @@ const Auth = () => {
       setCaptchaToken(null);
       captchaRef.current?.resetCaptcha();
     } catch (error: any) {
-      toast({ title: "Ошибка регистрации", description: error.message, variant: "destructive" });
+      toast({ title: "Ошибка регистрации", description: "Не удалось создать аккаунт. Попробуйте позже", variant: "destructive" });
       setCaptchaToken(null);
       captchaRef.current?.resetCaptcha();
     } finally {
@@ -287,7 +287,7 @@ const Auth = () => {
       captchaRef.current?.resetCaptcha();
       setActiveTab("signin");
     } catch (error: any) {
-      toast({ title: "Ошибка", description: error.message, variant: "destructive" });
+      toast({ title: "Ошибка", description: "Не удалось отправить письмо. Попробуйте позже", variant: "destructive" });
       setCaptchaToken(null);
       captchaRef.current?.resetCaptcha();
     } finally {
@@ -339,7 +339,7 @@ const Auth = () => {
         setActiveTab("reset");
         return;
       }
-      toast({ title: "Ошибка", description: error.message, variant: "destructive" });
+      toast({ title: "Ошибка", description: "Не удалось обновить пароль. Попробуйте позже", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -372,7 +372,7 @@ const Auth = () => {
 
       if (error) throw error;
     } catch (error: any) {
-      toast({ title: "Ошибка", description: error.message, variant: "destructive" });
+      toast({ title: "Ошибка", description: "Не удалось войти через Google. Попробуйте позже", variant: "destructive" });
       setLoading(false);
     }
   };
