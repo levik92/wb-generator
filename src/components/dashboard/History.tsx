@@ -128,7 +128,7 @@ export const History = ({
         url: j.result_video_url,
         tokens_cost: j.tokens_cost,
         created_at: j.created_at,
-        version_label: idx === 0 ? null : `Ред. (в. ${idx})`,
+        version_label: idx === 0 ? null : `Ред. (v. ${idx})`,
       }));
 
       result.push({
@@ -561,7 +561,7 @@ export const History = ({
               url: data.video_url,
               tokens_cost: videoRegenPrice || 2,
               created_at: new Date().toISOString(),
-              version_label: `Ред. (в. ${currentVideos.length})`,
+              version_label: `Ред. (v. ${currentVideos.length})`,
             };
             return {
               ...gen,
@@ -965,11 +965,6 @@ export const History = ({
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                           <Play className="w-5 h-5 text-white" />
                         </div>
-                        {(generation.output_data?.videos?.length || 0) > 1 && (
-                          <div className="absolute top-0.5 right-0.5 bg-primary/90 text-primary-foreground text-[9px] px-1 py-0.5 rounded font-medium leading-none">
-                            {generation.output_data.videos.length}
-                          </div>
-                        )}
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
@@ -996,6 +991,11 @@ export const History = ({
                         {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) > 1 && (
                           <Badge variant="outline" className="text-xs">
                             {generation.output_data.images.length} изобр.
+                          </Badge>
+                        )}
+                        {generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
+                          <Badge variant="outline" className="text-xs">
+                            {generation.output_data.videos.length} видео
                           </Badge>
                         )}
                       </div>
@@ -1142,8 +1142,12 @@ export const History = ({
                           </Button>
                         </div>
                         {img.is_edited && (
-                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded font-medium">
-                            Ред.
+                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
+                            {(() => {
+                              const editedImages = generation.output_data.images.filter((i: any) => i.is_edited);
+                              const editIndex = editedImages.indexOf(img);
+                              return `Ред. (v. ${editIndex + 1})`;
+                            })()}
                           </div>
                         )}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
@@ -1199,7 +1203,7 @@ export const History = ({
                           </Button>
                         </div>
                         {video.version_label && (
-                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded font-medium">
+                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
                             {video.version_label}
                           </div>
                         )}
