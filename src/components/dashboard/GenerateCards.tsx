@@ -1946,12 +1946,12 @@ export const GenerateCards = ({
                                 <div className="flex items-center gap-2 min-w-0">
                                   <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0 border border-border/30" />
                                   <span className="truncate">{variants[currentVariantIdx]?.label}</span>
+                                  <Badge variant="secondary" className="text-[10px] px-1 py-0 shrink-0">{variants.length}</Badge>
                                 </div>
-                                <Badge variant="secondary" className="text-[10px] px-1 py-0 shrink-0">{variants.length}</Badge>
                                 <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-56 p-1.5" align="start">
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1.5" align="start">
                               <div className="space-y-0.5 max-h-60 overflow-y-auto">
                                 {variants.map((v, vIdx) => (
                                   <button
@@ -1960,12 +1960,12 @@ export const GenerateCards = ({
                                       setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
                                       setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
                                     }}
-                                    className={`flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground ${currentVariantIdx === vIdx ? 'bg-accent/40 font-medium' : ''}`}
+                                    className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground group ${currentVariantIdx === vIdx ? 'bg-accent/25 font-medium' : ''}`}
                                   >
                                     <img src={v.url} alt={v.label} className="w-8 h-10 rounded-sm object-cover shrink-0 border border-border/40" />
                                     <span className="truncate">{v.label}</span>
                                     {currentVariantIdx === vIdx && (
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0 ml-auto" />
+                                      <CheckCircle2 className="w-4 h-4 text-primary group-hover:text-white shrink-0 ml-auto mr-1" />
                                     )}
                                   </button>
                                 ))}
