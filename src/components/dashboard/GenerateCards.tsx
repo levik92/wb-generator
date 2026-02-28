@@ -13,6 +13,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown } from "lucide-react";
@@ -1838,29 +1839,41 @@ export const GenerateCards = ({
                       <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
                       </p>
-                      {/* Variant selector dropdown */}
+                      {/* Variant selector with thumbnails */}
                       {variants.length > 1 && (
                         <div className="mt-2">
-                          <Select 
-                            value={String(currentVariantIdx)} 
-                            onValueChange={(val) => {
-                              const idx = parseInt(val);
-                              setSelectedVariant(prev => ({ ...prev, [index]: idx }));
-                              // Update displayed image to selected variant
-                              setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: variants[idx].url } : img));
-                            }}
-                          >
-                            <SelectTrigger className="h-7 text-xs w-full sm:w-auto min-w-[140px] bg-background/50">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {variants.map((v, vIdx) => (
-                                <SelectItem key={vIdx} value={String(vIdx)} className="text-xs">
-                                  {v.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-8 text-xs w-full sm:w-auto min-w-[160px] bg-background/50 justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0 border border-border/30" />
+                                  <span className="truncate">{variants[currentVariantIdx]?.label}</span>
+                                </div>
+                                <Badge variant="secondary" className="text-[10px] px-1 py-0 shrink-0">{variants.length}</Badge>
+                                <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-56 p-1.5" align="start">
+                              <div className="space-y-0.5 max-h-60 overflow-y-auto">
+                                {variants.map((v, vIdx) => (
+                                  <button
+                                    key={vIdx}
+                                    onClick={() => {
+                                      setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
+                                      setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
+                                    }}
+                                    className={`flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-accent ${currentVariantIdx === vIdx ? 'bg-accent/70 font-medium' : ''}`}
+                                  >
+                                    <img src={v.url} alt={v.label} className="w-8 h-10 rounded-sm object-cover shrink-0 border border-border/40" />
+                                    <span className="truncate">{v.label}</span>
+                                    {currentVariantIdx === vIdx && (
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0 ml-auto" />
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       )}
                     </div>

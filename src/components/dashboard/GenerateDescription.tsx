@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap, Settings } from "lucide-react";
+import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap, Settings, Clock } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { LightningLoader } from "@/components/ui/lightning-loader";
+
 interface Profile {
   id: string;
   email: string;
@@ -20,10 +22,14 @@ interface Profile {
   wb_connected: boolean;
   referral_code: string;
 }
+
 interface GenerateDescriptionProps {
   profile: Profile;
   onTokensUpdate: () => void;
 }
+
+const ESTIMATED_TIME_SEC = 30;
+
 export const GenerateDescription = ({
   profile,
   onTokensUpdate
@@ -36,20 +42,131 @@ export const GenerateDescription = ({
   const [keywords, setKeywords] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
-  const {
-    toast
-  } = useToast();
-  const {
-    price: descriptionPrice,
-    isLoading: priceLoading
-  } = useGenerationPrice('description_generation');
-  const {
-    data: activeModel,
-    isLoading: modelLoading
-  } = useActiveAiModel();
+  const [currentGenerationId, setCurrentGenerationId] = useState<string | null>(null);
+  const [smoothProgress, setSmoothProgress] = useState(0);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
+  const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
+
+  const { toast } = useToast();
+  const { price: descriptionPrice, isLoading: priceLoading } = useGenerationPrice('description_generation');
+  const { data: activeModel, isLoading: modelLoading } = useActiveAiModel();
+
+  // Poll for generation result
+  const pollGeneration = useCallback(async (generationId: string, startTime: number) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data, error } = await supabase
+          .from('generations')
+          .select('status, output_data')
+          .eq('id', generationId)
+          .single();
+
+        if (error) {
+          console.error('Poll error:', error);
+          return;
+        }
+
+        if (data.status === 'completed' && data.output_data) {
+          clearInterval(pollInterval);
+          const outputData = data.output_data as any;
+          setGeneratedText(outputData.description || '');
+          setGenerating(false);
+          setCurrentGenerationId(null);
+          setGenerationStartTime(null);
+          setSmoothProgress(100);
+          onTokensUpdate();
+          toast({
+            title: "Описание создано!",
+            description: "Описание товара успешно сгенерировано"
+          });
+        } else if (data.status === 'failed') {
+          clearInterval(pollInterval);
+          const outputData = data.output_data as any;
+          setGenerating(false);
+          setCurrentGenerationId(null);
+          setGenerationStartTime(null);
+          setSmoothProgress(0);
+          onTokensUpdate();
+          toast({
+            title: "Ошибка генерации",
+            description: outputData?.error || "Не удалось создать описание. Попробуйте позже",
+            variant: "destructive"
+          });
+        }
+      } catch (err) {
+        console.error('Poll exception:', err);
+      }
+    }, 2000);
+
+    return () => clearInterval(pollInterval);
+  }, [onTokensUpdate, toast]);
+
+  // Check for active description generation on mount
+  useEffect(() => {
+    if (hasCheckedJobs) return;
+
+    const checkActiveGenerations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('generations')
+          .select('id, created_at')
+          .eq('user_id', profile.id)
+          .eq('generation_type', 'description')
+          .eq('status', 'processing')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error || !data || data.length === 0) {
+          setHasCheckedJobs(true);
+          return;
+        }
+
+        const activeGen = data[0];
+        const createdAt = new Date(activeGen.created_at).getTime();
+        const elapsed = (Date.now() - createdAt) / 1000;
+
+        // If older than 5 minutes, it's probably stale
+        if (elapsed > 300) {
+          setHasCheckedJobs(true);
+          return;
+        }
+
+        // Resume polling
+        console.log('[GenerateDescription] Resuming active generation:', activeGen.id);
+        setGenerating(true);
+        setCurrentGenerationId(activeGen.id);
+        setGenerationStartTime(createdAt);
+        pollGeneration(activeGen.id, createdAt);
+      } catch (err) {
+        console.error('Error checking active generations:', err);
+      } finally {
+        setHasCheckedJobs(true);
+      }
+    };
+
+    checkActiveGenerations();
+  }, [profile.id, hasCheckedJobs, pollGeneration]);
+
+  // Smooth progress timer
+  useEffect(() => {
+    if (!generating || !generationStartTime) return;
+
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - generationStartTime) / 1000;
+      const progress = Math.min((elapsed / ESTIMATED_TIME_SEC) * 95, 95);
+      setSmoothProgress(progress);
+      const remaining = Math.max(ESTIMATED_TIME_SEC - elapsed, 0);
+      setEstimatedTimeRemaining(Math.ceil(remaining));
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [generating, generationStartTime]);
+
   const canGenerate = () => {
     return productName.trim() && productName.trim().length <= 150 && productName.trim().length >= 3 && keywords.trim().length <= 1200 && profile.tokens_balance >= descriptionPrice && !priceLoading;
   };
+
   const getGuardMessage = () => {
     if (!productName.trim()) return "Введите название товара";
     if (productName.trim().length > 150) return "Название товара должно быть не более 150 символов";
@@ -58,6 +175,7 @@ export const GenerateDescription = ({
     if (profile.tokens_balance < descriptionPrice) return `Недостаточно токенов (нужно ${descriptionPrice})`;
     return null;
   };
+
   const simulateGeneration = async () => {
     if (!activeModel) {
       toast({
@@ -67,17 +185,20 @@ export const GenerateDescription = ({
       });
       return;
     }
+
     setGenerating(true);
     setGeneratedText("");
+    setSmoothProgress(0);
+    const startTime = Date.now();
+    setGenerationStartTime(startTime);
+
     try {
       const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
       const keywordsList = keywords.split(',').map(k => k.trim()).filter(Boolean);
       const functionName = getEdgeFunctionName('generate-description', activeModel);
       console.log('[GenerateDescription] Active model:', activeModel, '| Function:', functionName);
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke(functionName, {
+
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
           productName,
           category: category || 'товар',
@@ -86,26 +207,38 @@ export const GenerateDescription = ({
           userId: profile.id
         }
       });
+
       if (error) throw error;
-      if (data.error) {
-        throw new Error(data.error);
+      if (data.error) throw new Error(data.error);
+
+      if (data.generationId) {
+        // Background mode: poll for result
+        setCurrentGenerationId(data.generationId);
+        pollGeneration(data.generationId, startTime);
+      } else if (data.description) {
+        // Synchronous fallback
+        setGeneratedText(data.description);
+        setGenerating(false);
+        setGenerationStartTime(null);
+        setSmoothProgress(100);
+        onTokensUpdate();
+        toast({
+          title: "Описание создано!",
+          description: "Описание товара успешно сгенерировано"
+        });
       }
-      setGeneratedText(data.description);
-      onTokensUpdate();
-      toast({
-        title: "Описание создано!",
-        description: "Описание товара успешно сгенерировано"
-      });
     } catch (error: any) {
+      setGenerating(false);
+      setGenerationStartTime(null);
+      setSmoothProgress(0);
       toast({
         title: "Ошибка генерации",
         description: "Не удалось создать описание. Попробуйте позже",
         variant: "destructive"
       });
-    } finally {
-      setGenerating(false);
     }
   };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedText);
     toast({
@@ -113,23 +246,17 @@ export const GenerateDescription = ({
       description: "Описание скопировано в буфер обмена"
     });
   };
+
   const downloadAsFile = (format: 'txt' | 'docx' | 'pdf') => {
     toast({
       title: "Скачивание начато",
       description: `Файл в формате ${format.toUpperCase()} будет скачан`
     });
   };
+
   return <div className="space-y-6 max-w-full overflow-hidden">
       {/* Header */}
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      duration: 0.5
-    }} className="flex items-center gap-3">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-center gap-3">
         <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
           <FileText className="w-6 h-6 text-primary" />
         </div>
@@ -140,16 +267,7 @@ export const GenerateDescription = ({
       </motion.div>
 
       {/* Feature Card */}
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      duration: 0.5,
-      delay: 0.1
-    }} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6">
         <div className="space-y-4">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
@@ -175,16 +293,7 @@ export const GenerateDescription = ({
 
       {/* Input Form */}
       <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
-        <motion.div initial={{
-        opacity: 0,
-        x: -20
-      }} animate={{
-        opacity: 1,
-        x: 0
-      }} transition={{
-        duration: 0.5,
-        delay: 0.2
-      }} className="relative overflow-hidden rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="relative overflow-hidden rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
           {/* Animated gradient backgrounds during generation */}
           {generating && (
             <div className="absolute inset-0 pointer-events-none" style={{
@@ -200,7 +309,7 @@ export const GenerateDescription = ({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="productName">Название товара</Label>
-              <Input id="productName" placeholder="Например: Беспроводные наушники AirPods" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} className="bg-background/50 border-border/50 focus:border-primary/50" />
+              <Input id="productName" placeholder="Например: Беспроводные наушники AirPods" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className="bg-background/50 border-border/50 focus:border-primary/50" />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{productName.length}/150 символов</span>
                 {productName.length > 140 && <span className="text-amber-500">Осталось: {150 - productName.length}</span>}
@@ -210,9 +319,9 @@ export const GenerateDescription = ({
             <div className="space-y-2">
               <Label>Ссылки на конкурентов <span className="text-muted-foreground">(необязательно)</span></Label>
               <div className="space-y-2">
-                <Input placeholder="Ссылка на конкурента 1" value={competitor1} onChange={e => setCompetitor1(e.target.value)} className="bg-background/50 border-border/50 focus:border-primary/50" />
-                <Input placeholder="Ссылка на конкурента 2" value={competitor2} onChange={e => setCompetitor2(e.target.value)} className="bg-background/50 border-border/50 focus:border-primary/50" />
-                <Input placeholder="Ссылка на конкурента 3" value={competitor3} onChange={e => setCompetitor3(e.target.value)} className="bg-background/50 border-border/50 focus:border-primary/50" />
+                <Input placeholder="Ссылка на конкурента 1" value={competitor1} onChange={e => setCompetitor1(e.target.value)} disabled={generating} className="bg-background/50 border-border/50 focus:border-primary/50" />
+                <Input placeholder="Ссылка на конкурента 2" value={competitor2} onChange={e => setCompetitor2(e.target.value)} disabled={generating} className="bg-background/50 border-border/50 focus:border-primary/50" />
+                <Input placeholder="Ссылка на конкурента 3" value={competitor3} onChange={e => setCompetitor3(e.target.value)} disabled={generating} className="bg-background/50 border-border/50 focus:border-primary/50" />
               </div>
               <p className="text-xs text-muted-foreground">
                 WB Генератор проанализирует описания конкурентов и выделит ключевые слова
@@ -221,31 +330,53 @@ export const GenerateDescription = ({
 
             <div className="space-y-2">
               <Label htmlFor="keywords">Ключевые слова</Label>
-              <Textarea id="keywords" placeholder="Введите ключевые слова через запятую: Ключ1, ключ2, ключ3" value={keywords} onChange={e => setKeywords(e.target.value.slice(0, 1200))} maxLength={1200} className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[80px] resize-none" rows={3} />
+              <Textarea id="keywords" placeholder="Введите ключевые слова через запятую: Ключ1, ключ2, ключ3" value={keywords} onChange={e => setKeywords(e.target.value.slice(0, 1200))} maxLength={1200} disabled={generating} className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[80px] resize-none" rows={3} />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Разделяйте запятыми (необязательно)</span>
                 <span>{keywords.length}/1200</span>
               </div>
             </div>
 
-            <Button onClick={simulateGeneration} disabled={!canGenerate() || generating} className="gap-2 w-full sm:w-auto" size="lg">
-              {generating ? <span className="flex items-center gap-3">
-                  <LightningLoader size="sm" className="text-white fill-white" />
-                  <span>Генерирую описание...</span>
-                </span> : <>
-                  <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">{generatedText ? 'Сгенерировать еще' : 'Сгенерировать описание'}</span>
-                  <span className="sm:hidden">Сгенерировать</span>
-                  <Badge variant="secondary" className="ml-1">
-                    {priceLoading ? '...' : descriptionPrice} токенов
-                  </Badge>
-                </>}
-            </Button>
+            {/* Generation progress */}
+            {generating && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-3">
+                  <LightningLoader size="sm" className="text-primary fill-primary" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">Генерирую описание...</span>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3" />
+                        <span>~{estimatedTimeRemaining > 0 ? `${estimatedTimeRemaining} сек` : 'почти готово'}</span>
+                      </div>
+                    </div>
+                    <Progress value={smoothProgress} className="h-2" />
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed p-3 rounded-xl bg-muted/20 backdrop-blur-sm">
+                  <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary animate-pulse" />
+                  <p><strong>Важно:</strong> Генерация идёт в фоне. Вы можете переключиться на другую вкладку — результат появится автоматически.</p>
+                </div>
+              </div>
+            )}
 
-            <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed mt-1">
-              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              <p>Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токенов</strong>. Описание генерирует нейросеть на основе введённых данных.</p>
-            </div>
+            {!generating && (
+              <Button onClick={simulateGeneration} disabled={!canGenerate() || generating} className="gap-2 w-full sm:w-auto" size="lg">
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">{generatedText ? 'Сгенерировать еще' : 'Сгенерировать описание'}</span>
+                <span className="sm:hidden">Сгенерировать</span>
+                <Badge variant="secondary" className="ml-1">
+                  {priceLoading ? '...' : descriptionPrice} токенов
+                </Badge>
+              </Button>
+            )}
+
+            {!generating && (
+              <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed mt-1">
+                <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <p>Стоимость: <strong>{priceLoading ? '...' : descriptionPrice} токенов</strong>. Описание генерирует нейросеть на основе введённых данных.</p>
+              </div>
+            )}
             
             {!canGenerate() && !generating && (
               <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
@@ -255,27 +386,11 @@ export const GenerateDescription = ({
                 </AlertDescription>
               </Alert>
             )}
-            
-            {generating && (
-              <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
-                <p><strong>Важно:</strong> Генерация может занять несколько минут. Не закрывайте страницу.</p>
-              </div>
-            )}
           </div>
         </motion.div>
 
         {/* Generated Result */}
-        <motion.div initial={{
-        opacity: 0,
-        x: 20
-      }} animate={{
-        opacity: 1,
-        x: 0
-      }} transition={{
-        duration: 0.5,
-        delay: 0.3
-      }} className="rounded-2xl border border-border/50 p-6 space-y-4 shadow-sm bg-card">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="rounded-2xl border border-border/50 p-6 space-y-4 shadow-sm bg-card">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><FileText className="w-4 h-4 shrink-0" />Готовое описание</h3>
@@ -308,8 +423,18 @@ export const GenerateDescription = ({
               </div>
             </div> : <div className="h-64 flex items-center justify-center rounded-xl border border-dashed border-border/50 bg-background/30">
               <div className="text-center text-muted-foreground">
-                <FileText className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Описание появится после генерации</p>
+                {generating ? (
+                  <>
+                    <LightningLoader size="md" className="mx-auto mb-3 text-primary fill-primary" />
+                    <p className="text-sm font-medium">Генерация описания...</p>
+                    <p className="text-xs mt-1">Результат появится здесь автоматически</p>
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">Описание появится после генерации</p>
+                  </>
+                )}
               </div>
             </div>}
         </motion.div>
