@@ -1864,25 +1864,15 @@ export const GenerateCards = ({
 
       {/* Image Preview Dialog — same style as History */}
       <Dialog open={!!fullscreenImage} onOpenChange={(open) => { if (!open) setFullscreenImage(null); }}>
-        <DialogContent className="max-w-4xl p-0 bg-black/90 border-white/10">
+        <DialogContent className="max-w-4xl p-0 bg-black/90 border-white/10 [&>button]:bg-white/20 [&>button]:rounded-lg [&>button]:w-7 [&>button]:h-7 [&>button]:text-white [&>button]:hover:bg-white/30">
           <DialogTitle className="sr-only">Просмотр изображения</DialogTitle>
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-10 text-white hover:bg-white/20"
-              onClick={() => setFullscreenImage(null)}
-            >
-              <X className="w-5 h-5" />
-            </Button>
-            {fullscreenImage && (
-              <img 
-                src={fullscreenImage.url} 
-                alt="Превью карточки" 
-                className="w-full h-auto max-h-[80vh] object-contain"
-              />
-            )}
-          </div>
+          {fullscreenImage && (
+            <img 
+              src={fullscreenImage.url} 
+              alt="Превью карточки" 
+              className="w-full h-auto max-h-[80vh] object-contain"
+            />
+          )}
         </DialogContent>
       </Dialog>
 
