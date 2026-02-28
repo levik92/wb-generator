@@ -6,13 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap, Settings, Clock } from "lucide-react";
+import { Info, FileText, Loader2, AlertCircle, Copy, Download, Sparkles, TrendingUp, Zap, Settings, Clock, AlertTriangle } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
-import { LightningLoader } from "@/components/ui/lightning-loader";
 
 interface Profile {
   id: string;
@@ -47,10 +46,13 @@ export const GenerateDescription = ({
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
   const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
+  const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
 
   const { toast } = useToast();
   const { price: descriptionPrice, isLoading: priceLoading } = useGenerationPrice('description_generation');
   const { data: activeModel, isLoading: modelLoading } = useActiveAiModel();
+
+  const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
 
   // Poll for generation result
   const pollGeneration = useCallback(async (generationId: string, startTime: number) => {
@@ -137,6 +139,9 @@ export const GenerateDescription = ({
         setGenerating(true);
         setCurrentGenerationId(activeGen.id);
         setGenerationStartTime(createdAt);
+        const remaining = Math.max(ESTIMATED_TIME_SEC - elapsed, 0);
+        setEstimatedTimeRemaining(Math.ceil(remaining));
+        setSmoothProgress(Math.min((elapsed / ESTIMATED_TIME_SEC) * 95, 95));
         pollGeneration(activeGen.id, createdAt);
       } catch (err) {
         console.error('Error checking active generations:', err);
@@ -148,20 +153,45 @@ export const GenerateDescription = ({
     checkActiveGenerations();
   }, [profile.id, hasCheckedJobs, pollGeneration]);
 
-  // Smooth progress timer
+  // Smooth progress bar animation - same approach as card generation
   useEffect(() => {
     if (!generating || !generationStartTime) return;
 
     const interval = setInterval(() => {
-      const elapsed = (Date.now() - generationStartTime) / 1000;
-      const progress = Math.min((elapsed / ESTIMATED_TIME_SEC) * 95, 95);
-      setSmoothProgress(progress);
-      const remaining = Math.max(ESTIMATED_TIME_SEC - elapsed, 0);
-      setEstimatedTimeRemaining(Math.ceil(remaining));
-    }, 500);
+      setSmoothProgress(prev => {
+        const elapsed = (Date.now() - generationStartTime) / 1000;
+        const targetProgress = Math.min((elapsed / ESTIMATED_TIME_SEC) * 95, 95);
+        if (prev >= targetProgress) return targetProgress;
+        return Math.min(prev + 0.2, targetProgress);
+      });
+    }, 100);
 
     return () => clearInterval(interval);
   }, [generating, generationStartTime]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!generating || estimatedTimeRemaining <= 0) return;
+    const interval = setInterval(() => {
+      setEstimatedTimeRemaining(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [generating, estimatedTimeRemaining]);
+
+  // Cycle through waiting messages after timer ends
+  useEffect(() => {
+    if (!generating || estimatedTimeRemaining > 0) {
+      setWaitingMessageIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setWaitingMessageIndex(prev => {
+        if (prev >= WAITING_MESSAGES.length - 1) return prev;
+        return prev + 1;
+      });
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [generating, estimatedTimeRemaining]);
 
   const canGenerate = () => {
     return productName.trim() && productName.trim().length <= 150 && productName.trim().length >= 3 && keywords.trim().length <= 1200 && profile.tokens_balance >= descriptionPrice && !priceLoading;
@@ -189,8 +219,10 @@ export const GenerateDescription = ({
     setGenerating(true);
     setGeneratedText("");
     setSmoothProgress(0);
+    setWaitingMessageIndex(0);
     const startTime = Date.now();
     setGenerationStartTime(startTime);
+    setEstimatedTimeRemaining(ESTIMATED_TIME_SEC);
 
     try {
       const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
@@ -291,16 +323,72 @@ export const GenerateDescription = ({
         </div>
       </motion.div>
 
+      {/* Generation Progress Card - matches card generation style */}
+      {generating && (
+        <Card className="relative overflow-hidden">
+          {/* Animated radial gradient background — bottom */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
+            animation: 'glow-drift 6s ease-in-out infinite alternate',
+          }} />
+          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
+            {/* Header: Spinner + Title + Status */}
+            <div className="flex items-start gap-3 pt-2">
+              <div className="relative shrink-0">
+                <div className="w-9 h-9 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+                <FileText className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
+              </div>
+              <div className="space-y-0.5">
+                {estimatedTimeRemaining > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm">Генерация описания</p>
+                      <div className="flex items-center gap-1 text-primary">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span className="text-sm font-bold tabular-nums">
+                          0:{String(estimatedTimeRemaining).padStart(2, '0')}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Анализируем данные и создаём описание...</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-semibold text-sm">Генерация описания</p>
+                    <p className="text-xs text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Progress bar — full width, smooth transitions */}
+            <div className="w-full space-y-1">
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${Math.min(smoothProgress, 95)}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>Генерация описания</span>
+                <span>{estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
+              </div>
+            </div>
+
+            {/* Info hint */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
+              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <span className="text-[11px] text-muted-foreground leading-relaxed">
+                Генерация проходит в фоновом режиме. Вы можете переключиться на другую вкладку — результат появится автоматически.
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Input Form */}
       <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="relative overflow-hidden rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
-          {/* Animated gradient backgrounds during generation */}
-          {generating && (
-            <div className="absolute inset-0 pointer-events-none" style={{
-              background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
-              animation: 'glow-drift 6s ease-in-out infinite alternate',
-            }} />
-          )}
           <div>
             <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><Settings className="w-4 h-4 shrink-0" />Параметры генерации</h3>
             <p className="text-sm text-muted-foreground">Заполните данные для создания уникального описания</p>
@@ -336,29 +424,6 @@ export const GenerateDescription = ({
                 <span>{keywords.length}/1200</span>
               </div>
             </div>
-
-            {/* Generation progress */}
-            {generating && (
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-3">
-                  <LightningLoader size="sm" className="text-primary fill-primary" />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">Генерирую описание...</span>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3" />
-                        <span>~{estimatedTimeRemaining > 0 ? `${estimatedTimeRemaining} сек` : 'почти готово'}</span>
-                      </div>
-                    </div>
-                    <Progress value={smoothProgress} className="h-2" />
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed p-3 rounded-xl bg-muted/20 backdrop-blur-sm">
-                  <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary animate-pulse" />
-                  <p><strong>Важно:</strong> Генерация идёт в фоне. Вы можете переключиться на другую вкладку — результат появится автоматически.</p>
-                </div>
-              </div>
-            )}
 
             {!generating && (
               <Button onClick={simulateGeneration} disabled={!canGenerate() || generating} className="gap-2 w-full sm:w-auto" size="lg">
@@ -425,7 +490,10 @@ export const GenerateDescription = ({
               <div className="text-center text-muted-foreground">
                 {generating ? (
                   <>
-                    <LightningLoader size="md" className="mx-auto mb-3 text-primary fill-primary" />
+                    <div className="relative w-10 h-10 mx-auto mb-3">
+                      <div className="w-10 h-10 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+                      <FileText className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    </div>
                     <p className="text-sm font-medium">Генерация описания...</p>
                     <p className="text-xs mt-1">Результат появится здесь автоматически</p>
                   </>
