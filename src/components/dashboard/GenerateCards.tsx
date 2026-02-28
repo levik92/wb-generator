@@ -1942,7 +1942,7 @@ export const GenerateCards = ({
                         <div className="mt-2">
                           <Popover>
                             <PopoverTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-8 text-xs w-full sm:w-auto min-w-[160px] bg-background/50 justify-between gap-2">
+                              <Button variant="outline" size="sm" className="h-8 text-xs w-full min-w-[160px] bg-muted/60 border-border/60 justify-between gap-2">
                                 <div className="flex items-center gap-2 min-w-0">
                                   <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0 border border-border/30" />
                                   <span className="truncate">{variants[currentVariantIdx]?.label}</span>
@@ -1960,7 +1960,7 @@ export const GenerateCards = ({
                                       setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
                                       setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
                                     }}
-                                    className={`flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-accent ${currentVariantIdx === vIdx ? 'bg-accent/70 font-medium' : ''}`}
+                                    className={`flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground ${currentVariantIdx === vIdx ? 'bg-accent font-medium' : ''}`}
                                   >
                                     <img src={v.url} alt={v.label} className="w-8 h-10 rounded-sm object-cover shrink-0 border border-border/40" />
                                     <span className="truncate">{v.label}</span>
