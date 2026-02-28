@@ -309,6 +309,47 @@ export const GenerateCards = ({
         // Resume polling for active job
         startJobPolling(latestJob.id);
       }
+
+      // Check for active per-card edit tasks (editing/regeneration started before leaving)
+      if (!latestJob || latestJob.status === 'completed') {
+        const { data: activeEditJobs } = await supabase
+          .from('generation_jobs')
+          .select(`
+            *,
+            generation_tasks (
+              id, card_index, card_type, status, image_url
+            )
+          `)
+          .eq('user_id', profile.id)
+          .eq('category', 'edit')
+          .in('status', ['processing', 'pending'])
+          .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // last 10 min
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (activeEditJobs && activeEditJobs.length > 0) {
+          // We need the current generated images to match edit tasks to their originals
+          // Use a slight delay to ensure generatedImages state is set from the completed job above
+          setTimeout(() => {
+            setGeneratedImages(currentImages => {
+              for (const editJob of activeEditJobs!) {
+                const activeTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'processing' || t.status === 'pending') || [];
+                for (const task of activeTasks) {
+                  // Find the matching image by stageIndex (card_index)
+                  const imgIndex = currentImages.findIndex(img => img.stageIndex === task.card_index);
+                  if (imgIndex >= 0) {
+                    const img = currentImages[imgIndex];
+                    const cardKey = `edit_${img.id}_${imgIndex}`;
+                    setEditingCards(prev => new Set([...prev, cardKey]));
+                    pollEditTask(task.id, imgIndex, cardKey);
+                  }
+                }
+              }
+              return currentImages; // don't modify
+            });
+          }, 100);
+        }
+      }
     } catch (error) {
       console.error('Error checking for active jobs:', error);
     }
@@ -1169,6 +1210,23 @@ export const GenerateCards = ({
       if (!productNameToUse) {
         throw new Error('Название товара недоступно');
       }
+
+      // Find sourceGenerationId so the DB trigger clusters the edit with the original
+      let sourceGenerationId: string | undefined;
+      const editJobId = editingImage.jobId || currentJobId;
+      if (editJobId) {
+        const { data: genData } = await supabase
+          .from('generations')
+          .select('id')
+          .eq('user_id', profile.id)
+          .eq('generation_type', 'cards')
+          .filter('input_data->>job_id', 'eq', editJobId)
+          .maybeSingle();
+        if (genData?.id) {
+          sourceGenerationId = genData.id;
+        }
+      }
+
       const {
         data,
         error
@@ -1179,7 +1237,8 @@ export const GenerateCards = ({
           cardIndex: editingImage.stageIndex,
           cardType: editingImage.cardType || CARD_STAGES[editingImage.stageIndex]?.key || 'cover',
           sourceImageUrl: editingImage.url,
-          editInstructions: editInstructions
+          editInstructions: editInstructions,
+          sourceGenerationId
         }
       });
       if (error) throw error;
