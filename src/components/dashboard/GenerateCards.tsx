@@ -1875,7 +1875,7 @@ export const GenerateCards = ({
       {/* Edit Dialog - Drawer on mobile, Dialog on desktop */}
       {isMobile ? (
         <Drawer open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DrawerContent>
+          <DrawerContent className="bg-card border-border/50">
             <DrawerHeader className="space-y-2">
               <DrawerTitle className="flex items-center gap-2 text-lg">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
