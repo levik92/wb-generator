@@ -1884,9 +1884,9 @@ export const GenerateCards = ({
                         <Button size="sm" variant="outline" onClick={e => {
                           e.stopPropagation();
                           onNavigateToVideo(image.url);
-                        }} className="w-full xs:w-auto sm:w-8 sm:h-8 sm:p-0 text-xs whitespace-nowrap sm:aspect-square border-primary/30 text-primary hover:bg-primary/10" title="Создать видеообложку">
-                          <Video className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="ml-1 sm:hidden">Видеообложка</span>
+                        }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3 border-violet-400/40 text-violet-600 dark:text-violet-400 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-colors" title="Создать видеообложку">
+                          <Video className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="md:hidden ml-1">Видеообложка</span>
                         </Button>
                       )}
                       
