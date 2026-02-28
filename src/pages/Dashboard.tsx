@@ -47,6 +47,7 @@ const Dashboard = () => {
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('cards');
   const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
+  const [pendingVideoImageUrl, setPendingVideoImageUrl] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -283,9 +284,13 @@ const Dashboard = () => {
           onTokensUpdate={refreshProfile} 
           onNavigateToBalance={() => handleTabChange('pricing')}
           onNavigateToLearning={() => handleTabChange('learning')}
+          onNavigateToVideo={(imageUrl) => {
+            setPendingVideoImageUrl(imageUrl);
+            handleTabChange('video');
+          }}
         />;
       case 'video':
-        return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} onNavigate={handleTabChange} />;
+        return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} onNavigate={handleTabChange} preAttachedImageUrl={pendingVideoImageUrl} onPreAttachedImageConsumed={() => setPendingVideoImageUrl(null)} />;
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'notifications':
@@ -310,6 +315,10 @@ const Dashboard = () => {
           onTokensUpdate={refreshProfile} 
           onNavigateToBalance={() => handleTabChange('pricing')}
           onNavigateToLearning={() => handleTabChange('learning')}
+          onNavigateToVideo={(imageUrl) => {
+            setPendingVideoImageUrl(imageUrl);
+            handleTabChange('video');
+          }}
         />;
     }
   };
