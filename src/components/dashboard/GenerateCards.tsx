@@ -254,6 +254,55 @@ export const GenerateCards = ({
           setGeneratedImages(images);
           setJobCompleted(true);
 
+          // Restore edit variants from completed edit jobs for this main job
+          const { data: completedEditJobs } = await supabase
+            .from('generation_jobs')
+            .select(`
+              *,
+              generation_tasks (
+                id, card_index, card_type, status, image_url, created_at
+              )
+            `)
+            .eq('user_id', profile.id)
+            .eq('category', 'edit')
+            .eq('status', 'completed')
+            .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+            .order('created_at', { ascending: true });
+
+          if (completedEditJobs && completedEditJobs.length > 0) {
+            const restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
+            const restoredSelected: Record<number, number> = {};
+
+            for (const editJob of completedEditJobs) {
+              const editTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+              for (const task of editTasks) {
+                const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                if (imgIndex >= 0) {
+                  if (!restoredVariants[imgIndex]) {
+                    // Start with original
+                    restoredVariants[imgIndex] = [{ url: images[imgIndex].url, label: 'Оригинал', id: images[imgIndex].id }];
+                  }
+                  const vNum = restoredVariants[imgIndex].length;
+                  restoredVariants[imgIndex].push({ url: task.image_url, label: `Ред. v.${vNum}`, id: task.id });
+                  restoredSelected[imgIndex] = restoredVariants[imgIndex].length - 1;
+                }
+              }
+            }
+
+            if (Object.keys(restoredVariants).length > 0) {
+              setImageVariants(restoredVariants);
+              setSelectedVariant(restoredSelected);
+              // Update displayed images to show last variant
+              setGeneratedImages(prev => prev.map((img, i) => {
+                if (restoredVariants[i] && restoredSelected[i] !== undefined) {
+                  const variant = restoredVariants[i][restoredSelected[i]];
+                  return { ...img, url: variant.url };
+                }
+                return img;
+              }));
+            }
+          }
+
           // Уведомление уже создано database trigger'ом в таблице notifications,
           // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
