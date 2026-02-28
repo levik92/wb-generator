@@ -16,7 +16,7 @@ serve(async (req) => {
     const requestBody = await req.json();
     const { productName, category = '', competitors, keywords, userId } = requestBody;
 
-    // Input validation with expanded limits for more robust validation
+    // Input validation
     if (!productName || typeof productName !== 'string' || productName.length > 200) {
       return new Response(JSON.stringify({ error: 'Invalid product name (max 200 characters)' }), {
         status: 400,
@@ -31,11 +31,9 @@ serve(async (req) => {
       });
     }
 
-    // Sanitize inputs to prevent injection attacks  
     const sanitizedProductName = productName.replace(/[<>\"']/g, '').trim();
     const sanitizedCategory = category.replace(/[<>\"']/g, '').trim();
 
-    // Sanitize and validate competitors array with additional security
     const sanitizedCompetitors = Array.isArray(competitors) 
       ? competitors.slice(0, 10)
           .filter(c => typeof c === 'string' && c.length <= 500)
@@ -43,7 +41,6 @@ serve(async (req) => {
           .filter(c => c.length > 0)
       : [];
 
-    // Sanitize and validate keywords array with additional security  
     const sanitizedKeywords = Array.isArray(keywords)
       ? keywords.slice(0, 20)
           .filter(k => typeof k === 'string' && k.length <= 100)
@@ -51,7 +48,6 @@ serve(async (req) => {
           .filter(k => k.length > 0)
       : [];
 
-    // Enhanced content filtering for harmful prompts
     const blockedTerms = ['<script>', 'javascript:', 'data:', 'vbscript:', 'onload', 'onerror', 'eval(', 'function(', 'setTimeout', 'setInterval'];
     const fullText = `${sanitizedProductName} ${sanitizedCategory} ${sanitizedCompetitors.join(' ')} ${sanitizedKeywords.join(' ')}`.toLowerCase();
     
@@ -67,12 +63,11 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get description generation price from database
+    // Get pricing
     const { data: pricingData, error: pricingError } = await supabase
       .from('generation_pricing')
       .select('tokens_cost')
@@ -81,9 +76,7 @@ serve(async (req) => {
 
     if (pricingError || !pricingData) {
       console.error('Pricing error:', pricingError);
-      return new Response(JSON.stringify({
-        error: 'Failed to get pricing information'
-      }), {
+      return new Response(JSON.stringify({ error: 'Failed to get pricing information' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -91,7 +84,7 @@ serve(async (req) => {
 
     const tokensRequired = pricingData.tokens_cost;
 
-    // Check if user has enough tokens before processing
+    // Check balance
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('tokens_balance')
@@ -99,7 +92,6 @@ serve(async (req) => {
       .single();
 
     if (profileError) {
-      console.error('Error checking user balance:', profileError);
       throw new Error('Ошибка при проверке баланса токенов');
     }
 
@@ -112,81 +104,8 @@ serve(async (req) => {
       });
     }
 
-    // Get prompt template from database
-    const { data: promptData, error: promptError } = await supabase
-      .from('ai_prompts')
-      .select('prompt_template')
-      .eq('prompt_type', 'description')
-      .single();
-
-    if (promptError) {
-      console.error('Error fetching prompt template:', promptError);
-      throw new Error('Ошибка получения шаблона промта');
-    }
-
-    // Build the prompt with sanitized data
-    const competitorText = sanitizedCompetitors.length > 0 
-      ? sanitizedCompetitors.join(', ')
-      : '';
-
-    const keywordText = sanitizedKeywords.length > 0 
-      ? sanitizedKeywords.join(', ')
-      : '';
-    
-    // Replace placeholders in the prompt template
-    let prompt = promptData.prompt_template;
-    prompt = prompt.replace(/{productName}/g, sanitizedProductName);
-    prompt = prompt.replace(/{category}/g, sanitizedCategory);
-    prompt = prompt.replace(/{competitors}/g, competitorText);
-    prompt = prompt.replace(/{keywords}/g, keywordText);
-
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      console.error('OpenAI API error:', response.status, errorData);
-      
-      if (response.status === 429) {
-        throw new Error('Слишком много запросов к OpenAI API. Попробуйте через несколько минут.');
-      } else if (response.status === 400 && errorData?.error?.code === 'billing_hard_limit_reached') {
-        throw new Error('Достигнут лимит биллинга OpenAI API. Обратитесь в поддержку.');
-      } else {
-        throw new Error(`Ошибка OpenAI API: ${response.status}. Попробуйте позже.`);
-      }
-    }
-
-    const data = await response.json();
-    const generatedDescription = data.choices[0].message.content;
-
-    // Only spend tokens after successful generation
-    const { data: tokenResult, error: tokenError } = await supabase.rpc('spend_tokens', {
-      user_id_param: userId,
-      tokens_amount: tokensRequired
-    });
-
-    if (tokenError) {
-      console.error('Token spending error after successful generation:', tokenError);
-      // Still return the description even if token spending fails
-      console.warn('Generated description successfully but failed to spend tokens');
-    }
-
-    // Save generation to database
-    const { error: saveError } = await supabase
+    // Create a 'processing' generation record FIRST
+    const { data: genRecord, error: genInsertError } = await supabase
       .from('generations')
       .insert({
         user_id: userId,
@@ -197,26 +116,133 @@ serve(async (req) => {
           competitors: sanitizedCompetitors,
           keywords: sanitizedKeywords
         },
-        output_data: {
-          description: generatedDescription
-        },
+        output_data: null,
         tokens_used: tokensRequired,
-        status: 'completed',
+        status: 'processing',
         product_name: sanitizedProductName,
         category: sanitizedCategory,
         keywords: sanitizedKeywords,
         competitors: sanitizedCompetitors
-      });
+      })
+      .select('id')
+      .single();
 
-    if (saveError) {
-      console.error('Error saving generation:', saveError);
+    if (genInsertError || !genRecord) {
+      console.error('Error creating generation record:', genInsertError);
+      throw new Error('Failed to create generation record');
     }
 
-    return new Response(JSON.stringify({ 
-      description: generatedDescription 
+    const generationId = genRecord.id;
+    console.log('[generate-description] Created generation record:', generationId);
+
+    // Return immediately with the generation ID
+    const immediateResponse = new Response(JSON.stringify({ 
+      generationId,
+      status: 'processing'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
+    // Process in background
+    const backgroundTask = (async () => {
+      try {
+        // Get prompt template
+        const { data: promptData, error: promptError } = await supabase
+          .from('ai_prompts')
+          .select('prompt_template')
+          .eq('prompt_type', 'description')
+          .single();
+
+        if (promptError) {
+          throw new Error('Ошибка получения шаблона промта');
+        }
+
+        const competitorText = sanitizedCompetitors.length > 0 ? sanitizedCompetitors.join(', ') : '';
+        const keywordText = sanitizedKeywords.length > 0 ? sanitizedKeywords.join(', ') : '';
+        
+        let prompt = promptData.prompt_template;
+        prompt = prompt.replace(/{productName}/g, sanitizedProductName);
+        prompt = prompt.replace(/{category}/g, sanitizedCategory);
+        prompt = prompt.replace(/{competitors}/g, competitorText);
+        prompt = prompt.replace(/{keywords}/g, keywordText);
+
+        // Call OpenAI
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 1000,
+            temperature: 0.7,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          console.error('OpenAI API error:', response.status, errorData);
+          throw new Error(`OpenAI API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const generatedDescription = data.choices[0].message.content;
+
+        // Spend tokens
+        const { error: tokenError } = await supabase.rpc('spend_tokens', {
+          user_id_param: userId,
+          tokens_amount: tokensRequired
+        });
+
+        if (tokenError) {
+          console.error('Token spending error:', tokenError);
+        }
+
+        // Update generation record to completed
+        await supabase
+          .from('generations')
+          .update({
+            status: 'completed',
+            output_data: { description: generatedDescription },
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', generationId);
+
+        console.log('[generate-description] Generation completed:', generationId);
+
+      } catch (error) {
+        console.error('[generate-description] Background error:', error);
+        
+        // Mark as failed
+        await supabase
+          .from('generations')
+          .update({
+            status: 'failed',
+            output_data: { error: error.message || 'Generation failed' },
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', generationId);
+
+        // Refund tokens
+        await supabase.rpc('refund_tokens', {
+          user_id_param: userId,
+          tokens_amount: tokensRequired,
+          reason_text: 'Возврат за неудачную генерацию описания'
+        });
+      }
+    })();
+
+    // Use EdgeRuntime.waitUntil for background processing
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      EdgeRuntime.waitUntil(backgroundTask);
+    } else {
+      // Fallback: wait for completion
+      await backgroundTask;
+    }
+
+    return immediateResponse;
 
   } catch (error) {
     console.error('Error in generate-description function:', error);
