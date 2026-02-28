@@ -1960,7 +1960,7 @@ export const GenerateCards = ({
                                       setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
                                       setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
                                     }}
-                                    className={`flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground ${currentVariantIdx === vIdx ? 'bg-accent font-medium' : ''}`}
+                                    className={`flex items-center gap-2.5 w-full rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground ${currentVariantIdx === vIdx ? 'bg-accent/40 font-medium' : ''}`}
                                   >
                                     <img src={v.url} alt={v.label} className="w-8 h-10 rounded-sm object-cover shrink-0 border border-border/40" />
                                     <span className="truncate">{v.label}</span>
