@@ -104,13 +104,14 @@ export const GenerateDescription = ({
     return () => clearInterval(pollInterval);
   }, [onTokensUpdate, toast]);
 
-  // Check for active description generation on mount
+  // Check for active description generation on mount + restore last result
   useEffect(() => {
     if (hasCheckedJobs) return;
 
     const checkActiveGenerations = async () => {
       try {
-        const { data, error } = await supabase
+        // First check for active (processing) generation
+        const { data: activeData, error: activeError } = await supabase
           .from('generations')
           .select('id, created_at')
           .eq('user_id', profile.id)
@@ -119,30 +120,44 @@ export const GenerateDescription = ({
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (error || !data || data.length === 0) {
-          setHasCheckedJobs(true);
-          return;
+        if (!activeError && activeData && activeData.length > 0) {
+          const activeGen = activeData[0];
+          const createdAt = new Date(activeGen.created_at).getTime();
+          const elapsed = (Date.now() - createdAt) / 1000;
+
+          if (elapsed <= 300) {
+            // Resume polling
+            console.log('[GenerateDescription] Resuming active generation:', activeGen.id);
+            setGenerating(true);
+            setCurrentGenerationId(activeGen.id);
+            setGenerationStartTime(createdAt);
+            const remaining = Math.max(ESTIMATED_TIME_SEC - elapsed, 0);
+            setEstimatedTimeRemaining(Math.ceil(remaining));
+            setSmoothProgress(Math.min((elapsed / ESTIMATED_TIME_SEC) * 95, 95));
+            pollGeneration(activeGen.id, createdAt);
+            setHasCheckedJobs(true);
+            return;
+          }
         }
 
-        const activeGen = data[0];
-        const createdAt = new Date(activeGen.created_at).getTime();
-        const elapsed = (Date.now() - createdAt) / 1000;
+        // No active generation — restore last completed result if we don't already have one
+        if (!generatedText) {
+          const { data: lastCompleted } = await supabase
+            .from('generations')
+            .select('output_data')
+            .eq('user_id', profile.id)
+            .eq('generation_type', 'description')
+            .eq('status', 'completed')
+            .order('created_at', { ascending: false })
+            .limit(1);
 
-        // If older than 5 minutes, it's probably stale
-        if (elapsed > 300) {
-          setHasCheckedJobs(true);
-          return;
+          if (lastCompleted && lastCompleted.length > 0 && lastCompleted[0].output_data) {
+            const outputData = lastCompleted[0].output_data as any;
+            if (outputData.description) {
+              setGeneratedText(outputData.description);
+            }
+          }
         }
-
-        // Resume polling
-        console.log('[GenerateDescription] Resuming active generation:', activeGen.id);
-        setGenerating(true);
-        setCurrentGenerationId(activeGen.id);
-        setGenerationStartTime(createdAt);
-        const remaining = Math.max(ESTIMATED_TIME_SEC - elapsed, 0);
-        setEstimatedTimeRemaining(Math.ceil(remaining));
-        setSmoothProgress(Math.min((elapsed / ESTIMATED_TIME_SEC) * 95, 95));
-        pollGeneration(activeGen.id, createdAt);
       } catch (err) {
         console.error('Error checking active generations:', err);
       } finally {
@@ -151,7 +166,7 @@ export const GenerateDescription = ({
     };
 
     checkActiveGenerations();
-  }, [profile.id, hasCheckedJobs, pollGeneration]);
+  }, [profile.id, hasCheckedJobs, pollGeneration, generatedText]);
 
   // Smooth progress bar animation - same approach as card generation
   useEffect(() => {
@@ -323,69 +338,6 @@ export const GenerateDescription = ({
         </div>
       </motion.div>
 
-      {/* Generation Progress Card - matches card generation style */}
-      {generating && (
-        <Card className="relative overflow-hidden">
-          {/* Animated radial gradient background — bottom */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
-            animation: 'glow-drift 6s ease-in-out infinite alternate',
-          }} />
-          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
-            {/* Header: Spinner + Title + Status */}
-            <div className="flex items-start gap-3 pt-2">
-              <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
-                <FileText className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
-              </div>
-              <div className="space-y-0.5">
-                {estimatedTimeRemaining > 0 ? (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">Генерация описания</p>
-                      <div className="flex items-center gap-1 text-primary">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span className="text-sm font-bold tabular-nums">
-                          0:{String(estimatedTimeRemaining).padStart(2, '0')}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Анализируем данные и создаём описание...</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="font-semibold text-sm">Генерация описания</p>
-                    <p className="text-xs text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Progress bar — full width, smooth transitions */}
-            <div className="w-full space-y-1">
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                  style={{ width: `${Math.min(smoothProgress, 95)}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                <span>Генерация описания</span>
-                <span>{estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
-              </div>
-            </div>
-
-            {/* Info hint */}
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
-              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <span className="text-[11px] text-muted-foreground leading-relaxed">
-                Генерация проходит в фоновом режиме. Вы можете переключиться на другую вкладку — результат появится автоматически.
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Input Form */}
       <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="relative overflow-hidden rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
@@ -434,6 +386,52 @@ export const GenerateDescription = ({
                   {priceLoading ? '...' : descriptionPrice} токенов
                 </Badge>
               </Button>
+            )}
+
+            {/* Inline progress bar — under the button */}
+            {generating && (
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center gap-3">
+                  <div className="relative shrink-0">
+                    <div className="w-8 h-8 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+                    <FileText className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3 w-3 text-primary" />
+                  </div>
+                  <div className="flex-1 space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm">Генерация описания</p>
+                      {estimatedTimeRemaining > 0 && (
+                        <div className="flex items-center gap-1 text-primary">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span className="text-sm font-bold tabular-nums">
+                            0:{String(estimatedTimeRemaining).padStart(2, '0')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {estimatedTimeRemaining > 0 ? 'Анализируем данные и создаём описание...' : WAITING_MESSAGES[waitingMessageIndex]}
+                    </p>
+                  </div>
+                </div>
+                <div className="w-full space-y-1">
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${Math.min(smoothProgress, 95)}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span>Генерация описания</span>
+                    <span>{estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/30 border border-border/40">
+                  <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                  <span className="text-[11px] text-muted-foreground leading-relaxed">
+                    Можете переключиться на другую вкладку — результат появится автоматически.
+                  </span>
+                </div>
+              </div>
             )}
 
             {!generating && (
