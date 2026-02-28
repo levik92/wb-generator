@@ -37,6 +37,8 @@ interface VideoCoversProps {
   profile: Profile;
   onTokensUpdate: () => void;
   onNavigate?: (tab: string) => void;
+  preAttachedImageUrl?: string | null;
+  onPreAttachedImageConsumed?: () => void;
 }
 
 const ESTIMATED_TIME_SECONDS = 60; // 1 minute
@@ -56,7 +58,7 @@ const UPLOAD_MESSAGES = [
   "Подготавливаем файл для обработки…",
 ];
 
-export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCoversProps) {
+export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedImageUrl, onPreAttachedImageConsumed }: VideoCoversProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
@@ -98,6 +100,23 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate }: VideoCovers
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  // Handle pre-attached image from card generation
+  useEffect(() => {
+    if (preAttachedImageUrl) {
+      // Set image preview from URL (no File object needed for display)
+      setImagePreview(preAttachedImageUrl);
+      // We don't have a File object, but we can fetch and create one
+      fetch(preAttachedImageUrl)
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], 'cover-image.jpg', { type: blob.type || 'image/jpeg' });
+          setSelectedImage(file);
+        })
+        .catch(err => console.error('Error fetching pre-attached image:', err));
+      onPreAttachedImageConsumed?.();
+    }
+  }, [preAttachedImageUrl]);
 
   // Elapsed timer
   useEffect(() => {

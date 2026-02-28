@@ -15,7 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown } from "lucide-react";
 import { CasesPromoBlock } from "./CasesPromoBlock";
 import { CasesPromoBanner } from "./CasesPromoBanner";
 import { GenerationPopups } from "./GenerationPopups";
@@ -41,6 +41,7 @@ interface GenerateCardsProps {
   onTokensUpdate: () => void;
   onNavigateToBalance?: () => void;
   onNavigateToLearning?: () => void;
+  onNavigateToVideo?: (imageUrl: string) => void;
 }
 const CARD_STAGES = [{
   name: "Главная",
@@ -79,7 +80,8 @@ export const GenerateCards = ({
   profile,
   onTokensUpdate,
   onNavigateToBalance,
-  onNavigateToLearning
+  onNavigateToLearning,
+  onNavigateToVideo
 }: GenerateCardsProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
@@ -151,6 +153,11 @@ export const GenerateCards = ({
   const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [editInstructions, setEditInstructions] = useState("");
   const [editingCards, setEditingCards] = useState<Set<string>>(new Set());
+  
+  // Edit variants: track all versions per image index
+  const [imageVariants, setImageVariants] = useState<Record<number, Array<{ url: string; label: string; id?: string }>>>({});
+  const [selectedVariant, setSelectedVariant] = useState<Record<number, number>>({});
+  
   const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
 
   // Load generation count from localStorage on mount
@@ -252,6 +259,25 @@ export const GenerateCards = ({
       } else if (latestJob && latestJob.status === 'processing') {
         // Restore job data for active generation
         setCurrentJobId(latestJob.id);
+        setGenerating(true); // Restore generating UI state
+        setJobCompleted(false);
+
+        // Calculate elapsed time and restore timer
+        const elapsedMs = Date.now() - new Date(latestJob.created_at).getTime();
+        const totalCards = latestJob.total_cards || 1;
+        const estimatedSecondsPerCard = 35;
+        const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard;
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        const remaining = Math.max(0, totalEstimatedSeconds - elapsedSeconds);
+        setEstimatedTimeRemaining(remaining);
+        setTotalEstimatedTime(totalEstimatedSeconds);
+        setSmoothProgress(Math.min(95, (elapsedSeconds / totalEstimatedSeconds) * 100));
+
+        // Restore selected cards from job tasks
+        const taskCardIndices = latestJob.generation_tasks?.map((t: any) => t.card_index).filter((v: any, i: any, a: any) => a.indexOf(v) === i).sort((a: number, b: number) => a - b) || [];
+        if (taskCardIndices.length > 0) {
+          setSelectedCards(taskCardIndices);
+        }
 
         // Save job data but keep form fields empty during processing
         const rawProductImages = latestJob.product_images as Array<{
@@ -601,6 +627,8 @@ export const GenerateCards = ({
     setCurrentJobId(null); // Clear previous job ID
     setPreviousJobStatus(null); // Reset status tracking
     setJobData(null); // Clear saved job data on new generation
+    setImageVariants({}); // Clear edit variants
+    setSelectedVariant({}); // Clear selected variants
 
     if (!canGenerate()) return;
     setGenerating(true);
@@ -1202,7 +1230,25 @@ export const GenerateCards = ({
           return;
         }
         if (task.status === 'completed' && task.image_url) {
-          // Update the generated image with new URL
+          // Add as a new variant instead of replacing
+          setImageVariants(prev => {
+            const existing = prev[imageIndex] || [];
+            // If no variants yet, add original as first variant
+            const currentImage = generatedImages[imageIndex];
+            const variants = existing.length === 0 && currentImage 
+              ? [{ url: currentImage.url, label: 'Оригинал', id: currentImage.id }] 
+              : [...existing];
+            const newLabel = `Ред. v.${variants.length}`;
+            variants.push({ url: task.image_url, label: newLabel, id: task.id });
+            return { ...prev, [imageIndex]: variants };
+          });
+          // Select the new variant
+          setSelectedVariant(prev => {
+            const existing = imageVariants[imageIndex] || [];
+            const newIdx = existing.length === 0 ? 1 : existing.length; // +1 because we just added
+            return { ...prev, [imageIndex]: newIdx };
+          });
+          // Update the displayed image
           setGeneratedImages(prev => prev.map((img, i) => i === imageIndex ? {
             ...img,
             url: task.image_url
@@ -1763,6 +1809,9 @@ export const GenerateCards = ({
             const isRegenerating = regeneratingCards.has(cardKey);
             const isEditingCard = editingCards.has(`edit_${image.id}_${index}`);
             const isProcessingCard = isRegenerating || isEditingCard;
+            const variants = imageVariants[index] || [];
+            const currentVariantIdx = selectedVariant[index] ?? (variants.length - 1);
+            const isCoverCard = image.stageIndex === 0;
             return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden ${isProcessingCard ? 'border-primary/30' : ''}`}>
                     {isProcessingCard && <>
                       <div className="absolute inset-0 pointer-events-none" style={{
@@ -1789,9 +1838,45 @@ export const GenerateCards = ({
                       <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
                       </p>
+                      {/* Variant selector dropdown */}
+                      {variants.length > 1 && (
+                        <div className="mt-2">
+                          <Select 
+                            value={String(currentVariantIdx)} 
+                            onValueChange={(val) => {
+                              const idx = parseInt(val);
+                              setSelectedVariant(prev => ({ ...prev, [index]: idx }));
+                              // Update displayed image to selected variant
+                              setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: variants[idx].url } : img));
+                            }}
+                          >
+                            <SelectTrigger className="h-7 text-xs w-full sm:w-auto min-w-[140px] bg-background/50">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {variants.map((v, vIdx) => (
+                                <SelectItem key={vIdx} value={String(vIdx)} className="text-xs">
+                                  {v.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
+                      {/* Video cover button - only on cover card */}
+                      {isCoverCard && onNavigateToVideo && (
+                        <Button size="sm" variant="outline" onClick={e => {
+                          e.stopPropagation();
+                          onNavigateToVideo(image.url);
+                        }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3 border-primary/30 text-primary hover:bg-primary/5" title="Создать видеообложку">
+                          <Video className="w-3 h-3 md:w-4 md:h-4" />
+                          <span className="ml-1">Видеообложка</span>
+                        </Button>
+                      )}
+                      
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         openEditDialog(image, index);
