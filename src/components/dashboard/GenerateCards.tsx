@@ -108,6 +108,7 @@ export const GenerateCards = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isRefDragOver, setIsRefDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
+  const [isRestoredGeneration, setIsRestoredGeneration] = useState(false);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number>(0);
   const [totalEstimatedTime, setTotalEstimatedTime] = useState<number>(0); // Полное время генерации
   const [smoothProgress, setSmoothProgress] = useState(0);
@@ -201,7 +202,7 @@ export const GenerateCards = ({
             image_url,
             storage_path
           )
-        `).eq('user_id', profile.id).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+        `).eq('user_id', profile.id).neq('category', 'edit').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
       .order('created_at', {
         ascending: false
       }).limit(1);
@@ -254,8 +255,22 @@ export const GenerateCards = ({
           setGeneratedImages(images);
           setJobCompleted(true);
 
-          // Restore edit variants from completed edit jobs for this main job
-          const { data: completedEditJobs } = await supabase
+          // Restore edit variants from completed edit jobs linked to this main job
+          // First find the generation record for this job to get sourceGenerationId
+          let sourceGenId: string | null = null;
+          const { data: genRecord } = await supabase
+            .from('generations')
+            .select('id')
+            .eq('user_id', profile.id)
+            .eq('generation_type', 'cards')
+            .filter('input_data->>job_id', 'eq', latestJob.id)
+            .maybeSingle();
+          if (genRecord?.id) {
+            sourceGenId = genRecord.id;
+          }
+
+          // Build query for edit jobs - filter by sourceGenerationId in description
+          let editQuery = supabase
             .from('generation_jobs')
             .select(`
               *,
@@ -268,6 +283,13 @@ export const GenerateCards = ({
             .eq('status', 'completed')
             .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
             .order('created_at', { ascending: true });
+          
+          // If we have a sourceGenerationId, filter edits to only those linked to this job
+          if (sourceGenId) {
+            editQuery = editQuery.like('description', `%[sourceGenerationId:${sourceGenId}]%`);
+          }
+
+          const { data: completedEditJobs } = await editQuery;
 
           if (completedEditJobs && completedEditJobs.length > 0) {
             const restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
@@ -307,56 +329,101 @@ export const GenerateCards = ({
           // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
       } else if (latestJob && latestJob.status === 'processing') {
-        // Restore job data for active generation
-        setCurrentJobId(latestJob.id);
-        setGenerating(true); // Restore generating UI state
-        setJobCompleted(false);
+        // Check if this is a single-card regen job (total_cards=1) — show per-card animation instead of full progress bar
+        const isSingleCardRegen = (latestJob.total_cards || 1) === 1;
+        
+        if (isSingleCardRegen) {
+          // Single-card regen: find the previous completed main job and restore its results,
+          // then show per-card regen animation
+          const { data: previousMainJobs } = await supabase
+            .from('generation_jobs')
+            .select(`*, generation_tasks (id, card_index, card_type, status, image_url, storage_path)`)
+            .eq('user_id', profile.id)
+            .neq('category', 'edit')
+            .eq('status', 'completed')
+            .lt('created_at', latestJob.created_at)
+            .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+            .order('created_at', { ascending: false })
+            .limit(1);
 
-        // Calculate elapsed time and restore timer
-        const elapsedMs = Date.now() - new Date(latestJob.created_at).getTime();
-        const totalCards = latestJob.total_cards || 1;
-        const estimatedSecondsPerCard = 35;
-        const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard;
-        const elapsedSeconds = Math.floor(elapsedMs / 1000);
-        const remaining = Math.max(0, totalEstimatedSeconds - elapsedSeconds);
-        setEstimatedTimeRemaining(remaining);
-        setTotalEstimatedTime(totalEstimatedSeconds);
-        setSmoothProgress(Math.min(95, (elapsedSeconds / totalEstimatedSeconds) * 100));
+          const prevJob = previousMainJobs?.[0];
+          if (prevJob) {
+            // Restore completed main job results
+            setCurrentJobId(prevJob.id);
+            const completedTasks = prevJob.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
+            if (completedTasks.length > 0) {
+              const images = completedTasks.sort((a: any, b: any) => a.card_index - b.card_index).map((task: any) => ({
+                id: task.id, url: task.image_url,
+                stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                stageIndex: task.card_index, cardType: task.card_type, jobId: prevJob.id
+              }));
+              setGeneratedImages(images);
+              setJobCompleted(true);
 
-        // Restore selected cards from job tasks
-        const taskCardIndices = latestJob.generation_tasks?.map((t: any) => t.card_index).filter((v: any, i: any, a: any) => a.indexOf(v) === i).sort((a: number, b: number) => a - b) || [];
-        if (taskCardIndices.length > 0) {
-          setSelectedCards(taskCardIndices);
-        }
+              // Show regen animation on the specific card
+              const regenTask = latestJob.generation_tasks?.find((t: any) => t.status === 'processing' || t.status === 'pending');
+              if (regenTask) {
+                const imgIndex = images.findIndex((img: any) => img.stageIndex === regenTask.card_index);
+                if (imgIndex >= 0) {
+                  const cardKey = `${images[imgIndex].id}_${imgIndex}`;
+                  setRegeneratingCards(prev => new Set([...prev, cardKey]));
+                  pollRegenerationTask(regenTask.id, imgIndex, cardKey);
+                }
+              }
+            }
+          }
+        } else {
+          // Multi-card generation: show full progress bar
+          setCurrentJobId(latestJob.id);
+          setGenerating(true);
+          setIsRestoredGeneration(true);
+          setJobCompleted(false);
 
-        // Save job data but keep form fields empty during processing
-        const rawProductImages = latestJob.product_images as Array<{
-          url: string;
-          name?: string;
-          type?: string;
-        }> || [];
-        const productImages = rawProductImages.map((img, idx) => ({
-          url: img.url,
-          name: img.name || `product_${idx + 1}`,
-          type: img.type,
-        }));
-        setJobData({
-          productName: latestJob.product_name || '',
-          category: latestJob.category || '',
-          description: latestJob.description || '',
-          productImages: productImages
-        });
-        // Keep full image metadata (incl. reference type) for regeneration/edit flows
-        setUploadedProductImages(
-          productImages.map((img, idx) => ({
+          // Calculate elapsed time and restore timer
+          const elapsedMs = Date.now() - new Date(latestJob.created_at).getTime();
+          const totalCards = latestJob.total_cards || 1;
+          const estimatedSecondsPerCard = 35;
+          const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard;
+          const elapsedSeconds = Math.floor(elapsedMs / 1000);
+          const remaining = Math.max(0, totalEstimatedSeconds - elapsedSeconds);
+          setEstimatedTimeRemaining(remaining);
+          setTotalEstimatedTime(totalEstimatedSeconds);
+          setSmoothProgress(Math.min(95, (elapsedSeconds / totalEstimatedSeconds) * 100));
+
+          // Restore selected cards from job tasks
+          const taskCardIndices = latestJob.generation_tasks?.map((t: any) => t.card_index).filter((v: any, i: any, a: any) => a.indexOf(v) === i).sort((a: number, b: number) => a - b) || [];
+          if (taskCardIndices.length > 0) {
+            setSelectedCards(taskCardIndices);
+          }
+
+          // Save job data but keep form fields empty during processing
+          const rawProductImages = latestJob.product_images as Array<{
+            url: string;
+            name?: string;
+            type?: string;
+          }> || [];
+          const productImages = rawProductImages.map((img, idx) => ({
             url: img.url,
             name: img.name || `product_${idx + 1}`,
             type: img.type,
-          }))
-        );
+          }));
+          setJobData({
+            productName: latestJob.product_name || '',
+            category: latestJob.category || '',
+            description: latestJob.description || '',
+            productImages: productImages
+          });
+          setUploadedProductImages(
+            productImages.map((img, idx) => ({
+              url: img.url,
+              name: img.name || `product_${idx + 1}`,
+              type: img.type,
+            }))
+          );
 
-        // Resume polling for active job
-        startJobPolling(latestJob.id);
+          // Resume polling for active job
+          startJobPolling(latestJob.id, { skipTimerReset: true });
+        }
       }
 
       // Check for active per-card edit tasks (editing/regeneration started before leaving)
@@ -404,10 +471,10 @@ export const GenerateCards = ({
     }
   };
   useEffect(() => {
-    if (generating) {
+    if (generating && !isRestoredGeneration) {
       setGeneratedImages([]);
     }
-  }, [generating]);
+  }, [generating, isRestoredGeneration]);
   const validateAndAddFiles = (uploadedFiles: File[]) => {
     if (uploadedFiles.length + files.length > 3) {
       toast({
@@ -566,7 +633,7 @@ export const GenerateCards = ({
       }
     });
   };
-  const startJobPolling = (jobId: string) => {
+  const startJobPolling = (jobId: string, options?: { skipTimerReset?: boolean }) => {
     // СТОП ВСЕМ POLLING'АМ - глобальная очистка
     if (globalPollingInterval) {
       console.log('Clearing global polling interval');
@@ -584,11 +651,14 @@ export const GenerateCards = ({
     setCurrentJobId(jobId);
 
     // Расчет времени: 35 секунд на изображение
-    const estimatedSecondsPerCard = 35;
-    const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
-    setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
-    setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
-    setWaitingMessageIndex(0); // Сбрасываем индекс сообщений
+    // Skip timer reset when restoring from navigation (values already set by checkForActiveJobs)
+    if (!options?.skipTimerReset) {
+      const estimatedSecondsPerCard = 35;
+      const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
+      setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
+      setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
+      setWaitingMessageIndex(0); // Сбрасываем индекс сообщений
+    }
 
     const pollJob = async () => {
       try {
@@ -615,7 +685,8 @@ export const GenerateCards = ({
           const processingTasks = job.generation_tasks?.filter((t: any) => t.status === 'processing') || [];
           const failedTasks = job.generation_tasks?.filter((t: any) => t.status === 'failed') || [];
           const retryingTasks = job.generation_tasks?.filter((t: any) => t.status === 'retrying') || [];
-          const progressPercent = completedTasks.length / selectedCards.length * 100;
+          const totalCards = job.total_cards || selectedCards.length || 1;
+          const progressPercent = completedTasks.length / totalCards * 100;
           setProgress(progressPercent);
           setCurrentStage(completedTasks.length);
 
@@ -651,8 +722,8 @@ export const GenerateCards = ({
           }
 
           // Check if ALL cards are completed (not just job status)
-          const totalCards = selectedCards.length;
-          const allCompleted = completedTasks.length === totalCards;
+          const allTotalCards = job.total_cards || selectedCards.length || 1;
+          const allCompleted = completedTasks.length === allTotalCards;
           const hasFailures = failedTasks.length > 0;
           const shouldStopPolling = allCompleted || job.status === 'failed' || job.status === 'completed';
           if (shouldStopPolling) {
@@ -720,6 +791,7 @@ export const GenerateCards = ({
     setJobData(null); // Clear saved job data on new generation
     setImageVariants({}); // Clear edit variants
     setSelectedVariant({}); // Clear selected variants
+    setIsRestoredGeneration(false); // This is a new generation
 
     if (!canGenerate()) return;
     setGenerating(true);
