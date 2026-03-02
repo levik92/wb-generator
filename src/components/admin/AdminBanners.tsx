@@ -7,8 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogTrigger,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, GripVertical, Eye, EyeOff, Loader2 } from "lucide-react";
 
@@ -245,19 +251,19 @@ export const AdminBanners = () => {
             Управление баннерами, отображаемыми в личном кабинете пользователей
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+        <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <ResponsiveDialogTrigger asChild>
             <Button onClick={openCreateDialog} className="gap-2">
               <Plus className="h-4 w-4" />
               <span>Добавить баннер</span>
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>
+          </ResponsiveDialogTrigger>
+          <ResponsiveDialogContent className="sm:max-w-lg">
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle>
                 {editingBanner ? "Редактировать баннер" : "Новый баннер"}
-              </DialogTitle>
-            </DialogHeader>
+              </ResponsiveDialogTitle>
+            </ResponsiveDialogHeader>
             <div className="space-y-4 py-4">
               {/* Preview */}
               <div
@@ -389,8 +395,8 @@ export const AdminBanners = () => {
                 </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
       </div>
 
       {/* Banners list */}
@@ -466,7 +472,7 @@ export const AdminBanners = () => {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Удалить баннер?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Это действие нельзя отменить. Баннер будет удален навсегда.
+                                Это действие нельзя отменить.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

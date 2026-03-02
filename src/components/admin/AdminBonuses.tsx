@@ -6,7 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogTrigger,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+} from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -552,19 +560,19 @@ export const AdminBonuses = () => {
                   <CardTitle className="text-lg">Бонусные программы</CardTitle>
                   <CardDescription>Управляйте заданиями для пользователей</CardDescription>
                 </div>
-                <Dialog open={programDialogOpen} onOpenChange={setProgramDialogOpen}>
-                  <DialogTrigger asChild>
+                <ResponsiveDialog open={programDialogOpen} onOpenChange={setProgramDialogOpen}>
+                  <ResponsiveDialogTrigger asChild>
                     <Button onClick={resetProgramForm} size="sm">
                       <Plus className="w-4 h-4 mr-2" />
                       Добавить
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>
+                  </ResponsiveDialogTrigger>
+                  <ResponsiveDialogContent className="sm:max-w-md">
+                    <ResponsiveDialogHeader>
+                      <ResponsiveDialogTitle>
                         {editingProgram ? 'Редактировать программу' : 'Новая бонусная программа'}
-                      </DialogTitle>
-                    </DialogHeader>
+                      </ResponsiveDialogTitle>
+                    </ResponsiveDialogHeader>
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
                         <Label>Название</Label>
@@ -680,16 +688,16 @@ export const AdminBonuses = () => {
                         </div>
                       )}
                     </div>
-                    <DialogFooter>
+                    <ResponsiveDialogFooter>
                       <Button variant="outline" onClick={() => setProgramDialogOpen(false)}>
                         Отмена
                       </Button>
                       <Button onClick={handleSaveProgram}>
                         {editingProgram ? 'Сохранить' : 'Создать'}
                       </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                    </ResponsiveDialogFooter>
+                  </ResponsiveDialogContent>
+                </ResponsiveDialog>
               </div>
             </CardHeader>
             <CardContent className="p-2 md:p-4">
@@ -766,14 +774,14 @@ export const AdminBonuses = () => {
       </Tabs>
 
       {/* Review Dialog */}
-      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Проверка заявки</DialogTitle>
-            <DialogDescription>
+      <ResponsiveDialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <ResponsiveDialogContent className="sm:max-w-md">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Проверка заявки</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
               {selectedSubmission?.program?.title}
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
@@ -820,7 +828,7 @@ export const AdminBonuses = () => {
             </div>
           </div>
 
-          <DialogFooter className="flex gap-2">
+          <ResponsiveDialogFooter className="flex gap-2">
             <Button variant="destructive" onClick={handleReject}>
               <XCircle className="w-4 h-4 mr-2" />
               Отклонить
@@ -829,9 +837,9 @@ export const AdminBonuses = () => {
               <CheckCircle className="w-4 h-4 mr-2" />
               Одобрить
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </ResponsiveDialogFooter>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </div>
   );
 };

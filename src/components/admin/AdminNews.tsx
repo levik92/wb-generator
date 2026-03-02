@@ -1,13 +1,21 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogTrigger,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+} from "@/components/ui/responsive-dialog";
 import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +72,6 @@ export const AdminNews = () => {
   const loadNews = async () => {
     try {
       setLoading(true);
-      // Use any type to bypass TypeScript checks for news table
       const { data, error } = await (supabase as any)
         .from('news')
         .select('*')
@@ -106,7 +113,6 @@ export const AdminNews = () => {
 
     try {
       if (editingNews) {
-        // Update existing news
         const { error } = await (supabase as any)
           .from('news')
           .update({
@@ -123,7 +129,6 @@ export const AdminNews = () => {
           description: "Новость обновлена",
         });
       } else {
-        // Create new news
         const { error } = await (supabase as any)
           .from('news')
           .insert({
@@ -288,22 +293,22 @@ export const AdminNews = () => {
           </p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+        <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <ResponsiveDialogTrigger asChild>
             <Button onClick={openCreateDialog} size="sm" className="gap-2 w-full sm:w-auto">
               <Plus className="w-4 h-4" />
               Создать новость
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-2xl mx-2">
-            <DialogHeader>
-              <DialogTitle>
+          </ResponsiveDialogTrigger>
+          <ResponsiveDialogContent className="sm:max-w-2xl">
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle>
                 {editingNews ? 'Редактировать новость' : 'Создать новость'}
-              </DialogTitle>
-              <DialogDescription>
+              </ResponsiveDialogTitle>
+              <ResponsiveDialogDescription>
                 Заполните информацию для новости. Максимум 1500 символов.
-              </DialogDescription>
-            </DialogHeader>
+              </ResponsiveDialogDescription>
+            </ResponsiveDialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="title">Заголовок *</Label>
@@ -345,17 +350,17 @@ export const AdminNews = () => {
                 />
               </div>
               
-              <DialogFooter>
+              <ResponsiveDialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Отмена
                 </Button>
                 <Button type="submit">
                   {editingNews ? 'Обновить' : 'Создать черновик'}
                 </Button>
-              </DialogFooter>
+              </ResponsiveDialogFooter>
             </form>
-          </DialogContent>
-        </Dialog>
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
       </div>
 
       <div className="grid gap-4">
@@ -456,9 +461,12 @@ export const AdminNews = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-3 break-words">
-                  {item.content}
-                </p>
+                <div className="bg-muted/50 rounded-lg p-3 text-sm max-h-24 overflow-hidden relative">
+                  <p className="whitespace-pre-wrap">{item.content}</p>
+                  {item.content.length > 200 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-muted/80 to-transparent" />
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))
