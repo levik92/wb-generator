@@ -145,7 +145,7 @@ serve(async (req) => {
         user_id: userId,
         product_name: sanitizedProductName,
         description: sanitizedDescription,
-        category: sanitizedCategory,
+        category: 'regeneration',
         status: 'processing',
         total_cards: 1,
         tokens_cost: tokensCost,
