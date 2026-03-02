@@ -191,7 +191,7 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         product_name: sanitizedProductName,
-        category: sanitizedCategory,
+        category: 'regeneration',
         description: sanitizedDescription,
         // IMPORTANT: keep full context so process-openai-task can use product + reference images
         product_images: imagesToUse,
