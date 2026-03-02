@@ -329,51 +329,49 @@ export const GenerateCards = ({
           // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
       } else if (latestJob && latestJob.status === 'processing') {
-        // Check if this is a single-card regen job (total_cards=1) — show per-card animation instead of full progress bar
-        const isSingleCardRegen = (latestJob.total_cards || 1) === 1;
+        // Check if there's a previous completed main job — if yes and this job has total_cards=1,
+        // it's a single-card regen, show per-card animation. Otherwise it's a main generation.
+        const { data: previousMainJobs } = await supabase
+          .from('generation_jobs')
+          .select(`*, generation_tasks (id, card_index, card_type, status, image_url, storage_path)`)
+          .eq('user_id', profile.id)
+          .neq('category', 'edit')
+          .eq('status', 'completed')
+          .lt('created_at', latestJob.created_at)
+          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        const prevJob = previousMainJobs?.[0];
+        const isSingleCardRegen = (latestJob.total_cards || 1) === 1 && !!prevJob;
         
-        if (isSingleCardRegen) {
-          // Single-card regen: find the previous completed main job and restore its results,
+        if (isSingleCardRegen && prevJob) {
+          // Single-card regen: restore previous completed main job results,
           // then show per-card regen animation
-          const { data: previousMainJobs } = await supabase
-            .from('generation_jobs')
-            .select(`*, generation_tasks (id, card_index, card_type, status, image_url, storage_path)`)
-            .eq('user_id', profile.id)
-            .neq('category', 'edit')
-            .eq('status', 'completed')
-            .lt('created_at', latestJob.created_at)
-            .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-            .order('created_at', { ascending: false })
-            .limit(1);
+          setCurrentJobId(prevJob.id);
+          const completedTasks = prevJob.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
+          if (completedTasks.length > 0) {
+            const images = completedTasks.sort((a: any, b: any) => a.card_index - b.card_index).map((task: any) => ({
+              id: task.id, url: task.image_url,
+              stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+              stageIndex: task.card_index, cardType: task.card_type, jobId: prevJob.id
+            }));
+            setGeneratedImages(images);
+            setJobCompleted(true);
 
-          const prevJob = previousMainJobs?.[0];
-          if (prevJob) {
-            // Restore completed main job results
-            setCurrentJobId(prevJob.id);
-            const completedTasks = prevJob.generation_tasks?.filter((t: any) => t.status === 'completed') || [];
-            if (completedTasks.length > 0) {
-              const images = completedTasks.sort((a: any, b: any) => a.card_index - b.card_index).map((task: any) => ({
-                id: task.id, url: task.image_url,
-                stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-                stageIndex: task.card_index, cardType: task.card_type, jobId: prevJob.id
-              }));
-              setGeneratedImages(images);
-              setJobCompleted(true);
-
-              // Show regen animation on the specific card
-              const regenTask = latestJob.generation_tasks?.find((t: any) => t.status === 'processing' || t.status === 'pending');
-              if (regenTask) {
-                const imgIndex = images.findIndex((img: any) => img.stageIndex === regenTask.card_index);
-                if (imgIndex >= 0) {
-                  const cardKey = `${images[imgIndex].id}_${imgIndex}`;
-                  setRegeneratingCards(prev => new Set([...prev, cardKey]));
-                  pollRegenerationTask(regenTask.id, imgIndex, cardKey);
-                }
+            // Show regen animation on the specific card
+            const regenTask = latestJob.generation_tasks?.find((t: any) => t.status === 'processing' || t.status === 'pending');
+            if (regenTask) {
+              const imgIndex = images.findIndex((img: any) => img.stageIndex === regenTask.card_index);
+              if (imgIndex >= 0) {
+                const cardKey = `${images[imgIndex].id}_${imgIndex}`;
+                setRegeneratingCards(prev => new Set([...prev, cardKey]));
+                pollRegenerationTask(regenTask.id, imgIndex, cardKey);
               }
             }
           }
         } else {
-          // Multi-card generation: show full progress bar
+          // Main generation (any number of cards): show full progress bar
           setCurrentJobId(latestJob.id);
           setGenerating(true);
           setIsRestoredGeneration(true);
