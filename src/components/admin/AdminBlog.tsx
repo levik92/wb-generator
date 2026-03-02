@@ -15,12 +15,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  ResponsiveDialog,
+  ResponsiveDialogTrigger,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 import {
   Table,
   TableBody,
@@ -146,7 +146,6 @@ export const AdminBlog = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Ошибка",
@@ -156,7 +155,6 @@ export const AdminBlog = () => {
       return;
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "Ошибка",
@@ -348,22 +346,22 @@ export const AdminBlog = () => {
           <h2 className="text-xl md:text-2xl font-bold">Управление блогом</h2>
           <p className="text-sm text-muted-foreground">Создавайте и редактируйте статьи для SEO</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
+        <ResponsiveDialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
         }}>
-          <DialogTrigger asChild>
+          <ResponsiveDialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="w-4 h-4" />
               Новая статья
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto mx-2">
-            <DialogHeader>
-              <DialogTitle>
+          </ResponsiveDialogTrigger>
+          <ResponsiveDialogContent className="sm:max-w-3xl">
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle>
                 {editingPost ? "Редактирование статьи" : "Новая статья"}
-              </DialogTitle>
-            </DialogHeader>
+              </ResponsiveDialogTitle>
+            </ResponsiveDialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Заголовок *</Label>
@@ -520,8 +518,8 @@ export const AdminBlog = () => {
                 </Button>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
       </div>
 
       <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">

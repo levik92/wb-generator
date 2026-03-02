@@ -4,7 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogTrigger,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+} from "@/components/ui/responsive-dialog";
 import { Label } from "@/components/ui/label";
 import { Ban, Pencil, Search, UserCheck, Eye, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -291,33 +299,33 @@ export function AdminUsers({
                           <Eye className="h-3 w-3" />
                         </Button>
                         
-                        <Dialog>
-                          <DialogTrigger asChild>
+                        <ResponsiveDialog>
+                          <ResponsiveDialogTrigger asChild>
                             <Button variant="outline" size="sm" onClick={() => {
                               setEditingUser(user);
                               setNewTokenBalance(user.tokens_balance.toString());
                             }} className="h-7 w-7 md:h-8 md:w-8 p-0">
                               <Pencil className="h-3 w-3" />
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-2">
-                            <DialogHeader>
-                              <DialogTitle className="text-base md:text-lg">Изменить баланс токенов</DialogTitle>
-                              <DialogDescription className="text-xs md:text-sm break-all">
+                          </ResponsiveDialogTrigger>
+                          <ResponsiveDialogContent className="sm:max-w-md">
+                            <ResponsiveDialogHeader>
+                              <ResponsiveDialogTitle className="text-base md:text-lg">Изменить баланс токенов</ResponsiveDialogTitle>
+                              <ResponsiveDialogDescription className="text-xs md:text-sm break-all">
                                 Пользователь: {editingUser?.email}
-                              </DialogDescription>
-                            </DialogHeader>
+                              </ResponsiveDialogDescription>
+                            </ResponsiveDialogHeader>
                             <div className="space-y-4">
                               <div className="space-y-2">
                                 <Label htmlFor="tokens">Новый баланс токенов</Label>
                                 <Input id="tokens" type="number" min="0" value={newTokenBalance} onChange={e => setNewTokenBalance(e.target.value)} />
                               </div>
                             </div>
-                            <DialogFooter>
+                            <ResponsiveDialogFooter>
                               <Button onClick={updateTokenBalance}>Сохранить</Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
+                            </ResponsiveDialogFooter>
+                          </ResponsiveDialogContent>
+                        </ResponsiveDialog>
 
                         <Button variant={user.is_blocked ? "default" : "destructive"} size="sm" onClick={() => toggleUserBlock(user.id, user.is_blocked)} className="h-7 w-7 md:h-8 md:w-8 p-0">
                           {user.is_blocked ? <UserCheck className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
@@ -353,14 +361,14 @@ export function AdminUsers({
       </Card>
 
       {/* User Details Modal */}
-      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="w-[calc(100vw-2rem)] !max-w-[calc(100vw-2rem)] lg:!max-w-4xl max-h-[85vh] overflow-y-auto p-3 sm:p-6">
-          <DialogHeader>
-            <DialogTitle className="text-base md:text-lg">Детали пользователя</DialogTitle>
-            <DialogDescription className="break-all text-xs md:text-sm">
+      <ResponsiveDialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <ResponsiveDialogContent className="sm:!max-w-4xl lg:!max-w-4xl">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle className="text-base md:text-lg">Детали пользователя</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription className="break-all text-xs md:text-sm">
               {selectedUser?.email}
-            </DialogDescription>
-          </DialogHeader>
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
 
           {detailsLoading ? <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -551,8 +559,8 @@ export function AdminUsers({
                   </div> : <p className="text-sm text-muted-foreground">Нет рефералов</p>}
               </div>
             </div>}
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
 
       {/* Survey Statistics */}
       <SurveyStats />

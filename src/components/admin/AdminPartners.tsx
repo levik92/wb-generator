@@ -8,7 +8,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -364,13 +369,13 @@ export const AdminPartners = () => {
       </Card>
 
       {/* Partner Details Dialog */}
-      <Dialog open={!!selectedPartner} onOpenChange={() => setSelectedPartner(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg">
+      <ResponsiveDialog open={!!selectedPartner} onOpenChange={() => setSelectedPartner(null)}>
+        <ResponsiveDialogContent className="sm:max-w-4xl">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle className="text-base sm:text-lg">
               Партнер: {selectedPartner?.user_email || "—"}
-            </DialogTitle>
-          </DialogHeader>
+            </ResponsiveDialogTitle>
+          </ResponsiveDialogHeader>
 
           {detailsLoading ? <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -504,7 +509,7 @@ export const AdminPartners = () => {
                   </div>}
               </div>
             </div>}
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </div>;
 };
