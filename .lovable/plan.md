@@ -1,92 +1,40 @@
 
 
-## Кластеризация видеообложек в истории + редактирование видео
+# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
 
-### Суть изменений
+## Problem
+When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
 
-Сейчас каждое видео (основное и его перегенерации) отображается как отдельная запись в истории. Нужно:
-1. **Кластеризовать** видео по одному исходному изображению (product_image_url) -- все видео с одинаковым фото в одну карточку
-2. **Добавить кнопку "Ред."** для видео в истории -- открывает диалог как у фото
-3. **Диалог редактирования** отправляет запрос на `regenerate-video-job` с новым промтом (до 300 символов)
-4. **Версии** помечаются бейджами "Ред. (в. 1)", "Ред. (в. 2)" и т.д.
-5. **Токены суммируются** в рамках кластера
-
-### Техническая реализация
-
-#### 1. Добавить `parent_job_id` в таблицу `video_generation_jobs`
-
-Миграция:
-```sql
-ALTER TABLE video_generation_jobs 
-  ADD COLUMN parent_job_id uuid REFERENCES video_generation_jobs(id) ON DELETE SET NULL;
+**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
+```text
+isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
 ```
+But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
 
-Это позволит явно связывать перегенерации с оригиналом.
+The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
 
-#### 2. Обновить Edge Function `regenerate-video-job`
+## Solution
 
-При создании записи нового видео в `video_generation_jobs` передавать `parent_job_id`:
-- Если у оригинального задания уже есть `parent_job_id`, использовать его (корневой)
-- Иначе использовать `original_job_id` как parent
+### 1. Mark regeneration jobs with a distinct category
+Update both edge functions to use `category: 'regeneration'` instead of the product category:
+- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
+- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
 
-Изменение в строках ~215-226: добавить `parent_job_id` в `insert`.
+### 2. Update `checkForActiveJobs` in GenerateCards.tsx
+- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
+- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
+- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
 
-#### 3. Обновить `History.tsx` -- кластеризация видео
+### 3. Update active edit jobs restoration block
+The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
 
-**Логика загрузки (loadHistory):**
-- При загрузке видео (`filter === 'video'` или `filter === 'all'`) группировать записи по кластерам:
-  - Записи с одинаковым `parent_job_id` или `product_image_url` объединяются
-  - Корневая запись (без `parent_job_id` или самая ранняя) становится главной
-  - Остальные -- версии внутри кластера
-- Формат mapped generation для видео-кластера:
-  - `output_data.videos` -- массив всех видео (url + tokens_cost + created_at + version_label)
-  - `tokens_used` -- сумма всех токенов кластера
+## Technical Details
 
-**Отображение видео-кластера:**
-- Основная карточка показывает превью первого (оригинального) видео
-- Бейдж "N видео" если версий больше 1
-- Кнопка "Все видео" раскрывает сетку всех версий
-- В сетке каждое видео с бейджем:
-  - Первое (оригинал) -- без бейджа
-  - Перегенерации -- "Ред. (в. 1)", "Ред. (в. 2)" и т.д.
-- На hover: кнопки Play (просмотр), Pencil (редактирование), Download (скачать)
-
-#### 4. Диалог редактирования видео
-
-Новый диалог (или переиспользование существующего Edit Dialog с адаптацией):
-- Заголовок: "Редактировать видеообложку"
-- Описание: "Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом."
-- Textarea до **300 символов** (не 1200 как у фото)
-- Стоимость: отображается `regenCost` (2 токена)
-- Кнопка "Начать редактирование" с иконкой Sparkles
-
-При нажатии:
-- Вызывается `supabase.functions.invoke("regenerate-video-job", { body: { original_job_id, user_prompt } })`
-- Запускается поллинг через `check-video-status`
-- Карточка показывает анимацию редактирования (такую же как у фото -- радиальные градиенты + бейдж "Редактирование...")
-- По завершении -- новое видео добавляется в кластер с бейджем версии
-
-#### 5. Поллинг завершения редактирования видео
-
-Новая функция `startVideoEditPolling(jobId, clusterId)`:
-- Каждые 10 секунд вызывает `check-video-status`
-- При `completed` -- добавляет видео в кластер через `setGenerations` (обновление стейта)
-- При `failed` -- убирает анимацию, показывает тост с ошибкой
-- Таймаут: 8 минут (как в VideoCovers)
-
-### Файлы для изменения
-
-1. **Миграция БД** -- добавить `parent_job_id` в `video_generation_jobs`
-2. **`supabase/functions/regenerate-video-job/index.ts`** -- передавать `parent_job_id` при INSERT (~3 строки)
-3. **`src/components/dashboard/History.tsx`** -- основные изменения:
-   - Кластеризация видео при загрузке (~40 строк)
-   - Диалог редактирования видео (~50 строк)
-   - Поллинг видео-редактирования (~40 строк)
-   - Отображение кластера видео в сетке (~60 строк)
-   - Кнопки действий для видео (Ред., Все видео) (~20 строк)
-
-### Обратная совместимость
-
-- Существующие видео без `parent_job_id` будут кластеризоваться по `product_image_url` (фоллбэк)
-- Одиночные видео отображаются как раньше, но с добавленной кнопкой "Ред."
+**Files to modify:**
+- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
+- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
+- `src/components/dashboard/GenerateCards.tsx`:
+  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
+  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
+  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
 
