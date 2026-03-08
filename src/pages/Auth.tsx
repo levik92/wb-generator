@@ -701,7 +701,7 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab("signin")}
-                  className="w-full text-center text-sm text-white/50 hover:text-white transition-colors"
+                  className="w-full text-center text-sm text-gray-400 hover:text-gray-700 transition-colors"
                 >
                   Вернуться ко входу
                 </button>
