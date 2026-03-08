@@ -531,8 +531,8 @@ const Cases = () => {
 
         {/* CTA Section */}
         <section className="relative py-16 sm:py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(268,50%,10%)] to-transparent" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[hsl(268,83%,50%)]/20 rounded-full blur-[150px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-50/50 to-transparent" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[hsl(268,83%,70%)]/8 rounded-full blur-[150px]" />
 
           <div className="container mx-auto px-4 sm:px-6 relative z-10">
             <motion.div
