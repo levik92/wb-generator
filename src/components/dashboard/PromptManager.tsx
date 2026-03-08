@@ -445,12 +445,37 @@ export function PromptManager() {
     }
   };
 
+  const technicalPrompts = prompts.filter(p => p.model_type === 'technical');
+  const [editingTechPrompt, setEditingTechPrompt] = useState<string | null>(null);
+  const [techEditValue, setTechEditValue] = useState('');
+  const [savingTechPrompt, setSavingTechPrompt] = useState(false);
+
+  const saveTechPrompt = async (promptId: string) => {
+    if (!techEditValue.trim()) return;
+    setSavingTechPrompt(true);
+    try {
+      const { error } = await supabase.from('ai_prompts').update({
+        prompt_template: techEditValue.trim(),
+        updated_at: new Date().toISOString()
+      }).eq('id', promptId);
+      if (error) throw error;
+      toast({ title: "Успешно", description: "Промт обновлен" });
+      setEditingTechPrompt(null);
+      await loadPrompts();
+    } catch (error) {
+      toast({ title: "Ошибка", description: "Не удалось сохранить", variant: "destructive" });
+    } finally {
+      setSavingTechPrompt(false);
+    }
+  };
+
   return <div className="space-y-4 md:space-y-6 overflow-x-hidden">
-      {/* Top-level tabs: Images / Video */}
+      {/* Top-level tabs: Images / Video / Technical */}
       <Tabs defaultValue="images">
-        <TabsList className="grid w-full max-w-[280px] sm:max-w-xs grid-cols-2 mb-6">
+        <TabsList className="grid w-full max-w-[420px] sm:max-w-md grid-cols-3 mb-6">
           <TabsTrigger value="images">Изображения</TabsTrigger>
           <TabsTrigger value="video">Видео</TabsTrigger>
+          <TabsTrigger value="technical">Технические</TabsTrigger>
         </TabsList>
 
         <TabsContent value="images">
