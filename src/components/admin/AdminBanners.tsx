@@ -129,13 +129,12 @@ const SystemStatusControl = () => {
   if (loading) return null;
 
   return (
-    <Card className="overflow-hidden">
+    <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Статус системы</CardTitle>
-        <p className="text-sm text-muted-foreground">Управление баннером статуса на дашборде пользователей</p>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {STATUS_OPTIONS.map((opt) => {
             const isActive = status === opt.value;
             return (
@@ -143,14 +142,14 @@ const SystemStatusControl = () => {
                 key={opt.value}
                 disabled={saving}
                 onClick={() => handleStatusChange(opt.value)}
-                className={`relative px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-300 ${
+                className={`relative px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 ${
                   isActive
-                    ? `${opt.color} border-current shadow-md scale-[1.03]`
-                    : 'bg-card text-muted-foreground border-border/50 opacity-50 hover:opacity-80 hover:border-border'
+                    ? `${opt.color} border-current shadow-sm`
+                    : 'bg-card text-muted-foreground border-border/40 opacity-45 hover:opacity-75'
                 }`}
               >
                 {isActive && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-current animate-pulse" />
+                  <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                 )}
                 {opt.label}
               </button>
@@ -162,11 +161,11 @@ const SystemStatusControl = () => {
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Сообщение для пользователей..."
-              className="flex-1"
+              placeholder="Пояснение для пользователей..."
+              className="flex-1 text-xs h-8"
             />
-            <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Сохранить'}
+            <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving} className="h-8 text-xs">
+              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Сохранить'}
             </Button>
           </div>
         )}
