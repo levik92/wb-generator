@@ -432,7 +432,7 @@ const Auth = () => {
 
             {/* Tab switcher for signin/signup */}
             {(activeTab === "signin" || activeTab === "signup") && (
-              <div className="flex bg-white/5 rounded-xl p-1 mb-6">
+              <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
                 <button
                   onClick={() => setActiveTab("signin")}
                   className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
