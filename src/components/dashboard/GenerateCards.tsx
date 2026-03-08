@@ -464,6 +464,12 @@ export const GenerateCards = ({
       return false;
     }
     setFiles(prev => [...prev, ...uploadedFiles]);
+    
+    // Auto-detect product name if empty
+    if (!productName.trim() && uploadedFiles.length > 0) {
+      identifyProduct(uploadedFiles[0]);
+    }
+    
     return true;
   };
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
