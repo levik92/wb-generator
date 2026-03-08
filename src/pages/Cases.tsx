@@ -416,7 +416,7 @@ const Cases = () => {
             className="absolute bottom-6 left-1/2 -translate-x-1/2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
             onClick={scrollToContent}
           >
-            <div className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5">
+            <div className="w-5 h-8 rounded-full border border-gray-300 flex justify-center pt-1.5">
               <div className="w-1 h-2 bg-white/40 rounded-full" />
             </div>
           </div>
