@@ -458,8 +458,8 @@ const Cases = () => {
                       </div>
 
                       {/* Title & Description */}
-                      <h3 className="text-lg font-bold text-white mb-2">{caseItem.title}</h3>
-                      <p className="text-sm text-white/50 mb-4 flex-1">{caseItem.description}</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{caseItem.title}</h3>
+                      <p className="text-sm text-gray-500 mb-4 flex-1">{caseItem.description}</p>
 
                       {/* Stats Grid */}
                       <div className="grid grid-cols-3 gap-2">
