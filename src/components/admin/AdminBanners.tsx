@@ -72,6 +72,7 @@ const STATUS_OPTIONS = [
 const SystemStatusControl = () => {
   const [status, setStatus] = useState('none');
   const [message, setMessage] = useState('');
+  const [subtitle, setSubtitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast: statusToast } = useToast();
@@ -80,12 +81,13 @@ const SystemStatusControl = () => {
     const load = async () => {
       const { data, error } = await (supabase as any)
         .from('system_status')
-        .select('status, message')
+        .select('status, message, subtitle')
         .limit(1)
         .single();
       if (!error && data) {
         setStatus(data.status);
         setMessage(data.message || '');
+        setSubtitle(data.subtitle || '');
       }
       setLoading(false);
     };
@@ -95,17 +97,19 @@ const SystemStatusControl = () => {
   const handleStatusChange = async (newStatus: string) => {
     setSaving(true);
     const newMessage = newStatus === status ? message : (DEFAULT_MESSAGES[newStatus] || '');
+    const newSubtitle = newStatus === status ? subtitle : '';
     
     const { error } = await (supabase as any)
       .from('system_status')
-      .update({ status: newStatus, message: newMessage, updated_at: new Date().toISOString() })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // update all rows
+      .update({ status: newStatus, message: newMessage, subtitle: newSubtitle, updated_at: new Date().toISOString() })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
 
     if (error) {
       statusToast({ title: 'Ошибка', description: 'Не удалось обновить статус', variant: 'destructive' });
     } else {
       setStatus(newStatus);
       setMessage(newMessage);
+      setSubtitle(newSubtitle);
       statusToast({ title: 'Статус обновлён' });
     }
     setSaving(false);
@@ -115,13 +119,13 @@ const SystemStatusControl = () => {
     setSaving(true);
     const { error } = await (supabase as any)
       .from('system_status')
-      .update({ message, updated_at: new Date().toISOString() })
+      .update({ message, subtitle, updated_at: new Date().toISOString() })
       .neq('id', '00000000-0000-0000-0000-000000000000');
 
     if (error) {
       statusToast({ title: 'Ошибка', variant: 'destructive' });
     } else {
-      statusToast({ title: 'Сообщение сохранено' });
+      statusToast({ title: 'Сохранено' });
     }
     setSaving(false);
   };
@@ -149,7 +153,7 @@ const SystemStatusControl = () => {
                 }`}
               >
                 {isActive && (
-                  <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                  <span className="absolute top-1/2 -translate-y-1/2 right-1.5 w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                 )}
                 {opt.label}
               </button>
@@ -157,16 +161,24 @@ const SystemStatusControl = () => {
           })}
         </div>
         {status !== 'none' && (
-          <div className="flex gap-2">
+          <div className="space-y-2">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Пояснение для пользователей..."
-              className="flex-1 text-xs h-8"
+              placeholder="Заголовок статуса..."
+              className="text-xs h-8"
             />
-            <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving} className="h-8 text-xs">
-              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Сохранить'}
-            </Button>
+            <div className="flex gap-2">
+              <Input
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                placeholder="Подзаголовок / пояснение причины..."
+                className="flex-1 text-xs h-8"
+              />
+              <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving} className="h-8 text-xs">
+                {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Сохранить'}
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

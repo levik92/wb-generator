@@ -1,0 +1,1 @@
+ALTER TABLE public.system_status ADD COLUMN IF NOT EXISTS subtitle text NOT NULL DEFAULT '';
