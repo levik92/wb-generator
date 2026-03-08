@@ -1,9 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+const DEFAULT_PROMPT = 'Определи товар на изображении. Верни только наименование товара на русском языке длиной до 120 символов с учетом пробелов. Без описания, без кавычек, без точки в конце.';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -25,10 +28,28 @@ serve(async (req) => {
       throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
+    // Fetch prompt from DB
+    let prompt = DEFAULT_PROMPT;
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const { data } = await supabase
+        .from('ai_prompts')
+        .select('prompt_template')
+        .eq('prompt_type', 'identify-product')
+        .eq('model_type', 'technical')
+        .limit(1)
+        .single();
+      if (data?.prompt_template) {
+        prompt = data.prompt_template;
+      }
+    } catch (e) {
+      console.warn('[identify-product] Failed to fetch prompt from DB, using default:', e.message);
+    }
+
     // Strip data URL prefix if present
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-
-    const prompt = 'Определи товар на изображении. Верни только наименование товара на русском языке длиной до 120 символов с учетом пробелов. Без описания, без кавычек, без точки в конце.';
 
     const aiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`,
