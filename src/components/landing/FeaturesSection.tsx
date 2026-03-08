@@ -80,29 +80,29 @@ const capabilities = [
 export const FeaturesSection = () => {
   return (
     <section id="features" className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gray-50" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
         <div className="text-center mb-16 sm:mb-20">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-sm text-purple-700 mb-6">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
             Почему WBGen
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
             Дизайн карточек WB
             <br />
-            <span className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,60%)] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)] bg-clip-text text-transparent">
               без дизайнера
             </span>
           </h2>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
             ИИ-генератор карточек для WB, Ozon и Яндекс Маркет — профессиональный результат за минуты
           </p>
         </div>
 
-        {/* Features grid */}
+        {/* Features grid - no framer-motion */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-24">
           {features.map((feature) => (
             <div
@@ -114,20 +114,20 @@ export const FeaturesSection = () => {
               >
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-500">{feature.description}</p>
+              <p className="text-white/50">{feature.description}</p>
             </div>
           ))}
         </div>
 
         {/* Capabilities section */}
         <div className="text-center mb-12">
-          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
             Полный набор инструментов
           </h3>
-          <p className="text-gray-500 max-w-xl mx-auto">
+          <p className="text-white/50 max-w-xl mx-auto">
             Всё, что нужно для создания продающих карточек на маркетплейсах
           </p>
         </div>
@@ -139,19 +139,19 @@ export const FeaturesSection = () => {
               className="glass-card rounded-2xl p-6 sm:p-8"
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(268,83%,55%)] to-[hsl(268,83%,45%)] flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] flex items-center justify-center flex-shrink-0">
                   <cap.icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                  <h4 className="text-lg sm:text-xl font-bold text-white mb-2">
                     {cap.title}
                   </h4>
-                  <p className="text-gray-500 text-sm mb-4">{cap.description}</p>
+                  <p className="text-white/50 text-sm mb-4">{cap.description}</p>
                   <ul className="flex flex-wrap gap-2">
                     {cap.features.map((f) => (
                       <li
                         key={f}
-                        className="px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-xs text-purple-700"
+                        className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/70"
                       >
                         {f}
                       </li>

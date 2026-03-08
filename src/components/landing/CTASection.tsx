@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 export const CTASection = () => {
   return (
     <section className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Gradient background - kept dark for contrast */}
+      {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,25%)] via-[hsl(268,70%,20%)] to-[hsl(240,10%,6%)]" />
       
-      {/* Orbs */}
+      {/* Static orbs - no animation for mobile performance */}
       <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-[hsl(268,83%,50%)] rounded-full blur-[120px] sm:blur-[150px] opacity-20 sm:opacity-30" />
       <div className="absolute bottom-1/4 right-1/4 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-[hsl(220,100%,50%)] rounded-full blur-[140px] sm:blur-[180px] opacity-15 sm:opacity-20" />
       
-      {/* Grid pattern */}
+      {/* Grid pattern - reduced on mobile */}
       <div className="absolute inset-0 grid-pattern opacity-5 sm:opacity-10" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -47,7 +47,7 @@ export const CTASection = () => {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl p-4 sm:p-6 bg-white/10 backdrop-blur-sm border border-white/10"
+                className="glass-card rounded-2xl p-4 sm:p-6"
               >
                 <stat.icon className="w-5 h-5 text-[hsl(268,83%,70%)] mx-auto mb-2" />
                 <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">

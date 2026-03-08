@@ -66,11 +66,14 @@ export const BenefitsSection = ({
   reversed = false,
   variant = "cards",
 }: BenefitsSectionProps) => {
+  // Determine layout based on benefits count and variant
+  const useGridLayout = variant === "grid" || (variant === "cards" && benefits.length >= 4);
   const useCardLayout = variant === "cards" || benefits.length >= 3;
 
   return (
     <section className="py-20 sm:py-28 relative">
-      <div className="absolute inset-0 bg-gray-50" />
+      {/* Transparent background to show page animation */}
+      <div className="absolute inset-0 bg-transparent" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
@@ -80,13 +83,13 @@ export const BenefitsSection = ({
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-2 rounded-full bg-[hsl(268,83%,55%)]/10 text-[hsl(268,83%,65%)] text-sm font-medium mb-4">
             Преимущества
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
             {title}
           </h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+          <p className="text-white/60 text-lg max-w-2xl mx-auto">
             {subtitle}
           </p>
         </motion.div>
@@ -112,17 +115,17 @@ export const BenefitsSection = ({
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="group"
                 >
-                  <div className="glass-card rounded-2xl p-8 h-full hover:border-purple-200 transition-all duration-300">
+                  <div className="glass-card rounded-2xl p-8 h-full border border-white/5 hover:border-[hsl(268,83%,55%)]/30 transition-all duration-300 hover:bg-white/[0.02]">
                     {/* Icon */}
                     <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                       <IconComponent className="w-7 h-7 text-white" />
                     </div>
                     
                     {/* Content */}
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-[hsl(268,83%,55%)] transition-colors">
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[hsl(268,83%,75%)] transition-colors">
                       {benefit.title}
                     </h3>
-                    <p className="text-gray-500 leading-relaxed">
+                    <p className="text-white/60 leading-relaxed">
                       {benefit.description}
                     </p>
                   </div>
@@ -132,9 +135,10 @@ export const BenefitsSection = ({
           </div>
         )}
 
-        {/* List layout */}
+        {/* List layout (fallback for small benefit sets with image) */}
         {!useCardLayout && (
           <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center ${reversed ? 'lg:flex-row-reverse' : ''}`}>
+            {/* Content */}
             <motion.div
               initial={{ opacity: 0, x: reversed ? 30 : -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -160,8 +164,8 @@ export const BenefitsSection = ({
                         <IconComponent className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-gray-900 font-bold text-lg mb-2">{benefit.title}</h3>
-                        <p className="text-gray-500">{benefit.description}</p>
+                        <h3 className="text-white font-bold text-lg mb-2">{benefit.title}</h3>
+                        <p className="text-white/60">{benefit.description}</p>
                       </div>
                     </motion.div>
                   );
@@ -169,6 +173,7 @@ export const BenefitsSection = ({
               </div>
             </motion.div>
             
+            {/* Image/Visual */}
             {imageSrc && (
               <motion.div
                 initial={{ opacity: 0, x: reversed ? -30 : 30 }}
@@ -177,14 +182,15 @@ export const BenefitsSection = ({
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className={`relative ${reversed ? 'lg:order-1' : ''}`}
               >
-                <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-xl">
+                <div className="relative rounded-2xl overflow-hidden border border-white/10">
                   <img 
                     src={imageSrc} 
                     alt={imageAlt}
                     className="w-full h-auto"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(240,10%,4%)/40] to-transparent" />
                 </div>
-                <div className="absolute -inset-4 bg-gradient-to-br from-purple-100/20 to-transparent rounded-3xl blur-2xl -z-10" />
+                <div className="absolute -inset-4 bg-gradient-to-br from-[hsl(268,50%,40%)/10] to-transparent rounded-3xl blur-2xl -z-10" />
               </motion.div>
             )}
           </div>

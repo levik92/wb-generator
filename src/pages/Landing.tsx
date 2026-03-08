@@ -24,10 +24,12 @@ const SectionLoader = () => (
 
 const Landing = () => {
   useEffect(() => {
-    document.documentElement.classList.remove("dark");
-    document.body.style.backgroundColor = "#ffffff";
+    // Force dark mode for landing page
+    document.documentElement.classList.add("dark");
+    document.body.style.backgroundColor = "#111111";
     
     return () => {
+      document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
@@ -47,7 +49,10 @@ const Landing = () => {
       
       <YandexMetrika />
       
-      <div className="min-h-screen bg-white text-gray-900 landing-light">
+      <div className="min-h-screen bg-[#111111] text-white landing-dark">
+        {/* Noise overlay for texture */}
+        <div className="noise-overlay" />
+        
         <LandingHeader />
         <main>
           <HeroSection />

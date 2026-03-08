@@ -29,7 +29,9 @@ const legalLinks = [
 
 export const LandingFooter = () => {
   return (
-    <footer className="relative py-16 border-t border-gray-800 bg-gray-900">
+    <footer className="relative py-16 border-t border-white/10">
+      <div className="absolute inset-0 bg-[#111111]" />
+
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Logo */}
@@ -42,7 +44,7 @@ export const LandingFooter = () => {
                 WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
               </span>
             </Link>
-            <p className="text-gray-400 text-sm">
+            <p className="text-white/50 text-sm">
               ИИ-инструменты для селлеров WB, Ozon, Яндекс Маркет
             </p>
           </div>
@@ -53,7 +55,7 @@ export const LandingFooter = () => {
             <ul className="space-y-3 text-sm">
               {productLinks.map((link) => (
                 <li key={link.href}>
-                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
+                  <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -68,11 +70,11 @@ export const LandingFooter = () => {
               {resourceLinks.map((link) => (
                 <li key={link.href}>
                   {link.external ? (
-                    <Link to={link.href} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                    <Link to={link.href} target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
                       {link.label}
                     </Link>
                   ) : (
-                    <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
+                    <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
                       {link.label}
                     </Link>
                   )}
@@ -92,19 +94,19 @@ export const LandingFooter = () => {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-400 hover:text-white transition-colors"
+                      className="text-white/50 hover:text-white transition-colors"
                     >
                       {link.label}
                     </a>
                   ) : (
-                    <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
+                    <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
                       {link.label}
                     </Link>
                   )}
                 </li>
               ))}
               <li>
-                <a href="mailto:info@wbgen.ru" className="text-gray-400 hover:text-white transition-colors">
+                <a href="mailto:info@wbgen.ru" className="text-white/50 hover:text-white transition-colors">
                   info@wbgen.ru
                 </a>
               </li>
@@ -117,7 +119,7 @@ export const LandingFooter = () => {
             <ul className="space-y-3 text-sm">
               {legalLinks.map((link) => (
                 <li key={link.href}>
-                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
+                  <Link to={link.href} className="text-white/50 hover:text-white transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -126,9 +128,9 @@ export const LandingFooter = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
-          <p className="text-sm text-gray-500">© 2025 ИП Чупин Антон Дмитриевич. Все права защищены.</p>
-          <p className="text-sm text-gray-500">ИНН: 723013381128</p>
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
+          <p className="text-sm text-white/40">© 2025 ИП Чупин Антон Дмитриевич. Все права защищены.</p>
+          <p className="text-sm text-white/40">ИНН: 723013381128</p>
         </div>
       </div>
     </footer>

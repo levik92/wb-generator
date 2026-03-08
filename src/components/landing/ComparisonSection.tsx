@@ -54,44 +54,44 @@ const comparisonData = [
 const renderValue = (value: boolean | string) => {
   if (value === true) {
     return (
-      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-        <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600" />
+      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+        <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
       </div>
     );
   }
   if (value === false) {
     return (
-      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-100 flex items-center justify-center">
-        <X className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
+      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+        <X className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
       </div>
     );
   }
   if (value === "partial") {
     return (
-      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-100 flex items-center justify-center">
-        <Minus className="w-3 h-3 sm:w-4 sm:h-4 text-amber-600" />
+      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+        <Minus className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400" />
       </div>
     );
   }
-  return <span className="text-xs sm:text-sm text-gray-600 text-center">{value}</span>;
+  return <span className="text-xs sm:text-sm text-white/70 text-center">{value}</span>;
 };
 
 export const ComparisonSection = () => {
   return (
     <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-white" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(240,10%,4%)] via-[hsl(240,8%,6%)] to-[hsl(240,10%,4%)]" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-sm text-purple-700 mb-4 sm:mb-6">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-4 sm:mb-6">
             Сравнение
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             WBGen vs альтернативы
           </h2>
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto">
             Объективное сравнение способов создания карточек для Wildberries
           </p>
         </div>
@@ -100,29 +100,29 @@ export const ComparisonSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-auto">
             {/* Header */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 border-b border-gray-100 min-w-[400px]">
-              <div className="text-xs sm:text-sm text-gray-400 font-medium">Критерий</div>
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 border-b border-white/10 min-w-[400px]">
+              <div className="text-xs sm:text-sm text-white/40 font-medium">Критерий</div>
               <div className="text-center">
-                <div className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(268,83%,45%)]">
+                <div className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)]">
                   <span className="text-xs sm:text-sm font-bold text-white">WBGen</span>
                 </div>
               </div>
-              <div className="text-center text-xs sm:text-sm text-gray-500 font-medium">
+              <div className="text-center text-xs sm:text-sm text-white/60 font-medium">
                 Дизайнер
               </div>
-              <div className="text-center text-xs sm:text-sm text-gray-500 font-medium">
+              <div className="text-center text-xs sm:text-sm text-white/60 font-medium">
                 Конструктор
               </div>
             </div>
 
             {/* Rows */}
-            <div className="divide-y divide-gray-50 min-w-[400px]">
+            <div className="divide-y divide-white/5 min-w-[400px]">
               {comparisonData.map((row) => (
                 <div
                   key={row.feature}
-                  className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 items-center hover:bg-gray-50/50 transition-colors"
+                  className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 items-center hover:bg-white/[0.02] transition-colors"
                 >
-                  <div className="text-xs sm:text-sm text-gray-600">{row.feature}</div>
+                  <div className="text-xs sm:text-sm text-white/70">{row.feature}</div>
                   <div className="flex justify-center">
                     <div className="comparison-highlight rounded-lg px-2 sm:px-3 py-1 sm:py-2">
                       {renderValue(row.wbgen)}
@@ -139,8 +139,8 @@ export const ComparisonSection = () => {
             </div>
 
             {/* Footer note */}
-            <div className="p-3 sm:p-6 border-t border-gray-100 bg-gray-50/50">
-              <p className="text-[10px] sm:text-xs text-gray-400 text-center">
+            <div className="p-3 sm:p-6 border-t border-white/10 bg-white/[0.02]">
+              <p className="text-[10px] sm:text-xs text-white/40 text-center">
                 * Подписка в месяц. Бесплатные конструкторы ограничены в функционале и не дают профессионального результата.
               </p>
             </div>
