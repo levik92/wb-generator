@@ -55,6 +55,117 @@ const presetGradients = [
   { name: "Красный", start: "#ef4444", end: "#f43f5e" },
 ];
 
+const DEFAULT_MESSAGES: Record<string, string> = {
+  none: '',
+  green: 'Все системы работают нормально',
+  yellow: 'Сервера загружены, возможны задержки при генерации',
+  red: 'Сервера перегружены, генерация может не работать',
+};
+
+const STATUS_OPTIONS = [
+  { value: 'none', label: 'Выключен', color: 'bg-muted text-muted-foreground border-border' },
+  { value: 'green', label: 'Всё работает', color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' },
+  { value: 'yellow', label: 'Возможны сбои', color: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30' },
+  { value: 'red', label: 'Нестабильная работа', color: 'bg-destructive/10 text-destructive border-destructive/30' },
+];
+
+const SystemStatusControl = () => {
+  const [status, setStatus] = useState('none');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast: statusToast } = useToast();
+
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await (supabase as any)
+        .from('system_status')
+        .select('status, message')
+        .limit(1)
+        .single();
+      if (!error && data) {
+        setStatus(data.status);
+        setMessage(data.message || '');
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const handleStatusChange = async (newStatus: string) => {
+    setSaving(true);
+    const newMessage = newStatus === status ? message : (DEFAULT_MESSAGES[newStatus] || '');
+    
+    const { error } = await (supabase as any)
+      .from('system_status')
+      .update({ status: newStatus, message: newMessage, updated_at: new Date().toISOString() })
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // update all rows
+
+    if (error) {
+      statusToast({ title: 'Ошибка', description: 'Не удалось обновить статус', variant: 'destructive' });
+    } else {
+      setStatus(newStatus);
+      setMessage(newMessage);
+      statusToast({ title: 'Статус обновлён' });
+    }
+    setSaving(false);
+  };
+
+  const handleMessageSave = async () => {
+    setSaving(true);
+    const { error } = await (supabase as any)
+      .from('system_status')
+      .update({ message, updated_at: new Date().toISOString() })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (error) {
+      statusToast({ title: 'Ошибка', variant: 'destructive' });
+    } else {
+      statusToast({ title: 'Сообщение сохранено' });
+    }
+    setSaving(false);
+  };
+
+  if (loading) return null;
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Статус системы</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              disabled={saving}
+              onClick={() => handleStatusChange(opt.value)}
+              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${opt.color} ${
+                status === opt.value ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-60 hover:opacity-100'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {status !== 'none' && (
+          <div className="flex gap-2">
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Сообщение для пользователей..."
+              className="flex-1"
+            />
+            <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Сохранить'}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export const AdminBanners = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
