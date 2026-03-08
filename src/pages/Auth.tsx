@@ -416,7 +416,7 @@ const Auth = () => {
                   WB<span className="text-[hsl(268,83%,55%)]">Gen</span>
                 </span>
               </Link>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 {activeTab === "signin" && "Вход в аккаунт"}
                 {activeTab === "signup" && "Создание аккаунта"}
                 {activeTab === "reset" && "Восстановление пароля"}
