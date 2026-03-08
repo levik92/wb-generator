@@ -564,7 +564,7 @@ const Cases = () => {
                 <Link to="/">
                   <Button 
                     variant="outline" 
-                    className="text-base px-8 py-6 rounded-xl font-semibold border-white/20 bg-white/5 text-white hover:bg-white/10 w-full sm:w-auto"
+                    className="text-base px-8 py-6 rounded-xl font-semibold border-gray-200 text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
                   >
                     На главную
                   </Button>
