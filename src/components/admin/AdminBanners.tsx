@@ -161,24 +161,16 @@ const SystemStatusControl = () => {
           })}
         </div>
         {status !== 'none' && (
-          <div className="space-y-2">
+          <div className="flex gap-2">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Заголовок статуса..."
-              className="text-xs h-8"
+              placeholder="Сообщение статуса..."
+              className="flex-1 text-xs h-8"
             />
-            <div className="flex gap-2">
-              <Input
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-                placeholder="Подзаголовок / пояснение причины..."
-                className="flex-1 text-xs h-8"
-              />
-              <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving} className="h-8 text-xs">
-                {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Сохранить'}
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" onClick={handleMessageSave} disabled={saving} className="h-8 text-xs">
+              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Сохранить'}
+            </Button>
           </div>
         )}
       </CardContent>
