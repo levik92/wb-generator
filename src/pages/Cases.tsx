@@ -345,7 +345,7 @@ const Cases = () => {
           <div className="flex items-center justify-between h-16 sm:h-20">
             <Link
               to="/"
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-sm font-medium">Назад</span>
