@@ -674,9 +674,9 @@ const Auth = () => {
                 {captchaSiteKey && (
                   <div className="flex justify-center">
                     <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
+                      <div className="h-[78px] w-[302px] bg-gray-50 border border-gray-200 rounded-lg flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                        <span className="text-xs text-gray-400">Загрузка капчи...</span>
                       </div>
                     }>
                       <HCaptcha
