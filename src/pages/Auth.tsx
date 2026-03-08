@@ -531,7 +531,7 @@ const Auth = () => {
                       <HCaptcha
                         ref={captchaRef}
                         sitekey={captchaSiteKey}
-                        theme="dark"
+                        theme="light"
                         onVerify={(token) => setCaptchaToken(token)}
                         onExpire={() => setCaptchaToken(null)}
                       />
