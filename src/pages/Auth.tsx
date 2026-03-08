@@ -748,7 +748,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] hover:opacity-90 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Сохранить пароль"}
                 </Button>
