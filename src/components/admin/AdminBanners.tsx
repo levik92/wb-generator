@@ -119,13 +119,13 @@ const SystemStatusControl = () => {
     setSaving(true);
     const { error } = await (supabase as any)
       .from('system_status')
-      .update({ message, updated_at: new Date().toISOString() })
+      .update({ message, subtitle, updated_at: new Date().toISOString() })
       .neq('id', '00000000-0000-0000-0000-000000000000');
 
     if (error) {
       statusToast({ title: 'Ошибка', variant: 'destructive' });
     } else {
-      statusToast({ title: 'Сообщение сохранено' });
+      statusToast({ title: 'Сохранено' });
     }
     setSaving(false);
   };
