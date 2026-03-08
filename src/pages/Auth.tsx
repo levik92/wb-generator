@@ -757,7 +757,7 @@ const Auth = () => {
 
             {/* Referral badge */}
             {(referralCode || partnerCode) && (activeTab === "signin" || activeTab === "signup") && (
-              <div className="mt-6 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="mt-6 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
                 <p className="text-xs text-emerald-400 text-center">
                   🎁 Вы пришли по реферальной ссылке — бонус будет начислен после регистрации
                 </p>
