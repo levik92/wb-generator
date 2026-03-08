@@ -437,8 +437,8 @@ const Auth = () => {
                   onClick={() => setActiveTab("signin")}
                   className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                     activeTab === "signin"
-                      ? "bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] text-white"
-                      : "text-white/50 hover:text-white"
+                      ? "bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   Вход
