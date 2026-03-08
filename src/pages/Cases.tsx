@@ -449,7 +449,7 @@ const Cases = () => {
                     <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex-1 flex flex-col">
                       {/* Category & Conversion */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/70">
+                        <span className="px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs text-gray-600">
                           {caseItem.category}
                         </span>
                         <span className="text-xl sm:text-2xl font-bold text-emerald-400">
