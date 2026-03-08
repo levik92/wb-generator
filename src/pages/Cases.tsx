@@ -521,7 +521,7 @@ const Cases = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-8 text-white/40"
+                className="text-center py-8 text-gray-400"
               >
                 Вы просмотрели все {allCases.length} кейсов
               </motion.div>
