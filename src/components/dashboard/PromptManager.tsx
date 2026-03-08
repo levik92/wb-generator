@@ -449,9 +449,6 @@ export function PromptManager() {
   };
 
   const technicalPrompts = prompts.filter(p => p.model_type === 'technical');
-  const [editingTechPrompt, setEditingTechPrompt] = useState<string | null>(null);
-  const [techEditValue, setTechEditValue] = useState('');
-  const [savingTechPrompt, setSavingTechPrompt] = useState(false);
 
   const saveTechPrompt = async (promptId: string) => {
     if (!techEditValue.trim()) return;
