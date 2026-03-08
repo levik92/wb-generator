@@ -28,6 +28,7 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
   const [promoCode, setPromoCode] = useState("");
   const [validating, setValidating] = useState(false);
   const [validPromo, setValidPromo] = useState<PromoCodeInfo | null>(null);
+  const [instantResult, setInstantResult] = useState<{ success: boolean; message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -39,6 +40,7 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
     setValidating(true);
     setError(null);
     setValidPromo(null);
+    setInstantResult(null);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -60,12 +62,6 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
         return;
       }
 
-      // Block tokens_instant at checkout
-      if (promo.type === 'tokens_instant') {
-        setError("Этот промокод нужно активировать в разделе Бонусы");
-        return;
-      }
-
       if (promo.valid_until && new Date(promo.valid_until) < new Date()) {
         setError("Промокод истек");
         return;
@@ -76,6 +72,26 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
         return;
       }
 
+      // Handle tokens_instant — redeem immediately via edge function
+      if (promo.type === 'tokens_instant') {
+        const { data, error: redeemError } = await supabase.functions.invoke('redeem-promocode', {
+          body: { code: promoCode.trim() }
+        });
+
+        if (redeemError) {
+          const errorMsg = data?.error || "Ошибка при активации промокода";
+          setError(errorMsg);
+        } else if (data?.error) {
+          setError(data.error);
+        } else {
+          setInstantResult({ success: true, message: `Начислено +${data.tokens_awarded} токенов на баланс` });
+          toast({ title: "Промокод активирован!", description: `+${data.tokens_awarded} токенов` });
+          setPromoCode("");
+        }
+        return;
+      }
+
+      // For discount/tokens types — apply to checkout
       const promoInfo: PromoCodeInfo = {
         id: promo.id,
         code: promo.code,
@@ -107,6 +123,7 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
     setValidPromo(null);
     setPromoCode("");
     setError(null);
+    setInstantResult(null);
     onPromoApplied(null);
   };
 
@@ -115,17 +132,17 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Gift className="w-5 h-5 text-wb-purple" />
-          <CardTitle>Ввести промокод</CardTitle>
+          <CardTitle>Промокод</CardTitle>
         </div>
-        <CardDescription>Получите скидку или бонусные токены</CardDescription>
+        <CardDescription>Активируйте промокод для получения скидки или токенов</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!validPromo ? (
+        {!validPromo && !instantResult ? (
           <>
             <div className="space-y-2">
               <Label htmlFor="promoCode">Промокод</Label>
               <div className="flex gap-2">
-                <Input id="promoCode" placeholder="Введите промокод" value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())} className="flex-1" />
+                <Input id="promoCode" placeholder="Введите промокод" value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && !validating && promoCode.trim() && validatePromoCode()} className="flex-1" />
                 <Button onClick={validatePromoCode} disabled={validating || !promoCode.trim()} className="bg-wb-purple hover:bg-wb-purple-dark">
                   {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Применить"}
                 </Button>
@@ -138,6 +155,21 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
               </Alert>
             )}
           </>
+        ) : instantResult ? (
+          <Alert className="border-green-500/30 bg-green-500/10">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <strong>Промокод активирован!</strong>
+                  <div className="mt-1">{instantResult.message}</div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={clearPromo} className="text-green-700 hover:bg-green-800 hover:text-white transition-colors">
+                  Ввести другой
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
         ) : (
           <Alert className="border-green-500/30 bg-green-500/10">
             <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -146,9 +178,9 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
                 <div>
                   <strong>Промокод активирован!</strong>
                   <div className="mt-1">
-                    {validPromo.type === 'discount'
-                      ? <>Скидка <Badge className="bg-green-600 hover:bg-green-600">{validPromo.value}%</Badge> будет применена при оплате</>
-                      : <>Вы получите <Badge className="bg-green-600 hover:bg-green-600">+{validPromo.value}</Badge> бонусных токенов после оплаты</>
+                    {validPromo!.type === 'discount'
+                      ? <>Скидка <Badge className="bg-green-600 hover:bg-green-600">{validPromo!.value}%</Badge> будет применена при оплате</>
+                      : <>Вы получите <Badge className="bg-green-600 hover:bg-green-600">+{validPromo!.value}</Badge> бонусных токенов после оплаты</>
                     }
                   </div>
                 </div>
