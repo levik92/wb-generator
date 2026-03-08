@@ -72,6 +72,7 @@ const STATUS_OPTIONS = [
 const SystemStatusControl = () => {
   const [status, setStatus] = useState('none');
   const [message, setMessage] = useState('');
+  const [subtitle, setSubtitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast: statusToast } = useToast();
@@ -80,12 +81,13 @@ const SystemStatusControl = () => {
     const load = async () => {
       const { data, error } = await (supabase as any)
         .from('system_status')
-        .select('status, message')
+        .select('status, message, subtitle')
         .limit(1)
         .single();
       if (!error && data) {
         setStatus(data.status);
         setMessage(data.message || '');
+        setSubtitle(data.subtitle || '');
       }
       setLoading(false);
     };
