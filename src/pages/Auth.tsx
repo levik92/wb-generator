@@ -392,7 +392,7 @@ const Auth = () => {
         {/* Back to home */}
         <Link
           to="/"
-          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
+          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-gray-400 hover:text-gray-700 transition-colors z-20"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Назад</span>
