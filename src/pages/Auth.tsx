@@ -376,7 +376,7 @@ const Auth = () => {
     }
   };
 
-  const inputClasses = "h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[hsl(268,83%,58%)] focus:ring-[hsl(268,83%,58%)]/20 rounded-xl pl-12";
+  const inputClasses = "h-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[hsl(268,83%,55%)] focus:ring-[hsl(268,83%,55%)]/20 rounded-xl pl-12";
 
   return (
     <>
