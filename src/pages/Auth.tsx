@@ -617,7 +617,7 @@ const Auth = () => {
                   />
                   <Label htmlFor="terms" className="text-xs text-gray-500 leading-relaxed">
                     Я согласен с{" "}
-                    <Link to="/terms" className="text-[hsl(268,83%,58%)] hover:underline" target="_blank">
+                    <Link to="/terms" className="text-[hsl(268,83%,55%)] hover:underline" target="_blank">
                       договором оферты
                     </Link>{" "}
                     и{" "}
