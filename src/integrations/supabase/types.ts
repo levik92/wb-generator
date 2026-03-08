@@ -1660,6 +1660,10 @@ export type Database = {
         Args: { payment_id_param: string }
         Returns: boolean
       }
+      redeem_promocode_tokens: {
+        Args: { p_amount: number; p_code: string; p_user_id: string }
+        Returns: undefined
+      }
       refund_tokens: {
         Args: {
           reason_text?: string
