@@ -62,9 +62,14 @@ export const SystemStatusBanner = () => {
   const displayMessage = statusData.message || config.defaultMessage;
 
   return (
-    <div className={`w-full mb-4 md:mb-6 rounded-xl border px-4 py-3 flex items-center gap-3 ${config.bg}`}>
-      <Icon className={`h-5 w-5 shrink-0 ${config.iconColor}`} />
-      <p className={`text-sm font-medium ${config.text}`}>{displayMessage}</p>
+    <div className={`w-full mb-4 md:mb-6 rounded-xl border px-4 py-3 flex items-start gap-3 ${config.bg}`}>
+      <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${config.iconColor}`} />
+      <div className="min-w-0">
+        <p className={`text-sm font-medium ${config.text}`}>{displayMessage}</p>
+        {statusData.subtitle && (
+          <p className={`text-xs mt-0.5 ${config.text} opacity-75`}>{statusData.subtitle}</p>
+        )}
+      </div>
     </div>
   );
 };
