@@ -469,9 +469,9 @@ const Cases = () => {
                             {caseItem.ordersChange}
                           </div>
                         </div>
-                        <div className="bg-red-500/10 rounded-lg p-2 text-center">
-                          <div className="text-[10px] text-red-400/70 mb-0.5">Дизайнер</div>
-                          <div className="text-xs sm:text-sm font-bold text-red-400 line-through">
+                        <div className="bg-red-50 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-red-400 mb-0.5">Дизайнер</div>
+                          <div className="text-xs sm:text-sm font-bold text-red-500 line-through">
                             {caseItem.designerCost}
                           </div>
                         </div>
