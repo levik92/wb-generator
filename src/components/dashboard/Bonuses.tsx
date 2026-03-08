@@ -1,5 +1,6 @@
 import { BonusProgram } from "./BonusProgram";
 import { Referrals } from "./Referrals";
+import { RedeemPromoCode } from "./RedeemPromoCode";
 import { Separator } from "@/components/ui/separator";
 
 interface Profile {
@@ -20,6 +21,11 @@ export const Bonuses = ({ profile }: BonusesProps) => {
     <div className="space-y-8">
       {/* Bonus Program Section */}
       <BonusProgram profile={profile} />
+
+      <Separator className="my-8" />
+
+      {/* Promo Code Redemption */}
+      <RedeemPromoCode />
       
       <Separator className="my-8" />
       
