@@ -1757,6 +1757,14 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
+          }} className="shrink-0" disabled={generating}>
+            setFiles([]);
+            setReferenceImage(null);
+            setProductName("");
+            setCategory("");
+            setDescription("");
+            setAutoDescription(false);
+            setSelectedCards([0]);
           }} className="shrink-0">
               <X className="w-4 h-4 mr-1" />
               Очистить
