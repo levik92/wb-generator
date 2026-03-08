@@ -7,6 +7,7 @@ type SystemStatus = 'none' | 'green' | 'yellow' | 'red';
 interface StatusData {
   status: SystemStatus;
   message: string;
+  subtitle: string;
 }
 
 const statusConfig = {
