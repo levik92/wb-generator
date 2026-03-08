@@ -23,6 +23,7 @@ import { VideoCovers } from "@/components/dashboard/VideoCovers";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
+import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
 
 // Mobile components
@@ -390,6 +391,7 @@ const Dashboard = () => {
         {!isMobile && <DashboardHeader profile={profile} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} />}
         
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
+          <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
           {renderContent()}
         </main>
