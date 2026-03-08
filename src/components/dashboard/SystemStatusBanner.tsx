@@ -41,7 +41,7 @@ export const SystemStatusBanner = () => {
     const fetchStatus = async () => {
       const { data, error } = await (supabase as any)
         .from('system_status')
-        .select('status, message')
+        .select('status, message, subtitle')
         .limit(1)
         .single();
 
