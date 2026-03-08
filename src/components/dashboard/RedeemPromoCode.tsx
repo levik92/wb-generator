@@ -29,7 +29,7 @@ export const RedeemPromoCode = ({ onRedeemed }: { onRedeemed?: () => void }) => 
       } else if (data?.error) {
         setResult({ success: false, message: data.error });
       } else {
-        setResult({ success: true, message: data.message });
+        setResult({ success: true, message: data.message || `Начислено ${data.tokens_awarded} токенов` });
         toast({ title: "Промокод активирован!", description: `+${data.tokens_awarded} токенов` });
         setCode("");
         onRedeemed?.();

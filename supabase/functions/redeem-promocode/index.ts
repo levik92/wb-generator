@@ -11,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Не авторизован' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -21,7 +20,6 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    // Verify user
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } }
     })
@@ -31,7 +29,6 @@ Deno.serve(async (req) => {
     }
     const userId = claimsData.claims.sub as string
 
-    // Parse body
     const { code } = await req.json()
     if (!code || typeof code !== 'string' || code.trim().length === 0 || code.trim().length > 50) {
       return new Response(JSON.stringify({ error: 'Некорректный промокод' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -43,7 +40,7 @@ Deno.serve(async (req) => {
     // Find promo code
     const { data: promo, error: promoError } = await adminClient
       .from('promocodes')
-      .select('id, code, type, value, max_uses, current_uses, valid_until, is_active')
+      .select('id, code, type, value, max_uses, current_uses, valid_until, is_active, max_uses_per_user')
       .eq('code', sanitizedCode)
       .eq('is_active', true)
       .single()
@@ -52,9 +49,9 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Промокод не найден или неактивен' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Only tokens type
-    if (promo.type !== 'tokens') {
-      return new Response(JSON.stringify({ error: 'Этот промокод нельзя активировать здесь' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    // Only tokens_instant type allowed here
+    if (promo.type !== 'tokens_instant') {
+      return new Response(JSON.stringify({ error: 'Этот промокод применяется при оплате' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     // Check expiration
@@ -62,30 +59,30 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Промокод истёк' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Check usage limit
+    // Check global usage limit
     if (promo.max_uses && (promo.current_uses ?? 0) >= promo.max_uses) {
       return new Response(JSON.stringify({ error: 'Лимит использований промокода исчерпан' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Check if user already used this promo (unique index will also catch this)
-    const { data: existingUse } = await adminClient
+    // Check per-user usage limit (for tokens_instant always 1)
+    const maxPerUser = promo.max_uses_per_user ?? 1 // tokens_instant defaults to 1
+    const { count: userUseCount } = await adminClient
       .from('promocode_uses')
-      .select('id')
+      .select('id', { count: 'exact', head: true })
       .eq('promocode_id', promo.id)
       .eq('user_id', userId)
-      .maybeSingle()
 
-    if (existingUse) {
+    if ((userUseCount ?? 0) >= maxPerUser) {
       return new Response(JSON.stringify({ error: 'Вы уже использовали этот промокод' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Record usage (unique index prevents race conditions)
+    // Record usage
     const { error: useError } = await adminClient
       .from('promocode_uses')
       .insert({ promocode_id: promo.id, user_id: userId })
 
     if (useError) {
-      if (useError.code === '23505') { // unique violation
+      if (useError.code === '23505') {
         return new Response(JSON.stringify({ error: 'Вы уже использовали этот промокод' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
       throw useError
@@ -97,7 +94,7 @@ Deno.serve(async (req) => {
       .update({ current_uses: (promo.current_uses ?? 0) + 1 })
       .eq('id', promo.id)
 
-    // Credit tokens using bypass_token_protection
+    // Credit tokens
     const tokensToAdd = promo.value
     await adminClient.rpc('set_config', { parameter: 'app.bypass_token_protection', value: 'true' })
 
@@ -116,7 +113,6 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       console.error('Failed to update balance:', updateError)
-      // Try SQL approach with bypass flag
       const { error: rpcError } = await adminClient.rpc('admin_update_user_tokens', {
         target_user_id: userId,
         new_balance: currentBalance + tokensToAdd,
@@ -125,7 +121,7 @@ Deno.serve(async (req) => {
       if (rpcError) throw rpcError
     }
 
-    // Record transaction for audit
+    // Audit
     await adminClient
       .from('token_transactions')
       .insert({
