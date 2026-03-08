@@ -97,17 +97,19 @@ const SystemStatusControl = () => {
   const handleStatusChange = async (newStatus: string) => {
     setSaving(true);
     const newMessage = newStatus === status ? message : (DEFAULT_MESSAGES[newStatus] || '');
+    const newSubtitle = newStatus === status ? subtitle : '';
     
     const { error } = await (supabase as any)
       .from('system_status')
-      .update({ status: newStatus, message: newMessage, updated_at: new Date().toISOString() })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // update all rows
+      .update({ status: newStatus, message: newMessage, subtitle: newSubtitle, updated_at: new Date().toISOString() })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
 
     if (error) {
       statusToast({ title: 'Ошибка', description: 'Не удалось обновить статус', variant: 'destructive' });
     } else {
       setStatus(newStatus);
       setMessage(newMessage);
+      setSubtitle(newSubtitle);
       statusToast({ title: 'Статус обновлён' });
     }
     setSaving(false);
