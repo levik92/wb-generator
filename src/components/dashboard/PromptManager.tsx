@@ -87,6 +87,11 @@ const getPromptDisplayName = (type: string): {
       name: 'Редактирование основная',
       description: 'Промт для профессиональной обработки фото: улучшение фона, освещения и цветокоррекции',
       category: 'Изображение'
+    },
+    'identify-product': {
+      name: 'Определение товара',
+      description: 'Промт для автоматического определения наименования товара по фотографии (Gemini Flash Lite)',
+      category: 'Технический'
     }
   };
   return promptNames[type] || {
