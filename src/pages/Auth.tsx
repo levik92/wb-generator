@@ -660,7 +660,7 @@ const Auth = () => {
             {activeTab === "reset" && (
               <form onSubmit={handlePasswordReset} className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="email"
                     placeholder="Email"
