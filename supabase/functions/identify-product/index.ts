@@ -28,7 +28,7 @@ serve(async (req) => {
     // Strip data URL prefix if present
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
-    const prompt = 'Определи товар на изображении. Верни только название товара на русском языке длиной до 130 символов с учетом пробелов. Без описания, без кавычек, без точки в конце.';
+    const prompt = 'Определи товар на изображении. Верни только наименование товара на русском языке длиной до 120 символов с учетом пробелов. Без описания, без кавычек, без точки в конце.';
 
     const aiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`,
