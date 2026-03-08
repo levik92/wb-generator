@@ -613,7 +613,7 @@ const Auth = () => {
                       setAgreeToTerms(checked as boolean);
                       if (checked) setShowTermsError(false);
                     }}
-                    className={`mt-0.5 border-white/20 data-[state=checked]:bg-[hsl(268,83%,58%)] data-[state=checked]:border-[hsl(268,83%,58%)] ${showTermsError ? 'border-red-500' : ''}`}
+                    className={`mt-0.5 border-gray-300 data-[state=checked]:bg-[hsl(268,83%,55%)] data-[state=checked]:border-[hsl(268,83%,55%)] ${showTermsError ? 'border-red-500' : ''}`}
                   />
                   <Label htmlFor="terms" className="text-xs text-white/50 leading-relaxed">
                     Я согласен с{" "}
