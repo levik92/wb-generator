@@ -637,6 +637,70 @@ export function PromptManager() {
             </Card>
           </div>
         </TabsContent>
+
+        <TabsContent value="technical">
+          <div className="space-y-4 md:space-y-6">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold">Технические промты</h2>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Системные промты для вспомогательных функций платформы
+              </p>
+            </div>
+
+            {technicalPrompts.length === 0 ? (
+              <Card className="bg-card">
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  <p>Технические промты не найдены</p>
+                </CardContent>
+              </Card>
+            ) : (
+              technicalPrompts.map(tp => (
+                <Card key={tp.id} className="bg-card">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{getPromptDisplayName(tp.prompt_type).name}</CardTitle>
+                    <CardDescription>{getPromptDisplayName(tp.prompt_type).description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {editingTechPrompt === tp.id ? (
+                        <>
+                          <Textarea
+                            value={techEditValue}
+                            onChange={e => setTechEditValue(e.target.value)}
+                            className="min-h-[200px] font-mono text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Button onClick={() => saveTechPrompt(tp.id)} disabled={savingTechPrompt} className="gap-2">
+                              <Save className="h-4 w-4" />
+                              {savingTechPrompt ? "Сохранение..." : "Сохранить"}
+                            </Button>
+                            <Button variant="outline" onClick={() => setEditingTechPrompt(null)}>
+                              <X className="h-4 w-4 mr-1" /> Отмена
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="bg-muted p-4 rounded-lg">
+                            <pre className="whitespace-pre-wrap text-sm text-muted-foreground">{tp.prompt_template}</pre>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              Обновлено: {new Date(tp.updated_at).toLocaleString('ru-RU')}
+                            </span>
+                            <Button variant="ghost" size="sm" onClick={() => { setEditingTechPrompt(tp.id); setTechEditValue(tp.prompt_template); }}>
+                              <Pencil className="h-4 w-4 mr-1" /> Редактировать
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
     </div>;
 }
