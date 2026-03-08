@@ -741,7 +741,7 @@ const Auth = () => {
                   />
                 </div>
 
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-400">
                   Минимум 8 символов, заглавные и строчные буквы, цифры
                 </p>
 
