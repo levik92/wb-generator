@@ -41,11 +41,10 @@ const Auth = () => {
   const tabParam = searchParams.get("tab");
 
   useEffect(() => {
-    document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "#111111";
+    document.documentElement.classList.remove("dark");
+    document.body.style.backgroundColor = "#ffffff";
     
     return () => {
-      document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
