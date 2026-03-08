@@ -402,7 +402,7 @@ const Auth = () => {
         <div
           className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
         >
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-colors">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-xl shadow-gray-200/30 hover:shadow-2xl transition-all">
             {/* Logo */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-3 mb-4 group">
