@@ -1251,6 +1251,27 @@ export type Database = {
         }
         Relationships: []
       }
+      system_status: {
+        Row: {
+          id: string
+          message: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          message?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          message?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       telegram_bot_subscribers: {
         Row: {
           chat_id: number
