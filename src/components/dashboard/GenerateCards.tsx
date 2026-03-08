@@ -472,6 +472,30 @@ export const GenerateCards = ({
     
     return true;
   };
+  const identifyProduct = async (file: File) => {
+    try {
+      setIsIdentifying(true);
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      
+      const { data, error } = await supabase.functions.invoke('identify-product', {
+        body: { imageBase64: base64 },
+      });
+      
+      if (!error && data?.productName) {
+        setProductName(data.productName.slice(0, 150));
+      }
+    } catch (err) {
+      console.error('Auto-detect failed:', err);
+    } finally {
+      setIsIdentifying(false);
+    }
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
     validateAndAddFiles(uploadedFiles);
