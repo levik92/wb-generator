@@ -452,7 +452,7 @@ const Cases = () => {
                         <span className="px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs text-gray-600">
                           {caseItem.category}
                         </span>
-                        <span className="text-xl sm:text-2xl font-bold text-emerald-400">
+                        <span className="text-xl sm:text-2xl font-bold text-emerald-500">
                           {caseItem.conversionGrowth}
                         </span>
                       </div>
