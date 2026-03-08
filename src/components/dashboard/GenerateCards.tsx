@@ -103,6 +103,7 @@ export const GenerateCards = ({
   const [completionNotificationShown, setCompletionNotificationShown] = useState(false);
   const [jobCompleted, setJobCompleted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isIdentifying, setIsIdentifying] = useState(false);
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
