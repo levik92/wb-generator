@@ -18,16 +18,15 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } }
-    })
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(authHeader.replace('Bearer ', ''))
-    if (claimsError || !claimsData?.claims) {
+    const token = authHeader.replace('Bearer ', '')
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data: { user }, error: userError } = await adminClient.auth.getUser(token)
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Не авторизован' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
-    const userId = claimsData.claims.sub as string
+    const userId = user.id
 
     const { code } = await req.json()
     if (!code || typeof code !== 'string' || code.trim().length === 0 || code.trim().length > 50) {
@@ -35,7 +34,6 @@ Deno.serve(async (req) => {
     }
 
     const sanitizedCode = code.trim().toUpperCase()
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
 
     // Find promo code
     const { data: promo, error: promoError } = await adminClient
@@ -94,42 +92,18 @@ Deno.serve(async (req) => {
       .update({ current_uses: (promo.current_uses ?? 0) + 1 })
       .eq('id', promo.id)
 
-    // Credit tokens
+    // Credit tokens atomically via SECURITY DEFINER function
     const tokensToAdd = promo.value
-    await adminClient.rpc('set_config', { parameter: 'app.bypass_token_protection', value: 'true' })
+    const { error: redeemError } = await adminClient.rpc('redeem_promocode_tokens', {
+      p_user_id: userId,
+      p_amount: tokensToAdd,
+      p_code: sanitizedCode
+    })
 
-    const { data: profile } = await adminClient
-      .from('profiles')
-      .select('tokens_balance')
-      .eq('id', userId)
-      .single()
-
-    const currentBalance = profile?.tokens_balance ?? 0
-
-    const { error: updateError } = await adminClient
-      .from('profiles')
-      .update({ tokens_balance: currentBalance + tokensToAdd })
-      .eq('id', userId)
-
-    if (updateError) {
-      console.error('Failed to update balance:', updateError)
-      const { error: rpcError } = await adminClient.rpc('admin_update_user_tokens', {
-        target_user_id: userId,
-        new_balance: currentBalance + tokensToAdd,
-        reason: `Активация промокода ${sanitizedCode}`
-      })
-      if (rpcError) throw rpcError
+    if (redeemError) {
+      console.error('Failed to redeem tokens:', redeemError)
+      throw redeemError
     }
-
-    // Audit
-    await adminClient
-      .from('token_transactions')
-      .insert({
-        user_id: userId,
-        amount: tokensToAdd,
-        transaction_type: 'promocode_redeem',
-        description: `Активация промокода ${sanitizedCode}: +${tokensToAdd} токенов`
-      })
 
     return new Response(JSON.stringify({
       success: true,

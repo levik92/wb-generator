@@ -1,50 +1,40 @@
 
 
-# Результат проверки: промокод «работает», но с потерями
+# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
 
-## Что произошло при вашем тесте
+## Problem
+When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
 
-Вы активировали промокод `123` — UI показал «успех», но на самом деле:
+**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
+```text
+isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
+```
+But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
 
-1. **Использование записалось** — строка в `promocode_uses` есть ✅
-2. **Токены НЕ начислились** — в `token_transactions` нет записи с промокодом, баланс не изменился ❌
-3. **Аудит не сохранён** — нет следа в истории транзакций ❌
+The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
 
-То есть промокод «сгорел» (повторно его уже не ввести), но токены не пришли.
+## Solution
 
-## Почему так вышло — 3 ошибки в коде
+### 1. Mark regeneration jobs with a distinct category
+Update both edge functions to use `category: 'regeneration'` instead of the product category:
+- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
+- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
 
-### Ошибка 1: `set_config` через RPC не работает
+### 2. Update `checkForActiveJobs` in GenerateCards.tsx
+- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
+- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
+- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
 
-Строка 99: `adminClient.rpc('set_config', ...)` — `set_config` это системная Postgres-функция, PostgREST её не экспортирует. Вызов молча провалится. Без bypass-флага триггер `protect_tokens_on_update` **откатывает** изменение баланса.
+### 3. Update active edit jobs restoration block
+The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
 
-### Ошибка 2: Фоллбэк `admin_update_user_tokens` тоже не работает
+## Technical Details
 
-Строки 116-121: если первый update не прошёл, вызывается `admin_update_user_tokens`. Но эта функция проверяет `has_role(auth.uid(), 'admin')` — а через `service_role` клиент `auth.uid()` равен `NULL`, проверка не пройдёт.
-
-### Ошибка 3: `transaction_type: 'promocode_redeem'` не существует
-
-Строка 130: constraint на `token_transactions` допускает только: `purchase`, `generation`, `refund`, `promocode`, `referral_bonus`, `bonus`, `direct_sql_update`. Тип `'promocode_redeem'` отклоняется.
-
-## План исправления
-
-### 1. Миграция: создать PL/pgSQL функцию
-
-Создать `redeem_promocode_tokens(p_user_id UUID, p_amount INT, p_code TEXT)` с `SECURITY DEFINER` — она внутри себя делает `set_config`, обновляет баланс и пишет аудит с правильным типом `'promocode'`. Одна атомарная операция.
-
-### 2. Обновить edge function
-
-- Убрать строки 97-132 (прямой update + fallback + audit insert)
-- Заменить на один вызов: `adminClient.rpc('redeem_promocode_tokens', { p_user_id: userId, p_amount: tokensToAdd, p_code: sanitizedCode })`
-
-### 3. Исправить уже «сгоревший» промокод
-
-Миграция: сбросить использование промокода `123` — удалить запись из `promocode_uses` и уменьшить `current_uses`, чтобы вы могли его использовать повторно.
-
-## Файлы
-
-| Файл | Действие |
-|---|---|
-| Миграция SQL | Создать функцию `redeem_promocode_tokens` + сбросить использование промокода `123` |
-| `supabase/functions/redeem-promocode/index.ts` | Заменить блок начисления на один RPC-вызов |
+**Files to modify:**
+- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
+- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
+- `src/components/dashboard/GenerateCards.tsx`:
+  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
+  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
+  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
 
