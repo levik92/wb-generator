@@ -337,13 +337,10 @@ const Cases = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white landing-dark">
-      {/* Noise overlay for texture */}
-      <div className="noise-overlay" />
-
+    <div className="min-h-screen bg-white text-gray-900 landing-light">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="absolute inset-0 bg-[#111111]/80 backdrop-blur-xl border-b border-white/5" />
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-b border-gray-200" />
         <div className="container mx-auto px-4 sm:px-6 relative">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <Link
