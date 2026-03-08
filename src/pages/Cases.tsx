@@ -417,7 +417,7 @@ const Cases = () => {
             onClick={scrollToContent}
           >
             <div className="w-5 h-8 rounded-full border border-gray-300 flex justify-center pt-1.5">
-              <div className="w-1 h-2 bg-white/40 rounded-full" />
+              <div className="w-1 h-2 bg-gray-400 rounded-full" />
             </div>
           </div>
         </section>
