@@ -1,5 +1,6 @@
 import { BonusProgram } from "./BonusProgram";
 import { Referrals } from "./Referrals";
+import { RedeemPromoCode } from "./RedeemPromoCode";
 import { Separator } from "@/components/ui/separator";
 
 interface Profile {
