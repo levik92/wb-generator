@@ -1725,14 +1725,6 @@ export const GenerateCards = ({
             setAutoDescription(false);
             setSelectedCards([0]);
           }} className="w-auto" disabled={generating}>
-            setFiles([]);
-            setReferenceImage(null);
-            setProductName("");
-            setCategory("");
-            setDescription("");
-            setAutoDescription(false);
-            setSelectedCards([0]);
-          }} className="w-auto">
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
