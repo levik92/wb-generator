@@ -129,24 +129,33 @@ const SystemStatusControl = () => {
   if (loading) return null;
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-2">
         <CardTitle className="text-base">Статус системы</CardTitle>
+        <p className="text-sm text-muted-foreground">Управление баннером статуса на дашборде пользователей</p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          {STATUS_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              disabled={saving}
-              onClick={() => handleStatusChange(opt.value)}
-              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${opt.color} ${
-                status === opt.value ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'opacity-60 hover:opacity-100'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {STATUS_OPTIONS.map((opt) => {
+            const isActive = status === opt.value;
+            return (
+              <button
+                key={opt.value}
+                disabled={saving}
+                onClick={() => handleStatusChange(opt.value)}
+                className={`relative px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-300 ${
+                  isActive
+                    ? `${opt.color} border-current shadow-md scale-[1.03]`
+                    : 'bg-card text-muted-foreground border-border/50 opacity-50 hover:opacity-80 hover:border-border'
+                }`}
+              >
+                {isActive && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-current animate-pulse" />
+                )}
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
         {status !== 'none' && (
           <div className="flex gap-2">
