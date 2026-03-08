@@ -465,8 +465,8 @@ export const GenerateCards = ({
     }
     setFiles(prev => [...prev, ...uploadedFiles]);
     
-    // Auto-detect product name if empty
-    if (!productName.trim() && uploadedFiles.length > 0) {
+    // Auto-detect product name on every new upload
+    if (uploadedFiles.length > 0) {
       identifyProduct(uploadedFiles[0]);
     }
     
