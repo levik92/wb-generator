@@ -355,7 +355,7 @@ const Cases = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] flex items-center justify-center">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-lg sm:text-xl font-bold text-white">WBGen</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-900">WBGen</span>
             </Link>
 
             <Link to="/dashboard?tab=pricing">
