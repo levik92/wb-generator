@@ -321,12 +321,10 @@ const Cases = () => {
   }, [loadMore, hasMore, isLoading]);
 
   useEffect(() => {
-    // Force dark mode for cases page
-    document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "#111111";
+    document.documentElement.classList.remove("dark");
+    document.body.style.backgroundColor = "#ffffff";
     
     return () => {
-      document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
