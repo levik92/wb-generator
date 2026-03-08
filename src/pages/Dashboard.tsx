@@ -23,6 +23,7 @@ import { VideoCovers } from "@/components/dashboard/VideoCovers";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
+import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
 
 // Mobile components
