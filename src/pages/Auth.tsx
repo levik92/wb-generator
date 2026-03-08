@@ -572,7 +572,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Пароль"
