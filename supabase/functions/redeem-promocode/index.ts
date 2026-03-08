@@ -20,14 +20,14 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } }
-    })
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(authHeader.replace('Bearer ', ''))
-    if (claimsError || !claimsData?.claims) {
+    const token = authHeader.replace('Bearer ', '')
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data: { user }, error: userError } = await adminClient.auth.getUser(token)
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Не авторизован' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
-    const userId = claimsData.claims.sub as string
+    const userId = user.id
 
     const { code } = await req.json()
     if (!code || typeof code !== 'string' || code.trim().length === 0 || code.trim().length > 50) {
