@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS promocode_uses_unique_user_promo ON public.promocode_uses(promocode_id, user_id);
