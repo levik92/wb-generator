@@ -483,7 +483,7 @@ export function PromptManager() {
                       <Label htmlFor="google" className="flex-1 cursor-pointer">
                         <div className="font-semibold mb-[6px]">Nanabanana Pro (Gemini)</div>
                         <div className="text-xs text-muted-foreground">
-                          Использует gemini-3-pro для описаний и gemini-3-pro-image для изображений
+                          Использует gemini-3.1-pro для описаний и gemini-3-pro-image для изображений
                         </div>
                       </Label>
                       {activeModel === 'google' && <Badge variant="default">Активна</Badge>}
