@@ -475,9 +475,9 @@ const Cases = () => {
                             {caseItem.designerCost}
                           </div>
                         </div>
-                        <div className="bg-emerald-500/10 rounded-lg p-2 text-center">
-                          <div className="text-[10px] text-emerald-400/70 mb-0.5">WBGen</div>
-                          <div className="text-xs sm:text-sm font-bold text-emerald-400">
+                        <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-emerald-500 mb-0.5">WBGen</div>
+                          <div className="text-xs sm:text-sm font-bold text-emerald-600">
                             {caseItem.wbgenCost}
                           </div>
                         </div>
