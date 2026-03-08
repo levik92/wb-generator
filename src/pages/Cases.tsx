@@ -463,9 +463,9 @@ const Cases = () => {
 
                       {/* Stats Grid */}
                       <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-white/5 rounded-lg p-2 text-center">
-                          <div className="text-[10px] text-white/40 mb-0.5">Заказы</div>
-                          <div className="text-xs sm:text-sm font-bold text-white">
+                        <div className="bg-gray-50 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-gray-400 mb-0.5">Заказы</div>
+                          <div className="text-xs sm:text-sm font-bold text-gray-900">
                             {caseItem.ordersChange}
                           </div>
                         </div>
