@@ -621,7 +621,7 @@ const Auth = () => {
                       договором оферты
                     </Link>{" "}
                     и{" "}
-                    <Link to="/privacy" className="text-[hsl(268,83%,58%)] hover:underline" target="_blank">
+                    <Link to="/privacy" className="text-[hsl(268,83%,55%)] hover:underline" target="_blank">
                       политикой конфиденциальности
                     </Link>
                   </Label>
