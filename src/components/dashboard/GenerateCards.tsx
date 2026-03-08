@@ -103,6 +103,7 @@ export const GenerateCards = ({
   const [completionNotificationShown, setCompletionNotificationShown] = useState(false);
   const [jobCompleted, setJobCompleted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isIdentifying, setIsIdentifying] = useState(false);
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -463,8 +464,38 @@ export const GenerateCards = ({
       return false;
     }
     setFiles(prev => [...prev, ...uploadedFiles]);
+    
+    // Auto-detect product name if empty
+    if (!productName.trim() && uploadedFiles.length > 0) {
+      identifyProduct(uploadedFiles[0]);
+    }
+    
     return true;
   };
+  const identifyProduct = async (file: File) => {
+    try {
+      setIsIdentifying(true);
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      
+      const { data, error } = await supabase.functions.invoke('identify-product', {
+        body: { imageBase64: base64 },
+      });
+      
+      if (!error && data?.productName) {
+        setProductName(data.productName.slice(0, 150));
+      }
+    } catch (err) {
+      console.error('Auto-detect failed:', err);
+    } finally {
+      setIsIdentifying(false);
+    }
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = Array.from(event.target.files || []);
     validateAndAddFiles(uploadedFiles);
@@ -1626,9 +1657,9 @@ export const GenerateCards = ({
               {files.length > 0 && <div className="flex flex-wrap gap-2">
                   {files.map((file, index) => <div key={index} className="relative group w-24 h-24">
                       <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full h-full aspect-square object-cover rounded-lg border" />
-                      <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
+                      {!generating && <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <X className="w-3 h-3" />
-                      </button>
+                      </button>}
                     </div>)}
                 </div>}
             </div>
@@ -1671,9 +1702,9 @@ export const GenerateCards = ({
               
               {referenceImage && <div className="relative group w-24 h-24">
                   <img src={URL.createObjectURL(referenceImage)} alt="Референс" className="w-full h-full aspect-square object-cover rounded-lg border" />
-                  <button onClick={removeReference} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity" disabled={generating}>
+                  {!generating && <button onClick={removeReference} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <X className="w-3 h-3" />
-                  </button>
+                  </button>}
                 </div>}
             </div>
           </CardContent>
@@ -1693,7 +1724,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="w-auto">
+          }} className="w-auto" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
@@ -1718,7 +1749,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="shrink-0">
+          }} className="shrink-0" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
@@ -1738,7 +1769,15 @@ export const GenerateCards = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
-            <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
+            <div className="relative">
+              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
+              {isIdentifying && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                  <span className="hidden sm:inline">Определяю...</span>
+                </div>
+              )}
+            </div>
             <div className="flex justify-end text-xs text-muted-foreground">
               <span>{productName.length}/150 символов</span>
             </div>
