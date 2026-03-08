@@ -1107,6 +1107,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           max_uses: number | null
+          max_uses_per_user: number | null
           type: string
           updated_at: string | null
           valid_from: string | null
@@ -1120,6 +1121,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           max_uses?: number | null
+          max_uses_per_user?: number | null
           type: string
           updated_at?: string | null
           valid_from?: string | null
@@ -1133,6 +1135,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           max_uses?: number | null
+          max_uses_per_user?: number | null
           type?: string
           updated_at?: string | null
           valid_from?: string | null

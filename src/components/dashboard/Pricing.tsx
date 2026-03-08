@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface PromoCodeInfo {
   id: string;
   code: string;
-  type: 'discount' | 'tokens';
+  type: 'discount' | 'tokens' | 'tokens_instant';
   value: number;
   max_uses: number | null;
   current_uses: number;

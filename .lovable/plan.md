@@ -1,51 +1,40 @@
 
 
-# План: 3 типа промокодов + контроль использований на аккаунт
+# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
 
-## Суть изменений
+## Problem
+When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
 
-Сейчас 2 типа: `tokens` (после оплаты) и `discount`. Нужно добавить третий тип `tokens_instant` — токены начисляются сразу без оплаты. Плюс добавить поле «макс. использований на аккаунт», которое для `tokens_instant` всегда заблокировано и равно 1.
+**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
+```text
+isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
+```
+But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
 
-## 1. Миграция БД
+The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
 
-Обновить CHECK constraint на `promocodes.type`, чтобы допускал 3 значения: `tokens`, `discount`, `tokens_instant`. Добавить колонку `max_uses_per_user` (integer, nullable, default null = неограниченно).
+## Solution
 
-## 2. PromoCodeManager.tsx (админка)
+### 1. Mark regeneration jobs with a distinct category
+Update both edge functions to use `category: 'regeneration'` instead of the product category:
+- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
+- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
 
-- Тип `type` расширить до 3 значений: `'tokens' | 'discount' | 'tokens_instant'`
-- В Select добавить 3 опции:
-  - «Бонусные токены (после оплаты)» — `tokens`
-  - «Скидка (%)» — `discount`
-  - «Бонусные токены (сразу)» — `tokens_instant`
-- Добавить поле `maxUsesPerUser` в форму — «Макс. использований на аккаунт»
-  - Если тип = `tokens_instant` → поле disabled, значение принудительно = 1
-  - Иначе → поле редактируемое, пустое = неограниченно
-- В таблице обновить отображение бейджей для 3 типов
-- При сохранении передавать `max_uses_per_user` в БД
+### 2. Update `checkForActiveJobs` in GenerateCards.tsx
+- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
+- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
+- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
 
-## 3. PromoCodeInput.tsx (при оплате)
+### 3. Update active edit jobs restoration block
+The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
 
-- Обновить тип `PromoCodeInfo` — добавить `tokens_instant`
-- При валидации: если промокод типа `tokens_instant` — показать ошибку «Этот промокод нужно активировать в разделе Бонусы» (не давать применить при оплате)
-- Типы `tokens` и `discount` работают как раньше
+## Technical Details
 
-## 4. Edge Function redeem-promocode
-
-- Принимать тип `tokens_instant` (вместо `tokens`)
-- Проверять `max_uses_per_user`: считать количество записей в `promocode_uses` для данного user+promo и сравнивать с лимитом
-- Для `tokens_instant` лимит всегда 1 (дополнительная серверная проверка)
-
-## 5. RedeemPromoCode.tsx (раздел Бонусы)
-
-- Обновить: принимать только `tokens_instant` тип (отказывать в `tokens` и `discount` — «Этот промокод применяется при оплате»)
-
-## Файлы
-
-| Файл | Действие |
-|---|---|
-| Миграция SQL | Добавить `tokens_instant` в constraint, колонку `max_uses_per_user` |
-| `src/components/dashboard/PromoCodeManager.tsx` | 3 типа, поле max_uses_per_user, блокировка для instant |
-| `src/components/dashboard/PromoCodeInput.tsx` | Блокировать `tokens_instant` при оплате |
-| `supabase/functions/redeem-promocode/index.ts` | Принимать `tokens_instant`, проверять per-user лимит |
-| `src/components/dashboard/RedeemPromoCode.tsx` | Принимать только `tokens_instant` |
+**Files to modify:**
+- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
+- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
+- `src/components/dashboard/GenerateCards.tsx`:
+  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
+  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
+  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
 
