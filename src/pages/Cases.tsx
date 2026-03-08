@@ -381,7 +381,7 @@ const Cases = () => {
               transition={{ duration: 0.8 }}
               className="text-center max-w-4xl mx-auto mb-16 sm:mb-20"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-sm text-purple-700 mb-6">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 Реальные результаты для селлеров
               </span>
