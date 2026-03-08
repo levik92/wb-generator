@@ -1,40 +1,52 @@
 
 
-# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
+# План: Безопасная активация промокодов в разделе «Бонусы»
 
-## Problem
-When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
+## Что делаем
 
-**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
-```text
-isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
-```
-But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
+Добавляем в раздел «Бонусы» возможность ввести промокод и получить токены. Вся логика проверки и начисления — на сервере (edge function), чтобы исключить манипуляции с клиента.
 
-The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
+## Изменения в базе данных
 
-## Solution
+**Миграция: уникальный индекс на `promocode_uses`**
+- `CREATE UNIQUE INDEX ON promocode_uses(promocode_id, user_id)` — гарантирует, что один пользователь может использовать промокод только 1 раз (защита на уровне БД от гонок)
 
-### 1. Mark regeneration jobs with a distinct category
-Update both edge functions to use `category: 'regeneration'` instead of the product category:
-- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
-- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
+## Новый Edge Function: `redeem-promocode`
 
-### 2. Update `checkForActiveJobs` in GenerateCards.tsx
-- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
-- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
-- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
+- Принимает `{ code: string }` от авторизованного пользователя
+- Проверяет: код существует, активен, не истёк, лимит использований не превышен
+- Проверяет в `promocode_uses`: не использовал ли этот пользователь уже этот промокод
+- Обрабатывает только промокоды типа `tokens` (тип `discount` — для оплаты, тут не применяется)
+- Начисляет токены через `bypass_token_protection` (существующий механизм защиты баланса)
+- Записывает в `promocode_uses`, увеличивает `current_uses`, пишет `token_transactions` для аудита
+- Возвращает количество начисленных токенов или ошибку
 
-### 3. Update active edit jobs restoration block
-The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
+**Конфигурация**: добавляем `[functions.redeem-promocode]` с `verify_jwt = false` в `config.toml` (проверка JWT внутри функции)
 
-## Technical Details
+## Новый компонент: `RedeemPromoCode.tsx`
 
-**Files to modify:**
-- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
-- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
-- `src/components/dashboard/GenerateCards.tsx`:
-  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
-  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
-  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
+- Компактная карточка с полем ввода промокода и кнопкой «Применить»
+- Вызывает `supabase.functions.invoke('redeem-promocode', { body: { code } })`
+- Показывает результат: успех (сколько токенов начислено) или ошибку (уже использован / не найден / истёк)
+- Никаких прямых запросов к таблицам — всё через edge function
+
+## Обновление `Bonuses.tsx`
+
+- Добавляем `<RedeemPromoCode />` между `BonusProgram` и `Referrals` (перед разделителем)
+
+## Безопасность
+
+- Клиент не может менять баланс напрямую — всё через серверную функцию с `service_role`
+- Уникальный индекс в БД предотвращает повторное использование даже при параллельных запросах
+- Аудит через `token_transactions` с типом `promocode_redeem`
+
+## Файлы
+
+| Файл | Действие |
+|---|---|
+| `supabase/functions/redeem-promocode/index.ts` | Создать |
+| `supabase/config.toml` | Добавить секцию функции |
+| Миграция (unique index на `promocode_uses`) | Создать |
+| `src/components/dashboard/RedeemPromoCode.tsx` | Создать |
+| `src/components/dashboard/Bonuses.tsx` | Добавить компонент |
 
