@@ -412,8 +412,8 @@ const Auth = () => {
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] blur-lg transition-opacity rounded-lg opacity-50" />
                 </div>
-                <span className="text-xl font-bold text-white">
-                  WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
+                <span className="text-xl font-bold text-gray-900">
+                  WB<span className="text-[hsl(268,83%,55%)]">Gen</span>
                 </span>
               </Link>
               <h1 className="text-2xl font-bold text-white mb-2">
