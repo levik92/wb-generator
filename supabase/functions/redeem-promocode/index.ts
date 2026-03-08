@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
     }
 
     const sanitizedCode = code.trim().toUpperCase()
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey)
 
     // Find promo code
     const { data: promo, error: promoError } = await adminClient
