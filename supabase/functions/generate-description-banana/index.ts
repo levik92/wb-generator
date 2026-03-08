@@ -129,9 +129,9 @@ serve(async (req) => {
           .replace('{competitors}', sanitizedCompetitors.join(', ') || 'не указано')
           .replace('{keywords}', sanitizedKeywords.join(', ') || 'не указано');
 
-        console.log('Calling Google Gemini 3 Pro API for description generation');
+        console.log('Calling Google Gemini 3.1 Pro API for description generation');
 
-        const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${geminiApiKey}`, {
+        const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
