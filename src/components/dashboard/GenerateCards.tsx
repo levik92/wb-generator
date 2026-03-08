@@ -1659,7 +1659,7 @@ export const GenerateCards = ({
                       <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full h-full aspect-square object-cover rounded-lg border" />
                       {!generating && <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <X className="w-3 h-3" />
-                      </button>
+                      </button>}
                     </div>)}
                 </div>}
             </div>
