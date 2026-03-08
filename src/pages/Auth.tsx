@@ -478,10 +478,10 @@ const Auth = () => {
 
                 <div className="relative mb-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10" />
+                    <div className="w-full border-t border-gray-200" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-[hsl(240,10%,8%)] px-3 text-white/40">или</span>
+                    <span className="bg-white px-3 text-gray-400">или</span>
                   </div>
                 </div>
               </>
