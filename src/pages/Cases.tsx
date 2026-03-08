@@ -550,7 +550,7 @@ const Cases = () => {
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Создайте такие же результаты
               </h2>
-              <p className="text-base sm:text-lg text-white/50 mb-8">
+              <p className="text-base sm:text-lg text-gray-500 mb-8">
                 Профессиональный дизайн от 59₽ вместо 5000₽ у дизайнера
               </p>
 
