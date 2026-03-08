@@ -404,7 +404,7 @@ const Cases = () => {
                     <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">{stat.label}</div>
                   </div>
                 ))}
               </div>
