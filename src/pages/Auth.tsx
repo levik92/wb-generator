@@ -41,11 +41,10 @@ const Auth = () => {
   const tabParam = searchParams.get("tab");
 
   useEffect(() => {
-    document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "#111111";
+    document.documentElement.classList.remove("dark");
+    document.body.style.backgroundColor = "#ffffff";
     
     return () => {
-      document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
@@ -377,24 +376,23 @@ const Auth = () => {
     }
   };
 
-  const inputClasses = "h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[hsl(268,83%,58%)] focus:ring-[hsl(268,83%,58%)]/20 rounded-xl pl-12";
+  const inputClasses = "h-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[hsl(268,83%,55%)] focus:ring-[hsl(268,83%,55%)]/20 rounded-xl pl-12";
 
   return (
     <>
       <YandexMetrika />
       
-      <div className="min-h-screen bg-[#111111] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50/30 flex items-center justify-center p-4 relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px]" />
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,70%)]/10 rounded-full blur-[150px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,70%)]/8 rounded-full blur-[120px]" />
         </div>
-        <div className="noise-overlay" />
 
         {/* Back to home */}
         <Link
           to="/"
-          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
+          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-gray-400 hover:text-gray-700 transition-colors z-20"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="text-sm">Назад</span>
@@ -404,7 +402,7 @@ const Auth = () => {
         <div
           className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
         >
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-colors">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-xl shadow-gray-200/30 hover:shadow-2xl transition-all">
             {/* Logo */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-3 mb-4 group">
@@ -414,17 +412,17 @@ const Auth = () => {
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] blur-lg transition-opacity rounded-lg opacity-50" />
                 </div>
-                <span className="text-xl font-bold text-white">
-                  WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
+                <span className="text-xl font-bold text-gray-900">
+                  WB<span className="text-[hsl(268,83%,55%)]">Gen</span>
                 </span>
               </Link>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 {activeTab === "signin" && "Вход в аккаунт"}
                 {activeTab === "signup" && "Создание аккаунта"}
                 {activeTab === "reset" && "Восстановление пароля"}
                 {activeTab === "new-password" && "Новый пароль"}
               </h1>
-              <p className="text-white/50 text-sm">
+              <p className="text-gray-400 text-sm">
                 {activeTab === "signin" && "Войдите, чтобы продолжить"}
                 {activeTab === "signup" && "Создавайте карточки за 3 минуты"}
                 {activeTab === "reset" && "Введите email для восстановления"}
@@ -434,13 +432,13 @@ const Auth = () => {
 
             {/* Tab switcher for signin/signup */}
             {(activeTab === "signin" || activeTab === "signup") && (
-              <div className="flex bg-white/5 rounded-xl p-1 mb-6">
+              <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
                 <button
                   onClick={() => setActiveTab("signin")}
                   className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                     activeTab === "signin"
-                      ? "bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] text-white"
-                      : "text-white/50 hover:text-white"
+                      ? "bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   Вход
@@ -449,8 +447,8 @@ const Auth = () => {
                   onClick={() => setActiveTab("signup")}
                   className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                     activeTab === "signup"
-                      ? "bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] text-white"
-                      : "text-white/50 hover:text-white"
+                      ? "bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   Регистрация
@@ -466,7 +464,7 @@ const Auth = () => {
                   variant="outline"
                   onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="w-full h-12 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white rounded-xl mb-6"
+                  className="w-full h-12 bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl mb-6"
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -480,10 +478,10 @@ const Auth = () => {
 
                 <div className="relative mb-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/10" />
+                    <div className="w-full border-t border-gray-200" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-[hsl(240,10%,8%)] px-3 text-white/40">или</span>
+                    <span className="bg-white px-3 text-gray-400">или</span>
                   </div>
                 </div>
               </>
@@ -493,7 +491,7 @@ const Auth = () => {
             {activeTab === "signin" && (
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="email"
                     placeholder="Email"
@@ -504,7 +502,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Пароль"
@@ -516,7 +514,7 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/50"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -525,15 +523,15 @@ const Auth = () => {
                 {captchaSiteKey && (
                   <div className="flex justify-center">
                     <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
+                      <div className="h-[78px] w-[302px] bg-gray-50 border border-gray-200 rounded-lg flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                        <span className="text-xs text-gray-400">Загрузка капчи...</span>
                       </div>
                     }>
                       <HCaptcha
                         ref={captchaRef}
                         sitekey={captchaSiteKey}
-                        theme="dark"
+                        theme="light"
                         onVerify={(token) => setCaptchaToken(token)}
                         onExpire={() => setCaptchaToken(null)}
                       />
@@ -544,7 +542,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] hover:opacity-90 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Войти"}
                 </Button>
@@ -552,7 +550,7 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab("reset")}
-                  className="w-full text-center text-sm text-white/50 hover:text-white transition-colors"
+                  className="w-full text-center text-sm text-gray-400 hover:text-gray-700 transition-colors"
                 >
                   Забыли пароль?
                 </button>
@@ -563,7 +561,7 @@ const Auth = () => {
             {activeTab === "signup" && (
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="email"
                     placeholder="Email"
@@ -574,7 +572,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Пароль"
@@ -586,13 +584,13 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/50"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Подтвердите пароль"
@@ -603,7 +601,7 @@ const Auth = () => {
                   />
                 </div>
 
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-400">
                   Минимум 8 символов, заглавные и строчные буквы, цифры
                 </p>
 
@@ -615,15 +613,15 @@ const Auth = () => {
                       setAgreeToTerms(checked as boolean);
                       if (checked) setShowTermsError(false);
                     }}
-                    className={`mt-0.5 border-white/20 data-[state=checked]:bg-[hsl(268,83%,58%)] data-[state=checked]:border-[hsl(268,83%,58%)] ${showTermsError ? 'border-red-500' : ''}`}
+                    className={`mt-0.5 border-gray-300 data-[state=checked]:bg-[hsl(268,83%,55%)] data-[state=checked]:border-[hsl(268,83%,55%)] ${showTermsError ? 'border-red-500' : ''}`}
                   />
-                  <Label htmlFor="terms" className="text-xs text-white/50 leading-relaxed">
+                  <Label htmlFor="terms" className="text-xs text-gray-500 leading-relaxed">
                     Я согласен с{" "}
-                    <Link to="/terms" className="text-[hsl(268,83%,58%)] hover:underline" target="_blank">
+                    <Link to="/terms" className="text-[hsl(268,83%,55%)] hover:underline" target="_blank">
                       договором оферты
                     </Link>{" "}
                     и{" "}
-                    <Link to="/privacy" className="text-[hsl(268,83%,58%)] hover:underline" target="_blank">
+                    <Link to="/privacy" className="text-[hsl(268,83%,55%)] hover:underline" target="_blank">
                       политикой конфиденциальности
                     </Link>
                   </Label>
@@ -632,15 +630,15 @@ const Auth = () => {
                 {captchaSiteKey && (
                   <div className="flex justify-center">
                     <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
+                      <div className="h-[78px] w-[302px] bg-gray-50 border border-gray-200 rounded-lg flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                        <span className="text-xs text-gray-400">Загрузка капчи...</span>
                       </div>
                     }>
                       <HCaptcha
                         ref={captchaRef}
                         sitekey={captchaSiteKey}
-                        theme="dark"
+                        theme="light"
                         onVerify={(token) => setCaptchaToken(token)}
                         onExpire={() => setCaptchaToken(null)}
                       />
@@ -651,7 +649,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] hover:opacity-90 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Создать аккаунт"}
                 </Button>
@@ -662,7 +660,7 @@ const Auth = () => {
             {activeTab === "reset" && (
               <form onSubmit={handlePasswordReset} className="space-y-4">
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="email"
                     placeholder="Email"
@@ -676,15 +674,15 @@ const Auth = () => {
                 {captchaSiteKey && (
                   <div className="flex justify-center">
                     <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
+                      <div className="h-[78px] w-[302px] bg-gray-50 border border-gray-200 rounded-lg flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                        <span className="text-xs text-gray-400">Загрузка капчи...</span>
                       </div>
                     }>
                       <HCaptcha
                         ref={captchaRef}
                         sitekey={captchaSiteKey}
-                        theme="dark"
+                        theme="light"
                         onVerify={(token) => setCaptchaToken(token)}
                         onExpire={() => setCaptchaToken(null)}
                       />
@@ -695,7 +693,7 @@ const Auth = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] hover:opacity-90 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Отправить ссылку"}
                 </Button>
@@ -703,7 +701,7 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab("signin")}
-                  className="w-full text-center text-sm text-white/50 hover:text-white transition-colors"
+                  className="w-full text-center text-sm text-gray-400 hover:text-gray-700 transition-colors"
                 >
                   Вернуться ко входу
                 </button>
@@ -714,7 +712,7 @@ const Auth = () => {
             {activeTab === "new-password" && (
               <form onSubmit={handleUpdatePassword} className="space-y-4">
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Новый пароль"
@@ -726,13 +724,13 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/50"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Подтвердите пароль"
@@ -743,14 +741,14 @@ const Auth = () => {
                   />
                 </div>
 
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-gray-400">
                   Минимум 8 символов, заглавные и строчные буквы, цифры
                 </p>
 
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,83%,55%)] hover:opacity-90 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Сохранить пароль"}
                 </Button>
@@ -759,8 +757,8 @@ const Auth = () => {
 
             {/* Referral badge */}
             {(referralCode || partnerCode) && (activeTab === "signin" || activeTab === "signup") && (
-              <div className="mt-6 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                <p className="text-xs text-emerald-400 text-center">
+              <div className="mt-6 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+                <p className="text-xs text-emerald-600 text-center">
                   🎁 Вы пришли по реферальной ссылке — бонус будет начислен после регистрации
                 </p>
               </div>

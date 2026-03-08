@@ -321,12 +321,10 @@ const Cases = () => {
   }, [loadMore, hasMore, isLoading]);
 
   useEffect(() => {
-    // Force dark mode for cases page
-    document.documentElement.classList.add("dark");
-    document.body.style.backgroundColor = "#111111";
+    document.documentElement.classList.remove("dark");
+    document.body.style.backgroundColor = "#ffffff";
     
     return () => {
-      document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
@@ -339,18 +337,15 @@ const Cases = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white landing-dark">
-      {/* Noise overlay for texture */}
-      <div className="noise-overlay" />
-
+    <div className="min-h-screen bg-white text-gray-900 landing-light">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="absolute inset-0 bg-[#111111]/80 backdrop-blur-xl border-b border-white/5" />
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-b border-gray-200" />
         <div className="container mx-auto px-4 sm:px-6 relative">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <Link
               to="/"
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="text-sm font-medium">Назад</span>
@@ -360,7 +355,7 @@ const Cases = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] flex items-center justify-center">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-lg sm:text-xl font-bold text-white">WBGen</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-900">WBGen</span>
             </Link>
 
             <Link to="/dashboard?tab=pricing">
@@ -386,19 +381,19 @@ const Cases = () => {
               transition={{ duration: 0.8 }}
               className="text-center max-w-4xl mx-auto mb-16 sm:mb-20"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-sm text-purple-700 mb-6">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 Реальные результаты для селлеров
               </span>
               
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                 Примеры генерации
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)]">
                   на сервисе WBGen
                 </span>
               </h1>
               
-              <p className="text-base sm:text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10">
+              <p className="text-base sm:text-lg md:text-xl text-gray-500 max-w-2xl mx-auto mb-10">
                 Карточки для Wildberries, Ozon и Яндекс Маркет — смотрите результаты наших клиентов
               </p>
 
@@ -406,10 +401,10 @@ const Cases = () => {
               <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-xl mx-auto">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
+                    <div className="text-xs sm:text-sm text-gray-400">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -421,8 +416,8 @@ const Cases = () => {
             className="absolute bottom-6 left-1/2 -translate-x-1/2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
             onClick={scrollToContent}
           >
-            <div className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5">
-              <div className="w-1 h-2 bg-white/40 rounded-full" />
+            <div className="w-5 h-8 rounded-full border border-gray-300 flex justify-center pt-1.5">
+              <div className="w-1 h-2 bg-gray-400 rounded-full" />
             </div>
           </div>
         </section>
@@ -454,35 +449,35 @@ const Cases = () => {
                     <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex-1 flex flex-col">
                       {/* Category & Conversion */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/70">
+                        <span className="px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs text-gray-600">
                           {caseItem.category}
                         </span>
-                        <span className="text-xl sm:text-2xl font-bold text-emerald-400">
+                        <span className="text-xl sm:text-2xl font-bold text-emerald-500">
                           {caseItem.conversionGrowth}
                         </span>
                       </div>
 
                       {/* Title & Description */}
-                      <h3 className="text-lg font-bold text-white mb-2">{caseItem.title}</h3>
-                      <p className="text-sm text-white/50 mb-4 flex-1">{caseItem.description}</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{caseItem.title}</h3>
+                      <p className="text-sm text-gray-500 mb-4 flex-1">{caseItem.description}</p>
 
                       {/* Stats Grid */}
                       <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-white/5 rounded-lg p-2 text-center">
-                          <div className="text-[10px] text-white/40 mb-0.5">Заказы</div>
-                          <div className="text-xs sm:text-sm font-bold text-white">
+                        <div className="bg-gray-50 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-gray-400 mb-0.5">Заказы</div>
+                          <div className="text-xs sm:text-sm font-bold text-gray-900">
                             {caseItem.ordersChange}
                           </div>
                         </div>
-                        <div className="bg-red-500/10 rounded-lg p-2 text-center">
-                          <div className="text-[10px] text-red-400/70 mb-0.5">Дизайнер</div>
-                          <div className="text-xs sm:text-sm font-bold text-red-400 line-through">
+                        <div className="bg-red-50 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-red-400 mb-0.5">Дизайнер</div>
+                          <div className="text-xs sm:text-sm font-bold text-red-500 line-through">
                             {caseItem.designerCost}
                           </div>
                         </div>
-                        <div className="bg-emerald-500/10 rounded-lg p-2 text-center">
-                          <div className="text-[10px] text-emerald-400/70 mb-0.5">WBGen</div>
-                          <div className="text-xs sm:text-sm font-bold text-emerald-400">
+                        <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                          <div className="text-[10px] text-emerald-500 mb-0.5">WBGen</div>
+                          <div className="text-xs sm:text-sm font-bold text-emerald-600">
                             {caseItem.wbgenCost}
                           </div>
                         </div>
@@ -505,14 +500,14 @@ const Cases = () => {
                     animate={{ opacity: 1 }}
                     className="flex items-center gap-3 text-white/50"
                   >
-                    <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin" />
                     <span>Загрузка...</span>
                   </motion.div>
                 ) : (
                   <motion.div
                     animate={{ y: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
-                    className="flex flex-col items-center gap-2 text-white/40"
+                    className="flex flex-col items-center gap-2 text-gray-400"
                   >
                     <ChevronDown className="w-6 h-6" />
                     <span className="text-sm">Листайте для загрузки</span>
@@ -526,7 +521,7 @@ const Cases = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-8 text-white/40"
+                className="text-center py-8 text-gray-400"
               >
                 Вы просмотрели все {allCases.length} кейсов
               </motion.div>
@@ -536,8 +531,8 @@ const Cases = () => {
 
         {/* CTA Section */}
         <section className="relative py-16 sm:py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(268,50%,10%)] to-transparent" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[hsl(268,83%,50%)]/20 rounded-full blur-[150px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-50/50 to-transparent" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[hsl(268,83%,70%)]/8 rounded-full blur-[150px]" />
 
           <div className="container mx-auto px-4 sm:px-6 relative z-10">
             <motion.div
@@ -549,13 +544,13 @@ const Cases = () => {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(268,83%,58%)]/20 to-[hsl(280,83%,58%)]/20 border border-[hsl(268,83%,58%)]/30 mb-6">
                 <Zap className="w-4 h-4 text-[hsl(268,83%,58%)]" />
-                <span className="text-sm font-medium text-white">Начните прямо сейчас</span>
+                <span className="text-sm font-medium text-gray-900">Начните прямо сейчас</span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Создайте такие же результаты
               </h2>
-              <p className="text-base sm:text-lg text-white/50 mb-8">
+              <p className="text-base sm:text-lg text-gray-500 mb-8">
                 Профессиональный дизайн от 59₽ вместо 5000₽ у дизайнера
               </p>
 
@@ -569,7 +564,7 @@ const Cases = () => {
                 <Link to="/">
                   <Button 
                     variant="outline" 
-                    className="text-base px-8 py-6 rounded-xl font-semibold border-white/20 bg-white/5 text-white hover:bg-white/10 w-full sm:w-auto"
+                    className="text-base px-8 py-6 rounded-xl font-semibold border-gray-200 text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
                   >
                     На главную
                   </Button>
