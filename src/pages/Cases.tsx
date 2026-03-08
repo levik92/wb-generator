@@ -507,7 +507,7 @@ const Cases = () => {
                   <motion.div
                     animate={{ y: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
-                    className="flex flex-col items-center gap-2 text-white/40"
+                    className="flex flex-col items-center gap-2 text-gray-400"
                   >
                     <ChevronDown className="w-6 h-6" />
                     <span className="text-sm">Листайте для загрузки</span>
