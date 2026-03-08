@@ -391,6 +391,7 @@ const Dashboard = () => {
         {!isMobile && <DashboardHeader profile={profile} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} />}
         
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
+          <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
           {renderContent()}
         </main>

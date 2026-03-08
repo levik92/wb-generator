@@ -243,6 +243,9 @@ export const AdminBanners = () => {
 
   return (
     <div className="space-y-6">
+      {/* System Status Control */}
+      <SystemStatusControl />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
