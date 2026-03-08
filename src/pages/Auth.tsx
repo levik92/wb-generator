@@ -422,7 +422,7 @@ const Auth = () => {
                 {activeTab === "reset" && "Восстановление пароля"}
                 {activeTab === "new-password" && "Новый пароль"}
               </h1>
-              <p className="text-white/50 text-sm">
+              <p className="text-gray-400 text-sm">
                 {activeTab === "signin" && "Войдите, чтобы продолжить"}
                 {activeTab === "signup" && "Создавайте карточки за 3 минуты"}
                 {activeTab === "reset" && "Введите email для восстановления"}
