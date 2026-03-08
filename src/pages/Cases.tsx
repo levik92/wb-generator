@@ -544,7 +544,7 @@ const Cases = () => {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[hsl(268,83%,58%)]/20 to-[hsl(280,83%,58%)]/20 border border-[hsl(268,83%,58%)]/30 mb-6">
                 <Zap className="w-4 h-4 text-[hsl(268,83%,58%)]" />
-                <span className="text-sm font-medium text-white">Начните прямо сейчас</span>
+                <span className="text-sm font-medium text-gray-900">Начните прямо сейчас</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
