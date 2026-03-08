@@ -401,7 +401,7 @@ const Cases = () => {
               <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-xl mx-auto">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
+                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                       {stat.value}
                     </div>
                     <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
