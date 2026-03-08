@@ -115,6 +115,9 @@ export function PromptManager() {
   const [editingVideoPrompt, setEditingVideoPrompt] = useState<string | null>(null);
   const [videoEditValue, setVideoEditValue] = useState('');
   const [savingVideoPrompt, setSavingVideoPrompt] = useState(false);
+  const [editingTechPrompt, setEditingTechPrompt] = useState<string | null>(null);
+  const [techEditValue, setTechEditValue] = useState('');
+  const [savingTechPrompt, setSavingTechPrompt] = useState(false);
   useEffect(() => {
     loadPrompts();
     loadActiveModel();
