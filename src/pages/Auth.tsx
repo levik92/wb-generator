@@ -235,7 +235,7 @@ const Auth = () => {
         await logLoginAttempt(email, true);
         toast({ title: "Добро пожаловать!", description: "Вы успешно вошли в систему." });
         setCaptchaToken(null);
-        captchaRef.current?.resetCaptcha();
+        setCaptchaKey(k => k + 1);
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -248,7 +248,7 @@ const Auth = () => {
       };
       toast({ title: "Ошибка входа", description: localizeAuthError(error.message), variant: "destructive" });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
