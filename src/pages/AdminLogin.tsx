@@ -135,23 +135,14 @@ export default function AdminLogin() {
               />
             </div>
 
-            {captchaSiteKey && (
-              <div className="flex justify-center">
-                <Suspense fallback={
-                  <div className="h-[78px] w-[303px] rounded border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Загрузка капчи...</span>
-                  </div>
-                }>
-                  <HCaptcha
-                    ref={captchaRef}
-                    sitekey={captchaSiteKey}
-                    onVerify={(token) => setCaptchaToken(token)}
-                    onExpire={() => setCaptchaToken(null)}
-                  />
-                </Suspense>
-              </div>
-            )}
+            <div className="flex justify-center">
+              <SmartCaptcha
+                key={captchaKey}
+                sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
+                onSuccess={(token) => setCaptchaToken(token)}
+                onTokenExpired={() => setCaptchaToken(null)}
+              />
+            </div>
 
             <Button type="submit" className="w-full" disabled={loading || (captchaSiteKey && !captchaToken)}>
               {loading ? "Вход..." : "Войти"}
