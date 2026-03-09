@@ -612,7 +612,7 @@ const Auth = () => {
                   </Label>
                 </div>
 
-                <div className="flex justify-center">
+                <div className="w-full [&>div]:!w-full [&>div>iframe]:!w-full">
                   <SmartCaptcha
                     key={captchaKey}
                     sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
