@@ -26,11 +26,10 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showTermsError, setShowTermsError] = useState(false);
-  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(true);
-  const captchaRef = useRef<any>(null);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
