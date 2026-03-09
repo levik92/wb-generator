@@ -1,38 +1,26 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { Shield, Loader2 } from "lucide-react";
-
-// Lazy load HCaptcha for faster initial page load
-const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
+import { SmartCaptcha } from "@yandex/smart-captcha";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captchaRef = useRef<any>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Site key для hCaptcha - получите его из настроек Supabase
-    // Authentication > Attack Protection > Bot and Abuse Protection
-    // Замените на ваш реальный site key
-    const siteKey = "d15aeff4-fff0-4da6-b948-86f26ab65ffa"; // Замените на ваш site key
-    setCaptchaSiteKey(siteKey);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({
         title: "Ошибка входа",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -95,7 +83,7 @@ export default function AdminLogin() {
           description: "Добро пожаловать в админ-панель",
         });
         setCaptchaToken(null);
-        captchaRef.current?.resetCaptcha();
+        setCaptchaKey(k => k + 1);
         navigate("/admin");
       }
     } catch (error) {
@@ -106,7 +94,7 @@ export default function AdminLogin() {
         variant: "destructive",
       });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -147,25 +135,16 @@ export default function AdminLogin() {
               />
             </div>
 
-            {captchaSiteKey && (
-              <div className="flex justify-center">
-                <Suspense fallback={
-                  <div className="h-[78px] w-[303px] rounded border border-border bg-muted/50 flex flex-col items-center justify-center gap-2">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Загрузка капчи...</span>
-                  </div>
-                }>
-                  <HCaptcha
-                    ref={captchaRef}
-                    sitekey={captchaSiteKey}
-                    onVerify={(token) => setCaptchaToken(token)}
-                    onExpire={() => setCaptchaToken(null)}
-                  />
-                </Suspense>
-              </div>
-            )}
+            <div className="flex justify-center">
+              <SmartCaptcha
+                key={captchaKey}
+                sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
+                onSuccess={(token) => setCaptchaToken(token)}
+                onTokenExpired={() => setCaptchaToken(null)}
+              />
+            </div>
 
-            <Button type="submit" className="w-full" disabled={loading || (captchaSiteKey && !captchaToken)}>
+            <Button type="submit" className="w-full" disabled={loading || !captchaToken}>
               {loading ? "Вход..." : "Войти"}
             </Button>
           </form>

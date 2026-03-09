@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,7 @@ import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
-
-const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
+import { SmartCaptcha } from "@yandex/smart-captcha";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -27,11 +26,10 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showTermsError, setShowTermsError] = useState(false);
-  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(true);
-  const captchaRef = useRef<any>(null);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
@@ -90,13 +88,8 @@ const Auth = () => {
   }, [tabParam, toast]);
 
   useEffect(() => {
-    const siteKey = "d15aeff4-fff0-4da6-b948-86f26ab65ffa";
-    setCaptchaSiteKey(siteKey);
-  }, []);
-
-  useEffect(() => {
     setCaptchaToken(null);
-    captchaRef.current?.resetCaptcha();
+    setCaptchaKey(k => k + 1);
   }, [activeTab]);
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
@@ -128,7 +121,7 @@ const Auth = () => {
       return;
     }
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({
         title: "Ошибка регистрации",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -199,11 +192,11 @@ const Auth = () => {
         duration: 10000,
       });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } catch (error: any) {
       toast({ title: "Ошибка регистрации", description: "Не удалось создать аккаунт. Попробуйте позже", variant: "destructive" });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -212,7 +205,7 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({
         title: "Ошибка входа",
         description: "Пожалуйста, пройдите проверку капчи.",
@@ -242,7 +235,7 @@ const Auth = () => {
         await logLoginAttempt(email, true);
         toast({ title: "Добро пожаловать!", description: "Вы успешно вошли в систему." });
         setCaptchaToken(null);
-        captchaRef.current?.resetCaptcha();
+        setCaptchaKey(k => k + 1);
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -255,7 +248,7 @@ const Auth = () => {
       };
       toast({ title: "Ошибка входа", description: localizeAuthError(error.message), variant: "destructive" });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -264,7 +257,7 @@ const Auth = () => {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({ title: "Ошибка", description: "Пройдите проверку капчи.", variant: "destructive" });
       return;
     }
@@ -284,12 +277,12 @@ const Auth = () => {
         duration: 8000,
       });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
       setActiveTab("signin");
     } catch (error: any) {
       toast({ title: "Ошибка", description: "Не удалось отправить письмо. Попробуйте позже", variant: "destructive" });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
@@ -522,24 +515,14 @@ const Auth = () => {
                   </button>
                 </div>
 
-                {captchaSiteKey && (
-                  <div className="flex justify-center">
-                    <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
-                      </div>
-                    }>
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        theme="dark"
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
-                    </Suspense>
-                  </div>
-                )}
+                <div className="flex justify-center">
+                  <SmartCaptcha
+                    key={captchaKey}
+                    sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onTokenExpired={() => setCaptchaToken(null)}
+                  />
+                </div>
 
                 <Button
                   type="submit"
@@ -629,24 +612,14 @@ const Auth = () => {
                   </Label>
                 </div>
 
-                {captchaSiteKey && (
-                  <div className="flex justify-center">
-                    <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
-                      </div>
-                    }>
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        theme="dark"
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
-                    </Suspense>
-                  </div>
-                )}
+                <div className="flex justify-center">
+                  <SmartCaptcha
+                    key={captchaKey}
+                    sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onTokenExpired={() => setCaptchaToken(null)}
+                  />
+                </div>
 
                 <Button
                   type="submit"
@@ -673,24 +646,14 @@ const Auth = () => {
                   />
                 </div>
 
-                {captchaSiteKey && (
-                  <div className="flex justify-center">
-                    <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
-                      </div>
-                    }>
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        theme="dark"
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
-                    </Suspense>
-                  </div>
-                )}
+                <div className="flex justify-center">
+                  <SmartCaptcha
+                    key={captchaKey}
+                    sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onTokenExpired={() => setCaptchaToken(null)}
+                  />
+                </div>
 
                 <Button
                   type="submit"
