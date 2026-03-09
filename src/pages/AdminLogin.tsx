@@ -83,7 +83,7 @@ export default function AdminLogin() {
           description: "Добро пожаловать в админ-панель",
         });
         setCaptchaToken(null);
-        captchaRef.current?.resetCaptcha();
+        setCaptchaKey(k => k + 1);
         navigate("/admin");
       }
     } catch (error) {
