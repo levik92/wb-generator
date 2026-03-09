@@ -192,11 +192,11 @@ const Auth = () => {
         duration: 10000,
       });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } catch (error: any) {
       toast({ title: "Ошибка регистрации", description: "Не удалось создать аккаунт. Попробуйте позже", variant: "destructive" });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
