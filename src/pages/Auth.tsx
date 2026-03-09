@@ -88,13 +88,8 @@ const Auth = () => {
   }, [tabParam, toast]);
 
   useEffect(() => {
-    const siteKey = "d15aeff4-fff0-4da6-b948-86f26ab65ffa";
-    setCaptchaSiteKey(siteKey);
-  }, []);
-
-  useEffect(() => {
     setCaptchaToken(null);
-    captchaRef.current?.resetCaptcha();
+    setCaptchaKey(k => k + 1);
   }, [activeTab]);
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
