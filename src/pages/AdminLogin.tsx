@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import { Shield, Loader2 } from "lucide-react";
-
-// Lazy load HCaptcha for faster initial page load
-const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
+import { SmartCaptcha } from "@yandex/smart-captcha";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
