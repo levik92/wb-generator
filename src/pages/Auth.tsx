@@ -257,7 +257,7 @@ const Auth = () => {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({ title: "Ошибка", description: "Пройдите проверку капчи.", variant: "destructive" });
       return;
     }
