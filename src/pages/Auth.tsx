@@ -277,12 +277,12 @@ const Auth = () => {
         duration: 8000,
       });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
       setActiveTab("signin");
     } catch (error: any) {
       toast({ title: "Ошибка", description: "Не удалось отправить письмо. Попробуйте позже", variant: "destructive" });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
