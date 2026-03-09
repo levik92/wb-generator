@@ -20,7 +20,7 @@ export default function AdminLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({
         title: "Ошибка входа",
         description: "Пожалуйста, пройдите проверку капчи.",
