@@ -94,7 +94,7 @@ export default function AdminLogin() {
         variant: "destructive",
       });
       setCaptchaToken(null);
-      captchaRef.current?.resetCaptcha();
+      setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
     }
