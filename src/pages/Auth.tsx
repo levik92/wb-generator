@@ -646,24 +646,14 @@ const Auth = () => {
                   />
                 </div>
 
-                {captchaSiteKey && (
-                  <div className="flex justify-center">
-                    <Suspense fallback={
-                      <div className="h-[78px] w-[302px] bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                        <span className="text-xs text-white/40">Загрузка капчи...</span>
-                      </div>
-                    }>
-                      <HCaptcha
-                        ref={captchaRef}
-                        sitekey={captchaSiteKey}
-                        theme="dark"
-                        onVerify={(token) => setCaptchaToken(token)}
-                        onExpire={() => setCaptchaToken(null)}
-                      />
-                    </Suspense>
-                  </div>
-                )}
+                <div className="flex justify-center">
+                  <SmartCaptcha
+                    key={captchaKey}
+                    sitekey="ysc1_uLpEbWmdSo9D5oYyKjcRh8SUhSgodHaxDVDQYlYJfa517ca8"
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onTokenExpired={() => setCaptchaToken(null)}
+                  />
+                </div>
 
                 <Button
                   type="submit"

@@ -144,7 +144,7 @@ export default function AdminLogin() {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading || (captchaSiteKey && !captchaToken)}>
+            <Button type="submit" className="w-full" disabled={loading || !captchaToken}>
               {loading ? "Вход..." : "Войти"}
             </Button>
           </form>
