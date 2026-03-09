@@ -121,7 +121,7 @@ const Auth = () => {
       return;
     }
 
-    if (captchaSiteKey && !captchaToken) {
+    if (!captchaToken) {
       toast({
         title: "Ошибка регистрации",
         description: "Пожалуйста, пройдите проверку капчи.",
