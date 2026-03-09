@@ -13,18 +13,9 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [captchaSiteKey, setCaptchaSiteKey] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const captchaRef = useRef<any>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Site key для hCaptcha - получите его из настроек Supabase
-    // Authentication > Attack Protection > Bot and Abuse Protection
-    // Замените на ваш реальный site key
-    const siteKey = "d15aeff4-fff0-4da6-b948-86f26ab65ffa"; // Замените на ваш site key
-    setCaptchaSiteKey(siteKey);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
