@@ -12,8 +12,7 @@ import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
-
-const HCaptcha = lazy(() => import("@hcaptcha/react-hcaptcha"));
+import { SmartCaptcha } from "@yandex/smart-captcha";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
