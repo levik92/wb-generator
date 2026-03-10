@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'script-defer',
       includeAssets: ['pwa-icon-192.png', 'pwa-icon-512.png', 'apple-touch-icon-new.png'],
       manifest: {
         name: 'WB Generator',

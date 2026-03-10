@@ -137,7 +137,7 @@ export const LandingHeader = () => {
             {/* CTA Buttons */}
             <div className="flex items-center gap-3 order-3">
               <Link to="/auth?tab=signin" className="lg:hidden">
-                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10" aria-label="Войти в аккаунт">
                   <LogIn className="w-5 h-5" />
                 </Button>
               </Link>
@@ -174,7 +174,7 @@ export const LandingHeader = () => {
                     WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
                   </span>
                 </Link>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-white/60 hover:text-white">
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-white/60 hover:text-white" aria-label="Закрыть меню">
                   <X className="w-5 h-5" />
                 </button>
               </div>
