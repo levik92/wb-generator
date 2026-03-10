@@ -174,7 +174,7 @@ export const LandingHeader = () => {
                     WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
                   </span>
                 </Link>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-white/60 hover:text-white">
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-white/60 hover:text-white" aria-label="Закрыть меню">
                   <X className="w-5 h-5" />
                 </button>
               </div>

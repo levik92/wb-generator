@@ -8,11 +8,13 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
 
-// Critical pages loaded immediately
-import Dashboard from "./pages/Dashboard";
-import Admin from "./pages/Admin";
-import Auth from "./pages/Auth";
+// Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
+
+// Critical authenticated pages - lazy loaded (not needed for landing)
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Auth = lazy(() => import("./pages/Auth"));
 
 // Lazy load public pages for better performance
 const Landing = lazy(() => import("./pages/Landing"));
