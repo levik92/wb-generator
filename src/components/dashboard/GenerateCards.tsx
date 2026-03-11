@@ -298,6 +298,7 @@ export const GenerateCards = ({
 
             for (const editJob of completedEditJobs) {
               const editTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+              const isRegen = editJob.category === 'regeneration';
               for (const task of editTasks) {
                 const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
                 if (imgIndex >= 0) {
@@ -306,7 +307,8 @@ export const GenerateCards = ({
                     restoredVariants[imgIndex] = [{ url: images[imgIndex].url, label: 'Оригинал', id: images[imgIndex].id }];
                   }
                   const vNum = restoredVariants[imgIndex].length;
-                  restoredVariants[imgIndex].push({ url: task.image_url, label: `Ред. v.${vNum}`, id: task.id });
+                  const labelPrefix = isRegen ? 'Ген.' : 'Ред.';
+                  restoredVariants[imgIndex].push({ url: task.image_url, label: `${labelPrefix} v.${vNum}`, id: task.id });
                   restoredSelected[imgIndex] = restoredVariants[imgIndex].length - 1;
                 }
               }
