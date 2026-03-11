@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, Menu, X, LogIn, ChevronDown, Image, FileText, Barcode, Video, BookOpen, Newspaper, FolderOpen } from "lucide-react";
+import { Zap, Menu, X, LogIn, ChevronDown, Image, FileText, Barcode, Video, BookOpen, Newspaper, FolderOpen, Users } from "lucide-react";
 
 const productItems = [
   { label: "Создание карточек", href: "/sozdanie-kartochek", icon: Image, description: "ИИ-дизайн за 3 минуты" },
