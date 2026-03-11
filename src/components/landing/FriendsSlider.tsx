@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FriendDetailDialog } from "./FriendDetailDialog";
@@ -40,11 +40,13 @@ export const FriendsSlider = () => {
       {/* Background */}
       <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Section header — matches other landing sections */}
+        {/* Section header */}
         <div className="text-center mb-16 sm:mb-20">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-sm text-blue-400 mb-6">
+            <BadgeCheck className="w-4 h-4" />
             Верифицированные партнёры
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
@@ -71,10 +73,10 @@ export const FriendsSlider = () => {
           </button>
         </div>
 
-        {/* Slider */}
+        {/* Slider — 5 items visible on desktop */}
         <div
           ref={setScrollRef}
-          className="flex gap-5 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 snap-x snap-mandatory"
+          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 snap-x snap-mandatory"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {friends.map((friend, i) => (
@@ -85,19 +87,19 @@ export const FriendsSlider = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: i * 0.06 }}
               onClick={() => setSelected(friend)}
-              className="snap-start shrink-0 w-[220px] sm:w-[260px] rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group"
+              className="snap-start shrink-0 w-[200px] sm:w-[calc((100%-64px)/5)] rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm p-5 hover:border-primary/30 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group"
             >
-              <div className="w-16 h-16 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden mb-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden mb-4 mx-auto">
                 <img
                   src={friend.logo_url}
                   alt={friend.name}
-                  className="w-11 h-11 object-contain"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                 />
               </div>
-              <h3 className="font-semibold text-white text-base truncate mb-1.5 group-hover:text-primary transition-colors">
+              <h3 className="font-semibold text-white text-sm sm:text-base truncate mb-1.5 group-hover:text-primary transition-colors text-center">
                 {friend.name}
               </h3>
-              <p className="text-sm text-white/40 line-clamp-2 leading-relaxed">
+              <p className="text-xs sm:text-sm text-white/40 line-clamp-2 leading-relaxed text-center">
                 {friend.short_description}
               </p>
             </motion.div>

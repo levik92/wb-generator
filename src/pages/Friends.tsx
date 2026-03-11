@@ -106,7 +106,7 @@ export default function Friends() {
             ) : friends.length === 0 ? (
               <p className="text-center text-white/40 py-16">Скоро здесь появятся наши друзья</p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
                 {friends.map((friend, i) => (
                   <motion.div
                     key={friend.id}
@@ -120,11 +120,11 @@ export default function Friends() {
                       className="flex items-center gap-4 mb-4 cursor-pointer"
                       onClick={() => setSelected(friend)}
                     >
-                      <div className="w-16 h-16 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-[72px] h-[72px] rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
                         <img
                           src={friend.logo_url}
                           alt={friend.name}
-                          className="w-11 h-11 object-contain"
+                          className="w-14 h-14 object-contain"
                         />
                       </div>
                       <div className="min-w-0">
