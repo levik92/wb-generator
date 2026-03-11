@@ -450,6 +450,18 @@ button[role="combobox"]:focus,
   }
 }
 
+@property --glow-x {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 30%;
+}
+
+@property --glow-x2 {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 70%;
+}
+
 @keyframes glow-drift {
   0% { --glow-x: 20%; }
   50% { --glow-x: 80%; }
