@@ -48,7 +48,7 @@ const FriendContent = ({ friend, onClose, isMobile }: { friend: ServiceFriend | 
   }, [friend, checkScroll]);
 
   return (
-    <div className="flex flex-col" style={{ maxHeight: isMobile ? '85vh' : undefined }}>
+    <div className="flex flex-col relative" style={{ maxHeight: isMobile ? '80vh' : '85vh', height: isMobile ? '80vh' : undefined }}>
       {/* Close button — desktop only, mobile uses drawer handle */}
       {!isMobile && (
         <button
