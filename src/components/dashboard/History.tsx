@@ -1182,12 +1182,15 @@ export const History = ({
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
-                        {img.is_edited && (
+                        {(img.is_edited || img.is_regenerated) && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
                             {(() => {
-                              const editedImages = generation.output_data.images.filter((i: any) => i.is_edited);
-                              const editIndex = editedImages.indexOf(img);
-                              return `Ред. (v. ${editIndex + 1})`;
+                              const matchingImages = generation.output_data.images.filter((i: any) => 
+                                img.is_regenerated ? i.is_regenerated : i.is_edited
+                              );
+                              const versionIndex = matchingImages.indexOf(img);
+                              const prefix = img.is_regenerated ? 'Ген.' : 'Ред.';
+                              return `${prefix} (v. ${versionIndex + 1})`;
                             })()}
                           </div>
                         )}

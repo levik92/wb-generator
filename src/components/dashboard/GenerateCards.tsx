@@ -2055,7 +2055,7 @@ export const GenerateCards = ({
                                 <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1.5" align="start">
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto sm:min-w-[200px] p-1.5" align="start">
                               <div className="space-y-0.5 max-h-60 overflow-y-auto">
                                 {variants.map((v, vIdx) => (
                                   <button
