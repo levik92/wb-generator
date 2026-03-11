@@ -149,7 +149,9 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         product_name: sanitizedProductName,
-        description: sanitizedDescription,
+        description: sourceGenerationId 
+          ? `${sanitizedDescription} [sourceGenerationId:${sourceGenerationId}]`
+          : sanitizedDescription,
         category: 'regeneration',
         status: 'processing',
         total_cards: 1,
