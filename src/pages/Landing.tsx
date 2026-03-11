@@ -78,6 +78,9 @@ const Landing = () => {
             <FAQSection />
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
+            <FriendsSlider />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
             <CTASection />
           </Suspense>
         </main>
