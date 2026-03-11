@@ -98,6 +98,7 @@ export default function Friends() {
                   className="w-24 h-24 sm:w-28 sm:h-28 animate-levitate drop-shadow-[0_8px_24px_hsl(268,83%,60%,0.3)]"
                 />
               </div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-6">
                 <BadgeCheck className="w-4 h-4" />
                 <span>Проверено командой WBGen</span>
               </div>
