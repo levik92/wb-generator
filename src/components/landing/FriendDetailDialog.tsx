@@ -143,24 +143,26 @@ const FriendContent = ({ friend, onClose, isMobile }: { friend: ServiceFriend | 
 
 export const FriendDetailDialog = ({ friend, onClose }: FriendDetailDialogProps) => {
   const isMobile = useIsMobile();
+  const isOpen = !!friend;
 
+  // Mobile: bottom drawer
   if (isMobile) {
     return (
-      <Drawer open={!!friend} onOpenChange={(open) => !open && onClose()}>
+      <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
         <DrawerContent className="bg-[#111111] border-white/[0.08] text-white relative">
-          {/* Gradient covers entire top including handle */}
           <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/[0.08] to-transparent pointer-events-none z-0" />
-          <DrawerTitle className="sr-only">{friend?.name}</DrawerTitle>
+          <DrawerTitle className="sr-only">{friend?.name ?? ""}</DrawerTitle>
           <FriendContent friend={friend} onClose={onClose} isMobile />
         </DrawerContent>
       </Drawer>
     );
   }
 
+  // Desktop: centered dialog
   return (
-    <Dialog open={!!friend} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-2xl bg-[#111111] border-white/[0.08] text-white p-0 overflow-hidden max-h-[90vh] flex flex-col [&>button]:hidden rounded-2xl">
-        <DialogTitle className="sr-only">{friend?.name}</DialogTitle>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="sm:max-w-2xl bg-[#111111] border-white/[0.08] text-white p-0 overflow-hidden max-h-[90vh] flex flex-col [&>button]:hidden rounded-2xl" aria-describedby={undefined}>
+        <DialogTitle className="sr-only">{friend?.name ?? ""}</DialogTitle>
         <FriendContent friend={friend} onClose={onClose} isMobile={false} />
       </DialogContent>
     </Dialog>
