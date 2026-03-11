@@ -475,18 +475,6 @@ button[role="combobox"]:focus,
   }
 }
 
-@property --glow-x {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 30%;
-}
-
-@property --glow-x2 {
-  syntax: '<percentage>';
-  inherits: false;
-  initial-value: 70%;
-}
-
 /* Telegram Mini App safe area support */
 body {
   padding-top: env(safe-area-inset-top, 0);
