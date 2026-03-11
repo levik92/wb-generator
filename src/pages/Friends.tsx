@@ -183,7 +183,9 @@ export default function Friends() {
           </div>
         </section>
 
-        <LandingFooter />
+        <div className="relative z-10">
+          <LandingFooter />
+        </div>
 
         {/* Detail Dialog */}
         <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
