@@ -111,7 +111,7 @@ export default function Friends() {
         </section>
 
         {/* Grid */}
-        <section className="pb-24 sm:pb-32">
+        <section className="pb-24 sm:pb-32 relative z-10">
           <div className="container mx-auto px-4">
             {loading ? (
               <div className="flex justify-center py-16">
@@ -127,7 +127,7 @@ export default function Friends() {
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: i * 0.08 }}
-                    className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-white/[0.05] transition-all duration-300 flex flex-col"
+                    className="group relative rounded-2xl border border-white/[0.06] bg-[#111111]/60 backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-[#111111]/80 transition-all duration-300 flex flex-col"
                   >
                     {/* Logo + name */}
                     <div
