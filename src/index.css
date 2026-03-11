@@ -452,6 +452,18 @@ button[role="combobox"]:focus,
 
 }
 
+@keyframes glow-drift {
+  0% { --glow-x: 20%; }
+  50% { --glow-x: 80%; }
+  100% { --glow-x: 20%; }
+}
+
+@keyframes glow-drift-top {
+  0% { --glow-x2: 75%; }
+  50% { --glow-x2: 25%; }
+  100% { --glow-x2: 75%; }
+}
+
 /* Telegram Mini App safe area support */
 body {
   padding-top: env(safe-area-inset-top, 0);
