@@ -186,7 +186,10 @@ export const AdminFriends = () => {
   return (
     <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base">Друзья сервиса</CardTitle>
+        <div>
+          <CardTitle className="text-lg sm:text-xl">Друзья сервиса</CardTitle>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Управление партнёрскими сервисами</p>
+        </div>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4 mr-1" /> Добавить
         </Button>
