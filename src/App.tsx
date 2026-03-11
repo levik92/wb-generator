@@ -38,6 +38,7 @@ const KnowledgeBase = lazy(() => import("./pages/KnowledgeBase"));
 const KnowledgeArticle = lazy(() => import("./pages/KnowledgeArticle"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const PartnersPage = lazy(() => import("./pages/PartnersPage"));
+const Friends = lazy(() => import("./pages/Friends"));
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,7 @@ const App = () => (
             <Route path="/baza-znaniy/:articleId" element={<KnowledgeArticle />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/friends" element={<Friends />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

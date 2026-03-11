@@ -1254,6 +1254,48 @@ export type Database = {
         }
         Relationships: []
       }
+      service_friends: {
+        Row: {
+          created_at: string
+          detailed_description: string
+          display_order: number
+          exclusive_conditions: string
+          id: string
+          is_active: boolean
+          logo_url: string
+          name: string
+          service_url: string
+          short_description: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detailed_description: string
+          display_order?: number
+          exclusive_conditions: string
+          id?: string
+          is_active?: boolean
+          logo_url: string
+          name: string
+          service_url: string
+          short_description: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detailed_description?: string
+          display_order?: number
+          exclusive_conditions?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string
+          name?: string
+          service_url?: string
+          short_description?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_status: {
         Row: {
           id: string
