@@ -60,6 +60,7 @@ serve(async (req) => {
       cardType,
       sourceImageUrl,
       productImages,
+      sourceGenerationId,
     } = requestBody;
 
     // Input validation
