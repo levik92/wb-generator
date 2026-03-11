@@ -1,71 +1,40 @@
 
 
+# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
+
 ## Problem
+When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
 
-There is a mismatch between card type keys used in different parts of the system:
+**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
+```text
+isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
+```
+But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
 
-| Card | Edge function (DB value) | Frontend key | Banana regen mapping |
-|------|------------------------|-------------|---------------------|
-| Главная | `cover` | `cover` | `cover` -> `cover` |
-| Образ жизни / Свойства | `lifestyle` | `features` | NOT MAPPED -> `cover` |
-| Макро | `macro` | `macro` | `macro` -> `macro` |
-| До/После / Товар в использовании | `beforeAfter` | `usage` | NOT MAPPED -> `cover` |
-| Комплект / Сравнение | `bundle` | `comparison` | NOT MAPPED -> `cover` |
-| Гарантия / Фото без инфографики | `guarantee` | `clean` | NOT MAPPED -> `cover` |
-| Редактирование | `mainEdit` | `mainEdit` | `mainEdit` -> `mainEdit` |
-
-When a card is originally generated, the edge function stores `card_type` as `lifestyle`, `beforeAfter`, `bundle`, `guarantee` in the database. When the user regenerates, the frontend sends this stored DB value. But:
-
-1. **Banana regeneration** (`regenerate-single-card-banana`): The `cardTypeToPromptType` map only contains frontend keys (`features`, `usage`, `comparison`, `clean`), not DB keys (`lifestyle`, `beforeAfter`, `bundle`, `guarantee`). Unmapped keys fall back to `cover`.
-
-2. **V2 regeneration** (`regenerate-single-card-v2`): Passes `cardType` directly to `getPromptTemplate` as `prompt_type`. If prompts are stored under the edge function keys (`lifestyle`, `beforeAfter`, etc.), it works. If stored under frontend keys, it breaks.
+The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
 
 ## Solution
 
-Update the `cardTypeToPromptType` mapping in `regenerate-single-card-banana/index.ts` to include **both** the DB keys and the frontend keys, so regeneration works regardless of which naming convention the stored `card_type` uses.
+### 1. Mark regeneration jobs with a distinct category
+Update both edge functions to use `category: 'regeneration'` instead of the product category:
+- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
+- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
 
-### File: `supabase/functions/regenerate-single-card-banana/index.ts`
+### 2. Update `checkForActiveJobs` in GenerateCards.tsx
+- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
+- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
+- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
 
-Update the `cardTypeToPromptType` map (lines 11-19) to include DB-stored keys:
+### 3. Update active edit jobs restoration block
+The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
 
-```typescript
-const cardTypeToPromptType: Record<string, string> = {
-  'cover': 'cover',
-  'features': 'features',
-  'lifestyle': 'features',      // DB key -> same prompt
-  'macro': 'macro',
-  'usage': 'beforeAfter',
-  'beforeAfter': 'beforeAfter', // DB key -> same prompt
-  'comparison': 'bundle',
-  'bundle': 'bundle',           // DB key -> same prompt
-  'clean': 'guarantee',
-  'guarantee': 'guarantee',     // DB key -> same prompt
-  'mainEdit': 'mainEdit',
-};
-```
+## Technical Details
 
-### File: `supabase/functions/regenerate-single-card-v2/index.ts`
-
-Add a similar mapping before `getPromptTemplate` is called (around line 177), so the correct prompt_type is used regardless of which key format was stored:
-
-```typescript
-const cardTypeToPromptType: Record<string, string> = {
-  'cover': 'cover',
-  'features': 'features',
-  'lifestyle': 'features',
-  'macro': 'macro',
-  'usage': 'beforeAfter',
-  'beforeAfter': 'beforeAfter',
-  'comparison': 'bundle',
-  'bundle': 'bundle',
-  'clean': 'guarantee',
-  'guarantee': 'guarantee',
-  'mainEdit': 'mainEdit',
-};
-
-const promptType = cardTypeToPromptType[cardType] || 'cover';
-const prompt = await getPromptTemplate(supabase, promptType, ...);
-```
-
-This ensures that no matter which key format (`lifestyle` from DB or `features` from frontend) is passed during regeneration, the correct prompt template is fetched.
+**Files to modify:**
+- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
+- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
+- `src/components/dashboard/GenerateCards.tsx`:
+  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
+  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
+  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
 

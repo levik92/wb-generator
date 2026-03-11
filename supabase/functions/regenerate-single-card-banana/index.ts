@@ -10,12 +10,16 @@ const corsHeaders = {
 // Map frontend card types to Google prompt types in database
 const cardTypeToPromptType: Record<string, string> = {
   'cover': 'cover',
-  'features': 'features', 
+  'features': 'features',
+  'lifestyle': 'features',      // DB key -> same prompt
   'macro': 'macro',
-  'usage': 'beforeAfter',    // "Товар в использовании" -> beforeAfter (карточка-инструкция, товар в действии)
-  'comparison': 'bundle',    // "Сравнение с другими товарами" -> bundle (карточка сравнения)
-  'clean': 'guarantee',      // "Фото без инфографики" -> guarantee (чистое имиджевое фото без текста)
-  'mainEdit': 'mainEdit',    // "Редактирование изображения" -> mainEdit (редизайн, смена ракурса и пр.)
+  'usage': 'beforeAfter',
+  'beforeAfter': 'beforeAfter', // DB key -> same prompt
+  'comparison': 'bundle',
+  'bundle': 'bundle',           // DB key -> same prompt
+  'clean': 'guarantee',
+  'guarantee': 'guarantee',     // DB key -> same prompt
+  'mainEdit': 'mainEdit',
 };
 
 // Helper function to get prompt template
