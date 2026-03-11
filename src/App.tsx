@@ -38,6 +38,7 @@ const KnowledgeBase = lazy(() => import("./pages/KnowledgeBase"));
 const KnowledgeArticle = lazy(() => import("./pages/KnowledgeArticle"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const PartnersPage = lazy(() => import("./pages/PartnersPage"));
+const Friends = lazy(() => import("./pages/Friends"));
 
 const queryClient = new QueryClient();
 
