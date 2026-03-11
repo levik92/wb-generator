@@ -173,8 +173,24 @@ serve(async (req) => {
       });
     }
 
+    // Map card type to prompt type (handles both DB keys and frontend keys)
+    const cardTypeToPromptType: Record<string, string> = {
+      'cover': 'cover',
+      'features': 'features',
+      'lifestyle': 'features',
+      'macro': 'macro',
+      'usage': 'beforeAfter',
+      'beforeAfter': 'beforeAfter',
+      'comparison': 'bundle',
+      'bundle': 'bundle',
+      'clean': 'guarantee',
+      'guarantee': 'guarantee',
+      'mainEdit': 'mainEdit',
+    };
+    const promptType = cardTypeToPromptType[cardType] || 'cover';
+
     // Generate prompt from database
-    const prompt = await getPromptTemplate(supabase, cardType, sanitizedProductName, sanitizedCategory, sanitizedDescription);
+    const prompt = await getPromptTemplate(supabase, promptType, sanitizedProductName, sanitizedCategory, sanitizedDescription);
 
     // Use all original images (incl. optional reference) if provided, otherwise fallback to single sourceImageUrl
     const imagesToUse = productImages && Array.isArray(productImages) && productImages.length > 0
