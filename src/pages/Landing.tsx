@@ -75,10 +75,10 @@ const Landing = () => {
             </section>
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
-            <FAQSection />
+            <FriendsSlider />
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
-            <FriendsSlider />
+            <FAQSection />
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
             <CTASection />
