@@ -24,7 +24,8 @@ import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
+import { Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
+import { LightningLoader } from "@/components/ui/lightning-loader";
 
 // Mobile components
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
@@ -271,7 +272,7 @@ const Dashboard = () => {
   };
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <LightningLoader size="md" />
       </div>;
   }
   if (!user || !profile) {
