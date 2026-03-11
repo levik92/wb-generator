@@ -13,6 +13,7 @@ const resourceLinks = [
   { label: "База знаний", href: "/baza-znaniy" },
   { label: "Блог", href: "/blog" },
   { label: "Тарифы", href: "/pricing" },
+  { label: "Наши друзья", href: "/friends" },
 ];
 
 const companyLinks = [
