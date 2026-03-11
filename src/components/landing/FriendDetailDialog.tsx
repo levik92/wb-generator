@@ -147,7 +147,7 @@ export const FriendDetailDialog = ({ friend, onClose }: FriendDetailDialogProps)
   if (isMobile) {
     return (
       <Drawer open={!!friend} onOpenChange={(open) => !open && onClose()}>
-        <DrawerContent className="bg-[#111111] border-white/[0.08] text-white relative overflow-hidden">
+        <DrawerContent className="bg-[#111111] border-white/[0.08] text-white relative">
           {/* Gradient covers entire top including handle */}
           <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/[0.08] to-transparent pointer-events-none z-0" />
           <DrawerTitle className="sr-only">{friend?.name}</DrawerTitle>
