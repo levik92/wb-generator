@@ -369,6 +369,9 @@ export const AdminPartners = () => {
         </CardContent>
       </Card>
 
+      {/* Friends Management */}
+      <AdminFriends />
+
       {/* Partner Details Dialog */}
       <ResponsiveDialog open={!!selectedPartner} onOpenChange={() => setSelectedPartner(null)}>
         <ResponsiveDialogContent className="sm:max-w-4xl">
