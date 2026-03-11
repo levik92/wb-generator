@@ -270,7 +270,7 @@ export const GenerateCards = ({
             sourceGenId = genRecord.id;
           }
 
-          // Build query for edit jobs - filter by sourceGenerationId in description
+          // Build query for edit/regeneration jobs - filter by sourceGenerationId in description
           let editQuery = supabase
             .from('generation_jobs')
             .select(`
@@ -280,7 +280,7 @@ export const GenerateCards = ({
               )
             `)
             .eq('user_id', profile.id)
-            .eq('category', 'edit')
+            .in('category', ['edit', 'regeneration'])
             .eq('status', 'completed')
             .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
             .order('created_at', { ascending: true });
