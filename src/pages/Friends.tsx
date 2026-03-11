@@ -98,15 +98,11 @@ export default function Friends() {
                   className="w-24 h-24 sm:w-28 sm:h-28 animate-levitate drop-shadow-[0_8px_24px_hsl(268,83%,60%,0.3)]"
                 />
               </div>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-6">
-                <BadgeCheck className="w-4 h-4" />
-                <span>Проверено командой WBGen</span>
-              </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
                 Наши друзья
               </h1>
               <p className="text-white/60 text-base sm:text-lg max-w-xl mx-auto">
-                Верифицированные сервисы, которые мы рекомендуем. Переходя от нас — вы получаете персональные условия и эксклюзивные бонусы.
+                Верифицированные сервисы, проверенные командой WBGen. Переходя от нас — вы получаете персональные условия и эксклюзивные бонусы.
               </p>
             </motion.div>
           </div>
