@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
-import { LightningLoader } from "./components/ui/lightning-loader";
 
 // Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
