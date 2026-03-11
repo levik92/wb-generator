@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { toast } from "@/hooks/use-toast";
 
 interface ProtectedRouteProps {
