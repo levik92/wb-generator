@@ -371,15 +371,15 @@ export const History = ({
     const labels: Record<string, string> = {
       cover: 'Обложка',
       features: 'Характ.',
-      guarantee: 'Гарантия',
+      guarantee: 'Без инфогр.',
       macro: 'Макро',
       usage: 'Примен.',
       mainEdit: 'Ред. фото',
-      comparison: 'Сравн.',
+      comparison: 'Сравнение',
       lifestyle: 'Свойства',
       clean: 'Чистый фон',
       beforeAfter: 'До/После',
-      bundle: 'Комплект',
+      bundle: 'Сравнение',
     };
     return type ? labels[type] || type : '';
   };
