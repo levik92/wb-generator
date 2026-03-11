@@ -378,7 +378,7 @@ export const History = ({
       comparison: 'Сравнение',
       lifestyle: 'Свойства',
       clean: 'Чистый фон',
-      beforeAfter: 'До/После',
+      beforeAfter: 'В использ.',
       bundle: 'Сравнение',
     };
     return type ? labels[type] || type : '';
