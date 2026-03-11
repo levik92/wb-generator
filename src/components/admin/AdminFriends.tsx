@@ -48,6 +48,9 @@ export const AdminFriends = () => {
   const [editing, setEditing] = useState<ServiceFriend | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadFriends();
@@ -70,6 +73,8 @@ export const AdminFriends = () => {
   const openCreate = () => {
     setEditing(null);
     setForm({ ...emptyForm, display_order: friends.length });
+    setLogoFile(null);
+    setLogoPreview(null);
     setDialogOpen(true);
   };
 
@@ -85,25 +90,68 @@ export const AdminFriends = () => {
       display_order: friend.display_order,
       is_active: friend.is_active,
     });
+    setLogoFile(null);
+    setLogoPreview(friend.logo_url || null);
     setDialogOpen(true);
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Выберите изображение", variant: "destructive" });
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast({ title: "Максимальный размер 3 МБ", variant: "destructive" });
+      return;
+    }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setForm({ ...form, logo_url: "" });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadLogo = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop() || "png";
+    const path = `logos/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("service_friends_logos")
+      .upload(path, file, { contentType: file.type, upsert: true });
+    if (error) throw new Error("Ошибка загрузки логотипа: " + error.message);
+    const { data } = supabase.storage.from("service_friends_logos").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const handleSave = async () => {
-    if (!form.name || !form.short_description || !form.logo_url || !form.service_url) {
+    const hasLogo = logoFile || form.logo_url;
+    if (!form.name || !form.short_description || !hasLogo || !form.service_url) {
       toast({ title: "Заполните обязательные поля", variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
+      let logoUrl = form.logo_url;
+      if (logoFile) {
+        logoUrl = await uploadLogo(logoFile);
+      }
+
+      const payload = { ...form, logo_url: logoUrl };
+
       if (editing) {
         const { error } = await supabase
           .from("service_friends")
-          .update({ ...form, updated_at: new Date().toISOString() })
+          .update({ ...payload, updated_at: new Date().toISOString() })
           .eq("id", editing.id);
         if (error) throw error;
         toast({ title: "Друг обновлён" });
       } else {
-        const { error } = await supabase.from("service_friends").insert(form);
+        const { error } = await supabase.from("service_friends").insert(payload);
         if (error) throw error;
         toast({ title: "Друг добавлен" });
       }
