@@ -334,7 +334,7 @@ button[role="combobox"]:focus,
   outline: none !important;
   border-color: hsl(var(--wb-purple)) !important;
   box-shadow: none !important;
-  ring: none !important;
+  
 }
 
 /* Mobile button text size adjustments */
