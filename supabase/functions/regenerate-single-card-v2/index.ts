@@ -60,6 +60,7 @@ serve(async (req) => {
       cardType,
       sourceImageUrl,
       productImages,
+      sourceGenerationId,
     } = requestBody;
 
     // Input validation
@@ -208,7 +209,9 @@ serve(async (req) => {
         user_id: userId,
         product_name: sanitizedProductName,
         category: 'regeneration',
-        description: sanitizedDescription,
+        description: sourceGenerationId
+          ? `${sanitizedDescription} [sourceGenerationId:${sourceGenerationId}]`
+          : sanitizedDescription,
         // IMPORTANT: keep full context so process-openai-task can use product + reference images
         product_images: imagesToUse,
         status: 'processing',

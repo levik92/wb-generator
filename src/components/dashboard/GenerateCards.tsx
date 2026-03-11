@@ -270,7 +270,7 @@ export const GenerateCards = ({
             sourceGenId = genRecord.id;
           }
 
-          // Build query for edit jobs - filter by sourceGenerationId in description
+          // Build query for edit/regeneration jobs - filter by sourceGenerationId in description
           let editQuery = supabase
             .from('generation_jobs')
             .select(`
@@ -280,7 +280,7 @@ export const GenerateCards = ({
               )
             `)
             .eq('user_id', profile.id)
-            .eq('category', 'edit')
+            .in('category', ['edit', 'regeneration'])
             .eq('status', 'completed')
             .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
             .order('created_at', { ascending: true });
@@ -298,6 +298,7 @@ export const GenerateCards = ({
 
             for (const editJob of completedEditJobs) {
               const editTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+              const isRegen = editJob.category === 'regeneration';
               for (const task of editTasks) {
                 const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
                 if (imgIndex >= 0) {
@@ -306,7 +307,8 @@ export const GenerateCards = ({
                     restoredVariants[imgIndex] = [{ url: images[imgIndex].url, label: 'Оригинал', id: images[imgIndex].id }];
                   }
                   const vNum = restoredVariants[imgIndex].length;
-                  restoredVariants[imgIndex].push({ url: task.image_url, label: `Ред. v.${vNum}`, id: task.id });
+                  const labelPrefix = isRegen ? 'Ген.' : 'Ред.';
+                  restoredVariants[imgIndex].push({ url: task.image_url, label: `${labelPrefix} v.${vNum}`, id: task.id });
                   restoredSelected[imgIndex] = restoredVariants[imgIndex].length - 1;
                 }
               }
@@ -1162,6 +1164,22 @@ export const GenerateCards = ({
       if (!productNameToUse?.trim()) {
         throw new Error('Название товара недоступно');
       }
+
+      // Find sourceGenerationId so the DB trigger clusters the regen with the original
+      let sourceGenerationId: string | undefined;
+      if (jobIdForRegeneration) {
+        const { data: genData } = await supabase
+          .from('generations')
+          .select('id')
+          .eq('user_id', profile.id)
+          .eq('generation_type', 'cards')
+          .filter('input_data->>job_id', 'eq', jobIdForRegeneration)
+          .maybeSingle();
+        if (genData?.id) {
+          sourceGenerationId = genData.id;
+        }
+      }
+
       const {
         data,
         error
@@ -1174,7 +1192,8 @@ export const GenerateCards = ({
           cardIndex: image.stageIndex,
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
           sourceImageUrl: sourceImageUrl,
-          productImages: allProductImages
+          productImages: allProductImages,
+          sourceGenerationId
         }
       });
       if (error) throw error;
@@ -1226,7 +1245,24 @@ export const GenerateCards = ({
           return;
         }
         if (task.status === 'completed' && task.image_url) {
-          // Update the generated image with new URL
+          // Add as a new variant instead of replacing (like edits, but with "Ген." label)
+          setImageVariants(prev => {
+            const existing = prev[imageIndex] || [];
+            const currentImage = generatedImages[imageIndex];
+            const variants = existing.length === 0 && currentImage 
+              ? [{ url: currentImage.url, label: 'Оригинал', id: currentImage.id }] 
+              : [...existing];
+            const newLabel = `Ген. v.${variants.length}`;
+            variants.push({ url: task.image_url, label: newLabel, id: task.id });
+            return { ...prev, [imageIndex]: variants };
+          });
+          // Select the new variant
+          setSelectedVariant(prev => {
+            const existing = imageVariants[imageIndex] || [];
+            const newIdx = existing.length === 0 ? 1 : existing.length;
+            return { ...prev, [imageIndex]: newIdx };
+          });
+          // Update the displayed image
           setGeneratedImages(prev => prev.map((img, i) => i === imageIndex ? {
             ...img,
             url: task.image_url
@@ -2019,7 +2055,7 @@ export const GenerateCards = ({
                                 <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1.5" align="start">
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto sm:min-w-[200px] p-1.5" align="start">
                               <div className="space-y-0.5 max-h-60 overflow-y-auto">
                                 {variants.map((v, vIdx) => (
                                   <button
