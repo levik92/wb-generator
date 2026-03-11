@@ -14,6 +14,7 @@ const FAQSection = lazy(() => import("@/components/landing/FAQSection").then(m =
 const CTASection = lazy(() => import("@/components/landing/CTASection").then(m => ({ default: m.CTASection })));
 const LandingFooter = lazy(() => import("@/components/landing/LandingFooter").then(m => ({ default: m.LandingFooter })));
 const PricingTeaser = lazy(() => import("@/components/services/PricingTeaser").then(m => ({ default: m.PricingTeaser })));
+const FriendsSlider = lazy(() => import("@/components/landing/FriendsSlider").then(m => ({ default: m.FriendsSlider })));
 
 // Simple loading placeholder
 const SectionLoader = () => (
