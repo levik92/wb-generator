@@ -162,12 +162,14 @@ export const FriendDetailDialog = ({ friend, onClose }: FriendDetailDialogProps)
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
-        className="sm:max-w-2xl bg-[#111111] border-white/[0.08] text-white p-0 max-h-[90vh] flex flex-col [&>button]:hidden rounded-2xl"
+        className="sm:max-w-2xl bg-[#111111] border-white/[0.08] text-white p-0 max-h-[90vh] [&>button]:hidden rounded-2xl overflow-hidden"
         aria-describedby={undefined}
       >
         <DialogTitle className="sr-only">{friend?.name ?? ""}</DialogTitle>
         <DialogDescription className="sr-only">Информация о партнёре</DialogDescription>
-        <FriendBody friend={friend} showClose onClose={onClose} />
+        <div className="flex flex-col max-h-[85vh]">
+          <FriendBody friend={friend} showClose onClose={onClose} />
+        </div>
       </DialogContent>
     </Dialog>
   );
