@@ -302,48 +302,6 @@
     box-shadow: 0 8px 20px -8px hsl(var(--accent) / 0.5);
   }
 
-/* Standardized borders for all inputs - 1px gray, lighter background */
-input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
-textarea, 
-select,
-button[role="combobox"] {
-  border-width: 1px !important;
-  border-style: solid !important;
-  border-color: hsl(var(--input-border)) !important;
-  background-color: hsl(var(--input)) !important;
-  font-size: 0.875rem;
-  transition: border-color 0.3s ease, background-color 0.3s ease !important;
-}
-
-/* Remove border from HCaptcha */
-.h-captcha iframe,
-[data-hcaptcha-widget-id] iframe,
-.h-captcha > div,
-[data-hcaptcha-widget-id] > div {
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-/* Focus state - purple border for all inputs */
-input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):focus, 
-textarea:focus, 
-select:focus,
-button[role="combobox"]:focus,
-[data-state="open"] > button[role="combobox"] {
-  outline: none !important;
-  border-color: hsl(var(--wb-purple)) !important;
-  box-shadow: none !important;
-  
-}
-
-/* Mobile button text size adjustments */
-@media (max-width: 640px) {
-  .btn-mobile-text {
-    font-size: 0.875rem !important;
-  }
-}
-
   /* Token hover effect */
   .token-hover:hover {
     @apply bg-wb-purple/10 backdrop-blur-sm;
@@ -449,7 +407,47 @@ button[role="combobox"]:focus,
       border-color: hsl(var(--primary) / 0.5);
     }
   }
+}
 
+/* Standardized borders for all inputs - 1px gray, lighter background */
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
+textarea, 
+select,
+button[role="combobox"] {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: hsl(var(--input-border)) !important;
+  background-color: hsl(var(--input)) !important;
+  font-size: 0.875rem;
+  transition: border-color 0.3s ease, background-color 0.3s ease !important;
+}
+
+/* Remove border from HCaptcha */
+.h-captcha iframe,
+[data-hcaptcha-widget-id] iframe,
+.h-captcha > div,
+[data-hcaptcha-widget-id] > div {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Focus state - purple border for all inputs */
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):focus, 
+textarea:focus, 
+select:focus,
+button[role="combobox"]:focus,
+[data-state="open"] > button[role="combobox"] {
+  outline: none !important;
+  border-color: hsl(var(--wb-purple)) !important;
+  box-shadow: none !important;
+}
+
+/* Mobile button text size adjustments */
+@media (max-width: 640px) {
+  .btn-mobile-text {
+    font-size: 0.875rem !important;
+  }
 }
 
 @keyframes glow-drift {
