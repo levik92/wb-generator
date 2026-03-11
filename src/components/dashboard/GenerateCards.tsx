@@ -1243,7 +1243,24 @@ export const GenerateCards = ({
           return;
         }
         if (task.status === 'completed' && task.image_url) {
-          // Update the generated image with new URL
+          // Add as a new variant instead of replacing (like edits, but with "Ген." label)
+          setImageVariants(prev => {
+            const existing = prev[imageIndex] || [];
+            const currentImage = generatedImages[imageIndex];
+            const variants = existing.length === 0 && currentImage 
+              ? [{ url: currentImage.url, label: 'Оригинал', id: currentImage.id }] 
+              : [...existing];
+            const newLabel = `Ген. v.${variants.length}`;
+            variants.push({ url: task.image_url, label: newLabel, id: task.id });
+            return { ...prev, [imageIndex]: variants };
+          });
+          // Select the new variant
+          setSelectedVariant(prev => {
+            const existing = imageVariants[imageIndex] || [];
+            const newIdx = existing.length === 0 ? 1 : existing.length;
+            return { ...prev, [imageIndex]: newIdx };
+          });
+          // Update the displayed image
           setGeneratedImages(prev => prev.map((img, i) => i === imageIndex ? {
             ...img,
             url: task.image_url
