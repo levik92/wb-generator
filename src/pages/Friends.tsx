@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BadgeCheck, Sparkles, HeartHandshake } from "lucide-react";
+import { ExternalLink, BadgeCheck, Sparkles } from "lucide-react";
+import verifiedBadge from "@/assets/verified-badge.png";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -89,13 +90,14 @@ export default function Friends() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Hero Icon */}
+              {/* Verified Badge */}
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                  <HeartHandshake className="w-10 h-10 text-primary" />
-                </div>
+                <img
+                  src={verifiedBadge}
+                  alt="Верифицировано"
+                  className="w-24 h-24 sm:w-28 sm:h-28 animate-levitate drop-shadow-[0_8px_24px_hsl(268,83%,60%,0.3)]"
+                />
               </div>
-
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-6">
                 <BadgeCheck className="w-4 h-4" />
                 <span>Проверено командой WBGen</span>
