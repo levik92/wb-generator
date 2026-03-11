@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Upload, X, ImageIcon } from "lucide-react";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -48,6 +48,9 @@ export const AdminFriends = () => {
   const [editing, setEditing] = useState<ServiceFriend | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadFriends();
@@ -70,6 +73,8 @@ export const AdminFriends = () => {
   const openCreate = () => {
     setEditing(null);
     setForm({ ...emptyForm, display_order: friends.length });
+    setLogoFile(null);
+    setLogoPreview(null);
     setDialogOpen(true);
   };
 
@@ -85,25 +90,68 @@ export const AdminFriends = () => {
       display_order: friend.display_order,
       is_active: friend.is_active,
     });
+    setLogoFile(null);
+    setLogoPreview(friend.logo_url || null);
     setDialogOpen(true);
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Выберите изображение", variant: "destructive" });
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      toast({ title: "Максимальный размер 3 МБ", variant: "destructive" });
+      return;
+    }
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    setForm({ ...form, logo_url: "" });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadLogo = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop() || "png";
+    const path = `logos/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("service_friends_logos")
+      .upload(path, file, { contentType: file.type, upsert: true });
+    if (error) throw new Error("Ошибка загрузки логотипа: " + error.message);
+    const { data } = supabase.storage.from("service_friends_logos").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const handleSave = async () => {
-    if (!form.name || !form.short_description || !form.logo_url || !form.service_url) {
+    const hasLogo = logoFile || form.logo_url;
+    if (!form.name || !form.short_description || !hasLogo || !form.service_url) {
       toast({ title: "Заполните обязательные поля", variant: "destructive" });
       return;
     }
     setSaving(true);
     try {
+      let logoUrl = form.logo_url;
+      if (logoFile) {
+        logoUrl = await uploadLogo(logoFile);
+      }
+
+      const payload = { ...form, logo_url: logoUrl };
+
       if (editing) {
         const { error } = await supabase
           .from("service_friends")
-          .update({ ...form, updated_at: new Date().toISOString() })
+          .update({ ...payload, updated_at: new Date().toISOString() })
           .eq("id", editing.id);
         if (error) throw error;
         toast({ title: "Друг обновлён" });
       } else {
-        const { error } = await supabase.from("service_friends").insert(form);
+        const { error } = await supabase.from("service_friends").insert(payload);
         if (error) throw error;
         toast({ title: "Друг добавлен" });
       }
@@ -195,8 +243,35 @@ export const AdminFriends = () => {
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Название сервиса" />
             </div>
             <div className="space-y-2">
-              <Label>URL логотипа *</Label>
-              <Input value={form.logo_url} onChange={(e) => setForm({ ...form, logo_url: e.target.value })} placeholder="https://..." />
+              <Label>Логотип *</Label>
+              {logoPreview ? (
+                <div className="relative w-20 h-20 rounded-xl border border-border bg-muted/30 flex items-center justify-center overflow-hidden group">
+                  <img src={logoPreview} alt="Logo" className="w-14 h-14 object-contain" />
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-24 rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Upload className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Нажмите для загрузки (до 3 МБ)</span>
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
             </div>
             <div className="space-y-2">
               <Label>Ссылка на сервис *</Label>
