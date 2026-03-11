@@ -62,6 +62,7 @@ serve(async (req) => {
       cardType,
       sourceImageUrl,
       productImages,
+      sourceGenerationId,
     } = await req.json();
 
     // Validate inputs
