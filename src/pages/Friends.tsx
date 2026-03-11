@@ -120,11 +120,11 @@ export default function Friends() {
                       className="flex items-center gap-4 mb-4 cursor-pointer"
                       onClick={() => setSelected(friend)}
                     >
-                      <div className="w-[72px] h-[72px] rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-[72px] h-[72px] rounded-xl border border-white/[0.08] overflow-hidden shrink-0">
                         <img
                           src={friend.logo_url}
                           alt={friend.name}
-                          className="w-14 h-14 object-contain"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="min-w-0">
