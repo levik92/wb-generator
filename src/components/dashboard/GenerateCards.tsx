@@ -1162,6 +1162,22 @@ export const GenerateCards = ({
       if (!productNameToUse?.trim()) {
         throw new Error('Название товара недоступно');
       }
+
+      // Find sourceGenerationId so the DB trigger clusters the regen with the original
+      let sourceGenerationId: string | undefined;
+      if (jobIdForRegeneration) {
+        const { data: genData } = await supabase
+          .from('generations')
+          .select('id')
+          .eq('user_id', profile.id)
+          .eq('generation_type', 'cards')
+          .filter('input_data->>job_id', 'eq', jobIdForRegeneration)
+          .maybeSingle();
+        if (genData?.id) {
+          sourceGenerationId = genData.id;
+        }
+      }
+
       const {
         data,
         error
@@ -1174,7 +1190,8 @@ export const GenerateCards = ({
           cardIndex: image.stageIndex,
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
           sourceImageUrl: sourceImageUrl,
-          productImages: allProductImages
+          productImages: allProductImages,
+          sourceGenerationId
         }
       });
       if (error) throw error;
