@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BadgeCheck, Sparkles } from "lucide-react";
+import { ExternalLink, BadgeCheck, Sparkles, HeartHandshake } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Dialog,
