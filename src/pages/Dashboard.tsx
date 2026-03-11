@@ -24,8 +24,7 @@ import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
-import { LightningLoader } from "@/components/ui/lightning-loader";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
 
 // Mobile components
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
