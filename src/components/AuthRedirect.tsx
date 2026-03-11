@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { LightningLoader } from "@/components/ui/lightning-loader";
+import { Loader2 } from "lucide-react";
 
 interface AuthRedirectProps {
   children: React.ReactNode;
@@ -39,7 +39,7 @@ export const AuthRedirect = ({ children }: AuthRedirectProps) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <LightningLoader size="md" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }

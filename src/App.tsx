@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
-import { LightningLoader } from "./components/ui/lightning-loader";
 
 // Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
@@ -46,7 +45,7 @@ const queryClient = new QueryClient();
 // Unified loading fallback for all lazy pages
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <LightningLoader size="md" />
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
