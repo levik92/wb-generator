@@ -64,11 +64,11 @@ export const FriendDetailDialog = ({ friend, onClose }: FriendDetailDialogProps)
           <div className="relative px-6 pt-8 pb-6 sm:px-8 sm:pt-10 sm:pb-8">
             <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.08] to-transparent" />
             <div className="relative flex items-start gap-5">
-              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0" style={{ width: 72, height: 72 }}>
+              <div className="rounded-2xl border border-white/[0.08] overflow-hidden shrink-0" style={{ width: 72, height: 72 }}>
                 <img
                   src={friend?.logo_url}
                   alt={friend?.name}
-                  className="w-14 h-14 sm:w-16 sm:h-16 object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <div className="min-w-0 pt-1">

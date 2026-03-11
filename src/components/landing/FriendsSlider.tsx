@@ -89,11 +89,11 @@ export const FriendsSlider = () => {
               onClick={() => setSelected(friend)}
               className="snap-start shrink-0 w-[200px] sm:w-[calc((100%-64px)/5)] rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm p-5 hover:border-primary/30 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group"
             >
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden mb-4 mx-auto">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border border-white/[0.08] overflow-hidden mb-4 mx-auto">
                 <img
                   src={friend.logo_url}
                   alt={friend.name}
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <h3 className="font-semibold text-white text-sm sm:text-base truncate mb-1.5 group-hover:text-primary transition-colors text-center">
