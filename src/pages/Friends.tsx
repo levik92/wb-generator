@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BadgeCheck, Sparkles } from "lucide-react";
+import { ExternalLink, BadgeCheck, Sparkles, HeartHandshake } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -49,17 +49,53 @@ export default function Friends() {
         <meta name="description" content="Партнёры WBGen — верифицированные сервисы для селлеров с персональными условиями и бонусами при переходе от нас." />
       </Helmet>
 
-      <div className="min-h-screen bg-[hsl(240,10%,4%)] text-white">
+      <div className="min-h-screen bg-[hsl(240,10%,4%)] text-white relative overflow-hidden">
+        {/* Background gradient animations */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-40">
+          <div 
+            className="absolute w-[800px] h-[800px] -top-1/4 -left-1/4 rounded-full animate-[pulse_15s_ease-in-out_infinite]"
+            style={{
+              background: 'radial-gradient(circle, hsl(268, 50%, 25%) 0%, transparent 70%)',
+            }}
+          />
+          <div 
+            className="absolute w-[600px] h-[600px] top-1/2 -right-1/4 rounded-full animate-[pulse_20s_ease-in-out_infinite_2s]"
+            style={{
+              background: 'radial-gradient(circle, hsl(280, 50%, 20%) 0%, transparent 70%)',
+            }}
+          />
+          <div 
+            className="absolute w-[500px] h-[500px] bottom-0 left-1/3 rounded-full animate-[pulse_25s_ease-in-out_infinite_4s]"
+            style={{
+              background: 'radial-gradient(circle, hsl(260, 40%, 18%) 0%, transparent 70%)',
+            }}
+          />
+        </div>
+
+        {/* Noise overlay */}
+        <div className="fixed inset-0 pointer-events-none opacity-[0.02]" 
+          style={{ 
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` 
+          }} 
+        />
+
         <LandingHeader />
 
         {/* Hero */}
-        <section className="pt-28 pb-12 sm:pt-36 sm:pb-16">
+        <section className="pt-28 pb-12 sm:pt-36 sm:pb-16 relative z-10">
           <div className="container mx-auto px-4 text-center max-w-3xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
+              {/* Hero Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+                  <HeartHandshake className="w-10 h-10 text-primary" />
+                </div>
+              </div>
+
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-6">
                 <BadgeCheck className="w-4 h-4" />
                 <span>Проверено командой WBGen</span>
@@ -75,7 +111,7 @@ export default function Friends() {
         </section>
 
         {/* Grid */}
-        <section className="pb-24 sm:pb-32">
+        <section className="pb-24 sm:pb-32 relative z-10">
           <div className="container mx-auto px-4">
             {loading ? (
               <div className="flex justify-center py-16">
@@ -91,7 +127,7 @@ export default function Friends() {
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: i * 0.08 }}
-                    className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-white/[0.05] transition-all duration-300 flex flex-col"
+                    className="group relative rounded-2xl border border-white/[0.06] bg-[#111111]/60 backdrop-blur-sm p-6 hover:border-primary/30 hover:bg-[#111111]/80 transition-all duration-300 flex flex-col"
                   >
                     {/* Logo + name */}
                     <div
@@ -147,11 +183,13 @@ export default function Friends() {
           </div>
         </section>
 
-        <LandingFooter />
+        <div className="relative z-10">
+          <LandingFooter />
+        </div>
 
         {/* Detail Dialog */}
         <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-          <DialogContent className="sm:max-w-lg bg-[hsl(240,10%,8%)] border-white/10 text-white">
+          <DialogContent className="sm:max-w-lg bg-[#111111] border-white/10 text-white">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3 text-lg">
                 {selected?.logo_url && (
