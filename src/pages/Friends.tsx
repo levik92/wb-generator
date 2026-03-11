@@ -3,16 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BadgeCheck, Sparkles } from "lucide-react";
+import { ExternalLink, BadgeCheck, ArrowRight } from "lucide-react";
 import verifiedBadge from "@/assets/verified-badge.png";
 import { motion } from "framer-motion";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Helmet } from "react-helmet-async";
+import { FriendDetailDialog } from "@/components/landing/FriendDetailDialog";
 
 interface ServiceFriend {
   id: string;
@@ -55,21 +50,15 @@ export default function Friends() {
         <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-40">
           <div 
             className="absolute w-[800px] h-[800px] -top-1/4 -left-1/4 rounded-full animate-[pulse_15s_ease-in-out_infinite]"
-            style={{
-              background: 'radial-gradient(circle, hsl(268, 50%, 25%) 0%, transparent 70%)',
-            }}
+            style={{ background: 'radial-gradient(circle, hsl(268, 50%, 25%) 0%, transparent 70%)' }}
           />
           <div 
             className="absolute w-[600px] h-[600px] top-1/2 -right-1/4 rounded-full animate-[pulse_20s_ease-in-out_infinite_2s]"
-            style={{
-              background: 'radial-gradient(circle, hsl(280, 50%, 20%) 0%, transparent 70%)',
-            }}
+            style={{ background: 'radial-gradient(circle, hsl(280, 50%, 20%) 0%, transparent 70%)' }}
           />
           <div 
             className="absolute w-[500px] h-[500px] bottom-0 left-1/3 rounded-full animate-[pulse_25s_ease-in-out_infinite_4s]"
-            style={{
-              background: 'radial-gradient(circle, hsl(260, 40%, 18%) 0%, transparent 70%)',
-            }}
+            style={{ background: 'radial-gradient(circle, hsl(260, 40%, 18%) 0%, transparent 70%)' }}
           />
         </div>
 
@@ -90,7 +79,6 @@ export default function Friends() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              {/* Verified Badge */}
               <div className="flex justify-center mb-6">
                 <img
                   src={verifiedBadge}
@@ -118,7 +106,7 @@ export default function Friends() {
             ) : friends.length === 0 ? (
               <p className="text-center text-white/40 py-16">Скоро здесь появятся наши друзья</p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-7xl mx-auto">
                 {friends.map((friend, i) => (
                   <motion.div
                     key={friend.id}
@@ -132,11 +120,11 @@ export default function Friends() {
                       className="flex items-center gap-4 mb-4 cursor-pointer"
                       onClick={() => setSelected(friend)}
                     >
-                      <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-16 h-16 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
                         <img
                           src={friend.logo_url}
                           alt={friend.name}
-                          className="w-10 h-10 object-contain"
+                          className="w-11 h-11 object-contain"
                         />
                       </div>
                       <div className="min-w-0">
@@ -158,7 +146,7 @@ export default function Friends() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+                        className="flex-1 border-white/10 text-white/80 bg-white/[0.04] hover:bg-white/[0.08] hover:text-white hover:border-white/20"
                         onClick={() => setSelected(friend)}
                       >
                         Подробнее
@@ -169,8 +157,8 @@ export default function Friends() {
                         asChild
                       >
                         <a href={friend.service_url} target="_blank" rel="noopener noreferrer">
-                          <Sparkles className="w-3.5 h-3.5" />
-                          Эксклюзив
+                          Перейти
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </a>
                       </Button>
                     </div>
@@ -185,57 +173,7 @@ export default function Friends() {
           <LandingFooter />
         </div>
 
-        {/* Detail Dialog */}
-        <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-          <DialogContent className="sm:max-w-lg bg-[#111111] border-white/10 text-white">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 text-lg">
-                {selected?.logo_url && (
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
-                    <img src={selected.logo_url} alt={selected.name} className="w-8 h-8 object-contain" />
-                  </div>
-                )}
-                <div>
-                  <span className="block">{selected?.name}</span>
-                  <span className="flex items-center gap-1 text-xs font-normal text-primary/70 mt-0.5">
-                    <BadgeCheck className="w-3 h-3" /> Верифицированный партнёр
-                  </span>
-                </div>
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-5 mt-2">
-              {/* Detailed description */}
-              <div>
-                <h4 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-2">О сервисе</h4>
-                <p className="text-sm text-white/70 leading-relaxed whitespace-pre-line">
-                  {selected?.detailed_description || selected?.short_description}
-                </p>
-              </div>
-
-              {/* Exclusive conditions */}
-              {selected?.exclusive_conditions && (
-                <div className="rounded-xl bg-primary/10 border border-primary/20 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <h4 className="text-sm font-semibold text-primary">Эксклюзивные условия</h4>
-                  </div>
-                  <p className="text-sm text-white/70 leading-relaxed whitespace-pre-line">
-                    {selected.exclusive_conditions}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA */}
-              <Button className="w-full gap-2" size="lg" asChild>
-                <a href={selected?.service_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4" />
-                  Перейти и получить эксклюзив
-                </a>
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <FriendDetailDialog friend={selected} onClose={() => setSelected(null)} />
       </div>
     </>
   );
