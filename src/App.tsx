@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
-import { Loader2 } from "lucide-react";
 
 // Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
@@ -46,7 +45,7 @@ const queryClient = new QueryClient();
 // Unified loading fallback for all lazy pages
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
   </div>
 );
 
