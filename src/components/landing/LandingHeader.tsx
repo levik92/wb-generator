@@ -14,6 +14,7 @@ const resourceItems = [
   { label: "Кейсы", href: "/cases", icon: FolderOpen, external: true },
   { label: "База знаний", href: "/baza-znaniy", icon: BookOpen },
   { label: "Блог", href: "/blog", icon: Newspaper },
+  { label: "Наши друзья", href: "/friends", icon: Users },
 ];
 
 export const LandingHeader = () => {
