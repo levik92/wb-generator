@@ -2026,14 +2026,14 @@ export const GenerateCards = ({
                         animation: 'glow-drift-top 8s ease-in-out infinite alternate',
                       }} />
                     </>}
-                    <div className="relative group/img shrink-0 w-full sm:w-auto flex justify-center sm:justify-start">
-                      <img src={image.url} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200 group-hover/img:brightness-75" />
+                    <div className="relative group/img shrink-0 w-fit mx-auto sm:mx-0 sm:w-auto">
+                      <img src={image.url} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200" />
                       {/* Hover overlay - only on image */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md overflow-hidden pointer-events-none">
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
                         <Eye className="w-5 h-5 text-white" />
                       </div>
                       {/* Click to preview */}
-                      <div className="absolute inset-0 cursor-pointer" onClick={() => setFullscreenImage(image)} />
+                      <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage(image)} />
                     </div>
                     
                     <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
