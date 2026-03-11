@@ -69,7 +69,7 @@ const FriendBody = ({ friend, showClose, onClose }: { friend: ServiceFriend | nu
       >
         {/* Hero header */}
         <div className="relative px-5 pt-4 pb-4 sm:px-8 sm:pt-10 sm:pb-8">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.08] to-transparent" />
+          <div className="absolute inset-0 hidden sm:block bg-gradient-to-b from-primary/[0.08] to-transparent" />
           <div className="relative flex items-start gap-4 sm:gap-5">
             <div className="rounded-2xl border border-white/[0.08] overflow-hidden shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px]">
               <img
