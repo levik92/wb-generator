@@ -169,8 +169,7 @@ export default {
 						transform: 'translateY(200px) rotate(360deg)',
 						opacity: '0'
 					}
-				}
-			},
+				},
 				'levitate': {
 					'0%, 100%': {
 						transform: 'translateY(0)'
