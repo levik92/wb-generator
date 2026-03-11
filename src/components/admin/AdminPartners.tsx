@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { AdminFriends } from "./AdminFriends";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
