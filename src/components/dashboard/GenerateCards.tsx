@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn } from "lucide-react";
 import { CasesPromoBlock } from "./CasesPromoBlock";
 import { CasesPromoBanner } from "./CasesPromoBanner";
 import { GenerationPopups } from "./GenerationPopups";
@@ -2030,7 +2030,7 @@ export const GenerateCards = ({
                       <img src={image.url} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200" />
                       {/* Hover overlay - only on image */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
-                        <Eye className="w-5 h-5 text-white" />
+                        <ZoomIn className="w-5 h-5 text-white" />
                       </div>
                       {/* Click to preview */}
                       <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage(image)} />
