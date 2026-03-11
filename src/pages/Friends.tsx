@@ -189,7 +189,7 @@ export default function Friends() {
 
         {/* Detail Dialog */}
         <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
-          <DialogContent className="sm:max-w-lg bg-[hsl(240,10%,8%)] border-white/10 text-white">
+          <DialogContent className="sm:max-w-lg bg-[#111111] border-white/10 text-white">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3 text-lg">
                 {selected?.logo_url && (
