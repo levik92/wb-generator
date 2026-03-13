@@ -489,11 +489,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           <Video className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+          <h2 className="text-2xl sm:text-3xl font-bold">
             Видеообложки
-            <Badge variant="secondary" className="bg-amber-400/15 text-amber-600 dark:text-amber-400 border-0 text-[10px] font-medium rounded-[10px] hover:bg-amber-400/15 size-7 flex items-center justify-center p-0 shrink-0">
-              Beta
-            </Badge>
           </h2>
           <p className="text-muted-foreground text-sm">Загрузите фото товара и получите 5-секундную видеообложку</p>
         </div>
