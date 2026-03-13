@@ -1230,34 +1230,37 @@ export const History = ({
                               onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
                               <Play className="w-4 h-4" />
                             </Button>
-                            <Play className="w-4 h-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
-                            disabled={videoEditingInProgress.has(generation.id)}
-                            onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
-                            {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={async (e) => { 
-                              e.stopPropagation(); 
-                              if (video.url) {
-                                try {
-                                  const response = await fetch(video.url);
-                                  const blob = await response.blob();
-                                  const a = document.createElement('a');
-                                  a.href = URL.createObjectURL(blob);
-                                  a.download = `video-cover-${vidIndex + 1}.mp4`;
-                                  document.body.appendChild(a);
-                                  a.click();
-                                  document.body.removeChild(a);
-                                  URL.revokeObjectURL(a.href);
-                                } catch {
-                                  window.open(video.url, '_blank');
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              disabled={videoEditingInProgress.has(generation.id)}
+                              onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
+                              {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                            </Button>
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={async (e) => { 
+                                e.stopPropagation(); 
+                                if (video.url) {
+                                  try {
+                                    const response = await fetch(video.url);
+                                    const blob = await response.blob();
+                                    const a = document.createElement('a');
+                                    a.href = URL.createObjectURL(blob);
+                                    a.download = `video-cover-${vidIndex + 1}.mp4`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(a.href);
+                                  } catch {
+                                    window.open(video.url, '_blank');
+                                  }
                                 }
-                              }
-                            }}>
-                            <Download className="w-4 h-4" />
-                          </Button>
+                              }}>
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                         {video.version_label && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
