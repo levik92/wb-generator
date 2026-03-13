@@ -1157,39 +1157,40 @@ export const History = ({
                               <ZoomIn className="w-4 h-4" />
                             </Button>
                           </div>
-                          >
-                            <ZoomIn className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            disabled={editingInProgress.has(img.image_url)}
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              openHistoryEditDialog(
-                                img.image_url, 
-                                generation.input_data?.productName || 'Товар', 
-                                img.type || `card_${imgIndex}`, 
-                                imgIndex,
-                                generation.id
-                              );
-                            }}
-                          >
-                            {editingInProgress.has(img.image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              const name = (generation.input_data?.productName || 'card').replace(/[<>:"/\\|?*]/g, '').trim();
-                              downloadSingleImage(img.image_url, `${name}_${img.type || imgIndex + 1}.png`); 
-                            }}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
+                          <div className="pointer-events-auto opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              disabled={editingInProgress.has(img.image_url)}
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                openHistoryEditDialog(
+                                  img.image_url, 
+                                  generation.input_data?.productName || 'Товар', 
+                                  img.type || `card_${imgIndex}`, 
+                                  imgIndex,
+                                  generation.id
+                                );
+                              }}
+                            >
+                              {editingInProgress.has(img.image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                            </Button>
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                const name = (generation.input_data?.productName || 'card').replace(/[<>:"/\\|?*]/g, '').trim();
+                                downloadSingleImage(img.image_url, `${name}_${img.type || imgIndex + 1}.png`); 
+                              }}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                         {(img.is_edited || img.is_regenerated) && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
