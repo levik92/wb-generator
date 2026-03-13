@@ -1243,9 +1243,8 @@ export const History = ({
                                   }
                                 }
                               }}>
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          </div>
+                            <Download className="w-4 h-4" />
+                          </Button>
                         </div>
                         {video.version_label && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
