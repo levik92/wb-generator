@@ -1146,12 +1146,17 @@ export const History = ({
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2 max-sm:rounded-lg overflow-hidden">
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={(e) => { e.stopPropagation(); openImagePreview(img.image_url); }}
+                        <div className="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none">
+                          <div className="pointer-events-auto opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={(e) => { e.stopPropagation(); openImagePreview(img.image_url); }}
+                            >
+                              <ZoomIn className="w-4 h-4" />
+                            </Button>
+                          </div>
                           >
                             <ZoomIn className="w-4 h-4" />
                           </Button>
