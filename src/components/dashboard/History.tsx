@@ -1214,22 +1214,17 @@ export const History = ({
                             <Video className="w-8 h-8 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none">
-                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity flex items-center gap-2">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
-                              onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
-                              <Play className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
-                              disabled={videoEditingInProgress.has(generation.id)}
-                              onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
-                              {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
-                            </Button>
-                          </div>
-                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
+                            onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
+                            <Play className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
+                            disabled={videoEditingInProgress.has(generation.id)}
+                            onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
+                            {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
                               onClick={async (e) => { 
                                 e.stopPropagation(); 
                                 if (video.url) {
