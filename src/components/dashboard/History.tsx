@@ -1003,8 +1003,10 @@ export const History = ({
                             <Video className="w-6 h-6 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                          <Play className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                            <Play className="w-4 h-4 text-primary" />
+                          </div>
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
