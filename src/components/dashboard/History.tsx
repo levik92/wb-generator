@@ -1003,8 +1003,10 @@ export const History = ({
                             <Video className="w-6 h-6 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                          <Play className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                            <Play className="w-4 h-4 text-primary" />
+                          </div>
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div 
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
@@ -1014,8 +1016,10 @@ export const History = ({
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-                          <ZoomIn className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                            <ZoomIn className="w-4 h-4 text-primary" />
+                          </div>
                         </div>
                       </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
                         {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
@@ -1142,45 +1146,51 @@ export const History = ({
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2 max-sm:rounded-lg overflow-hidden">
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={(e) => { e.stopPropagation(); openImagePreview(img.image_url); }}
-                          >
-                            <ZoomIn className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            disabled={editingInProgress.has(img.image_url)}
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              openHistoryEditDialog(
-                                img.image_url, 
-                                generation.input_data?.productName || 'Товар', 
-                                img.type || `card_${imgIndex}`, 
-                                imgIndex,
-                                generation.id
-                              );
-                            }}
-                          >
-                            {editingInProgress.has(img.image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              const name = (generation.input_data?.productName || 'card').replace(/[<>:"/\\|?*]/g, '').trim();
-                              downloadSingleImage(img.image_url, `${name}_${img.type || imgIndex + 1}.png`); 
-                            }}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
+                        <div className="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none">
+                          <div className="pointer-events-auto opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={(e) => { e.stopPropagation(); openImagePreview(img.image_url); }}
+                            >
+                              <ZoomIn className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              disabled={editingInProgress.has(img.image_url)}
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                openHistoryEditDialog(
+                                  img.image_url, 
+                                  generation.input_data?.productName || 'Товар', 
+                                  img.type || `card_${imgIndex}`, 
+                                  imgIndex,
+                                  generation.id
+                                );
+                              }}
+                            >
+                              {editingInProgress.has(img.image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                            </Button>
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                const name = (generation.input_data?.productName || 'card').replace(/[<>:"/\\|?*]/g, '').trim();
+                                downloadSingleImage(img.image_url, `${name}_${img.type || imgIndex + 1}.png`); 
+                              }}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                         {(img.is_edited || img.is_regenerated) && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
@@ -1214,37 +1224,43 @@ export const History = ({
                             <Video className="w-8 h-8 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/vid:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
-                            <Play className="w-4 h-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
-                            disabled={videoEditingInProgress.has(generation.id)}
-                            onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
-                            {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20"
-                            onClick={async (e) => { 
-                              e.stopPropagation(); 
-                              if (video.url) {
-                                try {
-                                  const response = await fetch(video.url);
-                                  const blob = await response.blob();
-                                  const a = document.createElement('a');
-                                  a.href = URL.createObjectURL(blob);
-                                  a.download = `video-cover-${vidIndex + 1}.mp4`;
-                                  document.body.appendChild(a);
-                                  a.click();
-                                  document.body.removeChild(a);
-                                  URL.revokeObjectURL(a.href);
-                                } catch {
-                                  window.open(video.url, '_blank');
+                        <div className="absolute inset-0 flex items-center justify-center gap-2 pointer-events-none">
+                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity flex items-center gap-2">
+                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
+                              <Play className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              disabled={videoEditingInProgress.has(generation.id)}
+                              onClick={(e) => { e.stopPropagation(); openVideoEditDialog(video.id || generation.id, generation.id, generation.output_data?.source_image); }}>
+                              {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                            </Button>
+                          </div>
+                          <div className="pointer-events-auto opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/90 text-primary hover:bg-white shadow-lg"
+                              onClick={async (e) => { 
+                                e.stopPropagation(); 
+                                if (video.url) {
+                                  try {
+                                    const response = await fetch(video.url);
+                                    const blob = await response.blob();
+                                    const a = document.createElement('a');
+                                    a.href = URL.createObjectURL(blob);
+                                    a.download = `video-cover-${vidIndex + 1}.mp4`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(a.href);
+                                  } catch {
+                                    window.open(video.url, '_blank');
+                                  }
                                 }
-                              }
-                            }}>
-                            <Download className="w-4 h-4" />
-                          </Button>
+                              }}>
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                         {video.version_label && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
