@@ -496,15 +496,6 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
         </div>
       </div>
 
-      {/* Beta Alert */}
-      <Alert className="border-border bg-background flex items-center gap-2 [&>svg+div]:ml-0 [&>svg+div]:translate-y-0 [&>svg~*]:pl-0 [&>svg]:static [&>svg]:shrink-0 py-3">
-        <Info className="h-4 w-4 text-muted-foreground !static !translate-y-0 shrink-0" />
-        <AlertDescription className="text-xs sm:text-sm text-muted-foreground pr-2 sm:pr-0">
-          Функция находится в <span className="font-medium">бета-доступе</span>. Качество генерации будет улучшаться и дорабатываться. В случае сбоев или вопросов пишите в{" "}
-          <a href="https://t.me/wbgen_support" target="_blank" rel="noopener noreferrer" className="underline font-medium text-muted-foreground hover:text-foreground transition-colors">поддержку</a>.
-        </AlertDescription>
-      </Alert>
-
       {/* Benefits block */}
       <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
