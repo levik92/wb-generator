@@ -384,7 +384,7 @@ async function processTasks(
   }
 }
 
-async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: number) {
+async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: number, styleDescription?: string | null) {
   try {
     // Mark as processing
     await supabase
@@ -396,13 +396,14 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       })
       .eq('id', task.id);
 
-    // Get prompt for this card type
+    // Get prompt for this card type (with optional style description)
     const prompt = await getPromptTemplate(
       supabase,
       task.card_type,
       job.product_name,
       job.category,
-      job.description
+      job.description,
+      styleDescription
     );
 
     // Get source image URL
