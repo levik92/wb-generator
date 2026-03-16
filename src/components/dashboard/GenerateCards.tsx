@@ -1873,7 +1873,34 @@ export const GenerateCards = ({
                     <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
                   </div>
+          </div>
+
+          {/* Unified Styling Toggle */}
+          <div className={`mt-4 border rounded-lg p-3 sm:p-4 transition-all ${
+            selectedCards.length >= 2 
+              ? 'border-primary/30 bg-primary/5' 
+              : 'border-border opacity-50'
+          }`}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                  <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
                 </div>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Стиль первой карточки будет применён ко всем остальным для единообразия
+                </p>
+              </div>
+              <Switch 
+                checked={unifiedStyling}
+                onCheckedChange={(checked) => {
+                  setUnifiedStyling(checked);
+                  setUnifiedStylingManuallyDisabled(!checked);
+                }}
+                disabled={selectedCards.length < 2 || generating}
+              />
+            </div>
+          </div>
               </div>)}
           </div>
         </CardContent>
