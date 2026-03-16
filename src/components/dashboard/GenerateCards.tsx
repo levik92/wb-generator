@@ -914,7 +914,8 @@ export const GenerateCards = ({
           userId: profile.id,
           productImages: productImagesData,
           referenceImageUrl,
-          selectedCards: selectedCards
+          selectedCards: selectedCards,
+          unifiedStyling: unifiedStyling && selectedCards.length >= 2
         }
       });
       if (error) {
