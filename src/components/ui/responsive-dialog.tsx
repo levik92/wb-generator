@@ -66,7 +66,7 @@ const ResponsiveDialogContent = ({ children, className }: ResponsiveDialogConten
   if (isMobile) {
     return (
       <DrawerContent className="bg-card border-border/50">
-        <div className={cn("max-h-[85vh] overflow-y-auto px-4 pb-6", className)}>
+        <div className={cn("max-h-[85dvh] overflow-y-auto px-4 pb-6", className)}>
           {children}
         </div>
       </DrawerContent>
