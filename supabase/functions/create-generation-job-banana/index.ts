@@ -38,7 +38,8 @@ serve(async (req) => {
       userId, 
       productImages = [],
       referenceImageUrl = null,
-      selectedCards = [0, 1, 2, 3, 4, 5] // Default all cards
+      selectedCards = [0, 1, 2, 3, 4, 5], // Default all cards
+      unifiedStyling = false
     } = requestBody;
 
     // Validate input
