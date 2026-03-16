@@ -1889,10 +1889,10 @@ export const GenerateCards = ({
           }`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                   <Sparkles className="w-4 h-4 text-primary shrink-0" />
                   <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none">Бета</Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none sm:order-none -order-1 sm:static">Бета</Badge>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
