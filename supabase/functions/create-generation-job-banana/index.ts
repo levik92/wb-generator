@@ -150,7 +150,8 @@ serve(async (req) => {
         product_images: finalProductImages,
         status: 'pending',
         total_cards: selectedCards.length,
-        tokens_cost: tokensRequired
+        tokens_cost: tokensRequired,
+        unified_styling: unifiedStyling
       })
       .select()
       .single();
