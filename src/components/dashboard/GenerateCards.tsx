@@ -1890,9 +1890,25 @@ export const GenerateCards = ({
                 <div className="flex items-center gap-2 mb-0.5">
                   <Sparkles className="w-4 h-4 text-primary shrink-0" />
                   <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          type="button" 
+                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                        <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Стиль первой карточки будет применён ко всем остальным для единообразия
+                  Пакет карточек товара будет создан в едином стиле
                 </p>
               </div>
               <Switch 
