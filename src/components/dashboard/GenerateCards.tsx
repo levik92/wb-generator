@@ -347,7 +347,8 @@ export const GenerateCards = ({
           const elapsedMs = Date.now() - new Date(latestJob.created_at).getTime();
           const totalCards = latestJob.total_cards || 1;
           const estimatedSecondsPerCard = 35;
-          const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard;
+          const unifiedExtra = latestJob.unified_styling ? 35 : 0;
+          const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard + unifiedExtra;
           const elapsedSeconds = Math.floor(elapsedMs / 1000);
           const remaining = Math.max(0, totalEstimatedSeconds - elapsedSeconds);
           setEstimatedTimeRemaining(remaining);
@@ -653,7 +654,8 @@ export const GenerateCards = ({
     // Skip timer reset when restoring from navigation (values already set by checkForActiveJobs)
     if (!options?.skipTimerReset) {
       const estimatedSecondsPerCard = 35;
-      const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
+      const unifiedExtra = unifiedStyling ? 35 : 0;
+      const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard + unifiedExtra;
       setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
       setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
       setWaitingMessageIndex(0); // Сбрасываем индекс сообщений
@@ -1890,9 +1892,25 @@ export const GenerateCards = ({
                 <div className="flex items-center gap-2 mb-0.5">
                   <Sparkles className="w-4 h-4 text-primary shrink-0" />
                   <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          type="button" 
+                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                        <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Стиль первой карточки будет применён ко всем остальным для единообразия
+                  Пакет карточек товара будет создан в едином стиле
                 </p>
               </div>
               <Switch 
