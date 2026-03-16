@@ -63,6 +63,7 @@ serve(async (req) => {
       sourceImageUrl,
       productImages,
       sourceGenerationId,
+      sourceJobId,
     } = await req.json();
 
     // Validate inputs
@@ -203,16 +204,19 @@ serve(async (req) => {
     
     // Check if the source generation had unified styling - load style_description
     let styleDescription: string | null = null;
-    if (sourceGenerationId) {
+    const jobIdToCheck = sourceJobId || sourceGenerationId;
+    if (jobIdToCheck) {
       const { data: sourceJob } = await supabase
         .from('generation_jobs')
         .select('style_description')
-        .eq('id', sourceGenerationId)
+        .eq('id', jobIdToCheck)
         .single();
       
       if (sourceJob?.style_description) {
         styleDescription = sourceJob.style_description;
         console.log(`[Regeneration] Using style_description from source job (${styleDescription.length} chars)`);
+      } else {
+        console.log(`[Regeneration] No style_description found for job ${jobIdToCheck}`);
       }
     }
 
