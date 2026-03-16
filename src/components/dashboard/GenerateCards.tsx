@@ -1898,12 +1898,13 @@ export const GenerateCards = ({
                         <button 
                           type="button" 
                           className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                          style={{ opacity: 1 }}
                           onClick={(e) => e.preventDefault()}
                         >
                           <Info className="w-4 h-4" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70" style={{ opacity: 1 }}>
                         <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
                       </TooltipContent>
                     </Tooltip>
