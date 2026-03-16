@@ -201,12 +201,32 @@ serve(async (req) => {
     console.log(`[Regeneration] images total: ${imagesToUse.length}, product: ${productImageCount}, reference: ${referenceImageCount}`);
     console.log(`[Regeneration] productName: "${sanitizedProductName}", description length: ${sanitizedDescription.length}`);
     
+    // Check if the source generation had unified styling - load style_description
+    let styleDescription: string | null = null;
+    if (sourceGenerationId) {
+      const { data: sourceJob } = await supabase
+        .from('generation_jobs')
+        .select('style_description')
+        .eq('id', sourceGenerationId)
+        .single();
+      
+      if (sourceJob?.style_description) {
+        styleDescription = sourceJob.style_description;
+        console.log(`[Regeneration] Using style_description from source job (${styleDescription.length} chars)`);
+      }
+    }
+
+    // Build prompt with optional style description
+    const enrichedDescription = styleDescription 
+      ? `${sanitizedDescription}\n\nВАЖНО — соблюдай единый стиль оформления карточки: ${styleDescription}`
+      : sanitizedDescription;
+    
     const prompt = await getPromptTemplate(
       supabase,
       promptType,
       sanitizedProductName,
       sanitizedCategory,
-      sanitizedDescription
+      enrichedDescription
     );
 
     // Invoke Google task processor
