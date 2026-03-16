@@ -1892,6 +1892,7 @@ export const GenerateCards = ({
                 <div className="flex items-center gap-2 mb-0.5">
                   <Sparkles className="w-4 h-4 text-primary shrink-0" />
                   <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none">Бета</Badge>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
