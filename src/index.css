@@ -481,3 +481,14 @@ body {
   padding-left: env(safe-area-inset-left, 0);
   padding-right: env(safe-area-inset-right, 0);
 }
+
+/* Fix mobile virtual keyboard pushing dialogs/drawers off-screen */
+@supports (height: 1dvh) {
+  [vaul-drawer] {
+    max-height: 100dvh !important;
+  }
+
+  .fixed[data-state] {
+    max-height: 100dvh;
+  }
+}
