@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,6 +92,8 @@ export const GenerateCards = ({
   const [description, setDescription] = useState("");
   const [autoDescription, setAutoDescription] = useState(false);
   const [selectedCards, setSelectedCards] = useState<number[]>([0]); // По умолчанию выбрана только главная
+  const [unifiedStyling, setUnifiedStyling] = useState(false);
+  const [unifiedStylingManuallyDisabled, setUnifiedStylingManuallyDisabled] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
@@ -615,12 +618,18 @@ export const GenerateCards = ({
   };
   const handleCardToggle = (cardIndex: number) => {
     setSelectedCards(prev => {
-      if (prev.includes(cardIndex)) {
-        if (prev.length === 1) return prev;
-        return prev.filter(i => i !== cardIndex);
-      } else {
-        return [...prev, cardIndex].sort((a, b) => a - b);
+      const newSelection = prev.includes(cardIndex)
+        ? (prev.length === 1 ? prev : prev.filter(i => i !== cardIndex))
+        : [...prev, cardIndex].sort((a, b) => a - b);
+      
+      // Auto-enable unified styling when 2+ cards selected (unless manually disabled)
+      if (newSelection.length >= 2 && !unifiedStylingManuallyDisabled) {
+        setUnifiedStyling(true);
+      } else if (newSelection.length < 2) {
+        setUnifiedStyling(false);
       }
+      
+      return newSelection;
     });
   };
   const startJobPolling = (jobId: string, options?: { skipTimerReset?: boolean }) => {
@@ -905,7 +914,8 @@ export const GenerateCards = ({
           userId: profile.id,
           productImages: productImagesData,
           referenceImageUrl,
-          selectedCards: selectedCards
+          selectedCards: selectedCards,
+          unifiedStyling: unifiedStyling && selectedCards.length >= 2
         }
       });
       if (error) {
@@ -1864,7 +1874,34 @@ export const GenerateCards = ({
                     <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
                   </div>
+          </div>
+
+          {/* Unified Styling Toggle */}
+          <div className={`mt-4 border rounded-lg p-3 sm:p-4 transition-all ${
+            selectedCards.length >= 2 
+              ? 'border-primary/30 bg-primary/5' 
+              : 'border-border opacity-50'
+          }`}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                  <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
                 </div>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Стиль первой карточки будет применён ко всем остальным для единообразия
+                </p>
+              </div>
+              <Switch 
+                checked={unifiedStyling}
+                onCheckedChange={(checked) => {
+                  setUnifiedStyling(checked);
+                  setUnifiedStylingManuallyDisabled(!checked);
+                }}
+                disabled={selectedCards.length < 2 || generating}
+              />
+            </div>
+          </div>
               </div>)}
           </div>
         </CardContent>

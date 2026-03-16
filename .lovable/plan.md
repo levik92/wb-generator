@@ -1,114 +1,40 @@
 
 
-# Единая стилизация карточек — обновленный план
+# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
 
-## Суть
-При выборе 2+ типов карточек переключатель «Единая стилизация» становится доступным (по умолчанию включен). Сначала генерируется первая карточка, затем Gemini анализирует её стиль, и описание стиля добавляется в промты остальных карточек.
+## Problem
+When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
 
----
-
-## 1. База данных — миграция
-
-Добавить в `generation_jobs`:
-- `unified_styling` boolean DEFAULT false
-- `style_description` text NULL
-
-Добавить промт в `ai_prompts`:
-- `prompt_type = 'style-analysis'`, `model_type = 'technical'`
-- Шаблон: инструкция для Gemini описать визуальный стиль изображения (цвета, шрифты, фоны, композиция, графические элементы) — кратко, в 3-5 предложениях
-
----
-
-## 2. Фронтенд — `GenerateCards.tsx`
-
-- Состояние `unifiedStyling` (boolean, default false)
-- Под сеткой типов карточек (строка ~1869), **внутри** того же `CardContent`, добавить подблок:
-
+**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
 ```text
-┌─────────────────────────────────────────────────┐
-│  ✨ Единая стилизация                    [◯───] │
-│  Стиль первой карточки будет применён           │
-│  ко всем остальным для единообразия             │
-└─────────────────────────────────────────────────┘
+isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
 ```
+But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
 
-- Блок **всегда виден**, но при `selectedCards.length < 2` переключатель `disabled`, текст серый (`text-muted-foreground/50`, `opacity-50`)
-- При `selectedCards.length >= 2` переключатель становится доступен и автоматически включается (если пользователь ранее не выключал вручную)
-- Используется компонент `Switch` из `@/components/ui/switch`
-- При генерации передавать `unifiedStyling: true/false` в edge function
+The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
 
----
+## Solution
 
-## 3. Новая Edge Function — `analyze-style/index.ts`
+### 1. Mark regeneration jobs with a distinct category
+Update both edge functions to use `category: 'regeneration'` instead of the product category:
+- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
+- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
 
-- Принимает: `imageUrl`, `jobId`
-- Загружает промт `style-analysis` из `ai_prompts` (model_type = 'technical')
-- Скачивает изображение, конвертирует в base64
-- Вызывает **Google Gemini API напрямую** (`gemini-3.1-flash-preview`) с ключом `GOOGLE_GEMINI_API_KEY` (уже есть в секретах)
-- Возвращает текстовое описание стиля
-- Сохраняет результат в `generation_jobs.style_description`
+### 2. Update `checkForActiveJobs` in GenerateCards.tsx
+- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
+- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
+- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
 
----
+### 3. Update active edit jobs restoration block
+The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
 
-## 4. Изменения в `create-generation-job-banana`
+## Technical Details
 
-- Принимать `unifiedStyling` из body
-- Сохранять в `generation_jobs.unified_styling`
-
----
-
-## 5. Изменения в `process-generation-tasks-banana` — ключевая логика
-
-В функции `processTasks` (строка 132):
-
-1. Проверить `job.unified_styling`
-2. Если включено:
-   - На первой итерации цикла: обработать только первую задачу (по `card_index`)
-   - После успешного завершения первой задачи: получить `image_url` из БД
-   - Вызвать `analyze-style` с URL готового изображения
-   - Получить `styleDescription`, сохранить в `generation_jobs.style_description`
-   - Продолжить обработку остальных задач как обычно
-3. Если выключено — без изменений
-
-В функции `processTask` (строка 326):
-- В `getPromptTemplate`: если у job есть `style_description`, добавить к `benefits` (description) блок: `\n\nВАЖНО — единый стиль оформления: ${style_description}`
-
----
-
-## 6. Перегенерация — `regenerate-single-card-banana` и `regenerate-single-card-v2`
-
-- При создании задачи перегенерации: если в `description` есть `[sourceGenerationId:...]`, загрузить `style_description` из родительского job
-- Если есть `style_description` — добавить к промту
-
----
-
-## 7. Конфигурация — `supabase/config.toml`
-
-```toml
-[functions.analyze-style]
-verify_jwt = false
-```
-
----
-
-## Порядок реализации
-
-1. Миграция БД (колонки + промт)
-2. `supabase/config.toml` — регистрация `analyze-style`
-3. Edge function `analyze-style`
-4. Обновить `create-generation-job-banana`
-5. Обновить `process-generation-tasks-banana`
-6. Обновить `regenerate-single-card-banana`
-7. Фронтенд — переключатель в `GenerateCards.tsx`
-
-## Файлы
-
-| Файл | Действие |
-|---|---|
-| `src/components/dashboard/GenerateCards.tsx` | Переключатель UI + передача флага |
-| `supabase/functions/analyze-style/index.ts` | Новая функция |
-| `supabase/functions/create-generation-job-banana/index.ts` | Приём флага |
-| `supabase/functions/process-generation-tasks-banana/index.ts` | Двухфазная логика |
-| `supabase/functions/regenerate-single-card-banana/index.ts` | Подхват style_description |
-| `supabase/config.toml` | Регистрация analyze-style |
+**Files to modify:**
+- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
+- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
+- `src/components/dashboard/GenerateCards.tsx`:
+  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
+  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
+  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
 

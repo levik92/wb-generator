@@ -104,3 +104,6 @@ verify_jwt = true
 
 [functions.redeem-promocode]
 verify_jwt = false
+
+[functions.analyze-style]
+verify_jwt = false

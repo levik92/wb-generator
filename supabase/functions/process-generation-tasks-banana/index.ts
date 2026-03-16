@@ -30,7 +30,8 @@ async function getPromptTemplate(
   promptType: string,
   productName: string,
   category: string,
-  benefits: string
+  benefits: string,
+  styleDescription?: string | null
 ): Promise<string> {
   const { data, error } = await supabase
     .from('ai_prompts')
@@ -43,10 +44,15 @@ async function getPromptTemplate(
     throw new Error(`Failed to fetch prompt for type: ${promptType}`);
   }
 
+  // If unified styling is active, append style description to benefits
+  const enrichedBenefits = styleDescription 
+    ? `${benefits}\n\nВАЖНО — соблюдай единый стиль оформления карточки: ${styleDescription}`
+    : benefits;
+
   return data.prompt_template
     .replace('{productName}', productName)
     .replace('{category}', category)
-    .replace('{benefits}', benefits);
+    .replace('{benefits}', enrichedBenefits);
 }
 
 serve(async (req) => {
@@ -152,6 +158,10 @@ async function processTasks(
   };
 
   try {
+    // Track whether we've completed the style analysis phase for unified styling
+    let styleAnalysisDone = !job.unified_styling; // Skip if not using unified styling
+    let styleDescription: string | null = job.style_description || null;
+
     while (Date.now() - startTime < MAX_PROCESSING_TIME) {
       // Fetch pending/retrying tasks
       const { data: tasks, error: tasksError } = await supabase
@@ -228,7 +238,58 @@ async function processTasks(
       }
 
       // Only process tasks that are ready
-      const readyTasks = tasks.filter(isTaskReady).slice(0, MAX_CONCURRENT_TASKS);
+      let readyTasks = tasks.filter(isTaskReady);
+
+      // UNIFIED STYLING: if style analysis not done yet, only process the first task
+      if (!styleAnalysisDone && readyTasks.length > 0) {
+        const firstTask = readyTasks[0];
+        console.log(`[unified-styling] Processing first task ${firstTask.id} (card_index: ${firstTask.card_index}) for style analysis`);
+        
+        await processTask(supabase, firstTask, job, MAX_RETRIES, styleDescription);
+        
+        // Check if first task completed successfully
+        const { data: firstTaskResult } = await supabase
+          .from('generation_tasks')
+          .select('status, image_url')
+          .eq('id', firstTask.id)
+          .single();
+
+        if (firstTaskResult?.status === 'completed' && firstTaskResult?.image_url) {
+          // Call analyze-style to get style description
+          console.log(`[unified-styling] First task completed, analyzing style...`);
+          try {
+            const { data: styleResult, error: styleError } = await supabase.functions.invoke('analyze-style', {
+              body: { imageUrl: firstTaskResult.image_url, jobId }
+            });
+
+            if (styleError) {
+              console.error('[unified-styling] Style analysis error:', styleError);
+            } else if (styleResult?.styleDescription) {
+              styleDescription = styleResult.styleDescription;
+              console.log(`[unified-styling] Style description obtained (${styleDescription!.length} chars)`);
+            }
+          } catch (e) {
+            console.error('[unified-styling] Failed to analyze style:', e);
+          }
+          
+          styleAnalysisDone = true;
+          // Continue to process remaining tasks with style description
+          await new Promise(resolve => setTimeout(resolve, 6000));
+          continue;
+        } else if (firstTaskResult?.status === 'failed') {
+          // First task failed - proceed without style analysis
+          console.log('[unified-styling] First task failed, proceeding without style analysis');
+          styleAnalysisDone = true;
+          continue;
+        } else {
+          // Task still processing or retrying, wait
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue;
+        }
+      }
+
+      // Normal processing (or after style analysis is done)
+      readyTasks = readyTasks.slice(0, MAX_CONCURRENT_TASKS);
 
       if (readyTasks.length === 0) {
         // Calculate wait time until next retry
@@ -252,9 +313,9 @@ async function processTasks(
         continue;
       }
 
-      // Process tasks one by one (to avoid overloading the API)
+      // Process tasks one by one
       for (const task of readyTasks) {
-        await processTask(supabase, task, job, MAX_RETRIES);
+        await processTask(supabase, task, job, MAX_RETRIES, styleDescription);
         // Delay between tasks to prevent API overload
         await new Promise(resolve => setTimeout(resolve, 6000));
       }
@@ -323,7 +384,7 @@ async function processTasks(
   }
 }
 
-async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: number) {
+async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: number, styleDescription?: string | null) {
   try {
     // Mark as processing
     await supabase
@@ -335,13 +396,14 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       })
       .eq('id', task.id);
 
-    // Get prompt for this card type
+    // Get prompt for this card type (with optional style description)
     const prompt = await getPromptTemplate(
       supabase,
       task.card_type,
       job.product_name,
       job.category,
-      job.description
+      job.description,
+      styleDescription
     );
 
     // Get source image URL
