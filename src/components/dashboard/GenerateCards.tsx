@@ -347,7 +347,8 @@ export const GenerateCards = ({
           const elapsedMs = Date.now() - new Date(latestJob.created_at).getTime();
           const totalCards = latestJob.total_cards || 1;
           const estimatedSecondsPerCard = 35;
-          const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard;
+          const unifiedExtra = latestJob.unified_styling ? 35 : 0;
+          const totalEstimatedSeconds = totalCards * estimatedSecondsPerCard + unifiedExtra;
           const elapsedSeconds = Math.floor(elapsedMs / 1000);
           const remaining = Math.max(0, totalEstimatedSeconds - elapsedSeconds);
           setEstimatedTimeRemaining(remaining);
