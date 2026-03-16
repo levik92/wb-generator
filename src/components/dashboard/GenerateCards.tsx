@@ -654,7 +654,8 @@ export const GenerateCards = ({
     // Skip timer reset when restoring from navigation (values already set by checkForActiveJobs)
     if (!options?.skipTimerReset) {
       const estimatedSecondsPerCard = 35;
-      const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard;
+      const unifiedExtra = unifiedStyling ? 35 : 0;
+      const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard + unifiedExtra;
       setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
       setTotalEstimatedTime(totalEstimatedSeconds); // Сохраняем полное время для расчета прогресса
       setWaitingMessageIndex(0); // Сбрасываем индекс сообщений

@@ -63,7 +63,7 @@ serve(async (req) => {
       throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview-06-30:generateContent?key=${geminiApiKey}`;
 
     console.log(`[analyze-style] Calling Gemini for style analysis, job: ${jobId}`);
 
