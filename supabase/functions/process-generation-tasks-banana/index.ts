@@ -30,7 +30,8 @@ async function getPromptTemplate(
   promptType: string,
   productName: string,
   category: string,
-  benefits: string
+  benefits: string,
+  styleDescription?: string | null
 ): Promise<string> {
   const { data, error } = await supabase
     .from('ai_prompts')
@@ -43,10 +44,15 @@ async function getPromptTemplate(
     throw new Error(`Failed to fetch prompt for type: ${promptType}`);
   }
 
+  // If unified styling is active, append style description to benefits
+  const enrichedBenefits = styleDescription 
+    ? `${benefits}\n\nВАЖНО — соблюдай единый стиль оформления карточки: ${styleDescription}`
+    : benefits;
+
   return data.prompt_template
     .replace('{productName}', productName)
     .replace('{category}', category)
-    .replace('{benefits}', benefits);
+    .replace('{benefits}', enrichedBenefits);
 }
 
 serve(async (req) => {
