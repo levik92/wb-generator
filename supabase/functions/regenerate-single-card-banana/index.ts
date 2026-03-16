@@ -63,6 +63,7 @@ serve(async (req) => {
       sourceImageUrl,
       productImages,
       sourceGenerationId,
+      sourceJobId,
     } = await req.json();
 
     // Validate inputs

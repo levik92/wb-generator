@@ -1203,7 +1203,8 @@ export const GenerateCards = ({
           cardType: image.cardType || CARD_STAGES[image.stageIndex]?.key || 'cover',
           sourceImageUrl: sourceImageUrl,
           productImages: allProductImages,
-          sourceGenerationId
+          sourceGenerationId,
+          sourceJobId: jobIdForRegeneration
         }
       });
       if (error) throw error;
