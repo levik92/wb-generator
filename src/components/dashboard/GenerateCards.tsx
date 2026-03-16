@@ -1874,6 +1874,8 @@ export const GenerateCards = ({
                     <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
                   </div>
+                </div>
+              </div>)}
           </div>
 
           {/* Unified Styling Toggle */}
@@ -1901,8 +1903,6 @@ export const GenerateCards = ({
                 disabled={selectedCards.length < 2 || generating}
               />
             </div>
-          </div>
-              </div>)}
           </div>
         </CardContent>
       </Card>
