@@ -617,12 +617,18 @@ export const GenerateCards = ({
   };
   const handleCardToggle = (cardIndex: number) => {
     setSelectedCards(prev => {
-      if (prev.includes(cardIndex)) {
-        if (prev.length === 1) return prev;
-        return prev.filter(i => i !== cardIndex);
-      } else {
-        return [...prev, cardIndex].sort((a, b) => a - b);
+      const newSelection = prev.includes(cardIndex)
+        ? (prev.length === 1 ? prev : prev.filter(i => i !== cardIndex))
+        : [...prev, cardIndex].sort((a, b) => a - b);
+      
+      // Auto-enable unified styling when 2+ cards selected (unless manually disabled)
+      if (newSelection.length >= 2 && !unifiedStylingManuallyDisabled) {
+        setUnifiedStyling(true);
+      } else if (newSelection.length < 2) {
+        setUnifiedStyling(false);
       }
+      
+      return newSelection;
     });
   };
   const startJobPolling = (jobId: string, options?: { skipTimerReset?: boolean }) => {
