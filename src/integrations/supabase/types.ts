@@ -382,8 +382,10 @@ export type Database = {
           product_name: string
           started_at: string | null
           status: Database["public"]["Enums"]["job_status"] | null
+          style_description: string | null
           tokens_cost: number | null
           total_cards: number | null
+          unified_styling: boolean
           updated_at: string | null
           user_id: string
         }
@@ -399,8 +401,10 @@ export type Database = {
           product_name: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
+          style_description?: string | null
           tokens_cost?: number | null
           total_cards?: number | null
+          unified_styling?: boolean
           updated_at?: string | null
           user_id: string
         }
@@ -416,8 +420,10 @@ export type Database = {
           product_name?: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
+          style_description?: string | null
           tokens_cost?: number | null
           total_cards?: number | null
+          unified_styling?: boolean
           updated_at?: string | null
           user_id?: string
         }
