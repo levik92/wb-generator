@@ -14,7 +14,8 @@ import {
   Handshake,
   DollarSign,
   LayoutDashboard,
-  FileText
+  FileText,
+  GraduationCap
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
