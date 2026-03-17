@@ -171,18 +171,18 @@ export const PromoCodeManager = () => {
               <CardDescription className="text-xs md:text-sm">Управление промокодами для пользователей</CardDescription>
             </div>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
+          <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <ResponsiveDialogTrigger asChild>
               <Button onClick={resetForm} size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Создать промокод
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-2">
-              <DialogHeader>
-                <DialogTitle>{editingPromo ? 'Редактировать промокод' : 'Создать промокод'}</DialogTitle>
-                <DialogDescription>Настройте параметры промокода для пользователей</DialogDescription>
-              </DialogHeader>
+            </ResponsiveDialogTrigger>
+            <ResponsiveDialogContent className="sm:max-w-md">
+              <ResponsiveDialogHeader>
+                <ResponsiveDialogTitle>{editingPromo ? 'Редактировать промокод' : 'Создать промокод'}</ResponsiveDialogTitle>
+                <ResponsiveDialogDescription>Настройте параметры промокода для пользователей</ResponsiveDialogDescription>
+              </ResponsiveDialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">Код промокода</Label>
@@ -235,12 +235,12 @@ export const PromoCodeManager = () => {
                   <Input id="validUntil" type="date" value={formData.validUntil} onChange={e => setFormData({ ...formData, validUntil: e.target.value })} />
                 </div>
               </div>
-              <DialogFooter>
+              <ResponsiveDialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Отмена</Button>
                 <Button onClick={handleSubmit}>{editingPromo ? 'Обновить' : 'Создать'}</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </ResponsiveDialogFooter>
+            </ResponsiveDialogContent>
+          </ResponsiveDialog>
         </div>
       </CardHeader>
       <CardContent className="p-2 md:p-4">
