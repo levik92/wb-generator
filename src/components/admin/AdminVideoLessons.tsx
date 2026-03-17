@@ -263,7 +263,7 @@ export const AdminVideoLessons = () => {
         ) : (
           lessons.map((lesson) => (
             <Card key={lesson.id} className={`rounded-2xl border-border/50 ${lesson.is_active ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
-              <CardHeader className="pb-3">
+              <CardHeader className="py-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
