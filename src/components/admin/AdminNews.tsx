@@ -58,6 +58,8 @@ export const AdminNews = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -371,7 +373,18 @@ export const AdminNews = () => {
             </CardContent>
           </Card>
         ) : (
-          news.map((item) => (
+          <>
+            {(() => {
+              const totalPages = Math.ceil(news.length / ITEMS_PER_PAGE);
+              const paginatedNews = news.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+              return (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Показано {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)} из {news.length}
+                    </p>
+                  </div>
+                  {paginatedNews.map((item) => (
             <Card key={item.id} className={`rounded-2xl border-border/50 ${item.is_published ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
               <CardHeader className="pb-3">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
@@ -469,7 +482,42 @@ export const AdminNews = () => {
                 </div>
               </CardContent>
             </Card>
-          ))
+                  ))}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Назад
+                      </Button>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                        <Button
+                          key={page}
+                          variant={page === currentPage ? "default" : "outline"}
+                          size="sm"
+                          className="w-9 h-9 p-0"
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Вперед
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </>
         )}
       </div>
     </div>
