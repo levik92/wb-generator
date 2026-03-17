@@ -49,6 +49,7 @@ const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   pricing: { title: 'Цены', subtitle: 'Тарифы и пакеты' },
   banners: { title: 'Баннеры', subtitle: 'Баннеры дашборда' },
   blog: { title: 'Блог', subtitle: 'Статьи и публикации' },
+  video_lessons: { title: 'Обучение', subtitle: 'Видеоуроки для пользователей' },
 };
 
 export default function Admin() {
