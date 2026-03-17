@@ -142,6 +142,7 @@ export default function Admin() {
       case 'pricing': return <AdminPricing />;
       case 'banners': return <AdminBanners />;
       case 'blog': return <AdminBlog />;
+      case 'video_lessons': return <AdminVideoLessons />;
       default: return <AdminAnalytics users={users} />;
     }
   };
