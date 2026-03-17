@@ -1583,6 +1583,42 @@ export type Database = {
           },
         ]
       }
+      video_lessons: {
+        Row: {
+          created_at: string
+          display_order: number
+          duration: string
+          id: string
+          is_active: boolean
+          kinescope_id: string
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          duration?: string
+          id?: string
+          is_active?: boolean
+          kinescope_id: string
+          subtitle?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          duration?: string
+          id?: string
+          is_active?: boolean
+          kinescope_id?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
