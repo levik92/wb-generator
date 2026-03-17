@@ -19,6 +19,7 @@ import { AdminPartners } from "@/components/admin/AdminPartners";
 import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminBanners } from "@/components/admin/AdminBanners";
 import { AdminBlog } from "@/components/admin/AdminBlog";
+import { AdminVideoLessons } from "@/components/admin/AdminVideoLessons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 import { UserIcon } from "lucide-react";
