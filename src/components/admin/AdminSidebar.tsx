@@ -72,6 +72,11 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'blog',
       label: 'Блог',
       icon: FileText,
+    },
+    {
+      id: 'video_lessons',
+      label: 'Обучение',
+      icon: GraduationCap,
     }
   ];
 

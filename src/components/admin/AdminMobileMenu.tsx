@@ -37,6 +37,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
     { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },
+    { id: 'video_lessons', label: 'Обучение', icon: GraduationCap },
   ];
 
   const handleTabChange = (tabId: string) => {
