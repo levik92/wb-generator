@@ -1,4 +1,4 @@
-import { AdminAnalyticsChart, AdminAdditionalMetrics } from "@/components/dashboard/AdminAnalyticsChart";
+import { AdminAnalyticsChart, AdminAdditionalMetrics, AdminLifetimeMetrics } from "@/components/dashboard/AdminAnalyticsChart";
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
