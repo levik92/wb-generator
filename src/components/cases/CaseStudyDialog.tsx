@@ -85,7 +85,7 @@ export const CaseStudyDialog = ({ caseId, children }: CaseStudyDialogProps) => {
           </ResponsiveDialogHeader>
 
           {/* Result highlight */}
-          <div className="bg-gradient-to-r from-emerald-500/10 to-[hsl(268,83%,58%)]/10 border border-emerald-500/20 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-xl p-4">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
