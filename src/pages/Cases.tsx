@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "@/components/landing/BeforeAfterSliderNew";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 
 // Все кейсы с изображениями до/после
 const allCases = [
