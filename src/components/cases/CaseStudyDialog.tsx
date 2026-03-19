@@ -156,6 +156,9 @@ export const CaseStudyDialog = ({ caseId, children }: CaseStudyDialogProps) => {
                       color: "#fff",
                       fontSize: "13px",
                     }}
+                    labelStyle={{ color: "rgba(255,255,255,0.5)" }}
+                    itemStyle={{ color: "#fff" }}
+                    cursor={{ fill: "rgba(255,255,255,0.05)" }}
                     formatter={(value: number) => [`${value} заказов`, "Заказы"]}
                   />
                   <Bar dataKey="orders" radius={[6, 6, 0, 0]}>
