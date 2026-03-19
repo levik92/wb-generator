@@ -516,6 +516,17 @@ serve(async (req) => {
     const periodRepeatPayments = Object.entries(periodUserPaymentCounts)
       .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
 
+    // 3b. Повторные оплаты за всё время
+    const allTimeUserPaymentCounts: { [key: string]: number } = {}
+    allPaymentsData?.forEach(p => {
+      if (p.user_id) {
+        allTimeUserPaymentCounts[p.user_id] = (allTimeUserPaymentCounts[p.user_id] || 0) + 1
+      }
+    })
+    const repeatPaymentUsers = Object.values(allTimeUserPaymentCounts).filter(count => count > 1).length
+    const totalRepeatPayments = Object.entries(allTimeUserPaymentCounts)
+      .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
+
     // Расчет конверсии за период (первая оплата за период / зарегистрированные за период)
     const periodConversionRate = totalUsersInPeriod > 0 
       ? Math.round((firstTimePaidInPeriod / totalUsersInPeriod) * 1000) / 10 
