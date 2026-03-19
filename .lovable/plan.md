@@ -1,40 +1,55 @@
 
+Проблема уже локализована: аналитика падает не из-за фронтенда, а из-за самого edge function `admin-analytics`.
 
-# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
+Что сломано
+- В `supabase/functions/admin-analytics/index.ts` в ответе используются переменные:
+  - `totalRepeatPayments`
+  - `repeatPaymentUsers`
+- Но в текущем коде они больше не вычисляются после последнего рефакторинга.
+- Из-за этого функция возвращает `500`, а все блоки админки, которые вызывают `admin-analytics`, показывают ошибки:
+  - основные графики
+  - breakdown-графики
+  - дополнительные метрики
+  - lifetime-метрики
 
-## Problem
-When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
+Что я предлагаю сделать
+1. Починить `admin-analytics` так, чтобы он снова рассчитывал общие метрики за всё время:
+   - `repeatPaymentUsers` = число пользователей с 2+ успешными оплатами за всё время
+   - `totalRepeatPayments` = количество повторных оплат за всё время
+2. Оставить новую формулу конверсии без изменений:
+   - `первая оплата пользователя за период / зарегистрированные пользователи за период * 100`
+3. Проверить и при необходимости привести в порядок формулы всех связанных метрик, чтобы названия и значения совпадали:
+   - `repeatPayments`
+   - `repeatPaymentsTotal`
+   - `repeatPaymentUsers`
+   - `repeatPaymentRate`
+   - `repeatPaymentRateTotal`
+4. Сохранить текущую мобильную адаптацию UI:
+   - блок lifetime metrics уже выглядит адаптированным
+   - для additional metrics при реализации я дополнительно проверю сетку и перенос текста на узких экранах
+5. После исправления перепроверить весь поток:
+   - вызов `admin-analytics`
+   - загрузку основных карточек
+   - загрузку breakdown-графиков
+   - загрузку дополнительных метрик
+   - загрузку lifetime-метрик
 
-**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
-```text
-isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
-```
-But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
+Почему это точно причина
+- В логах edge function есть прямое сообщение:
+  - `ReferenceError: totalRepeatPayments is not defined`
+- В коде ответа действительно есть ссылки на несуществующие переменные.
+- Поэтому сейчас ошибка воспроизводится на любом компоненте, который дергает эту функцию.
 
-The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
+Технически как будет исправлено
+- Внутри `admin-analytics` будет добавлен отдельный расчёт по `allPaymentsData`:
+  - словарь количества оплат на пользователя за всё время
+  - `repeatPaymentUsers = users with count > 1`
+  - `totalRepeatPayments = sum(count - 1 for users with count > 1)`
+- Затем эти значения будут безопасно подставляться в `additionalMetrics`.
+- При необходимости я также добавлю небольшой defensive cleanup, чтобы response не зависел от неинициализированных значений.
 
-## Solution
-
-### 1. Mark regeneration jobs with a distinct category
-Update both edge functions to use `category: 'regeneration'` instead of the product category:
-- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
-- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
-
-### 2. Update `checkForActiveJobs` in GenerateCards.tsx
-- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
-- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
-- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
-
-### 3. Update active edit jobs restoration block
-The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
-
-## Technical Details
-
-**Files to modify:**
-- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
-- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
-- `src/components/dashboard/GenerateCards.tsx`:
-  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
-  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
-  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
-
+Ожидаемый результат после фикса
+- Аналитика на `/admin` снова начнет загружаться.
+- Ошибки `FunctionsHttpError` при загрузке аналитики исчезнут.
+- Новые метрики и формула конверсии останутся рабочими.
+- Ничего дополнительного в UI откатывать не потребуется — нужен именно фикс backend-логики функции.
