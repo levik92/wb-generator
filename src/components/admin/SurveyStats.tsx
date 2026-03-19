@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { User, BarChart3, Megaphone, Loader2 } from "lucide-react";
 
@@ -21,6 +23,7 @@ export function SurveyStats() {
   const [data, setData] = useState<SurveyData[]>([]);
   const [totalRespondents, setTotalRespondents] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [otherAnswers, setOtherAnswers] = useState<{ question: string; answers: string[] } | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -43,11 +46,12 @@ export function SurveyStats() {
       const uniqueUsers = new Set((userCount || []).map((r: any) => r.user_id));
       setTotalRespondents(uniqueUsers.size);
 
-      // Aggregate counts
+      // Aggregate counts — group "Другое: ..." answers under "Другое"
       const counts: Record<string, Record<string, number>> = {};
       for (const row of responses || []) {
         if (!counts[row.question_key]) counts[row.question_key] = {};
-        counts[row.question_key][row.answer] = (counts[row.question_key][row.answer] || 0) + 1;
+        const displayAnswer = row.answer.startsWith("Другое:") ? "Другое" : row.answer;
+        counts[row.question_key][displayAnswer] = (counts[row.question_key][displayAnswer] || 0) + 1;
       }
 
       const aggregated: SurveyData[] = [];
@@ -62,6 +66,22 @@ export function SurveyStats() {
       console.error("Error loading survey stats:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOtherClick = async (questionKey: string) => {
+    try {
+      const { data: responses } = await (supabase as any)
+        .from("user_survey_responses")
+        .select("answer")
+        .eq("question_key", questionKey)
+        .like("answer", "Другое:%");
+
+      const answers = (responses || []).map((r: any) => r.answer.replace("Другое: ", "").trim()).filter(Boolean);
+      const title = QUESTION_LABELS[questionKey]?.title || questionKey;
+      setOtherAnswers({ question: title, answers });
+    } catch (error) {
+      console.error("Error loading other answers:", error);
     }
   };
 
@@ -84,53 +104,86 @@ export function SurveyStats() {
   }
 
   return (
-    <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
-      <CardHeader>
-        <CardTitle className="text-lg">
-          Опрос пользователей ({totalRespondents} ответов)
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {QUESTION_ORDER.map((qk) => {
-          const meta = QUESTION_LABELS[qk];
-          if (!meta) return null;
-          const Icon = meta.icon;
-          const questionData = data
-            .filter((d) => d.question_key === qk)
-            .sort((a, b) => b.count - a.count);
-          const total = questionData.reduce((s, d) => s + d.count, 0);
+    <>
+      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg">
+            Опрос пользователей ({totalRespondents} ответов)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {QUESTION_ORDER.map((qk) => {
+            const meta = QUESTION_LABELS[qk];
+            if (!meta) return null;
+            const Icon = meta.icon;
+            const questionData = data
+              .filter((d) => d.question_key === qk)
+              .sort((a, b) => b.count - a.count);
+            const total = questionData.reduce((s, d) => s + d.count, 0);
 
-          return (
-            <div key={qk} className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Icon className="w-4 h-4 text-primary" />
-                <h4 className="font-medium text-sm">{meta.title}</h4>
-              </div>
-              <div className="space-y-2">
-                {questionData.map((item) => {
-                  const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
-                  return (
-                    <div key={item.answer} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground truncate mr-2">{item.answer}</span>
-                        <span className="text-muted-foreground shrink-0">
-                          {item.count} ({pct}%)
-                        </span>
+            return (
+              <div key={qk} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Icon className="w-4 h-4 text-primary" />
+                  <h4 className="font-medium text-sm">{meta.title}</h4>
+                </div>
+                <div className="space-y-2">
+                  {questionData.map((item) => {
+                    const pct = total > 0 ? Math.round((item.count / total) * 100) : 0;
+                    const isOther = item.answer === "Другое";
+                    return (
+                      <div key={item.answer} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span
+                            className={`text-foreground truncate mr-2 ${isOther ? "cursor-pointer underline decoration-dotted hover:text-primary transition-colors" : ""}`}
+                            onClick={isOther ? () => handleOtherClick(qk) : undefined}
+                          >
+                            {item.answer}
+                          </span>
+                          <span className="text-muted-foreground shrink-0">
+                            {item.count} ({pct}%)
+                          </span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </CardContent>
-    </Card>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!otherAnswers} onOpenChange={() => setOtherAnswers(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              Ответы «Другое» — {otherAnswers?.question}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-80">
+            {otherAnswers?.answers.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Нет пользовательских ответов
+              </p>
+            ) : (
+              <div className="space-y-2 pr-4">
+                {otherAnswers?.answers.map((a, i) => (
+                  <div key={i} className="text-sm p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                    {a}
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
