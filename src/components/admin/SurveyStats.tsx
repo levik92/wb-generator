@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { User, BarChart3, Megaphone, Loader2 } from "lucide-react";
@@ -160,13 +165,13 @@ export function SurveyStats() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!otherAnswers} onOpenChange={() => setOtherAnswers(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-base">
+      <ResponsiveDialog open={!!otherAnswers} onOpenChange={() => setOtherAnswers(null)}>
+        <ResponsiveDialogContent className="sm:max-w-md !max-w-[calc(100vw-2rem)]">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle className="text-base">
               Ответы «Другое» — {otherAnswers?.question}
-            </DialogTitle>
-          </DialogHeader>
+            </ResponsiveDialogTitle>
+          </ResponsiveDialogHeader>
           <ScrollArea className="max-h-80">
             {otherAnswers?.answers.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
@@ -182,8 +187,8 @@ export function SurveyStats() {
               </div>
             )}
           </ScrollArea>
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </>
   );
 }
