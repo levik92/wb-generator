@@ -144,9 +144,17 @@ export const CasesShowcase = ({
                   </div>
                   <h3 className="text-lg font-bold text-white mb-1">{caseItem.title}</h3>
                   <p className="text-sm text-white/50 mb-3">{caseItem.description}</p>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-white/40">Заказы:</span>
-                    <span className="font-semibold text-white">{caseItem.ordersChange}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-white/40">Заказы:</span>
+                      <span className="font-semibold text-white">{caseItem.ordersChange}</span>
+                    </div>
+                    <CaseStudyDialog caseId={caseItem.id}>
+                      <button className="text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center gap-1 transition-colors">
+                        Изучить кейс
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </CaseStudyDialog>
                   </div>
                 </div>
               </div>
