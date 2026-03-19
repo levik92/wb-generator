@@ -144,9 +144,10 @@ const Terms = () => {
             <div className="p-4 rounded-xl bg-secondary/50">
               <p className="font-medium mb-3 text-sm">Реквизиты Исполнителя:</p>
               <ul className="list-none space-y-1 text-xs text-muted-foreground">
-                <li><strong>Наименование:</strong> Индивидуальный предприниматель Чупин Антон Дмитриевич</li>
-                <li><strong>ИНН:</strong> 723013381128</li>
-                <li><strong>Расчётный счёт:</strong> 40802810120000608278</li>
+                <li><strong>Наименование:</strong> Общество с ограниченной ответственностью «АЛЬТАИР»</li>
+                <li><strong>ИНН:</strong> 9724238597</li>
+                <li><strong>КПП:</strong> 772401001</li>
+                <li><strong>Расчётный счёт:</strong> 40702810120000295325</li>
                 <li><strong>Банк:</strong> ООО «Банк Точка»</li>
                 <li><strong>БИК:</strong> 044525104</li>
                 <li><strong>Корр. счёт:</strong> 30101810745374525104</li>
