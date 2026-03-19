@@ -165,13 +165,13 @@ export function SurveyStats() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!otherAnswers} onOpenChange={() => setOtherAnswers(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-base">
+      <ResponsiveDialog open={!!otherAnswers} onOpenChange={() => setOtherAnswers(null)}>
+        <ResponsiveDialogContent className="sm:max-w-md !max-w-[calc(100vw-2rem)]">
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle className="text-base">
               Ответы «Другое» — {otherAnswers?.question}
-            </DialogTitle>
-          </DialogHeader>
+            </ResponsiveDialogTitle>
+          </ResponsiveDialogHeader>
           <ScrollArea className="max-h-80">
             {otherAnswers?.answers.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
@@ -187,8 +187,8 @@ export function SurveyStats() {
               </div>
             )}
           </ScrollArea>
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </>
   );
 }
