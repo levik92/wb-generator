@@ -260,7 +260,7 @@ serve(async (req) => {
     ])
 
     // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей (с пагинацией)
-    const allPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, amount', [
+    const allPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, amount, created_at', [
       { field: 'status', op: 'eq', value: 'succeeded' }
     ])
 
@@ -441,6 +441,22 @@ serve(async (req) => {
     })
     const periodPaidUsersCount = periodPaidUsersSet.size
 
+    // Определяем первую оплату каждого пользователя (для конверсии)
+    const userFirstPaymentDate: { [key: string]: Date } = {}
+    allPaymentsData?.forEach(p => {
+      if (p.user_id && p.created_at) {
+        const payDate = new Date(p.created_at)
+        if (!userFirstPaymentDate[p.user_id] || payDate < userFirstPaymentDate[p.user_id]) {
+          userFirstPaymentDate[p.user_id] = payDate
+        }
+      }
+    })
+
+    // Пользователи, чья ПЕРВАЯ оплата попадает в период
+    const firstTimePaidInPeriod = Object.entries(userFirstPaymentDate).filter(([_, firstDate]) => {
+      return firstDate >= startDate && firstDate <= endDate
+    }).length
+
     // 2. Средний чек
     const totalPaymentsCount = allPaymentsData?.length || 0
     const totalPaymentsSum = allPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
@@ -450,31 +466,48 @@ serve(async (req) => {
     const periodPaymentsCount = paymentsData?.length || 0
     const periodAverageCheck = periodPaymentsCount > 0 ? Math.round(totalRevenueInPeriod / periodPaymentsCount) : 0
 
-    // 3. Повторные оплаты (пользователи с более чем 1 платежом)
-    const userPaymentCounts: { [key: string]: number } = {}
+    // === LIFETIME METRICS (за всё время) ===
+    // LTV: среднее время жизни платного пользователя (дни между первой и последней оплатой)
+    const userPaymentDates: { [key: string]: Date[] } = {}
+    allPaymentsData?.forEach(p => {
+      if (p.user_id && p.created_at) {
+        if (!userPaymentDates[p.user_id]) userPaymentDates[p.user_id] = []
+        userPaymentDates[p.user_id].push(new Date(p.created_at))
+      }
+    })
+    
+    let totalLifetimeDays = 0
+    let usersWithLifetime = 0
+    Object.values(userPaymentDates).forEach(dates => {
+      if (dates.length >= 1) {
+        const sorted = dates.sort((a, b) => a.getTime() - b.getTime())
+        const firstPayment = sorted[0]
+        const lastPayment = sorted[sorted.length - 1]
+        const lifetimeDays = Math.max(1, Math.ceil((lastPayment.getTime() - firstPayment.getTime()) / (1000 * 60 * 60 * 24)))
+        totalLifetimeDays += lifetimeDays
+        usersWithLifetime++
+      }
+    })
+    const avgLifetimeDays = usersWithLifetime > 0 ? Math.round(totalLifetimeDays / usersWithLifetime) : 0
+
+    // Средняя прибыль с клиента = сумма всех платежей / кол-во платящих пользователей
+    const avgRevenuePerCustomer = paidUsersCount > 0 ? Math.round(totalPaymentsSum / paidUsersCount) : 0
+
+    // Среднее кол-во транзакций = кол-во оплат / кол-во платящих пользователей
+    const avgTransactionsPerUser = paidUsersCount > 0 ? Math.round((totalPaymentsCount / paidUsersCount) * 10) / 10 : 0
+
+    // Максимальная совокупная оплата от одного пользователя
+    const userTotalSpent: { [key: string]: number } = {}
     allPaymentsData?.forEach(p => {
       if (p.user_id) {
-        userPaymentCounts[p.user_id] = (userPaymentCounts[p.user_id] || 0) + 1
+        userTotalSpent[p.user_id] = (userTotalSpent[p.user_id] || 0) + Number(p.amount)
       }
     })
-    const repeatPaymentUsers = Object.values(userPaymentCounts).filter(count => count > 1).length
-    const totalRepeatPayments = Object.entries(userPaymentCounts)
-      .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
+    const maxUserSpent = Object.values(userTotalSpent).length > 0 ? Math.round(Math.max(...Object.values(userTotalSpent))) : 0
 
-    // Повторные за период (пользователи с >1 платежом за период)
-    const periodUserPaymentCounts: { [key: string]: number } = {}
-    paymentsData?.forEach(p => {
-      if (p.user_id) {
-        periodUserPaymentCounts[p.user_id] = (periodUserPaymentCounts[p.user_id] || 0) + 1
-      }
-    })
-    const periodRepeatPaymentUsers = Object.values(periodUserPaymentCounts).filter(count => count > 1).length
-    const periodRepeatPayments = Object.entries(periodUserPaymentCounts)
-      .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
-
-    // Расчет конверсии за период (платящие за период / зарегистрированные за период)
+    // Расчет конверсии за период (первая оплата за период / зарегистрированные за период)
     const periodConversionRate = totalUsersInPeriod > 0 
-      ? Math.round((periodPaidUsersCount / totalUsersInPeriod) * 1000) / 10 
+      ? Math.round((firstTimePaidInPeriod / totalUsersInPeriod) * 1000) / 10 
       : 0
 
     // Расчет % повторных оплат за период (повторно платящие / платящие за период)
@@ -557,6 +590,7 @@ serve(async (req) => {
           periodRepeatPaymentUsers: periodRepeatPaymentUsers,
           periodUsersTotal: totalUsersInPeriod,
           totalUsers: totalUsersCount || 0,
+          firstTimePaidInPeriod: firstTimePaidInPeriod,
           // Проценты за период
           conversionRate: periodConversionRate,
           conversionRateTotal: (totalUsersCount && totalUsersCount > 0) 
@@ -566,6 +600,16 @@ serve(async (req) => {
           repeatPaymentRateTotal: paidUsersCount > 0 
             ? Math.round((repeatPaymentUsers / paidUsersCount) * 1000) / 10 
             : 0
+        },
+        // Метрики за всё время (без периода)
+        lifetimeMetrics: {
+          avgLifetimeDays,
+          avgRevenuePerCustomer,
+          avgTransactionsPerUser,
+          maxUserSpent,
+          totalPaidUsers: paidUsersCount,
+          totalPaymentsSum: Math.round(totalPaymentsSum),
+          totalPaymentsCount
         }
       }),
       {

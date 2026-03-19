@@ -1,4 +1,4 @@
-import { AdminAnalyticsChart, AdminAdditionalMetrics } from "@/components/dashboard/AdminAnalyticsChart";
+import { AdminAnalyticsChart, AdminAdditionalMetrics, AdminLifetimeMetrics } from "@/components/dashboard/AdminAnalyticsChart";
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,6 +104,15 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
         transition={{ duration: 0.4, delay: 0.25 }}
       >
         <AdminAdditionalMetrics />
+      </motion.div>
+
+      {/* Lifetime Metrics */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.35 }}
+      >
+        <AdminLifetimeMetrics />
       </motion.div>
 
       {/* Quick Stats */}

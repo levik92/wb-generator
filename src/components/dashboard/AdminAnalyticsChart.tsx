@@ -29,10 +29,21 @@ interface AdditionalMetrics {
   periodRepeatPaymentUsers: number;
   periodUsersTotal: number;
   totalUsers: number;
+  firstTimePaidInPeriod: number;
   conversionRate: number;
   conversionRateTotal: number;
   repeatPaymentRate: number;
   repeatPaymentRateTotal: number;
+}
+
+interface LifetimeMetrics {
+  avgLifetimeDays: number;
+  avgRevenuePerCustomer: number;
+  avgTransactionsPerUser: number;
+  maxUserSpent: number;
+  totalPaidUsers: number;
+  totalPaymentsSum: number;
+  totalPaymentsCount: number;
 }
 
 interface AnalyticsData {
@@ -674,8 +685,139 @@ export function AdminAdditionalMetrics() {
               {metrics?.conversionRate || 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics?.paidUsers || 0} из {metrics?.periodUsersTotal || 0} польз.
+              {metrics?.firstTimePaidInPeriod || 0} перв. оплат из {metrics?.periodUsersTotal || 0} рег.
               <span className="text-muted-foreground/70"> (всего: {metrics?.conversionRateTotal || 0}%)</span>
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Компонент для метрик за всё время (LTV, средняя прибыль и т.д.)
+export function AdminLifetimeMetrics() {
+  const [metrics, setMetrics] = useState<LifetimeMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMetrics();
+  }, []);
+
+  const loadMetrics = async () => {
+    setLoading(true);
+    try {
+      const now = new Date();
+      const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      const formatLocalDate = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      const { data: result, error } = await supabase.functions.invoke('admin-analytics', {
+        body: { period: 'custom', startDateCustom: formatLocalDate(yearAgo), endDateCustom: formatLocalDate(now) }
+      });
+      if (error) throw error;
+      setMetrics(result?.lifetimeMetrics || null);
+    } catch (error) {
+      console.error('Error loading lifetime metrics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="animate-fade-in">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Activity className="h-4 w-4 text-muted-foreground" />
+            Метрики за всё время
+          </CardTitle>
+          <CardDescription>Ключевые показатели платящих пользователей</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+                <div className="animate-pulse space-y-2">
+                  <div className="h-4 w-20 bg-muted rounded" />
+                  <div className="h-7 w-14 bg-muted rounded" />
+                  <div className="h-3 w-16 bg-muted rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="animate-fade-in">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Activity className="h-4 w-4 text-muted-foreground" />
+          Метрики за всё время
+        </CardTitle>
+        <CardDescription>Ключевые показатели платящих пользователей</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {/* LTV */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Coins className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">LTV (дней)</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {metrics?.avgLifetimeDays?.toLocaleString('ru-RU') || 0}
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              Ср. время жизни платного юзера
+            </p>
+          </div>
+
+          {/* Средняя прибыль с клиента */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <DollarSign className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">Ср. прибыль</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {metrics?.avgRevenuePerCustomer?.toLocaleString('ru-RU') || 0}₽
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              На {metrics?.totalPaidUsers || 0} платящих
+            </p>
+          </div>
+
+          {/* Среднее кол-во транзакций */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Repeat className="h-3.5 w-3.5 text-violet-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">Ср. транзакций</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-violet-600 dark:text-violet-400">
+              {metrics?.avgTransactionsPerUser || 0}
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              Всего: {metrics?.totalPaymentsCount?.toLocaleString('ru-RU') || 0} оплат
+            </p>
+          </div>
+
+          {/* Максимальная оплата */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">Макс. от юзера</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {metrics?.maxUserSpent?.toLocaleString('ru-RU') || 0}₽
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              Совокупная сумма оплат
             </p>
           </div>
         </div>
