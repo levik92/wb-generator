@@ -94,14 +94,20 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
     if (currentStep < QUESTIONS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Save all answers
+      // Save all answers, appending otherText where applicable
       setSaving(true);
       try {
-        const rows = Object.entries(answers).map(([question_key, answer]) => ({
-          user_id: userId,
-          question_key,
-          answer,
-        }));
+        const rows = Object.entries(answers).map(([question_key, answer]) => {
+          let finalAnswer = answer;
+          if (answer === "Другое" && otherText[question_key]) {
+            finalAnswer = `Другое: ${otherText[question_key]}`;
+          }
+          return {
+            user_id: userId,
+            question_key,
+            answer: finalAnswer,
+          };
+        });
         
         await (supabase as any)
           .from("user_survey_responses")
