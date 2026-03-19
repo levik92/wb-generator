@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "@/components/landing/BeforeAfterSliderNew";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 
 // Все кейсы с изображениями до/после
 const allCases = [
@@ -467,7 +468,7 @@ const Cases = () => {
                       <p className="text-sm text-white/50 mb-4 flex-1">{caseItem.description}</p>
 
                       {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-3 gap-2 mb-3">
                         <div className="bg-white/5 rounded-lg p-2 text-center">
                           <div className="text-[10px] text-white/40 mb-0.5">Заказы</div>
                           <div className="text-xs sm:text-sm font-bold text-white">
@@ -487,6 +488,14 @@ const Cases = () => {
                           </div>
                         </div>
                       </div>
+
+                      {/* Study button */}
+                      <CaseStudyDialog caseId={caseItem.id}>
+                        <button className="w-full text-center text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[hsl(268,83%,58%)]/10 hover:bg-[hsl(268,83%,58%)]/15 border border-[hsl(268,83%,58%)]/20 transition-all">
+                          Изучить кейс
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </CaseStudyDialog>
                     </div>
                   </div>
                 </div>
