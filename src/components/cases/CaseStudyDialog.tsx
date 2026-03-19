@@ -63,7 +63,7 @@ export const CaseStudyDialog = ({ caseId, children }: CaseStudyDialogProps) => {
       <div onClick={() => setOpen(true)} className="cursor-pointer">
         {children}
       </div>
-      <ResponsiveDialogContent className="sm:max-w-2xl lg:max-w-3xl bg-[#1a1a2e] border-white/10 text-white p-0">
+      <ResponsiveDialogContent className="sm:max-w-2xl lg:max-w-3xl border-border/50 text-white p-0">
         <div className="p-5 sm:p-8 space-y-6 sm:space-y-8">
           {/* Header */}
           <ResponsiveDialogHeader className="space-y-3 p-0">
