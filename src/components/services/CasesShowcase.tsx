@@ -8,6 +8,7 @@ import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 
 const cases = [
   {
+    id: 1,
     before: "/lovable-uploads/case-after-01.jpg",
     after: "/lovable-uploads/case-before-01.webp",
     category: "Продукты",
@@ -17,6 +18,7 @@ const cases = [
     description: "Яркая карточка с инфографикой",
   },
   {
+    id: 5,
     before: "/lovable-uploads/case-after-05.jpg",
     after: "/lovable-uploads/case-before-05.webp",
     category: "Обувь",
@@ -26,6 +28,7 @@ const cases = [
     description: "Акцент на материалы и амортизацию",
   },
   {
+    id: 9,
     before: "/lovable-uploads/case-after-09.jpg",
     after: "/lovable-uploads/case-before-09.jpg",
     category: "Смартфоны",
@@ -35,6 +38,7 @@ const cases = [
     description: "Революционная карточка с чипом A18",
   },
   {
+    id: 11,
     before: "/lovable-uploads/case-after-11.jpg",
     after: "/lovable-uploads/case-before-11.jpg",
     category: "Техника",
