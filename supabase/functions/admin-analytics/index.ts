@@ -590,6 +590,7 @@ serve(async (req) => {
           periodRepeatPaymentUsers: periodRepeatPaymentUsers,
           periodUsersTotal: totalUsersInPeriod,
           totalUsers: totalUsersCount || 0,
+          firstTimePaidInPeriod: firstTimePaidInPeriod,
           // Проценты за период
           conversionRate: periodConversionRate,
           conversionRateTotal: (totalUsersCount && totalUsersCount > 0) 
@@ -599,6 +600,16 @@ serve(async (req) => {
           repeatPaymentRateTotal: paidUsersCount > 0 
             ? Math.round((repeatPaymentUsers / paidUsersCount) * 1000) / 10 
             : 0
+        },
+        // Метрики за всё время (без периода)
+        lifetimeMetrics: {
+          avgLifetimeDays,
+          avgRevenuePerCustomer,
+          avgTransactionsPerUser,
+          maxUserSpent,
+          totalPaidUsers: paidUsersCount,
+          totalPaymentsSum: Math.round(totalPaymentsSum),
+          totalPaymentsCount
         }
       }),
       {
