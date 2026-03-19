@@ -29,10 +29,21 @@ interface AdditionalMetrics {
   periodRepeatPaymentUsers: number;
   periodUsersTotal: number;
   totalUsers: number;
+  firstTimePaidInPeriod: number;
   conversionRate: number;
   conversionRateTotal: number;
   repeatPaymentRate: number;
   repeatPaymentRateTotal: number;
+}
+
+interface LifetimeMetrics {
+  avgLifetimeDays: number;
+  avgRevenuePerCustomer: number;
+  avgTransactionsPerUser: number;
+  maxUserSpent: number;
+  totalPaidUsers: number;
+  totalPaymentsSum: number;
+  totalPaymentsCount: number;
 }
 
 interface AnalyticsData {
