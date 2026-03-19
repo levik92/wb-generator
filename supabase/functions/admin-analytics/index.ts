@@ -260,7 +260,7 @@ serve(async (req) => {
     ])
 
     // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей (с пагинацией)
-    const allPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, amount', [
+    const allPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, amount, created_at', [
       { field: 'status', op: 'eq', value: 'succeeded' }
     ])
 
