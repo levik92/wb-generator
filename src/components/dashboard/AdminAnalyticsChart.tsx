@@ -685,7 +685,7 @@ export function AdminAdditionalMetrics() {
               {metrics?.conversionRate || 0}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics?.paidUsers || 0} из {metrics?.periodUsersTotal || 0} польз.
+              {metrics?.firstTimePaidInPeriod || 0} перв. оплат из {metrics?.periodUsersTotal || 0} рег.
               <span className="text-muted-foreground/70"> (всего: {metrics?.conversionRateTotal || 0}%)</span>
             </p>
           </div>
