@@ -106,6 +106,15 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
         <AdminAdditionalMetrics />
       </motion.div>
 
+      {/* Lifetime Metrics */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.35 }}
+      >
+        <AdminLifetimeMetrics />
+      </motion.div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <StatCard
