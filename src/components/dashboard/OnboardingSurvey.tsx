@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, CheckCircle2, User, BarChart3, Megaphone } from "lucide-react";
 
@@ -66,6 +67,7 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [otherText, setOtherText] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -92,14 +94,20 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
     if (currentStep < QUESTIONS.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Save all answers
+      // Save all answers, appending otherText where applicable
       setSaving(true);
       try {
-        const rows = Object.entries(answers).map(([question_key, answer]) => ({
-          user_id: userId,
-          question_key,
-          answer,
-        }));
+        const rows = Object.entries(answers).map(([question_key, answer]) => {
+          let finalAnswer = answer;
+          if (answer === "Другое" && otherText[question_key]) {
+            finalAnswer = `Другое: ${otherText[question_key]}`;
+          }
+          return {
+            user_id: userId,
+            question_key,
+            answer: finalAnswer,
+          };
+        });
         
         await (supabase as any)
           .from("user_survey_responses")
@@ -192,30 +200,45 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
                 className="space-y-2 mb-6"
               >
                 {currentQuestion.options.map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => handleSelect(option)}
-                    className={`w-full text-left p-3 md:p-3.5 rounded-xl border transition-all text-sm md:text-base ${
-                      currentAnswer === option
-                        ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary/30"
-                        : "border-border hover:border-primary/40 hover:bg-muted/50 text-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                          currentAnswer === option
-                            ? "border-primary bg-primary"
-                            : "border-muted-foreground/40"
-                        }`}
-                      >
-                        {currentAnswer === option && (
-                          <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
-                        )}
+                  <div key={option}>
+                    <button
+                      onClick={() => handleSelect(option)}
+                      className={`w-full text-left p-3 md:p-3.5 rounded-xl border transition-all text-sm md:text-base ${
+                        currentAnswer === option
+                          ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary/30"
+                          : "border-border hover:border-primary/40 hover:bg-muted/50 text-foreground"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                            currentAnswer === option
+                              ? "border-primary bg-primary"
+                              : "border-muted-foreground/40"
+                          }`}
+                        >
+                          {currentAnswer === option && (
+                            <CheckCircle2 className="w-3 h-3 text-primary-foreground" />
+                          )}
+                        </div>
+                        {option}
                       </div>
-                      {option}
-                    </div>
-                  </button>
+                    </button>
+                    {option === "Другое" && currentAnswer === "Другое" && (
+                      <Input
+                        className="mt-2 ml-8 w-[calc(100%-2rem)] h-10 text-sm"
+                        placeholder="Уточните, откуда узнали (необязательно)"
+                        maxLength={100}
+                        value={otherText[currentQuestion.key] || ""}
+                        onChange={(e) =>
+                          setOtherText((prev) => ({
+                            ...prev,
+                            [currentQuestion.key]: e.target.value,
+                          }))
+                        }
+                      />
+                    )}
+                  </div>
                 ))}
               </motion.div>
 
