@@ -3,6 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
+import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 
 // Optimized images - using smaller/optimized versions where available
 const examples = [
