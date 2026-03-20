@@ -163,10 +163,18 @@ export const ExamplesSection = () => {
                       <div className="text-xs sm:text-sm font-bold text-emerald-400">
                         {example.wbgenCost}
                       </div>
-                    </div>
+                  <div className="flex items-center justify-end pt-1">
+                    <CaseStudyDialog caseId={example.caseId}>
+                      <button className="text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center gap-1 transition-colors">
+                        Изучить кейс
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </CaseStudyDialog>
+                  </div>
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           ))}
         </div>

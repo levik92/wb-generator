@@ -601,7 +601,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                     className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                     asChild
                   >
-                    <a href="/services/video-generation" target="_blank" rel="noopener noreferrer">
+                    <a href="/video-generaciya" target="_blank" rel="noopener noreferrer">
                       <Eye className="w-4 h-4 mr-2" />
                       Посмотреть
                       <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
