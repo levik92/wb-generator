@@ -3,10 +3,12 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
+import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 
 // Optimized images - using smaller/optimized versions where available
 const examples = [
   {
+    caseId: 2,
     before: "/lovable-uploads/example-after-lego.jpg",
     after: "/lovable-uploads/example-before-lego.jpg",
     category: "Игрушки",
@@ -17,6 +19,7 @@ const examples = [
     savings: "1 741₽",
   },
   {
+    caseId: 11,
     before: "/lovable-uploads/example-after-dyson.jpg",
     after: "/lovable-uploads/example-before-dyson.jpg",
     category: "Техника",
@@ -27,6 +30,7 @@ const examples = [
     savings: "2 141₽",
   },
   {
+    caseId: 18,
     before: "/lovable-uploads/example-after-dreamies.jpg",
     after: "/lovable-uploads/example-before-dreamies.jpg",
     category: "Зоотовары",
@@ -37,6 +41,7 @@ const examples = [
     savings: "1 341₽",
   },
   {
+    caseId: 12,
     before: "/lovable-uploads/example-after-jeans.jpg",
     after: "/lovable-uploads/example-before-jeans.jpg",
     category: "Одежда",
@@ -158,10 +163,18 @@ export const ExamplesSection = () => {
                       <div className="text-xs sm:text-sm font-bold text-emerald-400">
                         {example.wbgenCost}
                       </div>
-                    </div>
+                  <div className="flex items-center justify-end pt-1">
+                    <CaseStudyDialog caseId={example.caseId}>
+                      <button className="text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center gap-1 transition-colors">
+                        Изучить кейс
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </CaseStudyDialog>
+                  </div>
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           ))}
         </div>
