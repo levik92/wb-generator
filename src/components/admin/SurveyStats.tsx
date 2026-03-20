@@ -34,26 +34,41 @@ export function SurveyStats() {
     loadStats();
   }, []);
 
+  const fetchAllRows = async (table: string, selectFields: string, filters?: { key: string; value: string }[]) => {
+    const allRows: any[] = [];
+    const pageSize = 1000;
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore) {
+      let query = (supabase as any).from(table).select(selectFields).range(offset, offset + pageSize - 1);
+      if (filters) {
+        for (const f of filters) query = query.eq(f.key, f.value);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      if (data && data.length > 0) {
+        allRows.push(...data);
+        offset += pageSize;
+        hasMore = data.length === pageSize;
+      } else {
+        hasMore = false;
+      }
+    }
+    return allRows;
+  };
+
   const loadStats = async () => {
     try {
-      const { data: responses, error } = await (supabase as any)
-        .from("user_survey_responses")
-        .select("question_key, answer");
-
-      if (error) throw error;
+      const responses = await fetchAllRows("user_survey_responses", "question_key, answer");
 
       // Count unique users
-      const { data: userCount } = await (supabase as any)
-        .from("user_survey_responses")
-        .select("user_id")
-        .eq("question_key", "who_are_you");
-
-      const uniqueUsers = new Set((userCount || []).map((r: any) => r.user_id));
+      const userRows = await fetchAllRows("user_survey_responses", "user_id", [{ key: "question_key", value: "who_are_you" }]);
+      const uniqueUsers = new Set(userRows.map((r: any) => r.user_id));
       setTotalRespondents(uniqueUsers.size);
 
       // Aggregate counts — group "Другое: ..." answers under "Другое"
       const counts: Record<string, Record<string, number>> = {};
-      for (const row of responses || []) {
+      for (const row of responses) {
         if (!counts[row.question_key]) counts[row.question_key] = {};
         const displayAnswer = row.answer.startsWith("Другое:") ? "Другое" : row.answer;
         counts[row.question_key][displayAnswer] = (counts[row.question_key][displayAnswer] || 0) + 1;
