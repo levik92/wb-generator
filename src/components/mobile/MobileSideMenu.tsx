@@ -78,6 +78,10 @@ export const MobileSideMenu = ({
     label: 'Бонусы',
     icon: Gift
   }, {
+    id: 'support',
+    label: 'Поддержка',
+    icon: Headphones
+  }, {
     id: 'friends',
     label: 'Наши друзья',
     icon: HeartHandshake,

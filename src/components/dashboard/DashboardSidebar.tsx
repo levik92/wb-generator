@@ -125,6 +125,10 @@ export const DashboardSidebar = ({
     label: 'Обучение',
     icon: GraduationCap
   }, {
+    id: 'support',
+    label: 'Поддержка',
+    icon: Headphones
+  }, {
     id: 'settings',
     label: 'Настройки',
     icon: Settings
