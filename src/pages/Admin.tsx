@@ -145,6 +145,7 @@ export default function Admin() {
       case 'banners': return <AdminBanners />;
       case 'blog': return <AdminBlog />;
       case 'video_lessons': return <AdminVideoLessons />;
+      case 'support': return <AdminSupport />;
       default: return <AdminAnalytics users={users} />;
     }
   };

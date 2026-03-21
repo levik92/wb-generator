@@ -107,3 +107,9 @@ verify_jwt = false
 
 [functions.analyze-style]
 verify_jwt = false
+
+[functions.support-chat]
+verify_jwt = false
+
+[functions.support-admin]
+verify_jwt = false
