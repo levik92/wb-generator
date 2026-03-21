@@ -22,6 +22,7 @@ interface SettingsProps {
   profile: Profile;
   onUpdate: () => void;
   onSignOut: () => void;
+  onNavigateToSupport?: () => void;
 }
 export const Settings = ({
   profile,
