@@ -27,7 +27,8 @@ interface SettingsProps {
 export const Settings = ({
   profile,
   onUpdate,
-  onSignOut
+  onSignOut,
+  onNavigateToSupport
 }: SettingsProps) => {
   const [fullName, setFullName] = useState(profile.full_name || "");
   const [newEmail, setNewEmail] = useState("");
