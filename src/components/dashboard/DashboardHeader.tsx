@@ -35,7 +35,8 @@ interface DashboardHeaderProps {
 export const DashboardHeader = ({
   profile,
   onSignOut,
-  onNavigateToSettings
+  onNavigateToSettings,
+  onNavigateToSupport
 }: DashboardHeaderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
