@@ -1302,6 +1302,77 @@ export type Database = {
         }
         Relationships: []
       }
+      support_conversations: {
+        Row: {
+          admin_notified_at: string | null
+          ai_enabled: boolean
+          channel: string
+          created_at: string
+          id: string
+          needs_admin_attention: boolean
+          status: string
+          updated_at: string
+          user_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          admin_notified_at?: string | null
+          ai_enabled?: boolean
+          channel?: string
+          created_at?: string
+          id?: string
+          needs_admin_attention?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          admin_notified_at?: string | null
+          ai_enabled?: boolean
+          channel?: string
+          created_at?: string
+          id?: string
+          needs_admin_attention?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          encrypted_content: string
+          id: string
+          sender_type: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          encrypted_content: string
+          id?: string
+          sender_type?: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          encrypted_content?: string
+          id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_status: {
         Row: {
           id: string
