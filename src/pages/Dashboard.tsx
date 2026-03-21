@@ -309,6 +309,8 @@ const Dashboard = () => {
         return <News />;
       case 'learning':
         return <Learning />;
+      case 'support':
+        return <SupportChat profile={profile} />;
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
       default:
