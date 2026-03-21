@@ -92,6 +92,11 @@ const getPromptDisplayName = (type: string): {
       name: 'Определение товара',
       description: 'Промт для автоматического определения наименования товара по фотографии (Gemini Flash Lite)',
       category: 'Технический'
+    },
+    'support_ai': {
+      name: 'AI Поддержка',
+      description: 'Промт для виртуального ассистента поддержки на сайте',
+      category: 'Технический'
     }
   };
   return promptNames[type] || {
