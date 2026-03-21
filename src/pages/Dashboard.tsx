@@ -88,7 +88,7 @@ const Dashboard = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hashParam = window.location.hash.replace('#', '');
-      const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+      const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning', 'support'];
       
       if (hashParam && validTabs.includes(hashParam)) {
         setActiveTab(hashParam as ActiveTab);
