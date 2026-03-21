@@ -14,7 +14,8 @@ import {
   DollarSign,
   LayoutDashboard,
   FileText,
-  GraduationCap
+  GraduationCap,
+  Headphones
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
