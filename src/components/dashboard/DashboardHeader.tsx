@@ -212,6 +212,12 @@ export const DashboardHeader = ({
                 <Users className="mr-2 h-4 w-4" />
                 <span>Партнерам</span>
               </DropdownMenuItem>
+              {onNavigateToSupport && (
+                <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSupport}>
+                  <Headphones className="mr-2 h-4 w-4" />
+                  <span>Поддержка</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
                 <LogOut className="mr-2 h-4 w-4" />
