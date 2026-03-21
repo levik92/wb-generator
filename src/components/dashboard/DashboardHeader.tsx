@@ -29,6 +29,7 @@ interface DashboardHeaderProps {
   profile: Profile;
   onSignOut: () => void;
   onNavigateToSettings: () => void;
+  onNavigateToSupport?: () => void;
 }
 
 export const DashboardHeader = ({
