@@ -14,7 +14,8 @@ import {
   DollarSign,
   LayoutDashboard,
   FileText,
-  GraduationCap
+  GraduationCap,
+  Headphones
 } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -77,6 +78,11 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'video_lessons',
       label: 'Обучение',
       icon: GraduationCap,
+    },
+    {
+      id: 'support',
+      label: 'Поддержка',
+      icon: Headphones,
     }
   ];
 

@@ -3,10 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
+import { SupportWidget } from "./components/support/SupportWidget";
 
 // Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
@@ -49,13 +50,23 @@ const PageLoader = () => (
   </div>
 );
 
-const App = () => (
+const SupportWidgetWrapper = () => {
+  const location = useLocation();
+  const isPublicPage = !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/admin');
+  if (!isPublicPage) return null;
+  return <SupportWidget />;
+};
+
+const App = () => {
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <CookieConsent />
       <BrowserRouter>
+        <SupportWidgetWrapper />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={
@@ -111,6 +122,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

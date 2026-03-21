@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -22,6 +22,7 @@ import News from "@/pages/News";
 import { VideoCovers } from "@/components/dashboard/VideoCovers";
 import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
+import { SupportChat } from "@/components/support/SupportChat";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
@@ -40,7 +41,7 @@ interface Profile {
   referral_code: string;
   login_count: number;
 }
-type ActiveTab = 'cards' | 'video' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning';
+type ActiveTab = 'cards' | 'video' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning' | 'support';
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -65,7 +66,7 @@ const Dashboard = () => {
     const tabParam = searchParams.get('tab');
     const hashParam = window.location.hash.replace('#', '');
     
-    const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+    const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning', 'support'];
     
     // Priority: query param > hash anchor
     const targetTab = tabParam || hashParam;
@@ -87,7 +88,7 @@ const Dashboard = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hashParam = window.location.hash.replace('#', '');
-      const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+      const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning', 'support'];
       
       if (hashParam && validTabs.includes(hashParam)) {
         setActiveTab(hashParam as ActiveTab);
@@ -308,6 +309,8 @@ const Dashboard = () => {
         return <News />;
       case 'learning':
         return <Learning />;
+      case 'support':
+        return <SupportChat profile={profile} />;
       case 'settings':
         return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
       default:

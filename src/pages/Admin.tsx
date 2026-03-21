@@ -20,6 +20,7 @@ import { AdminPricing } from "@/components/admin/AdminPricing";
 import { AdminBanners } from "@/components/admin/AdminBanners";
 import { AdminBlog } from "@/components/admin/AdminBlog";
 import { AdminVideoLessons } from "@/components/admin/AdminVideoLessons";
+import { AdminSupport } from "@/components/admin/AdminSupport";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 import { UserIcon } from "lucide-react";
@@ -37,7 +38,7 @@ interface User {
   updated_at: string;
 }
 
-type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons' | 'support';
 
 const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   analytics: { title: 'Аналитика', subtitle: 'Статистика и метрики платформы' },
@@ -50,6 +51,7 @@ const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   banners: { title: 'Баннеры', subtitle: 'Баннеры дашборда' },
   blog: { title: 'Блог', subtitle: 'Статьи и публикации' },
   video_lessons: { title: 'Обучение', subtitle: 'Видеоуроки для пользователей' },
+  support: { title: 'Поддержка', subtitle: 'Чаты с пользователями' },
 };
 
 export default function Admin() {
@@ -143,6 +145,7 @@ export default function Admin() {
       case 'banners': return <AdminBanners />;
       case 'blog': return <AdminBlog />;
       case 'video_lessons': return <AdminVideoLessons />;
+      case 'support': return <AdminSupport />;
       default: return <AdminAnalytics users={users} />;
     }
   };

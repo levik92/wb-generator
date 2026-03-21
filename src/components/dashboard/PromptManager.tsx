@@ -92,6 +92,11 @@ const getPromptDisplayName = (type: string): {
       name: 'Определение товара',
       description: 'Промт для автоматического определения наименования товара по фотографии (Gemini Flash Lite)',
       category: 'Технический'
+    },
+    'support_ai': {
+      name: 'AI Поддержка',
+      description: 'Промт для виртуального ассистента поддержки на сайте',
+      category: 'Технический'
     }
   };
   return promptNames[type] || {
@@ -448,7 +453,7 @@ export function PromptManager() {
     }
   };
 
-  const technicalPrompts = prompts.filter(p => p.model_type === 'technical');
+  const technicalPrompts = prompts.filter(p => p.model_type === 'technical' || p.model_type === 'support');
 
   const saveTechPrompt = async (promptId: string) => {
     if (!techEditValue.trim()) return;
