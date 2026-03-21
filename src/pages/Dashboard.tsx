@@ -66,7 +66,7 @@ const Dashboard = () => {
     const tabParam = searchParams.get('tab');
     const hashParam = window.location.hash.replace('#', '');
     
-    const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning'];
+    const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning', 'support'];
     
     // Priority: query param > hash anchor
     const targetTab = tabParam || hashParam;
