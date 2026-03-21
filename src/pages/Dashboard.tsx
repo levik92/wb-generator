@@ -25,7 +25,7 @@ import Footer from "@/components/Footer";
 import { SupportChat } from "@/components/support/SupportChat";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones } from "lucide-react";
 
 // Mobile components
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
@@ -312,7 +312,7 @@ const Dashboard = () => {
       case 'support':
         return <SupportChat profile={profile} />;
       case 'settings':
-        return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
+        return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} onNavigateToSupport={() => setActiveTab('support')} />;
       default:
         return <GenerateCards 
           profile={profile} 
@@ -381,6 +381,10 @@ const Dashboard = () => {
                   <UserIconName className="mr-2 h-4 w-4" />
                   <span>Настройки</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActiveTab('support')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
+                  <Headphones className="mr-2 h-4 w-4" />
+                  <span>Поддержка</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
                   <LogOut className="mr-2 h-4 w-4" />
@@ -391,7 +395,7 @@ const Dashboard = () => {
           </div>}
         
         {/* Desktop Header */}
-        {!isMobile && <DashboardHeader profile={profile} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} />}
+        {!isMobile && <DashboardHeader profile={profile} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} />}
         
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
           <SystemStatusBanner />

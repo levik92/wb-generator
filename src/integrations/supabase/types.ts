@@ -1678,10 +1678,9 @@ export type Database = {
       }
       check_admin_profile_access_rate: { Args: never; Returns: boolean }
       cleanup_old_generations: { Args: never; Returns: undefined }
-      decrypt_support_message_edge: {
-        Args: { enc_key: string; encrypted: string }
-        Returns: string
-      }
+      decrypt_support_message_edge:
+        | { Args: { enc_key: string; encrypted: string }; Returns: string }
+        | { Args: { enc_key: string; encrypted: string }; Returns: string }
       encrypt_support_message_edge: {
         Args: { content: string; enc_key: string }
         Returns: string

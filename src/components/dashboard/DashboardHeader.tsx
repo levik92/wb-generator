@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User, UserIcon, Bell, Users } from "lucide-react";
+import { LogOut, User, UserIcon, Bell, Users, Headphones } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,12 +29,14 @@ interface DashboardHeaderProps {
   profile: Profile;
   onSignOut: () => void;
   onNavigateToSettings: () => void;
+  onNavigateToSupport?: () => void;
 }
 
 export const DashboardHeader = ({
   profile,
   onSignOut,
-  onNavigateToSettings
+  onNavigateToSettings,
+  onNavigateToSupport
 }: DashboardHeaderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -210,6 +212,12 @@ export const DashboardHeader = ({
                 <Users className="mr-2 h-4 w-4" />
                 <span>Партнерам</span>
               </DropdownMenuItem>
+              {onNavigateToSupport && (
+                <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSupport}>
+                  <Headphones className="mr-2 h-4 w-4" />
+                  <span>Поддержка</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
                 <LogOut className="mr-2 h-4 w-4" />
