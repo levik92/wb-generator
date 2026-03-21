@@ -66,6 +66,7 @@ const App = () => {
       <Sonner />
       <CookieConsent />
       <BrowserRouter>
+        <SupportWidgetWrapper />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={
@@ -121,6 +122,7 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
