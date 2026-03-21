@@ -312,7 +312,7 @@ const Dashboard = () => {
       case 'support':
         return <SupportChat profile={profile} />;
       case 'settings':
-        return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} />;
+        return <Settings profile={profile} onUpdate={refreshProfile} onSignOut={handleSignOut} onNavigateToSupport={() => setActiveTab('support')} />;
       default:
         return <GenerateCards 
           profile={profile} 
