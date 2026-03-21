@@ -25,7 +25,7 @@ import Footer from "@/components/Footer";
 import { SupportChat } from "@/components/support/SupportChat";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones } from "lucide-react";
 
 // Mobile components
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
