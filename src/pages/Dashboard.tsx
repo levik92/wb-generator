@@ -381,6 +381,10 @@ const Dashboard = () => {
                   <UserIconName className="mr-2 h-4 w-4" />
                   <span>Настройки</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActiveTab('support')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
+                  <Headphones className="mr-2 h-4 w-4" />
+                  <span>Поддержка</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
                   <LogOut className="mr-2 h-4 w-4" />
