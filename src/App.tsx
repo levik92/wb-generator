@@ -50,14 +50,14 @@ const PageLoader = () => (
   </div>
 );
 
+const SupportWidgetWrapper = () => {
+  const location = useLocation();
+  const isPublicPage = !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/admin');
+  if (!isPublicPage) return null;
+  return <SupportWidget />;
+};
+
 const App = () => {
-  // Only show widget on public pages via a wrapper component
-  const SupportWidgetWrapper = () => {
-    const location = window.location.pathname;
-    const isPublicPage = !location.startsWith('/dashboard') && !location.startsWith('/admin');
-    if (!isPublicPage) return null;
-    return <SupportWidget />;
-  };
 
   return (
   <QueryClientProvider client={queryClient}>
