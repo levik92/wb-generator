@@ -50,13 +50,21 @@ const PageLoader = () => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  // Only show widget on public pages via a wrapper component
+  const SupportWidgetWrapper = () => {
+    const location = window.location.pathname;
+    const isPublicPage = !location.startsWith('/dashboard') && !location.startsWith('/admin');
+    if (!isPublicPage) return null;
+    return <SupportWidget />;
+  };
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <CookieConsent />
-      <SupportWidget />
       <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <Routes>
