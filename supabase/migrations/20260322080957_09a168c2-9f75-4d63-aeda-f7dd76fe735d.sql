@@ -1,0 +1,1 @@
+DELETE FROM support_messages; DELETE FROM support_conversations;
