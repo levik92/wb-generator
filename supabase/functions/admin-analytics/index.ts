@@ -14,7 +14,6 @@ async function fetchAllRows(supabase: any, table: string, selectFields: string, 
   let hasMore = true
 
   while (hasMore) {
-    // Сначала применяем фильтры, потом range для корректной пагинации
     let query = supabase.from(table).select(selectFields)
     
     if (filters) {
@@ -25,11 +24,12 @@ async function fetchAllRows(supabase: any, table: string, selectFields: string, 
           query = query.gte(filter.field, filter.value)
         } else if (filter.op === 'lte') {
           query = query.lte(filter.field, filter.value)
+        } else if (filter.op === 'in') {
+          query = query.in(filter.field, filter.value)
         }
       }
     }
     
-    // Применяем range после фильтров
     query = query.range(offset, offset + pageSize - 1)
 
     const { data, error } = await query
@@ -52,7 +52,6 @@ async function fetchAllRows(supabase: any, table: string, selectFields: string, 
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -65,25 +64,19 @@ serve(async (req) => {
 
     const { period, startDateCustom, endDateCustom } = await req.json()
 
-    // Moscow timezone offset
     const MOSCOW_OFFSET_HOURS = 3
 
-    // Определяем временные рамки
     const now = new Date()
     let startDate: Date
     let endDate: Date = now
     let groupFormat: string
 
-    // Если переданы кастомные даты (формат YYYY-MM-DD, интерпретируем как московское время)
     if (startDateCustom && endDateCustom) {
-      // Парсим как московскую дату: 00:00 МСК = 21:00 UTC предыдущего дня
       const [sy, sm, sd] = startDateCustom.split('-').map(Number)
       const [ey, em, ed] = endDateCustom.split('-').map(Number)
       startDate = new Date(Date.UTC(sy, sm - 1, sd, 0 - MOSCOW_OFFSET_HOURS, 0, 0, 0))
-      // 23:59:59.999 МСК = 20:59:59.999 UTC
       endDate = new Date(Date.UTC(ey, em - 1, ed, 23 - MOSCOW_OFFSET_HOURS, 59, 59, 999))
       
-      // Определяем формат группировки в зависимости от длины периода
       const diffDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
       if (diffDays <= 1) {
         groupFormat = 'hour'
@@ -102,7 +95,6 @@ serve(async (req) => {
           break
         case 'week':
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          // Нормализуем к началу дня
           startDate.setUTCHours(0, 0, 0, 0)
           groupFormat = 'day'
           break
@@ -128,17 +120,13 @@ serve(async (req) => {
       }
     }
 
-    // Вычисляем предыдущий период для сравнения (такой же длины)
     const periodDuration = endDate.getTime() - startDate.getTime()
-    const prevEndDate = new Date(startDate.getTime() - 1) // Конец предыдущего периода - за 1 мс до начала текущего
+    const prevEndDate = new Date(startDate.getTime() - 1)
     prevEndDate.setUTCHours(23, 59, 59, 999)
     const prevStartDate = new Date(prevEndDate.getTime() - periodDuration)
     prevStartDate.setUTCHours(0, 0, 0, 0)
 
-    // Функция для конвертации UTC даты в Moscow timezone (UTC+3)
-    
     const toMoscowDate = (date: Date): Date => {
-      // Добавляем 3 часа к UTC времени, чтобы получить московское время
       return new Date(date.getTime() + MOSCOW_OFFSET_HOURS * 60 * 60 * 1000)
     }
     
@@ -146,7 +134,6 @@ serve(async (req) => {
       const moscowDate = toMoscowDate(date)
       
       if (format === 'hour') {
-        // Возвращаем ISO строку с московским часом
         const year = moscowDate.getUTCFullYear()
         const month = String(moscowDate.getUTCMonth() + 1).padStart(2, '0')
         const day = String(moscowDate.getUTCDate()).padStart(2, '0')
@@ -180,11 +167,8 @@ serve(async (req) => {
       return `${year}-${month}-${day}`
     }
 
-    // Генерируем временные интервалы для графика (в московском времени)
     const timeIntervals: string[] = []
     const current = new Date(startDate)
-    
-    // Используем endDate для ограничения, а не now
     const limitDate = endDate > now ? now : endDate
     
     while (current <= limitDate) {
@@ -195,7 +179,6 @@ serve(async (req) => {
         timeIntervals.push(formatMoscowDate(current, 'day'))
         current.setDate(current.getDate() + 1)
       } else if (groupFormat === 'week') {
-        // Начало недели (понедельник) в московском времени
         timeIntervals.push(getMoscowWeekStart(current))
         current.setDate(current.getDate() + 7)
       } else if (groupFormat === 'month') {
@@ -204,67 +187,74 @@ serve(async (req) => {
       }
     }
 
-    // Получаем данные о пользователях за период (с пагинацией)
+    // Получаем данные о пользователях за период
     const usersData = await fetchAllRows(supabase, 'profiles', 'id, created_at', [
       { field: 'created_at', op: 'gte', value: startDate.toISOString() },
       { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
-    // Получаем общее количество пользователей для расчета конверсии
     const { count: totalUsersCount } = await supabase
       .from('profiles')
       .select('id', { count: 'exact', head: true })
 
-    // Получаем данные о генерациях (с пагинацией)
-    const generationsData = await fetchAllRows(supabase, 'generations', 'created_at', [
+    // === AI REQUESTS: count individual tasks, not batch operations ===
+    // 1. Image generation tasks (each task = 1 image = 1 AI request)
+    const imageTasksData = await fetchAllRows(supabase, 'generation_tasks', 'created_at', [
       { field: 'created_at', op: 'gte', value: startDate.toISOString() },
-      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() },
+      { field: 'status', op: 'in', value: ['completed', 'processing', 'pending'] }
     ])
 
-    // === BREAKDOWN: генерации по типам ===
-    const generationsCardsData = await fetchAllRows(supabase, 'generations', 'created_at', [
-      { field: 'generation_type', op: 'eq', value: 'cards' },
-      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
-      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
-    ])
-
-    const generationsDescData = await fetchAllRows(supabase, 'generations', 'created_at, tokens_used', [
+    // 2. Description generations (each row = 1 description = 1 AI request)
+    const descriptionGenerationsData = await fetchAllRows(supabase, 'generations', 'created_at, tokens_used', [
       { field: 'generation_type', op: 'eq', value: 'description' },
       { field: 'created_at', op: 'gte', value: startDate.toISOString() },
       { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
+    // 3. Video generation jobs (each row = 1 video = 1 AI request)
     const videoJobsData = await fetchAllRows(supabase, 'video_generation_jobs', 'created_at, tokens_cost', [
       { field: 'created_at', op: 'gte', value: startDate.toISOString() },
       { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
-    // Токены по карточкам (generation_jobs.tokens_cost)
-    const cardTokensData = await fetchAllRows(supabase, 'generation_jobs', 'created_at, tokens_cost', [
-      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
-      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
-    ])
+    // Combined AI requests = image tasks + descriptions + videos
+    const allAiRequests = [
+      ...imageTasksData.map(t => ({ created_at: t.created_at, type: 'image' })),
+      ...descriptionGenerationsData.map(t => ({ created_at: t.created_at, type: 'description' })),
+      ...videoJobsData.map(t => ({ created_at: t.created_at, type: 'video' })),
+    ]
 
-    // Получаем данные о токенах (расход) (с пагинацией)
+    // === TOKENS: use token_transactions with type 'generation' for actual user spend ===
     const tokensData = await fetchAllRows(supabase, 'token_transactions', 'created_at, amount', [
       { field: 'transaction_type', op: 'eq', value: 'generation' },
       { field: 'created_at', op: 'gte', value: startDate.toISOString() },
       { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
-    // Получаем данные о платежах за период (с пагинацией)
+    // Image cards tokens (from generation_jobs)
+    const cardTokensData = await fetchAllRows(supabase, 'generation_jobs', 'created_at, tokens_cost', [
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+    ])
+
+    // Image card generations for breakdown (from generations table, type=cards)
+    const generationsCardsData = await fetchAllRows(supabase, 'generations', 'created_at', [
+      { field: 'generation_type', op: 'eq', value: 'cards' },
+      { field: 'created_at', op: 'gte', value: startDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: endDate.toISOString() }
+    ])
+
     const paymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, created_at, amount', [
       { field: 'status', op: 'eq', value: 'succeeded' },
       { field: 'created_at', op: 'gte', value: startDate.toISOString() },
       { field: 'created_at', op: 'lte', value: endDate.toISOString() }
     ])
 
-    // Получаем ВСЕ успешные платежи для расчета повторных оплат и платящих пользователей (с пагинацией)
     const allPaymentsData = await fetchAllRows(supabase, 'payments', 'id, user_id, amount, created_at', [
       { field: 'status', op: 'eq', value: 'succeeded' }
     ])
 
-    // Группируем данные по временным интервалам (в московском времени)
     const groupData = (data: any[], dateField: string, valueField?: string) => {
       const grouped: { [key: string]: number } = {}
       
@@ -303,13 +293,14 @@ serve(async (req) => {
       }))
     }
 
-    // Формируем данные для графиков
+    // Charts
     const usersChart = groupData(usersData || [], 'created_at')
-    const generationsChart = groupData(generationsData || [], 'created_at')
+    // AI Requests chart: count individual AI requests (tasks + descriptions + videos)
+    const generationsChart = groupData(allAiRequests, 'created_at')
     const tokensChart = groupData(tokensData || [], 'created_at', 'amount')
     const revenueChart = groupData(paymentsData || [], 'created_at', 'amount')
 
-    // Генерируем временные интервалы для предыдущего периода
+    // Previous period
     const prevTimeIntervals: string[] = []
     const prevCurrent = new Date(prevStartDate)
     
@@ -329,7 +320,6 @@ serve(async (req) => {
       }
     }
 
-    // Функция группировки для предыдущего периода (маппим на индексы текущего периода)
     const groupDataForPrevPeriod = (data: any[], dateField: string, valueField?: string) => {
       const grouped: { [key: string]: number } = {}
       
@@ -362,30 +352,47 @@ serve(async (req) => {
         }
       })
 
-      // Возвращаем данные с индексами текущего периода для наложения графиков
       return timeIntervals.map((interval, index) => ({
         date: interval,
         value: prevTimeIntervals[index] ? grouped[prevTimeIntervals[index]] || 0 : 0
       }))
     }
 
-    // Получаем ОБЩИЕ totals (за всё время для основных метрик, за период для отображения)
     const totalUsersInPeriod = usersData?.length || 0
-    const totalGenerationsInPeriod = generationsData?.length || 0
+    // Total AI requests = individual image tasks + descriptions + videos
+    const totalGenerationsInPeriod = allAiRequests.length
     const totalTokensSpentInPeriod = tokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
     const totalRevenueInPeriod = paymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
-    // ===== ДАННЫЕ ЗА ПРЕДЫДУЩИЙ ПЕРИОД ДЛЯ СРАВНЕНИЯ =====
+    // Previous period data
     const prevUsersData = await fetchAllRows(supabase, 'profiles', 'id, created_at', [
       { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
       { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
     ])
     
-    const prevGenerationsData = await fetchAllRows(supabase, 'generations', 'created_at', [
+    const prevImageTasksData = await fetchAllRows(supabase, 'generation_tasks', 'created_at', [
+      { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() },
+      { field: 'status', op: 'in', value: ['completed', 'processing', 'pending'] }
+    ])
+
+    const prevDescGenerationsData = await fetchAllRows(supabase, 'generations', 'created_at, tokens_used', [
+      { field: 'generation_type', op: 'eq', value: 'description' },
       { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
       { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
     ])
-    
+
+    const prevVideoJobsData = await fetchAllRows(supabase, 'video_generation_jobs', 'created_at, tokens_cost', [
+      { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
+      { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
+    ])
+
+    const prevAllAiRequests = [
+      ...prevImageTasksData.map(t => ({ created_at: t.created_at, type: 'image' })),
+      ...prevDescGenerationsData.map(t => ({ created_at: t.created_at, type: 'description' })),
+      ...prevVideoJobsData.map(t => ({ created_at: t.created_at, type: 'video' })),
+    ]
+
     const prevTokensData = await fetchAllRows(supabase, 'token_transactions', 'created_at, amount', [
       { field: 'transaction_type', op: 'eq', value: 'generation' },
       { field: 'created_at', op: 'gte', value: prevStartDate.toISOString() },
@@ -398,27 +405,24 @@ serve(async (req) => {
       { field: 'created_at', op: 'lte', value: prevEndDate.toISOString() }
     ])
 
-    // Totals за предыдущий период
     const prevTotalUsersInPeriod = prevUsersData?.length || 0
-    const prevTotalGenerationsInPeriod = prevGenerationsData?.length || 0
+    const prevTotalGenerationsInPeriod = prevAllAiRequests.length
     const prevTotalTokensSpentInPeriod = prevTokensData?.reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
     const prevTotalRevenueInPeriod = prevPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
-    // Формируем графики для предыдущего периода
+    // Previous period charts
     const prevUsersChart = groupDataForPrevPeriod(prevUsersData || [], 'created_at')
-    const prevGenerationsChart = groupDataForPrevPeriod(prevGenerationsData || [], 'created_at')
+    const prevGenerationsChart = groupDataForPrevPeriod(prevAllAiRequests, 'created_at')
     const prevTokensChart = groupDataForPrevPeriod(prevTokensData || [], 'created_at', 'amount')
     const prevRevenueChart = groupDataForPrevPeriod(prevPaymentsData || [], 'created_at', 'amount')
 
-    // Функция для расчета процента изменения
     const calculateChangePercent = (current: number, previous: number): number | null => {
       if (previous === 0) {
-        return current > 0 ? 100 : null // 100% рост если было 0, или null если всё равно 0
+        return current > 0 ? 100 : null
       }
       return Math.round(((current - previous) / previous) * 1000) / 10
     }
 
-    // Расчет процентов изменения
     const changePercents = {
       users: calculateChangePercent(totalUsersInPeriod, prevTotalUsersInPeriod),
       generations: calculateChangePercent(totalGenerationsInPeriod, prevTotalGenerationsInPeriod),
@@ -426,22 +430,19 @@ serve(async (req) => {
       revenue: calculateChangePercent(totalRevenueInPeriod, prevTotalRevenueInPeriod)
     }
 
-    // Расчет новых метрик
-    // 1. Платные пользователи (уникальные user_id с платежами)
+    // Additional metrics
     const paidUsersSet = new Set<string>()
     allPaymentsData?.forEach(p => {
       if (p.user_id) paidUsersSet.add(p.user_id)
     })
     const paidUsersCount = paidUsersSet.size
 
-    // Платные пользователи за период
     const periodPaidUsersSet = new Set<string>()
     paymentsData?.forEach(p => {
       if (p.user_id) periodPaidUsersSet.add(p.user_id)
     })
     const periodPaidUsersCount = periodPaidUsersSet.size
 
-    // Определяем первую оплату каждого пользователя (для конверсии)
     const userFirstPaymentDate: { [key: string]: Date } = {}
     allPaymentsData?.forEach(p => {
       if (p.user_id && p.created_at) {
@@ -452,22 +453,18 @@ serve(async (req) => {
       }
     })
 
-    // Пользователи, чья ПЕРВАЯ оплата попадает в период
     const firstTimePaidInPeriod = Object.entries(userFirstPaymentDate).filter(([_, firstDate]) => {
       return firstDate >= startDate && firstDate <= endDate
     }).length
 
-    // 2. Средний чек
     const totalPaymentsCount = allPaymentsData?.length || 0
     const totalPaymentsSum = allPaymentsData?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
     const averageCheck = totalPaymentsCount > 0 ? Math.round(totalPaymentsSum / totalPaymentsCount) : 0
 
-    // Средний чек за период
     const periodPaymentsCount = paymentsData?.length || 0
     const periodAverageCheck = periodPaymentsCount > 0 ? Math.round(totalRevenueInPeriod / periodPaymentsCount) : 0
 
-    // === LIFETIME METRICS (за всё время) ===
-    // LTV: среднее время жизни платного пользователя (дни между первой и последней оплатой)
+    // Lifetime metrics
     const userPaymentDates: { [key: string]: Date[] } = {}
     allPaymentsData?.forEach(p => {
       if (p.user_id && p.created_at) {
@@ -490,13 +487,9 @@ serve(async (req) => {
     })
     const avgLifetimeDays = usersWithLifetime > 0 ? Math.round(totalLifetimeDays / usersWithLifetime) : 0
 
-    // Средняя прибыль с клиента = сумма всех платежей / кол-во платящих пользователей
     const avgRevenuePerCustomer = paidUsersCount > 0 ? Math.round(totalPaymentsSum / paidUsersCount) : 0
-
-    // Среднее кол-во транзакций = кол-во оплат / кол-во платящих пользователей
     const avgTransactionsPerUser = paidUsersCount > 0 ? Math.round((totalPaymentsCount / paidUsersCount) * 10) / 10 : 0
 
-    // Максимальная совокупная оплата от одного пользователя
     const userTotalSpent: { [key: string]: number } = {}
     allPaymentsData?.forEach(p => {
       if (p.user_id) {
@@ -505,7 +498,6 @@ serve(async (req) => {
     })
     const maxUserSpent = Object.values(userTotalSpent).length > 0 ? Math.round(Math.max(...Object.values(userTotalSpent))) : 0
 
-    // 3. Повторные оплаты за период
     const periodUserPaymentCounts: { [key: string]: number } = {}
     paymentsData?.forEach(p => {
       if (p.user_id) {
@@ -516,7 +508,6 @@ serve(async (req) => {
     const periodRepeatPayments = Object.entries(periodUserPaymentCounts)
       .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
 
-    // 3b. Повторные оплаты за всё время
     const allTimeUserPaymentCounts: { [key: string]: number } = {}
     allPaymentsData?.forEach(p => {
       if (p.user_id) {
@@ -527,31 +518,30 @@ serve(async (req) => {
     const totalRepeatPayments = Object.entries(allTimeUserPaymentCounts)
       .reduce((sum, [_, count]) => sum + (count > 1 ? count - 1 : 0), 0)
 
-    // Расчет конверсии за период (первая оплата за период / зарегистрированные за период)
     const periodConversionRate = totalUsersInPeriod > 0 
       ? Math.round((firstTimePaidInPeriod / totalUsersInPeriod) * 1000) / 10 
       : 0
 
-    // Расчет % повторных оплат за период (повторно платящие / платящие за период)
     const periodRepeatPaymentRate = periodPaidUsersCount > 0 
       ? Math.round((periodRepeatPaymentUsers / periodPaidUsersCount) * 1000) / 10 
       : 0
 
-    // === BREAKDOWN CHARTS ===
-    const generationsCardsChart = groupData(generationsCardsData || [], 'created_at')
-    const generationsDescChart = groupData(generationsDescData || [], 'created_at')
+    // === BREAKDOWN CHARTS (for breakdown view) ===
+    // For image breakdown: use generation_tasks (individual images)
+    const generationsCardsChart = groupData(imageTasksData || [], 'created_at')
+    const generationsDescChart = groupData(descriptionGenerationsData || [], 'created_at')
     const generationsVideoChart = groupData(videoJobsData || [], 'created_at')
 
     const tokensCardsChart = groupData(cardTokensData || [], 'created_at', 'tokens_cost')
-    const tokensDescChart = groupData(generationsDescData || [], 'created_at', 'tokens_used')
+    const tokensDescChart = groupData(descriptionGenerationsData || [], 'created_at', 'tokens_used')
     const tokensVideoChart = groupData(videoJobsData || [], 'created_at', 'tokens_cost')
 
     const totalsByType = {
-      generationsCards: generationsCardsData?.length || 0,
-      generationsDescriptions: generationsDescData?.length || 0,
+      generationsCards: imageTasksData?.length || 0,
+      generationsDescriptions: descriptionGenerationsData?.length || 0,
       generationsVideo: videoJobsData?.length || 0,
       tokensCards: cardTokensData?.reduce((sum, t) => sum + (t.tokens_cost || 0), 0) || 0,
-      tokensDescriptions: generationsDescData?.reduce((sum, t) => sum + (t.tokens_used || 0), 0) || 0,
+      tokensDescriptions: descriptionGenerationsData?.reduce((sum, t) => sum + (t.tokens_used || 0), 0) || 0,
       tokensVideo: videoJobsData?.reduce((sum, t) => sum + (t.tokens_cost || 0), 0) || 0,
     }
 
@@ -565,7 +555,6 @@ serve(async (req) => {
           tokens: tokensChart,
           revenue: revenueChart
         },
-        // Графики за предыдущий период для сравнения
         previousCharts: {
           users: prevUsersChart,
           generations: prevGenerationsChart,
@@ -578,16 +567,13 @@ serve(async (req) => {
           tokens: totalTokensSpentInPeriod,
           revenue: totalRevenueInPeriod
         },
-        // Данные за предыдущий период для сравнения
         previousTotals: {
           users: prevTotalUsersInPeriod,
           generations: prevTotalGenerationsInPeriod,
           tokens: prevTotalTokensSpentInPeriod,
           revenue: prevTotalRevenueInPeriod
         },
-        // Проценты изменения относительно предыдущего периода
         changePercents,
-        // Разбивка по типам
         generationsByType: {
           cards: generationsCardsChart,
           descriptions: generationsDescChart,
@@ -599,7 +585,6 @@ serve(async (req) => {
           video: tokensVideoChart,
         },
         totalsByType,
-        // Новые метрики
         additionalMetrics: {
           paidUsers: periodPaidUsersCount,
           paidUsersTotal: paidUsersCount,
@@ -608,12 +593,10 @@ serve(async (req) => {
           repeatPayments: periodRepeatPayments,
           repeatPaymentsTotal: totalRepeatPayments,
           repeatPaymentUsers: repeatPaymentUsers,
-          // Метрики за период
           periodRepeatPaymentUsers: periodRepeatPaymentUsers,
           periodUsersTotal: totalUsersInPeriod,
           totalUsers: totalUsersCount || 0,
           firstTimePaidInPeriod: firstTimePaidInPeriod,
-          // Проценты за период
           conversionRate: periodConversionRate,
           conversionRateTotal: (totalUsersCount && totalUsersCount > 0) 
             ? Math.round((paidUsersCount / totalUsersCount) * 1000) / 10 
@@ -623,7 +606,6 @@ serve(async (req) => {
             ? Math.round((repeatPaymentUsers / paidUsersCount) * 1000) / 10 
             : 0
         },
-        // Метрики за всё время (без периода)
         lifetimeMetrics: {
           avgLifetimeDays,
           avgRevenuePerCustomer,
