@@ -26,12 +26,13 @@ interface AdminMobileMenuProps {
   unreadSupportCount?: number;
 }
 
-export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps) => {
+export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0 }: AdminMobileMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const menuItems = [
     { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
     { id: 'users', label: 'Пользователи', icon: Users },
+    { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined },
     { id: 'partners', label: 'Партнеры', icon: Handshake },
     { id: 'prompts', label: 'Модель', icon: Bot },
     { id: 'bonuses', label: 'Бонусы', icon: Gift },
@@ -40,7 +41,6 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },
     { id: 'video_lessons', label: 'Обучение', icon: GraduationCap },
-    { id: 'support', label: 'Поддержка', icon: Headphones },
   ];
 
   const handleTabChange = (tabId: string) => {
