@@ -34,6 +34,16 @@ interface BankDetails {
   card_number: string;
 }
 
+interface ReferralPayment {
+  payment_id: string;
+  payment_amount: number;
+  commission_amount: number;
+  commission_rate: number;
+  date: string;
+  package_name: string;
+  status: string;
+}
+
 interface ReferralDetail {
   id: string;
   referred_user_id: string;
@@ -43,6 +53,7 @@ interface ReferralDetail {
   total_payments: number;
   total_commission: number;
   registered_at: string;
+  payments: ReferralPayment[];
 }
 
 interface PartnerData {
