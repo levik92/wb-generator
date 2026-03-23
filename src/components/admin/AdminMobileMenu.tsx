@@ -23,6 +23,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 interface AdminMobileMenuProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  unreadSupportCount?: number;
 }
 
 export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps) => {
