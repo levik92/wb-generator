@@ -177,7 +177,7 @@ export const AdminPartners = () => {
             body: JSON.stringify({ partnerId: partner.id }),
           });
           if (res.ok) {
-            const { referrals: refData } = await res.json();
+            const { referrals: refData, is_admin } = await res.json();
             // Deduplicate by referred_user_id (keep latest)
             const uniqueMap = new Map<string, any>();
             (refData || []).forEach((r: any) => {
@@ -188,12 +188,13 @@ export const AdminPartners = () => {
             const deduped = Array.from(uniqueMap.values()).map((r: any) => ({
               id: r.id,
               referred_user_id: r.referred_user_id,
-              email: r.masked_email || '—',
+              email: (is_admin ? r.email : r.masked_email) || '—',
               full_name: r.full_name,
               status: r.status,
               total_payments: r.total_payments || 0,
               total_commission: r.total_commission || 0,
               registered_at: r.registered_at,
+              payments: r.payments || [],
             }));
             setReferrals(deduped);
           }
