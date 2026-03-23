@@ -26,7 +26,10 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesEndRef.current;
+    if (el?.parentElement) {
+      el.parentElement.scrollTop = el.parentElement.scrollHeight;
+    }
   }, []);
 
   useEffect(() => {
