@@ -489,42 +489,72 @@ export const AdminPartners = () => {
               {referrals.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Нет привлечённых клиентов</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Статус</TableHead>
-                        <TableHead>Оплаты</TableHead>
-                        <TableHead>Комиссия</TableHead>
-                        <TableHead>Дата регистрации</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {referrals.map(ref => (
-                        <TableRow key={ref.id}>
-                          <TableCell className="font-medium text-sm">
-                            {ref.email}
-                            {ref.full_name && <span className="text-xs text-muted-foreground ml-1">({ref.full_name})</span>}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={ref.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                              {ref.status === 'active' ? 'Оплатил' : 'Зарегистрирован'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {ref.total_payments > 0 ? `${ref.total_payments.toLocaleString()} ₽` : '—'}
-                          </TableCell>
-                          <TableCell className="font-medium text-primary">
-                            {ref.total_commission > 0 ? `${ref.total_commission.toLocaleString()} ₽` : '—'}
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
+                <div className="space-y-4">
+                  {referrals.map(ref => (
+                    <div key={ref.id} className="border border-border/50 rounded-xl overflow-hidden">
+                      {/* Referral header */}
+                      <div className="bg-muted/40 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-medium text-sm truncate">{ref.email}</span>
+                          {ref.full_name && <span className="text-xs text-muted-foreground">({ref.full_name})</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={ref.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                            {ref.status === 'active' ? 'Оплатил' : 'Зарегистрирован'}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
                             {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                          </span>
+                        </div>
+                      </div>
+                      {/* Referral summary */}
+                      <div className="px-4 py-2 flex flex-wrap gap-4 text-sm border-b border-border/30">
+                        <div>
+                          <span className="text-muted-foreground">Всего оплат: </span>
+                          <span className="font-semibold">{ref.total_payments > 0 ? `${Number(ref.total_payments).toLocaleString()} ₽` : '—'}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Комиссия: </span>
+                          <span className="font-semibold text-primary">{ref.total_commission > 0 ? `${Number(ref.total_commission).toLocaleString()} ₽` : '—'}</span>
+                        </div>
+                      </div>
+                      {/* Per-payment breakdown */}
+                      {ref.payments && ref.payments.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="text-xs">Дата</TableHead>
+                                <TableHead className="text-xs">Пакет</TableHead>
+                                <TableHead className="text-xs">Сумма оплаты</TableHead>
+                                <TableHead className="text-xs">Ставка</TableHead>
+                                <TableHead className="text-xs">Комиссия</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {ref.payments.map((p: any, idx: number) => (
+                                <TableRow key={idx}>
+                                  <TableCell className="text-xs">
+                                    {new Date(p.date).toLocaleDateString("ru-RU")}
+                                  </TableCell>
+                                  <TableCell className="text-xs">{p.package_name}</TableCell>
+                                  <TableCell className="text-xs font-medium">
+                                    {Number(p.payment_amount).toLocaleString()} ₽
+                                  </TableCell>
+                                  <TableCell className="text-xs">{p.commission_rate}%</TableCell>
+                                  <TableCell className="text-xs font-medium text-primary">
+                                    {Number(p.commission_amount).toLocaleString()} ₽
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground px-4 py-2">Оплат пока нет</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
