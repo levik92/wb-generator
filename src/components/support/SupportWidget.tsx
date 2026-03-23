@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Loader2, Bot, User, Headphones } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Bot, User, Headphones, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Message {
