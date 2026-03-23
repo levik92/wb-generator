@@ -68,7 +68,7 @@ serve(async (req) => {
             user_id: user_id || null,
             channel: channel || "widget",
             status: "active",
-            ai_enabled: channel === "widget",
+            ai_enabled: true,
           })
           .select()
           .single();
