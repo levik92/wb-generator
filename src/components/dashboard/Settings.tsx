@@ -317,11 +317,11 @@ export const Settings = ({
           </CardHeader>
           <CardContent className="relative">
             <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-3">
-              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => onNavigateToSupport?.()}>
+              <Button className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => onNavigateToSupport?.()}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Онлайн чат
               </Button>
-              <Button variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-500/10" asChild>
+              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" asChild>
                 <a href="https://t.me/wbgen_support/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                   <MessageCircle className="w-4 h-4" />
                   Телеграм чат
