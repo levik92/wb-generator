@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle, ExternalLink } from "lucide-react";
+import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +44,8 @@ export const AdminSupport = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
-  const callApi = async (body: any) => {
+  const callApiRef = useRef<(body: any) => Promise<any>>();
+  callApiRef.current = async (body: any) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Not authenticated");
     const res = await fetch(ADMIN_URL, {
@@ -59,6 +60,8 @@ export const AdminSupport = () => {
     return res.json();
   };
 
+  const callApi = useCallback((body: any) => callApiRef.current!(body), []);
+
   const loadConversations = useCallback(async () => {
     try {
       const { conversations: convs } = await callApi({ action: "list_conversations" });
@@ -68,7 +71,7 @@ export const AdminSupport = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [callApi]);
 
   useEffect(() => {
     loadConversations();
@@ -76,7 +79,7 @@ export const AdminSupport = () => {
     return () => clearInterval(interval);
   }, [loadConversations]);
 
-  const loadMessages = async (convId: string) => {
+  const loadMessages = useCallback(async (convId: string) => {
     setMsgsLoading(true);
     try {
       const { messages: msgs } = await callApi({
@@ -89,25 +92,25 @@ export const AdminSupport = () => {
     } finally {
       setMsgsLoading(false);
     }
-  };
+  }, [callApi]);
 
-  const selectConversation = (conv: Conversation) => {
+  const selectConversation = useCallback((conv: Conversation) => {
     setSelectedConv(conv);
     loadMessages(conv.id);
-  };
+  }, [loadMessages]);
 
   // Poll messages for selected conversation
   useEffect(() => {
     if (!selectedConv) return;
     const interval = setInterval(() => loadMessages(selectedConv.id), 8000);
     return () => clearInterval(interval);
-  }, [selectedConv?.id]);
+  }, [selectedConv?.id, loadMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || sending || !selectedConv) return;
     setInput("");
@@ -120,7 +123,6 @@ export const AdminSupport = () => {
         message: text,
       });
       await loadMessages(selectedConv.id);
-      // Update conversation AI status
       setSelectedConv((prev) => prev ? { ...prev, ai_enabled: false, needs_admin_attention: false } : null);
       loadConversations();
     } catch (e) {
@@ -129,7 +131,7 @@ export const AdminSupport = () => {
       setSending(false);
       inputRef.current?.focus();
     }
-  };
+  }, [input, sending, selectedConv, callApi, loadMessages, loadConversations]);
 
   const handleToggleAI = async () => {
     if (!selectedConv) return;
@@ -181,8 +183,8 @@ export const AdminSupport = () => {
 
   const attentionCount = conversations.filter((c) => c.needs_admin_attention).length;
 
-  // Conversation list view
-  const ConversationList = () => (
+  // Inline conversation list JSX
+  const conversationListContent = (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-2">
@@ -254,8 +256,8 @@ export const AdminSupport = () => {
     </div>
   );
 
-  // Chat view
-  const ChatView = () => (
+  // Inline chat view JSX
+  const chatViewContent = (
     <div className="flex flex-col h-full">
       {/* Chat header */}
       <div className="p-3 border-b border-border flex items-center justify-between">
@@ -312,7 +314,7 @@ export const AdminSupport = () => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {msgsLoading ? (
+        {msgsLoading && messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
@@ -389,7 +391,7 @@ export const AdminSupport = () => {
   if (isMobile) {
     return (
       <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
-        {selectedConv ? <ChatView /> : <ConversationList />}
+        {selectedConv ? chatViewContent : conversationListContent}
       </div>
     );
   }
@@ -398,12 +400,12 @@ export const AdminSupport = () => {
     <div className="border border-border rounded-2xl bg-card overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
       {/* Left panel - conversations list */}
       <div className="w-80 border-r border-border flex-shrink-0">
-        <ConversationList />
+        {conversationListContent}
       </div>
       {/* Right panel - chat */}
       <div className="flex-1 flex flex-col">
         {selectedConv ? (
-          <ChatView />
+          chatViewContent
         ) : (
           <div className="flex-1 flex items-center justify-center text-center px-8">
             <div>
