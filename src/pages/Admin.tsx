@@ -61,6 +61,7 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('analytics');
   const [adminEmail, setAdminEmail] = useState('');
+  const [unreadSupportCount, setUnreadSupportCount] = useState(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
