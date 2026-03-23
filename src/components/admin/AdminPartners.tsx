@@ -225,6 +225,7 @@ export const AdminPartners = () => {
             total_payments: r.total_payments || 0,
             total_commission: r.total_commission || 0,
             registered_at: r.registered_at,
+            payments: [],
           })));
         }
       }
