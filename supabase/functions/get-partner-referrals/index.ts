@@ -43,14 +43,31 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'partnerId is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Verify partner ownership
+    // Verify partner ownership or admin access
     const { data: partner, error: partnerErr } = await supabaseClient
       .from('partner_profiles')
       .select('id, user_id')
       .eq('id', partnerId)
       .maybeSingle();
 
-    if (partnerErr || !partner || partner.user_id !== user.id) {
+    if (partnerErr || !partner) {
+      return new Response(JSON.stringify({ error: 'Partner not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // Allow if owner or admin
+    const isOwner = partner.user_id === user.id;
+    let isAdmin = false;
+    if (!isOwner) {
+      const { data: roleData } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      isAdmin = !!roleData;
+    }
+
+    if (!isOwner && !isAdmin) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 

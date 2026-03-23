@@ -1856,6 +1856,10 @@ export type Database = {
         Args: { job_id_param: string }
         Returns: undefined
       }
+      update_profile_on_login: {
+        Args: { user_id_param: string }
+        Returns: undefined
+      }
       use_promocode: { Args: { code_param: string }; Returns: Json }
     }
     Enums: {
