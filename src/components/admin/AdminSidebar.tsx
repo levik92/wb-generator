@@ -46,7 +46,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
       label: 'Поддержка',
       icon: Headphones,
       badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined,
-      badgeColor: 'bg-destructive text-destructive-foreground border-destructive',
+      badgeColor: 'bg-primary text-primary-foreground border-primary',
     },
     {
       id: 'partners',
