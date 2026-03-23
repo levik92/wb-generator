@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface AdminSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  unreadSupportCount?: number;
 }
 
 export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
