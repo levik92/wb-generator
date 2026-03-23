@@ -222,10 +222,11 @@ export const AdminPartners = () => {
           .order("registered_at", { ascending: false });
         
         if (refData) {
-          // Deduplicate
+          // Deduplicate — prefer record with higher commission
           const uniqueMap = new Map<string, any>();
           refData.forEach((r: any) => {
-            if (!uniqueMap.has(r.referred_user_id)) {
+            const existing = uniqueMap.get(r.referred_user_id);
+            if (!existing || (r.total_commission || 0) > (existing.total_commission || 0)) {
               uniqueMap.set(r.referred_user_id, r);
             }
           });
