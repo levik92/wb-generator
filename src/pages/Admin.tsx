@@ -191,7 +191,7 @@ export default function Admin() {
     <div className="min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
-          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />
         </div>
       )}
 
