@@ -25,7 +25,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           checkBlocked(session.user.id);
           // Update profile activity on sign in
           if (event === 'SIGNED_IN') {
-            supabase.rpc('update_profile_on_login', { user_id_param: session.user.id }).catch(() => {});
+            supabase.rpc('update_profile_on_login', { user_id_param: session.user.id }).then(() => {}).catch(() => {});
           }
         } else {
           setLoading(false);
