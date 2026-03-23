@@ -104,6 +104,10 @@ export default function Admin() {
       }
       setIsAdmin(true);
       await loadUsers();
+      fetchUnreadSupport();
+      // Poll unread support count
+      const supportInterval = setInterval(fetchUnreadSupport, 20000);
+      return () => clearInterval(supportInterval);
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/dashboard');
