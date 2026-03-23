@@ -23,14 +23,16 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 interface AdminMobileMenuProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  unreadSupportCount?: number;
 }
 
-export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps) => {
+export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0 }: AdminMobileMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const menuItems = [
     { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
     { id: 'users', label: 'Пользователи', icon: Users },
+    { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined },
     { id: 'partners', label: 'Партнеры', icon: Handshake },
     { id: 'prompts', label: 'Модель', icon: Bot },
     { id: 'bonuses', label: 'Бонусы', icon: Gift },
@@ -39,7 +41,6 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },
     { id: 'video_lessons', label: 'Обучение', icon: GraduationCap },
-    { id: 'support', label: 'Поддержка', icon: Headphones },
   ];
 
   const handleTabChange = (tabId: string) => {
@@ -104,6 +105,11 @@ export const AdminMobileMenu = ({ activeTab, onTabChange }: AdminMobileMenuProps
                     >
                       <Icon className={`w-[18px] h-[18px] mr-3 ${isActive ? 'text-primary-foreground' : ''}`} />
                       <span className="flex-1 text-left text-sm">{item.label}</span>
+                      {(item as any).badge && (
+                        <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/90 text-destructive border-white/90' : 'bg-destructive text-destructive-foreground border-destructive'} rounded-full shadow-sm font-semibold`}>
+                          {(item as any).badge}
+                        </Badge>
+                      )}
                     </Button>
                   </li>
                 );

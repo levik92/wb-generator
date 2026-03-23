@@ -17,15 +17,17 @@ import {
   GraduationCap,
   Headphones
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AdminSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  unreadSupportCount?: number;
 }
 
-export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
+export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }: AdminSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
@@ -38,6 +40,13 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'users',
       label: 'Пользователи',
       icon: Users,
+    },
+    {
+      id: 'support',
+      label: 'Поддержка',
+      icon: Headphones,
+      badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined,
+      badgeColor: 'bg-destructive text-destructive-foreground border-destructive',
     },
     {
       id: 'partners',
@@ -79,11 +88,6 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       label: 'Обучение',
       icon: GraduationCap,
     },
-    {
-      id: 'support',
-      label: 'Поддержка',
-      icon: Headphones,
-    }
   ];
 
   return (
@@ -145,6 +149,18 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
                   <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
                   {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
+                {(item as any).badge && !isCollapsed && (
+                  <div className="absolute top-1/2 -translate-y-1/2 right-3">
+                    <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/90 text-destructive border-white/90' : (item as any).badgeColor || 'bg-muted text-muted-foreground border-border'} rounded-full shadow-sm pointer-events-none font-semibold`}>
+                      {(item as any).badge}
+                    </Badge>
+                  </div>
+                )}
+                {(item as any).badge && isCollapsed && (
+                  <div className="absolute -top-0.5 -right-0.5">
+                    <div className="w-2.5 h-2.5 bg-destructive rounded-full" />
+                  </div>
+                )}
               </li>
             );
           })}

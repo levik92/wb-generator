@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,28 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('analytics');
   const [adminEmail, setAdminEmail] = useState('');
+  const [unreadSupportCount, setUnreadSupportCount] = useState(0);
   const isMobile = useIsMobile();
+
+  const fetchUnreadSupport = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-admin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: "list_conversations" }),
+      });
+      if (res.ok) {
+        const { conversations } = await res.json();
+        const count = (conversations || []).filter((c: any) => c.needs_admin_attention).length;
+        setUnreadSupportCount(count);
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     checkAdminAccess();
@@ -83,6 +104,10 @@ export default function Admin() {
       }
       setIsAdmin(true);
       await loadUsers();
+      fetchUnreadSupport();
+      // Poll unread support count
+      const supportInterval = setInterval(fetchUnreadSupport, 20000);
+      return () => clearInterval(supportInterval);
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/dashboard');
@@ -166,7 +191,7 @@ export default function Admin() {
     <div className="min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
-          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />
         </div>
       )}
 
@@ -175,7 +200,7 @@ export default function Admin() {
         <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} />}
+              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />}
               <div className="min-w-0 flex-1 overflow-hidden">
                 <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
