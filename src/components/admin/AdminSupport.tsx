@@ -107,7 +107,10 @@ export const AdminSupport = () => {
   }, [selectedConv?.id, loadMessages]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesEndRef.current;
+    if (el?.parentElement) {
+      el.parentElement.scrollTop = el.parentElement.scrollHeight;
+    }
   }, [messages]);
 
   const handleSend = useCallback(async () => {
