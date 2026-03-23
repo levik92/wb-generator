@@ -133,17 +133,32 @@ serve(async (req) => {
       });
     }
 
-    const enriched = (referrals ?? []).map((r: any) => {
+    const enrichedRaw = (referrals ?? []).map((r: any) => {
       const prof = profileMap[r.referred_user_id] || { email: null, full_name: null };
       return {
         ...r,
-        // Admin sees full email, partner sees masked
         email: isAdmin ? prof.email : null,
         masked_email: maskEmail(prof.email),
         full_name: prof.full_name,
         payments: commissionsByReferral[r.id] || [],
       }
     })
+
+    // Server-side dedup: merge duplicate referrals for same user
+    const dedupMap = new Map<string, any>();
+    for (const r of enrichedRaw) {
+      const existing = dedupMap.get(r.referred_user_id);
+      if (!existing) {
+        dedupMap.set(r.referred_user_id, { ...r, payments: [...(r.payments || [])] });
+      } else {
+        // Merge payments
+        existing.payments = [...existing.payments, ...(r.payments || [])];
+        existing.total_payments = Math.max(Number(existing.total_payments) || 0, Number(r.total_payments) || 0);
+        existing.total_commission = Math.max(Number(existing.total_commission) || 0, Number(r.total_commission) || 0);
+        if (r.status === 'active' && existing.status !== 'active') existing.status = 'active';
+      }
+    }
+    const enriched = Array.from(dedupMap.values());
 
     return new Response(JSON.stringify({ referrals: enriched, is_admin: isAdmin }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (e) {

@@ -178,11 +178,24 @@ export const AdminPartners = () => {
           });
           if (res.ok) {
             const { referrals: refData, is_admin } = await res.json();
-            // Deduplicate by referred_user_id (keep latest)
+            // Deduplicate by referred_user_id — prefer record with higher commission, merge payments
             const uniqueMap = new Map<string, any>();
             (refData || []).forEach((r: any) => {
-              if (!uniqueMap.has(r.referred_user_id) || new Date(r.registered_at) > new Date(uniqueMap.get(r.referred_user_id).registered_at)) {
-                uniqueMap.set(r.referred_user_id, r);
+              const existing = uniqueMap.get(r.referred_user_id);
+              if (!existing) {
+                uniqueMap.set(r.referred_user_id, { ...r, payments: [...(r.payments || [])] });
+              } else {
+                // Merge payments arrays
+                const mergedPayments = [...(existing.payments || []), ...(r.payments || [])];
+                // Keep record with higher commission data
+                if ((r.total_commission || 0) > (existing.total_commission || 0)) {
+                  uniqueMap.set(r.referred_user_id, { ...r, payments: mergedPayments });
+                } else {
+                  existing.payments = mergedPayments;
+                  existing.total_payments = Math.max(existing.total_payments || 0, r.total_payments || 0);
+                  existing.total_commission = Math.max(existing.total_commission || 0, r.total_commission || 0);
+                  if (r.status === 'active' && existing.status !== 'active') existing.status = r.status;
+                }
               }
             });
             const deduped = Array.from(uniqueMap.values()).map((r: any) => ({
@@ -209,10 +222,11 @@ export const AdminPartners = () => {
           .order("registered_at", { ascending: false });
         
         if (refData) {
-          // Deduplicate
+          // Deduplicate — prefer record with higher commission
           const uniqueMap = new Map<string, any>();
           refData.forEach((r: any) => {
-            if (!uniqueMap.has(r.referred_user_id)) {
+            const existing = uniqueMap.get(r.referred_user_id);
+            if (!existing || (r.total_commission || 0) > (existing.total_commission || 0)) {
               uniqueMap.set(r.referred_user_id, r);
             }
           });
