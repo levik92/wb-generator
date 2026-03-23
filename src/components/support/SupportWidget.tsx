@@ -34,7 +34,10 @@ export const SupportWidget = () => {
   const visitorId = getVisitorId();
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = messagesEndRef.current;
+    if (el?.parentElement) {
+      el.parentElement.scrollTop = el.parentElement.scrollHeight;
+    }
   }, []);
 
   useEffect(() => {
