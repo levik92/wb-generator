@@ -62,6 +62,33 @@ const Dashboard = () => {
     hasCompletedJobs,
     resetCompletedJobsFlag
   } = useActiveJobs(profile?.id || '');
+  const { requestPermission, checkSupportMessages, checkNews } = useNotifications();
+
+  // Request notification permission and start polling
+  useEffect(() => {
+    if (!profile?.id) return;
+    
+    // Request permission after a short delay
+    const permTimer = setTimeout(() => {
+      requestPermission();
+    }, 5000);
+
+    // Poll for new notifications every 30s
+    const pollInterval = setInterval(() => {
+      if (document.hidden) return; // Don't poll if tab not visible
+      checkSupportMessages(profile.id);
+      checkNews(profile.id);
+    }, 30000);
+
+    // Initial check
+    checkSupportMessages(profile.id);
+    checkNews(profile.id);
+
+    return () => {
+      clearTimeout(permTimer);
+      clearInterval(pollInterval);
+    };
+  }, [profile?.id, requestPermission, checkSupportMessages, checkNews]);
   // Handle tab from URL query param or hash anchor
   useEffect(() => {
     const tabParam = searchParams.get('tab');
