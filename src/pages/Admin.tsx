@@ -64,6 +64,26 @@ export default function Admin() {
   const [unreadSupportCount, setUnreadSupportCount] = useState(0);
   const isMobile = useIsMobile();
 
+  const fetchUnreadSupport = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-admin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ action: "list_conversations" }),
+      });
+      if (res.ok) {
+        const { conversations } = await res.json();
+        const count = (conversations || []).filter((c: any) => c.needs_admin_attention).length;
+        setUnreadSupportCount(count);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     checkAdminAccess();
   }, []);
