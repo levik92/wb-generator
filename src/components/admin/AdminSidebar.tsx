@@ -27,7 +27,7 @@ interface AdminSidebarProps {
   unreadSupportCount?: number;
 }
 
-export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
+export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }: AdminSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
@@ -40,6 +40,13 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       id: 'users',
       label: 'Пользователи',
       icon: Users,
+    },
+    {
+      id: 'support',
+      label: 'Поддержка',
+      icon: Headphones,
+      badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined,
+      badgeColor: 'bg-destructive text-destructive-foreground border-destructive',
     },
     {
       id: 'partners',
@@ -81,11 +88,6 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
       label: 'Обучение',
       icon: GraduationCap,
     },
-    {
-      id: 'support',
-      label: 'Поддержка',
-      icon: Headphones,
-    }
   ];
 
   return (
