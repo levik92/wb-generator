@@ -105,6 +105,11 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
                     >
                       <Icon className={`w-[18px] h-[18px] mr-3 ${isActive ? 'text-primary-foreground' : ''}`} />
                       <span className="flex-1 text-left text-sm">{item.label}</span>
+                      {(item as any).badge && (
+                        <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/90 text-destructive border-white/90' : 'bg-destructive text-destructive-foreground border-destructive'} rounded-full shadow-sm font-semibold`}>
+                          {(item as any).badge}
+                        </Badge>
+                      )}
                     </Button>
                   </li>
                 );
