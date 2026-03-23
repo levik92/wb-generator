@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -32,6 +32,7 @@ import { MobileTabBar } from "@/components/mobile/MobileTabBar";
 import { MobileSideMenu } from "@/components/mobile/MobileSideMenu";
 import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
 import { OnboardingSurvey } from "@/components/dashboard/OnboardingSurvey";
+import { useNotifications } from "@/hooks/useNotifications";
 interface Profile {
   id: string;
   email: string;
@@ -61,6 +62,33 @@ const Dashboard = () => {
     hasCompletedJobs,
     resetCompletedJobsFlag
   } = useActiveJobs(profile?.id || '');
+  const { requestPermission, checkSupportMessages, checkNews } = useNotifications();
+
+  // Request notification permission and start polling
+  useEffect(() => {
+    if (!profile?.id) return;
+    
+    // Request permission after a short delay
+    const permTimer = setTimeout(() => {
+      requestPermission();
+    }, 5000);
+
+    // Poll for new notifications every 30s
+    const pollInterval = setInterval(() => {
+      if (document.hidden) return; // Don't poll if tab not visible
+      checkSupportMessages(profile.id);
+      checkNews(profile.id);
+    }, 30000);
+
+    // Initial check
+    checkSupportMessages(profile.id);
+    checkNews(profile.id);
+
+    return () => {
+      clearTimeout(permTimer);
+      clearInterval(pollInterval);
+    };
+  }, [profile?.id, requestPermission, checkSupportMessages, checkNews]);
   // Handle tab from URL query param or hash anchor
   useEffect(() => {
     const tabParam = searchParams.get('tab');

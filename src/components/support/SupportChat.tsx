@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, Headphones, MessageCircle } from "lucide-react";
+import { Send, Loader2, Headphones, MessageCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -249,6 +249,10 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
               <Send className="w-4 h-4" />
             </Button>
           </form>
+          <p className="text-[10px] text-muted-foreground mt-2 flex items-center justify-center gap-1">
+            <ShieldCheck className="w-3 h-3" />
+            Все сообщения зашифрованы и безопасны
+          </p>
         </div>
       </div>
     </div>
