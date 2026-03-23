@@ -1,40 +1,43 @@
 
 
-# Fix: Main generation with 1 card incorrectly shows per-card animation after page return
+# Fix: Deduplication logic drops referral with commission data
 
 ## Problem
-When you start a **main generation** (even with 1 card) and leave the page, upon returning the system incorrectly shows the per-card animation (as if it's a regeneration) instead of the full progress bar.
+For partner `cat.web@mail.ru`, client `cherryden666@gmail.com` has 2 duplicate referral records:
+- Record 1 (`e0eecceb`, 14:34:26.917): status=active, total_payments=990, total_commission=198, has commission records
+- Record 2 (`a5cf04c8`, 14:34:27.204): status=registered, total_payments=0, total_commission=0, no commissions
 
-**Root cause**: The `checkForActiveJobs` logic on line 346 uses this condition:
-```text
-isSingleCardRegen = (total_cards === 1) AND (previous completed job exists)
+The dedup logic keeps the **latest by date** — Record 2 (the empty one). Record 1 with all the payment data gets discarded.
+
+Additionally, `invited_clients_count = 2` in `partner_profiles` is wrong (should be 1).
+
+## Plan
+
+### 1. Fix deduplication logic in AdminPartners.tsx
+Change the dedup comparator to prefer the record with higher `total_commission` (or `total_payments`), falling back to latest date only when equal. This ensures the record with actual data is kept.
+
+In both the main path (line ~184) and fallback path (line ~214):
 ```
-But a main generation can also have `total_cards=1`, and if there's any completed job from the last 24 hours, it gets misidentified as a regeneration.
+// Keep record with more commission data; if equal, keep latest
+const existing = uniqueMap.get(r.referred_user_id);
+if (!existing || r.total_commission > existing.total_commission || 
+    (r.total_commission === existing.total_commission && new Date(r.registered_at) > new Date(existing.registered_at))) {
+  uniqueMap.set(r.referred_user_id, r);
+}
+```
 
-The regeneration edge functions (`regenerate-single-card-v2`, `regenerate-single-card-banana`) create jobs with the product's category (e.g. "Electronics"), not `'edit'`, so the query that filters `.neq('category', 'edit')` picks them up as if they were main generations.
+Also merge `payments` arrays from duplicates so no commission records are lost.
 
-## Solution
+### 2. Fix the duplicate referral data
+Use the insert tool to delete the duplicate empty referral record (`a5cf04c8`) and fix `invited_clients_count` to 1.
 
-### 1. Mark regeneration jobs with a distinct category
-Update both edge functions to use `category: 'regeneration'` instead of the product category:
-- `supabase/functions/regenerate-single-card-v2/index.ts` -- change `category: sanitizedCategory` to `category: 'regeneration'`
-- `supabase/functions/regenerate-single-card-banana/index.ts` -- same change
+### 3. Fix the edge function dedup (optional but recommended)
+Also merge payments from duplicate referrals in `get-partner-referrals/index.ts` server-side, so the response already contains consolidated data.
 
-### 2. Update `checkForActiveJobs` in GenerateCards.tsx
-- Change the query filter from `.neq('category', 'edit')` to `.not('category', 'in', '("edit","regeneration")')` so it only picks up true main generation jobs
-- Remove the flawed `isSingleCardRegen` heuristic -- after the fix, any job returned by this query is guaranteed to be a main generation, so always show the full progress bar
-- Update the edit jobs query section to also check for active `'regeneration'` category jobs (in addition to `'edit'`) to restore per-card animation for those
+## Files to modify
+- `src/components/admin/AdminPartners.tsx` — fix dedup logic (lines ~182-198)
 
-### 3. Update active edit jobs restoration block
-The section starting at line 427 that checks for active edit jobs should also look for `category: 'regeneration'` jobs, so if a regeneration is in progress when the user returns, the per-card animation is shown correctly.
-
-## Technical Details
-
-**Files to modify:**
-- `supabase/functions/regenerate-single-card-v2/index.ts` (line 194: `category: 'regeneration'`)
-- `supabase/functions/regenerate-single-card-banana/index.ts` (line 148: `category: 'regeneration'`)
-- `src/components/dashboard/GenerateCards.tsx`:
-  - Line 205: filter to exclude both 'edit' and 'regeneration' categories
-  - Lines 331-424: simplify -- remove `isSingleCardRegen` branch, always show full progress bar since only main jobs pass the filter
-  - Lines 427-440: expand `.eq('category', 'edit')` to `.in('category', ['edit', 'regeneration'])` to catch active regen jobs for per-card animation
+## Database fixes
+- DELETE duplicate referral `a5cf04c8-6665-459e-b299-184b74c4bc6f`
+- UPDATE `partner_profiles` SET `invited_clients_count = 1` WHERE `id = '4ee91fc4-9280-4f3a-96c2-87b6c35e6e23'`
 
