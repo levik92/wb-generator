@@ -32,6 +32,7 @@ import { MobileTabBar } from "@/components/mobile/MobileTabBar";
 import { MobileSideMenu } from "@/components/mobile/MobileSideMenu";
 import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
 import { OnboardingSurvey } from "@/components/dashboard/OnboardingSurvey";
+import { useNotifications } from "@/hooks/useNotifications";
 interface Profile {
   id: string;
   email: string;
