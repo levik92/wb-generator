@@ -177,9 +177,9 @@ export const SupportWidget = () => {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="w-14 h-14 rounded-full shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-14 h-14 rounded-full shadow-lg shadow-purple-500/40 bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 hover:from-violet-400 hover:via-purple-500 hover:to-indigo-600 text-white border-0"
             >
-              <MessageCircle className="w-6 h-6" />
+              <MessageCircle className="w-7 h-7" />
             </Button>
           </motion.div>
         )}
