@@ -139,7 +139,7 @@ serve(async (req) => {
 
         // If AI is enabled (widget), get AI response
         let aiResponse = null;
-        if (convData?.ai_enabled && convData?.channel === "widget") {
+        if (convData?.ai_enabled) {
           try {
             // Get conversation history for context
             const { data: history } = await supabase

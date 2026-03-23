@@ -303,6 +303,10 @@ export const SupportWidget = () => {
                   <Send className="w-4 h-4" />
                 </Button>
               </form>
+              <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center justify-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                Все сообщения зашифрованы и безопасны
+              </p>
             </div>
           </motion.div>
         )}
