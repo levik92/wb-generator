@@ -258,14 +258,14 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
                   }`}
                 >
                   {msg.attachment_url && (
-                    <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+                    <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
                       <img
                         src={msg.attachment_url}
                         alt="Вложение"
-                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30"
+                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
                         loading="lazy"
                       />
-                    </a>
+                    </button>
                   )}
                   {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
                 </div>
