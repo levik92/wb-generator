@@ -218,7 +218,7 @@ export const GenerateCards = ({
             image_url,
             storage_path
           )
-        `).eq('user_id', profile.id).not('category', 'in', '("edit","regeneration")').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+        `).eq('user_id', profile.id).not('category', 'in', '("edit","regeneration")').is('source_job_id', null).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
       .order('created_at', {
         ascending: false
       }).limit(1);
