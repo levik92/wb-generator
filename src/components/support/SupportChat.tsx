@@ -35,6 +35,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [aiTyping, setAiTyping] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
