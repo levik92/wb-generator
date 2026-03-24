@@ -73,6 +73,7 @@ interface PartnerData {
 }
 
 const COMMISSION_RATES = [15, 20, 25, 30];
+const REFERRALS_PER_PAGE = 10;
 
 export const AdminPartners = () => {
   const { toast } = useToast();
