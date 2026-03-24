@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X, Image as ImageIcon } from "lucide-react";
+import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/imageCompression";
 
 interface Message {
   id: string;
@@ -28,6 +30,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,11 +61,13 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    // Compress image before upload
+    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+    const ext = compressed.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${profile.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage
       .from("support-attachments")
-      .upload(path, file, { contentType: file.type });
+      .upload(path, compressed, { contentType: compressed.type });
     if (error) {
       console.error("Upload error:", error);
       return null;
@@ -253,14 +258,14 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
                   }`}
                 >
                   {msg.attachment_url && (
-                    <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+                    <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
                       <img
                         src={msg.attachment_url}
                         alt="Вложение"
-                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30"
+                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
                         loading="lazy"
                       />
-                    </a>
+                    </button>
                   )}
                   {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
                 </div>
@@ -342,6 +347,25 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
           </p>
         </div>
       </div>
+
+      {/* Image preview dialog */}
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-2 right-2 z-10 bg-white/20 hover:bg-white/30 rounded-lg w-7 h-7 flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Просмотр"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
