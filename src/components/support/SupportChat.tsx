@@ -157,7 +157,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="w-full max-w-full px-1">
       <div className="mb-6">
         <h2 className="text-xl font-bold flex items-center gap-2">
           <Headphones className="w-5 h-5 text-primary" />
