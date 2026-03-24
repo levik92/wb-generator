@@ -24,6 +24,7 @@ const AdminBanners = lazy(() => import("@/components/admin/AdminBanners").then(m
 const AdminBlog = lazy(() => import("@/components/admin/AdminBlog").then(m => ({ default: m.AdminBlog })));
 const AdminVideoLessons = lazy(() => import("@/components/admin/AdminVideoLessons").then(m => ({ default: m.AdminVideoLessons })));
 const AdminSupport = lazy(() => import("@/components/admin/AdminSupport").then(m => ({ default: m.AdminSupport })));
+const AdminUtmSources = lazy(() => import("@/components/admin/AdminUtmSources").then(m => ({ default: m.AdminUtmSources })));
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 import { UserIcon } from "lucide-react";
