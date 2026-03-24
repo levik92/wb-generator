@@ -201,9 +201,14 @@ serve(async (req) => {
       case "update_status": {
         if (!conversation_id || !status) throw new Error("Missing data");
 
+        const updateData: any = { status };
+        if (status === "closed") {
+          updateData.needs_admin_attention = false;
+        }
+
         await supabase
           .from("support_conversations")
-          .update({ status })
+          .update(updateData)
           .eq("id", conversation_id);
 
         return new Response(JSON.stringify({ success: true }), {
