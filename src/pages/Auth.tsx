@@ -13,7 +13,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 import { SmartCaptcha } from "@yandex/smart-captcha";
-import { getStoredUtmSourceId, useUtmTracking } from "@/hooks/useUtmTracking";
+import { getStoredUtmSourceId } from "@/hooks/useUtmTracking";
 
 const Auth = () => {
   useUtmTracking();
