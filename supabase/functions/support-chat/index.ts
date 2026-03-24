@@ -45,6 +45,7 @@ serve(async (req) => {
             sender_type: msg.sender_type,
             content: error ? "[Ошибка расшифровки]" : data,
             created_at: msg.created_at,
+            attachment_url: msg.attachment_url || null,
           });
         } catch {
           results.push({
@@ -53,6 +54,7 @@ serve(async (req) => {
             sender_type: msg.sender_type,
             content: "[Ошибка расшифровки]",
             created_at: msg.created_at,
+            attachment_url: msg.attachment_url || null,
           });
         }
       }
