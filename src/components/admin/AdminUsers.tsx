@@ -422,6 +422,14 @@ export function AdminUsers({
                 </div>
               </div>
 
+              {/* UTM Source */}
+              <div className="bg-muted/50 rounded-lg p-2.5 sm:p-3 flex items-center gap-2">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Источник:</div>
+                <Badge variant="secondary" className="text-xs">
+                  {userDetails.utmSourceName || 'Прямой заход'}
+                </Badge>
+              </div>
+
               {/* Survey Responses */}
               <div className="space-y-2">
                 <h3 className="text-sm sm:text-lg font-semibold">Результаты опроса</h3>
