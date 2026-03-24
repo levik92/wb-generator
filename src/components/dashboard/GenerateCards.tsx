@@ -829,12 +829,8 @@ export const GenerateCards = ({
                 description: `Все карточки готовы для скачивания`
               });
 
-              // Merge with pre-style images if this was a style generation
+              // Clear pre-style ref (merge already happened during polling)
               if (preStyleImagesRef.current.length > 0) {
-                setGeneratedImages(prev => {
-                  const styledImages = prev.map(img => ({ ...img, isStyled: true }));
-                  return [...preStyleImagesRef.current, ...styledImages];
-                });
                 preStyleImagesRef.current = [];
               }
             } else if (job.status === 'failed') {
