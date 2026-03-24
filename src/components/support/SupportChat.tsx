@@ -61,7 +61,9 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    // Compress image before upload
+    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+    const ext = compressed.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${profile.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage
       .from("support-attachments")
