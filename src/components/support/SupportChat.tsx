@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X, Info } from "lucide-react";
+import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -312,12 +312,6 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
             <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/50"}`} />
             {isOnline ? "Онлайн" : "Офлайн"}
           </span>
-          <div className="relative group">
-            <Info className="w-4 h-4 text-muted-foreground/60 cursor-help hover:text-muted-foreground transition-colors" />
-            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-1.5 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg border border-border whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-              Время работы: 09:00–22:00 МСК
-            </div>
-          </div>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
           {isOnline
