@@ -133,17 +133,36 @@ serve(async (req) => {
       case "get_messages": {
         if (!conversation_id) throw new Error("Missing conversation_id");
 
-        const { data: msgs, error } = await supabase
-          .from("support_messages")
-          .select("*")
-          .eq("conversation_id", conversation_id)
-          .order("created_at", { ascending: true });
+        const pageSize = reqLimit || 15;
 
+        // If before_id provided, load older messages
+        let query = supabase
+          .from("support_messages")
+          .select("*", { count: "exact" })
+          .eq("conversation_id", conversation_id)
+          .order("created_at", { ascending: false })
+          .limit(pageSize);
+
+        if (before_id) {
+          // Get the created_at of the before_id message
+          const { data: refMsg } = await supabase
+            .from("support_messages")
+            .select("created_at")
+            .eq("id", before_id)
+            .single();
+          if (refMsg) {
+            query = query.lt("created_at", refMsg.created_at);
+          }
+        }
+
+        const { data: msgs, error, count: totalCount } = await query;
         if (error) throw error;
 
-        const decrypted = await decryptMessages(msgs || []);
+        // Reverse to chronological order
+        const sorted = (msgs || []).reverse();
+        const decrypted = await decryptMessages(sorted);
 
-        return new Response(JSON.stringify({ messages: decrypted }), {
+        return new Response(JSON.stringify({ messages: decrypted, total: totalCount || 0, hasMore: (msgs?.length || 0) === pageSize }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
