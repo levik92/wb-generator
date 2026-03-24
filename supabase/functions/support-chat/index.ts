@@ -119,6 +119,23 @@ serve(async (req) => {
           .eq("id", conversation_id)
           .single();
 
+        // If conversation was closed, reopen it
+        if (convData?.status === "closed") {
+          await supabase
+            .from("support_conversations")
+            .update({
+              status: "active",
+              needs_admin_attention: true,
+            })
+            .eq("id", conversation_id);
+        } else {
+          // Mark as needing attention for active conversations too
+          await supabase
+            .from("support_conversations")
+            .update({ needs_admin_attention: true })
+            .eq("id", conversation_id);
+        }
+
         // Count existing user messages
         const { count: msgCount } = await supabase
           .from("support_messages")
