@@ -2582,7 +2582,7 @@ export const GenerateCards = ({
                 Создать в таком же стиле
               </DialogTitle>
               <DialogDescription className="text-sm text-left">
-                WBGen создаст новые карточки в такой же стилистике
+                WBGen создаст новые карточки в такой же стилистике как образец ниже
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
