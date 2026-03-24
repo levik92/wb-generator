@@ -151,6 +151,7 @@ export const AdminPartners = () => {
     setDetailsLoading(true);
     setManualPaymentAmount("");
     setReferrals([]);
+    setReferralPage(1);
     try {
       // Load withdrawals
       const { data: withdrawalsData } = await supabase
