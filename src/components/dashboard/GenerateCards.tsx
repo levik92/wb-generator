@@ -789,7 +789,13 @@ export const GenerateCards = ({
               cardType: task.card_type,
               jobId: job.id  // Store jobId for regeneration even after currentJobId is cleared
             }));
-            setGeneratedImages(images);
+            // If this is a style generation, preserve pre-style images during polling
+            if (preStyleImagesRef.current.length > 0) {
+              const styledImages = images.map(img => ({ ...img, isStyled: true }));
+              setGeneratedImages([...preStyleImagesRef.current, ...styledImages]);
+            } else {
+              setGeneratedImages(images);
+            }
           }
 
           // Check if ALL cards are completed (not just job status)
