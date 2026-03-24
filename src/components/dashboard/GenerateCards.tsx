@@ -2328,6 +2328,7 @@ export const GenerateCards = ({
             const isProcessingCard = isRegenerating || isEditingCard;
             const variants = imageVariants[index] || [];
             const currentVariantIdx = selectedVariant[index] ?? (variants.length - 1);
+            const displayedImageUrl = variants[currentVariantIdx]?.url || image.url;
             const isCoverCard = image.stageIndex === 0;
             return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden ${isProcessingCard ? 'border-primary/30' : ''}`}>
                     {isProcessingCard && <>
@@ -2341,13 +2342,13 @@ export const GenerateCards = ({
                       }} />
                     </>}
                     <div className="relative group/img shrink-0 w-fit mx-auto sm:mx-0 sm:w-auto">
-                      <img src={image.url} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200" />
+                      <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200" />
                       {/* Hover overlay - only on image */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
                         <ZoomIn className="w-5 h-5 text-white" />
                       </div>
                       {/* Click to preview */}
-                      <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage(image)} />
+                      <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
                     </div>
                     
                     <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
@@ -2426,7 +2427,7 @@ export const GenerateCards = ({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => onNavigateToVideo(image.url)} className="cursor-pointer">
+                              <DropdownMenuItem onClick={() => onNavigateToVideo(displayedImageUrl)} className="cursor-pointer">
                                 <Video className="w-4 h-4 mr-2" />
                                 Видеообложка
                               </DropdownMenuItem>
@@ -2452,7 +2453,7 @@ export const GenerateCards = ({
                       
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
-                        const currentUrl = variants.length > 0 ? variants[currentVariantIdx]?.url || image.url : image.url;
+                         const currentUrl = displayedImageUrl;
                         openEditDialog({ ...image, url: currentUrl }, index);
                       }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
                               {editingCards.has(`edit_${image.id}_${index}`) ? <>
