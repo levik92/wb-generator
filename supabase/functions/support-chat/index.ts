@@ -109,6 +109,7 @@ serve(async (req) => {
           conversation_id,
           sender_type: "user",
           encrypted_content: encData,
+          ...(attachment_url ? { attachment_url } : {}),
         });
 
         // Check if this is the first user message in a dashboard conversation
