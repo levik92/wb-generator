@@ -19,7 +19,7 @@ const FriendsSlider = lazy(() => import("@/components/landing/FriendsSlider").th
 // Simple loading placeholder
 const SectionLoader = () => (
   <div className="py-20 flex justify-center">
-    <div className="w-8 h-8 border-2 border-[hsl(268,83%,60%)] border-t-transparent rounded-full animate-spin" />
+    <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
   </div>
 );
 

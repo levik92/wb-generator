@@ -285,7 +285,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   if (initialLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
       </div>
     );
   }
