@@ -54,8 +54,9 @@ const PageLoader = () => (
 
 const SupportWidgetWrapper = () => {
   const location = useLocation();
-  const isPublicPage = !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/admin');
-  if (!isPublicPage) return null;
+  const path = location.pathname;
+  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet');
+  if (isHidden) return null;
   return (
     <Suspense fallback={null}>
       <SupportWidget />
