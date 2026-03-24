@@ -10,12 +10,14 @@ interface AuthRedirectProps {
 
 export const AuthRedirect = ({ children }: AuthRedirectProps) => {
   // Fast path: if no stored session, render children immediately
+  // Use try/catch for TMA/WebView where localStorage may be unavailable
   const hasStoredSession = (() => {
     try {
       const keys = Object.keys(localStorage);
       return keys.some(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
     } catch {
-      return false;
+      // localStorage unavailable (TMA/WebView) — must do async check
+      return true;
     }
   })();
 
