@@ -1578,7 +1578,7 @@ export const GenerateCards = ({
       setIsUploading(false);
       setSelectedCards(styleSelectedCards);
 
-      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel || 'banana');
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel!);
       
       const { data, error } = await supabase.functions.invoke(createJobFunction, {
         body: {
