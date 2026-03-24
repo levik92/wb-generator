@@ -163,6 +163,14 @@ export const GenerateCards = ({
   // Edit variants: track all versions per image index
   const [imageVariants, setImageVariants] = useState<Record<number, Array<{ url: string; label: string; id?: string }>>>({});
   const [selectedVariant, setSelectedVariant] = useState<Record<number, number>>({});
+
+  // Style generation dialog state
+  const [styleDialogOpen, setStyleDialogOpen] = useState(false);
+  const [styleSourceImage, setStyleSourceImage] = useState<any | null>(null);
+  const [styleSelectedCards, setStyleSelectedCards] = useState<number[]>([]);
+  const [styleDescription, setStyleDescription] = useState("");
+  const [styleAutoDescription, setStyleAutoDescription] = useState(true);
+  const [styleGenerating, setStyleGenerating] = useState(false);
   
   const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
 
@@ -1517,7 +1525,108 @@ export const GenerateCards = ({
     }, 5 * 60 * 1000);
   };
 
-  // Smooth progress bar animation based on time or completed tasks
+  // Style generation: open dialog
+  const openStyleDialog = (image: any) => {
+    setStyleSourceImage(image);
+    // Pre-select all card types except the current one
+    const availableCards = CARD_STAGES.map((_, i) => i).filter(i => i !== image.stageIndex && i !== 6); // Exclude current + mainEdit
+    setStyleSelectedCards([]);
+    // Set description from jobData or empty
+    const originalDesc = jobData?.description || '';
+    setStyleAutoDescription(true);
+    setStyleDescription(originalDesc);
+    setStyleDialogOpen(true);
+  };
+
+  const handleStyleCardToggle = (cardIndex: number) => {
+    setStyleSelectedCards(prev => 
+      prev.includes(cardIndex) 
+        ? prev.filter(i => i !== cardIndex)
+        : [...prev, cardIndex].sort((a, b) => a - b)
+    );
+  };
+
+  const generateInStyle = async () => {
+    if (!styleSourceImage || styleSelectedCards.length === 0 || !jobData) return;
+
+    const tokensNeeded = styleSelectedCards.length * photoGenerationPrice;
+    if (profile.tokens_balance < tokensNeeded) {
+      toast({
+        title: "Недостаточно токенов",
+        description: `Нужно ${tokensNeeded} токенов, доступно ${profile.tokens_balance}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setStyleGenerating(true);
+    setStyleDialogOpen(false);
+
+    try {
+      // Clear previous state for new generation
+      setGeneratedImages([]);
+      setCompletionNotificationShown(false);
+      setJobCompleted(false);
+      setCurrentJobId(null);
+      setPreviousJobStatus(null);
+      setImageVariants({});
+      setSelectedVariant({});
+      setIsRestoredGeneration(false);
+      setGenerating(true);
+      setProgress(0);
+      setCurrentStage(0);
+      setIsUploading(false);
+      setSelectedCards(styleSelectedCards);
+
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel!);
+      
+      const { data, error } = await supabase.functions.invoke(createJobFunction, {
+        body: {
+          productName: jobData.productName,
+          category: jobData.category || 'товар',
+          description: styleDescription,
+          userId: profile.id,
+          productImages: jobData.productImages.filter(img => img.type !== 'reference'),
+          referenceImageUrl: null,
+          selectedCards: styleSelectedCards,
+          unifiedStyling: true,
+          styleSourceImageUrl: styleSourceImage.url
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success && data.jobId) {
+        // Save job data
+        setJobData({
+          productName: jobData.productName,
+          category: jobData.category,
+          description: styleDescription,
+          productImages: jobData.productImages
+        });
+        startJobPolling(data.jobId);
+        toast({
+          title: "Генерация в стиле начата!",
+          description: "Создаём карточки в выбранном стиле..."
+        });
+      } else {
+        throw new Error(data.error || 'Ошибка создания задачи');
+      }
+    } catch (error: any) {
+      console.error('Style generation error:', error);
+      toast({
+        title: "Ошибка генерации",
+        description: "Не удалось запустить генерацию в стиле",
+        variant: "destructive"
+      });
+      setGenerating(false);
+    } finally {
+      setStyleGenerating(false);
+    }
+  };
+
   useEffect(() => {
     if (!generating || currentStage >= selectedCards.length) {
       setSmoothProgress(progress);
@@ -2164,6 +2273,15 @@ export const GenerateCards = ({
                                   <span className="md:hidden ml-1">Редактировать</span>
                                 </>}
                       </Button>
+
+                      {/* Style generation button */}
+                      <Button size="sm" variant="outline" onClick={e => {
+                        e.stopPropagation();
+                        openStyleDialog(image);
+                      }} disabled={!jobData || generating || styleGenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3 border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors" title="Создать в таком же стиле">
+                        <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
+                        <span className="md:hidden ml-1">В стиле</span>
+                      </Button>
                       
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
@@ -2309,6 +2427,215 @@ export const GenerateCards = ({
               <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
                 <Sparkles className="w-4 h-4" />
                 Начать редактирование
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Style Generation Dialog */}
+      {isMobile ? (
+        <Drawer open={styleDialogOpen} onOpenChange={setStyleDialogOpen}>
+          <DrawerContent className="bg-card border-border/50">
+            <DrawerHeader className="space-y-2">
+              <DrawerTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                Создать в таком же стиле
+              </DrawerTitle>
+              <DrawerDescription className="text-sm text-left">
+                AI проанализирует стиль выбранной карточки и создаст новые в том же стиле
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="space-y-4 px-4 pb-2 max-h-[60dvh] overflow-y-auto">
+              {/* Source image preview */}
+              {styleSourceImage && (
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-border/50">
+                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-md border" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{styleSourceImage.stage}</p>
+                    <p className="text-xs text-muted-foreground">Образец стиля</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Card type selection */}
+              <div className="space-y-2">
+                <Label className="font-semibold">Выберите типы карточек</Label>
+                <div className="space-y-2">
+                  {CARD_STAGES.filter((_, i) => i !== styleSourceImage?.stageIndex && i !== 6).map((stage, _) => {
+                    const realIndex = CARD_STAGES.indexOf(stage);
+                    return (
+                      <div 
+                        key={realIndex}
+                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
+                          styleSelectedCards.includes(realIndex) 
+                            ? 'border-primary bg-primary/5' 
+                            : 'border-border hover:border-muted-foreground/50'
+                        }`}
+                        onClick={() => handleStyleCardToggle(realIndex)}
+                      >
+                        <Checkbox checked={styleSelectedCards.includes(realIndex)} />
+                        <span className="text-sm">{stage.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Description field */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="font-semibold">Описание</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={styleAutoDescription}
+                      onCheckedChange={(checked) => {
+                        setStyleAutoDescription(checked);
+                        if (checked) {
+                          setStyleDescription(jobData?.description || '');
+                        } else {
+                          setStyleDescription('');
+                        }
+                      }}
+                    />
+                    <Label className="text-xs font-normal text-muted-foreground cursor-pointer">
+                      Придумай сам
+                    </Label>
+                  </div>
+                </div>
+                <Textarea 
+                  placeholder="Опишите пожелания для новых карточек..."
+                  value={styleDescription}
+                  onChange={e => setStyleDescription(e.target.value.slice(0, 1200))}
+                  maxLength={1200}
+                  disabled={styleAutoDescription}
+                  className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
+                />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                    <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                    <span>Стоимость: <span className="font-semibold">{styleSelectedCards.length * photoGenerationPrice} токенов</span></span>
+                  </div>
+                  <span>{styleDescription.length}/1200</span>
+                </div>
+              </div>
+            </div>
+            <DrawerFooter className="gap-2">
+              <Button 
+                onClick={generateInStyle} 
+                disabled={styleSelectedCards.length === 0 || !styleDescription.trim() || styleGenerating || !activeModel}
+                className="rounded-lg gap-2"
+              >
+                {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
+              </Button>
+              <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
+                Отмена
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={styleDialogOpen} onOpenChange={setStyleDialogOpen}>
+          <DialogContent className="sm:max-w-[520px] bg-card border-border/50 rounded-lg max-h-[85vh] overflow-y-auto">
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                Создать в таком же стиле
+              </DialogTitle>
+              <DialogDescription className="text-sm text-left">
+                AI проанализирует стиль выбранной карточки и создаст новые в том же стиле
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {/* Source image preview */}
+              {styleSourceImage && (
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-border/50">
+                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-md border" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{styleSourceImage.stage}</p>
+                    <p className="text-xs text-muted-foreground">Образец стиля</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Card type selection */}
+              <div className="space-y-2">
+                <Label className="font-semibold">Выберите типы карточек</Label>
+                <div className="space-y-2">
+                  {CARD_STAGES.filter((_, i) => i !== styleSourceImage?.stageIndex && i !== 6).map((stage, _) => {
+                    const realIndex = CARD_STAGES.indexOf(stage);
+                    return (
+                      <div 
+                        key={realIndex}
+                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
+                          styleSelectedCards.includes(realIndex) 
+                            ? 'border-primary bg-primary/5' 
+                            : 'border-border hover:border-muted-foreground/50'
+                        }`}
+                        onClick={() => handleStyleCardToggle(realIndex)}
+                      >
+                        <Checkbox checked={styleSelectedCards.includes(realIndex)} />
+                        <span className="text-sm">{stage.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Description field */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="font-semibold">Описание</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={styleAutoDescription}
+                      onCheckedChange={(checked) => {
+                        setStyleAutoDescription(checked);
+                        if (checked) {
+                          setStyleDescription(jobData?.description || '');
+                        } else {
+                          setStyleDescription('');
+                        }
+                      }}
+                    />
+                    <Label className="text-xs font-normal text-muted-foreground cursor-pointer">
+                      Придумай сам
+                    </Label>
+                  </div>
+                </div>
+                <Textarea 
+                  placeholder="Опишите пожелания для новых карточек..."
+                  value={styleDescription}
+                  onChange={e => setStyleDescription(e.target.value.slice(0, 1200))}
+                  maxLength={1200}
+                  disabled={styleAutoDescription}
+                  className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
+                />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                    <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                    <span>Стоимость: <span className="font-semibold">{styleSelectedCards.length * photoGenerationPrice} токенов</span></span>
+                  </div>
+                  <span>{styleDescription.length}/1200</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
+                Отмена
+              </Button>
+              <Button 
+                onClick={generateInStyle} 
+                disabled={styleSelectedCards.length === 0 || !styleDescription.trim() || styleGenerating || !activeModel}
+                className="rounded-lg gap-2"
+              >
+                {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
               </Button>
             </DialogFooter>
           </DialogContent>

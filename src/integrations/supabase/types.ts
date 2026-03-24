@@ -383,6 +383,7 @@ export type Database = {
           started_at: string | null
           status: Database["public"]["Enums"]["job_status"] | null
           style_description: string | null
+          style_source_image_url: string | null
           tokens_cost: number | null
           total_cards: number | null
           unified_styling: boolean
@@ -402,6 +403,7 @@ export type Database = {
           started_at?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
           style_description?: string | null
+          style_source_image_url?: string | null
           tokens_cost?: number | null
           total_cards?: number | null
           unified_styling?: boolean
@@ -421,6 +423,7 @@ export type Database = {
           started_at?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
           style_description?: string | null
+          style_source_image_url?: string | null
           tokens_cost?: number | null
           total_cards?: number | null
           unified_styling?: boolean

@@ -39,7 +39,8 @@ serve(async (req) => {
       productImages = [],
       referenceImageUrl = null,
       selectedCards = [0, 1, 2, 3, 4, 5], // Default all cards
-      unifiedStyling = false
+      unifiedStyling = false,
+      styleSourceImageUrl = null
     } = requestBody;
 
     // Validate input
@@ -151,7 +152,8 @@ serve(async (req) => {
         status: 'pending',
         total_cards: selectedCards.length,
         tokens_cost: tokensRequired,
-        unified_styling: unifiedStyling
+        unified_styling: unifiedStyling,
+        style_source_image_url: styleSourceImageUrl
       })
       .select()
       .single();
