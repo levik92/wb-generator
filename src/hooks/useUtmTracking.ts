@@ -17,6 +17,9 @@ export function getStoredUtmSourceId(): string | null {
   return localStorage.getItem(UTM_STORAGE_KEY);
 }
 
+/**
+ * Track UTM visits. Call on any page that may receive UTM traffic.
+ */
 export function useUtmTracking() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -29,37 +32,35 @@ export function useUtmTracking() {
 
     const trackVisit = async () => {
       try {
-        // Find matching utm_source record
-        let query = supabase
+        // Try exact match first (source + medium + campaign)
+        const { data: exactMatch } = await supabase
           .from("utm_sources")
           .select("id")
-          .eq("utm_source", utmSource);
+          .eq("utm_source", utmSource)
+          .eq("utm_medium", utmMedium)
+          .eq("utm_campaign", utmCampaign)
+          .limit(1)
+          .maybeSingle();
         
-        if (utmMedium) query = query.eq("utm_medium", utmMedium);
-        if (utmCampaign) query = query.eq("utm_campaign", utmCampaign);
-        
-        const { data } = await query.limit(1).single();
-        
-        if (!data) {
-          // Fallback: match just by utm_source
-          const { data: fallback } = await supabase
-            .from("utm_sources")
-            .select("id")
-            .eq("utm_source", utmSource)
-            .limit(1)
-            .single();
-          
-          if (!fallback) return;
-          
-          localStorage.setItem(UTM_STORAGE_KEY, fallback.id);
-          await recordVisit(fallback.id);
+        if (exactMatch) {
+          localStorage.setItem(UTM_STORAGE_KEY, exactMatch.id);
+          await recordVisit(exactMatch.id);
           return;
         }
 
-        localStorage.setItem(UTM_STORAGE_KEY, data.id);
-        await recordVisit(data.id);
+        // Fallback: match just by utm_source
+        const { data: fallback } = await supabase
+          .from("utm_sources")
+          .select("id")
+          .eq("utm_source", utmSource)
+          .limit(1)
+          .maybeSingle();
+        
+        if (fallback) {
+          localStorage.setItem(UTM_STORAGE_KEY, fallback.id);
+          await recordVisit(fallback.id);
+        }
       } catch (e) {
-        // Silent fail - tracking should never break the app
         console.error("UTM tracking error:", e);
       }
     };
@@ -71,8 +72,12 @@ export function useUtmTracking() {
 async function recordVisit(utmSourceId: string) {
   const visitorId = getOrCreateVisitorId();
   
-  await supabase.from("utm_visits").insert({
+  const { error } = await supabase.from("utm_visits").insert({
     utm_source_id: utmSourceId,
     visitor_id: visitorId,
   });
+  
+  if (error) {
+    console.error("UTM visit insert error:", error);
+  }
 }
