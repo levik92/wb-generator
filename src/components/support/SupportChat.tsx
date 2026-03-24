@@ -290,15 +290,33 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     );
   }
 
+  const isOnline = (() => {
+    const now = new Date();
+    const moscowHour = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Moscow" })).getHours();
+    return moscowHour >= 9 && moscowHour < 22;
+  })();
+
   return (
     <div className="w-full max-w-full px-1">
       <div className="mb-6">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <Headphones className="w-5 h-5 text-primary" />
-          Поддержка
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Headphones className="w-5 h-5 text-primary" />
+            Поддержка
+          </h2>
+          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
+            isOnline
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              : "bg-muted text-muted-foreground"
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/50"}`} />
+            {isOnline ? "Онлайн" : "Офлайн"}
+          </span>
+        </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Напишите нам, и менеджер ответит вам в ближайшее время
+          {isOnline
+            ? "Напишите нам, и менеджер ответит вам в ближайшее время"
+            : "Сейчас мы офлайн (09:00–22:00 МСК), но вы можете оставить сообщение"}
         </p>
       </div>
 
