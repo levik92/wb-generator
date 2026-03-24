@@ -269,6 +269,33 @@ serve(async (req) => {
         });
       }
 
+      case "get_ai_defaults": {
+        const { data: defaults } = await supabase
+          .from("support_ai_defaults")
+          .select("*")
+          .order("channel");
+
+        return new Response(JSON.stringify({ defaults: defaults || [] }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      case "set_ai_default": {
+        const { channel: ch, ai_enabled: enabled } = await req.json().catch(() => ({}));
+        if (!ch) {
+          // Re-parse from original body
+        }
+        const body2 = { channel: conversation_id, ai_enabled: status === "true" };
+        
+        await supabase
+          .from("support_ai_defaults")
+          .upsert({ channel: ch || conversation_id, ai_enabled: enabled ?? (status === "true"), updated_at: new Date().toISOString() }, { onConflict: "channel" });
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       default:
         throw new Error(`Unknown action: ${action}`);
     }
