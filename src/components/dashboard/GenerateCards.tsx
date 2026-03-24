@@ -382,37 +382,61 @@ export const GenerateCards = ({
               }
             }
             
-            // Add styled tasks as variants of existing images
+            // Add styled tasks as variants of existing images, or as new images if card type is new
             if (allStyledTasks.length > 0) {
               const variantsUpdate: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
               const selectUpdate: Record<number, number> = {};
+              const newImages: typeof images = [];
               
               // Build variants from current state + styled tasks
               setImageVariants(prev => {
                 const updated = { ...prev };
-                for (const { task } of allStyledTasks) {
-                  const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                for (const { task, jobId: styledJobId } of allStyledTasks) {
+                  // First check in existing images array (including newly added ones)
+                  let imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                  // Also check in newImages we're about to add
+                  if (imgIndex < 0) {
+                    const newIdx = newImages.findIndex((img: any) => img.stageIndex === task.card_index);
+                    if (newIdx >= 0) {
+                      imgIndex = images.length + newIdx;
+                    }
+                  }
+                  
                   if (imgIndex >= 0) {
                     if (!updated[imgIndex]) {
-                      updated[imgIndex] = [{ url: images[imgIndex].url, label: 'Оригинал', id: images[imgIndex].id }];
+                      const sourceImg = imgIndex < images.length ? images[imgIndex] : newImages[imgIndex - images.length];
+                      updated[imgIndex] = [{ url: sourceImg.url, label: 'Оригинал', id: sourceImg.id }];
                     }
                     const styleCount = updated[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
                     updated[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
                     selectUpdate[imgIndex] = updated[imgIndex].length - 1;
+                  } else {
+                    // New card type not in original job — add as new image
+                    newImages.push({
+                      id: task.id,
+                      url: task.image_url,
+                      stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                      stageIndex: task.card_index,
+                      cardType: task.card_type,
+                      jobId: styledJobId
+                    });
                   }
                 }
                 Object.assign(variantsUpdate, updated);
                 return updated;
               });
               setSelectedVariant(prev => ({ ...prev, ...selectUpdate }));
-              // Update displayed images to show latest styled version
-              setGeneratedImages(prev => prev.map((img, i) => {
-                if (selectUpdate[i] !== undefined && variantsUpdate[i]) {
-                  const variant = variantsUpdate[i][selectUpdate[i]];
-                  return { ...img, url: variant.url };
-                }
-                return img;
-              }));
+              // Update displayed images: update existing with latest variant + append new card types
+              setGeneratedImages(prev => {
+                const updated = prev.map((img, i) => {
+                  if (selectUpdate[i] !== undefined && variantsUpdate[i]) {
+                    const variant = variantsUpdate[i][selectUpdate[i]];
+                    return { ...img, url: variant.url };
+                  }
+                  return img;
+                });
+                return [...updated, ...newImages];
+              });
             }
           }
 
