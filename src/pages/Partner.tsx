@@ -384,7 +384,7 @@ const Partner = () => {
               <CardContent>
                 {chartsLoading ? (
                   <div className="flex items-center justify-center h-[260px]">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
                   </div>
                 ) : getEarningsChartData(parseInt(earningsDateRange)).length > 0 ? (
                   <ResponsiveContainer width="100%" height={260}>
