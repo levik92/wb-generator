@@ -83,6 +83,7 @@ export const AdminPartners = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<ReferralDetail[]>([]);
+  const [referralPage, setReferralPage] = useState(1);
   const [manualPaymentAmount, setManualPaymentAmount] = useState("");
   const [totalPaidOut, setTotalPaidOut] = useState(0);
 
