@@ -36,7 +36,7 @@ serve(async (req) => {
     const encryptionKey = Deno.env.get("SUPPORT_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
-    const { action, conversation_id, message, status, attachment_url } = await req.json();
+    const { action, conversation_id, message, status, attachment_url, offset, limit: reqLimit, before_id } = await req.json();
 
     const decryptMessages = async (messages: any[]) => {
       const results = [];
@@ -70,14 +70,17 @@ serve(async (req) => {
 
     switch (action) {
       case "list_conversations": {
-        const { data: conversations, error } = await supabase
+        const pageSize = reqLimit || 10;
+        const pageOffset = offset || 0;
+
+        const { data: conversations, error, count: totalCount } = await supabase
           .from("support_conversations")
-          .select("*")
-          .order("updated_at", { ascending: false });
+          .select("*", { count: "exact" })
+          .order("updated_at", { ascending: false })
+          .range(pageOffset, pageOffset + pageSize - 1);
 
         if (error) throw error;
 
-        // Get last message for each conversation
         const enriched = [];
         for (const conv of conversations || []) {
           const { data: lastMsg } = await supabase
@@ -97,7 +100,6 @@ serve(async (req) => {
             lastMessageText = decrypted || "";
           }
 
-          // Get user email if user_id exists
           let userEmail = null;
           if (conv.user_id) {
             const { data: profile } = await supabase
@@ -123,7 +125,7 @@ serve(async (req) => {
           });
         }
 
-        return new Response(JSON.stringify({ conversations: enriched }), {
+        return new Response(JSON.stringify({ conversations: enriched, total: totalCount || 0, hasMore: (pageOffset + pageSize) < (totalCount || 0) }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -131,17 +133,36 @@ serve(async (req) => {
       case "get_messages": {
         if (!conversation_id) throw new Error("Missing conversation_id");
 
-        const { data: msgs, error } = await supabase
-          .from("support_messages")
-          .select("*")
-          .eq("conversation_id", conversation_id)
-          .order("created_at", { ascending: true });
+        const pageSize = reqLimit || 15;
 
+        // If before_id provided, load older messages
+        let query = supabase
+          .from("support_messages")
+          .select("*", { count: "exact" })
+          .eq("conversation_id", conversation_id)
+          .order("created_at", { ascending: false })
+          .limit(pageSize);
+
+        if (before_id) {
+          // Get the created_at of the before_id message
+          const { data: refMsg } = await supabase
+            .from("support_messages")
+            .select("created_at")
+            .eq("id", before_id)
+            .single();
+          if (refMsg) {
+            query = query.lt("created_at", refMsg.created_at);
+          }
+        }
+
+        const { data: msgs, error, count: totalCount } = await query;
         if (error) throw error;
 
-        const decrypted = await decryptMessages(msgs || []);
+        // Reverse to chronological order
+        const sorted = (msgs || []).reverse();
+        const decrypted = await decryptMessages(sorted);
 
-        return new Response(JSON.stringify({ messages: decrypted }), {
+        return new Response(JSON.stringify({ messages: decrypted, total: totalCount || 0, hasMore: (msgs?.length || 0) === pageSize }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -210,12 +231,35 @@ serve(async (req) => {
       }
 
       case "get_attention_count": {
-        const { count } = await supabase
+        // Count conversations needing attention OR with new unread user messages
+        const { count: attentionCount } = await supabase
           .from("support_conversations")
           .select("id", { count: "exact", head: true })
           .eq("needs_admin_attention", true);
 
-        return new Response(JSON.stringify({ count: count || 0 }), {
+        // Count conversations where last message is from user (unread by admin)
+        const { data: activeConvs } = await supabase
+          .from("support_conversations")
+          .select("id")
+          .neq("status", "closed");
+
+        let newMsgCount = 0;
+        for (const conv of activeConvs || []) {
+          const { data: lastMsg } = await supabase
+            .from("support_messages")
+            .select("sender_type")
+            .eq("conversation_id", conv.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (lastMsg && lastMsg.sender_type === "user") {
+            newMsgCount++;
+          }
+        }
+
+        const totalCount = Math.max(attentionCount || 0, newMsgCount);
+
+        return new Response(JSON.stringify({ count: totalCount }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

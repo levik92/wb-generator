@@ -36,6 +36,8 @@ interface Message {
 const ADMIN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-admin`;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 5 * 1024 * 1024;
+const CONVS_PER_PAGE = 10;
+const MSGS_PER_PAGE = 15;
 
 export const AdminSupport = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -49,9 +51,16 @@ export const AdminSupport = () => {
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [hasMoreConvs, setHasMoreConvs] = useState(false);
+  const [loadingMoreConvs, setLoadingMoreConvs] = useState(false);
+  const [hasMoreMsgs, setHasMoreMsgs] = useState(false);
+  const [loadingMoreMsgs, setLoadingMoreMsgs] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const convsContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const shouldScrollRef = useRef(true);
   const isMobile = useIsMobile();
 
   const callApiRef = useRef<(body: any) => Promise<any>>();
@@ -73,7 +82,7 @@ export const AdminSupport = () => {
   const callApi = useCallback((body: any) => callApiRef.current!(body), []);
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 1.0 });
     const ext = compressed.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `admin/${Date.now()}.${ext}`;
     const { error } = await supabase.storage
@@ -87,55 +96,132 @@ export const AdminSupport = () => {
     return data.publicUrl;
   };
 
-  const loadConversations = useCallback(async () => {
+  const loadConversations = useCallback(async (append = false) => {
     try {
-      const { conversations: convs } = await callApi({ action: "list_conversations" });
-      setConversations(convs || []);
+      const offset = append ? conversations.length : 0;
+      const { conversations: convs, hasMore } = await callApi({
+        action: "list_conversations",
+        offset,
+        limit: CONVS_PER_PAGE,
+      });
+      if (append) {
+        setConversations(prev => [...prev, ...(convs || [])]);
+      } else {
+        setConversations(convs || []);
+      }
+      setHasMoreConvs(hasMore);
     } catch (e) {
       console.error("Load conversations error:", e);
     } finally {
       setLoading(false);
+      setLoadingMoreConvs(false);
     }
-  }, [callApi]);
+  }, [callApi, conversations.length]);
 
   useEffect(() => {
     loadConversations();
-    const interval = setInterval(loadConversations, 15000);
+    const interval = setInterval(() => loadConversations(false), 15000);
     return () => clearInterval(interval);
-  }, [loadConversations]);
+  }, [callApi]);
 
-  const loadMessages = useCallback(async (convId: string) => {
+  const loadMoreConvs = () => {
+    if (loadingMoreConvs || !hasMoreConvs) return;
+    setLoadingMoreConvs(true);
+    loadConversations(true);
+  };
+
+  const handleConvsScroll = useCallback(() => {
+    const container = convsContainerRef.current;
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    if (scrollHeight - scrollTop - clientHeight < 80 && hasMoreConvs && !loadingMoreConvs) {
+      loadMoreConvs();
+    }
+  }, [hasMoreConvs, loadingMoreConvs]);
+
+  const loadMessages = useCallback(async (convId: string, beforeId?: string) => {
+    const { messages: msgs, hasMore } = await callApi({
+      action: "get_messages",
+      conversation_id: convId,
+      ...(beforeId ? { before_id: beforeId } : {}),
+      limit: MSGS_PER_PAGE,
+    });
+    setHasMoreMsgs(hasMore);
+    return msgs || [];
+  }, [callApi]);
+
+  const selectConversation = useCallback(async (conv: Conversation) => {
+    setSelectedConv(conv);
     setMsgsLoading(true);
+    shouldScrollRef.current = true;
     try {
-      const { messages: msgs } = await callApi({
-        action: "get_messages",
-        conversation_id: convId,
-      });
-      setMessages(msgs || []);
+      const msgs = await loadMessages(conv.id);
+      setMessages(msgs);
     } catch (e) {
       console.error("Load messages error:", e);
     } finally {
       setMsgsLoading(false);
     }
-  }, [callApi]);
-
-  const selectConversation = useCallback((conv: Conversation) => {
-    setSelectedConv(conv);
-    loadMessages(conv.id);
   }, [loadMessages]);
 
+  // Poll messages for selected conversation
   useEffect(() => {
     if (!selectedConv) return;
-    const interval = setInterval(() => loadMessages(selectedConv.id), 8000);
+    const interval = setInterval(async () => {
+      try {
+        shouldScrollRef.current = true;
+        const msgs = await loadMessages(selectedConv.id);
+        setMessages(prev => {
+          if (msgs.length !== prev.length || msgs[msgs.length - 1]?.id !== prev[prev.length - 1]?.id) {
+            return msgs;
+          }
+          return prev;
+        });
+      } catch {}
+    }, 8000);
     return () => clearInterval(interval);
   }, [selectedConv?.id, loadMessages]);
 
   useEffect(() => {
+    if (!shouldScrollRef.current) return;
     const el = messagesEndRef.current;
     if (el?.parentElement) {
       el.parentElement.scrollTop = el.parentElement.scrollHeight;
     }
   }, [messages]);
+
+  const loadOlderMessages = async () => {
+    if (!selectedConv || loadingMoreMsgs || !hasMoreMsgs || messages.length === 0) return;
+    setLoadingMoreMsgs(true);
+    shouldScrollRef.current = false;
+    try {
+      const container = messagesContainerRef.current;
+      const prevScrollHeight = container?.scrollHeight || 0;
+      
+      const oldestId = messages[0]?.id;
+      const olderMsgs = await loadMessages(selectedConv.id, oldestId);
+      if (olderMsgs.length > 0) {
+        setMessages(prev => [...olderMsgs, ...prev]);
+        requestAnimationFrame(() => {
+          if (container) {
+            container.scrollTop = container.scrollHeight - prevScrollHeight;
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Load more error:", e);
+    } finally {
+      setLoadingMoreMsgs(false);
+    }
+  };
+
+  const handleMsgsScroll = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    if (container.scrollTop < 60 && hasMoreMsgs && !loadingMoreMsgs) {
+      loadOlderMessages();
+    }
+  }, [hasMoreMsgs, loadingMoreMsgs, messages]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -164,6 +250,7 @@ export const AdminSupport = () => {
     if ((!text && !pendingFile) || sending || !selectedConv) return;
     setInput("");
     setSending(true);
+    shouldScrollRef.current = true;
 
     try {
       let attachmentUrl: string | null = null;
@@ -180,9 +267,10 @@ export const AdminSupport = () => {
         message: text || "📎 Изображение",
         attachment_url: attachmentUrl,
       });
-      await loadMessages(selectedConv.id);
+      const msgs = await loadMessages(selectedConv.id);
+      setMessages(msgs);
       setSelectedConv((prev) => prev ? { ...prev, ai_enabled: false, needs_admin_attention: false } : null);
-      loadConversations();
+      loadConversations(false);
     } catch (e) {
       console.error("Send error:", e);
     } finally {
@@ -190,7 +278,7 @@ export const AdminSupport = () => {
       setUploading(false);
       inputRef.current?.focus();
     }
-  }, [input, pendingFile, sending, selectedConv, callApi, loadMessages, loadConversations]);
+  }, [input, pendingFile, sending, selectedConv, callApi, loadMessages]);
 
   const handleToggleAI = async () => {
     if (!selectedConv) return;
@@ -200,7 +288,7 @@ export const AdminSupport = () => {
         conversation_id: selectedConv.id,
       });
       setSelectedConv((prev) => prev ? { ...prev, ai_enabled } : null);
-      loadConversations();
+      loadConversations(false);
     } catch (e) {
       console.error("Toggle AI error:", e);
     }
@@ -216,7 +304,7 @@ export const AdminSupport = () => {
       });
       setSelectedConv(null);
       setMessages([]);
-      loadConversations();
+      loadConversations(false);
     } catch (e) {
       console.error("Close error:", e);
     }
@@ -236,9 +324,7 @@ export const AdminSupport = () => {
     }
   };
 
-  const getChannelLabel = (channel: string) => {
-    return channel === "dashboard" ? "Дашборд" : "Виджет";
-  };
+  const getChannelLabel = (channel: string) => channel === "dashboard" ? "Дашборд" : "Виджет";
 
   const attentionCount = conversations.filter((c) => c.needs_admin_attention).length;
 
@@ -299,7 +385,7 @@ export const AdminSupport = () => {
         </div>
         <p className="text-xs text-muted-foreground">Управление обращениями пользователей</p>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div ref={convsContainerRef} className="flex-1 overflow-y-auto" onScroll={handleConvsScroll}>
         {loading ? (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -310,40 +396,47 @@ export const AdminSupport = () => {
             <p className="text-sm text-muted-foreground">Обращений пока нет</p>
           </div>
         ) : (
-          conversations.map((conv) => (
-            <button
-              key={conv.id}
-              onClick={() => selectConversation(conv)}
-              className={`w-full text-left p-4 border-b border-border/50 hover:bg-secondary/50 transition-colors ${
-                selectedConv?.id === conv.id ? "bg-primary/5" : ""
-              } ${conv.needs_admin_attention ? "bg-destructive/5" : ""}`}
-            >
-              <div className="flex items-start justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium truncate max-w-[160px]">
-                    {conv.user_email || conv.visitor_id?.slice(0, 8) || "Аноним"}
-                  </span>
-                  <Badge variant="outline" className="text-[10px] px-1.5">
-                    {getChannelLabel(conv.channel)}
-                  </Badge>
+          <>
+            {conversations.map((conv) => (
+              <button
+                key={conv.id}
+                onClick={() => selectConversation(conv)}
+                className={`w-full text-left p-4 border-b border-border/50 hover:bg-secondary/50 transition-colors ${
+                  selectedConv?.id === conv.id ? "bg-primary/5" : ""
+                } ${conv.needs_admin_attention ? "bg-destructive/5" : ""}`}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium truncate max-w-[160px]">
+                      {conv.user_email || conv.visitor_id?.slice(0, 8) || "Аноним"}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] px-1.5">
+                      {getChannelLabel(conv.channel)}
+                    </Badge>
+                  </div>
+                  {getStatusBadge(conv)}
                 </div>
-                {getStatusBadge(conv)}
+                <p className="text-xs text-muted-foreground truncate mt-1">
+                  {conv.last_message || "Нет сообщений"}
+                </p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-[10px] text-muted-foreground">{conv.message_count} сообщ.</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {conv.last_message_at
+                      ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
+                          day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+                        })
+                      : ""}
+                  </span>
+                </div>
+              </button>
+            ))}
+            {loadingMoreConvs && (
+              <div className="flex justify-center p-3">
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               </div>
-              <p className="text-xs text-muted-foreground truncate mt-1">
-                {conv.last_message || "Нет сообщений"}
-              </p>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[10px] text-muted-foreground">{conv.message_count} сообщ.</span>
-                <span className="text-[10px] text-muted-foreground">
-                  {conv.last_message_at
-                    ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
-                        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
-                      })
-                    : ""}
-                </span>
-              </div>
-            </button>
-          ))
+            )}
+          </>
         )}
       </div>
     </div>
@@ -386,7 +479,19 @@ export const AdminSupport = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3" onScroll={handleMsgsScroll}>
+        {/* Load more indicator */}
+        {hasMoreMsgs && (
+          <div className="flex justify-center py-2">
+            {loadingMoreMsgs ? (
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            ) : (
+              <button onClick={loadOlderMessages} className="text-xs text-primary hover:underline">
+                Загрузить ранние сообщения
+              </button>
+            )}
+          </div>
+        )}
         {msgsLoading && messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
@@ -414,7 +519,7 @@ export const AdminSupport = () => {
         <div className="border-t border-border p-3">
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-2">
             <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleFileSelect} />
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary"
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary opacity-60 hover:opacity-100 transition-opacity"
               onClick={() => fileInputRef.current?.click()} disabled={sending || uploading}>
               <Paperclip className="w-4 h-4" />
             </Button>
@@ -436,44 +541,48 @@ export const AdminSupport = () => {
 
   if (isMobile) {
     return (
-      <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
-        {selectedConv ? chatViewContent : conversationListContent}
-      </div>
+      <>
+        <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
+          {selectedConv ? chatViewContent : conversationListContent}
+        </div>
+        <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+          <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
+            <button onClick={() => setPreviewImage(null)}
+              className="absolute top-2 right-2 z-10 bg-white/20 hover:bg-white/30 rounded-lg w-7 h-7 flex items-center justify-center transition-colors">
+              <X className="w-4 h-4 text-white" />
+            </button>
+            {previewImage && <img src={previewImage} alt="Просмотр" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />}
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
   return (
-    <div className="border border-border rounded-2xl bg-card overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
-      <div className="w-80 border-r border-border flex-shrink-0">{conversationListContent}</div>
-      <div className="flex-1 flex flex-col">
-        {selectedConv ? chatViewContent : (
-          <div className="flex-1 flex items-center justify-center text-center px-8">
-            <div>
-              <MessageCircle className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">Выберите диалог для просмотра</p>
+    <>
+      <div className="border border-border rounded-2xl bg-card overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
+        <div className="w-80 border-r border-border flex-shrink-0">{conversationListContent}</div>
+        <div className="flex-1 flex flex-col">
+          {selectedConv ? chatViewContent : (
+            <div className="flex-1 flex items-center justify-center text-center px-8">
+              <div>
+                <MessageCircle className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Выберите диалог для просмотра</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Image preview dialog */}
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
         <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
-          <button
-            onClick={() => setPreviewImage(null)}
-            className="absolute top-2 right-2 z-10 bg-white/20 hover:bg-white/30 rounded-lg w-7 h-7 flex items-center justify-center transition-colors"
-          >
+          <button onClick={() => setPreviewImage(null)}
+            className="absolute top-2 right-2 z-10 bg-white/20 hover:bg-white/30 rounded-lg w-7 h-7 flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-white" />
           </button>
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Просмотр"
-              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-            />
-          )}
+          {previewImage && <img src={previewImage} alt="Просмотр" className="w-full h-auto max-h-[80vh] object-contain rounded-lg" />}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
