@@ -1302,6 +1302,24 @@ export type Database = {
         }
         Relationships: []
       }
+      support_ai_defaults: {
+        Row: {
+          ai_enabled: boolean
+          channel: string
+          updated_at: string
+        }
+        Insert: {
+          ai_enabled?: boolean
+          channel: string
+          updated_at?: string
+        }
+        Update: {
+          ai_enabled?: boolean
+          channel?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       support_conversations: {
         Row: {
           admin_notified_at: string | null

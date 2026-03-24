@@ -63,14 +63,25 @@ serve(async (req) => {
 
     switch (action) {
       case "create_conversation": {
+        const convChannel = channel || "widget";
+        
+        // Get AI default for this channel
+        const { data: aiDefault } = await supabase
+          .from("support_ai_defaults")
+          .select("ai_enabled")
+          .eq("channel", convChannel)
+          .maybeSingle();
+        
+        const aiEnabled = aiDefault?.ai_enabled ?? (convChannel === "widget");
+
         const { data: conv, error } = await supabase
           .from("support_conversations")
           .insert({
             visitor_id: visitor_id || null,
             user_id: user_id || null,
-            channel: channel || "widget",
+            channel: convChannel,
             status: "active",
-            ai_enabled: true,
+            ai_enabled: aiEnabled,
           })
           .select()
           .single();

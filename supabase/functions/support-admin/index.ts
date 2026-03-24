@@ -36,7 +36,8 @@ serve(async (req) => {
     const encryptionKey = Deno.env.get("SUPPORT_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
-    const { action, conversation_id, message, status, attachment_url, offset, limit: reqLimit, before_id } = await req.json();
+    const body = await req.json();
+    const { action, conversation_id, message, status, attachment_url, offset, limit: reqLimit, before_id } = body;
 
     const decryptMessages = async (messages: any[]) => {
       const results = [];
@@ -265,6 +266,31 @@ serve(async (req) => {
         const totalCount = Math.max(attentionCount || 0, newMsgCount);
 
         return new Response(JSON.stringify({ count: totalCount }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      case "get_ai_defaults": {
+        const { data: defaults } = await supabase
+          .from("support_ai_defaults")
+          .select("*")
+          .order("channel");
+
+        return new Response(JSON.stringify({ defaults: defaults || [] }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      case "set_ai_default": {
+        const ch = body.channel;
+        const enabled = body.ai_enabled;
+        if (!ch || typeof enabled !== "boolean") throw new Error("Missing channel or ai_enabled");
+
+        await supabase
+          .from("support_ai_defaults")
+          .upsert({ channel: ch, ai_enabled: enabled, updated_at: new Date().toISOString() }, { onConflict: "channel" });
+
+        return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
