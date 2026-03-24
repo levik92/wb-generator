@@ -36,7 +36,8 @@ serve(async (req) => {
     const encryptionKey = Deno.env.get("SUPPORT_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
-    const { action, conversation_id, message, status, attachment_url, offset, limit: reqLimit, before_id } = await req.json();
+    const body = await req.json();
+    const { action, conversation_id, message, status, attachment_url, offset, limit: reqLimit, before_id } = body;
 
     const decryptMessages = async (messages: any[]) => {
       const results = [];
