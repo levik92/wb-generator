@@ -173,6 +173,9 @@ export const GenerateCards = ({
   const [styleAutoDescription, setStyleAutoDescription] = useState(true);
   const [styleGenerating, setStyleGenerating] = useState(false);
   
+  // Ref to save images before style generation for merging after completion
+  const preStyleImagesRef = useRef<any[]>([]);
+  
   const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
 
   // Load generation count from localStorage on mount
