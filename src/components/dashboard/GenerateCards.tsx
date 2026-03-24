@@ -2282,7 +2282,18 @@ export const GenerateCards = ({
                     </div>
                     
                     <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
-                      <h3 className="font-medium text-sm sm:text-base text-center sm:text-left truncate">{image.stage}</h3>
+                      <div className="flex items-center gap-2 justify-center sm:justify-start">
+                        <h3 className="font-medium text-sm sm:text-base truncate">{image.stage}</h3>
+                        {image.isStyled && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                            {(() => {
+                              const styledOfSameType = generatedImages.filter(img => img.isStyled && img.stageIndex === image.stageIndex);
+                              const styleIdx = styledOfSameType.indexOf(image);
+                              return `Стиль (${styleIdx + 1})`;
+                            })()}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
                       </p>

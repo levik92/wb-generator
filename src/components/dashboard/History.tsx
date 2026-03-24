@@ -1182,9 +1182,16 @@ export const History = ({
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
-                        {(img.is_edited || img.is_regenerated) && (
+                        {(img.is_edited || img.is_regenerated || img.is_styled) && (
                           <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
                             {(() => {
+                              if (img.is_styled) {
+                                const styledOfSameType = generation.output_data.images.filter((i: any) => 
+                                  i.is_styled && i.type === img.type
+                                );
+                                const versionIndex = styledOfSameType.indexOf(img);
+                                return `Стиль (${versionIndex + 1})`;
+                              }
                               const matchingImages = generation.output_data.images.filter((i: any) => 
                                 img.is_regenerated ? i.is_regenerated : i.is_edited
                               );
