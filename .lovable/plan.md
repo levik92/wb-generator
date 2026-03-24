@@ -1,43 +1,46 @@
 
 
-# Fix: Deduplication logic drops referral with commission data
+# Оптимизация скорости загрузки
 
-## Problem
-For partner `cat.web@mail.ru`, client `cherryden666@gmail.com` has 2 duplicate referral records:
-- Record 1 (`e0eecceb`, 14:34:26.917): status=active, total_payments=990, total_commission=198, has commission records
-- Record 2 (`a5cf04c8`, 14:34:27.204): status=registered, total_payments=0, total_commission=0, no commissions
+## Обнаруженные проблемы
 
-The dedup logic keeps the **latest by date** — Record 2 (the empty one). Record 1 with all the payment data gets discarded.
+1. **Дашборд загружает ВСЕ вкладки сразу** — 12+ компонентов импортируются при открытии, хотя видна только одна вкладка
+2. **framer-motion (~30KB)** загружается на каждой странице, даже для простых анимаций
+3. **SupportWidget** грузится на всех публичных страницах
+4. **AuthRedirect** делает async-запрос к Supabase перед показом лендинга даже для новых посетителей
+5. **DashboardSidebar** дублирует запрос `getUser()`, который уже делает родитель
 
-Additionally, `invited_clients_count = 2` in `partner_profiles` is wrong (should be 1).
+## План оптимизации
 
-## Plan
+### Шаг 1: Ленивая загрузка вкладок дашборда
+Все 12 компонентов вкладок в `Dashboard.tsx` перевести на `React.lazy()`. Загружается только активная вкладка.
 
-### 1. Fix deduplication logic in AdminPartners.tsx
-Change the dedup comparator to prefer the record with higher `total_commission` (or `total_payments`), falling back to latest date only when equal. This ensures the record with actual data is kept.
+### Шаг 2: CSS-анимации вместо framer-motion
+В критических компонентах (`SupportWidget`, `DashboardPageWrapper`, `CasesPromoBanner`) заменить `motion.div` на CSS `@keyframes`. Убирает framer-motion из начальной загрузки.
 
-In both the main path (line ~184) and fallback path (line ~214):
-```
-// Keep record with more commission data; if equal, keep latest
-const existing = uniqueMap.get(r.referred_user_id);
-if (!existing || r.total_commission > existing.total_commission || 
-    (r.total_commission === existing.total_commission && new Date(r.registered_at) > new Date(existing.registered_at))) {
-  uniqueMap.set(r.referred_user_id, r);
-}
-```
+### Шаг 3: Ленивая загрузка SupportWidget
+В `App.tsx` обернуть `SupportWidget` в `lazy()`.
 
-Also merge `payments` arrays from duplicates so no commission records are lost.
+### Шаг 4: Передача данных через props в сайдбар
+Убрать дублирующий вызов API в `DashboardSidebar.tsx`, передавать `profile` и `hasUnreadNews` через props.
 
-### 2. Fix the duplicate referral data
-Use the insert tool to delete the duplicate empty referral record (`a5cf04c8`) and fix `invited_clients_count` to 1.
+### Шаг 5: Быстрый путь для лендинга
+В `AuthRedirect.tsx` — если в localStorage нет токена Supabase, сразу показывать контент без async-проверки.
 
-### 3. Fix the edge function dedup (optional but recommended)
-Also merge payments from duplicate referrals in `get-partner-referrals/index.ts` server-side, so the response already contains consolidated data.
+### Шаг 6: Разделение бандла в Vite
+Добавить `manualChunks`: react-vendor, ui-vendor, framer-motion, supabase — отдельными чанками.
 
-## Files to modify
-- `src/components/admin/AdminPartners.tsx` — fix dedup logic (lines ~182-198)
+## Ожидаемый эффект
+- **Лендинг**: на 40-60% быстрее (нет задержки auth, нет framer-motion)
+- **Дашборд**: на ~50% быстрее первая загрузка (ленивые вкладки, минус 200-400KB JS)
+- **Админка**: тоже выигрывает от ленивой загрузки
 
-## Database fixes
-- DELETE duplicate referral `a5cf04c8-6665-459e-b299-184b74c4bc6f`
-- UPDATE `partner_profiles` SET `invited_clients_count = 1` WHERE `id = '4ee91fc4-9280-4f3a-96c2-87b6c35e6e23'`
+## Файлы для изменения
+- `src/pages/Dashboard.tsx` — lazy-импорты вкладок
+- `src/App.tsx` — lazy SupportWidget
+- `src/components/AuthRedirect.tsx` — fast-path через localStorage
+- `src/components/support/SupportWidget.tsx` — CSS вместо framer-motion
+- `src/components/dashboard/DashboardPageWrapper.tsx` — CSS вместо framer-motion
+- `src/components/dashboard/DashboardSidebar.tsx` — убрать дублирующий API-вызов
+- `vite.config.ts` — manualChunks
 
