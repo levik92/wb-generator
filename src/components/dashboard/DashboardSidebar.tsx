@@ -23,67 +23,30 @@ export const DashboardSidebar = ({
   profile
 }: DashboardSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [hasUnreadNews, setHasUnreadNews] = useState(false);
-
-  // Check for unread news
-  useEffect(() => {
-    const checkUnreadNews = async () => {
-      try {
-        const {
-          data: {
-            user
-          }
-        } = await supabase.auth.getUser();
-        if (!user) return;
-        const {
-          data: newsData
-        } = await (supabase as any).from('news').select('id, published_at').eq('is_published', true).order('published_at', {
-          ascending: false
-        }).limit(5);
-        if (newsData && newsData.length > 0) {
-          const {
-            data: readData
-          } = await (supabase as any).from('news_read_status').select('news_id').eq('user_id', user.id);
-          const readIds = new Set((readData as any)?.map((r: any) => r.news_id) || []);
-          const hasUnread = (newsData as any).some((news: any) => !readIds.has(news.id));
-          setHasUnreadNews(hasUnread);
-        }
-      } catch (error) {
-        console.error('Error checking unread news:', error);
-      }
-    };
-    checkUnreadNews();
-  }, []);
-
-  // Count unread news
   const [unreadCount, setUnreadCount] = useState(0);
+  const hasUnreadNews = unreadCount > 0;
+
+  // Check & count unread news in a single effect
   useEffect(() => {
     const countUnreadNews = async () => {
       try {
-        const {
-          data: {
-            user
-          }
-        } = await supabase.auth.getUser();
-        if (!user) return;
         const {
           data: newsData
         } = await (supabase as any).from('news').select('id').eq('is_published', true);
         if (newsData && newsData.length > 0) {
           const {
             data: readData
-          } = await (supabase as any).from('news_read_status').select('news_id').eq('user_id', user.id);
+          } = await (supabase as any).from('news_read_status').select('news_id').eq('user_id', profile.id);
           const readIds = new Set((readData as any)?.map((r: any) => r.news_id) || []);
           const count = (newsData as any).filter((news: any) => !readIds.has(news.id)).length;
           setUnreadCount(count);
-          setHasUnreadNews(count > 0);
         }
       } catch (error) {
         console.error('Error counting unread news:', error);
       }
     };
     countUnreadNews();
-  }, []);
+  }, [profile.id]);
   const menuItems = [{
     id: 'cards',
     label: 'Карточки товара',

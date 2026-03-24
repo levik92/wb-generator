@@ -10,19 +10,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { GenerateCards } from "@/components/dashboard/GenerateCards";
-import { GenerateDescription } from "@/components/dashboard/GenerateDescription";
-import { History } from "@/components/dashboard/History";
-import Balance from "@/components/dashboard/Balance";
-import { Bonuses } from "@/components/dashboard/Bonuses";
-import { Settings } from "@/components/dashboard/Settings";
-import LabelGenerator from "@/components/dashboard/LabelGenerator";
 import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
-import News from "@/pages/News";
-import { VideoCovers } from "@/components/dashboard/VideoCovers";
-import Learning from "@/pages/Learning";
 import Footer from "@/components/Footer";
-import { SupportChat } from "@/components/support/SupportChat";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones } from "lucide-react";
@@ -33,6 +22,27 @@ import { MobileSideMenu } from "@/components/mobile/MobileSideMenu";
 import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
 import { OnboardingSurvey } from "@/components/dashboard/OnboardingSurvey";
 import { useNotifications } from "@/hooks/useNotifications";
+
+// Lazy-loaded tab components
+const GenerateCards = lazy(() => import("@/components/dashboard/GenerateCards").then(m => ({ default: m.GenerateCards })));
+const GenerateDescription = lazy(() => import("@/components/dashboard/GenerateDescription").then(m => ({ default: m.GenerateDescription })));
+const History = lazy(() => import("@/components/dashboard/History").then(m => ({ default: m.History })));
+const Balance = lazy(() => import("@/components/dashboard/Balance"));
+const Bonuses = lazy(() => import("@/components/dashboard/Bonuses").then(m => ({ default: m.Bonuses })));
+const Settings = lazy(() => import("@/components/dashboard/Settings").then(m => ({ default: m.Settings })));
+const LabelGenerator = lazy(() => import("@/components/dashboard/LabelGenerator"));
+const News = lazy(() => import("@/pages/News"));
+const VideoCovers = lazy(() => import("@/components/dashboard/VideoCovers").then(m => ({ default: m.VideoCovers })));
+const Learning = lazy(() => import("@/pages/Learning"));
+const SupportChat = lazy(() => import("@/components/support/SupportChat").then(m => ({ default: m.SupportChat })));
+
+// Tab loading spinner
+const TabLoader = () => (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+  </div>
+);
+
 interface Profile {
   id: string;
   email: string;
@@ -202,8 +212,6 @@ const Dashboard = () => {
           error: referrerError
         } = await supabase.from('profiles').select('id').eq('referral_code', pendingReferralCode).single();
         if (!referrerError && referrerData && referrerData.id !== userId) {
-          // Just save the referrer - no tokens on registration anymore
-          // Tokens will be awarded to BOTH users after first payment
           const {
             error: updateError
           } = await supabase.from('profiles').update({
@@ -428,7 +436,9 @@ const Dashboard = () => {
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
           <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
-          {renderContent()}
+          <Suspense fallback={<TabLoader />}>
+            {renderContent()}
+          </Suspense>
         </main>
         
         {!isMobile && <Footer />}

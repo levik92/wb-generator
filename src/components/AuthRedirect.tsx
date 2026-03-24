@@ -9,12 +9,25 @@ interface AuthRedirectProps {
 }
 
 export const AuthRedirect = ({ children }: AuthRedirectProps) => {
+  // Fast path: if no stored session, render children immediately
+  const hasStoredSession = (() => {
+    try {
+      const keys = Object.keys(localStorage);
+      return keys.some(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+    } catch {
+      return false;
+    }
+  })();
+
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(hasStoredSession);
   const [searchParams] = useSearchParams();
   const initialized = useRef(false);
 
   useEffect(() => {
+    // If no stored session, skip auth check entirely
+    if (!hasStoredSession) return;
+    
     // Prevent double initialization in React StrictMode
     if (initialized.current) return;
     initialized.current = true;
