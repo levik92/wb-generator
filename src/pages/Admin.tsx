@@ -55,6 +55,7 @@ const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   blog: { title: 'Блог', subtitle: 'Статьи и публикации' },
   video_lessons: { title: 'Обучение', subtitle: 'Видеоуроки для пользователей' },
   support: { title: 'Поддержка', subtitle: 'Чаты с пользователями' },
+  utm: { title: 'Источники трафика', subtitle: 'UTM-ссылки и аналитика каналов' },
 };
 
 export default function Admin() {
