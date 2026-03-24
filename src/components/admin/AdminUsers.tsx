@@ -43,6 +43,7 @@ interface UserDetails {
   referrals: any[];
   tokenTransactions: any[];
   surveyResponses: { question_key: string; answer: string }[];
+  utmSourceName: string | null;
 }
 interface AdminUsersProps {
   users: User[];
