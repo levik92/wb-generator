@@ -70,14 +70,17 @@ serve(async (req) => {
 
     switch (action) {
       case "list_conversations": {
-        const { data: conversations, error } = await supabase
+        const pageSize = reqLimit || 10;
+        const pageOffset = offset || 0;
+
+        const { data: conversations, error, count: totalCount } = await supabase
           .from("support_conversations")
-          .select("*")
-          .order("updated_at", { ascending: false });
+          .select("*", { count: "exact" })
+          .order("updated_at", { ascending: false })
+          .range(pageOffset, pageOffset + pageSize - 1);
 
         if (error) throw error;
 
-        // Get last message for each conversation
         const enriched = [];
         for (const conv of conversations || []) {
           const { data: lastMsg } = await supabase
@@ -97,7 +100,6 @@ serve(async (req) => {
             lastMessageText = decrypted || "";
           }
 
-          // Get user email if user_id exists
           let userEmail = null;
           if (conv.user_id) {
             const { data: profile } = await supabase
@@ -123,7 +125,7 @@ serve(async (req) => {
           });
         }
 
-        return new Response(JSON.stringify({ conversations: enriched }), {
+        return new Response(JSON.stringify({ conversations: enriched, total: totalCount || 0, hasMore: (pageOffset + pageSize) < (totalCount || 0) }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
