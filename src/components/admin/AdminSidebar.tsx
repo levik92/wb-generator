@@ -15,7 +15,8 @@ import {
   LayoutDashboard,
   FileText,
   GraduationCap,
-  Headphones
+  Headphones,
+  Crosshair
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
