@@ -282,15 +282,13 @@ serve(async (req) => {
       }
 
       case "set_ai_default": {
-        const { channel: ch, ai_enabled: enabled } = await req.json().catch(() => ({}));
-        if (!ch) {
-          // Re-parse from original body
-        }
-        const body2 = { channel: conversation_id, ai_enabled: status === "true" };
-        
+        const ch = body.channel;
+        const enabled = body.ai_enabled;
+        if (!ch || typeof enabled !== "boolean") throw new Error("Missing channel or ai_enabled");
+
         await supabase
           .from("support_ai_defaults")
-          .upsert({ channel: ch || conversation_id, ai_enabled: enabled ?? (status === "true"), updated_at: new Date().toISOString() }, { onConflict: "channel" });
+          .upsert({ channel: ch, ai_enabled: enabled, updated_at: new Date().toISOString() }, { onConflict: "channel" });
 
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
