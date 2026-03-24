@@ -2520,25 +2520,7 @@ export const GenerateCards = ({
 
               {/* Description field */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="font-semibold">Описание</Label>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={styleAutoDescription}
-                      onCheckedChange={(checked) => {
-                        setStyleAutoDescription(checked);
-                        if (checked) {
-                          setStyleDescription(jobData?.description || '');
-                        } else {
-                          setStyleDescription('');
-                        }
-                      }}
-                    />
-                    <Label className="text-xs font-normal text-muted-foreground cursor-pointer">
-                      Придумай сам
-                    </Label>
-                  </div>
-                </div>
+                <Label className="font-semibold">Описание</Label>
                 <Textarea 
                   placeholder="Опишите пожелания для новых карточек..."
                   value={styleDescription}
@@ -2547,12 +2529,27 @@ export const GenerateCards = ({
                   disabled={styleAutoDescription}
                   className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
                 />
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                    <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
-                    <span>Стоимость: <span className="font-semibold">{styleSelectedCards.length * photoGenerationPrice} токенов</span></span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
+                    <Checkbox 
+                      id="styleAutoDescMobile"
+                      checked={styleAutoDescription} 
+                      onCheckedChange={(checked) => {
+                        setStyleAutoDescription(!!checked);
+                        if (checked) {
+                          setStyleDescription(jobData?.description || '');
+                        } else {
+                          setStyleDescription('');
+                        }
+                      }}
+                    />
+                    <Label htmlFor="styleAutoDescMobile" className="text-sm font-normal cursor-pointer">
+                      Придумай сам
+                    </Label>
                   </div>
-                  <span>{styleDescription.length}/1200</span>
+                  <div className="text-xs text-muted-foreground">
+                    <span>{styleDescription.length}/1200 символов</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2564,6 +2561,9 @@ export const GenerateCards = ({
               >
                 {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
+                <Badge variant="secondary" className="ml-1">
+                  {styleSelectedCards.length * photoGenerationPrice} токенов
+                </Badge>
               </Button>
               <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
                 Отмена
