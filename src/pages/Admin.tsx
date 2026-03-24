@@ -41,7 +41,7 @@ interface User {
   updated_at: string;
 }
 
-type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons' | 'support';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons' | 'support' | 'utm';
 
 const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   analytics: { title: 'Аналитика', subtitle: 'Статистика и метрики платформы' },
