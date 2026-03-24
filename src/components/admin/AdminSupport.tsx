@@ -506,7 +506,7 @@ export const AdminSupport = () => {
       {pendingPreview && (
         <div className="px-3 pb-2">
           <div className="relative inline-block">
-            <img src={pendingPreview} alt="Превью" className="h-16 rounded-lg object-cover border border-border" />
+            <img src={pendingPreview} alt="Превью" className="h-16 w-16 rounded-lg object-cover border border-border" />
             <button onClick={clearPendingFile}
               className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
               <X className="w-3 h-3" />
