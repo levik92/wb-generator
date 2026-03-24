@@ -7,20 +7,23 @@ import { LogOut, Download, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { lazy, Suspense } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminMobileMenu } from "@/components/admin/AdminMobileMenu";
-import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
-import { AdminUsers } from "@/components/admin/AdminUsers";
-import { PromptManager } from "@/components/dashboard/PromptManager";
 import { DataExportDialog } from "@/components/dashboard/DataExportDialog";
-import { AdminBonuses } from "@/components/admin/AdminBonuses";
-import { AdminNews } from "@/components/admin/AdminNews";
-import { AdminPartners } from "@/components/admin/AdminPartners";
-import { AdminPricing } from "@/components/admin/AdminPricing";
-import { AdminBanners } from "@/components/admin/AdminBanners";
-import { AdminBlog } from "@/components/admin/AdminBlog";
-import { AdminVideoLessons } from "@/components/admin/AdminVideoLessons";
-import { AdminSupport } from "@/components/admin/AdminSupport";
+
+// Lazy-load all admin tab components
+const AdminAnalytics = lazy(() => import("@/components/admin/AdminAnalytics").then(m => ({ default: m.AdminAnalytics })));
+const AdminUsers = lazy(() => import("@/components/admin/AdminUsers").then(m => ({ default: m.AdminUsers })));
+const PromptManager = lazy(() => import("@/components/dashboard/PromptManager").then(m => ({ default: m.PromptManager })));
+const AdminBonuses = lazy(() => import("@/components/admin/AdminBonuses").then(m => ({ default: m.AdminBonuses })));
+const AdminNews = lazy(() => import("@/components/admin/AdminNews").then(m => ({ default: m.AdminNews })));
+const AdminPartners = lazy(() => import("@/components/admin/AdminPartners").then(m => ({ default: m.AdminPartners })));
+const AdminPricing = lazy(() => import("@/components/admin/AdminPricing").then(m => ({ default: m.AdminPricing })));
+const AdminBanners = lazy(() => import("@/components/admin/AdminBanners").then(m => ({ default: m.AdminBanners })));
+const AdminBlog = lazy(() => import("@/components/admin/AdminBlog").then(m => ({ default: m.AdminBlog })));
+const AdminVideoLessons = lazy(() => import("@/components/admin/AdminVideoLessons").then(m => ({ default: m.AdminVideoLessons })));
+const AdminSupport = lazy(() => import("@/components/admin/AdminSupport").then(m => ({ default: m.AdminSupport })));
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 import { UserIcon } from "lucide-react";
@@ -247,15 +250,21 @@ export default function Admin() {
         </header>
 
         <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-full max-w-full"
-          >
-            {renderContent()}
-          </motion.div>
+          <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-[calc(100vh-180px)]">
+              <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+            </div>
+          }>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="w-full max-w-full"
+            >
+              {renderContent()}
+            </motion.div>
+          </Suspense>
         </main>
 
         <Footer />
