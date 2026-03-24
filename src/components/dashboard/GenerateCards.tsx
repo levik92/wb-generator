@@ -343,6 +343,64 @@ export const GenerateCards = ({
             }
           }
 
+          // Also load completed style job results (children of this main job)
+          const { data: styleChildJobs } = await supabase
+            .from('generation_jobs')
+            .select(`
+              *,
+              generation_tasks (
+                id, card_index, card_type, status, image_url, storage_path
+              )
+            `)
+            .eq('user_id', profile.id)
+            .eq('source_job_id', latestJob.id)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: true });
+
+          if (styleChildJobs && styleChildJobs.length > 0) {
+            const styledImages: any[] = [];
+            for (const sj of styleChildJobs) {
+              const tasks = sj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+              for (const task of tasks) {
+                styledImages.push({
+                  id: task.id,
+                  url: task.image_url,
+                  stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                  stageIndex: task.card_index,
+                  cardType: task.card_type,
+                  jobId: sj.id,
+                  isStyled: true
+                });
+              }
+              // Check one level deeper (style of style)
+              const { data: deeperJobs } = await supabase
+                .from('generation_jobs')
+                .select(`*, generation_tasks (id, card_index, card_type, status, image_url, storage_path)`)
+                .eq('user_id', profile.id)
+                .eq('source_job_id', sj.id)
+                .eq('status', 'completed');
+              if (deeperJobs) {
+                for (const dsj of deeperJobs) {
+                  const dtasks = dsj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+                  for (const task of dtasks) {
+                    styledImages.push({
+                      id: task.id,
+                      url: task.image_url,
+                      stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                      stageIndex: task.card_index,
+                      cardType: task.card_type,
+                      jobId: dsj.id,
+                      isStyled: true
+                    });
+                  }
+                }
+              }
+            }
+            if (styledImages.length > 0) {
+              setGeneratedImages(prev => [...prev, ...styledImages]);
+            }
+          }
+
           // Уведомление уже создано database trigger'ом в таблице notifications,
           // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
