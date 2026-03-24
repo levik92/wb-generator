@@ -163,6 +163,14 @@ export const GenerateCards = ({
   // Edit variants: track all versions per image index
   const [imageVariants, setImageVariants] = useState<Record<number, Array<{ url: string; label: string; id?: string }>>>({});
   const [selectedVariant, setSelectedVariant] = useState<Record<number, number>>({});
+
+  // Style generation dialog state
+  const [styleDialogOpen, setStyleDialogOpen] = useState(false);
+  const [styleSourceImage, setStyleSourceImage] = useState<any | null>(null);
+  const [styleSelectedCards, setStyleSelectedCards] = useState<number[]>([]);
+  const [styleDescription, setStyleDescription] = useState("");
+  const [styleAutoDescription, setStyleAutoDescription] = useState(true);
+  const [styleGenerating, setStyleGenerating] = useState(false);
   
   const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
 
