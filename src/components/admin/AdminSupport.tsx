@@ -665,6 +665,7 @@ export const AdminSupport = () => {
           )}
         </div>
       </div>
+      {aiDefaultsBlock}
 
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
         <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
