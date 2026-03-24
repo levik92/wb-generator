@@ -170,7 +170,7 @@ export const GenerateCards = ({
   const [styleSourceImage, setStyleSourceImage] = useState<any | null>(null);
   const [styleSelectedCards, setStyleSelectedCards] = useState<number[]>([]);
   const [styleDescription, setStyleDescription] = useState("");
-  const [styleAutoDescription, setStyleAutoDescription] = useState(true);
+  const [styleAutoDescription, setStyleAutoDescription] = useState(false);
   const [styleGenerating, setStyleGenerating] = useState(false);
   
   // Ref to save images before style generation for merging after completion
