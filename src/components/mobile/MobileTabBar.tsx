@@ -46,18 +46,21 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
       <div className="relative pb-safe">
         <nav className="flex items-center justify-around px-2 py-2">
           {/* Sliding indicator */}
-          <motion.div
-            className="absolute top-1 h-1 bg-primary rounded-full"
-            animate={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 500,
-              damping: 30,
-            }}
-          />
+          {indicatorStyle && (
+            <motion.div
+              className="absolute top-1 h-1 bg-primary rounded-full"
+              initial={false}
+              animate={{
+                left: indicatorStyle.left,
+                width: indicatorStyle.width,
+              }}
+              transition={isFirstRender.current ? { duration: 0 } : {
+                type: "spring",
+                stiffness: 500,
+                damping: 30,
+              }}
+            />
+          )}
           
           {tabs.map((tab, index) => {
             const Icon = tab.icon;
