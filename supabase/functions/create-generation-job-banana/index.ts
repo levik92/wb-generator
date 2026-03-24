@@ -40,7 +40,8 @@ serve(async (req) => {
       referenceImageUrl = null,
       selectedCards = [0, 1, 2, 3, 4, 5], // Default all cards
       unifiedStyling = false,
-      styleSourceImageUrl = null
+      styleSourceImageUrl = null,
+      sourceJobId = null
     } = requestBody;
 
     // Validate input
