@@ -2301,7 +2301,7 @@ export const GenerateCards = ({
               <div className="min-w-0 flex-1">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <Images className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Готовые карточки ({generatedImages.length}/{selectedCards.length})</span>
+                  <span className="truncate">Готовые карточки ({generatedImages.length}/{generatedImages.length + Object.values(imageVariants).reduce((sum, variants) => sum + Math.max(0, variants.length - 1), 0)})</span>
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
                   Ваши сгенерированные карточки готовы к скачиванию
