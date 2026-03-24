@@ -230,7 +230,8 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
       }
 
       // Send in background — don't block UI
-      setAiTyping(true);
+      const shouldShowTyping = aiEnabled;
+      if (shouldShowTyping) setAiTyping(true);
       callApi({
         action: "send_message",
         conversation_id: convId,
