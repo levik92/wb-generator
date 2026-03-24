@@ -358,19 +358,12 @@ export const GenerateCards = ({
             .order('created_at', { ascending: true });
 
           if (styleChildJobs && styleChildJobs.length > 0) {
-            const styledImages: any[] = [];
+            // Collect all styled tasks with their metadata
+            const allStyledTasks: Array<{ task: any; jobId: string }> = [];
             for (const sj of styleChildJobs) {
               const tasks = sj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
               for (const task of tasks) {
-                styledImages.push({
-                  id: task.id,
-                  url: task.image_url,
-                  stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-                  stageIndex: task.card_index,
-                  cardType: task.card_type,
-                  jobId: sj.id,
-                  isStyled: true
-                });
+                allStyledTasks.push({ task, jobId: sj.id });
               }
               // Check one level deeper (style of style)
               const { data: deeperJobs } = await supabase
@@ -383,21 +376,43 @@ export const GenerateCards = ({
                 for (const dsj of deeperJobs) {
                   const dtasks = dsj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
                   for (const task of dtasks) {
-                    styledImages.push({
-                      id: task.id,
-                      url: task.image_url,
-                      stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-                      stageIndex: task.card_index,
-                      cardType: task.card_type,
-                      jobId: dsj.id,
-                      isStyled: true
-                    });
+                    allStyledTasks.push({ task, jobId: dsj.id });
                   }
                 }
               }
             }
-            if (styledImages.length > 0) {
-              setGeneratedImages(prev => [...prev, ...styledImages]);
+            
+            // Add styled tasks as variants of existing images
+            if (allStyledTasks.length > 0) {
+              const variantsUpdate: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
+              const selectUpdate: Record<number, number> = {};
+              
+              // Build variants from current state + styled tasks
+              setImageVariants(prev => {
+                const updated = { ...prev };
+                for (const { task } of allStyledTasks) {
+                  const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                  if (imgIndex >= 0) {
+                    if (!updated[imgIndex]) {
+                      updated[imgIndex] = [{ url: images[imgIndex].url, label: 'Оригинал', id: images[imgIndex].id }];
+                    }
+                    const styleCount = updated[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
+                    updated[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
+                    selectUpdate[imgIndex] = updated[imgIndex].length - 1;
+                  }
+                }
+                Object.assign(variantsUpdate, updated);
+                return updated;
+              });
+              setSelectedVariant(prev => ({ ...prev, ...selectUpdate }));
+              // Update displayed images to show latest styled version
+              setGeneratedImages(prev => prev.map((img, i) => {
+                if (selectUpdate[i] !== undefined && variantsUpdate[i]) {
+                  const variant = variantsUpdate[i][selectUpdate[i]];
+                  return { ...img, url: variant.url };
+                }
+                return img;
+              }));
             }
           }
 
@@ -784,15 +799,42 @@ export const GenerateCards = ({
               url: task.image_url,
               stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
               stageIndex: task.card_index,
-              // IMPORTANT: keep original card type so regeneration/edit flows don't fallback to 'cover'
-              // (e.g. for mainEdit / "Редактирование изображения")
               cardType: task.card_type,
-              jobId: job.id  // Store jobId for regeneration even after currentJobId is cleared
+              jobId: job.id
             }));
-            // If this is a style generation, preserve pre-style images during polling
+            // If this is a style generation, merge styled images as variants
             if (preStyleImagesRef.current.length > 0) {
-              const styledImages = images.map(img => ({ ...img, isStyled: true }));
-              setGeneratedImages([...preStyleImagesRef.current, ...styledImages]);
+              const baseImages = [...preStyleImagesRef.current];
+              
+              // Add each styled image as a variant of the matching stageIndex
+              const updatedVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = { ...imageVariants };
+              const updatedSelected: Record<number, number> = { ...selectedVariant };
+              
+              for (const styledImg of images) {
+                const baseIdx = baseImages.findIndex(b => b.stageIndex === styledImg.stageIndex);
+                if (baseIdx >= 0) {
+                  const existing = updatedVariants[baseIdx] || [];
+                  if (existing.length === 0) {
+                    updatedVariants[baseIdx] = [
+                      { url: baseImages[baseIdx].url, label: 'Оригинал', id: baseImages[baseIdx].id },
+                      { url: styledImg.url, label: 'Стиль 1', id: styledImg.id }
+                    ];
+                    updatedSelected[baseIdx] = 1;
+                  } else {
+                    const styleCount = existing.filter(v => v.label.startsWith('Стиль')).length;
+                    updatedVariants[baseIdx] = [...existing, { url: styledImg.url, label: `Стиль ${styleCount + 1}`, id: styledImg.id }];
+                    updatedSelected[baseIdx] = updatedVariants[baseIdx].length - 1;
+                  }
+                  // Update displayed URL to the new styled version
+                  baseImages[baseIdx] = { ...baseImages[baseIdx], url: styledImg.url };
+                } else {
+                  baseImages.push(styledImg);
+                }
+              }
+              
+              setGeneratedImages(baseImages);
+              setImageVariants(updatedVariants);
+              setSelectedVariant(updatedSelected);
             } else {
               setGeneratedImages(images);
             }
@@ -2287,15 +2329,6 @@ export const GenerateCards = ({
                     <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
                       <div className="flex items-center gap-2 justify-center sm:justify-start">
                         <h3 className="font-medium text-sm sm:text-base truncate">{image.stage}</h3>
-                        {image.isStyled && (
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-                            {(() => {
-                              const styledOfSameType = generatedImages.filter(img => img.isStyled && img.stageIndex === image.stageIndex);
-                              const styleIdx = styledOfSameType.indexOf(image);
-                              return `Стиль (${styleIdx + 1})`;
-                            })()}
-                          </Badge>
-                        )}
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
