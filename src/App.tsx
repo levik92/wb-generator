@@ -7,10 +7,12 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
-import { SupportWidget } from "./components/support/SupportWidget";
 
 // Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
+
+// Lazy-load SupportWidget so it doesn't block initial render
+const SupportWidget = lazy(() => import("./components/support/SupportWidget").then(m => ({ default: m.SupportWidget })));
 
 // Critical authenticated pages - lazy loaded (not needed for landing)
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -54,7 +56,11 @@ const SupportWidgetWrapper = () => {
   const location = useLocation();
   const isPublicPage = !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/admin');
   if (!isPublicPage) return null;
-  return <SupportWidget />;
+  return (
+    <Suspense fallback={null}>
+      <SupportWidget />
+    </Suspense>
+  );
 };
 
 const App = () => {

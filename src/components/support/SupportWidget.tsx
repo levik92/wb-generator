@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Loader2, Bot, User, Headphones, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -170,150 +169,137 @@ export const SupportWidget = () => {
   return (
     <>
       {/* Chat Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-50"
+      {!isOpen && (
+        <div className="fixed bottom-6 right-6 z-50 animate-[scaleIn_0.3s_ease-out]">
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="w-14 h-14 rounded-full shadow-lg shadow-purple-500/40 bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 hover:from-violet-400 hover:via-purple-500 hover:to-indigo-600 text-white border-0"
           >
-            <Button
-              onClick={() => setIsOpen(true)}
-              className="w-14 h-14 rounded-full shadow-lg shadow-purple-500/40 bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 hover:from-violet-400 hover:via-purple-500 hover:to-indigo-600 text-white border-0"
-            >
-              <MessageCircle className="w-7 h-7" />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <MessageCircle className="w-7 h-7" />
+          </Button>
+        </div>
+      )}
 
       {/* Chat Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="fixed bottom-4 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[500px] max-h-[calc(100vh-2rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary text-primary-foreground rounded-t-2xl">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <Headphones className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Поддержка WBGen</p>
-                  <p className="text-xs opacity-80">Обычно отвечаем быстро</p>
-                </div>
+      {isOpen && (
+        <div
+          className="fixed bottom-4 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[500px] max-h-[calc(100vh-2rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-[chatPanelIn_0.25s_ease-out]"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary text-primary-foreground rounded-t-2xl">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <Headphones className="w-4 h-4" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full hover:bg-white/20 text-primary-foreground"
-                onClick={() => setIsOpen(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              <div>
+                <p className="text-sm font-semibold">Поддержка WBGen</p>
+                <p className="text-xs opacity-80">Обычно отвечаем быстро</p>
+              </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full hover:bg-white/20 text-primary-foreground"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {initialLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {initialLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center px-6">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <MessageCircle className="w-6 h-6 text-primary" />
                 </div>
-              ) : messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center px-6">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                    <MessageCircle className="w-6 h-6 text-primary" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground mb-1">Привет! 👋</p>
-                  <p className="text-xs text-muted-foreground">
-                    Задайте вопрос, и наш ассистент поможет вам разобраться с сервисом.
-                  </p>
-                </div>
-              ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex flex-col ${msg.sender_type === "user" ? "items-end" : "items-start"}`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        {getSenderIcon(msg.sender_type)}
-                        {getSenderName(msg.sender_type)}
-                      </span>
-                    </div>
-                    <div
-                      className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                        msg.sender_type === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : msg.sender_type === "system"
-                          ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
-                          : "bg-secondary text-secondary-foreground rounded-bl-md"
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground mt-0.5">
-                      {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                <p className="text-sm font-medium text-foreground mb-1">Привет! 👋</p>
+                <p className="text-xs text-muted-foreground">
+                  Задайте вопрос, и наш ассистент поможет вам разобраться с сервисом.
+                </p>
+              </div>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex flex-col ${msg.sender_type === "user" ? "items-end" : "items-start"}`}
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      {getSenderIcon(msg.sender_type)}
+                      {getSenderName(msg.sender_type)}
                     </span>
                   </div>
-                ))
-              )}
-              {loading && (
-                <div className="flex items-start gap-2">
-                  <div className="bg-secondary rounded-2xl rounded-bl-md px-3 py-2">
-                    <div className="flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                    </div>
+                  <div
+                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                      msg.sender_type === "user"
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : msg.sender_type === "system"
+                        ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
+                        : "bg-secondary text-secondary-foreground rounded-bl-md"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground mt-0.5">
+                    {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+              ))
+            )}
+            {loading && (
+              <div className="flex items-start gap-2">
+                <div className="bg-secondary rounded-2xl rounded-bl-md px-3 py-2">
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-            {/* Input */}
-            <div className="border-t border-border p-3">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
-                className="flex items-center gap-2"
+          {/* Input */}
+          <div className="border-t border-border p-3">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Напишите сообщение..."
+                className="flex-1 bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+                disabled={loading}
+                maxLength={1000}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                className="h-9 w-9 rounded-xl shrink-0"
+                disabled={!input.trim() || loading}
               >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Напишите сообщение..."
-                  className="flex-1 bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-                  disabled={loading}
-                  maxLength={1000}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  className="h-9 w-9 rounded-xl shrink-0"
-                  disabled={!input.trim() || loading}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </form>
-              <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                Все сообщения зашифрованы и безопасны
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+            <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center justify-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              Все сообщения зашифрованы и безопасны
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };

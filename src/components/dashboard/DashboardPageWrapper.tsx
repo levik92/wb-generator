@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface DashboardPageWrapperProps {
@@ -15,19 +14,12 @@ export const DashboardPageWrapper = ({
   className = "" 
 }: DashboardPageWrapperProps) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`space-y-6 ${className}`}
+    <div
+      className={`space-y-6 animate-[fadeSlideIn_0.4s_ease-out] ${className}`}
     >
       {/* Header */}
       <div className="relative">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
+        <div className="animate-[fadeSlideLeft_0.5s_ease-out_0.1s_both]">
           <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
             {title}
           </h2>
@@ -36,17 +28,13 @@ export const DashboardPageWrapper = ({
               {subtitle}
             </p>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Content */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      <div className="animate-[fadeIn_0.5s_ease-out_0.2s_both]">
         {children}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
