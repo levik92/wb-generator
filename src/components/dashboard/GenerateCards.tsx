@@ -834,14 +834,6 @@ export const GenerateCards = ({
             } else {
               setGeneratedImages(images);
             }
-                    result[idx] = { ...result[idx], url: styledImg.url };
-                  }
-                }
-                return result;
-              });
-            } else {
-              setGeneratedImages(images);
-            }
           }
 
           // Check if ALL cards are completed (not just job status)
