@@ -65,6 +65,12 @@ const SupportWidgetWrapper = () => {
   );
 };
 
+// Global UTM tracking - runs on every page load
+const UtmTracker = () => {
+  useUtmTracking();
+  return null;
+};
+
 const App = () => {
 
   return (
