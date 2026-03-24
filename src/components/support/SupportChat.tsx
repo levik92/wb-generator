@@ -351,7 +351,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         {pendingPreview && (
           <div className="px-4 pb-2">
             <div className="relative inline-block">
-              <img src={pendingPreview} alt="Превью" className="h-20 rounded-lg object-cover border border-border" />
+              <img src={pendingPreview} alt="Превью" className="h-20 w-20 rounded-lg object-cover border border-border" />
               <button
                 onClick={clearPendingFile}
                 className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs"
