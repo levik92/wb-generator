@@ -178,6 +178,9 @@ const Auth = () => {
       if (captchaToken) signupOptions.captchaToken = captchaToken;
       if (referralCode) signupOptions.data = { referral_code: referralCode };
       if (partnerCode) signupOptions.data = { ...signupOptions.data, partner_code: partnerCode };
+      
+      // Store UTM source ID for post-registration update
+      const utmSourceId = getStoredUtmSourceId();
 
       const { error } = await supabase.auth.signUp({ email, password, options: signupOptions });
 
