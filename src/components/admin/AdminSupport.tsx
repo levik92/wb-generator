@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle, Paperclip, Settings } from "lucide-react";
+import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -498,37 +498,38 @@ export const AdminSupport = () => {
           </>
         )}
       </div>
-      
-      {/* AI Defaults Settings */}
-      <div className="border-t border-border p-4">
-        <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
-          <Settings className="w-3.5 h-3.5" />
-          ИИ по умолчанию
-        </h4>
-        <div className="space-y-2.5">
-          {[
-            { key: "widget", label: "Виджет" },
-            { key: "dashboard", label: "Дашборд" },
-          ].map(({ key, label }) => (
-            <div key={key} className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{label}</span>
-              <button
-                onClick={() => toggleAiDefault(key)}
-                className={`relative w-9 h-5 rounded-full transition-colors ${
-                  aiDefaults[key] ? "bg-primary" : "bg-muted"
-                }`}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                  aiDefaults[key] ? "translate-x-4" : "translate-x-0"
-                }`} />
-              </button>
-            </div>
-          ))}
-        </div>
-        <p className="text-[10px] text-muted-foreground mt-2">
-          Определяет, запустится ли ИИ автоматически при новом обращении
-        </p>
+    </div>
+  );
+
+  const aiDefaultsBlock = (
+    <div className="border border-border rounded-2xl bg-card p-4 mt-4">
+      <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+        <Bot className="w-4 h-4 text-primary" />
+        ИИ по умолчанию
+      </h4>
+      <div className="space-y-3">
+        {[
+          { key: "widget", label: "Виджет" },
+          { key: "dashboard", label: "Дашборд" },
+        ].map(({ key, label }) => (
+          <div key={key} className="flex items-center justify-between">
+            <span className="text-sm text-foreground">{label}</span>
+            <button
+              onClick={() => toggleAiDefault(key)}
+              className={`relative w-10 h-[22px] rounded-full transition-colors ${
+                aiDefaults[key] ? "bg-primary" : "bg-muted"
+              }`}
+            >
+              <span className={`absolute top-[3px] left-[3px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                aiDefaults[key] ? "translate-x-[18px]" : "translate-x-0"
+              }`} />
+            </button>
+          </div>
+        ))}
       </div>
+      <p className="text-[10px] text-muted-foreground mt-3">
+        Определяет, запустится ли ИИ автоматически при новом обращении
+      </p>
     </div>
   );
 
@@ -635,6 +636,7 @@ export const AdminSupport = () => {
         <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
           {selectedConv ? chatViewContent : conversationListContent}
         </div>
+        {!selectedConv && aiDefaultsBlock}
         <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
           <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
             <button onClick={() => setPreviewImage(null)}
@@ -663,6 +665,7 @@ export const AdminSupport = () => {
           )}
         </div>
       </div>
+      {aiDefaultsBlock}
 
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
         <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">

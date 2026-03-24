@@ -199,7 +199,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         clearPendingFile();
       }
 
-      // Optimistic update
+      // Optimistic update — release loading immediately so UI isn't blocked
       setMessages((prev) => [
         ...prev,
         {
@@ -210,20 +210,23 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
           attachment_url: attachmentUrl,
         },
       ]);
+      setLoading(false);
+      inputRef.current?.focus();
 
-      await callApi({
+      // Send in background — don't block UI
+      callApi({
         action: "send_message",
         conversation_id: convId,
         message: text || "📎 Изображение",
         attachment_url: attachmentUrl,
-      });
-
-      // Refresh latest messages
-      const msgs = await loadMessages(convId);
-      setMessages(msgs);
+      }).then(() => loadMessages(convId!))
+        .then((msgs) => {
+          shouldScrollRef.current = true;
+          setMessages(msgs);
+        })
+        .catch((e) => console.error("Send error:", e));
     } catch (e) {
       console.error("Send error:", e);
-    } finally {
       setLoading(false);
       inputRef.current?.focus();
     }
