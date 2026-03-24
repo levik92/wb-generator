@@ -308,8 +308,8 @@ export const GenerateCards = ({
           const { data: completedEditJobs } = await editQuery;
 
           let restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
+          let restoredSelected: Record<number, number> = {};
           if (completedEditJobs && completedEditJobs.length > 0) {
-            const restoredSelected: Record<number, number> = {};
 
             for (const editJob of completedEditJobs) {
               const editTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
@@ -385,15 +385,12 @@ export const GenerateCards = ({
             // Add styled tasks as variants of existing images, or as new images if card type is new
             if (allStyledTasks.length > 0) {
               // Build variants synchronously to avoid race conditions between state setters
-              const currentVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
-              const selectUpdate: Record<number, number> = {};
+              const currentVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {
+                ...restoredVariants,
+              };
+              const styleSelected: Record<number, number> = {};
               const newImages: typeof images = [];
-              
-              // Get current edit/regen variants that were already restored above
-              // We need to merge with them, not overwrite
-              const existingVariants = { ...(Object.keys(restoredVariants || {}).length > 0 ? restoredVariants : {}) };
-              Object.assign(currentVariants, existingVariants);
-              
+
               for (const { task, jobId: styledJobId } of allStyledTasks) {
                 let imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
                 if (imgIndex < 0) {
@@ -402,7 +399,7 @@ export const GenerateCards = ({
                     imgIndex = images.length + newIdx;
                   }
                 }
-                
+
                 if (imgIndex >= 0) {
                   if (!currentVariants[imgIndex]) {
                     const sourceImg = imgIndex < images.length ? images[imgIndex] : newImages[imgIndex - images.length];
@@ -410,7 +407,7 @@ export const GenerateCards = ({
                   }
                   const styleCount = currentVariants[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
                   currentVariants[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
-                  selectUpdate[imgIndex] = currentVariants[imgIndex].length - 1;
+                  styleSelected[imgIndex] = currentVariants[imgIndex].length - 1;
                 } else {
                   newImages.push({
                     id: task.id,
@@ -422,18 +419,23 @@ export const GenerateCards = ({
                   });
                 }
               }
-              
-              // Set all states synchronously with computed values
+
+              const finalSelected = {
+                ...restoredSelected,
+                ...styleSelected,
+              };
+
               setImageVariants(currentVariants);
-              setSelectedVariant(prev => ({ ...prev, ...selectUpdate }));
-              // Update displayed images to match selected variants
+              setSelectedVariant(finalSelected);
+
               const updatedImages = images.map((img, i) => {
-                if (selectUpdate[i] !== undefined && currentVariants[i]) {
-                  const variant = currentVariants[i][selectUpdate[i]];
+                if (currentVariants[i] && finalSelected[i] !== undefined) {
+                  const variant = currentVariants[i][finalSelected[i]];
                   return { ...img, url: variant.url };
                 }
                 return img;
               });
+
               setGeneratedImages([...updatedImages, ...newImages]);
             }
           }
