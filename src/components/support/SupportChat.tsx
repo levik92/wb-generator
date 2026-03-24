@@ -104,6 +104,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         });
         if (conversation) {
           setConversationId(conversation.id);
+          setAiEnabled(conversation.ai_enabled ?? false);
           const msgs = await loadMessages(conversation.id);
           setMessages(msgs);
           shouldScrollRef.current = true;
