@@ -24,7 +24,6 @@ const SectionLoader = () => (
 );
 
 const Landing = () => {
-  useUtmTracking();
   useEffect(() => {
     // Force dark mode for landing page
     document.documentElement.classList.add("dark");

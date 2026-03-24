@@ -16,7 +16,6 @@ import { SmartCaptcha } from "@yandex/smart-captcha";
 import { getStoredUtmSourceId } from "@/hooks/useUtmTracking";
 
 const Auth = () => {
-  useUtmTracking();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
