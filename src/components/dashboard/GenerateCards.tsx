@@ -764,6 +764,15 @@ export const GenerateCards = ({
                 title: "Генерация завершена!",
                 description: `Все карточки готовы для скачивания`
               });
+
+              // Merge with pre-style images if this was a style generation
+              if (preStyleImagesRef.current.length > 0) {
+                setGeneratedImages(prev => {
+                  const styledImages = prev.map(img => ({ ...img, isStyled: true }));
+                  return [...preStyleImagesRef.current, ...styledImages];
+                });
+                preStyleImagesRef.current = [];
+              }
             } else if (job.status === 'failed') {
               toast({
                 title: "Ошибка генерации",
