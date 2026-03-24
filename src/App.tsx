@@ -80,6 +80,7 @@ const App = () => {
       <Sonner />
       <CookieConsent />
       <BrowserRouter>
+        <UtmTracker />
         <SupportWidgetWrapper />
         <Suspense fallback={<PageLoader />}>
           <Routes>
