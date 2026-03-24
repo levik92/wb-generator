@@ -80,7 +80,7 @@ const Footer = () => {
         <div className="border-t border-border pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-2">
             <p className="text-sm text-muted-foreground">
-              © 2025 ООО «АЛЬТАИР». Все права защищены.
+              © 2026. ООО «АЛЬТАИР». Все права защищены.
             </p>
             <p className="text-sm text-muted-foreground">
               ИНН: 9724238597
