@@ -498,6 +498,37 @@ export const AdminSupport = () => {
           </>
         )}
       </div>
+      
+      {/* AI Defaults Settings */}
+      <div className="border-t border-border p-4">
+        <h4 className="text-xs font-semibold text-muted-foreground mb-3 flex items-center gap-1.5">
+          <Settings className="w-3.5 h-3.5" />
+          ИИ по умолчанию
+        </h4>
+        <div className="space-y-2.5">
+          {[
+            { key: "widget", label: "Виджет" },
+            { key: "dashboard", label: "Дашборд" },
+          ].map(({ key, label }) => (
+            <div key={key} className="flex items-center justify-between">
+              <span className="text-sm text-foreground">{label}</span>
+              <button
+                onClick={() => toggleAiDefault(key)}
+                className={`relative w-9 h-5 rounded-full transition-colors ${
+                  aiDefaults[key] ? "bg-primary" : "bg-muted"
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                  aiDefaults[key] ? "translate-x-4" : "translate-x-0"
+                }`} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2">
+          Определяет, запустится ли ИИ автоматически при новом обращении
+        </p>
+      </div>
     </div>
   );
 
