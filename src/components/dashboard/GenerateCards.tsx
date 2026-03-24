@@ -2479,7 +2479,7 @@ export const GenerateCards = ({
                 Создать в таком же стиле
               </DrawerTitle>
               <DrawerDescription className="text-sm text-left">
-                WBGen создаст новые карточки в такой же стилистике
+                WBGen создаст новые карточки в такой же стилистике как образец ниже
               </DrawerDescription>
             </DrawerHeader>
             <div className="space-y-4 px-4 pb-2 max-h-[60dvh] overflow-y-auto">
