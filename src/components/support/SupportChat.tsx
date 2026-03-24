@@ -347,6 +347,25 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
           </p>
         </div>
       </div>
+
+      {/* Image preview dialog */}
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-2 right-2 z-10 bg-white/20 hover:bg-white/30 rounded-lg w-7 h-7 flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Просмотр"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
