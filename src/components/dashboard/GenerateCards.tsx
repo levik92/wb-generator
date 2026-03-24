@@ -735,10 +735,10 @@ export const GenerateCards = ({
     currentPollingJobId = jobId;
     setCurrentJobId(jobId);
 
-    // Расчет времени: 35 секунд на изображение
+    // Расчет времени: 40 секунд на изображение + 35 секунд на стилизацию
     // Skip timer reset when restoring from navigation (values already set by checkForActiveJobs)
     if (!options?.skipTimerReset) {
-      const estimatedSecondsPerCard = 35;
+      const estimatedSecondsPerCard = 40;
       const unifiedExtra = unifiedStyling ? 35 : 0;
       const totalEstimatedSeconds = selectedCards.length * estimatedSecondsPerCard + unifiedExtra;
       setEstimatedTimeRemaining(totalEstimatedSeconds); // в секундах
