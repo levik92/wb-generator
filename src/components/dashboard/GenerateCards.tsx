@@ -800,54 +800,40 @@ export const GenerateCards = ({
             }));
             // If this is a style generation, merge styled images as variants
             if (preStyleImagesRef.current.length > 0) {
-              // Keep original images as the base, add styled ones as variants
               const baseImages = [...preStyleImagesRef.current];
-              setGeneratedImages(baseImages);
               
               // Add each styled image as a variant of the matching stageIndex
-              setImageVariants(prev => {
-                const updated = { ...prev };
-                for (const styledImg of images) {
-                  // Find the index in baseImages that matches this stageIndex
-                  const baseIdx = baseImages.findIndex(b => b.stageIndex === styledImg.stageIndex);
-                  if (baseIdx >= 0) {
-                    const existing = updated[baseIdx] || [];
-                    // If no variants yet, add original as first
-                    if (existing.length === 0) {
-                      updated[baseIdx] = [
-                        { url: baseImages[baseIdx].url, label: 'Оригинал', id: baseImages[baseIdx].id },
-                        { url: styledImg.url, label: 'Стиль 1', id: styledImg.id }
-                      ];
-                    } else {
-                      // Count existing style variants
-                      const styleCount = existing.filter(v => v.label.startsWith('Стиль')).length;
-                      updated[baseIdx] = [...existing, { url: styledImg.url, label: `Стиль ${styleCount + 1}`, id: styledImg.id }];
-                    }
+              const updatedVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = { ...imageVariants };
+              const updatedSelected: Record<number, number> = { ...selectedVariant };
+              
+              for (const styledImg of images) {
+                const baseIdx = baseImages.findIndex(b => b.stageIndex === styledImg.stageIndex);
+                if (baseIdx >= 0) {
+                  const existing = updatedVariants[baseIdx] || [];
+                  if (existing.length === 0) {
+                    updatedVariants[baseIdx] = [
+                      { url: baseImages[baseIdx].url, label: 'Оригинал', id: baseImages[baseIdx].id },
+                      { url: styledImg.url, label: 'Стиль 1', id: styledImg.id }
+                    ];
+                    updatedSelected[baseIdx] = 1;
                   } else {
-                    // No matching base image — add as new card
-                    baseImages.push(styledImg);
-                    setGeneratedImages([...baseImages]);
+                    const styleCount = existing.filter(v => v.label.startsWith('Стиль')).length;
+                    updatedVariants[baseIdx] = [...existing, { url: styledImg.url, label: `Стиль ${styleCount + 1}`, id: styledImg.id }];
+                    updatedSelected[baseIdx] = updatedVariants[baseIdx].length - 1;
                   }
+                  // Update displayed URL to the new styled version
+                  baseImages[baseIdx] = { ...baseImages[baseIdx], url: styledImg.url };
+                } else {
+                  baseImages.push(styledImg);
                 }
-                return updated;
-              });
-              // Select the newest variant for each styled card
-              setSelectedVariant(prev => {
-                const updated = { ...prev };
-                for (const styledImg of images) {
-                  const baseIdx = baseImages.findIndex(b => b.stageIndex === styledImg.stageIndex);
-                  if (baseIdx >= 0) {
-                    // Will be set after imageVariants update in next render
-                  }
-                }
-                return updated;
-              });
-              // Update displayed images to show the new styled version
-              setGeneratedImages(prev => {
-                const result = [...prev];
-                for (const styledImg of images) {
-                  const idx = result.findIndex(b => b.stageIndex === styledImg.stageIndex);
-                  if (idx >= 0) {
+              }
+              
+              setGeneratedImages(baseImages);
+              setImageVariants(updatedVariants);
+              setSelectedVariant(updatedSelected);
+            } else {
+              setGeneratedImages(images);
+            }
                     result[idx] = { ...result[idx], url: styledImg.url };
                   }
                 }
