@@ -38,7 +38,7 @@ const SupportChat = lazy(() => import("@/components/support/SupportChat").then(m
 
 // Tab loading spinner
 const TabLoader = () => (
-  <div className="flex items-center justify-center py-20">
+  <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-[calc(100vh-180px)]">
     <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
   </div>
 );
