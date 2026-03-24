@@ -231,12 +231,35 @@ serve(async (req) => {
       }
 
       case "get_attention_count": {
-        const { count } = await supabase
+        // Count conversations needing attention OR with new unread user messages
+        const { count: attentionCount } = await supabase
           .from("support_conversations")
           .select("id", { count: "exact", head: true })
           .eq("needs_admin_attention", true);
 
-        return new Response(JSON.stringify({ count: count || 0 }), {
+        // Count conversations where last message is from user (unread by admin)
+        const { data: activeConvs } = await supabase
+          .from("support_conversations")
+          .select("id")
+          .neq("status", "closed");
+
+        let newMsgCount = 0;
+        for (const conv of activeConvs || []) {
+          const { data: lastMsg } = await supabase
+            .from("support_messages")
+            .select("sender_type")
+            .eq("conversation_id", conv.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (lastMsg && lastMsg.sender_type === "user") {
+            newMsgCount++;
+          }
+        }
+
+        const totalCount = Math.max(attentionCount || 0, newMsgCount);
+
+        return new Response(JSON.stringify({ count: totalCount }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
