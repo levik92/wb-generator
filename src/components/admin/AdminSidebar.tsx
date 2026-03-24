@@ -32,68 +32,18 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
-    {
-      id: 'analytics',
-      label: 'Аналитика',
-      icon: BarChart3,
-    },
-    {
-      id: 'users',
-      label: 'Пользователи',
-      icon: Users,
-    },
-    {
-      id: 'support',
-      label: 'Поддержка',
-      icon: Headphones,
-      badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined,
-      badgeColor: 'bg-primary text-primary-foreground border-primary',
-    },
-    {
-      id: 'partners',
-      label: 'Партнеры',
-      icon: Handshake,
-    },
-    {
-      id: 'prompts',
-      label: 'Модель',
-      icon: Bot,
-    },
-    {
-      id: 'bonuses',
-      label: 'Бонусы',
-      icon: Gift,
-    },
-    {
-      id: 'pricing',
-      label: 'Цены',
-      icon: DollarSign,
-    },
-    {
-      id: 'banners',
-      label: 'Баннеры',
-      icon: LayoutDashboard,
-    },
-    {
-      id: 'news',
-      label: 'Новости',
-      icon: Megaphone,
-    },
-    {
-      id: 'blog',
-      label: 'Блог',
-      icon: FileText,
-    },
-    {
-      id: 'video_lessons',
-      label: 'Обучение',
-      icon: GraduationCap,
-    },
-    {
-      id: 'utm',
-      label: 'Трафик',
-      icon: Crosshair,
-    },
+    { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
+    { id: 'users', label: 'Пользователи', icon: Users },
+    { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined, badgeColor: 'bg-primary text-primary-foreground border-primary' },
+    { id: 'utm', label: 'Трафик', icon: Crosshair },
+    { id: 'partners', label: 'Партнеры', icon: Handshake },
+    { id: 'prompts', label: 'Модель', icon: Bot },
+    { id: 'bonuses', label: 'Бонусы', icon: Gift },
+    { id: 'pricing', label: 'Цены', icon: DollarSign },
+    { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
+    { id: 'news', label: 'Новости', icon: Megaphone },
+    { id: 'blog', label: 'Блог', icon: FileText },
+    { id: 'video_lessons', label: 'Обучение', icon: GraduationCap },
   ];
 
   return (
