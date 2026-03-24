@@ -157,7 +157,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="w-full max-w-full px-1">
       <div className="mb-6">
         <h2 className="text-xl font-bold flex items-center gap-2">
           <Headphones className="w-5 h-5 text-primary" />
@@ -209,17 +209,6 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
                 </span>
               </div>
             ))
-          )}
-          {loading && (
-            <div className="flex items-start">
-              <div className="bg-secondary rounded-2xl rounded-bl-md px-4 py-2.5">
-                <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-              </div>
-            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
