@@ -205,6 +205,18 @@ serve(async (req) => {
         const updateData: any = { status };
         if (status === "closed") {
           updateData.needs_admin_attention = false;
+
+          // Send system message notifying user
+          const closeMsg = "Менеджер закрыл обращение. Если у вас есть ещё вопросы — просто напишите сообщение в этот чат.";
+          const { data: closeEnc } = await supabase.rpc("encrypt_support_message_edge", {
+            content: closeMsg,
+            enc_key: encryptionKey,
+          });
+          await supabase.from("support_messages").insert({
+            conversation_id,
+            sender_type: "system",
+            encrypted_content: closeEnc,
+          });
         }
 
         await supabase
