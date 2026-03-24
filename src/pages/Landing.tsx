@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
 import YandexMetrika from "@/components/YandexMetrika";
-import { useUtmTracking } from "@/hooks/useUtmTracking";
 
 // Lazy load below-the-fold sections for better performance
 const FeaturesSection = lazy(() => import("@/components/landing/FeaturesSection").then(m => ({ default: m.FeaturesSection })));
@@ -25,7 +24,6 @@ const SectionLoader = () => (
 );
 
 const Landing = () => {
-  useUtmTracking();
   useEffect(() => {
     // Force dark mode for landing page
     document.documentElement.classList.add("dark");
