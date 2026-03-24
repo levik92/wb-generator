@@ -18,7 +18,7 @@ serve(async (req) => {
     const encryptionKey = Deno.env.get("SUPPORT_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
-    const { action, conversation_id, message, visitor_id, user_id, channel } = await req.json();
+    const { action, conversation_id, message, visitor_id, user_id, channel, attachment_url } = await req.json();
 
     // Helper: encrypt message
     const encrypt = async (text: string) => {
@@ -45,6 +45,7 @@ serve(async (req) => {
             sender_type: msg.sender_type,
             content: error ? "[Ошибка расшифровки]" : data,
             created_at: msg.created_at,
+            attachment_url: msg.attachment_url || null,
           });
         } catch {
           results.push({
@@ -53,6 +54,7 @@ serve(async (req) => {
             sender_type: msg.sender_type,
             content: "[Ошибка расшифровки]",
             created_at: msg.created_at,
+            attachment_url: msg.attachment_url || null,
           });
         }
       }
@@ -107,6 +109,7 @@ serve(async (req) => {
           conversation_id,
           sender_type: "user",
           encrypted_content: encData,
+          ...(attachment_url ? { attachment_url } : {}),
         });
 
         // Check if this is the first user message in a dashboard conversation

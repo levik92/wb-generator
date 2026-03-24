@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle } from "lucide-react";
+import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,9 +28,12 @@ interface Message {
   sender_type: "user" | "ai" | "admin" | "system";
   content: string;
   created_at: string;
+  attachment_url?: string | null;
 }
 
 const ADMIN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-admin`;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE = 5 * 1024 * 1024;
 
 export const AdminSupport = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -40,8 +43,12 @@ export const AdminSupport = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [msgsLoading, setMsgsLoading] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
   const callApiRef = useRef<(body: any) => Promise<any>>();
@@ -61,6 +68,20 @@ export const AdminSupport = () => {
   };
 
   const callApi = useCallback((body: any) => callApiRef.current!(body), []);
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `admin/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("support-attachments")
+      .upload(path, file, { contentType: file.type });
+    if (error) {
+      console.error("Upload error:", error);
+      return null;
+    }
+    const { data } = supabase.storage.from("support-attachments").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   const loadConversations = useCallback(async () => {
     try {
@@ -99,7 +120,6 @@ export const AdminSupport = () => {
     loadMessages(conv.id);
   }, [loadMessages]);
 
-  // Poll messages for selected conversation
   useEffect(() => {
     if (!selectedConv) return;
     const interval = setInterval(() => loadMessages(selectedConv.id), 8000);
@@ -113,17 +133,48 @@ export const AdminSupport = () => {
     }
   }, [messages]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      alert("Допустимые форматы: JPG, PNG, WEBP");
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      alert("Максимальный размер файла: 5 МБ");
+      return;
+    }
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+    if (e.target) e.target.value = "";
+  };
+
+  const clearPendingFile = () => {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+  };
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
-    if (!text || sending || !selectedConv) return;
+    if ((!text && !pendingFile) || sending || !selectedConv) return;
     setInput("");
     setSending(true);
 
     try {
+      let attachmentUrl: string | null = null;
+      if (pendingFile) {
+        setUploading(true);
+        attachmentUrl = await uploadFile(pendingFile);
+        setUploading(false);
+        clearPendingFile();
+      }
+
       await callApi({
         action: "send_message",
         conversation_id: selectedConv.id,
-        message: text,
+        message: text || "📎 Изображение",
+        attachment_url: attachmentUrl,
       });
       await loadMessages(selectedConv.id);
       setSelectedConv((prev) => prev ? { ...prev, ai_enabled: false, needs_admin_attention: false } : null);
@@ -132,9 +183,10 @@ export const AdminSupport = () => {
       console.error("Send error:", e);
     } finally {
       setSending(false);
+      setUploading(false);
       inputRef.current?.focus();
     }
-  }, [input, sending, selectedConv, callApi, loadMessages, loadConversations]);
+  }, [input, pendingFile, sending, selectedConv, callApi, loadMessages, loadConversations]);
 
   const handleToggleAI = async () => {
     if (!selectedConv) return;
@@ -186,7 +238,47 @@ export const AdminSupport = () => {
 
   const attentionCount = conversations.filter((c) => c.needs_admin_attention).length;
 
-  // Inline conversation list JSX
+  const renderMessageBubble = (msg: Message) => (
+    <div
+      key={msg.id}
+      className={`flex flex-col ${msg.sender_type === "admin" ? "items-end" : "items-start"}`}
+    >
+      <span className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+        {msg.sender_type === "user" && <User className="w-3 h-3" />}
+        {msg.sender_type === "ai" && <Bot className="w-3 h-3" />}
+        {msg.sender_type === "admin" && <Headphones className="w-3 h-3" />}
+        {msg.sender_type === "system" && <AlertTriangle className="w-3 h-3" />}
+        {msg.sender_type === "user" ? "Пользователь" : msg.sender_type === "ai" ? "AI" : msg.sender_type === "admin" ? "Вы" : "Система"}
+      </span>
+      <div
+        className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+          msg.sender_type === "admin"
+            ? "bg-primary text-primary-foreground rounded-br-md"
+            : msg.sender_type === "user"
+            ? "bg-secondary text-secondary-foreground rounded-bl-md"
+            : msg.sender_type === "system"
+            ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
+            : "bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-bl-md border border-blue-500/20"
+        }`}
+      >
+        {msg.attachment_url && (
+          <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+            <img
+              src={msg.attachment_url}
+              alt="Вложение"
+              className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30"
+              loading="lazy"
+            />
+          </a>
+        )}
+        {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+      </div>
+      <span className="text-[10px] text-muted-foreground mt-0.5">
+        {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+      </span>
+    </div>
+  );
+
   const conversationListContent = (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border">
@@ -203,7 +295,6 @@ export const AdminSupport = () => {
         </div>
         <p className="text-xs text-muted-foreground">Управление обращениями пользователей</p>
       </div>
-
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center p-8">
@@ -238,16 +329,11 @@ export const AdminSupport = () => {
                 {conv.last_message || "Нет сообщений"}
               </p>
               <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[10px] text-muted-foreground">
-                  {conv.message_count} сообщ.
-                </span>
+                <span className="text-[10px] text-muted-foreground">{conv.message_count} сообщ.</span>
                 <span className="text-[10px] text-muted-foreground">
                   {conv.last_message_at
                     ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
+                        day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
                       })
                     : ""}
                 </span>
@@ -259,22 +345,13 @@ export const AdminSupport = () => {
     </div>
   );
 
-  // Inline chat view JSX
   const chatViewContent = (
     <div className="flex flex-col h-full">
-      {/* Chat header */}
       <div className="p-3 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           {(isMobile || !selectedConv) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-lg"
-              onClick={() => {
-                setSelectedConv(null);
-                setMessages([]);
-              }}
-            >
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"
+              onClick={() => { setSelectedConv(null); setMessages([]); }}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
           )}
@@ -295,94 +372,57 @@ export const AdminSupport = () => {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 text-xs rounded-lg"
-            onClick={handleToggleAI}
-            title={selectedConv?.ai_enabled ? "Выключить AI" : "Включить AI"}
-          >
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg" onClick={handleToggleAI}
+            title={selectedConv?.ai_enabled ? "Выключить AI" : "Включить AI"}>
             {selectedConv?.ai_enabled ? <BotOff className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 text-xs rounded-lg text-destructive hover:text-destructive"
-            onClick={handleCloseConv}
-          >
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg text-destructive hover:text-destructive" onClick={handleCloseConv}>
             <X className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {msgsLoading && messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex flex-col ${msg.sender_type === "admin" ? "items-end" : "items-start"}`}
-            >
-              <span className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-                {msg.sender_type === "user" && <User className="w-3 h-3" />}
-                {msg.sender_type === "ai" && <Bot className="w-3 h-3" />}
-                {msg.sender_type === "admin" && <Headphones className="w-3 h-3" />}
-                {msg.sender_type === "system" && <AlertTriangle className="w-3 h-3" />}
-                {msg.sender_type === "user" ? "Пользователь" : msg.sender_type === "ai" ? "AI" : msg.sender_type === "admin" ? "Вы" : "Система"}
-              </span>
-              <div
-                className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                  msg.sender_type === "admin"
-                    ? "bg-primary text-primary-foreground rounded-br-md"
-                    : msg.sender_type === "user"
-                    ? "bg-secondary text-secondary-foreground rounded-bl-md"
-                    : msg.sender_type === "system"
-                    ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
-                    : "bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-bl-md border border-blue-500/20"
-                }`}
-              >
-                {msg.content}
-              </div>
-              <span className="text-[10px] text-muted-foreground mt-0.5">
-                {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-              </span>
-            </div>
-          ))
+          messages.map(renderMessageBubble)
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* Pending file preview */}
+      {pendingPreview && (
+        <div className="px-3 pb-2">
+          <div className="relative inline-block">
+            <img src={pendingPreview} alt="Превью" className="h-16 rounded-lg object-cover border border-border" />
+            <button onClick={clearPendingFile}
+              className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {selectedConv?.status !== "closed" && (
         <div className="border-t border-border p-3">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="flex items-center gap-2"
-          >
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-2">
+            <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleFileSelect} />
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary"
+              onClick={() => fileInputRef.current?.click()} disabled={sending || uploading}>
+              <Paperclip className="w-4 h-4" />
+            </Button>
             <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)}
               placeholder="Ответить пользователю..."
               className="flex-1 bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-              disabled={sending}
-              maxLength={2000}
+              disabled={sending || uploading} maxLength={2000}
             />
-            <Button
-              type="submit"
-              size="icon"
-              className="h-9 w-9 rounded-xl shrink-0"
-              disabled={!input.trim() || sending}
-            >
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            <Button type="submit" size="icon" className="h-9 w-9 rounded-xl shrink-0"
+              disabled={(!input.trim() && !pendingFile) || sending || uploading}>
+              {sending || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </form>
         </div>
@@ -390,7 +430,6 @@ export const AdminSupport = () => {
     </div>
   );
 
-  // Layout
   if (isMobile) {
     return (
       <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
@@ -401,15 +440,9 @@ export const AdminSupport = () => {
 
   return (
     <div className="border border-border rounded-2xl bg-card overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
-      {/* Left panel - conversations list */}
-      <div className="w-80 border-r border-border flex-shrink-0">
-        {conversationListContent}
-      </div>
-      {/* Right panel - chat */}
+      <div className="w-80 border-r border-border flex-shrink-0">{conversationListContent}</div>
       <div className="flex-1 flex flex-col">
-        {selectedConv ? (
-          chatViewContent
-        ) : (
+        {selectedConv ? chatViewContent : (
           <div className="flex-1 flex items-center justify-center text-center px-8">
             <div>
               <MessageCircle className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />

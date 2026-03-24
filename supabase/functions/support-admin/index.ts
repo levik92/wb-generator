@@ -36,7 +36,7 @@ serve(async (req) => {
     const encryptionKey = Deno.env.get("SUPPORT_ENCRYPTION_KEY");
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
-    const { action, conversation_id, message, status } = await req.json();
+    const { action, conversation_id, message, status, attachment_url } = await req.json();
 
     const decryptMessages = async (messages: any[]) => {
       const results = [];
@@ -52,6 +52,7 @@ serve(async (req) => {
             sender_type: msg.sender_type,
             content: error ? "[Ошибка расшифровки]" : data,
             created_at: msg.created_at,
+            attachment_url: msg.attachment_url || null,
           });
         } catch {
           results.push({
@@ -60,6 +61,7 @@ serve(async (req) => {
             sender_type: msg.sender_type,
             content: "[Ошибка расшифровки]",
             created_at: msg.created_at,
+            attachment_url: msg.attachment_url || null,
           });
         }
       }
@@ -157,6 +159,7 @@ serve(async (req) => {
           conversation_id,
           sender_type: "admin",
           encrypted_content: encData,
+          ...(attachment_url ? { attachment_url } : {}),
         });
 
         // Disable AI when admin responds

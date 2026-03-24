@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, Loader2, Headphones, MessageCircle, ShieldCheck } from "lucide-react";
+import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,6 +8,7 @@ interface Message {
   sender_type: "user" | "ai" | "admin" | "system";
   content: string;
   created_at: string;
+  attachment_url?: string | null;
 }
 
 interface SupportChatProps {
@@ -15,6 +16,8 @@ interface SupportChatProps {
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-chat`;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 export const SupportChat = ({ profile }: SupportChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -22,8 +25,12 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback(() => {
     const el = messagesEndRef.current;
@@ -48,6 +55,20 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${profile.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("support-attachments")
+      .upload(path, file, { contentType: file.type });
+    if (error) {
+      console.error("Upload error:", error);
+      return null;
+    }
+    const { data } = supabase.storage.from("support-attachments").getPublicUrl(path);
+    return data.publicUrl;
   };
 
   // Load existing conversation
@@ -75,9 +96,31 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     load();
   }, [profile.id]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      alert("Допустимые форматы: JPG, PNG, WEBP");
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      alert("Максимальный размер файла: 5 МБ");
+      return;
+    }
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+    if (e.target) e.target.value = "";
+  };
+
+  const clearPendingFile = () => {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+  };
+
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if ((!text && !pendingFile) || loading || uploading) return;
     setInput("");
     setLoading(true);
 
@@ -94,21 +137,31 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         setConversationId(convId);
       }
 
+      let attachmentUrl: string | null = null;
+      if (pendingFile) {
+        setUploading(true);
+        attachmentUrl = await uploadFile(pendingFile);
+        setUploading(false);
+        clearPendingFile();
+      }
+
       // Optimistic update
       setMessages((prev) => [
         ...prev,
         {
           id: "temp-" + Date.now(),
           sender_type: "user",
-          content: text,
+          content: text || (attachmentUrl ? "📎 Изображение" : ""),
           created_at: new Date().toISOString(),
+          attachment_url: attachmentUrl,
         },
       ]);
 
       await callApi({
         action: "send_message",
         conversation_id: convId,
-        message: text,
+        message: text || "📎 Изображение",
+        attachment_url: attachmentUrl,
       });
 
       // Refresh messages
@@ -199,7 +252,17 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
                       : "bg-secondary text-secondary-foreground rounded-bl-md"
                   }`}
                 >
-                  {msg.content}
+                  {msg.attachment_url && (
+                    <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+                      <img
+                        src={msg.attachment_url}
+                        alt="Вложение"
+                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30"
+                        loading="lazy"
+                      />
+                    </a>
+                  )}
+                  {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
                 </div>
                 <span className="text-[10px] text-muted-foreground mt-0.5">
                   {new Date(msg.created_at).toLocaleTimeString("ru-RU", {
@@ -213,6 +276,21 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Pending file preview */}
+        {pendingPreview && (
+          <div className="px-4 pb-2">
+            <div className="relative inline-block">
+              <img src={pendingPreview} alt="Превью" className="h-20 rounded-lg object-cover border border-border" />
+              <button
+                onClick={clearPendingFile}
+                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Input */}
         <div className="border-t border-border p-4">
           <form
@@ -223,22 +301,39 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
             className="flex items-center gap-2"
           >
             <input
+              ref={fileInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-xl shrink-0 text-muted-foreground hover:text-primary"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading || uploading}
+            >
+              <Paperclip className="w-4.5 h-4.5" />
+            </Button>
+            <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Напишите сообщение..."
               className="flex-1 bg-secondary/50 border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
-              disabled={loading}
+              disabled={loading || uploading}
               maxLength={2000}
             />
             <Button
               type="submit"
               size="icon"
               className="h-10 w-10 rounded-xl shrink-0"
-              disabled={!input.trim() || loading}
+              disabled={(!input.trim() && !pendingFile) || loading || uploading}
             >
-              <Send className="w-4 h-4" />
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </form>
           <p className="text-[10px] text-muted-foreground mt-2 flex items-center justify-center gap-1">
