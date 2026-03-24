@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -173,6 +173,9 @@ export const GenerateCards = ({
   const [styleAutoDescription, setStyleAutoDescription] = useState(true);
   const [styleGenerating, setStyleGenerating] = useState(false);
   
+  // Ref to save images before style generation for merging after completion
+  const preStyleImagesRef = useRef<any[]>([]);
+  
   const WAITING_MESSAGES = ["Еще чуть-чуть...", "Добавляем мелкие детали...", "Причесываем и шлифуем...", "Почти готово, немного терпения..."];
 
   // Load generation count from localStorage on mount
@@ -215,7 +218,7 @@ export const GenerateCards = ({
             image_url,
             storage_path
           )
-        `).eq('user_id', profile.id).not('category', 'in', '("edit","regeneration")').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+        `).eq('user_id', profile.id).not('category', 'in', '("edit","regeneration")').is('source_job_id', null).gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
       .order('created_at', {
         ascending: false
       }).limit(1);
@@ -337,6 +340,64 @@ export const GenerateCards = ({
                 }
                 return img;
               }));
+            }
+          }
+
+          // Also load completed style job results (children of this main job)
+          const { data: styleChildJobs } = await supabase
+            .from('generation_jobs')
+            .select(`
+              *,
+              generation_tasks (
+                id, card_index, card_type, status, image_url, storage_path
+              )
+            `)
+            .eq('user_id', profile.id)
+            .eq('source_job_id', latestJob.id)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: true });
+
+          if (styleChildJobs && styleChildJobs.length > 0) {
+            const styledImages: any[] = [];
+            for (const sj of styleChildJobs) {
+              const tasks = sj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+              for (const task of tasks) {
+                styledImages.push({
+                  id: task.id,
+                  url: task.image_url,
+                  stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                  stageIndex: task.card_index,
+                  cardType: task.card_type,
+                  jobId: sj.id,
+                  isStyled: true
+                });
+              }
+              // Check one level deeper (style of style)
+              const { data: deeperJobs } = await supabase
+                .from('generation_jobs')
+                .select(`*, generation_tasks (id, card_index, card_type, status, image_url, storage_path)`)
+                .eq('user_id', profile.id)
+                .eq('source_job_id', sj.id)
+                .eq('status', 'completed');
+              if (deeperJobs) {
+                for (const dsj of deeperJobs) {
+                  const dtasks = dsj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
+                  for (const task of dtasks) {
+                    styledImages.push({
+                      id: task.id,
+                      url: task.image_url,
+                      stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                      stageIndex: task.card_index,
+                      cardType: task.card_type,
+                      jobId: dsj.id,
+                      isStyled: true
+                    });
+                  }
+                }
+              }
+            }
+            if (styledImages.length > 0) {
+              setGeneratedImages(prev => [...prev, ...styledImages]);
             }
           }
 
@@ -761,6 +822,15 @@ export const GenerateCards = ({
                 title: "Генерация завершена!",
                 description: `Все карточки готовы для скачивания`
               });
+
+              // Merge with pre-style images if this was a style generation
+              if (preStyleImagesRef.current.length > 0) {
+                setGeneratedImages(prev => {
+                  const styledImages = prev.map(img => ({ ...img, isStyled: true }));
+                  return [...preStyleImagesRef.current, ...styledImages];
+                });
+                preStyleImagesRef.current = [];
+              }
             } else if (job.status === 'failed') {
               toast({
                 title: "Ошибка генерации",
@@ -1564,7 +1634,13 @@ export const GenerateCards = ({
     setStyleDialogOpen(false);
 
     try {
-      // Clear previous state for new generation
+      // Save current images for merging after style generation completes
+      preStyleImagesRef.current = [...generatedImages];
+      
+      // Find the source job ID (job that created the existing images)
+      const sourceJobId = generatedImages[0]?.jobId || currentJobId || null;
+
+      // Clear display state for progress bar
       setGeneratedImages([]);
       setCompletionNotificationShown(false);
       setJobCompleted(false);
@@ -1591,7 +1667,8 @@ export const GenerateCards = ({
           referenceImageUrl: null,
           selectedCards: styleSelectedCards,
           unifiedStyling: true,
-          styleSourceImageUrl: styleSourceImage.url
+          styleSourceImageUrl: styleSourceImage.url,
+          sourceJobId: sourceJobId
         }
       });
 
@@ -1600,13 +1677,7 @@ export const GenerateCards = ({
       }
 
       if (data.success && data.jobId) {
-        // Save job data
-        setJobData({
-          productName: jobData.productName,
-          category: jobData.category,
-          description: styleDescription,
-          productImages: jobData.productImages
-        });
+        // Keep original job data (don't overwrite productName etc)
         startJobPolling(data.jobId);
         toast({
           title: "Генерация в стиле начата!",
@@ -1617,6 +1688,11 @@ export const GenerateCards = ({
       }
     } catch (error: any) {
       console.error('Style generation error:', error);
+      // Restore pre-style images on error
+      if (preStyleImagesRef.current.length > 0) {
+        setGeneratedImages(preStyleImagesRef.current);
+        preStyleImagesRef.current = [];
+      }
       toast({
         title: "Ошибка генерации",
         description: "Не удалось запустить генерацию в стиле",
@@ -2206,7 +2282,18 @@ export const GenerateCards = ({
                     </div>
                     
                     <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
-                      <h3 className="font-medium text-sm sm:text-base text-center sm:text-left truncate">{image.stage}</h3>
+                      <div className="flex items-center gap-2 justify-center sm:justify-start">
+                        <h3 className="font-medium text-sm sm:text-base truncate">{image.stage}</h3>
+                        {image.isStyled && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                            {(() => {
+                              const styledOfSameType = generatedImages.filter(img => img.isStyled && img.stageIndex === image.stageIndex);
+                              const styleIdx = styledOfSameType.indexOf(image);
+                              return `Стиль (${styleIdx + 1})`;
+                            })()}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
                         {CARD_STAGES[image.stageIndex]?.description}
                       </p>

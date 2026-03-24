@@ -40,7 +40,8 @@ serve(async (req) => {
       referenceImageUrl = null,
       selectedCards = [0, 1, 2, 3, 4, 5], // Default all cards
       unifiedStyling = false,
-      styleSourceImageUrl = null
+      styleSourceImageUrl = null,
+      sourceJobId = null
     } = requestBody;
 
     // Validate input
@@ -141,20 +142,25 @@ serve(async (req) => {
     }
 
     // Create generation job
+    const jobInsert: any = {
+      user_id: userId,
+      product_name: productName,
+      category: category,
+      description: description,
+      product_images: finalProductImages,
+      status: 'pending',
+      total_cards: selectedCards.length,
+      tokens_cost: tokensRequired,
+      unified_styling: unifiedStyling,
+      style_source_image_url: styleSourceImageUrl
+    };
+    if (sourceJobId) {
+      jobInsert.source_job_id = sourceJobId;
+    }
+
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
-      .insert({
-        user_id: userId,
-        product_name: productName,
-        category: category,
-        description: description,
-        product_images: finalProductImages,
-        status: 'pending',
-        total_cards: selectedCards.length,
-        tokens_cost: tokensRequired,
-        unified_styling: unifiedStyling,
-        style_source_image_url: styleSourceImageUrl
-      })
+      .insert(jobInsert)
       .select()
       .single();
 

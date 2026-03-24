@@ -380,6 +380,7 @@ export type Database = {
           id: string
           product_images: Json | null
           product_name: string
+          source_job_id: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["job_status"] | null
           style_description: string | null
@@ -400,6 +401,7 @@ export type Database = {
           id?: string
           product_images?: Json | null
           product_name: string
+          source_job_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
           style_description?: string | null
@@ -420,6 +422,7 @@ export type Database = {
           id?: string
           product_images?: Json | null
           product_name?: string
+          source_job_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
           style_description?: string | null
@@ -430,7 +433,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "generation_jobs_source_job_id_fkey"
+            columns: ["source_job_id"]
+            isOneToOne: false
+            referencedRelation: "generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       generation_pricing: {
         Row: {
