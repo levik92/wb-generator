@@ -2153,7 +2153,8 @@ export const GenerateCards = ({
                       
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
-                        openEditDialog(image, index);
+                        const currentUrl = variants.length > 0 ? variants[currentVariantIdx]?.url || image.url : image.url;
+                        openEditDialog({ ...image, url: currentUrl }, index);
                       }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
                               {editingCards.has(`edit_${image.id}_${index}`) ? <>
                                   <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
