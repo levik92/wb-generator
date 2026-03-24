@@ -215,17 +215,24 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
       inputRef.current?.focus();
 
       // Send in background — don't block UI
+      setAiTyping(true);
       callApi({
         action: "send_message",
         conversation_id: convId,
         message: text || "📎 Изображение",
         attachment_url: attachmentUrl,
-      }).then(() => loadMessages(convId!))
+      }).then((res) => {
+          setAiTyping(false);
+          return loadMessages(convId!);
+        })
         .then((msgs) => {
           shouldScrollRef.current = true;
           setMessages(msgs);
         })
-        .catch((e) => console.error("Send error:", e));
+        .catch((e) => {
+          console.error("Send error:", e);
+          setAiTyping(false);
+        });
     } catch (e) {
       console.error("Send error:", e);
       setLoading(false);
