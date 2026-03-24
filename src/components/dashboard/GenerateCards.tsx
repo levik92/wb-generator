@@ -1654,6 +1654,7 @@ export const GenerateCards = ({
       setCurrentStage(0);
       setIsUploading(false);
       setSelectedCards(styleSelectedCards);
+      setUnifiedStyling(true); // Style generation always uses unified styling for correct timer
 
       const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel!);
       
