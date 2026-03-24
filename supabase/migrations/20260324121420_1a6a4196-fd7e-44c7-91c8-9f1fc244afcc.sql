@@ -1,0 +1,1 @@
+ALTER TABLE public.generation_jobs ADD COLUMN IF NOT EXISTS style_source_image_url TEXT;
