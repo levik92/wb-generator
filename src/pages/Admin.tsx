@@ -250,15 +250,21 @@ export default function Admin() {
         </header>
 
         <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-full max-w-full"
-          >
-            {renderContent()}
-          </motion.div>
+          <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-[calc(100vh-180px)]">
+              <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+            </div>
+          }>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="w-full max-w-full"
+            >
+              {renderContent()}
+            </motion.div>
+          </Suspense>
         </main>
 
         <Footer />
