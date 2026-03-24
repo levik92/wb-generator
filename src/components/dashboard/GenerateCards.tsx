@@ -170,7 +170,7 @@ export const GenerateCards = ({
   const [styleSourceImage, setStyleSourceImage] = useState<any | null>(null);
   const [styleSelectedCards, setStyleSelectedCards] = useState<number[]>([]);
   const [styleDescription, setStyleDescription] = useState("");
-  const [styleAutoDescription, setStyleAutoDescription] = useState(true);
+  const [styleAutoDescription, setStyleAutoDescription] = useState(false);
   const [styleGenerating, setStyleGenerating] = useState(false);
   
   // Ref to save images before style generation for merging after completion
@@ -789,7 +789,13 @@ export const GenerateCards = ({
               cardType: task.card_type,
               jobId: job.id  // Store jobId for regeneration even after currentJobId is cleared
             }));
-            setGeneratedImages(images);
+            // If this is a style generation, preserve pre-style images during polling
+            if (preStyleImagesRef.current.length > 0) {
+              const styledImages = images.map(img => ({ ...img, isStyled: true }));
+              setGeneratedImages([...preStyleImagesRef.current, ...styledImages]);
+            } else {
+              setGeneratedImages(images);
+            }
           }
 
           // Check if ALL cards are completed (not just job status)
@@ -823,12 +829,8 @@ export const GenerateCards = ({
                 description: `Все карточки готовы для скачивания`
               });
 
-              // Merge with pre-style images if this was a style generation
+              // Clear pre-style ref (merge already happened during polling)
               if (preStyleImagesRef.current.length > 0) {
-                setGeneratedImages(prev => {
-                  const styledImages = prev.map(img => ({ ...img, isStyled: true }));
-                  return [...preStyleImagesRef.current, ...styledImages];
-                });
                 preStyleImagesRef.current = [];
               }
             } else if (job.status === 'failed') {
@@ -1604,8 +1606,8 @@ export const GenerateCards = ({
     setStyleSelectedCards([]);
     // Set description from jobData or empty
     const originalDesc = jobData?.description || '';
-    setStyleAutoDescription(true);
-    setStyleDescription(originalDesc);
+    setStyleAutoDescription(false);
+    setStyleDescription('');
     setStyleDialogOpen(true);
   };
 
@@ -1654,6 +1656,7 @@ export const GenerateCards = ({
       setCurrentStage(0);
       setIsUploading(false);
       setSelectedCards(styleSelectedCards);
+      setUnifiedStyling(true); // Style generation always uses unified styling for correct timer
 
       const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel!);
       
