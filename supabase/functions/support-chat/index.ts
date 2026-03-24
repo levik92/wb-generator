@@ -341,7 +341,6 @@ serve(async (req) => {
           const { data, error } = await query
             .eq("user_id", user_id)
             .eq("channel", "dashboard")
-            .neq("status", "closed")
             .order("created_at", { ascending: false })
             .limit(1)
             .maybeSingle();
