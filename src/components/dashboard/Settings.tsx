@@ -323,7 +323,7 @@ export const Settings = ({
                   Телеграм чат
                 </a>
               </Button>
-              <Button className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => onNavigateToSupport?.()}>
+              <Button className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => onNavigateToSupport?.()}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Онлайн чат
               </Button>
