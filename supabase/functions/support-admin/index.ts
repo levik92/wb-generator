@@ -159,6 +159,7 @@ serve(async (req) => {
           conversation_id,
           sender_type: "admin",
           encrypted_content: encData,
+          ...(attachment_url ? { attachment_url } : {}),
         });
 
         // Disable AI when admin responds
