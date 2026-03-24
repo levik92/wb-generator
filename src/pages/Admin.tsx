@@ -74,12 +74,11 @@ export default function Admin() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ action: "list_conversations" }),
+        body: JSON.stringify({ action: "get_attention_count" }),
       });
       if (res.ok) {
-        const { conversations } = await res.json();
-        const count = (conversations || []).filter((c: any) => c.needs_admin_attention).length;
-        setUnreadSupportCount(count);
+        const { count } = await res.json();
+        setUnreadSupportCount(count || 0);
       }
     } catch {}
   }, []);
