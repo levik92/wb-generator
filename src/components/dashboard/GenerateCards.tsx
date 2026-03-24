@@ -2330,7 +2330,7 @@ export const GenerateCards = ({
             const currentVariantIdx = selectedVariant[index] ?? (variants.length - 1);
             const displayedImageUrl = variants[currentVariantIdx]?.url || image.url;
             const isCoverCard = image.stageIndex === 0;
-            return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden ${isProcessingCard ? 'border-primary/30' : ''}`}>
+            return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden animate-fade-in ${isProcessingCard ? 'border-primary/30' : ''}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
                     {isProcessingCard && <>
                       <div className="absolute inset-0 pointer-events-none" style={{
                         background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
