@@ -371,7 +371,7 @@ export function AdminUsers({
           </ResponsiveDialogHeader>
 
           {detailsLoading ? <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
             </div> : userDetails && <div className="space-y-6 w-full min-w-0 overflow-hidden">
               {/* Stats Cards */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">

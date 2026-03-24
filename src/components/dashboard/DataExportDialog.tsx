@@ -210,7 +210,7 @@ export function DataExportDialog({ children }: DataExportDialogProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
         </DialogContent>
       </Dialog>

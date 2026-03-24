@@ -514,8 +514,7 @@ const Cases = () => {
                     animate={{ opacity: 1 }}
                     className="flex items-center gap-3 text-white/50"
                   >
-                    <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
-                    <span>Загрузка...</span>
+                    <div className="w-7 h-7 rounded-full border-[2.5px] border-white/20 border-t-white/60 animate-[spin_0.7s_linear_infinite]" />
                   </motion.div>
                 ) : (
                   <motion.div
