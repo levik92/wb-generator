@@ -502,34 +502,39 @@ export const AdminSupport = () => {
   );
 
   const aiDefaultsBlock = (
-    <div className="border border-border rounded-2xl bg-card p-4 mt-4">
-      <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
-        <Bot className="w-4 h-4 text-primary" />
-        ИИ по умолчанию
-      </h4>
-      <div className="space-y-3">
+    <div className="border border-border rounded-2xl bg-card overflow-hidden mt-4">
+      <div className="p-4 border-b border-border">
+        <h3 className="text-lg font-bold flex items-center gap-2">
+          <Bot className="w-5 h-5 text-primary" />
+          ИИ по умолчанию
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          Определяет, запустится ли ИИ автоматически при новом обращении
+        </p>
+      </div>
+      <div className="p-4 space-y-4">
         {[
-          { key: "widget", label: "Виджет" },
-          { key: "dashboard", label: "Дашборд" },
-        ].map(({ key, label }) => (
-          <div key={key} className="flex items-center justify-between">
-            <span className="text-sm text-foreground">{label}</span>
+          { key: "widget", label: "Виджет", desc: "Чат на лендинге для посетителей" },
+          { key: "dashboard", label: "Дашборд", desc: "Чат внутри личного кабинета" },
+        ].map(({ key, label, desc }) => (
+          <div key={key} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-border/50">
+            <div>
+              <span className="text-sm font-medium text-foreground">{label}</span>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{desc}</p>
+            </div>
             <button
               onClick={() => toggleAiDefault(key)}
-              className={`relative w-10 h-[22px] rounded-full transition-colors ${
+              className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
                 aiDefaults[key] ? "bg-primary" : "bg-muted"
               }`}
             >
-              <span className={`absolute top-[3px] left-[3px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
-                aiDefaults[key] ? "translate-x-[18px]" : "translate-x-0"
+              <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                aiDefaults[key] ? "translate-x-5" : "translate-x-0"
               }`} />
             </button>
           </div>
         ))}
       </div>
-      <p className="text-[10px] text-muted-foreground mt-3">
-        Определяет, запустится ли ИИ автоматически при новом обращении
-      </p>
     </div>
   );
 
