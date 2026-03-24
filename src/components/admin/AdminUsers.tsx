@@ -43,6 +43,7 @@ interface UserDetails {
   referrals: any[];
   tokenTransactions: any[];
   surveyResponses: { question_key: string; answer: string }[];
+  utmSourceName: string | null;
 }
 interface AdminUsersProps {
   users: User[];
@@ -120,6 +121,25 @@ export function AdminUsers({
         });
         return { ...ref, referred: { email: refData?.[0]?.email || 'Unknown' } };
       }));
+      // Load UTM source info
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('utm_source_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      let utmSourceName: string | null = null;
+      if (profileData?.utm_source_id) {
+        const { data: utmData } = await supabase
+          .from('utm_sources')
+          .select('name, utm_source, utm_medium, utm_campaign')
+          .eq('id', profileData.utm_source_id)
+          .maybeSingle();
+        if (utmData) {
+          utmSourceName = utmData.name || `${utmData.utm_source}${utmData.utm_medium ? ` / ${utmData.utm_medium}` : ''}`;
+        }
+      }
+
       const [paymentsRes, tokensRes, generationsCountRes, generationsRes, allTransactionsRes, surveyRes] = await Promise.all([
         supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
@@ -139,7 +159,8 @@ export function AdminUsers({
         paymentHistory: paymentsRes.data || [],
         referrals: referralsWithEmails,
         tokenTransactions: allTransactionsRes.data || [],
-        surveyResponses: surveyRes.data || []
+        surveyResponses: surveyRes.data || [],
+        utmSourceName
       });
     } catch (error) {
       console.error('Error loading user details:', error);
@@ -399,6 +420,14 @@ export function AdminUsers({
                   </div>
                   <div className="text-[10px] sm:text-xs text-orange-600/80 dark:text-orange-400/80">Рефералов</div>
                 </div>
+              </div>
+
+              {/* UTM Source */}
+              <div className="bg-muted/50 rounded-lg p-2.5 sm:p-3 flex items-center gap-2">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Источник:</div>
+                <Badge variant="secondary" className="text-xs">
+                  {userDetails.utmSourceName || 'Прямой заход'}
+                </Badge>
               </div>
 
               {/* Survey Responses */}

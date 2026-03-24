@@ -34,6 +34,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
     { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
     { id: 'users', label: 'Пользователи', icon: Users },
     { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined },
+    { id: 'utm', label: 'Трафик', icon: Crosshair },
     { id: 'partners', label: 'Партнеры', icon: Handshake },
     { id: 'prompts', label: 'Модель', icon: Bot },
     { id: 'bonuses', label: 'Бонусы', icon: Gift },
@@ -42,7 +43,6 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },
     { id: 'video_lessons', label: 'Обучение', icon: GraduationCap },
-    { id: 'utm', label: 'Трафик', icon: Crosshair },
   ];
 
   const handleTabChange = (tabId: string) => {
