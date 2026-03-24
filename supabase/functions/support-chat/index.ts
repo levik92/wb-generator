@@ -249,6 +249,7 @@ serve(async (req) => {
               await supabase
                 .from("support_conversations")
                 .update({
+                  ai_enabled: false,
                   needs_admin_attention: true,
                   status: "waiting_for_admin",
                   admin_notified_at: new Date().toISOString(),

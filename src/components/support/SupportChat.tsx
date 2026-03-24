@@ -192,27 +192,40 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         setConversationId(convId);
       }
 
+      // Build optimistic message immediately (before upload)
+      const tempId = "temp-" + Date.now();
+      const optimisticMsg: Message = {
+        id: tempId,
+        sender_type: "user",
+        content: text || "📎 Изображение",
+        created_at: new Date().toISOString(),
+        attachment_url: pendingPreview || null,
+      };
+
       let attachmentUrl: string | null = null;
       if (pendingFile) {
+        // Show optimistic message with local preview right away
+        setMessages((prev) => [...prev, optimisticMsg]);
+        setLoading(false);
+        inputRef.current?.focus();
+
         setUploading(true);
         attachmentUrl = await uploadFile(pendingFile);
         setUploading(false);
         clearPendingFile();
-      }
 
-      // Optimistic update — release loading immediately so UI isn't blocked
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: "temp-" + Date.now(),
-          sender_type: "user",
-          content: text || (attachmentUrl ? "📎 Изображение" : ""),
-          created_at: new Date().toISOString(),
-          attachment_url: attachmentUrl,
-        },
-      ]);
-      setLoading(false);
-      inputRef.current?.focus();
+        // Update optimistic message with real URL
+        if (attachmentUrl) {
+          setMessages((prev) =>
+            prev.map((m) => m.id === tempId ? { ...m, attachment_url: attachmentUrl } : m)
+          );
+        }
+      } else {
+        // No file — show optimistic message immediately
+        setMessages((prev) => [...prev, optimisticMsg]);
+        setLoading(false);
+        inputRef.current?.focus();
+      }
 
       // Send in background — don't block UI
       setAiTyping(true);
@@ -221,7 +234,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         conversation_id: convId,
         message: text || "📎 Изображение",
         attachment_url: attachmentUrl,
-      }).then((res) => {
+      }).then(() => {
           setAiTyping(false);
           return loadMessages(convId!);
         })
