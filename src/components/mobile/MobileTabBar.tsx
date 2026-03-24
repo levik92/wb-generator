@@ -16,8 +16,9 @@ const tabs = [
 ];
 
 export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number } | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const isFirstRender = useRef(true);
   
   useEffect(() => {
     const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
@@ -28,6 +29,10 @@ export const MobileTabBar = ({ activeTab, onTabChange }: MobileTabBarProps) => {
           left: activeElement.offsetLeft + activeElement.offsetWidth / 2 - 20,
           width: 40,
         });
+        // After first measurement, allow animations
+        if (isFirstRender.current) {
+          isFirstRender.current = false;
+        }
       }
     }
   }, [activeTab]);
