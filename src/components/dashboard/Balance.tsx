@@ -131,7 +131,7 @@ export default function Balance() {
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
             {pricesLoading ? <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
               </div> : <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4 flex items-center gap-3 hover:border-primary/20 transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
