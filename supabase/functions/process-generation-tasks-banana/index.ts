@@ -162,6 +162,32 @@ async function processTasks(
     let styleAnalysisDone = !job.unified_styling; // Skip if not using unified styling
     let styleDescription: string | null = job.style_description || null;
 
+    // If style_source_image_url is provided, analyze style immediately before processing any tasks
+    if (job.style_source_image_url && job.unified_styling && !styleDescription) {
+      console.log(`[unified-styling] Pre-analyzing style from source image: ${job.style_source_image_url}`);
+      try {
+        const { data: styleResult, error: styleError } = await supabase.functions.invoke('analyze-style', {
+          body: { imageUrl: job.style_source_image_url, jobId }
+        });
+
+        if (styleError) {
+          console.error('[unified-styling] Pre-style analysis error:', styleError);
+        } else if (styleResult?.styleDescription) {
+          styleDescription = styleResult.styleDescription;
+          console.log(`[unified-styling] Pre-style description obtained (${styleDescription!.length} chars)`);
+          // Mark style analysis as done so all tasks get the style
+          styleAnalysisDone = true;
+        }
+      } catch (e) {
+        console.error('[unified-styling] Failed to pre-analyze style:', e);
+      }
+      
+      if (!styleAnalysisDone) {
+        // Fallback: if pre-analysis failed, use normal flow (first card as style source)
+        console.log('[unified-styling] Pre-analysis failed, falling back to first-card analysis');
+      }
+    }
+
     while (Date.now() - startTime < MAX_PROCESSING_TIME) {
       // Fetch pending/retrying tasks
       const { data: tasks, error: tasksError } = await supabase

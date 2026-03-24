@@ -152,7 +152,8 @@ serve(async (req) => {
         status: 'pending',
         total_cards: selectedCards.length,
         tokens_cost: tokensRequired,
-        unified_styling: unifiedStyling
+        unified_styling: unifiedStyling,
+        style_source_image_url: styleSourceImageUrl
       })
       .select()
       .single();
