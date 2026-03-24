@@ -307,8 +307,8 @@ export const GenerateCards = ({
 
           const { data: completedEditJobs } = await editQuery;
 
+          let restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
           if (completedEditJobs && completedEditJobs.length > 0) {
-            const restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
             const restoredSelected: Record<number, number> = {};
 
             for (const editJob of completedEditJobs) {
