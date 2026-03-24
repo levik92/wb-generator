@@ -89,6 +89,11 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
       label: 'Обучение',
       icon: GraduationCap,
     },
+    {
+      id: 'utm',
+      label: 'Трафик',
+      icon: Crosshair,
+    },
   ];
 
   return (
