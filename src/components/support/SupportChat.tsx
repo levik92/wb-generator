@@ -67,7 +67,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     const path = `${profile.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage
       .from("support-attachments")
-      .upload(path, file, { contentType: file.type });
+      .upload(path, compressed, { contentType: compressed.type });
     if (error) {
       console.error("Upload error:", error);
       return null;
