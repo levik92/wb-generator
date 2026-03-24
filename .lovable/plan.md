@@ -1,46 +1,45 @@
 
 
-# Оптимизация скорости загрузки
+# Функция «В таком же стиле» — реализация
 
-## Обнаруженные проблемы
+## Что делаем
 
-1. **Дашборд загружает ВСЕ вкладки сразу** — 12+ компонентов импортируются при открытии, хотя видна только одна вкладка
-2. **framer-motion (~30KB)** загружается на каждой странице, даже для простых анимаций
-3. **SupportWidget** грузится на всех публичных страницах
-4. **AuthRedirect** делает async-запрос к Supabase перед показом лендинга даже для новых посетителей
-5. **DashboardSidebar** дублирует запрос `getUser()`, который уже делает родитель
+Кнопка Sparkles возле каждой сгенерированной карточки. По клику — ResponsiveDialog (Drawer на мобилке, Dialog на ПК) с:
+- Превью исходной карточки
+- Чекбоксы типов карточек (без типа текущей)
+- Поле описания + Switch «Придумай сам» (вкл. по умолчанию → поле заблокировано, заполнено оригинальным описанием из jobData)
+- Кнопка «Создать N карточек — X токенов» (стоимость: 5 токенов за карточку, как обычная генерация)
 
-## План оптимизации
+## Техническая логика
 
-### Шаг 1: Ленивая загрузка вкладок дашборда
-Все 12 компонентов вкладок в `Dashboard.tsx` перевести на `React.lazy()`. Загружается только активная вкладка.
-
-### Шаг 2: CSS-анимации вместо framer-motion
-В критических компонентах (`SupportWidget`, `DashboardPageWrapper`, `CasesPromoBanner`) заменить `motion.div` на CSS `@keyframes`. Убирает framer-motion из начальной загрузки.
-
-### Шаг 3: Ленивая загрузка SupportWidget
-В `App.tsx` обернуть `SupportWidget` в `lazy()`.
-
-### Шаг 4: Передача данных через props в сайдбар
-Убрать дублирующий вызов API в `DashboardSidebar.tsx`, передавать `profile` и `hasUnreadNews` через props.
-
-### Шаг 5: Быстрый путь для лендинга
-В `AuthRedirect.tsx` — если в localStorage нет токена Supabase, сразу показывать контент без async-проверки.
-
-### Шаг 6: Разделение бандла в Vite
-Добавить `manualChunks`: react-vendor, ui-vendor, framer-motion, supabase — отдельными чанками.
-
-## Ожидаемый эффект
-- **Лендинг**: на 40-60% быстрее (нет задержки auth, нет framer-motion)
-- **Дашборд**: на ~50% быстрее первая загрузка (ленивые вкладки, минус 200-400KB JS)
-- **Админка**: тоже выигрывает от ленивой загрузки
+1. Пользователь нажимает Sparkles у карточки → открывается попап
+2. Выбирает типы карточек, при необходимости пишет своё описание (или оставляет «Придумай сам»)
+3. По кнопке «Создать»:
+   - Берутся `productName`, `productImages` из `jobData` (сохранённые при генерации)
+   - `description` — из поля попапа (новое или оригинальное)
+   - Вызывается `create-generation-job-banana` с `unifiedStyling: true` и новым параметром `styleSourceImageUrl` (URL выбранной карточки)
+   - Бэкенд: `process-generation-tasks-banana` при наличии `style_source_image_url` в job вызывает `analyze-style` с этим URL вместо первой сгенерированной карточки, и применяет стиль ко ВСЕМ карточкам (не пропускает первую)
 
 ## Файлы для изменения
-- `src/pages/Dashboard.tsx` — lazy-импорты вкладок
-- `src/App.tsx` — lazy SupportWidget
-- `src/components/AuthRedirect.tsx` — fast-path через localStorage
-- `src/components/support/SupportWidget.tsx` — CSS вместо framer-motion
-- `src/components/dashboard/DashboardPageWrapper.tsx` — CSS вместо framer-motion
-- `src/components/dashboard/DashboardSidebar.tsx` — убрать дублирующий API-вызов
-- `vite.config.ts` — manualChunks
+
+### 1. Миграция БД
+- Добавить колонку `style_source_image_url TEXT` в `generation_jobs`
+
+### 2. `supabase/functions/create-generation-job-banana/index.ts`
+- Принять параметр `styleSourceImageUrl` из body
+- Сохранить в `generation_jobs.style_source_image_url`
+
+### 3. `supabase/functions/process-generation-tasks-banana/index.ts`
+- Если `job.style_source_image_url` есть → вызвать `analyze-style` с этим URL сразу (не ждать первую карточку), применить стиль ко всем задачам
+- Изменить логику: `styleAnalysisDone = !job.unified_styling` → если есть `style_source_image_url`, то сразу анализировать стиль до обработки задач
+
+### 4. `src/components/dashboard/GenerateCards.tsx`
+- Добавить состояния: `styleDialogOpen`, `styleSourceImage`, `styleSelectedCards`, `styleDescription`, `styleAutoDescription`
+- Кнопка Sparkles в ряду кнопок (между Edit и Regenerate), фиолетовая обводка
+- Компонент попапа — ResponsiveDialog с чекбоксами, полем описания, Switch «Придумай сам»
+- Функция `generateInStyle()`:
+  - Использует `jobData` для productName, productImages
+  - Вызывает `create-generation-job-banana` с `styleSourceImageUrl`, `unifiedStyling: true`, выбранными карточками
+  - Запускает polling (`startJobPolling`)
+  - Стоимость: `selectedCards.length * photoGenerationPrice` (5 токенов за карточку)
 
