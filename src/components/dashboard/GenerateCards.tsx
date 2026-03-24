@@ -2273,6 +2273,15 @@ export const GenerateCards = ({
                                   <span className="md:hidden ml-1">Редактировать</span>
                                 </>}
                       </Button>
+
+                      {/* Style generation button */}
+                      <Button size="sm" variant="outline" onClick={e => {
+                        e.stopPropagation();
+                        openStyleDialog(image);
+                      }} disabled={!jobData || generating || styleGenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3 border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors" title="Создать в таком же стиле">
+                        <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
+                        <span className="md:hidden ml-1">В стиле</span>
+                      </Button>
                       
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
