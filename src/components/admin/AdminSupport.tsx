@@ -519,7 +519,7 @@ export const AdminSupport = () => {
         <div className="border-t border-border p-3">
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-2">
             <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleFileSelect} />
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary opacity-60 hover:opacity-100 transition-opacity"
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary opacity-40 hover:opacity-100 transition-opacity"
               onClick={() => fileInputRef.current?.click()} disabled={sending || uploading}>
               <Paperclip className="w-4 h-4" />
             </Button>
