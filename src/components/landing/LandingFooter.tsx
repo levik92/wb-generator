@@ -130,7 +130,7 @@ export const LandingFooter = () => {
         </div>
 
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
-          <p className="text-sm text-white/40">© 2025 ООО «АЛЬТАИР». Все права защищены.</p>
+          <p className="text-sm text-white/40"><p className="text-sm text-white/40">© 2026. ООО «АЛЬТАИР». Все права защищены.</p></p>
           <p className="text-sm text-white/40">ИНН: 9724238597</p>
         </div>
       </div>
