@@ -19,7 +19,8 @@ interface SupportChatProps {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-chat`;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 5 * 1024 * 1024;
+const MESSAGES_PER_PAGE = 15;
 
 export const SupportChat = ({ profile }: SupportChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -31,11 +32,16 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const shouldScrollRef = useRef(true);
 
   const scrollToBottom = useCallback(() => {
+    if (!shouldScrollRef.current) return;
     const el = messagesEndRef.current;
     if (el?.parentElement) {
       el.parentElement.scrollTop = el.parentElement.scrollHeight;
@@ -61,8 +67,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   };
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    // Compress image before upload
-    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 0.85 });
+    const compressed = await compressImage(file, { maxWidth: 1200, maxHeight: 1200, quality: 1.0 });
     const ext = compressed.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${profile.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage
@@ -76,6 +81,17 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     return data.publicUrl;
   };
 
+  const loadMessages = useCallback(async (convId: string, beforeId?: string) => {
+    const { messages: msgs, hasMore } = await callApi({
+      action: "get_messages",
+      conversation_id: convId,
+      ...(beforeId ? { before_id: beforeId } : {}),
+      limit: MESSAGES_PER_PAGE,
+    });
+    setHasMoreMessages(hasMore);
+    return msgs || [];
+  }, []);
+
   // Load existing conversation
   useEffect(() => {
     const load = async () => {
@@ -86,11 +102,9 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         });
         if (conversation) {
           setConversationId(conversation.id);
-          const { messages: msgs } = await callApi({
-            action: "get_messages",
-            conversation_id: conversation.id,
-          });
-          setMessages(msgs || []);
+          const msgs = await loadMessages(conversation.id);
+          setMessages(msgs);
+          shouldScrollRef.current = true;
         }
       } catch (e) {
         console.error("Load error:", e);
@@ -100,6 +114,40 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     };
     load();
   }, [profile.id]);
+
+  const loadOlderMessages = async () => {
+    if (!conversationId || loadingMore || !hasMoreMessages || messages.length === 0) return;
+    setLoadingMore(true);
+    shouldScrollRef.current = false;
+    try {
+      const container = messagesContainerRef.current;
+      const prevScrollHeight = container?.scrollHeight || 0;
+      
+      const oldestId = messages[0]?.id;
+      const olderMsgs = await loadMessages(conversationId, oldestId);
+      if (olderMsgs.length > 0) {
+        setMessages(prev => [...olderMsgs, ...prev]);
+        // Preserve scroll position
+        requestAnimationFrame(() => {
+          if (container) {
+            container.scrollTop = container.scrollHeight - prevScrollHeight;
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Load more error:", e);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleScroll = useCallback(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    if (container.scrollTop < 60 && hasMoreMessages && !loadingMore) {
+      loadOlderMessages();
+    }
+  }, [hasMoreMessages, loadingMore, messages]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -128,6 +176,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     if ((!text && !pendingFile) || loading || uploading) return;
     setInput("");
     setLoading(true);
+    shouldScrollRef.current = true;
 
     try {
       let convId = conversationId;
@@ -169,12 +218,9 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         attachment_url: attachmentUrl,
       });
 
-      // Refresh messages
-      const { messages: allMsgs } = await callApi({
-        action: "get_messages",
-        conversation_id: convId,
-      });
-      setMessages(allMsgs || []);
+      // Refresh latest messages
+      const msgs = await loadMessages(convId);
+      setMessages(msgs);
     } catch (e) {
       console.error("Send error:", e);
     } finally {
@@ -188,15 +234,18 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     if (!conversationId) return;
     const interval = setInterval(async () => {
       try {
-        const { messages: msgs } = await callApi({
-          action: "get_messages",
-          conversation_id: conversationId,
+        shouldScrollRef.current = true;
+        const msgs = await loadMessages(conversationId);
+        setMessages(prev => {
+          if (msgs.length !== prev.length || msgs[msgs.length - 1]?.id !== prev[prev.length - 1]?.id) {
+            return msgs;
+          }
+          return prev;
         });
-        setMessages(msgs || []);
       } catch {}
     }, 8000);
     return () => clearInterval(interval);
-  }, [conversationId]);
+  }, [conversationId, loadMessages]);
 
   const getSenderName = (type: string) => {
     switch (type) {
@@ -228,7 +277,24 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
 
       <div className="border border-border rounded-2xl bg-card overflow-hidden flex flex-col h-[calc(100vh-280px)] min-h-[400px] max-h-[600px]">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div
+          ref={messagesContainerRef}
+          className="flex-1 overflow-y-auto p-4 space-y-3"
+          onScroll={handleScroll}
+        >
+          {/* Load more indicator */}
+          {hasMoreMessages && (
+            <div className="flex justify-center py-2">
+              {loadingMore ? (
+                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              ) : (
+                <button onClick={loadOlderMessages} className="text-xs text-primary hover:underline">
+                  Загрузить ранние сообщения
+                </button>
+              )}
+            </div>
+          )}
+          
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
