@@ -34,6 +34,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [aiTyping, setAiTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -214,17 +215,24 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
       inputRef.current?.focus();
 
       // Send in background — don't block UI
+      setAiTyping(true);
       callApi({
         action: "send_message",
         conversation_id: convId,
         message: text || "📎 Изображение",
         attachment_url: attachmentUrl,
-      }).then(() => loadMessages(convId!))
+      }).then((res) => {
+          setAiTyping(false);
+          return loadMessages(convId!);
+        })
         .then((msgs) => {
           shouldScrollRef.current = true;
           setMessages(msgs);
         })
-        .catch((e) => console.error("Send error:", e));
+        .catch((e) => {
+          console.error("Send error:", e);
+          setAiTyping(false);
+        });
     } catch (e) {
       console.error("Send error:", e);
       setLoading(false);
@@ -346,6 +354,16 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
                 </span>
               </div>
             ))
+          )}
+          {aiTyping && (
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] text-muted-foreground mb-1">Ассистент</span>
+              <div className="bg-secondary text-secondary-foreground rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:300ms]" />
+              </div>
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
