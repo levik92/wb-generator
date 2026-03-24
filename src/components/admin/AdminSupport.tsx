@@ -636,6 +636,7 @@ export const AdminSupport = () => {
         <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
           {selectedConv ? chatViewContent : conversationListContent}
         </div>
+        {!selectedConv && aiDefaultsBlock}
         <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
           <DialogContent className="max-w-3xl p-2 bg-black/90 border-none">
             <button onClick={() => setPreviewImage(null)}
