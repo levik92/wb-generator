@@ -784,15 +784,64 @@ export const GenerateCards = ({
               url: task.image_url,
               stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
               stageIndex: task.card_index,
-              // IMPORTANT: keep original card type so regeneration/edit flows don't fallback to 'cover'
-              // (e.g. for mainEdit / "Редактирование изображения")
               cardType: task.card_type,
-              jobId: job.id  // Store jobId for regeneration even after currentJobId is cleared
+              jobId: job.id
             }));
-            // If this is a style generation, preserve pre-style images during polling
+            // If this is a style generation, merge styled images as variants
             if (preStyleImagesRef.current.length > 0) {
-              const styledImages = images.map(img => ({ ...img, isStyled: true }));
-              setGeneratedImages([...preStyleImagesRef.current, ...styledImages]);
+              // Keep original images as the base, add styled ones as variants
+              const baseImages = [...preStyleImagesRef.current];
+              setGeneratedImages(baseImages);
+              
+              // Add each styled image as a variant of the matching stageIndex
+              setImageVariants(prev => {
+                const updated = { ...prev };
+                for (const styledImg of images) {
+                  // Find the index in baseImages that matches this stageIndex
+                  const baseIdx = baseImages.findIndex(b => b.stageIndex === styledImg.stageIndex);
+                  if (baseIdx >= 0) {
+                    const existing = updated[baseIdx] || [];
+                    // If no variants yet, add original as first
+                    if (existing.length === 0) {
+                      updated[baseIdx] = [
+                        { url: baseImages[baseIdx].url, label: 'Оригинал', id: baseImages[baseIdx].id },
+                        { url: styledImg.url, label: 'Стиль 1', id: styledImg.id }
+                      ];
+                    } else {
+                      // Count existing style variants
+                      const styleCount = existing.filter(v => v.label.startsWith('Стиль')).length;
+                      updated[baseIdx] = [...existing, { url: styledImg.url, label: `Стиль ${styleCount + 1}`, id: styledImg.id }];
+                    }
+                  } else {
+                    // No matching base image — add as new card
+                    baseImages.push(styledImg);
+                    setGeneratedImages([...baseImages]);
+                  }
+                }
+                return updated;
+              });
+              // Select the newest variant for each styled card
+              setSelectedVariant(prev => {
+                const updated = { ...prev };
+                for (const styledImg of images) {
+                  const baseIdx = baseImages.findIndex(b => b.stageIndex === styledImg.stageIndex);
+                  if (baseIdx >= 0) {
+                    // Will be set after imageVariants update in next render
+                  }
+                }
+                return updated;
+              });
+              // Update displayed images to show the new styled version
+              setGeneratedImages(prev => {
+                const result = [...prev];
+                for (const styledImg of images) {
+                  const idx = result.findIndex(b => b.stageIndex === styledImg.stageIndex);
+                  if (idx >= 0) {
+                    result[idx] = { ...result[idx], url: styledImg.url };
+                  }
+                }
+                return result;
+              });
             } else {
               setGeneratedImages(images);
             }
