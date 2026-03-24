@@ -1343,6 +1343,7 @@ export type Database = {
       }
       support_messages: {
         Row: {
+          attachment_url: string | null
           conversation_id: string
           created_at: string
           encrypted_content: string
@@ -1350,6 +1351,7 @@ export type Database = {
           sender_type: string
         }
         Insert: {
+          attachment_url?: string | null
           conversation_id: string
           created_at?: string
           encrypted_content: string
@@ -1357,6 +1359,7 @@ export type Database = {
           sender_type?: string
         }
         Update: {
+          attachment_url?: string | null
           conversation_id?: string
           created_at?: string
           encrypted_content?: string
@@ -1749,6 +1752,7 @@ export type Database = {
       }
       check_admin_profile_access_rate: { Args: never; Returns: boolean }
       cleanup_old_generations: { Args: never; Returns: undefined }
+      cleanup_old_support_attachments: { Args: never; Returns: undefined }
       decrypt_support_message_edge: {
         Args: { enc_key: string; encrypted: string }
         Returns: string
