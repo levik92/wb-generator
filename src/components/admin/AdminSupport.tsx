@@ -355,7 +355,7 @@ export const AdminSupport = () => {
     if (conv.needs_admin_attention) {
       return (
         <span className="group/badge relative">
-          <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] px-1.5 group-hover/badge:hidden">Требует внимания</Badge>
+          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] px-1.5 group-hover/badge:hidden">Ожидает</Badge>
           <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] px-1.5 hidden group-hover/badge:inline-flex cursor-pointer hover:bg-destructive/20"
             onClick={(e) => closeConversationInline(conv.id, e)}>Закрыть</Badge>
         </span>
