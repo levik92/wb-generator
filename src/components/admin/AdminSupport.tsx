@@ -55,6 +55,7 @@ export const AdminSupport = () => {
   const [loadingMoreConvs, setLoadingMoreConvs] = useState(false);
   const [hasMoreMsgs, setHasMoreMsgs] = useState(false);
   const [loadingMoreMsgs, setLoadingMoreMsgs] = useState(false);
+  const [aiDefaults, setAiDefaults] = useState<Record<string, boolean>>({ widget: true, dashboard: false });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const convsContainerRef = useRef<HTMLDivElement>(null);
