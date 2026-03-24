@@ -307,8 +307,8 @@ export const GenerateCards = ({
 
           const { data: completedEditJobs } = await editQuery;
 
+          let restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
           if (completedEditJobs && completedEditJobs.length > 0) {
-            const restoredVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
             const restoredSelected: Record<number, number> = {};
 
             for (const editJob of completedEditJobs) {
@@ -384,59 +384,57 @@ export const GenerateCards = ({
             
             // Add styled tasks as variants of existing images, or as new images if card type is new
             if (allStyledTasks.length > 0) {
-              const variantsUpdate: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
+              // Build variants synchronously to avoid race conditions between state setters
+              const currentVariants: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
               const selectUpdate: Record<number, number> = {};
               const newImages: typeof images = [];
               
-              // Build variants from current state + styled tasks
-              setImageVariants(prev => {
-                const updated = { ...prev };
-                for (const { task, jobId: styledJobId } of allStyledTasks) {
-                  // First check in existing images array (including newly added ones)
-                  let imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
-                  // Also check in newImages we're about to add
-                  if (imgIndex < 0) {
-                    const newIdx = newImages.findIndex((img: any) => img.stageIndex === task.card_index);
-                    if (newIdx >= 0) {
-                      imgIndex = images.length + newIdx;
-                    }
-                  }
-                  
-                  if (imgIndex >= 0) {
-                    if (!updated[imgIndex]) {
-                      const sourceImg = imgIndex < images.length ? images[imgIndex] : newImages[imgIndex - images.length];
-                      updated[imgIndex] = [{ url: sourceImg.url, label: 'Оригинал', id: sourceImg.id }];
-                    }
-                    const styleCount = updated[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
-                    updated[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
-                    selectUpdate[imgIndex] = updated[imgIndex].length - 1;
-                  } else {
-                    // New card type not in original job — add as new image
-                    newImages.push({
-                      id: task.id,
-                      url: task.image_url,
-                      stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-                      stageIndex: task.card_index,
-                      cardType: task.card_type,
-                      jobId: styledJobId
-                    });
+              // Get current edit/regen variants that were already restored above
+              // We need to merge with them, not overwrite
+              const existingVariants = { ...(Object.keys(restoredVariants || {}).length > 0 ? restoredVariants : {}) };
+              Object.assign(currentVariants, existingVariants);
+              
+              for (const { task, jobId: styledJobId } of allStyledTasks) {
+                let imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                if (imgIndex < 0) {
+                  const newIdx = newImages.findIndex((img: any) => img.stageIndex === task.card_index);
+                  if (newIdx >= 0) {
+                    imgIndex = images.length + newIdx;
                   }
                 }
-                Object.assign(variantsUpdate, updated);
-                return updated;
-              });
-              setSelectedVariant(prev => ({ ...prev, ...selectUpdate }));
-              // Update displayed images: update existing with latest variant + append new card types
-              setGeneratedImages(prev => {
-                const updated = prev.map((img, i) => {
-                  if (selectUpdate[i] !== undefined && variantsUpdate[i]) {
-                    const variant = variantsUpdate[i][selectUpdate[i]];
-                    return { ...img, url: variant.url };
+                
+                if (imgIndex >= 0) {
+                  if (!currentVariants[imgIndex]) {
+                    const sourceImg = imgIndex < images.length ? images[imgIndex] : newImages[imgIndex - images.length];
+                    currentVariants[imgIndex] = [{ url: sourceImg.url, label: 'Оригинал', id: sourceImg.id }];
                   }
-                  return img;
-                });
-                return [...updated, ...newImages];
+                  const styleCount = currentVariants[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
+                  currentVariants[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
+                  selectUpdate[imgIndex] = currentVariants[imgIndex].length - 1;
+                } else {
+                  newImages.push({
+                    id: task.id,
+                    url: task.image_url,
+                    stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
+                    stageIndex: task.card_index,
+                    cardType: task.card_type,
+                    jobId: styledJobId
+                  });
+                }
+              }
+              
+              // Set all states synchronously with computed values
+              setImageVariants(currentVariants);
+              setSelectedVariant(prev => ({ ...prev, ...selectUpdate }));
+              // Update displayed images to match selected variants
+              const updatedImages = images.map((img, i) => {
+                if (selectUpdate[i] !== undefined && currentVariants[i]) {
+                  const variant = currentVariants[i][selectUpdate[i]];
+                  return { ...img, url: variant.url };
+                }
+                return img;
               });
+              setGeneratedImages([...updatedImages, ...newImages]);
             }
           }
 
