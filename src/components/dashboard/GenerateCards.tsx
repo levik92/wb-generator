@@ -384,6 +384,10 @@ export const GenerateCards = ({
             
             // Add styled tasks as variants of existing images
             if (allStyledTasks.length > 0) {
+              const variantsUpdate: Record<number, Array<{ url: string; label: string; id?: string }>> = {};
+              const selectUpdate: Record<number, number> = {};
+              
+              // Build variants from current state + styled tasks
               setImageVariants(prev => {
                 const updated = { ...prev };
                 for (const { task } of allStyledTasks) {
@@ -394,21 +398,21 @@ export const GenerateCards = ({
                     }
                     const styleCount = updated[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
                     updated[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
+                    selectUpdate[imgIndex] = updated[imgIndex].length - 1;
                   }
                 }
+                Object.assign(variantsUpdate, updated);
                 return updated;
               });
-              // Select the latest style variant for each
-              setSelectedVariant(prev => {
-                const updated = { ...prev };
-                for (const { task } of allStyledTasks) {
-                  const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
-                  if (imgIndex >= 0) {
-                    // Will be the last added variant
-                  }
+              setSelectedVariant(prev => ({ ...prev, ...selectUpdate }));
+              // Update displayed images to show latest styled version
+              setGeneratedImages(prev => prev.map((img, i) => {
+                if (selectUpdate[i] !== undefined && variantsUpdate[i]) {
+                  const variant = variantsUpdate[i][selectUpdate[i]];
+                  return { ...img, url: variant.url };
                 }
-                return updated;
-              });
+                return img;
+              }));
             }
           }
 
