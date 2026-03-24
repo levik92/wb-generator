@@ -1525,7 +1525,108 @@ export const GenerateCards = ({
     }, 5 * 60 * 1000);
   };
 
-  // Smooth progress bar animation based on time or completed tasks
+  // Style generation: open dialog
+  const openStyleDialog = (image: any) => {
+    setStyleSourceImage(image);
+    // Pre-select all card types except the current one
+    const availableCards = CARD_STAGES.map((_, i) => i).filter(i => i !== image.stageIndex && i !== 6); // Exclude current + mainEdit
+    setStyleSelectedCards([]);
+    // Set description from jobData or empty
+    const originalDesc = jobData?.description || '';
+    setStyleAutoDescription(true);
+    setStyleDescription(originalDesc);
+    setStyleDialogOpen(true);
+  };
+
+  const handleStyleCardToggle = (cardIndex: number) => {
+    setStyleSelectedCards(prev => 
+      prev.includes(cardIndex) 
+        ? prev.filter(i => i !== cardIndex)
+        : [...prev, cardIndex].sort((a, b) => a - b)
+    );
+  };
+
+  const generateInStyle = async () => {
+    if (!styleSourceImage || styleSelectedCards.length === 0 || !jobData) return;
+
+    const tokensNeeded = styleSelectedCards.length * photoGenerationPrice;
+    if (profile.tokens_balance < tokensNeeded) {
+      toast({
+        title: "Недостаточно токенов",
+        description: `Нужно ${tokensNeeded} токенов, доступно ${profile.tokens_balance}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setStyleGenerating(true);
+    setStyleDialogOpen(false);
+
+    try {
+      // Clear previous state for new generation
+      setGeneratedImages([]);
+      setCompletionNotificationShown(false);
+      setJobCompleted(false);
+      setCurrentJobId(null);
+      setPreviousJobStatus(null);
+      setImageVariants({});
+      setSelectedVariant({});
+      setIsRestoredGeneration(false);
+      setGenerating(true);
+      setProgress(0);
+      setCurrentStage(0);
+      setIsUploading(false);
+      setSelectedCards(styleSelectedCards);
+
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel || 'banana');
+      
+      const { data, error } = await supabase.functions.invoke(createJobFunction, {
+        body: {
+          productName: jobData.productName,
+          category: jobData.category || 'товар',
+          description: styleDescription,
+          userId: profile.id,
+          productImages: jobData.productImages.filter(img => img.type !== 'reference'),
+          referenceImageUrl: null,
+          selectedCards: styleSelectedCards,
+          unifiedStyling: true,
+          styleSourceImageUrl: styleSourceImage.url
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success && data.jobId) {
+        // Save job data
+        setJobData({
+          productName: jobData.productName,
+          category: jobData.category,
+          description: styleDescription,
+          productImages: jobData.productImages
+        });
+        startJobPolling(data.jobId);
+        toast({
+          title: "Генерация в стиле начата!",
+          description: "Создаём карточки в выбранном стиле..."
+        });
+      } else {
+        throw new Error(data.error || 'Ошибка создания задачи');
+      }
+    } catch (error: any) {
+      console.error('Style generation error:', error);
+      toast({
+        title: "Ошибка генерации",
+        description: "Не удалось запустить генерацию в стиле",
+        variant: "destructive"
+      });
+      setGenerating(false);
+    } finally {
+      setStyleGenerating(false);
+    }
+  };
+
   useEffect(() => {
     if (!generating || currentStage >= selectedCards.length) {
       setSmoothProgress(progress);
