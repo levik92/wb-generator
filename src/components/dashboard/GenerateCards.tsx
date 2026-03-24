@@ -1604,8 +1604,8 @@ export const GenerateCards = ({
     setStyleSelectedCards([]);
     // Set description from jobData or empty
     const originalDesc = jobData?.description || '';
-    setStyleAutoDescription(true);
-    setStyleDescription(originalDesc);
+    setStyleAutoDescription(false);
+    setStyleDescription('');
     setStyleDialogOpen(true);
   };
 
