@@ -73,6 +73,7 @@ interface PartnerData {
 }
 
 const COMMISSION_RATES = [15, 20, 25, 30];
+const REFERRALS_PER_PAGE = 10;
 
 export const AdminPartners = () => {
   const { toast } = useToast();
@@ -83,6 +84,7 @@ export const AdminPartners = () => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<ReferralDetail[]>([]);
+  const [referralPage, setReferralPage] = useState(1);
   const [manualPaymentAmount, setManualPaymentAmount] = useState("");
   const [totalPaidOut, setTotalPaidOut] = useState(0);
 
@@ -149,6 +151,7 @@ export const AdminPartners = () => {
     setDetailsLoading(true);
     setManualPaymentAmount("");
     setReferrals([]);
+    setReferralPage(1);
     try {
       // Load withdrawals
       const { data: withdrawalsData } = await supabase
@@ -504,7 +507,7 @@ export const AdminPartners = () => {
                 <p className="text-sm text-muted-foreground">Нет привлечённых клиентов</p>
               ) : (
                 <div className="space-y-4">
-                  {referrals.map(ref => (
+                  {referrals.slice((referralPage - 1) * REFERRALS_PER_PAGE, referralPage * REFERRALS_PER_PAGE).map(ref => (
                     <div key={ref.id} className="border border-border/50 rounded-xl overflow-hidden">
                       {/* Referral header */}
                       <div className="bg-muted/40 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
@@ -569,6 +572,22 @@ export const AdminPartners = () => {
                       )}
                     </div>
                   ))}
+                  {/* Pagination */}
+                  {referrals.length > REFERRALS_PER_PAGE && (
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-xs text-muted-foreground">
+                        {(referralPage - 1) * REFERRALS_PER_PAGE + 1}–{Math.min(referralPage * REFERRALS_PER_PAGE, referrals.length)} из {referrals.length}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" disabled={referralPage <= 1} onClick={() => setReferralPage(p => p - 1)}>
+                          Назад
+                        </Button>
+                        <Button size="sm" variant="outline" disabled={referralPage >= Math.ceil(referrals.length / REFERRALS_PER_PAGE)} onClick={() => setReferralPage(p => p + 1)}>
+                          Далее
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
