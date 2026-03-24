@@ -1634,7 +1634,13 @@ export const GenerateCards = ({
     setStyleDialogOpen(false);
 
     try {
-      // Clear previous state for new generation
+      // Save current images for merging after style generation completes
+      preStyleImagesRef.current = [...generatedImages];
+      
+      // Find the source job ID (job that created the existing images)
+      const sourceJobId = generatedImages[0]?.jobId || currentJobId || null;
+
+      // Clear display state for progress bar
       setGeneratedImages([]);
       setCompletionNotificationShown(false);
       setJobCompleted(false);
@@ -1661,7 +1667,8 @@ export const GenerateCards = ({
           referenceImageUrl: null,
           selectedCards: styleSelectedCards,
           unifiedStyling: true,
-          styleSourceImageUrl: styleSourceImage.url
+          styleSourceImageUrl: styleSourceImage.url,
+          sourceJobId: sourceJobId
         }
       });
 
@@ -1670,13 +1677,7 @@ export const GenerateCards = ({
       }
 
       if (data.success && data.jobId) {
-        // Save job data
-        setJobData({
-          productName: jobData.productName,
-          category: jobData.category,
-          description: styleDescription,
-          productImages: jobData.productImages
-        });
+        // Keep original job data (don't overwrite productName etc)
         startJobPolling(data.jobId);
         toast({
           title: "Генерация в стиле начата!",
@@ -1687,6 +1688,11 @@ export const GenerateCards = ({
       }
     } catch (error: any) {
       console.error('Style generation error:', error);
+      // Restore pre-style images on error
+      if (preStyleImagesRef.current.length > 0) {
+        setGeneratedImages(preStyleImagesRef.current);
+        preStyleImagesRef.current = [];
+      }
       toast({
         title: "Ошибка генерации",
         description: "Не удалось запустить генерацию в стиле",
