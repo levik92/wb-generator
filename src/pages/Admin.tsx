@@ -175,6 +175,7 @@ export default function Admin() {
       case 'blog': return <AdminBlog />;
       case 'video_lessons': return <AdminVideoLessons />;
       case 'support': return <AdminSupport />;
+      case 'utm': return <AdminUtmSources />;
       default: return <AdminAnalytics users={users} />;
     }
   };
