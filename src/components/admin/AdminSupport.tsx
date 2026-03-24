@@ -125,6 +125,28 @@ export const AdminSupport = () => {
     return () => clearInterval(interval);
   }, [callApi]);
 
+  // Load AI defaults
+  useEffect(() => {
+    callApi({ action: "get_ai_defaults" }).then(({ defaults }) => {
+      const map: Record<string, boolean> = {};
+      for (const d of defaults || []) {
+        map[d.channel] = d.ai_enabled;
+      }
+      setAiDefaults(map);
+    }).catch(console.error);
+  }, [callApi]);
+
+  const toggleAiDefault = async (channel: string) => {
+    const newVal = !aiDefaults[channel];
+    setAiDefaults(prev => ({ ...prev, [channel]: newVal }));
+    try {
+      await callApi({ action: "set_ai_default", channel, ai_enabled: newVal });
+    } catch (e) {
+      console.error("Toggle AI default error:", e);
+      setAiDefaults(prev => ({ ...prev, [channel]: !newVal }));
+    }
+  };
+
   const loadMoreConvs = () => {
     if (loadingMoreConvs || !hasMoreConvs) return;
     setLoadingMoreConvs(true);
