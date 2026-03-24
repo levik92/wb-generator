@@ -35,6 +35,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [aiTyping, setAiTyping] = useState(false);
+  const [aiEnabled, setAiEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,6 +104,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         });
         if (conversation) {
           setConversationId(conversation.id);
+          setAiEnabled(conversation.ai_enabled ?? false);
           const msgs = await loadMessages(conversation.id);
           setMessages(msgs);
           shouldScrollRef.current = true;
@@ -228,7 +230,8 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
       }
 
       // Send in background — don't block UI
-      setAiTyping(true);
+      const shouldShowTyping = aiEnabled;
+      if (shouldShowTyping) setAiTyping(true);
       callApi({
         action: "send_message",
         conversation_id: convId,
