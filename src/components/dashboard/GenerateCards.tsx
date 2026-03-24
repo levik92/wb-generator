@@ -2582,7 +2582,7 @@ export const GenerateCards = ({
                 Создать в таком же стиле
               </DialogTitle>
               <DialogDescription className="text-sm text-left">
-                AI проанализирует стиль выбранной карточки и создаст новые в том же стиле
+                WBGen создаст новые карточки в такой же стилистике
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
