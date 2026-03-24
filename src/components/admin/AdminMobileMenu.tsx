@@ -16,7 +16,8 @@ import {
   LayoutDashboard,
   FileText,
   GraduationCap,
-  Headphones
+  Headphones,
+  Crosshair
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -41,6 +42,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },
     { id: 'video_lessons', label: 'Обучение', icon: GraduationCap },
+    { id: 'utm', label: 'Трафик', icon: Crosshair },
   ];
 
   const handleTabChange = (tabId: string) => {

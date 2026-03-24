@@ -24,6 +24,7 @@ const AdminBanners = lazy(() => import("@/components/admin/AdminBanners").then(m
 const AdminBlog = lazy(() => import("@/components/admin/AdminBlog").then(m => ({ default: m.AdminBlog })));
 const AdminVideoLessons = lazy(() => import("@/components/admin/AdminVideoLessons").then(m => ({ default: m.AdminVideoLessons })));
 const AdminSupport = lazy(() => import("@/components/admin/AdminSupport").then(m => ({ default: m.AdminSupport })));
+const AdminUtmSources = lazy(() => import("@/components/admin/AdminUtmSources").then(m => ({ default: m.AdminUtmSources })));
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 import { UserIcon } from "lucide-react";
@@ -41,7 +42,7 @@ interface User {
   updated_at: string;
 }
 
-type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons' | 'support';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons' | 'support' | 'utm';
 
 const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   analytics: { title: 'Аналитика', subtitle: 'Статистика и метрики платформы' },
@@ -55,6 +56,7 @@ const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   blog: { title: 'Блог', subtitle: 'Статьи и публикации' },
   video_lessons: { title: 'Обучение', subtitle: 'Видеоуроки для пользователей' },
   support: { title: 'Поддержка', subtitle: 'Чаты с пользователями' },
+  utm: { title: 'Источники трафика', subtitle: 'UTM-ссылки и аналитика каналов' },
 };
 
 export default function Admin() {
@@ -173,6 +175,7 @@ export default function Admin() {
       case 'blog': return <AdminBlog />;
       case 'video_lessons': return <AdminVideoLessons />;
       case 'support': return <AdminSupport />;
+      case 'utm': return <AdminUtmSources />;
       default: return <AdminAnalytics users={users} />;
     }
   };

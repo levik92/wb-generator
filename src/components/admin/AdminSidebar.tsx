@@ -15,7 +15,8 @@ import {
   LayoutDashboard,
   FileText,
   GraduationCap,
-  Headphones
+  Headphones,
+  Crosshair
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -87,6 +88,11 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
       id: 'video_lessons',
       label: 'Обучение',
       icon: GraduationCap,
+    },
+    {
+      id: 'utm',
+      label: 'Трафик',
+      icon: Crosshair,
     },
   ];
 

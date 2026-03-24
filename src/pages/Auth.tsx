@@ -13,6 +13,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 import { SmartCaptcha } from "@yandex/smart-captcha";
+import { getStoredUtmSourceId } from "@/hooks/useUtmTracking";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -177,12 +178,20 @@ const Auth = () => {
       if (captchaToken) signupOptions.captchaToken = captchaToken;
       if (referralCode) signupOptions.data = { referral_code: referralCode };
       if (partnerCode) signupOptions.data = { ...signupOptions.data, partner_code: partnerCode };
+      
+      // Store UTM source ID for post-registration update
+      const utmSourceId = getStoredUtmSourceId();
 
-      const { error } = await supabase.auth.signUp({ email, password, options: signupOptions });
+      const { data: signUpData, error } = await supabase.auth.signUp({ email, password, options: signupOptions });
 
       if (error) {
         await logLoginAttempt(email, false, error.message);
         throw error;
+      }
+
+      // Save UTM source to profile after successful registration
+      if (utmSourceId && signUpData?.user?.id) {
+        await supabase.from('profiles').update({ utm_source_id: utmSourceId }).eq('id', signUpData.user.id);
       }
 
       await logLoginAttempt(email, true);

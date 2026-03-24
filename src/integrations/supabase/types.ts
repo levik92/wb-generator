@@ -1052,6 +1052,7 @@ export type Database = {
           referred_by: string | null
           tokens_balance: number
           updated_at: string
+          utm_source_id: string | null
           wb_connected: boolean
         }
         Insert: {
@@ -1065,6 +1066,7 @@ export type Database = {
           referred_by?: string | null
           tokens_balance?: number
           updated_at?: string
+          utm_source_id?: string | null
           wb_connected?: boolean
         }
         Update: {
@@ -1078,6 +1080,7 @@ export type Database = {
           referred_by?: string | null
           tokens_balance?: number
           updated_at?: string
+          utm_source_id?: string | null
           wb_connected?: boolean
         }
         Relationships: [
@@ -1086,6 +1089,13 @@ export type Database = {
             columns: ["referred_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_utm_source_id_fkey"
+            columns: ["utm_source_id"]
+            isOneToOne: false
+            referencedRelation: "utm_sources"
             referencedColumns: ["id"]
           },
         ]
@@ -1632,6 +1642,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      utm_sources: {
+        Row: {
+          base_url: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          utm_campaign: string
+          utm_medium: string
+          utm_source: string
+        }
+        Insert: {
+          base_url?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          utm_campaign?: string
+          utm_medium?: string
+          utm_source: string
+        }
+        Update: {
+          base_url?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          utm_campaign?: string
+          utm_medium?: string
+          utm_source?: string
+        }
+        Relationships: []
+      }
+      utm_visits: {
+        Row: {
+          created_at: string
+          id: string
+          utm_source_id: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          utm_source_id: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          utm_source_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "utm_visits_utm_source_id_fkey"
+            columns: ["utm_source_id"]
+            isOneToOne: false
+            referencedRelation: "utm_sources"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_generation_jobs: {
         Row: {
