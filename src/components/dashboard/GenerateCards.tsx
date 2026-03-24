@@ -358,19 +358,12 @@ export const GenerateCards = ({
             .order('created_at', { ascending: true });
 
           if (styleChildJobs && styleChildJobs.length > 0) {
-            const styledImages: any[] = [];
+            // Collect all styled tasks with their metadata
+            const allStyledTasks: Array<{ task: any; jobId: string }> = [];
             for (const sj of styleChildJobs) {
               const tasks = sj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
               for (const task of tasks) {
-                styledImages.push({
-                  id: task.id,
-                  url: task.image_url,
-                  stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-                  stageIndex: task.card_index,
-                  cardType: task.card_type,
-                  jobId: sj.id,
-                  isStyled: true
-                });
+                allStyledTasks.push({ task, jobId: sj.id });
               }
               // Check one level deeper (style of style)
               const { data: deeperJobs } = await supabase
@@ -383,21 +376,39 @@ export const GenerateCards = ({
                 for (const dsj of deeperJobs) {
                   const dtasks = dsj.generation_tasks?.filter((t: any) => t.status === 'completed' && t.image_url) || [];
                   for (const task of dtasks) {
-                    styledImages.push({
-                      id: task.id,
-                      url: task.image_url,
-                      stage: CARD_STAGES[task.card_index]?.name || `Card ${task.card_index}`,
-                      stageIndex: task.card_index,
-                      cardType: task.card_type,
-                      jobId: dsj.id,
-                      isStyled: true
-                    });
+                    allStyledTasks.push({ task, jobId: dsj.id });
                   }
                 }
               }
             }
-            if (styledImages.length > 0) {
-              setGeneratedImages(prev => [...prev, ...styledImages]);
+            
+            // Add styled tasks as variants of existing images
+            if (allStyledTasks.length > 0) {
+              setImageVariants(prev => {
+                const updated = { ...prev };
+                for (const { task } of allStyledTasks) {
+                  const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                  if (imgIndex >= 0) {
+                    if (!updated[imgIndex]) {
+                      updated[imgIndex] = [{ url: images[imgIndex].url, label: 'Оригинал', id: images[imgIndex].id }];
+                    }
+                    const styleCount = updated[imgIndex].filter(v => v.label.startsWith('Стиль')).length;
+                    updated[imgIndex].push({ url: task.image_url, label: `Стиль ${styleCount + 1}`, id: task.id });
+                  }
+                }
+                return updated;
+              });
+              // Select the latest style variant for each
+              setSelectedVariant(prev => {
+                const updated = { ...prev };
+                for (const { task } of allStyledTasks) {
+                  const imgIndex = images.findIndex((img: any) => img.stageIndex === task.card_index);
+                  if (imgIndex >= 0) {
+                    // Will be the last added variant
+                  }
+                }
+                return updated;
+              });
             }
           }
 
