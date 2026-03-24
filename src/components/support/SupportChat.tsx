@@ -311,7 +311,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
               type="button"
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-xl shrink-0 text-muted-foreground hover:text-primary"
+              className="h-10 w-10 rounded-xl shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/5 opacity-60 hover:opacity-100 transition-opacity"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || uploading}
             >
