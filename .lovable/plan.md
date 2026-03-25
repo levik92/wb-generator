@@ -1,45 +1,69 @@
 
 
-# Функция «В таком же стиле» — реализация
+## Аудит фронтенда: мертвый и неиспользуемый код
 
-## Что делаем
+### Результаты проверки
 
-Кнопка Sparkles возле каждой сгенерированной карточки. По клику — ResponsiveDialog (Drawer на мобилке, Dialog на ПК) с:
-- Превью исходной карточки
-- Чекбоксы типов карточек (без типа текущей)
-- Поле описания + Switch «Придумай сам» (вкл. по умолчанию → поле заблокировано, заполнено оригинальным описанием из jobData)
-- Кнопка «Создать N карточек — X токенов» (стоимость: 5 токенов за карточку, как обычная генерация)
+Найдено значительное количество файлов и зависимостей, которые нигде не используются, но попадают в бандл или засоряют проект.
 
-## Техническая логика
+---
 
-1. Пользователь нажимает Sparkles у карточки → открывается попап
-2. Выбирает типы карточек, при необходимости пишет своё описание (или оставляет «Придумай сам»)
-3. По кнопке «Создать»:
-   - Берутся `productName`, `productImages` из `jobData` (сохранённые при генерации)
-   - `description` — из поля попапа (новое или оригинальное)
-   - Вызывается `create-generation-job-banana` с `unifiedStyling: true` и новым параметром `styleSourceImageUrl` (URL выбранной карточки)
-   - Бэкенд: `process-generation-tasks-banana` при наличии `style_source_image_url` в job вызывает `analyze-style` с этим URL вместо первой сгенерированной карточки, и применяет стиль ко ВСЕМ карточкам (не пропускает первую)
+### 1. Неиспользуемые компоненты (файлы для удаления)
 
-## Файлы для изменения
+| Файл | Причина |
+|------|---------|
+| `src/components/Snowfall.tsx` | Нигде не импортируется. Сезонный эффект, забытый в коде. Также засоряет tailwind.config.ts анимацией `snowfall`. |
+| `src/components/ForceLightTheme.tsx` | Нигде не импортируется. |
+| `src/components/BeforeAfterSlider.tsx` | Старая версия. Заменена на `BeforeAfterSliderNew`. Нигде не используется. |
+| `src/components/dashboard/OptimizedGenerateCards.tsx` | Нигде не импортируется. Видимо старая/альтернативная версия `GenerateCards`. |
+| `src/components/dashboard/SecurityDashboard.tsx` | Используется только из `dashboard/AdminAnalytics.tsx`, который сам мертвый (см. ниже). |
+| `src/components/dashboard/AdminAnalytics.tsx` | Старый дубликат `admin/AdminAnalytics.tsx`. Нигде не импортируется. |
+| `src/components/dashboard/CasesPromoBanner.tsx` | Нигде не импортируется. |
+| `src/components/dashboard/CasesPromoBlock.tsx` | Нигде не импортируется. |
+| `src/components/dashboard/RedeemPromoCode.tsx` | Нигде не импортируется. |
+| `src/components/dashboard/DashboardPageWrapper.tsx` | Нигде не импортируется. |
+| `src/components/dashboard/Pricing.tsx` | Нигде не импортируется (Balance.tsx используется вместо неё). |
+| `src/components/mobile/OnboardingWizard.tsx` | Нигде не импортируется. |
+| `src/components/ui/optimized-image.tsx` | Нигде не импортируется. |
+| `src/components/ui/resizable.tsx` | Нигде не импортируется. |
+| `src/components/ui/input-otp.tsx` | Нигде не импортируется. |
+| `src/components/ui/carousel.tsx` | Нигде не импортируется. |
+| `src/components/ui/hover-card.tsx` | Нигде не импортируется. |
+| `src/components/ui/context-menu.tsx` | Нигде не импортируется. |
+| `src/components/ui/menubar.tsx` | Нигде не импортируется. |
+| `src/components/ui/navigation-menu.tsx` | Нигде не импортируется. |
+| `src/components/ui/aspect-ratio.tsx` | Нигде не импортируется. |
+| `src/components/ui/breadcrumb.tsx` | Нигде не импортируется. |
+| `src/components/ui/toggle-group.tsx` | Нигде не импортируется (toggle.tsx используется только отсюда). |
+| `src/components/ui/toggle.tsx` | Используется только из toggle-group.tsx, который сам мертвый. |
 
-### 1. Миграция БД
-- Добавить колонку `style_source_image_url TEXT` в `generation_jobs`
+### 2. Неиспользуемые npm-зависимости
 
-### 2. `supabase/functions/create-generation-job-banana/index.ts`
-- Принять параметр `styleSourceImageUrl` из body
-- Сохранить в `generation_jobs.style_source_image_url`
+| Пакет | Причина |
+|-------|---------|
+| `react-resizable-panels` | Используется только в мертвом `resizable.tsx`. |
+| `input-otp` | Используется только в мертвом `input-otp.tsx`. |
+| `embla-carousel-react` | Используется только в мертвом `carousel.tsx`. |
+| `@types/papaparse` | Это types-пакет в dependencies вместо devDependencies. Не критично для производительности, но некорректно. |
 
-### 3. `supabase/functions/process-generation-tasks-banana/index.ts`
-- Если `job.style_source_image_url` есть → вызвать `analyze-style` с этим URL сразу (не ждать первую карточку), применить стиль ко всем задачам
-- Изменить логику: `styleAnalysisDone = !job.unified_styling` → если есть `style_source_image_url`, то сразу анализировать стиль до обработки задач
+**Примечание**: `react-icons` используется (Auth.tsx + BonusProgram.tsx), поэтому оставляем.
 
-### 4. `src/components/dashboard/GenerateCards.tsx`
-- Добавить состояния: `styleDialogOpen`, `styleSourceImage`, `styleSelectedCards`, `styleDescription`, `styleAutoDescription`
-- Кнопка Sparkles в ряду кнопок (между Edit и Regenerate), фиолетовая обводка
-- Компонент попапа — ResponsiveDialog с чекбоксами, полем описания, Switch «Придумай сам»
-- Функция `generateInStyle()`:
-  - Использует `jobData` для productName, productImages
-  - Вызывает `create-generation-job-banana` с `styleSourceImageUrl`, `unifiedStyling: true`, выбранными карточками
-  - Запускает polling (`startJobPolling`)
-  - Стоимость: `selectedCards.length * photoGenerationPrice` (5 токенов за карточку)
+### 3. Мертвый код в tailwind.config.ts
+
+- Анимация `snowfall` и соответствующие keyframes — можно удалить вместе с компонентом.
+
+---
+
+### План действий
+
+1. **Удалить ~23 неиспользуемых файла** (список выше)
+2. **Удалить 3 неиспользуемые npm-зависимости** из package.json: `react-resizable-panels`, `input-otp`, `embla-carousel-react`
+3. **Перенести `@types/papaparse`** из dependencies в devDependencies
+4. **Очистить tailwind.config.ts** от анимации `snowfall`
+
+### Влияние
+
+- Уменьшение размера бандла за счет удаления tree-shaking-невозможных модулей и лишних зависимостей
+- Чище кодовая база, меньше путаницы
+- Никаких функциональных изменений — всё удаляемое нигде не используется
 
