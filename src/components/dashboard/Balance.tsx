@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coins, FileText, Images, Loader2, Pencil, Video, RefreshCw, Zap } from "lucide-react";
-import Pricing from "./Pricing";
+
 import PaymentHistory from "./PaymentHistory";
 import { PromoCodeInput } from "./PromoCodeInput";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
