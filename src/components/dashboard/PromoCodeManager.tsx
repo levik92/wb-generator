@@ -178,7 +178,7 @@ export const PromoCodeManager = () => {
                 Создать промокод
               </Button>
             </ResponsiveDialogTrigger>
-            <ResponsiveDialogContent className="sm:max-w-md">
+            <ResponsiveDialogContent className="sm:max-w-md !max-w-[calc(100vw-2rem)]">
               <ResponsiveDialogHeader>
                 <ResponsiveDialogTitle>{editingPromo ? 'Редактировать промокод' : 'Создать промокод'}</ResponsiveDialogTitle>
                 <ResponsiveDialogDescription>Настройте параметры промокода для пользователей</ResponsiveDialogDescription>
@@ -232,7 +232,7 @@ export const PromoCodeManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="validUntil">Действует до</Label>
-                  <Input id="validUntil" type="date" value={formData.validUntil} onChange={e => setFormData({ ...formData, validUntil: e.target.value })} />
+                  <Input id="validUntil" type="date" value={formData.validUntil} onChange={e => setFormData({ ...formData, validUntil: e.target.value })} className="w-full min-w-0" />
                 </div>
               </div>
               <ResponsiveDialogFooter>

@@ -29,6 +29,7 @@ export function SurveyStats() {
   const [totalRespondents, setTotalRespondents] = useState(0);
   const [loading, setLoading] = useState(true);
   const [otherAnswers, setOtherAnswers] = useState<{ question: string; answers: string[] } | null>(null);
+  const [displayedCount, setDisplayedCount] = useState(15);
 
   useEffect(() => {
     loadStats();
@@ -100,6 +101,7 @@ export function SurveyStats() {
       const answers = (responses || []).map((r: any) => r.answer.replace("Другое: ", "").trim()).filter(Boolean);
       const title = QUESTION_LABELS[questionKey]?.title || questionKey;
       setOtherAnswers({ question: title, answers });
+      setDisplayedCount(15);
     } catch (error) {
       console.error("Error loading other answers:", error);
     }
@@ -194,11 +196,19 @@ export function SurveyStats() {
               </p>
             ) : (
               <div className="space-y-2 pr-4">
-                {otherAnswers?.answers.map((a, i) => (
+                {otherAnswers?.answers.slice(0, displayedCount).map((a, i) => (
                   <div key={i} className="text-sm p-2.5 rounded-lg bg-muted/50 border border-border/50">
                     {a}
                   </div>
                 ))}
+                {otherAnswers && displayedCount < otherAnswers.answers.length && (
+                  <button
+                    onClick={() => setDisplayedCount(prev => prev + 15)}
+                    className="w-full text-center text-sm text-primary hover:text-primary/80 py-2 transition-colors"
+                  >
+                    Показать ещё ({otherAnswers.answers.length - displayedCount} осталось)
+                  </button>
+                )}
               </div>
             )}
           </ScrollArea>
