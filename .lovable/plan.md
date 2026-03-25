@@ -1,69 +1,46 @@
 
 
-## Аудит фронтенда: мертвый и неиспользуемый код
+## Результат ревизии после чистки
 
-### Результаты проверки
+### Статус: все чисто, ничего не сломано
 
-Найдено значительное количество файлов и зависимостей, которые нигде не используются, но попадают в бандл или засоряют проект.
+Проверено:
+- Все импорты удаленных файлов отсутствуют — нигде нет ссылок на удаленные компоненты
+- `BeforeAfterSliderNew` (рабочая версия) корректно используется в 3 местах
+- `Pricing.tsx` (dashboard) корректно используется в `Balance.tsx`
+- `snowfall` полностью удален из tailwind.config.ts
+- Консоль без ошибок
+- `CasesPromoBanner` / `CasesPromoBlock` — нигде не импортируются
 
----
+### Один остаток: неиспользуемые Radix-пакеты в package.json
 
-### 1. Неиспользуемые компоненты (файлы для удаления)
+После удаления компонентов в package.json остались 7 Radix-пакетов, которые больше не нужны:
 
-| Файл | Причина |
-|------|---------|
-| `src/components/Snowfall.tsx` | Нигде не импортируется. Сезонный эффект, забытый в коде. Также засоряет tailwind.config.ts анимацией `snowfall`. |
-| `src/components/ForceLightTheme.tsx` | Нигде не импортируется. |
-| `src/components/BeforeAfterSlider.tsx` | Старая версия. Заменена на `BeforeAfterSliderNew`. Нигде не используется. |
-| `src/components/dashboard/OptimizedGenerateCards.tsx` | Нигде не импортируется. Видимо старая/альтернативная версия `GenerateCards`. |
-| `src/components/dashboard/SecurityDashboard.tsx` | Используется только из `dashboard/AdminAnalytics.tsx`, который сам мертвый (см. ниже). |
-| `src/components/dashboard/AdminAnalytics.tsx` | Старый дубликат `admin/AdminAnalytics.tsx`. Нигде не импортируется. |
-| `src/components/dashboard/CasesPromoBanner.tsx` | Нигде не импортируется. |
-| `src/components/dashboard/CasesPromoBlock.tsx` | Нигде не импортируется. |
-| `src/components/dashboard/RedeemPromoCode.tsx` | Нигде не импортируется. |
-| `src/components/dashboard/DashboardPageWrapper.tsx` | Нигде не импортируется. |
-| `src/components/dashboard/Pricing.tsx` | Нигде не импортируется (Balance.tsx используется вместо неё). |
-| `src/components/mobile/OnboardingWizard.tsx` | Нигде не импортируется. |
-| `src/components/ui/optimized-image.tsx` | Нигде не импортируется. |
-| `src/components/ui/resizable.tsx` | Нигде не импортируется. |
-| `src/components/ui/input-otp.tsx` | Нигде не импортируется. |
-| `src/components/ui/carousel.tsx` | Нигде не импортируется. |
-| `src/components/ui/hover-card.tsx` | Нигде не импортируется. |
-| `src/components/ui/context-menu.tsx` | Нигде не импортируется. |
-| `src/components/ui/menubar.tsx` | Нигде не импортируется. |
-| `src/components/ui/navigation-menu.tsx` | Нигде не импортируется. |
-| `src/components/ui/aspect-ratio.tsx` | Нигде не импортируется. |
-| `src/components/ui/breadcrumb.tsx` | Нигде не импортируется. |
-| `src/components/ui/toggle-group.tsx` | Нигде не импортируется (toggle.tsx используется только отсюда). |
-| `src/components/ui/toggle.tsx` | Используется только из toggle-group.tsx, который сам мертвый. |
+- `@radix-ui/react-aspect-ratio`
+- `@radix-ui/react-context-menu`
+- `@radix-ui/react-hover-card`
+- `@radix-ui/react-menubar`
+- `@radix-ui/react-navigation-menu`
+- `@radix-ui/react-toggle`
+- `@radix-ui/react-toggle-group`
 
-### 2. Неиспользуемые npm-зависимости
+Также `@types/papaparse` все еще в dependencies вместо devDependencies.
 
-| Пакет | Причина |
-|-------|---------|
-| `react-resizable-panels` | Используется только в мертвом `resizable.tsx`. |
-| `input-otp` | Используется только в мертвом `input-otp.tsx`. |
-| `embla-carousel-react` | Используется только в мертвом `carousel.tsx`. |
-| `@types/papaparse` | Это types-пакет в dependencies вместо devDependencies. Не критично для производительности, но некорректно. |
-
-**Примечание**: `react-icons` используется (Auth.tsx + BonusProgram.tsx), поэтому оставляем.
-
-### 3. Мертвый код в tailwind.config.ts
-
-- Анимация `snowfall` и соответствующие keyframes — можно удалить вместе с компонентом.
+**Действие**: удалить 7 пакетов из dependencies, перенести `@types/papaparse` в devDependencies.
 
 ---
 
-### План действий
+### Ответ на вопрос: будут ли страницы открываться «значительно быстрее»?
 
-1. **Удалить ~23 неиспользуемых файла** (список выше)
-2. **Удалить 3 неиспользуемые npm-зависимости** из package.json: `react-resizable-panels`, `input-otp`, `embla-carousel-react`
-3. **Перенести `@types/papaparse`** из dependencies в devDependencies
-4. **Очистить tailwind.config.ts** от анимации `snowfall`
+**Нет, честно говоря — разница будет минимальной.** Вот почему:
 
-### Влияние
+Vite (сборщик проекта) использует **tree-shaking** — он включает в финальный бандл только тот код, который реально импортируется. Удаленные файлы **нигде не импортировались**, поэтому они и так **не попадали в продакшн-бандл**. Пользователи их никогда не скачивали.
 
-- Уменьшение размера бандла за счет удаления tree-shaking-невозможных модулей и лишних зависимостей
-- Чище кодовая база, меньше путаницы
-- Никаких функциональных изменений — всё удаляемое нигде не используется
+**Реальная польза от чистки:**
+- Чище кодовая база — легче поддерживать, меньше путаницы
+- Быстрее локальная разработка (меньше файлов для Vite dev server)
+- Убраны лишние npm-пакеты, чуть меньше `node_modules`
+- Нет ложных срабатываний при поиске по коду
+
+**Что реально влияет на скорость загрузки** — это lazy-loading (уже настроен), размер используемых библиотек (framer-motion, recharts и т.д.), и серверная часть (Supabase запросы).
 
