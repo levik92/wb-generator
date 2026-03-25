@@ -249,6 +249,13 @@ const Dashboard = () => {
         }
         sessionStorage.removeItem('pending_partner_code');
       }
+
+      // Process pending UTM source (from Google OAuth)
+      const pendingUtmSourceId = sessionStorage.getItem('pending_utm_source_id');
+      if (pendingUtmSourceId && !profileData.utm_source_id) {
+        await supabase.from('profiles').update({ utm_source_id: pendingUtmSourceId }).eq('id', userId);
+        sessionStorage.removeItem('pending_utm_source_id');
+      }
     } catch (error) {
       console.error('Error processing pending codes:', error);
     }
