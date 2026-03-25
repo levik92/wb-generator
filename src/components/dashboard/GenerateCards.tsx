@@ -19,8 +19,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { CasesPromoBlock } from "./CasesPromoBlock";
-import { CasesPromoBanner } from "./CasesPromoBanner";
 import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
 import { isTelegramWebApp } from "@/lib/telegram";
@@ -1894,14 +1892,6 @@ export const GenerateCards = ({
         </CardContent>
       </Card>
 
-      {/* Dismissible Cases Promo Banner */}
-      {onNavigateToBalance && (
-        <CasesPromoBanner 
-          userId={profile.id} 
-          loginCount={profile.login_count || 0} 
-          onNavigateToBalance={onNavigateToBalance} 
-        />
-      )}
 
       {/* Generation Popups */}
       {onNavigateToLearning && (
