@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, BookOpen, Smartphone, Download, Share, PlusSquare } from "lucide-react";
 import { motion } from "framer-motion";
@@ -141,9 +142,9 @@ export const GenerationPopups = ({
       </Dialog>
 
       {/* Learning popup - After first generation */}
-      <Dialog open={showLearningPopup} onOpenChange={handleLearningOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+      <ResponsiveDialog open={showLearningPopup} onOpenChange={handleLearningOpenChange}>
+        <ResponsiveDialogContent className="sm:max-w-md">
+          <ResponsiveDialogHeader>
             <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
@@ -152,15 +153,15 @@ export const GenerationPopups = ({
                 <BookOpen className="w-8 h-8 text-emerald-500" />
               </motion.div>
             </div>
-            <DialogTitle className="text-center text-xl">
+            <ResponsiveDialogTitle className="text-center text-xl">
               🎉 Поздравляем с первой генерацией!
-            </DialogTitle>
-            <DialogDescription className="text-center">
+            </ResponsiveDialogTitle>
+            <ResponsiveDialogDescription className="text-center">
               Хотите делать карточки ещё лучше? Посмотрите обучающие материалы в базе знаний — 
               там мы рассказываем, как получить максимум от генераций.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+          <ResponsiveDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <Button variant="outline" onClick={handleLearningClose} className="w-full sm:w-auto">
               Напомнить позже
             </Button>
@@ -168,9 +169,9 @@ export const GenerationPopups = ({
               Перейти к обучению
               <BookOpen className="w-4 h-4 ml-2" />
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </ResponsiveDialogFooter>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
 
       {/* PWA Install popup - After 5 and 15 generations */}
       <Dialog open={showPwaPopup} onOpenChange={setShowPwaPopup}>

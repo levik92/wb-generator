@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Payment {
   id: string;
@@ -15,9 +17,12 @@ interface Payment {
   confirmed_at: string | null;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export default function PaymentHistory() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadPayments();
@@ -92,7 +97,7 @@ export default function PaymentHistory() {
           <>
             {/* Mobile and Tablet Card Layout */}
             <div className="block lg:hidden space-y-3 p-4">
-              {payments.map((payment) => (
+              {payments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((payment) => (
                 <div key={payment.id} className="bg-muted/30 rounded-lg p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -137,7 +142,7 @@ export default function PaymentHistory() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {payments.map((payment) => (
+                  {payments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((payment) => (
                     <TableRow key={payment.id}>
                       <TableCell className="font-medium">
                         {payment.package_name}
@@ -159,6 +164,36 @@ export default function PaymentHistory() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Pagination */}
+            {payments.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center justify-between px-4 py-3 border-t">
+                <span className="text-xs text-muted-foreground">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, payments.length)} из {payments.length}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm px-2">{currentPage} / {Math.ceil(payments.length / ITEMS_PER_PAGE)}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={currentPage >= Math.ceil(payments.length / ITEMS_PER_PAGE)}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </CardContent>
