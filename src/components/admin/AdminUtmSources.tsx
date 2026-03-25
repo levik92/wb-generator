@@ -40,7 +40,7 @@ export function AdminUtmSources() {
   const [formSource, setFormSource] = useState("");
   const [formMedium, setFormMedium] = useState("");
   const [formCampaign, setFormCampaign] = useState("");
-  const [formBaseUrl, setFormBaseUrl] = useState("https://wb-gen.lovable.app");
+  const [formBaseUrl, setFormBaseUrl] = useState("https://wbgen.ru");
 
   useEffect(() => {
     fetchData();
@@ -125,7 +125,7 @@ export function AdminUtmSources() {
       toast.success("UTM-источник создан");
       setDialogOpen(false);
       setFormName(""); setFormSource(""); setFormMedium(""); setFormCampaign("");
-      setFormBaseUrl("https://wb-gen.lovable.app");
+      setFormBaseUrl("https://wbgen.ru");
       fetchData();
     } catch (error: any) {
       toast.error("Ошибка: " + error.message);

@@ -176,22 +176,19 @@ const Auth = () => {
       const signupOptions: any = { emailRedirectTo: redirectUrl };
 
       if (captchaToken) signupOptions.captchaToken = captchaToken;
-      if (referralCode) signupOptions.data = { referral_code: referralCode };
-      if (partnerCode) signupOptions.data = { ...signupOptions.data, partner_code: partnerCode };
-      
-      // Store UTM source ID for post-registration update
+      // Build signup metadata with referral, partner, and UTM data
       const utmSourceId = getStoredUtmSourceId();
+      const metaData: Record<string, string> = {};
+      if (referralCode) metaData.referral_code = referralCode;
+      if (partnerCode) metaData.partner_code = partnerCode;
+      if (utmSourceId) metaData.utm_source_id = utmSourceId;
+      if (Object.keys(metaData).length > 0) signupOptions.data = metaData;
 
       const { data: signUpData, error } = await supabase.auth.signUp({ email, password, options: signupOptions });
 
       if (error) {
         await logLoginAttempt(email, false, error.message);
         throw error;
-      }
-
-      // Save UTM source to profile after successful registration
-      if (utmSourceId && signUpData?.user?.id) {
-        await supabase.from('profiles').update({ utm_source_id: utmSourceId }).eq('id', signUpData.user.id);
       }
 
       await logLoginAttempt(email, true);
@@ -363,6 +360,10 @@ const Auth = () => {
       
       if (referralCode) sessionStorage.setItem('pending_referral_code', referralCode);
       if (partnerCode) sessionStorage.setItem('pending_partner_code', partnerCode);
+      
+      // Store UTM source for post-OAuth profile update
+      const utmSourceId = getStoredUtmSourceId();
+      if (utmSourceId) sessionStorage.setItem('pending_utm_source_id', utmSourceId);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
