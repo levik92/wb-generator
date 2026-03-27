@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { encode as base64Encode, decode as base64Decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -491,7 +491,9 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     }
 
     // Convert base64 to blob for storage
-    const imageBlob = Uint8Array.from(atob(generatedImageBase64), c => c.charCodeAt(0));
+    const imageBlob = base64Decode(generatedImageBase64);
+    // Free the large base64 string from memory before uploading
+    generatedImageBase64 = null as any;
 
     // Upload to Supabase Storage
     const fileName = `${task.job.user_id}/${task.job_id}/${task.card_index}_${task.card_type}.png`;
