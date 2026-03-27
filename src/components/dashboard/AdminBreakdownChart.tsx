@@ -158,7 +158,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-3 shadow-lg">
+        <div className="bg-background border rounded-lg p-3 shadow-lg">
           <p className="text-sm font-medium text-foreground mb-2">
             {formatXAxisDate(label)}
           </p>

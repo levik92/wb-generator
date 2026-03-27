@@ -202,7 +202,7 @@ export default function Admin() {
 
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Header - matches DashboardHeader */}
-        <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
+        <header className="border-b border-border bg-card sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
               {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />}

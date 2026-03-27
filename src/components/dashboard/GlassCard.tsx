@@ -33,7 +33,7 @@ export const GlassCard = ({
       transition={{ duration: 0.4, delay }}
       className={cn(
         "relative rounded-2xl overflow-hidden",
-        "bg-card/80 backdrop-blur-xl",
+        "bg-card",
         "border border-border/50",
         hover && "transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20",
         className
