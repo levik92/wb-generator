@@ -2,25 +2,22 @@
 
 ## Проблема
 
-После деплоя фикса с `base64Decode` функция `process-google-task` падает с ошибкой **`Assignment to constant variable`** на строке 496. Переменная `generatedImageBase64` объявлена через `const` (строка 446), а мы пытаемся присвоить ей `null`.
-
-Gemini успешно генерирует изображение, `base64Decode` корректно его декодирует, но краш происходит сразу после — перед загрузкой в Storage.
+Gemini API `imageSize` принимает значения **в нижнем регистре**: `"1k"`, `"2k"`, `"4k"`. Наш код и БД хранят `"1K"` / `"2K"` (верхний регистр). Gemini игнорирует невалидный параметр и генерирует в максимальном разрешении (~4K, 3600×4800), что объясняет и огромный размер файлов, и проблемы с памятью.
 
 ## Исправление
 
-Один файл, одна строка.
+Одна строка в одном файле.
 
-**Файл: `supabase/functions/process-google-task/index.ts`**
+**Файл: `supabase/functions/process-google-task/index.ts`** (~строка 121)
 
-Строка 446 — заменить `const` на `let`:
+При передаче `imageResolution` в API привести к нижнему регистру:
 
 ```typescript
-// БЫЛО:
-const generatedImageBase64 = aiData.candidates?.[0]?.content?.parts?.find(...)?.inlineData?.data;
-
-// СТАЛО:
-let generatedImageBase64 = aiData.candidates?.[0]?.content?.parts?.find(...)?.inlineData?.data;
+imageConfig: {
+  imageSize: imageResolution.toLowerCase(),  // "1k" or "2k"
+  aspectRatio: "3:4"
+}
 ```
 
-Это позволит строке 496 (`generatedImageBase64 = null`) освободить память перед загрузкой в Storage. После деплоя текущая задача (Lavazza) должна успешно завершиться при следующем ретрае.
+Админ-панель и БД продолжат хранить `"1K"` / `"2K"` — конвертация происходит только при вызове API. После деплоя изображения будут генерироваться в реальном 2K (2048×3072), а не в 4K. Это также окончательно решит проблему с Memory limit.
 
