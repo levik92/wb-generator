@@ -6,11 +6,16 @@ import { X } from "lucide-react";
 const CONSENT_KEY = 'wb-gen-cookie-consent';
 
 export const CookieConsent = () => {
-  // Проверяем localStorage сразу при инициализации состояния
-  const [isVisible, setIsVisible] = useState(() => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
     const consent = localStorage.getItem(CONSENT_KEY);
-    return !consent; // Показываем только если нет сохраненного согласия
-  });
+    if (!consent) {
+      // Delay display so it doesn't overlap with onboarding survey
+      const timer = setTimeout(() => setIsVisible(true), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleAccept = () => {
     try {
