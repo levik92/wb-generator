@@ -7,6 +7,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function waitUntil(promise: Promise<unknown>) {
+  try {
+    (globalThis as any).EdgeRuntime?.waitUntil?.(promise);
+  } catch (_) {
+    // ignore
+  }
+}
+
 // Map frontend card types to Google prompt types in database
 const cardTypeToPromptType: Record<string, string> = {
   'cover': 'cover',
@@ -233,18 +241,23 @@ serve(async (req) => {
       enrichedDescription
     );
 
-    // Invoke Google task processor
-    const { error: processError } = await supabase.functions.invoke('process-google-task', {
-      body: {
-        taskId: task.id,
-        sourceImageUrl: sourceImageUrl,
-        prompt: prompt,
-      },
-    });
+    const backgroundTask = supabase.functions
+      .invoke('process-generation-tasks-banana', {
+        body: { jobId: job.id },
+      })
+      .then(({ error: processError }) => {
+        if (processError) {
+          console.error('Failed to start background regeneration:', processError);
+          return;
+        }
 
-    if (processError) {
-      throw processError;
-    }
+        console.log(`Background regeneration started for job ${job.id}`);
+      })
+      .catch((processError) => {
+        console.error('Background regeneration exception:', processError);
+      });
+
+    waitUntil(backgroundTask);
 
     // Create notification
     await supabase.from('notifications').insert({
