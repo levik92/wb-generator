@@ -101,7 +101,7 @@ async function callGeminiApi(
   keyName: string,
   imageResolution: string = '2K'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
-  const modelName = 'gemini-3.1-pro-image-preview';
+  const modelName = 'gemini-3-pro-image-preview';
   const normalizedRes = (imageResolution || '2K').toUpperCase() === '1K' ? '1K' : '2K';
   console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: 3:4`);
   
