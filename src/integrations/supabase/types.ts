@@ -1957,10 +1957,12 @@ export type Database = {
         }
         Returns: string
       }
-      process_payment_success: {
-        Args: { payment_id_param: string }
-        Returns: boolean
-      }
+      process_payment_success:
+        | { Args: { payment_id_param: string }; Returns: boolean }
+        | {
+            Args: { external_id_param?: string; payment_id_param: string }
+            Returns: boolean
+          }
       redeem_promocode_tokens: {
         Args: { p_amount: number; p_code: string; p_user_id: string }
         Returns: undefined
