@@ -118,7 +118,7 @@ async function callGeminiApi(
           generationConfig: {
             responseModalities: ["IMAGE", "TEXT"],
             imageConfig: {
-              imageSize: imageResolution,  // "1K" or "2K"
+              imageSize: imageResolution.toLowerCase(),  // "1k" or "2k"
               aspectRatio: "3:4"
             }
           }
