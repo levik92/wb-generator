@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { forceSignOut } from "@/lib/auth";
+import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveJobs } from "@/hooks/useActiveJobs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
