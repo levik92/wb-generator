@@ -92,6 +92,14 @@ export default function Admin() {
     checkAdminAccess();
   }, []);
 
+  // Polling for unread support - proper cleanup
+  useEffect(() => {
+    if (!isAdmin) return;
+    fetchUnreadSupport();
+    const interval = setInterval(fetchUnreadSupport, 20000);
+    return () => clearInterval(interval);
+  }, [isAdmin, fetchUnreadSupport]);
+
   const checkAdminAccess = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -108,10 +116,6 @@ export default function Admin() {
       }
       setIsAdmin(true);
       await loadUsers();
-      fetchUnreadSupport();
-      // Poll unread support count
-      const supportInterval = setInterval(fetchUnreadSupport, 20000);
-      return () => clearInterval(supportInterval);
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/dashboard');
@@ -154,8 +158,13 @@ export default function Admin() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      navigate('/');
+    }
   };
 
   const handleTabChange = (tab: string) => {
