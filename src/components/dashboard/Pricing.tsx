@@ -112,7 +112,53 @@ export default function Pricing({
         return;
       }
 
-      // Redirect to payment URL
+      if (data.provider === 'cloudpayments') {
+        // Open CloudPayments widget
+        const cp = (window as any).cp;
+        if (!cp) {
+          toast({
+            title: "Ошибка",
+            description: "Виджет CloudPayments не загружен. Попробуйте обновить страницу.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        const widget = new cp.CloudPayments();
+        widget.pay('charge', {
+          publicId: data.publicId,
+          description: data.description,
+          amount: data.amount,
+          currency: data.currency,
+          accountId: data.accountId,
+          email: data.email,
+          data: data.data,
+          skin: 'mini',
+        }, {
+          onSuccess: () => {
+            toast({
+              title: "Оплата прошла успешно!",
+              description: `Начислено ${finalTokens} токенов`,
+            });
+            // Redirect to dashboard with success
+            window.location.href = '/dashboard?payment=success';
+          },
+          onFail: (reason: string) => {
+            console.error('CloudPayments payment failed:', reason);
+            toast({
+              title: "Ошибка оплаты",
+              description: "Платёж не прошёл. Попробуйте ещё раз.",
+              variant: "destructive"
+            });
+          },
+          onComplete: () => {
+            setLoading(null);
+          }
+        });
+        return;
+      }
+
+      // YooKassa flow - redirect to payment URL
       if (data.payment_url) {
         window.location.href = data.payment_url;
       }
