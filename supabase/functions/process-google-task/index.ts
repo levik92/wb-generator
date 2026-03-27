@@ -102,19 +102,12 @@ async function callGeminiApi(
   imageResolution: string = '2K'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
   const modelName = 'gemini-3-pro-image-preview';
-  // Map DB resolution setting to quality parameter
-  // "1K" -> quality not set (standard), "2K" -> "high" quality for maximum detail
-  const qualityLevel = (imageResolution || '2K').toUpperCase() === '2K' ? 'high' : undefined;
-  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, quality: ${qualityLevel || 'standard'}, aspectRatio: 3:4`);
+  // Map DB resolution: "1K" -> "standard", "2K" -> "high"
+  const normalizedRes = (imageResolution || '2K').toUpperCase();
+  const qualityLevel = normalizedRes === '2K' ? 'high' : 'standard';
+  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, quality: ${qualityLevel}, aspectRatio: 3:4`);
   
   try {
-    const imageConfig: Record<string, string> = {
-      aspectRatio: "3:4"
-    };
-    if (qualityLevel) {
-      imageConfig.quality = qualityLevel;
-    }
-
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
       {
@@ -128,7 +121,8 @@ async function callGeminiApi(
           }],
           generationConfig: {
             responseModalities: ["IMAGE", "TEXT"],
-            imageConfig
+            quality: qualityLevel,
+            aspectRatio: "3:4"
           }
         }),
       }
