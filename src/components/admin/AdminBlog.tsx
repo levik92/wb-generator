@@ -522,7 +522,7 @@ export const AdminBlog = () => {
         </ResponsiveDialog>
       </div>
 
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card border-border/50 rounded-2xl">
         <CardHeader>
           <CardTitle>Статьи блога</CardTitle>
           <CardDescription>

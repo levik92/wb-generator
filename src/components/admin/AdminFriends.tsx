@@ -184,7 +184,7 @@ export const AdminFriends = () => {
   }
 
   return (
-    <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+    <Card className="bg-card border-border/50 rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="text-lg sm:text-xl">Друзья сервиса</CardTitle>

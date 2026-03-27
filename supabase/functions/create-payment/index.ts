@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface PaymentRequest {
@@ -50,11 +50,6 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
     // Get authenticated user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -62,6 +57,16 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
+    
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        auth: { persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
+    );
+
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user) {
@@ -181,7 +186,8 @@ serve(async (req) => {
           tokens_amount: finalTokens.toString(),
           promo_code: appliedPromo?.code || '',
           promo_type: appliedPromo?.type || '',
-          promo_value: appliedPromo?.value?.toString() || ''
+          promo_value: appliedPromo?.value?.toString() || '',
+          external_payment_id: externalPaymentId
         })
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

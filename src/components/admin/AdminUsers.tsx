@@ -255,7 +255,7 @@ export function AdminUsers({
       </div>
 
       {/* Users Table */}
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl w-full min-w-0 overflow-hidden">
+      <Card className="bg-card border-border/50 rounded-2xl w-full min-w-0 overflow-hidden">
         <CardHeader>
           <CardTitle className="text-lg sm:text-xl">Управление пользователями</CardTitle>
           <CardDescription>
