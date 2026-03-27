@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { forceSignOut } from "@/lib/auth";
 import { toast } from "@/hooks/use-toast";
 import { LogOut, Download, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -158,13 +158,7 @@ export default function Admin() {
   };
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut({ scope: 'local' });
-    } catch (error) {
-      console.error('Sign out error:', error);
-    } finally {
-      navigate('/');
-    }
+    await forceSignOut();
   };
 
   const handleTabChange = (tab: string) => {

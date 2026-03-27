@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { forceSignOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveJobs } from "@/hooks/useActiveJobs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -280,13 +280,7 @@ const Dashboard = () => {
     }
   };
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut({ scope: 'local' });
-    } catch (error) {
-      console.error('Sign out error:', error);
-    } finally {
-      navigate("/");
-    }
+    await forceSignOut();
   };
   const refreshProfile = () => {
     if (user) {
