@@ -178,8 +178,13 @@ const Partner = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      navigate("/");
+    }
   };
 
   const getFilteredCommissions = (days: number) => {
