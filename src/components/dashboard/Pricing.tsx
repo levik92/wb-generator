@@ -113,9 +113,9 @@ export default function Pricing({
       }
 
       if (data.provider === 'cloudpayments') {
-        // Open CloudPayments widget
-        const cp = (window as any).cp;
-        if (!cp) {
+        // Open CloudPayments widget (new API: widget.start)
+        const cpLib = (window as any).cp;
+        if (!cpLib) {
           toast({
             title: "Ошибка",
             description: "Виджет CloudPayments не загружен. Попробуйте обновить страницу.",
@@ -124,37 +124,38 @@ export default function Pricing({
           return;
         }
         
-        const widget = new cp.CloudPayments();
-        widget.pay('charge', {
-          publicId: data.publicId,
-          description: data.description,
-          amount: data.amount,
-          currency: data.currency,
-          accountId: data.accountId,
-          email: data.email,
-          data: data.data,
-          skin: 'mini',
-        }, {
-          onSuccess: () => {
+        const widget = new cpLib.CloudPayments();
+        
+        widget.oncomplete = (result: any) => {
+          setLoading(null);
+          if (result?.status === 'success') {
             toast({
               title: "Оплата прошла успешно!",
-              description: `Начислено ${finalTokens} токенов`,
+              description: `Начислено ${data.tokens || finalTokens} токенов`,
             });
-            // Redirect to dashboard with success
             window.location.href = '/dashboard?payment=success';
-          },
-          onFail: (reason: string) => {
-            console.error('CloudPayments payment failed:', reason);
+          } else if (result?.status === 'fail') {
             toast({
               title: "Ошибка оплаты",
-              description: "Платёж не прошёл. Попробуйте ещё раз.",
+              description: result?.message || "Платёж не прошёл. Попробуйте ещё раз.",
               variant: "destructive"
             });
-          },
-          onComplete: () => {
-            setLoading(null);
           }
-        });
+        };
+
+        widget.start(data.intentParams)
+          .then((widgetResult: any) => {
+            console.log('CloudPayments widget result:', widgetResult);
+          })
+          .catch((error: any) => {
+            console.error('CloudPayments widget error:', error);
+            setLoading(null);
+            toast({
+              title: "Ошибка оплаты",
+              description: "Не удалось открыть форму оплаты.",
+              variant: "destructive"
+            });
+          });
         return;
       }
 
