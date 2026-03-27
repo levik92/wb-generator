@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { forceSignOut } from "@/lib/auth";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { useActiveJobs } from "@/hooks/useActiveJobs";
@@ -280,13 +281,7 @@ const Dashboard = () => {
     }
   };
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut({ scope: 'local' });
-    } catch (error) {
-      console.error('Sign out error:', error);
-    } finally {
-      navigate("/");
-    }
+    await forceSignOut();
   };
   const refreshProfile = () => {
     if (user) {
