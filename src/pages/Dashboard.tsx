@@ -281,19 +281,11 @@ const Dashboard = () => {
   };
   const handleSignOut = async () => {
     try {
-      const {
-        error
-      } = await supabase.auth.signOut({
-        scope: 'global'
-      });
-      if (error) throw error;
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
       navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Ошибка выхода",
-        description: "Не удалось выйти из системы. Попробуйте снова",
-        variant: "destructive"
-      });
     }
   };
   const refreshProfile = () => {
