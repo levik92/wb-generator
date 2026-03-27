@@ -102,18 +102,19 @@ serve(async (req) => {
     
     const transactionId = webhookData.TransactionId;
     const status = webhookData.Status;
-    const dataJson = webhookData.Data;
+    const dataJson = webhookData.Data || webhookData.JsonData;
     const userId = webhookData.AccountId;
+    const invoiceId = webhookData.InvoiceId; // maps to externalId from widget.start()
     
     let metadata: any = {};
     try {
-      metadata = dataJson ? JSON.parse(dataJson) : {};
+      metadata = dataJson ? (typeof dataJson === 'string' ? JSON.parse(dataJson) : dataJson) : {};
     } catch {
       console.warn('Failed to parse Data field:', dataJson);
     }
     
-    // Get external_payment_id from metadata (passed from create-payment)
-    const externalPaymentId = metadata.external_payment_id || null;
+    // Get external_payment_id: first from metadata, then fallback to InvoiceId (externalId from widget)
+    const externalPaymentId = metadata.external_payment_id || invoiceId || null;
     
     const url = new URL(req.url);
     const notificationType = url.searchParams.get('type') || 'pay';
