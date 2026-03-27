@@ -101,11 +101,12 @@ async function callGeminiApi(
   keyName: string,
   imageResolution: string = '2K'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
-  console.log(`Calling Google Gemini API with ${keyName}, resolution: ${imageResolution}...`);
+  const modelName = 'gemini-3.1-flash-image-preview';
+  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, resolution: ${imageResolution}...`);
   
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -117,8 +118,12 @@ async function callGeminiApi(
           }],
           generationConfig: {
             responseModalities: ["IMAGE", "TEXT"],
+            thinkingConfig: {
+              thinkingLevel: "minimal",
+              includeThoughts: false
+            },
             imageConfig: {
-              imageSize: imageResolution,  // "1K" or "2K" — uppercase required by Gemini API
+              imageSize: imageResolution,
               aspectRatio: "3:4"
             }
           }
