@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, CreditCard } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQueryClient } from "@tanstack/react-query";
 interface PaymentPackage {
   id: string;
@@ -30,12 +31,60 @@ export function AdminPricing() {
   const [generationPrices, setGenerationPrices] = useState<GenerationPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<string>('yookassa');
+  const [cloudpaymentsPublicId, setCloudpaymentsPublicId] = useState('');
+  const [providerSettingsId, setProviderSettingsId] = useState<string | null>(null);
+  const [savingProvider, setSavingProvider] = useState(false);
   const queryClient = useQueryClient();
   useEffect(() => {
     loadData();
   }, []);
   const loadData = async () => {
-    await Promise.all([loadPackages(), loadGenerationPrices()]);
+    await Promise.all([loadPackages(), loadGenerationPrices(), loadProviderSettings()]);
+  };
+  const loadProviderSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('payment_provider_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        setActiveProvider(data.active_provider);
+        setCloudpaymentsPublicId(data.cloudpayments_public_id || '');
+        setProviderSettingsId(data.id);
+      }
+    } catch (error) {
+      console.error('Error loading provider settings:', error);
+    }
+  };
+  const handleSaveProviderSettings = async () => {
+    setSavingProvider(true);
+    try {
+      if (activeProvider === 'cloudpayments' && !cloudpaymentsPublicId.trim()) {
+        toast({ title: "Ошибка", description: "Укажите Public ID для CloudPayments", variant: "destructive" });
+        return;
+      }
+      const updateData = {
+        active_provider: activeProvider,
+        cloudpayments_public_id: cloudpaymentsPublicId.trim() || null,
+        updated_at: new Date().toISOString(),
+      };
+      if (providerSettingsId) {
+        const { error } = await supabase
+          .from('payment_provider_settings')
+          .update(updateData)
+          .eq('id', providerSettingsId);
+        if (error) throw error;
+      }
+      toast({ title: "Успешно", description: "Настройки платёжной системы сохранены" });
+    } catch (error) {
+      console.error('Error saving provider settings:', error);
+      toast({ title: "Ошибка", description: "Не удалось сохранить настройки", variant: "destructive" });
+    } finally {
+      setSavingProvider(false);
+    }
   };
   const loadPackages = async () => {
     try {
