@@ -1003,7 +1003,7 @@ export const History = ({
                             <Video className="w-6 h-6 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
@@ -1014,7 +1014,7 @@ export const History = ({
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
                       </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
@@ -1142,7 +1142,7 @@ export const History = ({
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
                           <Button 
                             size="icon" 
                             variant="ghost" 
@@ -1221,7 +1221,7 @@ export const History = ({
                             <Video className="w-8 h-8 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
                           <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
                             onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
                             <Play className="w-4 h-4" />
