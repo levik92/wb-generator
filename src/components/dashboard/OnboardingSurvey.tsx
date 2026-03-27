@@ -135,7 +135,8 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <motion.div
             initial={{ y: "100%", opacity: 0 }}
