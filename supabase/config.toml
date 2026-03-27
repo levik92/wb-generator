@@ -113,3 +113,6 @@ verify_jwt = false
 
 [functions.support-admin]
 verify_jwt = false
+
+[functions.cloudpayments-webhook]
+verify_jwt = false

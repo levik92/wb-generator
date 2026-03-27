@@ -951,48 +951,78 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_provider_settings: {
+        Row: {
+          active_provider: string
+          cloudpayments_public_id: string | null
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          active_provider?: string
+          cloudpayments_public_id?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          active_provider?: string
+          cloudpayments_public_id?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
           confirmed_at: string | null
           created_at: string
           currency: string
+          external_payment_id: string | null
           id: string
           metadata: Json | null
           package_name: string
+          payment_provider: string | null
           status: string
           tokens_amount: number
           updated_at: string
           user_id: string
-          yookassa_payment_id: string
+          yookassa_payment_id: string | null
         }
         Insert: {
           amount: number
           confirmed_at?: string | null
           created_at?: string
           currency?: string
+          external_payment_id?: string | null
           id?: string
           metadata?: Json | null
           package_name: string
+          payment_provider?: string | null
           status?: string
           tokens_amount: number
           updated_at?: string
           user_id: string
-          yookassa_payment_id: string
+          yookassa_payment_id?: string | null
         }
         Update: {
           amount?: number
           confirmed_at?: string | null
           created_at?: string
           currency?: string
+          external_payment_id?: string | null
           id?: string
           metadata?: Json | null
           package_name?: string
+          payment_provider?: string | null
           status?: string
           tokens_amount?: number
           updated_at?: string
           user_id?: string
-          yookassa_payment_id?: string
+          yookassa_payment_id?: string | null
         }
         Relationships: [
           {
