@@ -6,6 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function waitUntil(promise: Promise<unknown>) {
+  try {
+    (globalThis as any).EdgeRuntime?.waitUntil?.(promise);
+  } catch (_) {
+    // ignore
+  }
+}
+
 async function getPromptTemplate(supabase: any, promptType: string, productName: string, editInstructions: string): Promise<string> {
   console.log(`Fetching prompt template for type: ${promptType}, product: ${productName}`);
   
@@ -151,25 +159,23 @@ serve(async (req) => {
     const prompt = await getPromptTemplate(supabase, 'edit-card', productName, editInstructions);
     console.log('Generated prompt:', prompt.substring(0, 100) + '...');
 
-    // Call processing function with the source image URL
-    // Note: process-google-task reads product_images from job, but we also pass sourceImageUrl for compatibility
-    console.log('Invoking process-google-task...');
-    const { error: processingError } = await supabase.functions.invoke('process-google-task', {
-      body: {
-        taskId: task.id,
-        sourceImageUrl: sourceImageUrl,
-        prompt: prompt
-      }
-    });
+    console.log('Starting background processing via process-generation-tasks-banana...');
+    const backgroundTask = supabase.functions
+      .invoke('process-generation-tasks-banana', {
+        body: { jobId: job.id }
+      })
+      .then(({ error: processingError }) => {
+        if (processingError) {
+          console.error('Background processing error:', processingError);
+          return;
+        }
+        console.log('process-generation-tasks-banana invoked successfully');
+      })
+      .catch((processingError) => {
+        console.error('Background processing exception:', processingError);
+      });
 
-    if (processingError) {
-      console.error('Processing error:', processingError);
-      // Don't fail - the task is created and might be processed later
-      // Just log the error and return success since task/job are created
-      console.log('Note: process-google-task invocation failed, but task is created');
-    } else {
-      console.log('process-google-task invoked successfully');
-    }
+    waitUntil(backgroundTask);
 
     // Create notification
     await supabase.from('notifications').insert({
