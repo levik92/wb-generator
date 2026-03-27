@@ -1,43 +1,30 @@
 
-План исправлений по двум проблемам:
 
-1. Починить выход из аккаунта везде, а не только частично
-- Проверю и унифицирую logout во всех местах: `Dashboard.tsx`, `Admin.tsx`, `Partner.tsx`, а также сценарии принудительного выхода.
-- Везде приведу поведение к одному шаблону: локальный выход, игнорирование ошибки `session_not_found`, гарантированный редирект.
-- Уберу зависимость UX выхода от ответа сервера, чтобы просроченная/битая сессия не блокировала выход.
+## Problem
 
-2. Убрать висящие запросы, которые могут мешать logout
-- В `Admin.tsx` сейчас polling `support-admin` запускается внутри `checkAdminAccess()` с неправильным cleanup: это может оставлять активный интервал.
-- Вынесу polling в отдельный `useEffect` с корректным `clearInterval`.
-- Добавлю защиту, чтобы после выхода не продолжались запросы к `support-admin` и другим auth-зависимым источникам.
+UTM clicks are not being recorded for logged-in users.
 
-3. Учесть влияние CloudPayments без ложной причины
-- По коду CloudPayments не выглядит прямой причиной logout-багов: проблема больше похожа на работу с истекшей сессией и продолжающимися auth-запросами.
-- Но я отдельно проверю, нет ли после подключения CloudPayments дополнительной логики/скрипта, которая держит auth-состояние или вызывает лишние запросы в дашборде.
+**Root cause**: When a logged-in user visits `https://wbgen.ru/?utm_source=ls-promo`, the `AuthRedirect` component immediately redirects to `/dashboard` via React Router's `<Navigate>`, which **strips the query parameters from the URL before** `UtmTracker`'s `useEffect` fires. By the time `window.location.search` is read, the `utm_source` param is gone.
 
-4. Исправить Safari-проблемы именно в админке
-- В админке уже частично убран blur, но остаются проблемные интерактивные слои: тултипы, поповеры, дропдауны и chart-tooltips.
-- Пересоберу поведение admin-hover элементов так, чтобы они не зависели от конфликтного hover/click-менеджмента Safari.
-- Отдельно поправлю кастомный `Tooltip` из `src/components/ui/tooltip.tsx`: сейчас он вручную управляет `open` и подмешивает click/touch поверх Radix, это очень похоже на источник поломки всплывашек в Safari.
+The 3 existing visits were recorded from non-logged-in users where `AuthRedirect` does not redirect.
 
-5. Стабилизировать всплывашки и графики в админке
-- Для элементов админки переведу проблемные ховеры на более надежный режим:
-  - где нужно — `Popover`/`DropdownMenu` вместо нестабильного hover-only сценария;
-  - для chart-tooltips — проверю контейнеры, z-index и pointer-events, чтобы Safari не терял события над SVG.
-- Сохраню текущий визуал админки, но уберу именно те паттерны, которые конфликтуют с WebKit.
+## Fix
 
-6. Технически что именно затрону
-- `src/pages/Admin.tsx` — logout + cleanup polling.
-- `src/pages/Partner.tsx` — logout по тому же безопасному шаблону.
-- `src/pages/Dashboard.tsx` — проверка итогового logout-потока, чтобы он был консистентен.
-- `src/components/ui/tooltip.tsx` — упрощение/исправление логики открытия.
-- При необходимости: admin-компоненты с popover/dropdown/chart tooltip, если после ревизии выяснится, что проблема локально в них.
+**Capture UTM params at module load time**, before React Router can strip them. This is a single-file change to `src/hooks/useUtmTracking.ts`.
 
-Технические выводы
-- На `Dashboard` logout уже переведен на `scope: 'local'`, но в `Admin` и `Partner` до сих пор остался обычный `signOut()`.
-- В логах Supabase есть типичный паттерн `POST /logout -> 403 session_not_found`, то есть серверная сессия уже потеряна, а UI все еще пытается завершить logout как обычный серверный сценарий.
-- В `Admin.tsx` есть архитектурная ошибка: `setInterval(fetchUnreadSupport, 20000)` создается внутри async-функции `checkAdminAccess()`, а возвращаемый cleanup там фактически не используется React-ом. Это очень похоже на “висящий запрос”.
-- Для Safari в проекте уже есть память-ограничение, что blur-слои ломали hover у SVG/графиков. Основные контейнеры админки уже стали solid, но кастомный tooltip-слой все еще выглядит подозрительно и требует правки.
+### Technical approach
 
-Итог
-Сделаю один пакет исправлений: нормализую logout, уберу висящий admin polling, затем стабилизирую интерактивные hover/tooltip/popover сценарии в Safari именно в админке.
+1. **`src/hooks/useUtmTracking.ts`** -- At the top of the module (outside any component/hook), immediately read `window.location.search` and store the UTM params in module-scope variables. This runs when the JS module is first imported, well before any React rendering or routing.
+
+```text
+// Module-scope capture (runs before React Router)
+const INITIAL_PARAMS = new URLSearchParams(window.location.search);
+const INITIAL_UTM_SOURCE = INITIAL_PARAMS.get("utm_source");
+const INITIAL_UTM_MEDIUM = INITIAL_PARAMS.get("utm_medium") || "";
+const INITIAL_UTM_CAMPAIGN = INITIAL_PARAMS.get("utm_campaign") || "";
+```
+
+Then inside `useUtmTracking()`, use these captured values instead of reading `window.location.search` (which may already be `/dashboard` by the time the effect runs).
+
+This is the only change needed. No database or RLS changes required -- the policies are correct (public INSERT on `utm_visits`, public SELECT on `utm_sources`).
+
