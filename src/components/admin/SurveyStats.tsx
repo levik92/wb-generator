@@ -117,7 +117,7 @@ export function SurveyStats() {
 
   if (totalRespondents === 0) {
     return (
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card border-border/50 rounded-2xl">
         <CardContent className="py-8 text-center text-muted-foreground text-sm">
           Пока нет ответов на опрос
         </CardContent>
@@ -127,7 +127,7 @@ export function SurveyStats() {
 
   return (
     <>
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card border-border/50 rounded-2xl">
         <CardHeader>
           <CardTitle className="text-lg">
             Опрос пользователей ({totalRespondents} ответов)

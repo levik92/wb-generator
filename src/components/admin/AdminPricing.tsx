@@ -265,7 +265,7 @@ export function AdminPricing() {
   }
   return <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
       {/* Тарифы */}
-      <Card className="overflow-hidden bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="overflow-hidden bg-card border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
@@ -374,7 +374,7 @@ export function AdminPricing() {
       </Card>
 
       {/* Цены генерации */}
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-lg sm:text-xl">Стоимость генерации</CardTitle>
           <CardDescription className="text-xs sm:text-sm mt-1">
@@ -414,7 +414,7 @@ export function AdminPricing() {
       </Card>
 
       {/* Платёжная система */}
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-primary" />
