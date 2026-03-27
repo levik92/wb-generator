@@ -101,8 +101,9 @@ async function callGeminiApi(
   keyName: string,
   imageResolution: string = '2K'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
-  const modelName = 'gemini-3.1-flash-image-preview';
-  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, resolution: ${imageResolution}...`);
+  const modelName = 'gemini-3-pro-image-preview';
+  const normalizedImageResolution = (imageResolution || '2K').toUpperCase();
+  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, resolution: ${normalizedImageResolution}...`);
   
   try {
     const response = await fetch(
@@ -118,12 +119,8 @@ async function callGeminiApi(
           }],
           generationConfig: {
             responseModalities: ["IMAGE", "TEXT"],
-            thinkingConfig: {
-              thinkingLevel: "minimal",
-              includeThoughts: false
-            },
             imageConfig: {
-              imageSize: imageResolution,
+              imageSize: normalizedImageResolution,
               aspectRatio: "3:4"
             }
           }
