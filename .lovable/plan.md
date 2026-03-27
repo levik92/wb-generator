@@ -1,30 +1,39 @@
 
 
-## Problem
+## Проблема
 
-UTM clicks are not being recorded for logged-in users.
+Edge Function `process-google-task` крашится с "Memory limit exceeded" при декодировании base64 → бинарный. Проблема **не в модели** — Gemini успешно генерирует изображение, но `atob()` + `Uint8Array.from()` создаёт 3 копии данных в RAM, что превышает лимит 150МБ при больших изображениях.
 
-**Root cause**: When a logged-in user visits `https://wbgen.ru/?utm_source=ls-promo`, the `AuthRedirect` component immediately redirects to `/dashboard` via React Router's `<Navigate>`, which **strips the query parameters from the URL before** `UtmTracker`'s `useEffect` fires. By the time `window.location.search` is read, the `utm_source` param is gone.
+Сегодня с 12:00 частота сбоев резко выросла — Gemini стал возвращать более тяжёлые изображения (нормальная вариативность), и функция перестала вписываться в лимит.
 
-The 3 existing visits were recorded from non-logged-in users where `AuthRedirect` does not redirect.
+## Исправление
 
-## Fix
+**Файл: `supabase/functions/process-google-task/index.ts`**
 
-**Capture UTM params at module load time**, before React Router can strip them. This is a single-file change to `src/hooks/useUtmTracking.ts`.
+### 1. Добавить импорт `decode` из стандартной библиотеки Deno (строка 4)
 
-### Technical approach
-
-1. **`src/hooks/useUtmTracking.ts`** -- At the top of the module (outside any component/hook), immediately read `window.location.search` and store the UTM params in module-scope variables. This runs when the JS module is first imported, well before any React rendering or routing.
-
-```text
-// Module-scope capture (runs before React Router)
-const INITIAL_PARAMS = new URLSearchParams(window.location.search);
-const INITIAL_UTM_SOURCE = INITIAL_PARAMS.get("utm_source");
-const INITIAL_UTM_MEDIUM = INITIAL_PARAMS.get("utm_medium") || "";
-const INITIAL_UTM_CAMPAIGN = INITIAL_PARAMS.get("utm_campaign") || "";
+```typescript
+import { encode as base64Encode, decode as base64Decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 ```
 
-Then inside `useUtmTracking()`, use these captured values instead of reading `window.location.search` (which may already be `/dashboard` by the time the effect runs).
+### 2. Заменить строку 494 — неэффективное декодирование
 
-This is the only change needed. No database or RLS changes required -- the policies are correct (public INSERT on `utm_visits`, public SELECT on `utm_sources`).
+```typescript
+// БЫЛО (3 копии в памяти):
+const imageBlob = Uint8Array.from(atob(generatedImageBase64), c => c.charCodeAt(0));
+
+// СТАЛО (1 копия, нативная функция Deno):
+const imageBlob = base64Decode(generatedImageBase64);
+```
+
+### 3. Освободить память сразу после декодирования (после строки 494)
+
+Обнулить ссылку на base64-строку в объекте ответа AI, чтобы GC мог освободить память до начала загрузки в Storage:
+
+```typescript
+// Очистка памяти перед загрузкой
+generatedImageBase64 = null;
+```
+
+Одна функция, три строки изменений. После деплоя генерации должны перестать падать.
 
