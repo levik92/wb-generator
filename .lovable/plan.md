@@ -1,59 +1,68 @@
 
 
-## Safari Admin Panel Issues — Root Cause & Fix
+## План интеграции CloudPayments
 
-### Problem
-Two distinct Safari-specific issues:
+### Что будем делать
 
-1. **Chart tooltips only work on click, not hover** — caused by the custom `Tooltip` component in `src/components/ui/tooltip.tsx`. It overrides Radix's default hover behavior and adds `onClick`/`onTouchEnd` toggle logic. Recharts uses its OWN `Tooltip` (not Radix), so this isn't the direct cause for charts — but the Recharts tooltip uses `backdrop-blur-sm` in its content div, which Safari composites incorrectly over the chart's SVG, blocking pointer events from reaching the chart area beneath.
+Добавляем CloudPayments как альтернативную платёжную систему рядом с ЮKassa. В админке на странице «Цены» появится блок переключения. Все оплаты идут через выбранную систему.
 
-2. **"Layer on top" feeling across the admin** — the sticky header on line 205 of `Admin.tsx` uses `backdrop-blur-xl`. In Safari, `backdrop-blur` creates a compositing layer that can intercept pointer events and cause rendering glitches with elements underneath (especially SVG charts in scrollable containers). Combined with `GlassCard` (`backdrop-blur-xl`), `AdminSidebar` (`backdrop-blur-xl`), and `DashboardHeader` (`backdrop-blur-xl`), there are multiple stacking blur layers competing.
+### Шаги реализации
 
-### Fix (minimal, no visual change)
+**1. База данных — новая таблица настроек**
+- Создаём таблицу `payment_provider_settings` с полями: `active_provider` (yookassa/cloudpayments), `cloudpayments_public_id`, `updated_at`
+- Добавляем в таблицу `payments` колонки `payment_provider` и `external_payment_id`
+- Колонку `yookassa_payment_id` делаем nullable (для обратной совместимости)
+- RLS: чтение — для всех авторизованных, запись — только админы
 
-**File 1: `src/pages/Admin.tsx`** (line 205)
-- Replace `backdrop-blur-xl` on the sticky header with a solid `bg-card` background
-- The visual difference is negligible (card already has ~95% opacity), but eliminates the compositing layer that blocks interactions
+**2. Админка — блок переключения**
+- В конце `AdminPricing.tsx` добавляем карточку «Платёжная система»
+- Радио-переключатель: ЮKassa / CloudPayments
+- При выборе CloudPayments — поле ввода Public ID
+- Кнопка сохранения, запись в `payment_provider_settings`
 
-```
-// Before
-bg-card/50 backdrop-blur-xl sticky top-0 z-20
+**3. Фронтенд — виджет CloudPayments**
+- В `index.html` подключаем скрипт `https://widget.cloudpayments.ru/bundles/cloudpayments.js`
+- В `Pricing.tsx` при оплате проверяем активного провайдера
+- Если CloudPayments — открываем виджет `cp.CloudPayments().start(...)` вместо редиректа на ЮKassa
+- Перед открытием виджета создаём запись платежа в БД со статусом `pending`
 
-// After  
-bg-card sticky top-0 z-20
-```
+**4. Вебхук CloudPayments — новая Edge Function**
+- Создаём `supabase/functions/cloudpayments-webhook/index.ts`
+- Обрабатываем Pay и Fail уведомления
+- Проверяем подпись через HMAC-SHA256 (заголовок `Content-HMAC`)
+- При успехе — зачисляем токены, обновляем статус платежа
+- Возвращаем `{"code": 0}` для подтверждения
 
-**File 2: `src/components/dashboard/AdminAnalyticsChart.tsx`** (line 317)
-- Remove `backdrop-blur-sm` from chart tooltip div
-- Replace with solid background
+**5. Обновление create-payment**
+- Добавляем проверку: если провайдер cloudpayments — не вызываем YooKassa API, а просто создаём pending-запись и возвращаем данные для виджета
 
-```
-// Before
-bg-background/95 backdrop-blur-sm
+**6. Секреты**
+- `CLOUDPAYMENTS_API_SECRET` — для проверки подписи вебхуков
 
-// After
-bg-background
-```
+---
 
-**File 3: `src/components/dashboard/AdminBreakdownChart.tsx`**
-- Same tooltip fix — check for `backdrop-blur` in its custom tooltip and remove it
+### Что нужно сделать в личном кабинете CloudPayments
 
-**File 4: `src/components/admin/AdminSidebar.tsx`** (line 50)
-- Replace `bg-card/80 backdrop-blur-xl` with `bg-card`
+1. **Зарегистрироваться** на [cloudpayments.ru](https://cloudpayments.ru) и пройти модерацию (подключение магазина)
 
-**File 5: `src/components/dashboard/GlassCard.tsx`** (line 36)
-- Replace `bg-card/80 backdrop-blur-xl` with `bg-card`
+2. **Получить ключи** — в разделе «Сайты» → ваш сайт:
+   - **Public ID** — публичный идентификатор терминала (вводится в админке)
+   - **Пароль для API** — секретный ключ (добавим в Supabase secrets)
 
-### What this does NOT change
-- No visual design changes — solid backgrounds at these opacity levels look identical
-- No functional changes — only removes CSS properties that Safari handles poorly
-- Dashboard header, landing page, and other non-admin pages are untouched (per user: "в остальных вроде все ок")
+3. **Настроить уведомления (вебхуки)**:
+   - Перейти в раздел «Уведомления» вашего сайта
+   - **Pay** — включить, указать URL: `https://xguiyabpngjkavyosbza.supabase.co/functions/v1/cloudpayments-webhook`
+   - **Fail** — включить, тот же URL
+   - Формат: **CloudPayments** (не JSON)
+   - Метод: **POST**
+   - Кодировка: **UTF-8**
 
-### Why this works
-Safari's WebKit engine creates GPU-composited layers for `backdrop-blur`. When multiple such layers overlap (sidebar + header + cards + chart tooltips), it causes:
-- Pointer event passthrough failures (hover doesn't register on charts)
-- Input lag and "heavy" feel when interacting with elements under blur layers
-- Tooltip rendering delays
+4. **Включить получение данных в уведомлениях** — поставить галочку «Передавать в уведомлениях параметр Data»
 
-Removing blur from the admin panel's structural elements eliminates these compositing conflicts while maintaining the same visual appearance.
+5. **Настроить онлайн-кассу (CloudKassir)** если нужна фискализация:
+   - В разделе «Онлайн-касса» подключить ОФД
+   - Указать ИНН и систему налогообложения
+   - Мы будем передавать чеки через параметр `cloudPayments` в виджете
+
+6. **Тестовый режим** — сначала можно включить тестовый терминал для проверки интеграции без реальных денег
 
