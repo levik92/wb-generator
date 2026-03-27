@@ -171,24 +171,36 @@ serve(async (req) => {
         metadata_param: { payment_provider: 'cloudpayments', package_name: body.packageName, promo: appliedPromo }
       });
       
+      const originUrl = req.headers.get("origin") || 'https://wbgen.ru';
+      
       return new Response(JSON.stringify({
         provider: 'cloudpayments',
-        publicId: cloudpaymentsPublicId,
-        amount: finalAmount,
-        currency: 'RUB',
-        description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
-        accountId: user.id,
-        email: user.email,
-        externalPaymentId: externalPaymentId,
-        data: JSON.stringify({
-          user_id: user.id,
-          package_name: body.packageName,
-          tokens_amount: finalTokens.toString(),
-          promo_code: appliedPromo?.code || '',
-          promo_type: appliedPromo?.type || '',
-          promo_value: appliedPromo?.value?.toString() || '',
-          external_payment_id: externalPaymentId
-        })
+        intentParams: {
+          publicTerminalId: cloudpaymentsPublicId,
+          description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
+          amount: finalAmount,
+          currency: 'RUB',
+          paymentSchema: 'Single',
+          externalId: externalPaymentId,
+          skin: 'modern',
+          autoClose: 3,
+          userInfo: {
+            accountId: user.id,
+            email: user.email,
+          },
+          metadata: {
+            user_id: user.id,
+            package_name: body.packageName,
+            tokens_amount: finalTokens.toString(),
+            promo_code: appliedPromo?.code || '',
+            promo_type: appliedPromo?.type || '',
+            promo_value: appliedPromo?.value?.toString() || '',
+            external_payment_id: externalPaymentId
+          },
+          successRedirectUrl: `${originUrl}/dashboard?payment=success`,
+          failRedirectUrl: `${originUrl}/dashboard?payment=failed`,
+        },
+        tokens: finalTokens,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
