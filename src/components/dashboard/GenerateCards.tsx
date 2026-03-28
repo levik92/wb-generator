@@ -520,15 +520,22 @@ export const GenerateCards = ({
           setTimeout(() => {
             setGeneratedImages(currentImages => {
               for (const editJob of activeEditJobs!) {
+                const isRegen = editJob.category === 'regeneration';
                 const activeTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'processing' || t.status === 'pending') || [];
                 for (const task of activeTasks) {
                   // Find the matching image by stageIndex (card_index)
                   const imgIndex = currentImages.findIndex(img => img.stageIndex === task.card_index);
                   if (imgIndex >= 0) {
                     const img = currentImages[imgIndex];
-                    const cardKey = `edit_${img.id}_${imgIndex}`;
-                    setEditingCards(prev => new Set([...prev, cardKey]));
-                    pollEditTask(task.id, imgIndex, cardKey);
+                    if (isRegen) {
+                      const cardKey = `${img.id}_${imgIndex}`;
+                      setRegeneratingCards(prev => new Set([...prev, cardKey]));
+                      pollRegenerationTask(task.id, imgIndex, cardKey);
+                    } else {
+                      const cardKey = `edit_${img.id}_${imgIndex}`;
+                      setEditingCards(prev => new Set([...prev, cardKey]));
+                      pollEditTask(task.id, imgIndex, cardKey);
+                    }
                   }
                 }
               }
