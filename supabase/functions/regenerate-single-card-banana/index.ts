@@ -30,30 +30,6 @@ const cardTypeToPromptType: Record<string, string> = {
   'mainEdit': 'mainEdit',
 };
 
-// Helper function to get prompt template
-async function getPromptTemplate(
-  supabase: any,
-  promptType: string,
-  productName: string,
-  category: string,
-  benefits: string
-): Promise<string> {
-  const { data, error } = await supabase
-    .from('ai_prompts')
-    .select('prompt_template')
-    .eq('prompt_type', promptType)
-    .eq('model_type', 'google')
-    .single();
-
-  if (error || !data) {
-    throw new Error(`Failed to fetch prompt for type: ${promptType}`);
-  }
-
-  return data.prompt_template
-    .replace('{productName}', productName)
-    .replace('{category}', category)
-    .replace('{benefits}', benefits);
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -152,7 +128,25 @@ serve(async (req) => {
           type: 'product'
         }];
 
-    // Create temporary job for tracking with product_images
+    // Check if the source generation had unified styling - load style_description BEFORE creating job
+    let styleDescription: string | null = null;
+    const jobIdToCheck = sourceJobId || sourceGenerationId;
+    if (jobIdToCheck) {
+      const { data: sourceJob } = await supabase
+        .from('generation_jobs')
+        .select('style_description')
+        .eq('id', jobIdToCheck)
+        .single();
+      
+      if (sourceJob?.style_description) {
+        styleDescription = sourceJob.style_description;
+        console.log(`[Regeneration] Using style_description from source job (${styleDescription.length} chars)`);
+      } else {
+        console.log(`[Regeneration] No style_description found for job ${jobIdToCheck}`);
+      }
+    }
+
+    // Create temporary job for tracking with product_images and style
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
       .insert({
@@ -165,7 +159,8 @@ serve(async (req) => {
         status: 'pending',
         total_cards: 1,
         tokens_cost: tokensCost,
-        product_images: imagesToUse
+        product_images: imagesToUse,
+        ...(styleDescription ? { style_description: styleDescription } : {}),
       })
       .select()
       .single();
@@ -200,46 +195,14 @@ serve(async (req) => {
       throw new Error('Failed to create regeneration task');
     }
 
-    // Get prompt template - map card type to actual prompt type in database
-    const promptType = cardTypeToPromptType[cardType] || 'cover';
-    
     // Diagnostic logging for regeneration context
+    const promptType = cardTypeToPromptType[cardType] || 'cover';
     const productImageCount = imagesToUse.filter((img: any) => img.type === 'product').length;
     const referenceImageCount = imagesToUse.filter((img: any) => img.type === 'reference').length;
     console.log(`[Regeneration] cardType: "${cardType}" -> promptType: "${promptType}"`);
     console.log(`[Regeneration] images total: ${imagesToUse.length}, product: ${productImageCount}, reference: ${referenceImageCount}`);
     console.log(`[Regeneration] productName: "${sanitizedProductName}", description length: ${sanitizedDescription.length}`);
-    
-    // Check if the source generation had unified styling - load style_description
-    let styleDescription: string | null = null;
-    const jobIdToCheck = sourceJobId || sourceGenerationId;
-    if (jobIdToCheck) {
-      const { data: sourceJob } = await supabase
-        .from('generation_jobs')
-        .select('style_description')
-        .eq('id', jobIdToCheck)
-        .single();
-      
-      if (sourceJob?.style_description) {
-        styleDescription = sourceJob.style_description;
-        console.log(`[Regeneration] Using style_description from source job (${styleDescription.length} chars)`);
-      } else {
-        console.log(`[Regeneration] No style_description found for job ${jobIdToCheck}`);
-      }
-    }
-
-    // Build prompt with optional style description
-    const enrichedDescription = styleDescription 
-      ? `${sanitizedDescription}\n\nВАЖНО — соблюдай единый стиль оформления карточки: ${styleDescription}`
-      : sanitizedDescription;
-    
-    const prompt = await getPromptTemplate(
-      supabase,
-      promptType,
-      sanitizedProductName,
-      sanitizedCategory,
-      enrichedDescription
-    );
+    console.log(`[Regeneration] style_description saved to job: ${styleDescription ? styleDescription.length + ' chars' : 'none'}`);
 
     const backgroundTask = supabase.functions
       .invoke('process-generation-tasks-banana', {
