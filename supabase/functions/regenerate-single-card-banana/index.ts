@@ -162,7 +162,7 @@ serve(async (req) => {
           ? `${sanitizedDescription} [sourceGenerationId:${sourceGenerationId}]`
           : sanitizedDescription,
         category: 'regeneration',
-        status: 'processing',
+        status: 'pending',
         total_cards: 1,
         tokens_cost: tokensCost,
         product_images: imagesToUse
@@ -186,7 +186,7 @@ serve(async (req) => {
         job_id: job.id,
         card_index: cardIndex,
         card_type: cardType,
-        status: 'processing',
+        status: 'pending',
       })
       .select()
       .single();
