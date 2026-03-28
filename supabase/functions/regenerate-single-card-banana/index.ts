@@ -30,30 +30,6 @@ const cardTypeToPromptType: Record<string, string> = {
   'mainEdit': 'mainEdit',
 };
 
-// Helper function to get prompt template
-async function getPromptTemplate(
-  supabase: any,
-  promptType: string,
-  productName: string,
-  category: string,
-  benefits: string
-): Promise<string> {
-  const { data, error } = await supabase
-    .from('ai_prompts')
-    .select('prompt_template')
-    .eq('prompt_type', promptType)
-    .eq('model_type', 'google')
-    .single();
-
-  if (error || !data) {
-    throw new Error(`Failed to fetch prompt for type: ${promptType}`);
-  }
-
-  return data.prompt_template
-    .replace('{productName}', productName)
-    .replace('{category}', category)
-    .replace('{benefits}', benefits);
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
