@@ -152,7 +152,25 @@ serve(async (req) => {
           type: 'product'
         }];
 
-    // Create temporary job for tracking with product_images
+    // Check if the source generation had unified styling - load style_description BEFORE creating job
+    let styleDescription: string | null = null;
+    const jobIdToCheck = sourceJobId || sourceGenerationId;
+    if (jobIdToCheck) {
+      const { data: sourceJob } = await supabase
+        .from('generation_jobs')
+        .select('style_description')
+        .eq('id', jobIdToCheck)
+        .single();
+      
+      if (sourceJob?.style_description) {
+        styleDescription = sourceJob.style_description;
+        console.log(`[Regeneration] Using style_description from source job (${styleDescription.length} chars)`);
+      } else {
+        console.log(`[Regeneration] No style_description found for job ${jobIdToCheck}`);
+      }
+    }
+
+    // Create temporary job for tracking with product_images and style
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
       .insert({
@@ -165,7 +183,8 @@ serve(async (req) => {
         status: 'pending',
         total_cards: 1,
         tokens_cost: tokensCost,
-        product_images: imagesToUse
+        product_images: imagesToUse,
+        ...(styleDescription ? { style_description: styleDescription } : {}),
       })
       .select()
       .single();
