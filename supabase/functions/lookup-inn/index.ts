@@ -71,11 +71,12 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "Ты помощник для поиска данных организаций РФ. Отвечай строго JSON без markdown." },
+          { role: "system", content: "Ты помощник для поиска данных организаций РФ. Используй поиск Google чтобы найти актуальные данные. Отвечай строго JSON без markdown." },
           { role: "user", content: prompt },
         ],
         temperature: 0.1,
         max_tokens: 500,
+        tools: [{ google_search_retrieval: {} }],
       }),
     });
 
