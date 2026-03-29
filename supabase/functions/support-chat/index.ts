@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const SUPPORT_AI_ENABLED = Deno.env.get("SUPPORT_AI_ENABLED") === "true";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -72,7 +74,7 @@ serve(async (req) => {
           .eq("channel", convChannel)
           .maybeSingle();
         
-        const aiEnabled = aiDefault?.ai_enabled ?? (convChannel === "widget");
+        const aiEnabled = SUPPORT_AI_ENABLED && (aiDefault?.ai_enabled ?? false);
 
         const { data: conv, error } = await supabase
           .from("support_conversations")
@@ -168,9 +170,9 @@ serve(async (req) => {
           });
         }
 
-        // If AI is enabled (widget), get AI response
+        // AI support is opt-in and disabled by default in self-hosted mode.
         let aiResponse = null;
-        if (convData?.ai_enabled) {
+        if (SUPPORT_AI_ENABLED && convData?.ai_enabled) {
           try {
             // Get conversation history for context
             const { data: history } = await supabase
@@ -202,29 +204,9 @@ serve(async (req) => {
                 })),
             ];
 
-            const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-            if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
-            const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${LOVABLE_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "google/gemini-3.1-pro-preview",
-                messages,
-                stream: false,
-              }),
-            });
-
-            if (!aiResp.ok) {
-              console.error("AI gateway error:", aiResp.status, await aiResp.text());
-              throw new Error("AI gateway error");
-            }
-
-            const aiData = await aiResp.json();
-            const aiContent = aiData.choices?.[0]?.message?.content || "";
+            // Self-hosted mode keeps support chat operational without Lovable AI.
+            // If support AI is reintroduced later, wire a provider here.
+            const aiContent = "";
 
             // Check for escalation
             const needsEscalation = aiContent.includes("[ESCALATE]");
