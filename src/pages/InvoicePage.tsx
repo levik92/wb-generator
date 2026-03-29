@@ -108,17 +108,18 @@ export default function InvoicePage() {
 
   const handleDownloadPDF = async () => {
     if (!invoice || !org) return;
-    const [{ default: jsPDF }, { ROBOTO_REGULAR_BASE64 }] = await Promise.all([
+    const [{ default: jsPDF }, { ARIAL_REGULAR_BASE64, ARIAL_BOLD_BASE64 }] = await Promise.all([
       import('jspdf'),
-      import('@/lib/robotoFont'),
+      import('@/lib/arialFont'),
     ]);
     const doc = new jsPDF('p', 'mm', 'a4');
 
-    // Register Roboto font for Cyrillic support
-    doc.addFileToVFS('Roboto-Regular.ttf', ROBOTO_REGULAR_BASE64);
-    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'bold');
-    doc.setFont('Roboto', 'normal');
+    // Register Arial (Liberation Sans) font for Cyrillic support
+    doc.addFileToVFS('Arial-Regular.ttf', ARIAL_REGULAR_BASE64);
+    doc.addFileToVFS('Arial-Bold.ttf', ARIAL_BOLD_BASE64);
+    doc.addFont('Arial-Regular.ttf', 'Arial', 'normal');
+    doc.addFont('Arial-Bold.ttf', 'Arial', 'bold');
+    doc.setFont('Arial', 'normal');
 
     const w = 210;
     let y = 15;
@@ -127,7 +128,8 @@ export default function InvoicePage() {
     const formattedDate = new Date(invoice.invoice_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
     doc.setFontSize(9);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
+    doc.setLineWidth(0.15);
 
     // Bank header
     doc.setDrawColor(0);
@@ -148,38 +150,39 @@ export default function InvoicePage() {
     doc.text(SELLER.name, ml + 25, y + 29);
 
     y += 38;
-    doc.setFontSize(16);
-    doc.setFont('Roboto', 'bold');
+    doc.setFontSize(14);
+    doc.setFont('Arial', 'bold');
     doc.text(`Счёт на оплату ${invoice.invoice_number}`, ml, y);
     y += 6;
     doc.setFontSize(10);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
     doc.text(`от ${formattedDate}`, ml, y);
     y += 2;
-    doc.setLineWidth(0.5);
+    doc.setLineWidth(0.3);
     doc.line(ml, y, mr, y);
     y += 8;
 
     doc.setFontSize(9);
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('Arial', 'bold');
     doc.text('Поставщик:', ml, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
     doc.text(`${SELLER.name}, ИНН ${SELLER.inn}, КПП ${SELLER.kpp}`, ml + 28, y);
     y += 7;
 
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('Arial', 'bold');
     doc.text('Покупатель:', ml, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
     const buyerLine = `${org.name}, ИНН ${org.inn}${org.kpp ? `, КПП ${org.kpp}` : ''}${org.legal_address ? `, ${org.legal_address}` : ''}`;
     doc.text(buyerLine, ml + 28, y, { maxWidth: mr - ml - 30 });
     y += 12;
 
+    doc.setLineWidth(0.15);
     const colX = [ml, ml + 10, ml + 90, ml + 108, ml + 128, ml + 155];
     doc.setFillColor(240, 240, 240);
     doc.rect(ml, y, mr - ml, 8, 'F');
     doc.rect(ml, y, mr - ml, 8);
     doc.setFontSize(8);
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('Arial', 'bold');
     doc.text('№', colX[0] + 2, y + 5.5);
     doc.text('Наименование', colX[1] + 2, y + 5.5);
     doc.text('Кол-во', colX[2] + 2, y + 5.5);
@@ -194,7 +197,7 @@ export default function InvoicePage() {
     doc.rect(ml, y, mr - ml, rowH);
     colX.forEach(x => doc.line(x, y, x, y + rowH));
     doc.line(mr, y, mr, y + rowH);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
     doc.text('1', colX[0] + 3, y + 5.5);
     doc.text(`Пополнение тарифа "${invoice.package_name}" (${invoice.tokens_amount} токенов)`, colX[1] + 2, y + 5.5, { maxWidth: 78 });
     doc.text('1', colX[2] + 4, y + 5.5);
@@ -203,31 +206,68 @@ export default function InvoicePage() {
     doc.text(`${invoice.amount.toFixed(2)}`, colX[5] + 2, y + 5.5);
     y += rowH + 5;
 
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('Arial', 'bold');
     doc.setFontSize(10);
     doc.text(`Итого: ${invoice.amount.toFixed(2)} руб.`, mr, y, { align: 'right' });
     y += 6;
     doc.text(`Без налога (НДС)`, mr, y, { align: 'right' });
     y += 6;
     doc.setFontSize(9);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
     doc.text(`Всего наименований 1, на сумму ${invoice.amount.toFixed(2)} руб.`, ml, y);
     y += 10;
 
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('Arial', 'bold');
     doc.text('Назначение платежа:', ml, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('Arial', 'normal');
     doc.text(invoice.payment_purpose, ml, y + 5, { maxWidth: mr - ml });
     y += 20;
-    doc.setLineWidth(0.3);
+    doc.setLineWidth(0.15);
     doc.line(ml, y, mr, y);
     y += 8;
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('Arial', 'bold');
     doc.text('Руководитель', ml, y);
+    doc.setLineWidth(0.1);
     doc.line(ml + 50, y + 1, ml + 120, y + 1);
     y += 12;
     doc.text('Главный бухгалтер', ml, y);
     doc.line(ml + 50, y + 1, ml + 120, y + 1);
+
+    // Contract terms section
+    y += 15;
+    doc.setLineWidth(0.15);
+    doc.line(ml, y, mr, y);
+    y += 8;
+
+    doc.setFontSize(11);
+    doc.setFont('Arial', 'bold');
+    doc.text(`Основные условия настоящего счёта-договора ${invoice.invoice_number} от ${formattedDate}.`, ml, y, { maxWidth: mr - ml });
+    y += 8;
+
+    doc.setFontSize(8);
+    doc.setFont('Arial', 'normal');
+    const terms = [
+      '1. Предметом настоящего Счёта-договора является оказание услуги (далее - "услуга").',
+      '2. Оплата настоящего Счёта-договора означает согласие Заказчика с условиями оплаты и выполнения услуги.',
+      '3. Настоящий Счёт-договор действителен в течение 5 (пяти) банковских дней от даты его составления включительно. При отсутствии оплаты в указанный срок настоящий Счёт-договор признается недействительным.',
+      '4. Оплата Счёта-договора третьими лицами (сторонами), а также неполная (частичная) оплата Счёта-договора не допускается.',
+      '5. Исполнитель вправе не начинать выполнение услуги до зачисления оплаты на расчетный счёт.',
+      '6. Подписание Заказчиком или его уполномоченным представителем акта выполнения услуги означает согласие Заказчика с полнотой и надлежащим качеством оказанной услуги.',
+    ];
+
+    terms.forEach(term => {
+      const lines = doc.splitTextToSize(term, mr - ml);
+      doc.text(lines, ml, y);
+      y += lines.length * 4 + 2;
+    });
+
+    y += 6;
+    doc.setFont('Arial', 'bold');
+    doc.setFontSize(9);
+    doc.text('Поставщик', ml, y);
+    y += 5;
+    doc.setFont('Arial', 'normal');
+    doc.text(`${SELLER.name}, ИНН ${SELLER.inn}, КПП ${SELLER.kpp}`, ml, y);
 
     doc.save(`Счёт_${invoice.invoice_number}.pdf`);
   };
