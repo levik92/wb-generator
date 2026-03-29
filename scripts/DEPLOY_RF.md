@@ -21,6 +21,20 @@ The script:
 - syncs `supabase/functions` into self-hosted Supabase
 - recreates the `functions` container
 
+If Lovable keeps pushing into `main`, use the sync helper first:
+
+```bash
+chmod +x /home/wbgen/apps/wb-generator/scripts/sync-main-to-selfhosted.sh
+/home/wbgen/apps/wb-generator/scripts/sync-main-to-selfhosted.sh
+```
+
+This script:
+
+- fetches `origin/main`
+- merges it into `selfhosted`
+- pushes `selfhosted`
+- runs the RF deploy script
+
 Environment overrides:
 
 ```bash
