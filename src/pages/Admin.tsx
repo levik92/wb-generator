@@ -70,6 +70,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('analytics');
   const [adminEmail, setAdminEmail] = useState('');
   const [unreadSupportCount, setUnreadSupportCount] = useState(0);
+  const [pendingInvoicesCount, setPendingInvoicesCount] = useState(0);
   const isMobile = useIsMobile();
 
   const fetchUnreadSupport = useCallback(async () => {
