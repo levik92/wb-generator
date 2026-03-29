@@ -264,7 +264,7 @@ export default function InvoicePage() {
               <Download className="w-4 h-4" /> Скачать PDF
             </Button>
             {invoice.status === 'invoice_issued' && (
-              <Button onClick={handleConfirmPayment} disabled={confirming} className="gap-2 bg-green-600 hover:bg-green-700 text-white">
+              <Button onClick={handleConfirmPayment} disabled={confirming} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
                 {confirming ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Я оплатил
               </Button>

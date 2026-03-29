@@ -29,6 +29,7 @@ export default function Pricing({
 }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const {
     data: packages,
     isLoading: packagesLoading
@@ -187,13 +188,10 @@ export default function Pricing({
       </div>;
   }
 
-  if (invoicePackage) {
-    return (
-      <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
-        <InvoiceForm selectedPackage={invoicePackage} onBack={() => setInvoicePackage(null)} />
-      </Suspense>
-    );
-  }
+  const openInvoiceDialog = (pkg: any) => {
+    setInvoicePackage(pkg);
+    setInvoiceDialogOpen(true);
+  };
   return <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Тарифные планы</h2>
@@ -298,7 +296,7 @@ export default function Pricing({
                   {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
                 </Button>
                 {(plan as any).invoice_enabled && !isTrialUsed && (
-                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => setInvoicePackage(plan)}>
+                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => openInvoiceDialog(plan)}>
                     <Building2 className="w-3.5 h-3.5" />
                     Счёт для юр. лица
                   </Button>
@@ -341,5 +339,17 @@ export default function Pricing({
           </div>
         </CardContent>
       </Card>
+      {invoicePackage && (
+        <Suspense fallback={null}>
+          <InvoiceForm
+            selectedPackage={invoicePackage}
+            open={invoiceDialogOpen}
+            onOpenChange={(open) => {
+              setInvoiceDialogOpen(open);
+              if (!open) setInvoicePackage(null);
+            }}
+          />
+        </Suspense>
+      )}
     </div>;
 }

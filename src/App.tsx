@@ -43,6 +43,7 @@ const KnowledgeArticle = lazy(() => import("./pages/KnowledgeArticle"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const PartnersPage = lazy(() => import("./pages/PartnersPage"));
 const Friends = lazy(() => import("./pages/Friends"));
+const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 
 const queryClient = new QueryClient();
 
@@ -129,6 +130,11 @@ const App = () => {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/invoice/:invoiceNumber" element={
+              <ProtectedRoute>
+                <InvoicePage />
+              </ProtectedRoute>
+            } />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
