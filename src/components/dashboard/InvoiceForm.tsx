@@ -131,7 +131,7 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
         invoiceNum = `${Date.now().toString().slice(-6)}`;
       }
 
-      const invoiceNumber = `WB-${invoiceNum}`;
+      const invoiceNumber = `WBG-${invoiceNum}`;
       const paymentPurpose = `Оплата за пополнение тарифа "${selectedPackage.name}" в сервисе WBGen. Без НДС.`;
 
       const { error: invError } = await supabase
