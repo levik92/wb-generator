@@ -20,6 +20,7 @@ interface PaymentPackage {
   is_active: boolean;
   is_popular: boolean;
   is_trial: boolean;
+  invoice_enabled: boolean;
 }
 interface GenerationPrice {
   id: string;
@@ -136,7 +137,8 @@ export function AdminPricing() {
         tokens: pkg.tokens,
         is_active: pkg.is_active,
         is_popular: pkg.is_popular,
-        is_trial: pkg.is_trial
+        is_trial: pkg.is_trial,
+        invoice_enabled: pkg.invoice_enabled,
       }).eq('id', pkg.id);
       if (error) throw error;
       toast({
@@ -286,13 +288,14 @@ export function AdminPricing() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Популярный</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Триал</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
-                    <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Популярный</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Триал</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Безнал</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
+                     <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -342,6 +345,15 @@ export function AdminPricing() {
                       const updated = packages.map(p => p.id === pkg.id ? {
                         ...p,
                         is_trial: checked
+                      } : p);
+                      setPackages(updated);
+                    }} />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Switch checked={pkg.invoice_enabled} onCheckedChange={checked => {
+                      const updated = packages.map(p => p.id === pkg.id ? {
+                        ...p,
+                        invoice_enabled: checked
                       } : p);
                       setPackages(updated);
                     }} />
