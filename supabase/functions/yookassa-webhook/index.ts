@@ -8,12 +8,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Function to verify YooKassa webhook signature
+// YooKassa webhook IPs: 185.71.76.0/27, 185.71.77.0/27, 77.75.153.0/25, 77.75.154.0/25
+function isYooKassaIP(ip: string | null): boolean {
+  if (!ip) return false;
+  return (
+    ip.startsWith('185.71.76.') ||
+    ip.startsWith('185.71.77.') ||
+    ip.startsWith('77.75.153.') ||
+    ip.startsWith('77.75.154.')
+  );
+}
+
 async function verifyWebhookSignature(requestBody: string, signature: string | null): Promise<boolean> {
-  if (!signature) {
-    console.log('No signature provided in webhook');
-    return false;
-  }
+  if (!signature) return false;
 
   const secretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
   if (!secretKey) {
@@ -22,7 +29,6 @@ async function verifyWebhookSignature(requestBody: string, signature: string | n
   }
 
   try {
-    // YooKassa uses HMAC-SHA256 for webhook signatures
     const key = await crypto.subtle.importKey(
       "raw",
       new TextEncoder().encode(secretKey),
@@ -37,19 +43,15 @@ async function verifyWebhookSignature(requestBody: string, signature: string | n
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
 
-    // Compare signatures safely using constant-time comparison
     const providedSig = signature.toLowerCase().replace(/^sha256=/, '');
     const expectedSig = expectedSignatureHex.toLowerCase();
-    
-    if (providedSig.length !== expectedSig.length) {
-      return false;
-    }
-    
+
+    if (providedSig.length !== expectedSig.length) return false;
+
     let result = 0;
     for (let i = 0; i < providedSig.length; i++) {
       result |= providedSig.charCodeAt(i) ^ expectedSig.charCodeAt(i);
     }
-    
     return result === 0;
   } catch (error) {
     console.error('Error verifying webhook signature:', error);
@@ -57,132 +59,130 @@ async function verifyWebhookSignature(requestBody: string, signature: string | n
   }
 }
 
+function getClientIP(req: Request): string | null {
+  const forwardedFor = req.headers.get('X-Forwarded-For');
+  return req.headers.get('CF-Connecting-IP') ||
+    (forwardedFor ? forwardedFor.split(',')[0].trim() : null) ||
+    req.headers.get('X-Real-IP');
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseServiceRole = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   try {
     console.log('ЮKassa webhook received');
-    
-    // Get the raw body
+
     const requestBody = await req.text();
-    
-    console.log('All headers for debugging:', Object.fromEntries(req.headers.entries()));
-    
-    // Security: Verify webhook is from YooKassa by checking IP ranges
-    // YooKassa webhook IPs: 185.71.76.0/27, 185.71.77.0/27, 77.75.153.0/25, 77.75.154.0/25, 2a02:5180::/32
-    // X-Forwarded-For может содержать несколько IP через запятую, берем первый
-    const forwardedFor = req.headers.get('X-Forwarded-For');
-    const clientIP = req.headers.get('CF-Connecting-IP') || 
-                     (forwardedFor ? forwardedFor.split(',')[0].trim() : null) || 
-                     req.headers.get('X-Real-IP');
+    const clientIP = getClientIP(req);
     console.log('Webhook from IP:', clientIP);
-    
-    // Check if IP is from YooKassa (basic validation)
-    const isFromYooKassa = clientIP && (
-      clientIP.startsWith('185.71.76.') || 
-      clientIP.startsWith('185.71.77.') || 
-      clientIP.startsWith('77.75.153.') || 
-      clientIP.startsWith('77.75.154.')
-    );
-    
-    if (!isFromYooKassa) {
-      console.warn('Webhook from unexpected IP:', clientIP);
-      // Log but don't block - for testing/development
-      const supabaseServiceRole = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
-      
+
+    // Security: verify request origin
+    const webhookSignature = req.headers.get('X-Webhook-Signature') ||
+      req.headers.get('Content-HMAC');
+    const signatureValid = await verifyWebhookSignature(requestBody, webhookSignature);
+    const ipValid = isYooKassaIP(clientIP);
+
+    // Block if BOTH signature and IP checks fail
+    if (!signatureValid && !ipValid) {
+      console.error('Webhook blocked: invalid signature AND unexpected IP:', clientIP);
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
-        event_type_param: 'webhook_unexpected_ip',
-        event_description_param: 'YooKassa webhook from unexpected IP',
+        event_type_param: 'webhook_blocked',
+        event_description_param: 'YooKassa webhook blocked: invalid signature and unexpected IP',
         ip_address_param: clientIP,
         user_agent_param: req.headers.get('User-Agent'),
-        metadata_param: { ip: clientIP, timestamp: new Date().toISOString() }
+        metadata_param: {
+          ip: clientIP,
+          has_signature: !!webhookSignature,
+          timestamp: new Date().toISOString()
+        }
+      });
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    
-    const supabaseServiceRole = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
+
+    // Log warning if only one check passed
+    if (!signatureValid || !ipValid) {
+      console.warn(`Webhook partially verified: signature=${signatureValid}, ip=${ipValid}`);
+      await supabaseServiceRole.rpc('log_security_event', {
+        user_id_param: null,
+        event_type_param: 'webhook_partial_verification',
+        event_description_param: `YooKassa webhook: signature=${signatureValid}, ip_valid=${ipValid}`,
+        ip_address_param: clientIP,
+        user_agent_param: req.headers.get('User-Agent'),
+        metadata_param: { ip: clientIP, signatureValid, ipValid }
+      });
+    }
 
     const webhookData = JSON.parse(requestBody);
-    console.log('Webhook data:', JSON.stringify(webhookData, null, 2));
+    console.log('Webhook event:', webhookData.event);
 
     const { event, object: paymentObject } = webhookData;
-    
+
     if (event === 'payment.succeeded') {
       const paymentId = paymentObject.id;
       console.log(`Processing successful payment: ${paymentId}`);
-      
-      // Call the database function to process payment success
+
       const { data, error } = await supabaseServiceRole.rpc('process_payment_success', {
         payment_id_param: paymentId
       });
-      
+
       if (error) {
         console.error('Error processing payment success:', error);
         throw new Error(`Database error: ${error.message}`);
       }
-      
+
       if (!data) {
         console.log(`Payment ${paymentId} not found or already processed`);
       } else {
         console.log(`Successfully processed payment ${paymentId}`);
-        
-        // Log successful payment processing
-        const logForwardedFor = req.headers.get('X-Forwarded-For');
-        const logIP = req.headers.get('CF-Connecting-IP') || 
-                      (logForwardedFor ? logForwardedFor.split(',')[0].trim() : null);
         await supabaseServiceRole.rpc('log_security_event', {
           user_id_param: null,
           event_type_param: 'payment_webhook_success',
           event_description_param: `Payment ${paymentId} processed successfully`,
-          ip_address_param: logIP,
+          ip_address_param: clientIP,
           user_agent_param: req.headers.get('User-Agent'),
           metadata_param: { paymentId, amount: paymentObject.amount }
         });
       }
-      
+
     } else if (event === 'payment.canceled') {
       const paymentId = paymentObject.id;
       console.log(`Processing canceled payment: ${paymentId}`);
-      
-      // Update payment status to canceled
+
       const { error } = await supabaseServiceRole
         .from('payments')
-        .update({ 
+        .update({
           status: 'canceled',
           updated_at: new Date().toISOString()
         })
         .eq('yookassa_payment_id', paymentId);
-        
+
       if (error) {
         console.error('Error updating canceled payment:', error);
         throw new Error(`Database error: ${error.message}`);
       }
-      
+
       console.log(`Payment ${paymentId} marked as canceled`);
-      
-      // Log payment cancellation
-      const cancelForwardedFor = req.headers.get('X-Forwarded-For');
-      const cancelIP = req.headers.get('CF-Connecting-IP') || 
-                       (cancelForwardedFor ? cancelForwardedFor.split(',')[0].trim() : null);
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
         event_type_param: 'payment_canceled',
         event_description_param: `Payment ${paymentId} was canceled`,
-        ip_address_param: cancelIP,
+        ip_address_param: clientIP,
         user_agent_param: req.headers.get('User-Agent'),
         metadata_param: { paymentId }
       });
-      
+
     } else {
       console.log(`Unhandled event: ${event}`);
     }
@@ -194,30 +194,21 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in yookassa-webhook function:', error);
-    
-    // Log webhook processing errors
+
     try {
-      const supabaseServiceRole = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
-      
-      const errorForwardedFor = req.headers.get('X-Forwarded-For');
-      const errorIP = req.headers.get('CF-Connecting-IP') || 
-                      (errorForwardedFor ? errorForwardedFor.split(',')[0].trim() : null);
+      const clientIP = getClientIP(req);
       await supabaseServiceRole.rpc('log_security_event', {
         user_id_param: null,
         event_type_param: 'webhook_processing_error',
         event_description_param: `Webhook processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        ip_address_param: errorIP,
+        ip_address_param: clientIP,
         user_agent_param: req.headers.get('User-Agent'),
         metadata_param: { error: error instanceof Error ? error.message : 'Unknown error', timestamp: new Date().toISOString() }
       });
     } catch (logError) {
       console.error('Failed to log webhook error:', logError);
     }
-    
+
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
