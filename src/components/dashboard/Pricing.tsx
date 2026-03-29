@@ -297,6 +297,12 @@ export default function Pricing({
                 <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name || !!isTrialUsed}>
                   {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
                 </Button>
+                {(plan as any).invoice_enabled && !isTrialUsed && (
+                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => setInvoicePackage(plan)}>
+                    <Building2 className="w-3.5 h-3.5" />
+                    Выставить счёт для юр. лица
+                  </Button>
+                )}
               </CardContent>
             </Card>;
       })}
