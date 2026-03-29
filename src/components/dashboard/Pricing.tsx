@@ -186,6 +186,14 @@ export default function Pricing({
         <p className="text-muted-foreground">Тарифные планы временно недоступны</p>
       </div>;
   }
+
+  if (invoicePackage) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+        <InvoiceForm selectedPackage={invoicePackage} onBack={() => setInvoicePackage(null)} />
+      </Suspense>
+    );
+  }
   return <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Тарифные планы</h2>
