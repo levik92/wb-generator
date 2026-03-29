@@ -116,3 +116,6 @@ verify_jwt = false
 
 [functions.cloudpayments-webhook]
 verify_jwt = false
+
+[functions.cleanup-stale-payments]
+verify_jwt = false
