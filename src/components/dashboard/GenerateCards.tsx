@@ -21,7 +21,7 @@ import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
-import { isTelegramWebApp } from "@/lib/telegram";
+import { isTelegramWebApp, safeBlobDownload } from "@/lib/telegram";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -520,15 +520,22 @@ export const GenerateCards = ({
           setTimeout(() => {
             setGeneratedImages(currentImages => {
               for (const editJob of activeEditJobs!) {
+                const isRegen = editJob.category === 'regeneration';
                 const activeTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'processing' || t.status === 'pending') || [];
                 for (const task of activeTasks) {
                   // Find the matching image by stageIndex (card_index)
                   const imgIndex = currentImages.findIndex(img => img.stageIndex === task.card_index);
                   if (imgIndex >= 0) {
                     const img = currentImages[imgIndex];
-                    const cardKey = `edit_${img.id}_${imgIndex}`;
-                    setEditingCards(prev => new Set([...prev, cardKey]));
-                    pollEditTask(task.id, imgIndex, cardKey);
+                    if (isRegen) {
+                      const cardKey = `${img.id}_${imgIndex}`;
+                      setRegeneratingCards(prev => new Set([...prev, cardKey]));
+                      pollRegenerationTask(task.id, imgIndex, cardKey);
+                    } else {
+                      const cardKey = `edit_${img.id}_${imgIndex}`;
+                      setEditingCards(prev => new Set([...prev, cardKey]));
+                      pollEditTask(task.id, imgIndex, cardKey);
+                    }
                   }
                 }
               }
@@ -1142,18 +1149,9 @@ export const GenerateCards = ({
       }
 
       // Generate ZIP and download
-      const zipBlob = await zip.generateAsync({
-        type: 'blob'
-      });
-      const url = window.URL.createObjectURL(zipBlob);
-      const link = document.createElement('a');
-      link.href = url;
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
       const safeZipName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-      link.download = `${safeZipName}_all_cards.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      safeBlobDownload(zipBlob, `${safeZipName}_all_cards.zip`);
       toast({
         title: "Скачивание завершено",
         description: `ZIP-архив с ${generatedImages.length} изображениями готов`
@@ -1186,17 +1184,9 @@ export const GenerateCards = ({
       // Standard browser: fetch as blob for proper download
       const response = await fetch(image.url);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
       const safeProductName = productName.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       const safeStageName = image.stage.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-      link.download = `${safeProductName}_${safeStageName}.png`;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      safeBlobDownload(blob, `${safeProductName}_${safeStageName}.png`);
       toast({
         title: "Скачивание началось",
         description: `Карточка "${image.stage}" скачивается`

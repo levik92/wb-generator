@@ -591,6 +591,78 @@ export type Database = {
           },
         ]
       }
+      invoice_payments: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          created_at: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          organization_id: string
+          package_id: string
+          package_name: string
+          payment_purpose: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          tokens_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          organization_id: string
+          package_id: string
+          package_name: string
+          payment_purpose: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tokens_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          organization_id?: string
+          package_id?: string
+          package_name?: string
+          payment_purpose?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tokens_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "payment_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news: {
         Row: {
           content: string
@@ -681,6 +753,60 @@ export type Database = {
           read?: boolean
           title?: string
           type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      organization_details: {
+        Row: {
+          actual_address: string | null
+          bank_name: string | null
+          bik: string | null
+          checking_account: string | null
+          correspondent_account: string | null
+          created_at: string
+          director_name: string | null
+          id: string
+          inn: string
+          kpp: string | null
+          legal_address: string | null
+          name: string
+          ogrn: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_address?: string | null
+          bank_name?: string | null
+          bik?: string | null
+          checking_account?: string | null
+          correspondent_account?: string | null
+          created_at?: string
+          director_name?: string | null
+          id?: string
+          inn: string
+          kpp?: string | null
+          legal_address?: string | null
+          name: string
+          ogrn?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_address?: string | null
+          bank_name?: string | null
+          bik?: string | null
+          checking_account?: string | null
+          correspondent_account?: string | null
+          created_at?: string
+          director_name?: string | null
+          id?: string
+          inn?: string
+          kpp?: string | null
+          legal_address?: string | null
+          name?: string
+          ogrn?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -920,6 +1046,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          invoice_enabled: boolean
           is_active: boolean
           is_popular: boolean
           is_trial: boolean
@@ -931,6 +1058,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          invoice_enabled?: boolean
           is_active?: boolean
           is_popular?: boolean
           is_trial?: boolean
@@ -942,6 +1070,7 @@ export type Database = {
           created_at?: string
           currency?: string
           id?: string
+          invoice_enabled?: boolean
           is_active?: boolean
           is_popular?: boolean
           is_trial?: boolean
@@ -951,48 +1080,78 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_provider_settings: {
+        Row: {
+          active_provider: string
+          cloudpayments_public_id: string | null
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          active_provider?: string
+          cloudpayments_public_id?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          active_provider?: string
+          cloudpayments_public_id?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
           confirmed_at: string | null
           created_at: string
           currency: string
+          external_payment_id: string | null
           id: string
           metadata: Json | null
           package_name: string
+          payment_provider: string | null
           status: string
           tokens_amount: number
           updated_at: string
           user_id: string
-          yookassa_payment_id: string
+          yookassa_payment_id: string | null
         }
         Insert: {
           amount: number
           confirmed_at?: string | null
           created_at?: string
           currency?: string
+          external_payment_id?: string | null
           id?: string
           metadata?: Json | null
           package_name: string
+          payment_provider?: string | null
           status?: string
           tokens_amount: number
           updated_at?: string
           user_id: string
-          yookassa_payment_id: string
+          yookassa_payment_id?: string | null
         }
         Update: {
           amount?: number
           confirmed_at?: string | null
           created_at?: string
           currency?: string
+          external_payment_id?: string | null
           id?: string
           metadata?: Json | null
           package_name?: string
+          payment_provider?: string | null
           status?: string
           tokens_amount?: number
           updated_at?: string
           user_id?: string
-          yookassa_payment_id?: string
+          yookassa_payment_id?: string | null
         }
         Relationships: [
           {
@@ -1927,10 +2086,17 @@ export type Database = {
         }
         Returns: string
       }
-      process_payment_success: {
-        Args: { payment_id_param: string }
-        Returns: boolean
+      nextval_invoice_number: { Args: never; Returns: number }
+      process_invoice_payment: {
+        Args: { p_action: string; p_admin_id: string; p_invoice_id: string }
+        Returns: undefined
       }
+      process_payment_success:
+        | { Args: { payment_id_param: string }; Returns: boolean }
+        | {
+            Args: { external_id_param?: string; payment_id_param: string }
+            Returns: boolean
+          }
       redeem_promocode_tokens: {
         Args: { p_amount: number; p_code: string; p_user_id: string }
         Returns: undefined

@@ -1,46 +1,100 @@
 
 
-## Результат ревизии после чистки
+## Аудит: оплата, админка и уязвимости
 
-### Статус: все чисто, ничего не сломано
+### Статус оплаты и админки
 
-Проверено:
-- Все импорты удаленных файлов отсутствуют — нигде нет ссылок на удаленные компоненты
-- `BeforeAfterSliderNew` (рабочая версия) корректно используется в 3 местах
-- `Pricing.tsx` (dashboard) корректно используется в `Balance.tsx`
-- `snowfall` полностью удален из tailwind.config.ts
-- Консоль без ошибок
-- `CasesPromoBanner` / `CasesPromoBlock` — нигде не импортируются
+**Оплата — работает корректно:**
+- `create-payment` — проверяет JWT, поддерживает YooKassa и CloudPayments, валидирует пакеты и промокоды
+- `yookassa-webhook` — проверяет подпись HMAC + IP, обрабатывает `payment.succeeded` и `payment.canceled`
+- `cloudpayments-webhook` — проверяет HMAC, обрабатывает `pay` и `fail` с уведомлениями
+- `process_payment_success` (DB function) — атомарно начисляет токены, обновляет статус, логирует
 
-### Один остаток: неиспользуемые Radix-пакеты в package.json
+**Админка — работает корректно:**
+- `admin-analytics` — теперь защищён JWT + проверка роли `admin` (исправлено ранее)
+- Клиентская часть (`AdminAnalyticsChart`) корректно вызывает функцию с `Authorization` заголовком
 
-После удаления компонентов в package.json остались 7 Radix-пакетов, которые больше не нужны:
+### Найденные уязвимости (требуют исправления)
 
-- `@radix-ui/react-aspect-ratio`
-- `@radix-ui/react-context-menu`
-- `@radix-ui/react-hover-card`
-- `@radix-ui/react-menubar`
-- `@radix-ui/react-navigation-menu`
-- `@radix-ui/react-toggle`
-- `@radix-ui/react-toggle-group`
+**КРИТИЧЕСКИЕ (error):**
 
-Также `@types/papaparse` все еще в dependencies вместо devDependencies.
+1. **`token_transactions` — любой пользователь может вставлять записи** (PRIVILEGE_ESCALATION)
+   - Политика `System can insert transactions` с `WITH CHECK: true` для `public`
+   - Злоумышленник может создавать фальшивые записи о транзакциях
+   - **Исправление:** ограничить INSERT только для `service_role`
 
-**Действие**: удалить 7 пакетов из dependencies, перенести `@types/papaparse` в devDependencies.
+2. **`referrals` / `referrals_completed` — мошенничество с рефералами** (PRIVILEGE_ESCALATION)
+   - Политики INSERT с `WITH CHECK: true` для `public`
+   - Любой может создавать фальшивые реферальные связи
+   - **Исправление:** ограничить INSERT только для `service_role`
 
----
+3. **`telegram_bot_subscribers` — утечка персональных данных** (EXPOSED_SENSITIVE_DATA)
+   - 92 записи с именами, фамилиями, username и chat_id доступны публично
+   - Политика `Service role can manage subscribers` применена к `public` вместо `service_role`
+   - **Исправление:** пересоздать политику только для `service_role`
 
-### Ответ на вопрос: будут ли страницы открываться «значительно быстрее»?
+**СРЕДНИЕ (warn):**
 
-**Нет, честно говоря — разница будет минимальной.** Вот почему:
+4. **`check-email-exists` — перечисление email без аутентификации**
+   - Позволяет узнать, зарегистрирован ли email
+   - **Исправление:** добавить проверку JWT
 
-Vite (сборщик проекта) использует **tree-shaking** — он включает в финальный бандл только тот код, который реально импортируется. Удаленные файлы **нигде не импортировались**, поэтому они и так **не попадали в продакшн-бандл**. Пользователи их никогда не скачивали.
+5. **`admin_profile_access_rate_limit` — любой может сбрасывать rate limit**
+   - **Исправление:** ограничить для `service_role`
 
-**Реальная польза от чистки:**
-- Чище кодовая база — легче поддерживать, меньше путаницы
-- Быстрее локальная разработка (меньше файлов для Vite dev server)
-- Убраны лишние npm-пакеты, чуть меньше `node_modules`
-- Нет ложных срабатываний при поиске по коду
+6. **`profile_access_audit` — любой может вставлять фальшивые записи аудита**
+   - **Исправление:** ограничить INSERT для `service_role`
 
-**Что реально влияет на скорость загрузки** — это lazy-loading (уже настроен), размер используемых библиотек (framer-motion, recharts и т.д.), и серверная часть (Supabase запросы).
+7. **Несколько функций без `SET search_path`** — потенциальный search path hijacking
+
+8. **OTP с длинным сроком жизни, нет защиты от утёкших паролей, устаревший Postgres** — настраивается в дашборде Supabase
+
+### План исправлений
+
+**Одна SQL-миграция**, которая:
+
+```sql
+-- 1. token_transactions: INSERT только для service_role
+DROP POLICY "System can insert transactions" ON token_transactions;
+CREATE POLICY "Service role can insert transactions"
+  ON token_transactions FOR INSERT TO service_role
+  WITH CHECK (true);
+
+-- 2. referrals: INSERT только для service_role
+DROP POLICY "System can insert referrals" ON referrals;
+CREATE POLICY "Service role can insert referrals"
+  ON referrals FOR INSERT TO service_role
+  WITH CHECK (true);
+
+-- 3. referrals_completed: INSERT только для service_role
+DROP POLICY "System can insert completed referrals" ON referrals_completed;
+CREATE POLICY "Service role can insert completed referrals"
+  ON referrals_completed FOR INSERT TO service_role
+  WITH CHECK (true);
+
+-- 4. telegram_bot_subscribers: ALL только для service_role
+DROP POLICY "Service role can manage subscribers" ON telegram_bot_subscribers;
+CREATE POLICY "Service role can manage subscribers"
+  ON telegram_bot_subscribers FOR ALL TO service_role
+  USING (true) WITH CHECK (true);
+
+-- 5. admin_profile_access_rate_limit: только service_role
+DROP POLICY "System can manage rate limit records" ON admin_profile_access_rate_limit;
+CREATE POLICY "Service role can manage rate limit records"
+  ON admin_profile_access_rate_limit FOR ALL TO service_role
+  USING (true) WITH CHECK (true);
+
+-- 6. profile_access_audit: INSERT только для service_role
+DROP POLICY "System can insert profile access audit" ON profile_access_audit;
+CREATE POLICY "Service role can insert profile access audit"
+  ON profile_access_audit FOR INSERT TO service_role
+  WITH CHECK (true);
+```
+
+**Edge-функция `check-email-exists`:** добавить проверку JWT (аналогично `admin-analytics`).
+
+**Рекомендации для дашборда Supabase (вручную):**
+- Включить защиту от утёкших паролей (HIBP)
+- Уменьшить время жизни OTP
+- Обновить версию Postgres
 

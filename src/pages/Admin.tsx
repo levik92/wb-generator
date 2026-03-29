@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { forceSignOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { LogOut, Download, Loader2 } from "lucide-react";
@@ -25,6 +26,7 @@ const AdminBlog = lazy(() => import("@/components/admin/AdminBlog").then(m => ({
 const AdminVideoLessons = lazy(() => import("@/components/admin/AdminVideoLessons").then(m => ({ default: m.AdminVideoLessons })));
 const AdminSupport = lazy(() => import("@/components/admin/AdminSupport").then(m => ({ default: m.AdminSupport })));
 const AdminUtmSources = lazy(() => import("@/components/admin/AdminUtmSources").then(m => ({ default: m.AdminUtmSources })));
+const AdminPayments = lazy(() => import("@/components/admin/AdminPayments").then(m => ({ default: m.AdminPayments })));
 import { useIsMobile } from "@/hooks/use-mobile";
 import Footer from "@/components/Footer";
 import { UserIcon } from "lucide-react";
@@ -42,7 +44,7 @@ interface User {
   updated_at: string;
 }
 
-type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'banners' | 'blog' | 'video_lessons' | 'support' | 'utm';
+type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'payments_admin' | 'banners' | 'blog' | 'video_lessons' | 'support' | 'utm';
 
 const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   analytics: { title: 'Аналитика', subtitle: 'Статистика и метрики платформы' },
@@ -52,6 +54,7 @@ const TAB_TITLES: Record<ActiveTab, { title: string; subtitle: string }> = {
   bonuses: { title: 'Бонусы', subtitle: 'Бонусные программы' },
   news: { title: 'Новости', subtitle: 'Управление новостями' },
   pricing: { title: 'Цены', subtitle: 'Тарифы и пакеты' },
+  payments_admin: { title: 'Оплаты', subtitle: 'Все платежи и счета' },
   banners: { title: 'Баннеры', subtitle: 'Баннеры дашборда' },
   blog: { title: 'Блог', subtitle: 'Статьи и публикации' },
   video_lessons: { title: 'Обучение', subtitle: 'Видеоуроки для пользователей' },
@@ -92,6 +95,14 @@ export default function Admin() {
     checkAdminAccess();
   }, []);
 
+  // Polling for unread support - proper cleanup
+  useEffect(() => {
+    if (!isAdmin) return;
+    fetchUnreadSupport();
+    const interval = setInterval(fetchUnreadSupport, 20000);
+    return () => clearInterval(interval);
+  }, [isAdmin, fetchUnreadSupport]);
+
   const checkAdminAccess = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -108,10 +119,6 @@ export default function Admin() {
       }
       setIsAdmin(true);
       await loadUsers();
-      fetchUnreadSupport();
-      // Poll unread support count
-      const supportInterval = setInterval(fetchUnreadSupport, 20000);
-      return () => clearInterval(supportInterval);
     } catch (error) {
       console.error('Error checking admin access:', error);
       navigate('/dashboard');
@@ -154,8 +161,7 @@ export default function Admin() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    await forceSignOut();
   };
 
   const handleTabChange = (tab: string) => {
@@ -171,6 +177,7 @@ export default function Admin() {
       case 'bonuses': return <AdminBonuses />;
       case 'news': return <AdminNews />;
       case 'pricing': return <AdminPricing />;
+      case 'payments_admin': return <AdminPayments />;
       case 'banners': return <AdminBanners />;
       case 'blog': return <AdminBlog />;
       case 'video_lessons': return <AdminVideoLessons />;
@@ -202,7 +209,7 @@ export default function Admin() {
 
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Header - matches DashboardHeader */}
-        <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
+        <header className="border-b border-border bg-card sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
               {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />}

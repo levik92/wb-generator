@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 
 interface Payment {
   id: string;
@@ -15,6 +15,8 @@ interface Payment {
   status: string;
   created_at: string;
   confirmed_at: string | null;
+  type: 'payment' | 'invoice';
+  invoice_number?: string;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -33,31 +35,75 @@ export default function PaymentHistory() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
+      const [paymentsRes, invoicesRes] = await Promise.all([
+        supabase
+          .from('payments')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('invoice_payments')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false }),
+      ]);
 
-      if (error) {
-        console.error('Error loading payments:', error);
-        toast({
-          title: "Ошибка",
-          description: "Не удалось загрузить историю платежей",
-          variant: "destructive",
-        });
-      } else {
-        setPayments(data || []);
-      }
+      const regularPayments: Payment[] = (paymentsRes.data || []).map(p => ({
+        id: p.id,
+        package_name: p.package_name,
+        amount: p.amount,
+        tokens_amount: p.tokens_amount,
+        status: p.status,
+        created_at: p.created_at,
+        confirmed_at: p.confirmed_at,
+        type: 'payment' as const,
+      }));
+
+      const invoicePayments: Payment[] = (invoicesRes.data || []).map(p => ({
+        id: p.id,
+        package_name: p.package_name,
+        amount: Number(p.amount),
+        tokens_amount: p.tokens_amount,
+        status: p.status,
+        created_at: p.created_at,
+        confirmed_at: p.reviewed_at,
+        type: 'invoice' as const,
+        invoice_number: p.invoice_number,
+      }));
+
+      const all = [...regularPayments, ...invoicePayments].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setPayments(all);
     } catch (error) {
       console.error('Error loading payments:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить историю платежей",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (payment: Payment) => {
+    if (payment.type === 'invoice') {
+      switch (payment.status) {
+        case 'invoice_issued':
+          return <Badge variant="secondary">Выставлен</Badge>;
+        case 'awaiting_confirmation':
+          return <Badge variant="outline">На проверке</Badge>;
+        case 'paid':
+          return <Badge variant="default">Начислено</Badge>;
+        case 'rejected':
+          return <Badge variant="destructive">Отклонён</Badge>;
+        default:
+          return <Badge variant="secondary">{payment.status}</Badge>;
+      }
+    }
+    switch (payment.status) {
       case 'succeeded':
         return <Badge variant="default">Успешно</Badge>;
       case 'pending':
@@ -65,8 +111,12 @@ export default function PaymentHistory() {
       case 'canceled':
         return <Badge variant="destructive">Отменен</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge variant="secondary">{payment.status}</Badge>;
     }
+  };
+
+  const openInvoice = (invoiceNumber: string) => {
+    window.open(`/invoice/${invoiceNumber}`, '_blank');
   };
 
   if (loading) {
@@ -101,7 +151,10 @@ export default function PaymentHistory() {
                 <div key={payment.id} className="bg-muted/30 rounded-lg p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <div className="font-medium text-sm">{payment.package_name}</div>
+                      <div className="font-medium text-sm flex items-center gap-1.5">
+                        {payment.type === 'invoice' && <FileText className="w-3.5 h-3.5 text-muted-foreground" />}
+                        {payment.package_name}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {new Date(payment.created_at).toLocaleDateString('ru-RU', {
                           year: 'numeric',
@@ -112,7 +165,7 @@ export default function PaymentHistory() {
                         })}
                       </div>
                     </div>
-                    {getStatusBadge(payment.status)}
+                    {getStatusBadge(payment)}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
@@ -125,6 +178,18 @@ export default function PaymentHistory() {
                       <div className="font-medium">{payment.tokens_amount}</div>
                     </div>
                   </div>
+
+                  {payment.type === 'invoice' && payment.invoice_number && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2 text-xs"
+                      onClick={() => openInvoice(payment.invoice_number!)}
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Счёт {payment.invoice_number}
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -139,17 +204,21 @@ export default function PaymentHistory() {
                     <TableHead>Токены</TableHead>
                     <TableHead>Статус</TableHead>
                     <TableHead>Дата</TableHead>
+                    <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {payments.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((payment) => (
                     <TableRow key={payment.id}>
                       <TableCell className="font-medium">
-                        {payment.package_name}
+                        <span className="flex items-center gap-1.5">
+                          {payment.type === 'invoice' && <FileText className="w-3.5 h-3.5 text-muted-foreground" />}
+                          {payment.package_name}
+                        </span>
                       </TableCell>
                       <TableCell>{payment.amount}₽</TableCell>
                       <TableCell>{payment.tokens_amount}</TableCell>
-                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                      <TableCell>{getStatusBadge(payment)}</TableCell>
                       <TableCell>
                         {new Date(payment.created_at).toLocaleDateString('ru-RU', {
                           year: 'numeric',
@@ -158,6 +227,19 @@ export default function PaymentHistory() {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
+                      </TableCell>
+                      <TableCell>
+                        {payment.type === 'invoice' && payment.invoice_number && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-xs"
+                            onClick={() => openInvoice(payment.invoice_number!)}
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            Счёт
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

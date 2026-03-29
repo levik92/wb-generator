@@ -4,6 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 const UTM_STORAGE_KEY = "wbgen_utm_source_id";
 const VISITOR_ID_KEY = "wbgen_visitor_id";
 
+// Capture UTM params at module load time, before React Router can strip them
+const INITIAL_PARAMS = new URLSearchParams(window.location.search);
+const INITIAL_UTM_SOURCE = INITIAL_PARAMS.get("utm_source");
+const INITIAL_UTM_MEDIUM = INITIAL_PARAMS.get("utm_medium") || "";
+const INITIAL_UTM_CAMPAIGN = INITIAL_PARAMS.get("utm_campaign") || "";
+
 function getOrCreateVisitorId(): string {
   let id = localStorage.getItem(VISITOR_ID_KEY);
   if (!id) {
@@ -22,13 +28,7 @@ export function getStoredUtmSourceId(): string | null {
  */
 export function useUtmTracking() {
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const utmSource = params.get("utm_source");
-    
-    if (!utmSource) return;
-
-    const utmMedium = params.get("utm_medium") || "";
-    const utmCampaign = params.get("utm_campaign") || "";
+    if (!INITIAL_UTM_SOURCE) return;
 
     const trackVisit = async () => {
       try {
@@ -36,9 +36,9 @@ export function useUtmTracking() {
         const { data: exactMatch } = await supabase
           .from("utm_sources")
           .select("id")
-          .eq("utm_source", utmSource)
-          .eq("utm_medium", utmMedium)
-          .eq("utm_campaign", utmCampaign)
+          .eq("utm_source", INITIAL_UTM_SOURCE)
+          .eq("utm_medium", INITIAL_UTM_MEDIUM)
+          .eq("utm_campaign", INITIAL_UTM_CAMPAIGN)
           .limit(1)
           .maybeSingle();
         
@@ -52,7 +52,7 @@ export function useUtmTracking() {
         const { data: fallback } = await supabase
           .from("utm_sources")
           .select("id")
-          .eq("utm_source", utmSource)
+          .eq("utm_source", INITIAL_UTM_SOURCE)
           .limit(1)
           .maybeSingle();
         

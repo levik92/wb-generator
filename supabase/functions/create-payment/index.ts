@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface PaymentRequest {
@@ -50,11 +50,6 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
     // Get authenticated user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -62,6 +57,16 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
+    
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        auth: { persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
+    );
+
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user) {
@@ -118,6 +123,91 @@ serve(async (req) => {
 
     console.log(`Creating payment for user ${user.id}, package: ${body.packageName}, amount: ${finalAmount}`);
 
+    // Check active payment provider
+    const { data: providerSettings } = await supabaseServiceRole
+      .from('payment_provider_settings')
+      .select('*')
+      .limit(1)
+      .maybeSingle();
+    
+    const activeProvider = providerSettings?.active_provider || 'yookassa';
+    
+    if (activeProvider === 'cloudpayments') {
+      // For CloudPayments, we create a pending payment record and return widget data
+      const cloudpaymentsPublicId = providerSettings?.cloudpayments_public_id;
+      if (!cloudpaymentsPublicId) {
+        throw new Error('CloudPayments Public ID not configured');
+      }
+      
+      const externalPaymentId = `cp_${user.id}_${Date.now()}`;
+      
+      const { error: insertError } = await supabaseServiceRole
+        .from('payments')
+        .insert({
+          user_id: user.id,
+          yookassa_payment_id: null,
+          external_payment_id: externalPaymentId,
+          payment_provider: 'cloudpayments',
+          amount: finalAmount,
+          currency: 'RUB',
+          status: 'pending',
+          tokens_amount: finalTokens,
+          package_name: body.packageName,
+          metadata: { promo: appliedPromo }
+        });
+      
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        throw new Error(`Database error: ${insertError.message}`);
+      }
+      
+      // Log security event
+      await supabaseServiceRole.rpc('log_security_event', {
+        user_id_param: user.id,
+        event_type_param: 'payment_created',
+        event_description_param: `CloudPayments payment created for package: ${body.packageName}, amount: ${finalAmount} RUB`,
+        ip_address_param: clientIP,
+        user_agent_param: userAgent,
+        metadata_param: { payment_provider: 'cloudpayments', package_name: body.packageName, promo: appliedPromo }
+      });
+      
+      const originUrl = req.headers.get("origin") || 'https://wbgen.ru';
+      
+      return new Response(JSON.stringify({
+        provider: 'cloudpayments',
+        intentParams: {
+          publicTerminalId: cloudpaymentsPublicId,
+          description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
+          amount: finalAmount,
+          currency: 'RUB',
+          paymentSchema: 'Single',
+          externalId: externalPaymentId,
+          skin: 'modern',
+          autoClose: 3,
+          userInfo: {
+            accountId: user.id,
+            email: user.email,
+          },
+          metadata: {
+            user_id: user.id,
+            package_name: body.packageName,
+            tokens_amount: finalTokens.toString(),
+            promo_code: appliedPromo?.code || '',
+            promo_type: appliedPromo?.type || '',
+            promo_value: appliedPromo?.value?.toString() || '',
+            external_payment_id: externalPaymentId
+          },
+          successRedirectUrl: `${originUrl}/dashboard?payment=success`,
+          failRedirectUrl: `${originUrl}/dashboard?payment=failed`,
+        },
+        tokens: finalTokens,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // YooKassa flow (existing)
     const idempotenceKey = `${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     const paymentPayload = {
@@ -183,11 +273,11 @@ serve(async (req) => {
               'Authorization': `Basic ${btoa(`1267489:${yookassaSecretKey}`)}`,
               'Content-Type': 'application/json',
               'Idempotence-Key': idempotenceKey,
-              'Connection': 'close', // Force connection close to avoid TLS issues
+              'Connection': 'close',
             },
             body: JSON.stringify(paymentPayload)
           },
-          25000 // 25 second timeout
+          25000
         );
         
         console.log('YooKassa response status:', response.status);
@@ -200,13 +290,12 @@ serve(async (req) => {
         
         yookassaData = await response.json();
         console.log('YooKassa payment created successfully:', yookassaData.id);
-        break; // Success, exit loop
+        break;
         
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         console.error(`Attempt ${attempt} failed:`, lastError.message);
         
-        // Check if it's a retriable error
         const msg = lastError.message.toLowerCase();
         const isRetriable = msg.includes('abort') || 
                            msg.includes('timeout') ||
@@ -224,7 +313,6 @@ serve(async (req) => {
           continue;
         }
         
-        // Non-retriable error or last attempt - throw
         throw lastError;
       }
     }
@@ -239,6 +327,7 @@ serve(async (req) => {
       .insert({
         user_id: user.id,
         yookassa_payment_id: yookassaData.id,
+        payment_provider: 'yookassa',
         amount: finalAmount,
         currency: 'RUB',
         status: 'pending',
@@ -263,6 +352,7 @@ serve(async (req) => {
     });
 
     return new Response(JSON.stringify({ 
+      provider: 'yookassa',
       payment_url: yookassaData.confirmation.confirmation_url,
       payment_id: yookassaData.id
     }), {

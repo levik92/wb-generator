@@ -13,7 +13,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
+import { isTelegramWebApp, telegramSafeDownload, safeBlobDownload } from "@/lib/telegram";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
@@ -251,14 +251,7 @@ export const History = ({
               const response = await fetch(image.image_url);
               const blob = await response.blob();
               const fileName = `${safeProductName}_${image.type || 'card'}.png`;
-              const url = window.URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(url);
+              safeBlobDownload(blob, fileName);
             }
           } else {
             // Multiple images — pack into ZIP archive
@@ -273,14 +266,7 @@ export const History = ({
               }
             }
             const zipBlob = await zip.generateAsync({ type: 'blob' });
-            const url = window.URL.createObjectURL(zipBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${safeProductName}.zip`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            safeBlobDownload(zipBlob, `${safeProductName}.zip`);
           }
         } else {
           toast({
@@ -296,14 +282,7 @@ export const History = ({
           try {
             const response = await fetch(videoUrl);
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${safeProductName}_video.mp4`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            safeBlobDownload(blob, `${safeProductName}_video.mp4`);
           } catch {
             window.open(videoUrl, '_blank');
           }
@@ -312,14 +291,7 @@ export const History = ({
         // For descriptions, download as text file
         const description = generation.output_data?.description || 'Описание товара';
         const blob = new Blob([description], { type: 'text/plain;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${safeProductName}_description.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        safeBlobDownload(blob, `${safeProductName}_description.txt`);
       }
       
       const imagesCount = generation.output_data?.images?.length || 0;
@@ -354,14 +326,7 @@ export const History = ({
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      safeBlobDownload(blob, fileName);
     } catch {
       toast({ title: "Ошибка скачивания", variant: "destructive" });
     }
@@ -1003,7 +968,7 @@ export const History = ({
                             <Video className="w-6 h-6 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
@@ -1221,7 +1186,7 @@ export const History = ({
                             <Video className="w-8 h-8 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
                           <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
                             onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
                             <Play className="w-4 h-4" />

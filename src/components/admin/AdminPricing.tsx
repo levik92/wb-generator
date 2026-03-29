@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, CreditCard } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQueryClient } from "@tanstack/react-query";
 interface PaymentPackage {
   id: string;
@@ -18,6 +20,7 @@ interface PaymentPackage {
   is_active: boolean;
   is_popular: boolean;
   is_trial: boolean;
+  invoice_enabled: boolean;
 }
 interface GenerationPrice {
   id: string;
@@ -30,12 +33,60 @@ export function AdminPricing() {
   const [generationPrices, setGenerationPrices] = useState<GenerationPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<string>('yookassa');
+  const [cloudpaymentsPublicId, setCloudpaymentsPublicId] = useState('');
+  const [providerSettingsId, setProviderSettingsId] = useState<string | null>(null);
+  const [savingProvider, setSavingProvider] = useState(false);
   const queryClient = useQueryClient();
   useEffect(() => {
     loadData();
   }, []);
   const loadData = async () => {
-    await Promise.all([loadPackages(), loadGenerationPrices()]);
+    await Promise.all([loadPackages(), loadGenerationPrices(), loadProviderSettings()]);
+  };
+  const loadProviderSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('payment_provider_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        setActiveProvider(data.active_provider);
+        setCloudpaymentsPublicId(data.cloudpayments_public_id || '');
+        setProviderSettingsId(data.id);
+      }
+    } catch (error) {
+      console.error('Error loading provider settings:', error);
+    }
+  };
+  const handleSaveProviderSettings = async () => {
+    setSavingProvider(true);
+    try {
+      if (activeProvider === 'cloudpayments' && !cloudpaymentsPublicId.trim()) {
+        toast({ title: "Ошибка", description: "Укажите Public ID для CloudPayments", variant: "destructive" });
+        return;
+      }
+      const updateData = {
+        active_provider: activeProvider,
+        cloudpayments_public_id: cloudpaymentsPublicId.trim() || null,
+        updated_at: new Date().toISOString(),
+      };
+      if (providerSettingsId) {
+        const { error } = await supabase
+          .from('payment_provider_settings')
+          .update(updateData)
+          .eq('id', providerSettingsId);
+        if (error) throw error;
+      }
+      toast({ title: "Успешно", description: "Настройки платёжной системы сохранены" });
+    } catch (error) {
+      console.error('Error saving provider settings:', error);
+      toast({ title: "Ошибка", description: "Не удалось сохранить настройки", variant: "destructive" });
+    } finally {
+      setSavingProvider(false);
+    }
   };
   const loadPackages = async () => {
     try {
@@ -86,7 +137,8 @@ export function AdminPricing() {
         tokens: pkg.tokens,
         is_active: pkg.is_active,
         is_popular: pkg.is_popular,
-        is_trial: pkg.is_trial
+        is_trial: pkg.is_trial,
+        invoice_enabled: pkg.invoice_enabled,
       }).eq('id', pkg.id);
       if (error) throw error;
       toast({
@@ -215,7 +267,7 @@ export function AdminPricing() {
   }
   return <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
       {/* Тарифы */}
-      <Card className="overflow-hidden bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="overflow-hidden bg-card border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
@@ -236,13 +288,14 @@ export function AdminPricing() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Популярный</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Триал</TableHead>
-                    <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
-                    <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Популярный</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Триал</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Безнал</TableHead>
+                     <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Активен</TableHead>
+                     <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -297,6 +350,15 @@ export function AdminPricing() {
                     }} />
                       </TableCell>
                       <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                        <Switch checked={pkg.invoice_enabled} onCheckedChange={checked => {
+                      const updated = packages.map(p => p.id === pkg.id ? {
+                        ...p,
+                        invoice_enabled: checked
+                      } : p);
+                      setPackages(updated);
+                    }} />
+                      </TableCell>
+                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
                         <Switch checked={pkg.is_active} onCheckedChange={checked => {
                       const updated = packages.map(p => p.id === pkg.id ? {
                         ...p,
@@ -324,7 +386,7 @@ export function AdminPricing() {
       </Card>
 
       {/* Цены генерации */}
-      <Card className="bg-card/80 backdrop-blur-xl border-border/50 rounded-2xl">
+      <Card className="bg-card border-border/50 rounded-2xl">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-lg sm:text-xl">Стоимость генерации</CardTitle>
           <CardDescription className="text-xs sm:text-sm mt-1">
@@ -359,6 +421,66 @@ export function AdminPricing() {
             <p className="text-[10px] sm:text-xs text-muted-foreground pt-2 leading-relaxed">
               * Изменения цен применяются автоматически во всех разделах портала
             </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Платёжная система */}
+      <Card className="bg-card border-border/50 rounded-2xl">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-primary" />
+            <CardTitle className="text-lg sm:text-xl">Платёжная система</CardTitle>
+          </div>
+          <CardDescription className="text-xs sm:text-sm mt-1">
+            Выберите активную платёжную систему для приёма оплат
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6 sm:pt-0">
+          <div className="space-y-4">
+            <RadioGroup value={activeProvider} onValueChange={setActiveProvider} className="space-y-3">
+              <div className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${activeProvider === 'yookassa' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                <RadioGroupItem value="yookassa" id="yookassa" />
+                <Label htmlFor="yookassa" className="flex-1 cursor-pointer">
+                  <div className="font-medium text-sm">ЮKassa</div>
+                  <div className="text-xs text-muted-foreground">Текущая платёжная система</div>
+                </Label>
+                {activeProvider === 'yookassa' && (
+                  <Badge variant="secondary" className="text-xs">Активна</Badge>
+                )}
+              </div>
+              <div className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${activeProvider === 'cloudpayments' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                <RadioGroupItem value="cloudpayments" id="cloudpayments" />
+                <Label htmlFor="cloudpayments" className="flex-1 cursor-pointer">
+                  <div className="font-medium text-sm">CloudPayments</div>
+                  <div className="text-xs text-muted-foreground">Альтернативная платёжная система</div>
+                </Label>
+                {activeProvider === 'cloudpayments' && (
+                  <Badge variant="secondary" className="text-xs">Активна</Badge>
+                )}
+              </div>
+            </RadioGroup>
+
+            {activeProvider === 'cloudpayments' && (
+              <div className="space-y-2 p-3 rounded-lg bg-muted/30">
+                <Label htmlFor="cp-public-id" className="text-sm font-medium">Public ID</Label>
+                <Input
+                  id="cp-public-id"
+                  value={cloudpaymentsPublicId}
+                  onChange={(e) => setCloudpaymentsPublicId(e.target.value)}
+                  placeholder="pk_..."
+                  className="text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Публичный идентификатор из личного кабинета CloudPayments
+                </p>
+              </div>
+            )}
+
+            <Button onClick={handleSaveProviderSettings} disabled={savingProvider} className="w-full sm:w-auto">
+              {savingProvider ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Сохранить настройки
+            </Button>
           </div>
         </CardContent>
       </Card>

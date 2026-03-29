@@ -16,7 +16,8 @@ import {
   FileText,
   GraduationCap,
   Headphones,
-  Crosshair
+  Crosshair,
+  Receipt
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -40,6 +41,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
     { id: 'prompts', label: 'Модель', icon: Bot },
     { id: 'bonuses', label: 'Бонусы', icon: Gift },
     { id: 'pricing', label: 'Цены', icon: DollarSign },
+    { id: 'payments_admin', label: 'Оплаты', icon: Receipt },
     { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },
@@ -47,7 +49,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
   ];
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card/80 backdrop-blur-xl flex flex-col transition-all duration-300 hidden md:flex h-screen`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} shrink-0 border-r border-border bg-card flex flex-col transition-all duration-300 hidden md:flex h-screen`}>
       {/* Logo / Collapse Toggle */}
       <div className={`${isCollapsed ? 'p-3' : 'p-5'}`}>
         <div className="flex items-center justify-between">

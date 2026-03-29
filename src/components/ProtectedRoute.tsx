@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "@/hooks/use-toast";
+import { forceSignOut } from "@/lib/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -60,7 +61,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           description: "Ваш аккаунт был заблокирован администратором",
           variant: "destructive"
         });
-        await supabase.auth.signOut();
+        await forceSignOut();
       }
     } catch (e) {
       console.error('Error checking block status:', e);

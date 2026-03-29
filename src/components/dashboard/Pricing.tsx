@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+const InvoiceForm = lazy(() => import("@/components/dashboard/InvoiceForm"));
 
 interface PromoCodeInfo {
   id: string;
@@ -27,6 +28,8 @@ export default function Pricing({
   appliedPromo
 }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const {
     data: packages,
     isLoading: packagesLoading
@@ -112,7 +115,54 @@ export default function Pricing({
         return;
       }
 
-      // Redirect to payment URL
+      if (data.provider === 'cloudpayments') {
+        // Open CloudPayments widget (new API: widget.start)
+        const cpLib = (window as any).cp;
+        if (!cpLib) {
+          toast({
+            title: "Ошибка",
+            description: "Виджет CloudPayments не загружен. Попробуйте обновить страницу.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        const widget = new cpLib.CloudPayments();
+        
+        widget.oncomplete = (result: any) => {
+          setLoading(null);
+          if (result?.status === 'success') {
+            toast({
+              title: "Оплата прошла успешно!",
+              description: `Начислено ${data.tokens || finalTokens} токенов`,
+            });
+            window.location.href = '/dashboard?payment=success';
+          } else if (result?.status === 'fail') {
+            toast({
+              title: "Ошибка оплаты",
+              description: result?.message || "Платёж не прошёл. Попробуйте ещё раз.",
+              variant: "destructive"
+            });
+          }
+        };
+
+        widget.start(data.intentParams)
+          .then((widgetResult: any) => {
+            console.log('CloudPayments widget result:', widgetResult);
+          })
+          .catch((error: any) => {
+            console.error('CloudPayments widget error:', error);
+            setLoading(null);
+            toast({
+              title: "Ошибка оплаты",
+              description: "Не удалось открыть форму оплаты.",
+              variant: "destructive"
+            });
+          });
+        return;
+      }
+
+      // YooKassa flow - redirect to payment URL
       if (data.payment_url) {
         window.location.href = data.payment_url;
       }
@@ -137,6 +187,11 @@ export default function Pricing({
         <p className="text-muted-foreground">Тарифные планы временно недоступны</p>
       </div>;
   }
+
+  const openInvoiceDialog = (pkg: any) => {
+    setInvoicePackage(pkg);
+    setInvoiceDialogOpen(true);
+  };
   return <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Тарифные планы</h2>
@@ -240,6 +295,12 @@ export default function Pricing({
                 <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name || !!isTrialUsed}>
                   {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
                 </Button>
+                {(plan as any).invoice_enabled && !isTrialUsed && (
+                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => openInvoiceDialog(plan)}>
+                    <Building2 className="w-3.5 h-3.5" />
+                    Счёт для юр. лица
+                  </Button>
+                )}
               </CardContent>
             </Card>;
       })}
@@ -278,5 +339,17 @@ export default function Pricing({
           </div>
         </CardContent>
       </Card>
+      {invoicePackage && (
+        <Suspense fallback={null}>
+          <InvoiceForm
+            selectedPackage={invoicePackage}
+            open={invoiceDialogOpen}
+            onOpenChange={(open) => {
+              setInvoiceDialogOpen(open);
+              if (!open) setInvoicePackage(null);
+            }}
+          />
+        </Suspense>
+      )}
     </div>;
 }
