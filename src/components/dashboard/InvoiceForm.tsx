@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Search, ArrowLeft, FileDown, Building2 } from "lucide-react";
+import { Loader2, Search, FileDown, Building2 } from "lucide-react";
 import type { PaymentPackage } from "@/hooks/usePaymentPackages";
-import { InvoicePreview } from "./InvoicePreview";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+} from "@/components/ui/responsive-dialog";
 
 interface OrgData {
   name: string;
@@ -21,10 +27,11 @@ interface OrgData {
 
 interface InvoiceFormProps {
   selectedPackage: PaymentPackage;
-  onBack: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProps) {
+export default function InvoiceForm({ selectedPackage, open, onOpenChange }: InvoiceFormProps) {
   const [inn, setInn] = useState("");
   const [lookingUp, setLookingUp] = useState(false);
   const [orgData, setOrgData] = useState<OrgData>({
@@ -33,16 +40,7 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
   const [orgFound, setOrgFound] = useState<boolean | null>(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [createdInvoice, setCreatedInvoice] = useState<{
-    invoiceNumber: string;
-    invoiceDate: string;
-    orgData: OrgData;
-    packageName: string;
-    amount: number;
-    tokens: number;
-  } | null>(null);
 
-  // Bank details for buyer
   const [bankName, setBankName] = useState("");
   const [bik, setBik] = useState("");
   const [checkingAccount, setCheckingAccount] = useState("");
@@ -104,7 +102,6 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Save org details
       const { data: orgRecord, error: orgError } = await supabase
         .from('organization_details')
         .upsert({
@@ -126,7 +123,6 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
 
       if (orgError) throw orgError;
 
-      // Get next invoice number
       const { data: seqData, error: seqError } = await (supabase.rpc as any)('nextval_invoice_number');
       let invoiceNum = '1001';
       if (!seqError && seqData) {
@@ -154,16 +150,11 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
 
       if (invError) throw invError;
 
-      setCreatedInvoice({
-        invoiceNumber,
-        invoiceDate: new Date().toISOString(),
-        orgData,
-        packageName: selectedPackage.name,
-        amount: selectedPackage.price,
-        tokens: selectedPackage.tokens,
-      });
-
       toast({ title: "Счёт сформирован", description: `Счёт ${invoiceNumber} создан` });
+      onOpenChange(false);
+
+      // Open invoice in new tab
+      window.open(`/invoice/${invoiceNumber}`, '_blank');
     } catch (error) {
       console.error("Create invoice error:", error);
       toast({ title: "Ошибка", description: "Не удалось создать счёт", variant: "destructive" });
@@ -172,38 +163,20 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
     }
   };
 
-  if (createdInvoice) {
-    return (
-      <InvoicePreview
-        invoiceNumber={createdInvoice.invoiceNumber}
-        invoiceDate={createdInvoice.invoiceDate}
-        buyerOrg={createdInvoice.orgData}
-        buyerBank={{ bankName, bik, checkingAccount, corrAccount }}
-        packageName={createdInvoice.packageName}
-        amount={createdInvoice.amount}
-        tokens={createdInvoice.tokens}
-        onBack={onBack}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <Button variant="ghost" onClick={onBack} className="gap-2 mb-2">
-        <ArrowLeft className="w-4 h-4" /> Назад к тарифам
-      </Button>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="!max-w-[calc(100vw-2rem)] sm:!max-w-lg">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-primary" />
+            Счёт для юр. лица
+          </ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
+            {selectedPackage.name} — {selectedPackage.price}₽ ({selectedPackage.tokens} токенов)
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
 
-      <Card className="border-border/50 rounded-2xl">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Building2 className="w-6 h-6 text-primary" />
-            <div>
-              <CardTitle>Выставление счёта для юр. лица</CardTitle>
-              <CardDescription>Тариф: {selectedPackage.name} — {selectedPackage.price}₽ ({selectedPackage.tokens} токенов)</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <div className="space-y-4">
           {/* INN Lookup */}
           <div className="space-y-2">
             <Label>ИНН организации</Label>
@@ -211,96 +184,100 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
               <Input
                 value={inn}
                 onChange={e => setInn(e.target.value.replace(/\D/g, '').slice(0, 12))}
-                placeholder="Введите ИНН (10 или 12 цифр)"
+                placeholder="10 или 12 цифр"
                 maxLength={12}
+                className="min-w-0"
               />
-              <Button onClick={handleInnLookup} disabled={lookingUp} className="shrink-0 gap-2">
+              <Button onClick={handleInnLookup} disabled={lookingUp} size="sm" className="shrink-0 gap-1.5">
                 {lookingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 Найти
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">Данные организации будут определены автоматически по ИНН</p>
+            <p className="text-xs text-muted-foreground">Данные организации будут заполнены автоматически</p>
           </div>
 
           {orgFound !== null && (
             <>
               {orgFound === false && (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                  <p className="text-sm text-destructive">Не удалось найти организацию. Заполните данные вручную.</p>
+                  <p className="text-xs text-destructive">Не удалось найти организацию. Заполните данные вручную.</p>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2 space-y-2">
-                  <Label>Название организации *</Label>
-                  <Input value={orgData.name} onChange={e => setOrgData(prev => ({ ...prev, name: e.target.value }))} placeholder="ООО «Название»" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <Label className="text-xs">Название организации *</Label>
+                  <Input value={orgData.name} onChange={e => setOrgData(prev => ({ ...prev, name: e.target.value }))} placeholder="ООО «Название»" className="min-w-0" />
                 </div>
-                <div className="space-y-2">
-                  <Label>ИНН *</Label>
-                  <Input value={orgData.inn} onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value }))} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs">ИНН *</Label>
+                  <Input value={orgData.inn} onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value }))} className="min-w-0" />
                 </div>
-                <div className="space-y-2">
-                  <Label>КПП</Label>
-                  <Input value={orgData.kpp} onChange={e => setOrgData(prev => ({ ...prev, kpp: e.target.value }))} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs">КПП</Label>
+                  <Input value={orgData.kpp} onChange={e => setOrgData(prev => ({ ...prev, kpp: e.target.value }))} className="min-w-0" />
                 </div>
-                <div className="space-y-2">
-                  <Label>ОГРН</Label>
-                  <Input value={orgData.ogrn} onChange={e => setOrgData(prev => ({ ...prev, ogrn: e.target.value }))} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs">ОГРН</Label>
+                  <Input value={orgData.ogrn} onChange={e => setOrgData(prev => ({ ...prev, ogrn: e.target.value }))} className="min-w-0" />
                 </div>
-                <div className="space-y-2">
-                  <Label>Руководитель</Label>
-                  <Input value={orgData.director_name} onChange={e => setOrgData(prev => ({ ...prev, director_name: e.target.value }))} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Руководитель</Label>
+                  <Input value={orgData.director_name} onChange={e => setOrgData(prev => ({ ...prev, director_name: e.target.value }))} className="min-w-0" />
                 </div>
-                <div className="sm:col-span-2 space-y-2">
-                  <Label>Юридический адрес</Label>
-                  <Input value={orgData.legal_address} onChange={e => setOrgData(prev => ({ ...prev, legal_address: e.target.value }))} />
+                <div className="sm:col-span-2 space-y-1.5">
+                  <Label className="text-xs">Юридический адрес</Label>
+                  <Input value={orgData.legal_address} onChange={e => setOrgData(prev => ({ ...prev, legal_address: e.target.value }))} className="min-w-0" />
                 </div>
               </div>
 
               {/* Bank details */}
-              <div className="pt-2 border-t">
-                <h4 className="text-sm font-medium mb-3">Банковские реквизиты покупателя</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Банк</Label>
-                    <Input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="Название банка" />
+              <div className="pt-2 border-t space-y-3">
+                <h4 className="text-xs font-medium text-muted-foreground">Банковские реквизиты</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Банк</Label>
+                    <Input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="Название банка" className="min-w-0" />
                   </div>
-                  <div className="space-y-2">
-                    <Label>БИК</Label>
-                    <Input value={bik} onChange={e => setBik(e.target.value)} placeholder="БИК" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">БИК</Label>
+                    <Input value={bik} onChange={e => setBik(e.target.value)} className="min-w-0" />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Р/с</Label>
-                    <Input value={checkingAccount} onChange={e => setCheckingAccount(e.target.value)} placeholder="Расчётный счёт" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Р/с</Label>
+                    <Input value={checkingAccount} onChange={e => setCheckingAccount(e.target.value)} className="min-w-0" />
                   </div>
-                  <div className="space-y-2">
-                    <Label>К/с</Label>
-                    <Input value={corrAccount} onChange={e => setCorrAccount(e.target.value)} placeholder="Корр. счёт" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">К/с</Label>
+                    <Input value={corrAccount} onChange={e => setCorrAccount(e.target.value)} className="min-w-0" />
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2 pt-2">
-                <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={c => setAgreedToTerms(c === true)} />
-                <label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+              <div className="flex items-start gap-2">
+                <Checkbox id="invoice-terms" checked={agreedToTerms} onCheckedChange={c => setAgreedToTerms(c === true)} />
+                <label htmlFor="invoice-terms" className="text-xs leading-relaxed cursor-pointer">
                   Я согласен с условиями{" "}
                   <a href="/terms" target="_blank" className="text-primary underline">публичной оферты</a>
                 </label>
               </div>
-
-              <Button
-                onClick={handleCreateInvoice}
-                disabled={creating || !orgData.name || !orgData.inn || !agreedToTerms}
-                className="w-full gap-2"
-                size="lg"
-              >
-                {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
-                Сформировать счёт
-              </Button>
             </>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {orgFound !== null && (
+          <ResponsiveDialogFooter>
+            <Button
+              onClick={handleCreateInvoice}
+              disabled={creating || !orgData.name || !orgData.inn || !agreedToTerms}
+              className="w-full gap-2"
+            >
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+              Сформировать счёт
+            </Button>
+          </ResponsiveDialogFooter>
+        )}
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
