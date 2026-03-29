@@ -127,13 +127,12 @@ export default function InvoiceForm({ selectedPackage, onBack }: InvoiceFormProp
       if (orgError) throw orgError;
 
       // Get next invoice number
-      const { data: seqData, error: seqError } = await supabase.rpc('nextval_invoice_number');
+      const { data: seqData, error: seqError } = await (supabase.rpc as any)('nextval_invoice_number');
       let invoiceNum = '1001';
       if (!seqError && seqData) {
         invoiceNum = String(seqData);
       } else {
-        // Fallback: use timestamp-based number
-        invoiceNum = `WB-${Date.now().toString().slice(-6)}`;
+        invoiceNum = `${Date.now().toString().slice(-6)}`;
       }
 
       const invoiceNumber = `WB-${invoiceNum}`;

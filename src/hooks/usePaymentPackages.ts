@@ -11,6 +11,7 @@ export interface PaymentPackage {
   is_active: boolean;
   is_popular: boolean;
   is_trial: boolean;
+  invoice_enabled: boolean;
   created_at: string;
 }
 

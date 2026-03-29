@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+const InvoiceForm = lazy(() => import("@/components/dashboard/InvoiceForm"));
 
 interface PromoCodeInfo {
   id: string;
@@ -27,6 +28,7 @@ export default function Pricing({
   appliedPromo
 }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const {
     data: packages,
     isLoading: packagesLoading
@@ -184,6 +186,14 @@ export default function Pricing({
         <p className="text-muted-foreground">Тарифные планы временно недоступны</p>
       </div>;
   }
+
+  if (invoicePackage) {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+        <InvoiceForm selectedPackage={invoicePackage} onBack={() => setInvoicePackage(null)} />
+      </Suspense>
+    );
+  }
   return <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Тарифные планы</h2>
@@ -287,6 +297,12 @@ export default function Pricing({
                 <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name || !!isTrialUsed}>
                   {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
                 </Button>
+                {(plan as any).invoice_enabled && !isTrialUsed && (
+                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => setInvoicePackage(plan)}>
+                    <Building2 className="w-3.5 h-3.5" />
+                    Выставить счёт для юр. лица
+                  </Button>
+                )}
               </CardContent>
             </Card>;
       })}
