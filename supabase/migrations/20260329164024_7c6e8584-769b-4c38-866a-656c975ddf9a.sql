@@ -1,0 +1,2 @@
+ALTER TABLE public.token_transactions DROP CONSTRAINT token_transactions_transaction_type_check;
+ALTER TABLE public.token_transactions ADD CONSTRAINT token_transactions_transaction_type_check CHECK (transaction_type = ANY (ARRAY['purchase'::text, 'generation'::text, 'refund'::text, 'promocode'::text, 'referral_bonus'::text, 'bonus'::text, 'direct_sql_update'::text, 'invoice_payment'::text]));
