@@ -160,6 +160,13 @@ serve(async (req) => {
       const paymentId = paymentObject.id;
       console.log(`Processing canceled payment: ${paymentId}`);
 
+      // Get payment record to find user_id for notification
+      const { data: canceledPayment } = await supabaseServiceRole
+        .from('payments')
+        .select('user_id, package_name')
+        .eq('yookassa_payment_id', paymentId)
+        .single();
+
       const { error } = await supabaseServiceRole
         .from('payments')
         .update({
@@ -171,6 +178,18 @@ serve(async (req) => {
       if (error) {
         console.error('Error updating canceled payment:', error);
         throw new Error(`Database error: ${error.message}`);
+      }
+
+      // Send notification to user about canceled payment
+      if (canceledPayment?.user_id) {
+        await supabaseServiceRole
+          .from('notifications')
+          .insert({
+            user_id: canceledPayment.user_id,
+            title: 'Оплата отменена',
+            message: `Платёж за "${canceledPayment.package_name || 'пакет'}" был отменён`,
+            type: 'payment_failed',
+          });
       }
 
       console.log(`Payment ${paymentId} marked as canceled`);
