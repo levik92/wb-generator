@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Search, FileDown, Building2 } from "lucide-react";
+import { Loader2, FileDown, Building2 } from "lucide-react";
 import type { PaymentPackage } from "@/hooks/usePaymentPackages";
 import {
   ResponsiveDialog,
@@ -37,6 +37,11 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  const [bankName, setBankName] = useState("");
+  const [bik, setBik] = useState("");
+  const [checkingAccount, setCheckingAccount] = useState("");
+  const [corrAccount, setCorrAccount] = useState("");
 
   const handleCreateInvoice = async () => {
     if (!orgData.name || !orgData.inn) {
@@ -104,7 +109,6 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
       toast({ title: "Счёт сформирован", description: `Счёт ${invoiceNumber} создан` });
       onOpenChange(false);
 
-      // Open invoice in new tab
       window.open(`/invoice/${invoiceNumber}`, '_blank');
     } catch (error) {
       console.error("Create invoice error:", error);
@@ -128,106 +132,75 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
         </ResponsiveDialogHeader>
 
         <div className="space-y-4">
-          {/* INN Lookup */}
-          <div className="space-y-2">
-            <Label>ИНН организации</Label>
-            <div className="flex gap-2">
-              <Input
-                value={inn}
-                onChange={e => setInn(e.target.value.replace(/\D/g, '').slice(0, 12))}
-                placeholder="10 или 12 цифр"
-                maxLength={12}
-                className="min-w-0"
-              />
-              <Button onClick={handleInnLookup} disabled={lookingUp} size="sm" className="shrink-0 gap-1.5">
-                {lookingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                Найти
-              </Button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2 space-y-1.5">
+              <Label className="text-xs">Название организации *</Label>
+              <Input value={orgData.name} onChange={e => setOrgData(prev => ({ ...prev, name: e.target.value }))} placeholder="ООО «Название»" className="min-w-0" />
             </div>
-            <p className="text-xs text-muted-foreground">Данные организации будут заполнены автоматически</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">ИНН *</Label>
+              <Input value={orgData.inn} onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value.replace(/\D/g, '').slice(0, 12) }))} placeholder="10 или 12 цифр" maxLength={12} className="min-w-0" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">КПП</Label>
+              <Input value={orgData.kpp} onChange={e => setOrgData(prev => ({ ...prev, kpp: e.target.value }))} className="min-w-0" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">ОГРН</Label>
+              <Input value={orgData.ogrn} onChange={e => setOrgData(prev => ({ ...prev, ogrn: e.target.value }))} className="min-w-0" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Руководитель</Label>
+              <Input value={orgData.director_name} onChange={e => setOrgData(prev => ({ ...prev, director_name: e.target.value }))} className="min-w-0" />
+            </div>
+            <div className="sm:col-span-2 space-y-1.5">
+              <Label className="text-xs">Юридический адрес</Label>
+              <Input value={orgData.legal_address} onChange={e => setOrgData(prev => ({ ...prev, legal_address: e.target.value }))} className="min-w-0" />
+            </div>
           </div>
 
-          {orgFound !== null && (
-            <>
-              {orgFound === false && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                  <p className="text-xs text-destructive">Не удалось найти организацию. Заполните данные вручную.</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label className="text-xs">Название организации *</Label>
-                  <Input value={orgData.name} onChange={e => setOrgData(prev => ({ ...prev, name: e.target.value }))} placeholder="ООО «Название»" className="min-w-0" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">ИНН *</Label>
-                  <Input value={orgData.inn} onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value }))} className="min-w-0" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">КПП</Label>
-                  <Input value={orgData.kpp} onChange={e => setOrgData(prev => ({ ...prev, kpp: e.target.value }))} className="min-w-0" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">ОГРН</Label>
-                  <Input value={orgData.ogrn} onChange={e => setOrgData(prev => ({ ...prev, ogrn: e.target.value }))} className="min-w-0" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Руководитель</Label>
-                  <Input value={orgData.director_name} onChange={e => setOrgData(prev => ({ ...prev, director_name: e.target.value }))} className="min-w-0" />
-                </div>
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label className="text-xs">Юридический адрес</Label>
-                  <Input value={orgData.legal_address} onChange={e => setOrgData(prev => ({ ...prev, legal_address: e.target.value }))} className="min-w-0" />
-                </div>
+          {/* Bank details */}
+          <div className="pt-2 border-t space-y-3">
+            <h4 className="text-xs font-medium text-muted-foreground">Банковские реквизиты</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Банк</Label>
+                <Input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="Название банка" className="min-w-0" />
               </div>
-
-              {/* Bank details */}
-              <div className="pt-2 border-t space-y-3">
-                <h4 className="text-xs font-medium text-muted-foreground">Банковские реквизиты</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Банк</Label>
-                    <Input value={bankName} onChange={e => setBankName(e.target.value)} placeholder="Название банка" className="min-w-0" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">БИК</Label>
-                    <Input value={bik} onChange={e => setBik(e.target.value)} className="min-w-0" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Р/с</Label>
-                    <Input value={checkingAccount} onChange={e => setCheckingAccount(e.target.value)} className="min-w-0" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">К/с</Label>
-                    <Input value={corrAccount} onChange={e => setCorrAccount(e.target.value)} className="min-w-0" />
-                  </div>
-                </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">БИК</Label>
+                <Input value={bik} onChange={e => setBik(e.target.value)} className="min-w-0" />
               </div>
-
-              <div className="flex items-start gap-2">
-                <Checkbox id="invoice-terms" checked={agreedToTerms} onCheckedChange={c => setAgreedToTerms(c === true)} />
-                <label htmlFor="invoice-terms" className="text-xs leading-relaxed cursor-pointer">
-                  Я согласен с условиями{" "}
-                  <a href="/terms" target="_blank" className="text-primary underline">публичной оферты</a>
-                </label>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Р/с</Label>
+                <Input value={checkingAccount} onChange={e => setCheckingAccount(e.target.value)} className="min-w-0" />
               </div>
-            </>
-          )}
+              <div className="space-y-1.5">
+                <Label className="text-xs">К/с</Label>
+                <Input value={corrAccount} onChange={e => setCorrAccount(e.target.value)} className="min-w-0" />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2">
+            <Checkbox id="invoice-terms" checked={agreedToTerms} onCheckedChange={c => setAgreedToTerms(c === true)} />
+            <label htmlFor="invoice-terms" className="text-xs leading-relaxed cursor-pointer">
+              Я согласен с условиями{" "}
+              <a href="/terms" target="_blank" className="text-primary underline">публичной оферты</a>
+            </label>
+          </div>
         </div>
 
-        {orgFound !== null && (
-          <ResponsiveDialogFooter>
-            <Button
-              onClick={handleCreateInvoice}
-              disabled={creating || !orgData.name || !orgData.inn || !agreedToTerms}
-              className="w-full gap-2"
-            >
-              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
-              Сформировать счёт
-            </Button>
-          </ResponsiveDialogFooter>
-        )}
+        <ResponsiveDialogFooter>
+          <Button
+            onClick={handleCreateInvoice}
+            disabled={creating || !orgData.name || !orgData.inn || !agreedToTerms}
+            className="w-full gap-2"
+          >
+            {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+            Сформировать счёт
+          </Button>
+        </ResponsiveDialogFooter>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );
