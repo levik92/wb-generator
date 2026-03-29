@@ -102,6 +102,11 @@ const getPromptDisplayName = (type: string): {
       name: 'Поиск организации по ИНН',
       description: 'Промт для поиска данных организации по ИНН через Gemini',
       category: 'Технический'
+    },
+    'style-analysis': {
+      name: 'Стиль',
+      description: 'Задание стиля карточке',
+      category: 'Технический'
     }
   };
   return promptNames[type] || {
