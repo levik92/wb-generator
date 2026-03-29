@@ -171,6 +171,13 @@ serve(async (req) => {
       
       // Update payment status if we have external_payment_id
       if (externalPaymentId) {
+        // Get payment record to find user_id for notification
+        const { data: failedPayment } = await supabaseServiceRole
+          .from('payments')
+          .select('user_id, package_name')
+          .eq('external_payment_id', externalPaymentId)
+          .single();
+
         await supabaseServiceRole
           .from('payments')
           .update({
@@ -178,6 +185,18 @@ serve(async (req) => {
             updated_at: new Date().toISOString(),
           })
           .eq('external_payment_id', externalPaymentId);
+
+        // Send notification to user about failed payment
+        if (failedPayment?.user_id) {
+          await supabaseServiceRole
+            .from('notifications')
+            .insert({
+              user_id: failedPayment.user_id,
+              title: 'Оплата не прошла',
+              message: `Платёж за "${failedPayment.package_name || 'пакет'}" не был завершён. Причина: ${webhookData.Reason || 'неизвестна'}`,
+              type: 'payment_failed',
+            });
+        }
       }
       
       const forwardedFor = req.headers.get('x-forwarded-for');
