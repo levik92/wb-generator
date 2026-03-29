@@ -108,8 +108,18 @@ export default function InvoicePage() {
 
   const handleDownloadPDF = async () => {
     if (!invoice || !org) return;
-    const { default: jsPDF } = await import('jspdf');
+    const [{ default: jsPDF }, { ROBOTO_REGULAR_BASE64 }] = await Promise.all([
+      import('jspdf'),
+      import('@/lib/robotoFont'),
+    ]);
     const doc = new jsPDF('p', 'mm', 'a4');
+
+    // Register Roboto font for Cyrillic support
+    doc.addFileToVFS('Roboto-Regular.ttf', ROBOTO_REGULAR_BASE64);
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'bold');
+    doc.setFont('Roboto', 'normal');
+
     const w = 210;
     let y = 15;
     const ml = 15;
