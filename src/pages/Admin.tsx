@@ -228,7 +228,7 @@ export default function Admin() {
         <header className="border-b border-border bg-card sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />}
+              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} />}
               <div className="min-w-0 flex-1 overflow-hidden">
                 <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
