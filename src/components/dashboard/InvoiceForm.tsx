@@ -32,60 +32,11 @@ interface InvoiceFormProps {
 }
 
 export default function InvoiceForm({ selectedPackage, open, onOpenChange }: InvoiceFormProps) {
-  const [inn, setInn] = useState("");
-  const [lookingUp, setLookingUp] = useState(false);
   const [orgData, setOrgData] = useState<OrgData>({
     name: "", inn: "", kpp: "", ogrn: "", legal_address: "", director_name: "",
   });
-  const [orgFound, setOrgFound] = useState<boolean | null>(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [creating, setCreating] = useState(false);
-
-  const [bankName, setBankName] = useState("");
-  const [bik, setBik] = useState("");
-  const [checkingAccount, setCheckingAccount] = useState("");
-  const [corrAccount, setCorrAccount] = useState("");
-
-  const handleInnLookup = async () => {
-    if (!inn || !/^\d{10,12}$/.test(inn.trim())) {
-      toast({ title: "Ошибка", description: "Введите корректный ИНН (10 или 12 цифр)", variant: "destructive" });
-      return;
-    }
-
-    setLookingUp(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const { data, error } = await supabase.functions.invoke('lookup-inn', {
-        body: { inn: inn.trim() },
-      });
-
-      if (error || data?.error === 'not_found') {
-        setOrgFound(false);
-        setOrgData(prev => ({ ...prev, inn: inn.trim() }));
-        toast({ title: "Не удалось найти", description: "Введите данные организации вручную" });
-      } else {
-        setOrgFound(true);
-        setOrgData({
-          name: data.name || "",
-          inn: data.inn || inn.trim(),
-          kpp: data.kpp || "",
-          ogrn: data.ogrn || "",
-          legal_address: data.legal_address || "",
-          director_name: data.director_name || "",
-        });
-        toast({ title: "Организация найдена", description: data.name });
-      }
-    } catch (error) {
-      console.error("INN lookup error:", error);
-      setOrgFound(false);
-      setOrgData(prev => ({ ...prev, inn: inn.trim() }));
-      toast({ title: "Не удалось найти", description: "Введите данные вручную" });
-    } finally {
-      setLookingUp(false);
-    }
-  };
 
   const handleCreateInvoice = async () => {
     if (!orgData.name || !orgData.inn) {
