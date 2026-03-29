@@ -249,16 +249,9 @@ export default function InvoicePage() {
       y += lines.length * 4 + 2;
     });
 
-    y += 6;
-    doc.setFont('Arial', 'bold');
-    doc.setFontSize(9);
-    doc.text('Поставщик', ml, y);
-    y += 5;
-    doc.setFont('Arial', 'normal');
-    doc.text(`${SELLER.name}, ИНН ${SELLER.inn}, КПП ${SELLER.kpp}`, ml, y);
-    y += 10;
+      y += 4;
 
-    // Руководитель
+    // Руководитель (no duplicate supplier block)
     doc.setFont('Arial', 'bold');
     doc.text('Руководитель', ml, y);
     doc.setLineWidth(0.1);
@@ -418,9 +411,9 @@ export default function InvoicePage() {
             </div>
 
             {/* Contract terms */}
-            <div className="pt-4 border-t space-y-3">
-              <h3 className="font-bold text-sm">Основные условия настоящего счёта-договора {invoice.invoice_number} от {formattedDate}.</h3>
-              <ol className="text-xs text-muted-foreground space-y-1.5 list-none pl-0">
+            <div className="pt-4 border-t space-y-2">
+              <p className="text-sm">Основные условия настоящего счёта-договора {invoice.invoice_number} от {formattedDate}.</p>
+              <ol className="text-sm text-muted-foreground space-y-1 list-none pl-0">
                 <li>1. Предметом настоящего Счёта-договора является оказание услуги (далее - &quot;услуга&quot;).</li>
                 <li>2. Оплата настоящего Счёта-договора означает согласие Заказчика с условиями оплаты и выполнения услуги.</li>
                 <li>3. Настоящий Счёт-договор действителен в течение 5 (пяти) банковских дней от даты его составления включительно. При отсутствии оплаты в указанный срок настоящий Счёт-договор признается недействительным.</li>
@@ -429,10 +422,10 @@ export default function InvoicePage() {
                 <li>6. Подписание Заказчиком или его уполномоченным представителем акта выполнения услуги означает согласие Заказчика с полнотой и надлежащим качеством оказанной услуги.</li>
               </ol>
               <div className="pt-2">
-                <p className="text-xs"><strong>Поставщик:</strong> {SELLER.name}, ИНН {SELLER.inn}, КПП {SELLER.kpp}</p>
+                <p className="text-sm text-muted-foreground">Поставщик: {SELLER.name}, ИНН {SELLER.inn}, КПП {SELLER.kpp}</p>
               </div>
               <div className="pt-2">
-                <p className="text-xs font-semibold">Руководитель ____________________</p>
+                <p className="text-sm">Руководитель ____________________</p>
               </div>
             </div>
           </CardContent>

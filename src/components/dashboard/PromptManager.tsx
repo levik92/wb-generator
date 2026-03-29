@@ -97,6 +97,11 @@ const getPromptDisplayName = (type: string): {
       name: 'AI Поддержка',
       description: 'Промт для виртуального ассистента поддержки на сайте',
       category: 'Технический'
+    },
+    'inn_lookup': {
+      name: 'Поиск организации по ИНН',
+      description: 'Промт для поиска данных организации по ИНН через Gemini',
+      category: 'Технический'
     }
   };
   return promptNames[type] || {
