@@ -225,20 +225,8 @@ export default function InvoicePage() {
     doc.setLineWidth(0.15);
     doc.line(ml, y, mr, y);
     y += 8;
-    doc.setFont('Arial', 'bold');
-    doc.text('Руководитель', ml, y);
-    doc.setLineWidth(0.1);
-    doc.line(ml + 50, y + 1, ml + 120, y + 1);
-    y += 12;
-    doc.text('Главный бухгалтер', ml, y);
-    doc.line(ml + 50, y + 1, ml + 120, y + 1);
 
     // Contract terms section
-    y += 15;
-    doc.setLineWidth(0.15);
-    doc.line(ml, y, mr, y);
-    y += 8;
-
     doc.setFontSize(11);
     doc.setFont('Arial', 'bold');
     doc.text(`Основные условия настоящего счёта-договора ${invoice.invoice_number} от ${formattedDate}.`, ml, y, { maxWidth: mr - ml });
@@ -268,6 +256,13 @@ export default function InvoicePage() {
     y += 5;
     doc.setFont('Arial', 'normal');
     doc.text(`${SELLER.name}, ИНН ${SELLER.inn}, КПП ${SELLER.kpp}`, ml, y);
+    y += 10;
+
+    // Руководитель
+    doc.setFont('Arial', 'bold');
+    doc.text('Руководитель', ml, y);
+    doc.setLineWidth(0.1);
+    doc.line(ml + 50, y + 1, ml + 120, y + 1);
 
     doc.save(`Счёт_${invoice.invoice_number}.pdf`);
   };
@@ -420,6 +415,25 @@ export default function InvoicePage() {
             <p className="text-sm">Всего наименований 1, на сумму <strong>{amount.toFixed(2)} руб.</strong></p>
             <div className="pt-4 border-t">
               <p className="text-sm"><strong>Назначение платежа:</strong> {invoice.payment_purpose}</p>
+            </div>
+
+            {/* Contract terms */}
+            <div className="pt-4 border-t space-y-3">
+              <h3 className="font-bold text-sm">Основные условия настоящего счёта-договора {invoice.invoice_number} от {formattedDate}.</h3>
+              <ol className="text-xs text-muted-foreground space-y-1.5 list-none pl-0">
+                <li>1. Предметом настоящего Счёта-договора является оказание услуги (далее - &quot;услуга&quot;).</li>
+                <li>2. Оплата настоящего Счёта-договора означает согласие Заказчика с условиями оплаты и выполнения услуги.</li>
+                <li>3. Настоящий Счёт-договор действителен в течение 5 (пяти) банковских дней от даты его составления включительно. При отсутствии оплаты в указанный срок настоящий Счёт-договор признается недействительным.</li>
+                <li>4. Оплата Счёта-договора третьими лицами (сторонами), а также неполная (частичная) оплата Счёта-договора не допускается.</li>
+                <li>5. Исполнитель вправе не начинать выполнение услуги до зачисления оплаты на расчетный счёт.</li>
+                <li>6. Подписание Заказчиком или его уполномоченным представителем акта выполнения услуги означает согласие Заказчика с полнотой и надлежащим качеством оказанной услуги.</li>
+              </ol>
+              <div className="pt-2">
+                <p className="text-xs"><strong>Поставщик:</strong> {SELLER.name}, ИНН {SELLER.inn}, КПП {SELLER.kpp}</p>
+              </div>
+              <div className="pt-2">
+                <p className="text-xs font-semibold">Руководитель ____________________</p>
+              </div>
             </div>
           </CardContent>
         </Card>
