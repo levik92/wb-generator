@@ -53,11 +53,8 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase admin client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Reuse the already-created admin client
+    const supabase = supabaseAuth;
 
     // Check if user exists in auth.users table
     const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
