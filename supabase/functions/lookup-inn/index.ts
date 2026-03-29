@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: "Ты помощник для поиска данных организаций РФ. Отвечай строго JSON без markdown." },
           { role: "user", content: prompt },
