@@ -39,6 +39,8 @@ const getNotificationIcon = (type: string) => {
       return <Gift className="w-4 h-4" />;
     case 'payment_confirmed':
       return <CreditCard className="w-4 h-4" />;
+    case 'payment_failed':
+      return <XCircle className="w-4 h-4" />;
     case 'email_changed':
       return <Mail className="w-4 h-4" />;
     case 'password_changed':
@@ -60,6 +62,8 @@ const getNotificationColor = (type: string) => {
       return 'bg-green-500/10 text-green-600 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30';
     case 'payment_confirmed':
       return 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:bg-purple-500/20 dark:text-purple-400 dark:border-purple-500/30';
+    case 'payment_failed':
+      return 'bg-red-500/10 text-red-600 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30';
     case 'email_changed':
     case 'password_changed':
       return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30';
