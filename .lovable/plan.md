@@ -1,33 +1,100 @@
 
 
-## Уязвимость: Эндпоинт admin-analytics доступен без аутентификации
+## Аудит: оплата, админка и уязвимости
 
-### Проблема
+### Статус оплаты и админки
 
-Edge-функция `admin-analytics` отдаёт конфиденциальные бизнес-метрики (выручка, количество пользователей, расход токенов, данные по платежам) **любому**, кто отправит запрос на URL. Нет ни проверки JWT-токена, ни проверки роли администратора — функция сразу создаёт service role клиент и выполняет запросы к базе.
+**Оплата — работает корректно:**
+- `create-payment` — проверяет JWT, поддерживает YooKassa и CloudPayments, валидирует пакеты и промокоды
+- `yookassa-webhook` — проверяет подпись HMAC + IP, обрабатывает `payment.succeeded` и `payment.canceled`
+- `cloudpayments-webhook` — проверяет HMAC, обрабатывает `pay` и `fail` с уведомлениями
+- `process_payment_success` (DB function) — атомарно начисляет токены, обновляет статус, логирует
 
-Для сравнения: `support-admin` корректно проверяет и авторизацию, и роль `admin` перед тем как выдать данные.
+**Админка — работает корректно:**
+- `admin-analytics` — теперь защищён JWT + проверка роли `admin` (исправлено ранее)
+- Клиентская часть (`AdminAnalyticsChart`) корректно вызывает функцию с `Authorization` заголовком
 
-### Риск
+### Найденные уязвимости (требуют исправления)
 
-Злоумышленник может вызвать эндпоинт напрямую и получить:
-- данные о выручке и платежах
-- количество пользователей и их активность
-- статистику генераций и расход токенов
-- любые другие бизнес-метрики
+**КРИТИЧЕСКИЕ (error):**
 
-### План исправления
+1. **`token_transactions` — любой пользователь может вставлять записи** (PRIVILEGE_ESCALATION)
+   - Политика `System can insert transactions` с `WITH CHECK: true` для `public`
+   - Злоумышленник может создавать фальшивые записи о транзакциях
+   - **Исправление:** ограничить INSERT только для `service_role`
 
-**Файл: `supabase/functions/admin-analytics/index.ts`**
+2. **`referrals` / `referrals_completed` — мошенничество с рефералами** (PRIVILEGE_ESCALATION)
+   - Политики INSERT с `WITH CHECK: true` для `public`
+   - Любой может создавать фальшивые реферальные связи
+   - **Исправление:** ограничить INSERT только для `service_role`
 
-Добавить блок аутентификации сразу после проверки CORS (строка 59), перед созданием service role клиента:
+3. **`telegram_bot_subscribers` — утечка персональных данных** (EXPOSED_SENSITIVE_DATA)
+   - 92 записи с именами, фамилиями, username и chat_id доступны публично
+   - Политика `Service role can manage subscribers` применена к `public` вместо `service_role`
+   - **Исправление:** пересоздать политику только для `service_role`
 
-1. Извлечь `Authorization` заголовок из запроса
-2. Создать Supabase-клиент с anon-ключом для проверки токена
-3. Вызвать `supabase.auth.getUser(token)` для валидации JWT
-4. Запросить таблицу `user_roles` через service role клиент, чтобы подтвердить роль `admin`
-5. Вернуть `401` если нет токена или он невалидный, `403` если пользователь не админ
-6. Оставить существующий service role клиент для запросов к данным — он используется только после успешной проверки
+**СРЕДНИЕ (warn):**
 
-Паттерн полностью повторяет `support-admin/index.ts` (строки 14–30).
+4. **`check-email-exists` — перечисление email без аутентификации**
+   - Позволяет узнать, зарегистрирован ли email
+   - **Исправление:** добавить проверку JWT
+
+5. **`admin_profile_access_rate_limit` — любой может сбрасывать rate limit**
+   - **Исправление:** ограничить для `service_role`
+
+6. **`profile_access_audit` — любой может вставлять фальшивые записи аудита**
+   - **Исправление:** ограничить INSERT для `service_role`
+
+7. **Несколько функций без `SET search_path`** — потенциальный search path hijacking
+
+8. **OTP с длинным сроком жизни, нет защиты от утёкших паролей, устаревший Postgres** — настраивается в дашборде Supabase
+
+### План исправлений
+
+**Одна SQL-миграция**, которая:
+
+```sql
+-- 1. token_transactions: INSERT только для service_role
+DROP POLICY "System can insert transactions" ON token_transactions;
+CREATE POLICY "Service role can insert transactions"
+  ON token_transactions FOR INSERT TO service_role
+  WITH CHECK (true);
+
+-- 2. referrals: INSERT только для service_role
+DROP POLICY "System can insert referrals" ON referrals;
+CREATE POLICY "Service role can insert referrals"
+  ON referrals FOR INSERT TO service_role
+  WITH CHECK (true);
+
+-- 3. referrals_completed: INSERT только для service_role
+DROP POLICY "System can insert completed referrals" ON referrals_completed;
+CREATE POLICY "Service role can insert completed referrals"
+  ON referrals_completed FOR INSERT TO service_role
+  WITH CHECK (true);
+
+-- 4. telegram_bot_subscribers: ALL только для service_role
+DROP POLICY "Service role can manage subscribers" ON telegram_bot_subscribers;
+CREATE POLICY "Service role can manage subscribers"
+  ON telegram_bot_subscribers FOR ALL TO service_role
+  USING (true) WITH CHECK (true);
+
+-- 5. admin_profile_access_rate_limit: только service_role
+DROP POLICY "System can manage rate limit records" ON admin_profile_access_rate_limit;
+CREATE POLICY "Service role can manage rate limit records"
+  ON admin_profile_access_rate_limit FOR ALL TO service_role
+  USING (true) WITH CHECK (true);
+
+-- 6. profile_access_audit: INSERT только для service_role
+DROP POLICY "System can insert profile access audit" ON profile_access_audit;
+CREATE POLICY "Service role can insert profile access audit"
+  ON profile_access_audit FOR INSERT TO service_role
+  WITH CHECK (true);
+```
+
+**Edge-функция `check-email-exists`:** добавить проверку JWT (аналогично `admin-analytics`).
+
+**Рекомендации для дашборда Supabase (вручную):**
+- Включить защиту от утёкших паролей (HIBP)
+- Уменьшить время жизни OTP
+- Обновить версию Postgres
 
