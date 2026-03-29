@@ -1,100 +1,49 @@
 
 
-## Аудит: оплата, админка и уязвимости
+## Audit Results: B2B Invoice System
 
-### Статус оплаты и админки
+### What Works Correctly
+1. **Database schema** — `invoice_payments`, `organization_details` tables are properly configured with correct columns, constraints, and unique key on `user_id`
+2. **RLS policies** — Both tables have proper policies (users see own data, admins see all, users can create/update own)
+3. **Invoice numbering** — `invoice_number_seq` sequence exists, RPC `nextval_invoice_number` works, prefix is `WBG-`
+4. **Font support** — `arialFont.ts` has both `ARIAL_REGULAR_BASE64` and `ARIAL_BOLD_BASE64` exports
+5. **PDF generation** — Properly registers Arial font, uses thin lines (0.15), includes contract terms, supplier info, signature
+6. **Electronic invoice UI** — Matching layout with bank details, contract terms, status badges, "Я оплатил" button
+7. **Payment history** — Fetches both `payments` and `invoice_payments`, shows combined chronological list
+8. **Invoice creation flow** — Upserts org data, generates invoice number, inserts record, opens in new tab
+9. **Admin processing** — `process_invoice_payment` RPC correctly handles approve/reject with token crediting
+10. **AI prompt in DB** — `inn_lookup` prompt exists in `ai_prompts` table
 
-**Оплата — работает корректно:**
-- `create-payment` — проверяет JWT, поддерживает YooKassa и CloudPayments, валидирует пакеты и промокоды
-- `yookassa-webhook` — проверяет подпись HMAC + IP, обрабатывает `payment.succeeded` и `payment.canceled`
-- `cloudpayments-webhook` — проверяет HMAC, обрабатывает `pay` и `fail` с уведомлениями
-- `process_payment_success` (DB function) — атомарно начисляет токены, обновляет статус, логирует
+### Issues Found
 
-**Админка — работает корректно:**
-- `admin-analytics` — теперь защищён JWT + проверка роли `admin` (исправлено ранее)
-- Клиентская часть (`AdminAnalyticsChart`) корректно вызывает функцию с `Authorization` заголовком
+#### 1. CRITICAL: `lookup-inn` Edge Function Returns "not_found" for All INNs
+- **Tested**: Called with INN `9724238597` (your own company) and `7707083893` (Sberbank) — both returned `{"error":"not_found"}`
+- **Root cause**: The function has zero log output beyond "booted", meaning the AI gateway call is either failing silently or the model name `google/gemini-3.1-pro-preview` is returning empty/invalid responses
+- **The catch block** on line 105-107 swallows all errors and returns `not_found` with no logging
+- **Fix**: Add `console.error` logging before the AI call and after receiving the response. Also add a fallback model or validate the AI response. Need to add detailed logging to diagnose the exact failure point.
 
-### Найденные уязвимости (требуют исправления)
+#### 2. MINOR: Model name may need verification
+- The model `google/gemini-3.1-pro-preview` is used — same as in `support-chat`. If support chat works, the model is valid, but the INN lookup task may need a different prompt approach since Gemini may refuse to provide organization data it's not confident about.
 
-**КРИТИЧЕСКИЕ (error):**
+### Proposed Fixes
 
-1. **`token_transactions` — любой пользователь может вставлять записи** (PRIVILEGE_ESCALATION)
-   - Политика `System can insert transactions` с `WITH CHECK: true` для `public`
-   - Злоумышленник может создавать фальшивые записи о транзакциях
-   - **Исправление:** ограничить INSERT только для `service_role`
+**File: `supabase/functions/lookup-inn/index.ts`**
+- Add detailed `console.log` statements for: prompt sent, AI response status, raw AI text, parsed JSON
+- Log AI gateway errors with response body text
+- Consider using a simpler model like `google/gemini-2.0-flash` for faster/more reliable responses
+- Add proper error differentiation so users know why lookup failed (API error vs not found vs rate limit)
 
-2. **`referrals` / `referrals_completed` — мошенничество с рефералами** (PRIVILEGE_ESCALATION)
-   - Политики INSERT с `WITH CHECK: true` для `public`
-   - Любой может создавать фальшивые реферальные связи
-   - **Исправление:** ограничить INSERT только для `service_role`
+**No other files need changes** — the rest of the system (forms, PDF, history, admin) is correctly wired up.
 
-3. **`telegram_bot_subscribers` — утечка персональных данных** (EXPOSED_SENSITIVE_DATA)
-   - 92 записи с именами, фамилиями, username и chat_id доступны публично
-   - Политика `Service role can manage subscribers` применена к `public` вместо `service_role`
-   - **Исправление:** пересоздать политику только для `service_role`
+### Technical Details
 
-**СРЕДНИЕ (warn):**
+The edge function needs these specific logging additions:
+1. Before AI call: log the constructed prompt
+2. After AI response: log `aiRes.status` and response body if not OK
+3. After parsing: log the raw text and parsed result
+4. In catch block: log the actual error object
 
-4. **`check-email-exists` — перечисление email без аутентификации**
-   - Позволяет узнать, зарегистрирован ли email
-   - **Исправление:** добавить проверку JWT
+Additionally, the model should be changed from `google/gemini-3.1-pro-preview` to `google/gemini-2.0-flash` which is more reliable for structured data extraction tasks.
 
-5. **`admin_profile_access_rate_limit` — любой может сбрасывать rate limit**
-   - **Исправление:** ограничить для `service_role`
-
-6. **`profile_access_audit` — любой может вставлять фальшивые записи аудита**
-   - **Исправление:** ограничить INSERT для `service_role`
-
-7. **Несколько функций без `SET search_path`** — потенциальный search path hijacking
-
-8. **OTP с длинным сроком жизни, нет защиты от утёкших паролей, устаревший Postgres** — настраивается в дашборде Supabase
-
-### План исправлений
-
-**Одна SQL-миграция**, которая:
-
-```sql
--- 1. token_transactions: INSERT только для service_role
-DROP POLICY "System can insert transactions" ON token_transactions;
-CREATE POLICY "Service role can insert transactions"
-  ON token_transactions FOR INSERT TO service_role
-  WITH CHECK (true);
-
--- 2. referrals: INSERT только для service_role
-DROP POLICY "System can insert referrals" ON referrals;
-CREATE POLICY "Service role can insert referrals"
-  ON referrals FOR INSERT TO service_role
-  WITH CHECK (true);
-
--- 3. referrals_completed: INSERT только для service_role
-DROP POLICY "System can insert completed referrals" ON referrals_completed;
-CREATE POLICY "Service role can insert completed referrals"
-  ON referrals_completed FOR INSERT TO service_role
-  WITH CHECK (true);
-
--- 4. telegram_bot_subscribers: ALL только для service_role
-DROP POLICY "Service role can manage subscribers" ON telegram_bot_subscribers;
-CREATE POLICY "Service role can manage subscribers"
-  ON telegram_bot_subscribers FOR ALL TO service_role
-  USING (true) WITH CHECK (true);
-
--- 5. admin_profile_access_rate_limit: только service_role
-DROP POLICY "System can manage rate limit records" ON admin_profile_access_rate_limit;
-CREATE POLICY "Service role can manage rate limit records"
-  ON admin_profile_access_rate_limit FOR ALL TO service_role
-  USING (true) WITH CHECK (true);
-
--- 6. profile_access_audit: INSERT только для service_role
-DROP POLICY "System can insert profile access audit" ON profile_access_audit;
-CREATE POLICY "Service role can insert profile access audit"
-  ON profile_access_audit FOR INSERT TO service_role
-  WITH CHECK (true);
-```
-
-**Edge-функция `check-email-exists`:** добавить проверку JWT (аналогично `admin-analytics`).
-
-**Рекомендации для дашборда Supabase (вручную):**
-- Включить защиту от утёкших паролей (HIBP)
-- Уменьшить время жизни OTP
-- Обновить версию Postgres
+After deploying these changes, a re-test via `curl_edge_functions` will confirm whether the INN lookup works.
 
