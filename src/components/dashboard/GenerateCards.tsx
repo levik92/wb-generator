@@ -1149,9 +1149,6 @@ export const GenerateCards = ({
       }
 
       // Generate ZIP and download
-      const zipBlob = await zip.generateAsync({
-        type: 'blob'
-      });
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const safeZipName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       safeBlobDownload(zipBlob, `${safeZipName}_all_cards.zip`);
