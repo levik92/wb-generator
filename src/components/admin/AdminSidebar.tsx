@@ -27,9 +27,10 @@ interface AdminSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   unreadSupportCount?: number;
+  pendingInvoicesCount?: number;
 }
 
-export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }: AdminSidebarProps) => {
+export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, pendingInvoicesCount = 0 }: AdminSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
@@ -38,10 +39,10 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0 }:
     { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined, badgeColor: 'bg-primary text-primary-foreground border-primary' },
     { id: 'utm', label: 'Трафик', icon: Crosshair },
     { id: 'partners', label: 'Партнеры', icon: Handshake },
+    { id: 'payments_admin', label: 'Оплаты', icon: Receipt, badge: pendingInvoicesCount > 0 ? pendingInvoicesCount.toString() : undefined, badgeColor: 'bg-orange-500 text-white border-orange-500' },
     { id: 'prompts', label: 'Модель', icon: Bot },
     { id: 'bonuses', label: 'Бонусы', icon: Gift },
     { id: 'pricing', label: 'Цены', icon: DollarSign },
-    { id: 'payments_admin', label: 'Оплаты', icon: Receipt },
     { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
     { id: 'news', label: 'Новости', icon: Megaphone },
     { id: 'blog', label: 'Блог', icon: FileText },

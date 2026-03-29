@@ -70,6 +70,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('analytics');
   const [adminEmail, setAdminEmail] = useState('');
   const [unreadSupportCount, setUnreadSupportCount] = useState(0);
+  const [pendingInvoicesCount, setPendingInvoicesCount] = useState(0);
   const isMobile = useIsMobile();
 
   const fetchUnreadSupport = useCallback(async () => {
@@ -95,13 +96,28 @@ export default function Admin() {
     checkAdminAccess();
   }, []);
 
-  // Polling for unread support - proper cleanup
+  const fetchPendingInvoices = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('invoice_payments')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['invoice_issued', 'awaiting_confirmation']);
+      if (!error && count) setPendingInvoicesCount(count);
+      else setPendingInvoicesCount(0);
+    } catch {}
+  }, []);
+
+  // Polling for unread support & pending invoices - proper cleanup
   useEffect(() => {
     if (!isAdmin) return;
     fetchUnreadSupport();
-    const interval = setInterval(fetchUnreadSupport, 20000);
+    fetchPendingInvoices();
+    const interval = setInterval(() => {
+      fetchUnreadSupport();
+      fetchPendingInvoices();
+    }, 20000);
     return () => clearInterval(interval);
-  }, [isAdmin, fetchUnreadSupport]);
+  }, [isAdmin, fetchUnreadSupport, fetchPendingInvoices]);
 
   const checkAdminAccess = async () => {
     try {
@@ -203,7 +219,7 @@ export default function Admin() {
     <div className="min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
-          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} />
         </div>
       )}
 
@@ -212,7 +228,7 @@ export default function Admin() {
         <header className="border-b border-border bg-card sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} />}
+              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} />}
               <div className="min-w-0 flex-1 overflow-hidden">
                 <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
