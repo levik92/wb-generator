@@ -2086,6 +2086,7 @@ export type Database = {
         }
         Returns: string
       }
+      nextval_invoice_number: { Args: never; Returns: number }
       process_invoice_payment: {
         Args: { p_action: string; p_admin_id: string; p_invoice_id: string }
         Returns: undefined
