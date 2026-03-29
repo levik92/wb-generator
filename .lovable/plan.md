@@ -1,65 +1,42 @@
 
 
-## Аудит платежной системы — найденные проблемы
+## Результат проверки: найдены 3 проблемы
 
-### Проблема 1: YooKassa webhook НЕ проверяет подпись (КРИТИЧНО)
+### Проблема 1: Тип уведомления об оплате не совпадает с UI (обе версии)
 
-Функция `verifyWebhookSignature` **определена, но нигде не вызывается**. Любой, кто знает URL вебхука, может отправить поддельный запрос `payment.succeeded` и начислить себе токены бесплатно.
+Обе версии `process_payment_success` создают уведомление с типом `'success'`, но в `NotificationCenter.tsx` иконка кредитной карты привязана к типу `'payment_confirmed'`. Тип `'success'` попадает в `default` — показывается обычный колокольчик без цветовой стилизации.
 
-**Сравнение с CloudPayments:** CloudPayments webhook корректно вызывает `verifyHmac()` и блокирует запросы с невалидной подписью. YooKassa — нет.
+**Решение:** Заменить тип `'success'` на `'payment_confirmed'` в обеих перегрузках `process_payment_success` (миграция SQL).
 
-IP-проверка (`isFromYooKassa`) тоже только логирует, но не блокирует.
+### Проблема 2: CloudPayments fail — нет уведомления пользователю
 
-**Решение:** Добавить вызов `verifyWebhookSignature` в основной обработчик и блокировать запросы без валидной подписи. Также сделать IP-проверку блокирующей (с fallback на signature check).
+Когда CloudPayments присылает `?type=fail`, статус платежа обновляется на `failed`, но пользователь не получает уведомление. Аналогично, YooKassa `payment.canceled` обновляет статус, но тоже без уведомления.
 
-### Проблема 2: Старая версия `process_payment_success` (1 параметр) не создает уведомления
+**Решение:** Добавить `INSERT INTO notifications` в CloudPayments webhook (fail) и в YooKassa webhook (canceled):
+- CloudPayments fail: после обновления статуса на `failed`, вставить уведомление с типом `'payment_confirmed'` и текстом «Оплата не прошла»
+- YooKassa canceled: аналогично, уведомление «Оплата отменена»
 
-В БД существуют **2 перегрузки** функции:
-- 1-параметровая (payment_id_param) — вызывается из YooKassa webhook — **не создает notification** для пользователя
-- 2-параметровая (payment_id_param, external_id_param) — вызывается из CloudPayments — **создает notification**
+### Проблема 3: NotificationCenter не обрабатывает типы отказа/отмены визуально
 
-Пользователи, оплатившие через YooKassa, не получают уведомление "Оплата прошла успешно".
+В UI нет специальной стилизации для неудачных платежей (красная иконка и т.п.).
 
-**Решение:** Обновить 1-параметровую версию, добавив `INSERT INTO notifications`.
-
-### Проблема 3: `secure_payments_user_select` не включает статус `expired`
-
-RLS-политика для пользователей:
-```sql
-status = ANY (ARRAY['pending', 'succeeded', 'failed', 'canceled'])
-```
-
-Статус `expired` отсутствует — пользователи не видят свои истекшие платежи в истории.
-
-**Решение:** Добавить `'expired'` в массив допустимых статусов.
-
-### Проблема 4: `secure_payments_webhook_insert` требует `yookassa_payment_id IS NOT NULL`
-
-```sql
-WITH CHECK (... AND yookassa_payment_id IS NOT NULL ...)
-```
-
-Но CloudPayments-платежи вставляются с `yookassa_payment_id: null` (строка 148 в create-payment). Это работает только потому что insert идет через service_role, который обходит RLS. Не критично, но стоит исправить для чистоты.
+**Решение:** Добавить тип `'payment_failed'` в `NotificationCenter.tsx` с красной стилизацией. Использовать этот тип для failed/canceled уведомлений.
 
 ---
 
 ## План исправлений
 
-### Файлы для изменения:
+### 1. Миграция SQL
+- `CREATE OR REPLACE FUNCTION process_payment_success(payment_id_param text)` — заменить тип `'success'` на `'payment_confirmed'`
+- `CREATE OR REPLACE FUNCTION process_payment_success(payment_id_param text, external_id_param text)` — заменить тип `'success'` на `'payment_confirmed'`
 
-1. **`supabase/functions/yookassa-webhook/index.ts`**
-   - Добавить вызов `verifyWebhookSignature()` после получения тела запроса
-   - Сделать IP-проверку блокирующей (или хотя бы в связке с signature)
-   - Если подпись невалидна И IP не из YooKassa — блокировать с 403
+### 2. CloudPayments webhook (`supabase/functions/cloudpayments-webhook/index.ts`)
+- В блоке `notificationType === 'fail'`: добавить `INSERT INTO notifications` с типом `'payment_failed'`, получив `user_id` из записи платежа
 
-2. **Миграция SQL:**
-   - Обновить 1-параметровую `process_payment_success`: добавить INSERT INTO notifications
-   - Обновить RLS-политику `secure_payments_user_select`: добавить `'expired'` в список статусов
-   - Обновить RLS-политику `secure_payments_webhook_insert`: сделать `yookassa_payment_id` nullable (заменить на `yookassa_payment_id IS NOT NULL OR external_payment_id IS NOT NULL`)
+### 3. YooKassa webhook (`supabase/functions/yookassa-webhook/index.ts`)
+- В блоке `event === 'payment.canceled'`: добавить `INSERT INTO notifications` с типом `'payment_failed'`, получив `user_id` из записи платежа
 
-### Важные детали реализации:
-
-- Проверка подписи YooKassa: если подпись отсутствует в заголовке (YooKassa может не всегда отправлять), фолбэк на IP-проверку
-- Блокировка: если оба метода верификации провалены — вернуть 403 и залогировать событие
-- Уведомление в 1-параметровой версии должно быть идентично 2-параметровой
+### 4. NotificationCenter.tsx
+- Добавить `'payment_failed'` в `getNotificationIcon` (иконка `CreditCard` или `XCircle`)
+- Добавить `'payment_failed'` в `getNotificationColor` (красная стилизация)
 
