@@ -1,4 +1,7 @@
-import { corsHeaders } from "../_shared/cors.ts";
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
 
