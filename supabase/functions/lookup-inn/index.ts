@@ -22,10 +22,14 @@ async function getPromptTemplate(): Promise<string> {
       .eq('prompt_type', 'inn_lookup')
       .maybeSingle();
     
-    if (data?.prompt_template) return data.prompt_template;
+    if (data?.prompt_template) {
+      console.log("[lookup-inn] Loaded prompt from DB");
+      return data.prompt_template;
+    }
   } catch (e) {
-    console.error("Failed to load prompt from DB:", e);
+    console.error("[lookup-inn] Failed to load prompt from DB:", e);
   }
+  console.log("[lookup-inn] Using default prompt");
   return DEFAULT_PROMPT;
 }
 
@@ -42,18 +46,22 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const inn = body?.inn?.trim();
+    console.log("[lookup-inn] Request for INN:", inn);
 
     if (!inn || !/^\d{10,12}$/.test(inn)) {
       return new Response(JSON.stringify({ error: "Некорректный ИНН. Введите 10 или 12 цифр." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (!LOVABLE_API_KEY) {
+      console.error("[lookup-inn] LOVABLE_API_KEY is not set");
       return new Response(JSON.stringify({ error: "API key not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const promptTemplate = await getPromptTemplate();
     const prompt = promptTemplate.replace(/\{inn\}/g, inn);
+    console.log("[lookup-inn] Prompt length:", prompt.length);
 
+    console.log("[lookup-inn] Calling AI gateway...");
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -61,7 +69,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3.1-pro-preview",
+        model: "google/gemini-2.0-flash",
         messages: [
           { role: "system", content: "Ты помощник для поиска данных организаций РФ. Отвечай строго JSON без markdown." },
           { role: "user", content: prompt },
@@ -71,31 +79,38 @@ Deno.serve(async (req) => {
       }),
     });
 
+    console.log("[lookup-inn] AI response status:", aiRes.status);
+
     if (!aiRes.ok) {
-      console.error("AI gateway error:", aiRes.status);
+      const errorBody = await aiRes.text();
+      console.error("[lookup-inn] AI gateway error body:", errorBody);
       if (aiRes.status === 429) {
         return new Response(JSON.stringify({ error: "rate_limited" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       if (aiRes.status === 402) {
         return new Response(JSON.stringify({ error: "payment_required" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      return new Response(JSON.stringify({ error: "not_found" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "ai_error", message: `AI returned ${aiRes.status}` }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiData = await aiRes.json();
     const text = aiData?.choices?.[0]?.message?.content?.trim();
+    console.log("[lookup-inn] Raw AI text:", text);
 
     if (!text) {
+      console.warn("[lookup-inn] AI returned empty content");
       return new Response(JSON.stringify({ error: "not_found" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Extract JSON from response (may have markdown backticks)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error("[lookup-inn] No JSON found in AI response");
       return new Response(JSON.stringify({ error: "not_found" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
+    console.log("[lookup-inn] Parsed result:", JSON.stringify(parsed));
 
     if (parsed.error === "not_found") {
       return new Response(JSON.stringify({ error: "not_found" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -103,7 +118,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify(parsed), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
-    console.error("lookup-inn error:", error);
-    return new Response(JSON.stringify({ error: "not_found" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.error("[lookup-inn] Unexpected error:", error);
+    return new Response(JSON.stringify({ error: "internal_error", message: String(error) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
