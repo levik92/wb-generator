@@ -57,10 +57,10 @@ serve(async (req) => {
     const supabase = supabaseAuth;
 
     // Check if user exists in auth.users table
-    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+    const { data: authUsers, error: listUsersError } = await supabase.auth.admin.listUsers();
     
-    if (authError) {
-      console.error('Error checking auth users:', authError);
+    if (listUsersError) {
+      console.error('Error checking auth users:', listUsersError);
       return new Response(
         JSON.stringify({ error: 'Failed to check user existence' }),
         { 
