@@ -127,7 +127,7 @@ export default function InvoicePage() {
     const formattedDate = new Date(invoice.invoice_date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
 
     // Bank header
     doc.setDrawColor(0);
@@ -149,11 +149,11 @@ export default function InvoicePage() {
 
     y += 38;
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.text(`Счёт на оплату ${invoice.invoice_number}`, ml, y);
     y += 6;
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     doc.text(`от ${formattedDate}`, ml, y);
     y += 2;
     doc.setLineWidth(0.5);
@@ -161,15 +161,15 @@ export default function InvoicePage() {
     y += 8;
 
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.text('Поставщик:', ml, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     doc.text(`${SELLER.name}, ИНН ${SELLER.inn}, КПП ${SELLER.kpp}`, ml + 28, y);
     y += 7;
 
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.text('Покупатель:', ml, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     const buyerLine = `${org.name}, ИНН ${org.inn}${org.kpp ? `, КПП ${org.kpp}` : ''}${org.legal_address ? `, ${org.legal_address}` : ''}`;
     doc.text(buyerLine, ml + 28, y, { maxWidth: mr - ml - 30 });
     y += 12;
@@ -179,7 +179,7 @@ export default function InvoicePage() {
     doc.rect(ml, y, mr - ml, 8, 'F');
     doc.rect(ml, y, mr - ml, 8);
     doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.text('№', colX[0] + 2, y + 5.5);
     doc.text('Наименование', colX[1] + 2, y + 5.5);
     doc.text('Кол-во', colX[2] + 2, y + 5.5);
@@ -194,7 +194,7 @@ export default function InvoicePage() {
     doc.rect(ml, y, mr - ml, rowH);
     colX.forEach(x => doc.line(x, y, x, y + rowH));
     doc.line(mr, y, mr, y + rowH);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     doc.text('1', colX[0] + 3, y + 5.5);
     doc.text(`Пополнение тарифа "${invoice.package_name}" (${invoice.tokens_amount} токенов)`, colX[1] + 2, y + 5.5, { maxWidth: 78 });
     doc.text('1', colX[2] + 4, y + 5.5);
@@ -203,26 +203,26 @@ export default function InvoicePage() {
     doc.text(`${invoice.amount.toFixed(2)}`, colX[5] + 2, y + 5.5);
     y += rowH + 5;
 
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.setFontSize(10);
     doc.text(`Итого: ${invoice.amount.toFixed(2)} руб.`, mr, y, { align: 'right' });
     y += 6;
     doc.text(`Без налога (НДС)`, mr, y, { align: 'right' });
     y += 6;
     doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     doc.text(`Всего наименований 1, на сумму ${invoice.amount.toFixed(2)} руб.`, ml, y);
     y += 10;
 
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.text('Назначение платежа:', ml, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     doc.text(invoice.payment_purpose, ml, y + 5, { maxWidth: mr - ml });
     y += 20;
     doc.setLineWidth(0.3);
     doc.line(ml, y, mr, y);
     y += 8;
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.text('Руководитель', ml, y);
     doc.line(ml + 50, y + 1, ml + 120, y + 1);
     y += 12;
