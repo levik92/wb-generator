@@ -96,13 +96,28 @@ export default function Admin() {
     checkAdminAccess();
   }, []);
 
-  // Polling for unread support - proper cleanup
+  const fetchPendingInvoices = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('invoice_payments')
+        .select('*', { count: 'exact', head: true })
+        .in('status', ['invoice_issued', 'awaiting_confirmation']);
+      if (!error && count) setPendingInvoicesCount(count);
+      else setPendingInvoicesCount(0);
+    } catch {}
+  }, []);
+
+  // Polling for unread support & pending invoices - proper cleanup
   useEffect(() => {
     if (!isAdmin) return;
     fetchUnreadSupport();
-    const interval = setInterval(fetchUnreadSupport, 20000);
+    fetchPendingInvoices();
+    const interval = setInterval(() => {
+      fetchUnreadSupport();
+      fetchPendingInvoices();
+    }, 20000);
     return () => clearInterval(interval);
-  }, [isAdmin, fetchUnreadSupport]);
+  }, [isAdmin, fetchUnreadSupport, fetchPendingInvoices]);
 
   const checkAdminAccess = async () => {
     try {
