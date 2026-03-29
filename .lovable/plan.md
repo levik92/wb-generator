@@ -1,42 +1,33 @@
 
 
-## Результат проверки: найдены 3 проблемы
+## Уязвимость: Эндпоинт admin-analytics доступен без аутентификации
 
-### Проблема 1: Тип уведомления об оплате не совпадает с UI (обе версии)
+### Проблема
 
-Обе версии `process_payment_success` создают уведомление с типом `'success'`, но в `NotificationCenter.tsx` иконка кредитной карты привязана к типу `'payment_confirmed'`. Тип `'success'` попадает в `default` — показывается обычный колокольчик без цветовой стилизации.
+Edge-функция `admin-analytics` отдаёт конфиденциальные бизнес-метрики (выручка, количество пользователей, расход токенов, данные по платежам) **любому**, кто отправит запрос на URL. Нет ни проверки JWT-токена, ни проверки роли администратора — функция сразу создаёт service role клиент и выполняет запросы к базе.
 
-**Решение:** Заменить тип `'success'` на `'payment_confirmed'` в обеих перегрузках `process_payment_success` (миграция SQL).
+Для сравнения: `support-admin` корректно проверяет и авторизацию, и роль `admin` перед тем как выдать данные.
 
-### Проблема 2: CloudPayments fail — нет уведомления пользователю
+### Риск
 
-Когда CloudPayments присылает `?type=fail`, статус платежа обновляется на `failed`, но пользователь не получает уведомление. Аналогично, YooKassa `payment.canceled` обновляет статус, но тоже без уведомления.
+Злоумышленник может вызвать эндпоинт напрямую и получить:
+- данные о выручке и платежах
+- количество пользователей и их активность
+- статистику генераций и расход токенов
+- любые другие бизнес-метрики
 
-**Решение:** Добавить `INSERT INTO notifications` в CloudPayments webhook (fail) и в YooKassa webhook (canceled):
-- CloudPayments fail: после обновления статуса на `failed`, вставить уведомление с типом `'payment_confirmed'` и текстом «Оплата не прошла»
-- YooKassa canceled: аналогично, уведомление «Оплата отменена»
+### План исправления
 
-### Проблема 3: NotificationCenter не обрабатывает типы отказа/отмены визуально
+**Файл: `supabase/functions/admin-analytics/index.ts`**
 
-В UI нет специальной стилизации для неудачных платежей (красная иконка и т.п.).
+Добавить блок аутентификации сразу после проверки CORS (строка 59), перед созданием service role клиента:
 
-**Решение:** Добавить тип `'payment_failed'` в `NotificationCenter.tsx` с красной стилизацией. Использовать этот тип для failed/canceled уведомлений.
+1. Извлечь `Authorization` заголовок из запроса
+2. Создать Supabase-клиент с anon-ключом для проверки токена
+3. Вызвать `supabase.auth.getUser(token)` для валидации JWT
+4. Запросить таблицу `user_roles` через service role клиент, чтобы подтвердить роль `admin`
+5. Вернуть `401` если нет токена или он невалидный, `403` если пользователь не админ
+6. Оставить существующий service role клиент для запросов к данным — он используется только после успешной проверки
 
----
-
-## План исправлений
-
-### 1. Миграция SQL
-- `CREATE OR REPLACE FUNCTION process_payment_success(payment_id_param text)` — заменить тип `'success'` на `'payment_confirmed'`
-- `CREATE OR REPLACE FUNCTION process_payment_success(payment_id_param text, external_id_param text)` — заменить тип `'success'` на `'payment_confirmed'`
-
-### 2. CloudPayments webhook (`supabase/functions/cloudpayments-webhook/index.ts`)
-- В блоке `notificationType === 'fail'`: добавить `INSERT INTO notifications` с типом `'payment_failed'`, получив `user_id` из записи платежа
-
-### 3. YooKassa webhook (`supabase/functions/yookassa-webhook/index.ts`)
-- В блоке `event === 'payment.canceled'`: добавить `INSERT INTO notifications` с типом `'payment_failed'`, получив `user_id` из записи платежа
-
-### 4. NotificationCenter.tsx
-- Добавить `'payment_failed'` в `getNotificationIcon` (иконка `CreditCard` или `XCircle`)
-- Добавить `'payment_failed'` в `getNotificationColor` (красная стилизация)
+Паттерн полностью повторяет `support-admin/index.ts` (строки 14–30).
 
