@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface CheckEmailRequest {
@@ -11,66 +11,36 @@ interface CheckEmailRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // Verify JWT authentication
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const supabaseAuth = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { email }: CheckEmailRequest = await req.json();
     
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'Email is required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Reuse the already-created admin client
-    const supabase = supabaseAuth;
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
     // Check if user exists in auth.users table
-    const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+    const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers();
     
-    if (authError) {
-      console.error('Error checking auth users:', authError);
+    if (listError) {
+      console.error('Error checking auth users:', listError);
       return new Response(
         JSON.stringify({ error: 'Failed to check user existence' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if email exists in the users list
     const emailExists = authUsers.users.some(user => 
       user.email?.toLowerCase() === email.toLowerCase()
     );
@@ -79,20 +49,14 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ exists: emailExists }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in check-email-exists function:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
