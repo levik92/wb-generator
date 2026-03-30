@@ -69,6 +69,8 @@ export default function Pricing({
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
   const videoPrice = generationPrices?.find(p => p.price_type === 'video_generation')?.tokens_cost || 10;
   const handlePayment = async (packageName: string, amount: number, tokens: number) => {
+    if (isPaymentInProgress.current) return;
+    isPaymentInProgress.current = true;
     try {
       setLoading(packageName);
       const {
@@ -82,6 +84,7 @@ export default function Pricing({
           description: "Необходимо войти в систему",
           variant: "destructive"
         });
+        setLoading(null);
         return;
       }
 
@@ -113,11 +116,11 @@ export default function Pricing({
           description: "Не удалось создать платеж",
           variant: "destructive"
         });
+        setLoading(null);
         return;
       }
 
       if (data.provider === 'cloudpayments') {
-        // Open CloudPayments widget (new API: widget.start)
         const cpLib = (window as any).cp;
         if (!cpLib) {
           toast({
@@ -125,13 +128,13 @@ export default function Pricing({
             description: "Виджет CloudPayments не загружен. Попробуйте обновить страницу.",
             variant: "destructive"
           });
+          setLoading(null);
           return;
         }
         
         const widget = new cpLib.CloudPayments();
         
         widget.oncomplete = (result: any) => {
-          setLoading(null);
           if (result?.status === 'success') {
             toast({
               title: "Оплата прошла успешно!",
@@ -147,26 +150,27 @@ export default function Pricing({
           }
         };
 
-        widget.start(data.intentParams)
-          .then((widgetResult: any) => {
-            console.log('CloudPayments widget result:', widgetResult);
-          })
-          .catch((error: any) => {
-            console.error('CloudPayments widget error:', error);
-            setLoading(null);
-            toast({
-              title: "Ошибка оплаты",
-              description: "Не удалось открыть форму оплаты.",
-              variant: "destructive"
-            });
+        try {
+          await widget.start(data.intentParams);
+        } catch (widgetError: any) {
+          console.error('CloudPayments widget error:', widgetError);
+          toast({
+            title: "Ошибка оплаты",
+            description: "Не удалось открыть форму оплаты.",
+            variant: "destructive"
           });
+        }
+        setLoading(null);
         return;
       }
 
       // YooKassa flow - redirect to payment URL
       if (data.payment_url) {
         window.location.href = data.payment_url;
+        return;
       }
+
+      setLoading(null);
     } catch (error) {
       console.error('Payment error:', error);
       toast({
@@ -174,8 +178,9 @@ export default function Pricing({
         description: "Произошла ошибка при создании платежа",
         variant: "destructive"
       });
-    } finally {
       setLoading(null);
+    } finally {
+      isPaymentInProgress.current = false;
     }
   };
   if (packagesLoading || pricesLoading) {
