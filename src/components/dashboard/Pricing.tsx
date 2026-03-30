@@ -28,6 +28,7 @@ export default function Pricing({
   appliedPromo
 }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const isPaymentInProgress = useRef(false);
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const {
