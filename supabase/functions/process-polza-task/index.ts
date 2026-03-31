@@ -322,10 +322,10 @@ async function handleCompleted(supabase: any, task: any, finalResult: any, _polz
   const contentType = imgResponse.headers.get('content-type')?.split(';')[0]?.trim() || 'image/png';
   const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
 
-  const storagePath = `generated/${task.job.user_id}/${task.job_id}/${taskId}.${ext}`;
+  const storagePath = `${task.job.user_id}/${task.job_id}/${task.card_index}_${task.card_type}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
-    .from('generation-results')
+    .from('generated-cards')
     .upload(storagePath, imgBytes, { contentType, upsert: true });
 
   if (uploadError) {
@@ -334,7 +334,7 @@ async function handleCompleted(supabase: any, task: any, finalResult: any, _polz
   }
 
   const { data: { publicUrl } } = supabase.storage
-    .from('generation-results')
+    .from('generated-cards')
     .getPublicUrl(storagePath);
 
   // Update task as completed

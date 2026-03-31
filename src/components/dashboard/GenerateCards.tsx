@@ -602,7 +602,8 @@ export const GenerateCards = ({
         reader.readAsDataURL(file);
       });
       
-      const { data, error } = await supabase.functions.invoke('identify-product', {
+      const identifyFn = getIdentifyFunctionName(aiModelData?.provider);
+      const { data, error } = await supabase.functions.invoke(identifyFn, {
         body: { imageBase64: base64 },
       });
       
