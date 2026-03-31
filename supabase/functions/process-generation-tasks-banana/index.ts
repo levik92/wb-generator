@@ -548,7 +548,7 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     // Non-retryable errors - retry won't help, stop immediately
     const NON_RETRYABLE = ['google_400', 'no_image_generated', 'IMAGE_SAFETY', 
                             'upload_failed', 'MALFORMED_FUNCTION_CALL', 'too_large',
-                            'url_generation_failed'];
+                            'url_generation_failed', 'polza_failed'];
     if (NON_RETRYABLE.some(e => currentLastError.includes(e))) {
       console.log(`Task ${task.id} has non-retryable error: ${currentLastError}, skipping retry`);
       return;
