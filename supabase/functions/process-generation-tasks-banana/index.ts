@@ -166,7 +166,15 @@ async function processTasks(
     if (job.style_source_image_url && job.unified_styling && !styleDescription) {
       console.log(`[unified-styling] Pre-analyzing style from source image: ${job.style_source_image_url}`);
       try {
-        const { data: styleResult, error: styleError } = await supabase.functions.invoke('analyze-style', {
+        // Route analyze-style based on provider
+        const { data: pSettings } = await supabase
+          .from('ai_model_settings')
+          .select('api_provider')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const styleFunction = pSettings?.api_provider === 'polza' ? 'analyze-style-polza' : 'analyze-style';
+        const { data: styleResult, error: styleError } = await supabase.functions.invoke(styleFunction, {
           body: { imageUrl: job.style_source_image_url, jobId }
         });
 

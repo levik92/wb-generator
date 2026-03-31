@@ -134,6 +134,8 @@ export function PromptManager() {
   const [editingTechPrompt, setEditingTechPrompt] = useState<string | null>(null);
   const [techEditValue, setTechEditValue] = useState('');
   const [savingTechPrompt, setSavingTechPrompt] = useState(false);
+  const [apiProvider, setApiProvider] = useState<'direct' | 'polza'>('direct');
+  const [savingProvider, setSavingProvider] = useState(false);
   useEffect(() => {
     loadPrompts();
     loadActiveModel();
