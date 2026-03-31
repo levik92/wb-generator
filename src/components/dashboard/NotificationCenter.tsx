@@ -190,32 +190,14 @@ export const NotificationCenter = ({ profile, onMarkAllReadRef }: NotificationCe
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Уведомления</h2>
-          <p className="text-muted-foreground">Загрузка...</p>
-        </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold mb-2">Уведомления</h2>
-          <p className="text-muted-foreground">
-            {unreadCount > 0 ? `${unreadCount} новых уведомлений` : 'Все уведомления прочитаны'}
-          </p>
-        </div>
-        {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline">
-            <Check className="w-4 h-4 mr-2" />
-            Отметить все
-          </Button>
-        )}
-      </div>
-
       {notifications.length === 0 ? (
         <Card>
           <CardHeader>

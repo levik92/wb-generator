@@ -53,6 +53,18 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
     loadReadNews();
   }, [currentPage]);
 
+  // Expose markAllAsRead to parent via ref
+  useEffect(() => {
+    if (onMarkAllReadRef) {
+      onMarkAllReadRef.current = markAllAsRead;
+    }
+    return () => {
+      if (onMarkAllReadRef) {
+        onMarkAllReadRef.current = null;
+      }
+    };
+  });
+
   const loadNews = async () => {
     try {
       setLoading(true);

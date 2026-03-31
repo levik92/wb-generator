@@ -841,41 +841,7 @@ export const History = ({
         </EditDialog>
       )}
 
-      {/* Header */}
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      duration: 0.5
-    }} className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <HistoryIcon className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">История генераций</h2>
-            <p className="text-muted-foreground text-sm">Все ваши созданные карточки и описания</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-muted-foreground hidden sm:block" />
-          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-full sm:w-48 bg-background border-border/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все генерации</SelectItem>
-              <SelectItem value="cards">Карточки</SelectItem>
-              <SelectItem value="description">Описания</SelectItem>
-              <SelectItem value="video">Видеообложки</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </motion.div>
+
 
       {/* Info Alert */}
       <motion.div initial={{
