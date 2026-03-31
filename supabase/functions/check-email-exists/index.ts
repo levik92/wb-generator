@@ -30,20 +30,22 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Check if user exists in auth.users table
-    const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers();
-    
-    if (listError) {
-      console.error('Error checking auth users:', listError);
+    // Query profiles table directly instead of listUsers() which has pagination issues
+    const { data, error: queryError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .limit(1);
+
+    if (queryError) {
+      console.error('Error checking profiles:', queryError);
       return new Response(
         JSON.stringify({ error: 'Failed to check user existence' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const emailExists = authUsers.users.some(user => 
-      user.email?.toLowerCase() === email.toLowerCase()
-    );
+    const emailExists = data && data.length > 0;
 
     console.log(`Email check for ${email}: exists=${emailExists}`);
 
