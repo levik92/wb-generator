@@ -227,21 +227,9 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
 
   if (loading) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="space-y-6"
-      >
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <Newspaper className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">Новости</h2>
-            <p className="text-muted-foreground text-sm">Загрузка новостей...</p>
-          </div>
-        </div>
-      </motion.div>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+      </div>
     );
   }
 
