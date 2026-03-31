@@ -40,12 +40,16 @@ interface HistoryProps {
   shouldRefresh?: boolean;
   onRefreshComplete?: () => void;
   onTokensUpdate?: () => void;
+  filter?: 'all' | 'cards' | 'description' | 'video';
+  onFilterChange?: (filter: 'all' | 'cards' | 'description' | 'video') => void;
 }
 export const History = ({
   profile,
   shouldRefresh,
   onRefreshComplete,
-  onTokensUpdate
+  onTokensUpdate,
+  filter: externalFilter,
+  onFilterChange
 }: HistoryProps) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
