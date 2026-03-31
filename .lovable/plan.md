@@ -1,60 +1,68 @@
 
-Что нашёл:
-- Сейчас ошибка возникает не на капче и не на проверке email, а именно на `supabase.auth.signUp()` с `AuthApiError: Error sending confirmation email`.
-- Регресс выглядит связанным с прошлой правкой в `src/pages/Auth.tsx`: там появился `getStableAuthBaseUrl()`, который принудительно подставляет `https://wbgen.ru` в `emailRedirectTo`.
-- Это как раз та часть signup-логики, которую мы меняли вместе с UX-потоком. Сам новый экран подтверждения почты не должен ломать отправку письма, а вот жёсткая подмена redirect URL — может.
-- В этом же файле другие auth-сценарии до сих пор работают через текущий origin, поэтому логика стала несогласованной.
-- `check-email-exists` и SmartCaptcha не выглядят корнем проблемы: капча у вас проходит, email не найден, ошибка падает уже на этапе отправки confirmation email.
 
-Do I know what the issue is?
-Да. Наиболее вероятный источник поломки — именно новая принудительная подмена `emailRedirectTo` на `https://wbgen.ru`, которую мы добавили при UX-изменениях.
+## Диагноз
 
-План исправления:
-1. В `src/pages/Auth.tsx` убрать принудительный `getStableAuthBaseUrl()` и вернуть поведение “как раньше” для регистрации:
-   - использовать текущий корректный origin/route вместо жёстко зашитого домена
-   - тем же способом формировать URL для `signUp()` и `resend()`
+Активный провайдер оплаты — **CloudPayments**. Проблема в том, что виджет CloudPayments вызывается неправильно:
 
-2. Сохранить UX-улучшения, которые были нужны:
-   - экран `confirm-email`
-   - хранение `pendingConfirmationEmail`
-   - кнопка повторной отправки письма
-   - перевод на экран подтверждения при `Email not confirmed`
+1. **`widget.start()`** — такого метода нет в CloudPayments SDK. Правильный метод: **`widget.pay('auth', options, callbacks)`**
+2. **`widget.oncomplete = ...`** — нельзя так назначать колбэки. Они передаются третьим аргументом в `widget.pay()`
+3. Edge function возвращает `publicTerminalId`, а CloudPayments ожидает `publicId`
 
-3. Привести auth-flow к единой логике URL:
-   - signup
-   - resend confirmation
-   - reset password
-   - OAuth redirect
-   Чтобы не было ситуации, где разные сценарии используют разные базовые домены.
+В результате `widget.start()` молча завершается (или бросает ошибку, которая ловится catch), кнопка возвращается в активное состояние, и ничего не происходит.
 
-4. Улучшить диагностику прямо в `Auth.tsx`:
-   - логировать точный redirect URL, который уходит в signup/resend
-   - оставить понятные сообщения для пользователя, но не маскировать реальную причину в консоли
+## План исправления
 
-5. Не трогать сейчас лишнее:
-   - не переписывать заново `check-email-exists`
-   - не ломать confirm-email UX
-   - не менять email-провайдер “вслепую”
+### Файл: `src/components/dashboard/Pricing.tsx` (строки 123-165)
 
-6. Если после возврата старой redirect-логики ошибка вдруг останется, вторым шагом проверить уже внешнюю конфигурацию Supabase Auth:
-   - Site URL / Redirect URLs
-   - активный send-email hook
-   - старые настройки, завязанные на `wbgen.ru`
-   Но это резервный шаг, не первый.
+Заменить блок CloudPayments на правильный вызов API:
 
-Что получится после фикса:
-```text
-Было:
-signup -> emailRedirectTo принудительно уходит на https://wbgen.ru/... -> Supabase возвращает 500 "Error sending confirmation email"
+```typescript
+if (data.provider === 'cloudpayments') {
+  const cpLib = (window as any).cp;
+  if (!cpLib) {
+    toast({ title: "Ошибка", description: "Виджет CloudPayments не загружен.", variant: "destructive" });
+    setLoading(null);
+    return;
+  }
 
-Станет:
-signup -> redirect формируется корректно для текущего приложения -> письмо подтверждения снова отправляется -> пользователь видит экран "Подтвердите почту" -> resend тоже работает
+  const widget = new cpLib.CloudPayments();
+  const params = data.intentParams;
+
+  widget.pay('auth',
+    {
+      publicId: params.publicTerminalId,
+      description: params.description,
+      amount: params.amount,
+      currency: params.currency,
+      invoiceId: params.externalId,
+      accountId: params.userInfo?.accountId,
+      email: params.userInfo?.email,
+      skin: params.skin || 'modern',
+      data: params.metadata,
+    },
+    {
+      onSuccess: (options: any) => {
+        toast({ title: "Оплата прошла успешно!", description: `Начислено ${data.tokens || finalTokens} токенов` });
+        window.location.href = '/dashboard?payment=success';
+      },
+      onFail: (reason: any, options: any) => {
+        toast({ title: "Ошибка оплаты", description: reason || "Платёж не прошёл.", variant: "destructive" });
+        setLoading(null);
+      },
+      onComplete: (paymentResult: any, options: any) => {
+        setLoading(null);
+        isPaymentInProgress.current = false;
+      },
+    }
+  );
+  return; // не сбрасываем loading здесь — onComplete/onFail сделают это
+}
 ```
 
-Основной файл:
-- `src/pages/Auth.tsx`
+Ключевые изменения:
+- `widget.start()` → `widget.pay('auth', options, callbacks)`
+- Колбэки `onSuccess`/`onFail`/`onComplete` передаются как 3-й аргумент
+- `publicTerminalId` → `publicId`
+- `setLoading(null)` перенесен в колбэки (а не сразу после вызова)
+- `isPaymentInProgress.current = false` сбрасывается в `onComplete`
 
-Итоговый подход:
-- вернуть рабочую signup-логику “как раньше”
-- сохранить полезный UX после регистрации
-- убрать именно тот регресс, который мы сами внесли в redirect/email flow
