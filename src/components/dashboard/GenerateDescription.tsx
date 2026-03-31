@@ -306,7 +306,7 @@ export const GenerateDescription = ({
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6">
         <div className="space-y-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <div className="hidden sm:flex w-12 h-12 rounded-xl bg-primary/15 items-center justify-center shrink-0">
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1">
