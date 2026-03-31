@@ -1055,8 +1055,8 @@ export const GenerateCards = ({
       }
 
       // Create generation job with dynamic model-based function name
-      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel);
-      console.log('[GenerateCards] Active model:', activeModel, '| Function:', createJobFunction);
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateCards] Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', createJobFunction);
       const {
         data,
         error

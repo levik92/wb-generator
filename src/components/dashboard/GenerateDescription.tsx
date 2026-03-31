@@ -242,8 +242,8 @@ export const GenerateDescription = ({
     try {
       const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
       const keywordsList = keywords.split(',').map(k => k.trim()).filter(Boolean);
-      const functionName = getEdgeFunctionName('generate-description', activeModel);
-      console.log('[GenerateDescription] Active model:', activeModel, '| Function:', functionName);
+      const functionName = getEdgeFunctionName('generate-description', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateDescription] Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', functionName);
 
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {

@@ -456,8 +456,8 @@ export const History = ({
     setEditingInProgress(prev => new Set(prev).add(editKey));
     setEditDialogOpen(false);
     try {
-      const model = activeModel || 'openai';
-      const editFunction = getImageEdgeFunctionName('edit-card', model);
+      const model = activeModel?.model || 'openai';
+      const editFunction = getImageEdgeFunctionName('edit-card', model, activeModel?.provider);
       const { data, error } = await supabase.functions.invoke(editFunction, {
         body: {
           productName: editingImageData.productName,
