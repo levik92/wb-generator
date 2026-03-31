@@ -1712,7 +1712,7 @@ export const GenerateCards = ({
       setSelectedCards(styleSelectedCards);
       setUnifiedStyling(true); // Style generation always uses unified styling for correct timer
 
-      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel!);
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel?.model || 'google', activeModel?.provider);
       
       const { data, error } = await supabase.functions.invoke(createJobFunction, {
         body: {
