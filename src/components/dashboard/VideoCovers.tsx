@@ -359,7 +359,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
       setGenerationStartTime(Date.now());
       setElapsedSeconds(0);
 
-      const { data, error } = await supabase.functions.invoke("create-video-job", {
+      const createFn = getVideoEdgeFunctionName("create-video-job", provider);
+      const { data, error } = await supabase.functions.invoke(createFn, {
         body: { image_url: imageUrl, user_prompt: userPrompt.trim() || undefined },
       });
 
