@@ -23,7 +23,7 @@ const Auth = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const [activeTab, setActiveTab] = useState<"signin" | "signup" | "reset" | "new-password">("signin");
+  const [activeTab, setActiveTab] = useState<"signin" | "signup" | "reset" | "new-password" | "confirm-email">("signin");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showTermsError, setShowTermsError] = useState(false);
@@ -31,6 +31,8 @@ const Auth = () => {
   const [captchaKey, setCaptchaKey] = useState(0);
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState("");
+  const [resending, setResending] = useState(false);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
