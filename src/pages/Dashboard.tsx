@@ -55,6 +55,22 @@ interface Profile {
   login_count: number;
 }
 type ActiveTab = 'cards' | 'video' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning' | 'support';
+
+const MOBILE_TAB_TITLES: Record<string, string> = {
+  cards: 'Карточки',
+  video: 'Видеообложки',
+  description: 'Описания',
+  labels: 'Этикетки',
+  history: 'История',
+  pricing: 'Баланс',
+  bonuses: 'Бонусы',
+  settings: 'Настройки',
+  notifications: 'Уведомления',
+  news: 'Новости',
+  learning: 'Обучение',
+  support: 'Поддержка',
+};
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
