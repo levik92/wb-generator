@@ -194,11 +194,8 @@ const Auth = () => {
       }
 
       await logLoginAttempt(email, true);
-      toast({
-        title: "Аккаунт создан! 📧",
-        description: "Перейдите в почту и подтвердите email. После — войдите через вкладку 'Вход'.",
-        duration: 10000,
-      });
+      setPendingConfirmationEmail(email);
+      setActiveTab("confirm-email");
       setCaptchaToken(null);
       setCaptchaKey(k => k + 1);
     } catch (error: any) {
@@ -207,6 +204,31 @@ const Auth = () => {
       setCaptchaKey(k => k + 1);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!pendingConfirmationEmail || resending) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: pendingConfirmationEmail,
+      });
+      if (error) throw error;
+      toast({
+        title: "Письмо отправлено!",
+        description: "Проверьте почту, включая папку «Спам».",
+        duration: 6000,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Не удалось отправить",
+        description: "Попробуйте через минуту. Если проблема сохраняется — напишите в поддержку.",
+        variant: "destructive",
+      });
+    } finally {
+      setResending(false);
     }
   };
 
