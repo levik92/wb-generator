@@ -35,7 +35,11 @@ const tagColors: Record<string, string> = {
   'Кейсы': 'bg-pink-500/10 text-pink-600 border-pink-500/20 dark:bg-pink-500/20 dark:text-pink-400',
 };
 
-const News = () => {
+interface NewsProps {
+  onMarkAllReadRef?: React.MutableRefObject<(() => void) | null>;
+}
+
+const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
