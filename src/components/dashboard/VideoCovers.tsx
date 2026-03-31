@@ -12,6 +12,7 @@ import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard, Coins, HelpCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useActiveAiModel, getVideoEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
   id: string;
