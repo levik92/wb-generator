@@ -41,6 +41,7 @@ export type Database = {
       ai_model_settings: {
         Row: {
           active_model: string
+          api_provider: string
           created_at: string | null
           id: string
           image_resolution: string | null
@@ -48,6 +49,7 @@ export type Database = {
         }
         Insert: {
           active_model: string
+          api_provider?: string
           created_at?: string | null
           id?: string
           image_resolution?: string | null
@@ -55,6 +57,7 @@ export type Database = {
         }
         Update: {
           active_model?: string
+          api_provider?: string
           created_at?: string | null
           id?: string
           image_resolution?: string | null
