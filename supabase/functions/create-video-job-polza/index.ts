@@ -113,14 +113,16 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "kling-v2-6",
+        model: "kling/v3",
         input: {
           prompt,
           images: [{ type: "url", data: image_url }],
-          aspect_ratio: "3:4",
-          duration: "5",
+          aspect_ratio: "9:16",
+          duration: 5,
           mode: "std",
+          sound: "false",
         },
+        async: true,
       }),
     });
 
