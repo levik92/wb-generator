@@ -136,6 +136,8 @@ export function PromptManager() {
   const [savingTechPrompt, setSavingTechPrompt] = useState(false);
   const [apiProvider, setApiProvider] = useState<'direct' | 'polza'>('direct');
   const [savingProvider, setSavingProvider] = useState(false);
+  const [videoApiProvider, setVideoApiProvider] = useState<'direct' | 'polza'>('direct');
+  const [savingVideoProvider, setSavingVideoProvider] = useState(false);
   useEffect(() => {
     loadPrompts();
     loadActiveModel();
