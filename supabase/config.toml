@@ -119,3 +119,24 @@ verify_jwt = false
 
 [functions.cleanup-stale-payments]
 verify_jwt = false
+
+[functions.process-polza-task]
+verify_jwt = false
+
+[functions.generate-description-polza]
+verify_jwt = true
+
+[functions.identify-product-polza]
+verify_jwt = true
+
+[functions.analyze-style-polza]
+verify_jwt = false
+
+[functions.create-video-job-polza]
+verify_jwt = false
+
+[functions.check-video-status-polza]
+verify_jwt = false
+
+[functions.regenerate-video-job-polza]
+verify_jwt = false
