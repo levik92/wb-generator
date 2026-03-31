@@ -261,8 +261,7 @@ serve(async (req) => {
                   messages,
                   stream: false,
                   provider: {
-                    order: ["Google AI Studio", "Google"],
-                    allow_fallbacks: true,
+                    only: ["Google AI Studio"],
                   },
                 }),
               });

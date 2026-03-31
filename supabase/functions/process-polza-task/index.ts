@@ -201,8 +201,7 @@ ${referenceImage ? `2. Последнее изображение (референ
           image_resolution: imageResolution,
         },
         provider: {
-          order: ["Google AI Studio", "Google"],
-          allow_fallbacks: true,
+          only: ["Google AI Studio"],
         },
       }),
     });
