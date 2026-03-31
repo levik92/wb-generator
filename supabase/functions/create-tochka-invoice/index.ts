@@ -3,7 +3,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const TOCHKA_BASE = "https://enter.tochka.com/uapi";
 
-async function fetchCustomerCode(token: string, accountId: string): Promise<string> {
+async function fetchCustomerCode(token: string): Promise<string> {
   const res = await fetch(`${TOCHKA_BASE}/open-banking/v1.0/customers`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -12,38 +12,16 @@ async function fetchCustomerCode(token: string, accountId: string): Promise<stri
     throw new Error(`Failed to fetch customers: ${res.status} ${text}`);
   }
   const data = await res.json();
-  const customers = data?.Data?.Customer || data?.customers || [];
-  for (const customer of customers) {
-    const accounts = customer?.accounts || customer?.Accounts || [];
-    for (const acc of accounts) {
-      const id = acc?.accountId || acc?.account_id || "";
-      if (id === accountId || id.startsWith(accountId.split("/")[0])) {
-        return customer.customerCode || customer.customer_code;
-      }
-    }
-    // Also check customerCode directly if no accounts match
-    if (customer.customerCode || customer.customer_code) {
-      // If only one customer, use it
-      if (customers.length === 1) {
-        return customer.customerCode || customer.customer_code;
-      }
-    }
+  const customers = data?.Data?.Customer || [];
+  if (customers.length === 0) {
+    throw new Error("No customers found in Tochka account");
   }
-  throw new Error(`No customer found for account ${accountId}`);
-}
-
-async function lookupCounterparty(token: string, inn: string) {
-  try {
-    const res = await fetch(`${TOCHKA_BASE}/invoice/v1.0/counterparty/${inn}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.Data || data || null;
-  } catch (e) {
-    console.warn("Counterparty lookup failed:", e);
-    return null;
+  // Take the first customer's code
+  const code = customers[0]?.customerCode;
+  if (!code) {
+    throw new Error("customerCode missing in API response");
   }
+  return code;
 }
 
 Deno.serve(async (req) => {
@@ -99,10 +77,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch customerCode dynamically
+    // Fetch customerCode from Tochka API
     let customerCode: string;
     try {
-      customerCode = await fetchCustomerCode(tochkaToken, tochkaAccountId);
+      customerCode = await fetchCustomerCode(tochkaToken);
       console.log("Resolved customerCode:", customerCode);
     } catch (e) {
       console.error("Failed to resolve customerCode:", e);
@@ -110,30 +88,6 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Auto-fill buyer data from Tochka counterparty lookup
-    const counterparty = await lookupCounterparty(tochkaToken, orgData.inn);
-    if (counterparty) {
-      console.log("Counterparty data:", JSON.stringify(counterparty));
-      // User-provided data takes priority; fill only empty fields
-      if (!orgData.kpp && counterparty.kpp) orgData.kpp = counterparty.kpp;
-      if (!orgData.legal_address && counterparty.legalAddress) orgData.legal_address = counterparty.legalAddress;
-      if (!orgData.name && counterparty.secondSideName) orgData.name = counterparty.secondSideName;
-      if (!bankDetails?.bankName && counterparty.bankName) {
-        bankDetails.bankName = counterparty.bankName;
-      }
-      if (!bankDetails?.bik && counterparty.bik) {
-        bankDetails.bik = counterparty.bik;
-      }
-      if (!bankDetails?.checkingAccount && counterparty.accountId) {
-        // accountId is "RS/BIK" format
-        const parts = counterparty.accountId?.split("/");
-        if (parts?.length >= 1) bankDetails.checkingAccount = parts[0];
-      }
-      if (!bankDetails?.corrAccount && counterparty.bankCorrAccount) {
-        bankDetails.corrAccount = counterparty.bankCorrAccount;
-      }
     }
 
     // 1. Upsert organization details
@@ -201,7 +155,7 @@ Deno.serve(async (req) => {
         ? `${bankDetails.checkingAccount}/${bankDetails.bik}`
         : undefined;
 
-    // Determine buyer type: 12-digit INN = IP, 10-digit = company
+    // 12-digit INN = IP, 10-digit = company
     const buyerType = orgData.inn.length === 12 ? "ip" : "company";
     const priceStr = String(packagePrice);
 
