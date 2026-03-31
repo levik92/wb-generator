@@ -528,6 +528,44 @@ export function PromptManager() {
                 </p>
               </div>
 
+              {/* API Provider Selection */}
+              <Card className="bg-card border-primary/20">
+                <CardHeader>
+                  <CardTitle className="text-lg">API Провайдер</CardTitle>
+                  <CardDescription>
+                    Выберите способ подключения к AI моделям. Polza AI — альтернативный провайдер с единым API.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup value={apiProvider} onValueChange={value => saveApiProvider(value as 'direct' | 'polza')} disabled={savingProvider} className="space-y-3">
+                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
+                      <RadioGroupItem value="direct" id="provider-direct" />
+                      <Label htmlFor="provider-direct" className="flex-1 cursor-pointer">
+                        <div className="font-semibold mb-[6px]">Прямое подключение (Direct API)</div>
+                        <div className="text-xs text-muted-foreground">
+                          Прямые вызовы к Google Gemini и Kling AI через их официальные API
+                        </div>
+                      </Label>
+                      {apiProvider === 'direct' && <Badge variant="default">Активен</Badge>}
+                    </div>
+                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
+                      <RadioGroupItem value="polza" id="provider-polza" />
+                      <Label htmlFor="provider-polza" className="flex-1 cursor-pointer">
+                        <div className="font-semibold mb-[6px]">Польза AI (Polza)</div>
+                        <div className="text-xs text-muted-foreground">
+                          Единый API-провайдер для всех моделей (Gemini, Kling и другие) через polza.ai
+                        </div>
+                      </Label>
+                      {apiProvider === 'polza' && <Badge variant="default">Активен</Badge>}
+                    </div>
+                  </RadioGroup>
+                  {savingProvider && <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full border-[2px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+                      Сохранение настроек...
+                    </div>}
+                </CardContent>
+              </Card>
+
               {/* Model Selection */}
               <Card className="bg-card">
                 <CardHeader>
