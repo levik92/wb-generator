@@ -1220,8 +1220,8 @@ export const GenerateCards = ({
       }
 
       // Use dynamic model-based function name for regeneration
-      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
-      console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
+      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateCards] Regenerate - Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', regenerateFunction);
 
       // Collect all product images and reference image for regeneration
       // PRIORITY: Database is the source of truth (has complete data incl. reference)
