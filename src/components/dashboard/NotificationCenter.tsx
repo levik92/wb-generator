@@ -84,6 +84,18 @@ export const NotificationCenter = ({ profile, onMarkAllReadRef }: NotificationCe
     loadNotifications();
   }, [profile.id]);
 
+  // Expose markAllAsRead to parent via ref
+  useEffect(() => {
+    if (onMarkAllReadRef) {
+      onMarkAllReadRef.current = markAllAsRead;
+    }
+    return () => {
+      if (onMarkAllReadRef) {
+        onMarkAllReadRef.current = null;
+      }
+    };
+  });
+
   const loadNotifications = async () => {
     try {
       const { data, error } = await supabase
