@@ -438,8 +438,20 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       throw new Error('No source image available');
     }
 
-    // Call Google task processor
-    const result = await supabase.functions.invoke('process-google-task', {
+    // Determine which task processor to use based on api_provider setting
+    const { data: providerSettings } = await supabase
+      .from('ai_model_settings')
+      .select('api_provider')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const apiProvider = providerSettings?.api_provider || 'direct';
+    const processorFunction = apiProvider === 'polza' ? 'process-polza-task' : 'process-google-task';
+    console.log(`Using ${processorFunction} (provider: ${apiProvider}) for task ${task.id}`);
+
+    // Call task processor
+    const result = await supabase.functions.invoke(processorFunction, {
       body: {
         taskId: task.id,
         sourceImageUrl: sourceImageUrl,
