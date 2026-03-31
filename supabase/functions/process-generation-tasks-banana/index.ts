@@ -289,10 +289,17 @@ async function processTasks(
           .single();
 
         if (firstTaskResult?.status === 'completed' && firstTaskResult?.image_url) {
-          // Call analyze-style to get style description
+          // Call analyze-style to get style description (route based on provider)
           console.log(`[unified-styling] First task completed, analyzing style...`);
           try {
-            const { data: styleResult, error: styleError } = await supabase.functions.invoke('analyze-style', {
+            const { data: pSettingsStyle } = await supabase
+              .from('ai_model_settings')
+              .select('api_provider')
+              .order('updated_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            const styleFn = pSettingsStyle?.api_provider === 'polza' ? 'analyze-style-polza' : 'analyze-style';
+            const { data: styleResult, error: styleError } = await supabase.functions.invoke(styleFn, {
               body: { imageUrl: firstTaskResult.image_url, jobId }
             });
 

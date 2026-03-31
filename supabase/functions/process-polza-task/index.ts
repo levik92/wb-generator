@@ -244,6 +244,36 @@ ${referenceImage ? `2. Последнее изображение (референ
       return await handleCompleted(supabase, task, mediaResult, polzaApiKey);
     }
 
+    // Handle synchronous failure
+    if (mediaResult.status === 'failed' || mediaResult.status === 'cancelled') {
+      const errorMsg = mediaResult.error?.message || mediaResult.error?.code || 'Polza generation failed synchronously';
+      console.error(`[process-polza-task] Synchronous failure: ${errorMsg}`);
+
+      await supabase
+        .from('generation_tasks')
+        .update({ status: 'failed', last_error: `polza_failed: ${errorMsg}`, updated_at: new Date().toISOString() })
+        .eq('id', taskId);
+
+      const tokensToRefund = calcRefundTokensForTask(task.job);
+      await supabase.rpc('refund_tokens', {
+        user_id_param: task.job.user_id,
+        tokens_amount: tokensToRefund,
+        reason_text: `Возврат за ошибку Polza: ${errorMsg}`
+      });
+
+      await supabase.from('notifications').insert({
+        user_id: task.job.user_id,
+        type: 'error',
+        title: 'Ошибка генерации',
+        message: `Не удалось сгенерировать карточку "${task.job.product_name}". ${errorMsg} Токены возвращены.`
+      });
+
+      return new Response(
+        JSON.stringify({ success: false, handled: true, error: errorMsg }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Return the generation ID so orchestrator can poll later
     return new Response(
       JSON.stringify({ success: true, pending: true, polzaGenerationId: mediaResult.id }),
@@ -292,10 +322,10 @@ async function handleCompleted(supabase: any, task: any, finalResult: any, _polz
   const contentType = imgResponse.headers.get('content-type')?.split(';')[0]?.trim() || 'image/png';
   const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
 
-  const storagePath = `generated/${task.job.user_id}/${task.job_id}/${taskId}.${ext}`;
+  const storagePath = `${task.job.user_id}/${task.job_id}/${task.card_index}_${task.card_type}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
-    .from('generation-results')
+    .from('generated-cards')
     .upload(storagePath, imgBytes, { contentType, upsert: true });
 
   if (uploadError) {
@@ -304,7 +334,7 @@ async function handleCompleted(supabase: any, task: any, finalResult: any, _polz
   }
 
   const { data: { publicUrl } } = supabase.storage
-    .from('generation-results')
+    .from('generated-cards')
     .getPublicUrl(storagePath);
 
   // Update task as completed
