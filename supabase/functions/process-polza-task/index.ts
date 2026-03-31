@@ -1,7 +1,4 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,8 +6,6 @@ const corsHeaders = {
 };
 
 const POLZA_BASE_URL = 'https://polza.ai/api/v1';
-const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_TIME_MS = 5 * 60 * 1000; // 5 minutes
 
 function calcRefundTokensForTask(job: any): number {
   const tokensCost = Number(job?.tokens_cost ?? 1);
@@ -20,45 +15,17 @@ function calcRefundTokensForTask(job: any): number {
   return Math.max(1, Math.round(tokensCost / totalCards));
 }
 
-async function pollMediaStatus(polzaApiKey: string, generationId: string): Promise<any> {
-  const startTime = Date.now();
-  while (Date.now() - startTime < MAX_POLL_TIME_MS) {
-    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
-    
-    const resp = await fetch(`${POLZA_BASE_URL}/media/${generationId}`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${polzaApiKey}` },
-    });
-
-    if (!resp.ok) {
-      console.error(`[process-polza-task] Poll error: ${resp.status}`);
-      continue;
-    }
-
-    const result = await resp.json();
-    console.log(`[process-polza-task] Poll status: ${result.status}`);
-
-    if (result.status === 'completed') {
-      return result;
-    }
-    if (result.status === 'failed' || result.status === 'cancelled') {
-      throw new Error(result.error?.message || 'Polza media generation failed');
-    }
-  }
-  throw new Error('Polza media generation timed out');
-}
-
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { taskId, sourceImageUrl, prompt } = await req.json();
+    const { taskId, sourceImageUrl, prompt, polzaGenerationId } = await req.json();
 
-    if (!taskId || !sourceImageUrl || !prompt) {
+    if (!taskId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
+        JSON.stringify({ error: 'Missing taskId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -94,6 +61,77 @@ serve(async (req) => {
       );
     }
 
+    // ========== PHASE 2: Check status of existing Polza generation ==========
+    if (polzaGenerationId) {
+      console.log(`[process-polza-task] Phase 2: Checking status of ${polzaGenerationId}`);
+
+      const resp = await fetch(`${POLZA_BASE_URL}/media/${polzaGenerationId}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${polzaApiKey}` },
+      });
+
+      if (!resp.ok) {
+        const errText = await resp.text();
+        console.error(`[process-polza-task] Status check error: ${resp.status}`, errText);
+        // Return pending so orchestrator retries later
+        return new Response(
+          JSON.stringify({ success: true, pending: true, polzaGenerationId }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const result = await resp.json();
+      console.log(`[process-polza-task] Polza status: ${result.status}`);
+
+      if (result.status === 'pending' || result.status === 'processing') {
+        // Still working, tell orchestrator to retry later
+        return new Response(
+          JSON.stringify({ success: true, pending: true, polzaGenerationId }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (result.status === 'failed' || result.status === 'cancelled') {
+        const errorMsg = result.error?.message || 'Polza generation failed';
+        console.error(`[process-polza-task] Generation failed: ${errorMsg}`);
+
+        await supabase
+          .from('generation_tasks')
+          .update({ status: 'failed', last_error: `polza_failed: ${errorMsg}`, updated_at: new Date().toISOString() })
+          .eq('id', taskId);
+
+        const tokensToRefund = calcRefundTokensForTask(task.job);
+        await supabase.rpc('refund_tokens', {
+          user_id_param: task.job.user_id,
+          tokens_amount: tokensToRefund,
+          reason_text: `Возврат за ошибку Polza: ${errorMsg}`
+        });
+
+        await supabase.from('notifications').insert({
+          user_id: task.job.user_id,
+          type: 'error',
+          title: 'Ошибка генерации',
+          message: `Не удалось сгенерировать карточку "${task.job.product_name}". ${errorMsg} Токены возвращены.`
+        });
+
+        return new Response(
+          JSON.stringify({ success: false, handled: true, error: errorMsg }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Completed! Extract image and upload
+      return await handleCompleted(supabase, task, result, polzaApiKey);
+    }
+
+    // ========== PHASE 1: Submit new generation to Polza ==========
+    if (!sourceImageUrl || !prompt) {
+      return new Response(
+        JSON.stringify({ error: 'Missing sourceImageUrl or prompt for phase 1' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const jobImages = task.job.product_images as Array<{ url: string; name?: string; type?: string }> || [];
     const productImages = jobImages.filter(img => img.type !== 'reference');
     const referenceImage = jobImages.find(img => img.type === 'reference');
@@ -104,8 +142,8 @@ serve(async (req) => {
         .update({ status: 'failed', last_error: 'Не найдены изображения товара.', updated_at: new Date().toISOString() })
         .eq('id', taskId);
       return new Response(
-        JSON.stringify({ error: 'No product images found' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'No product images found', handled: true }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -118,9 +156,9 @@ serve(async (req) => {
       .maybeSingle();
     const imageResolution = modelSettings?.image_resolution || '2K';
 
-    console.log(`[process-polza-task] Processing task ${taskId} via Polza API, resolution: ${imageResolution}`);
+    console.log(`[process-polza-task] Phase 1: Submitting task ${taskId} to Polza, resolution: ${imageResolution}`);
 
-    // Build images array for Polza Media API - use URLs directly (no base64 needed!)
+    // Build images array
     const inputImages: Array<{type: string; data: string}> = [];
     for (const img of productImages) {
       inputImages.push({ type: 'url', data: img.url });
@@ -129,7 +167,7 @@ serve(async (req) => {
       inputImages.push({ type: 'url', data: referenceImage.url });
     }
 
-    // Build the full prompt with image structure instructions
+    // Build structured prompt
     const structuredPrompt = `ВАЖНАЯ ИНФОРМАЦИЯ О СТРУКТУРЕ ИЗОБРАЖЕНИЙ:
 
 Я отправляю тебе ${productImages.length + (referenceImage ? 1 : 0)} изображений в следующем порядке:
@@ -147,7 +185,7 @@ ${referenceImage ? `2. Последнее изображение (референ
 
 ОБЯЗАТЕЛЬНО: Верни сгенерированное ИЗОБРАЖЕНИЕ карточки товара.`;
 
-    // Call Polza Media API
+    // Call Polza Media API (non-blocking - just submit)
     const mediaResponse = await fetch(`${POLZA_BASE_URL}/media`, {
       method: 'POST',
       headers: {
@@ -199,96 +237,95 @@ ${referenceImage ? `2. Последнее изображение (референ
     }
 
     const mediaResult = await mediaResponse.json();
-    console.log(`[process-polza-task] Media created: ${mediaResult.id}, status: ${mediaResult.status}`);
+    console.log(`[process-polza-task] Polza submitted: id=${mediaResult.id}, status=${mediaResult.status}`);
 
-    // If already completed (synchronous response)
-    let finalResult = mediaResult;
-    if (mediaResult.status === 'pending' || mediaResult.status === 'processing') {
-      // Poll for completion
-      finalResult = await pollMediaStatus(polzaApiKey, mediaResult.id);
+    // If already completed synchronously (unlikely but handle it)
+    if (mediaResult.status === 'completed') {
+      return await handleCompleted(supabase, task, mediaResult, polzaApiKey);
     }
 
-    // Extract image URL from response
-    // data can be a URL string, an array of URLs, or an object with url field
-    let imageUrl: string | null = null;
-    if (typeof finalResult.data === 'string') {
-      imageUrl = finalResult.data;
-    } else if (Array.isArray(finalResult.data) && finalResult.data.length > 0) {
-      const firstItem = finalResult.data[0];
-      imageUrl = typeof firstItem === 'string' ? firstItem : firstItem?.url || firstItem?.b64_json || null;
-    } else if (finalResult.data?.url) {
-      imageUrl = finalResult.data.url;
-    }
-
-    if (!imageUrl) {
-      console.error('[process-polza-task] No image URL in response:', JSON.stringify(finalResult));
-      throw new Error('No image generated by Polza');
-    }
-
-    console.log(`[process-polza-task] Got image URL from Polza: ${imageUrl.substring(0, 80)}...`);
-
-    // Download from Polza CDN and upload to Supabase Storage
-    const imgResponse = await fetch(imageUrl);
-    if (!imgResponse.ok) {
-      throw new Error(`Failed to download image from Polza CDN: ${imgResponse.status}`);
-    }
-
-    const imgBuffer = await imgResponse.arrayBuffer();
-    const imgBytes = new Uint8Array(imgBuffer);
-    const contentType = imgResponse.headers.get('content-type')?.split(';')[0]?.trim() || 'image/png';
-    const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
-
-    const storagePath = `generated/${task.job.user_id}/${task.job_id}/${taskId}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('generation-results')
-      .upload(storagePath, imgBytes, {
-        contentType,
-        upsert: true,
-      });
-
-    if (uploadError) {
-      console.error('[process-polza-task] Upload error:', uploadError);
-      throw new Error('Failed to upload to storage');
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('generation-results')
-      .getPublicUrl(storagePath);
-
-    // Update task as completed
-    await supabase
-      .from('generation_tasks')
-      .update({
-        status: 'completed',
-        image_url: publicUrl,
-        storage_path: storagePath,
-        completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', taskId);
-
-    // Update job completed count
-    await supabase.rpc('increment_completed_cards', { job_id_param: task.job_id });
-
-    console.log(`[process-polza-task] Task ${taskId} completed successfully via Polza`);
-
+    // Return the generation ID so orchestrator can poll later
     return new Response(
-      JSON.stringify({ success: true, imageUrl: publicUrl }),
+      JSON.stringify({ success: true, pending: true, polzaGenerationId: mediaResult.id }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('[process-polza-task] Error:', error);
-
-    // Try to mark task as failed
-    try {
-      const { taskId } = await new Response(null).json().catch(() => ({}));
-    } catch (_) {}
-
     return new Response(
       JSON.stringify({ error: error.message || 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
+
+// Handle completed Polza generation - download image and upload to Supabase Storage
+async function handleCompleted(supabase: any, task: any, finalResult: any, _polzaApiKey: string) {
+  const taskId = task.id;
+
+  // Extract image URL from response
+  let imageUrl: string | null = null;
+  if (typeof finalResult.data === 'string') {
+    imageUrl = finalResult.data;
+  } else if (Array.isArray(finalResult.data) && finalResult.data.length > 0) {
+    const firstItem = finalResult.data[0];
+    imageUrl = typeof firstItem === 'string' ? firstItem : firstItem?.url || firstItem?.b64_json || null;
+  } else if (finalResult.data?.url) {
+    imageUrl = finalResult.data.url;
+  }
+
+  if (!imageUrl) {
+    console.error('[process-polza-task] No image URL in response:', JSON.stringify(finalResult));
+    throw new Error('No image generated by Polza');
+  }
+
+  console.log(`[process-polza-task] Got image URL: ${imageUrl.substring(0, 80)}...`);
+
+  // Download and upload to Supabase Storage
+  const imgResponse = await fetch(imageUrl);
+  if (!imgResponse.ok) {
+    throw new Error(`Failed to download image from Polza CDN: ${imgResponse.status}`);
+  }
+
+  const imgBuffer = await imgResponse.arrayBuffer();
+  const imgBytes = new Uint8Array(imgBuffer);
+  const contentType = imgResponse.headers.get('content-type')?.split(';')[0]?.trim() || 'image/png';
+  const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? 'jpg' : 'png';
+
+  const storagePath = `generated/${task.job.user_id}/${task.job_id}/${taskId}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('generation-results')
+    .upload(storagePath, imgBytes, { contentType, upsert: true });
+
+  if (uploadError) {
+    console.error('[process-polza-task] Upload error:', uploadError);
+    throw new Error('Failed to upload to storage');
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('generation-results')
+    .getPublicUrl(storagePath);
+
+  // Update task as completed
+  await supabase
+    .from('generation_tasks')
+    .update({
+      status: 'completed',
+      image_url: publicUrl,
+      storage_path: storagePath,
+      completed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', taskId);
+
+  // Update job completed count
+  await supabase.rpc('increment_completed_cards', { job_id_param: task.job_id });
+
+  console.log(`[process-polza-task] Task ${taskId} completed successfully`);
+
+  return new Response(
+    JSON.stringify({ success: true, imageUrl: publicUrl }),
+    { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type', 'Content-Type': 'application/json' } }
+  );
+}

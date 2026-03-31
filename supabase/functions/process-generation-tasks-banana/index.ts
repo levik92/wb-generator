@@ -420,30 +420,43 @@ async function processTasks(
 
 async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: number, styleDescription?: string | null) {
   try {
-    // Mark as processing
-    await supabase
-      .from('generation_tasks')
-      .update({
-        status: 'processing',
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', task.id);
+    // Check if this is a Polza pending task (phase 2 - status check)
+    const isPolzaPending = (task.last_error || '').startsWith('polza_pending:');
 
-    // Get prompt for this card type (with optional style description)
-    const prompt = await getPromptTemplate(
-      supabase,
-      task.card_type,
-      job.product_name,
-      job.category,
-      job.description,
-      styleDescription
-    );
+    let prompt = '';
+    let sourceImageUrl = '';
+    let polzaGenerationId: string | undefined;
 
-    // Get source image URL
-    const sourceImageUrl = job.product_images?.[0]?.url;
-    if (!sourceImageUrl) {
-      throw new Error('No source image available');
+    if (isPolzaPending) {
+      // Phase 2: Extract generation ID and check status
+      polzaGenerationId = task.last_error.replace('polza_pending:', '');
+      console.log(`[polza] Phase 2: Checking status for generation ${polzaGenerationId} (task ${task.id})`);
+    } else {
+      // Phase 1 or direct processing: Mark as processing and prepare prompt
+      await supabase
+        .from('generation_tasks')
+        .update({
+          status: 'processing',
+          started_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', task.id);
+
+      // Get prompt for this card type (with optional style description)
+      prompt = await getPromptTemplate(
+        supabase,
+        task.card_type,
+        job.product_name,
+        job.category,
+        job.description,
+        styleDescription
+      );
+
+      // Get source image URL
+      sourceImageUrl = job.product_images?.[0]?.url;
+      if (!sourceImageUrl) {
+        throw new Error('No source image available');
+      }
     }
 
     // Determine which task processor to use based on api_provider setting
@@ -459,17 +472,38 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     console.log(`Using ${processorFunction} (provider: ${apiProvider}) for task ${task.id}`);
 
     // Call task processor
+    const invokeBody: any = { taskId: task.id };
+    if (polzaGenerationId) {
+      invokeBody.polzaGenerationId = polzaGenerationId;
+    } else {
+      invokeBody.sourceImageUrl = sourceImageUrl;
+      invokeBody.prompt = prompt;
+    }
+
     const result = await supabase.functions.invoke(processorFunction, {
-      body: {
-        taskId: task.id,
-        sourceImageUrl: sourceImageUrl,
-        prompt: prompt,
-      },
+      body: invokeBody,
     });
 
     // Check if error was already handled by the processor
     if (result.data?.handled === true) {
       console.log(`Task ${task.id} error already handled by ${processorFunction}: ${result.data?.error}`);
+      return;
+    }
+
+    // Handle Polza pending response - store generation ID and schedule retry
+    if (result.data?.pending === true && result.data?.polzaGenerationId) {
+      const genId = result.data.polzaGenerationId;
+      console.log(`[polza] Task ${task.id} pending, generation ID: ${genId}. Scheduling status check in 8s.`);
+      await supabase
+        .from('generation_tasks')
+        .update({
+          status: 'retrying',
+          last_error: `polza_pending:${genId}`,
+          retry_after: 8000,
+          retry_count: 0, // Don't count status checks as retries
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', task.id);
       return;
     }
 
@@ -485,7 +519,7 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       .single();
     
     if (updatedTask) {
-      console.log(`Task ${task.id} status after process-google-task: ${updatedTask.status}, retry_count: ${updatedTask.retry_count}`);
+      console.log(`Task ${task.id} status after ${processorFunction}: ${updatedTask.status}, retry_count: ${updatedTask.retry_count}`);
     }
 
   } catch (error) {
@@ -514,7 +548,7 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     // Non-retryable errors - retry won't help, stop immediately
     const NON_RETRYABLE = ['google_400', 'no_image_generated', 'IMAGE_SAFETY', 
                             'upload_failed', 'MALFORMED_FUNCTION_CALL', 'too_large',
-                            'url_generation_failed'];
+                            'url_generation_failed', 'polza_failed'];
     if (NON_RETRYABLE.some(e => currentLastError.includes(e))) {
       console.log(`Task ${task.id} has non-retryable error: ${currentLastError}, skipping retry`);
       return;
