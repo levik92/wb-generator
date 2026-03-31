@@ -224,24 +224,44 @@ serve(async (req) => {
                 "Content-Type": "application/json",
               };
             } else {
-              const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-              if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-              aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+              const geminiApiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+              if (!geminiApiKey) throw new Error("GOOGLE_GEMINI_API_KEY not configured");
+              aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`;
               aiHeaders = {
-                Authorization: `Bearer ${LOVABLE_API_KEY}`,
                 "Content-Type": "application/json",
               };
             }
 
-            const aiResp = await fetch(aiUrl, {
-              method: "POST",
-              headers: aiHeaders,
-              body: JSON.stringify({
-                model: "google/gemini-3.1-pro-preview",
-                messages,
-                stream: false,
-              }),
-            });
+            let aiResp: Response;
+
+            if (apiProvider === 'direct') {
+              // Direct Gemini API uses different format
+              const geminiMessages = messages.map((m: any) => ({
+                role: m.role === 'assistant' ? 'model' : m.role === 'system' ? 'user' : m.role,
+                parts: [{ text: m.role === 'system' ? `[System Instructions]: ${m.content}` : m.content }],
+              }));
+
+              aiResp = await fetch(aiUrl, {
+                method: "POST",
+                headers: aiHeaders,
+                body: JSON.stringify({
+                  contents: geminiMessages,
+                  generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1000,
+                  },
+                }),
+              });
+            } else {
+              aiResp = await fetch(aiUrl, {
+                method: "POST",
+                headers: aiHeaders,
+                body: JSON.stringify({
+                  messages,
+                  stream: false,
+                }),
+              });
+            }
 
             if (!aiResp.ok) {
               console.error("AI gateway error:", aiResp.status, await aiResp.text());
