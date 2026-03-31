@@ -26,6 +26,7 @@ interface Notification {
 
 interface NotificationCenterProps {
   profile: Profile;
+  onMarkAllReadRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 const getNotificationIcon = (type: string) => {
