@@ -240,7 +240,13 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-
+      {/* Mark all as read button */}
+      <div className="flex justify-end">
+        <Button onClick={markAllAsRead} variant="outline" size="sm" className="gap-2">
+          <CheckCheck className="w-4 h-4" />
+          Прочитать все
+        </Button>
+      </div>
 
       {news.length === 0 ? (
         <Card className="bg-card/80 backdrop-blur-xl border-border/50">
