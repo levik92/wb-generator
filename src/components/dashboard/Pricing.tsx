@@ -160,7 +160,7 @@ export default function Pricing({
               console.error('[CloudPayments] Payment failed:', reason);
               toast({
                 title: "Ошибка оплаты",
-                description: reason || "Платёж не прошёл. Попробуйте ещё раз.",
+                description: "Платёж отменён. Попробуйте ещё раз.",
                 variant: "destructive"
               });
               setLoading(null);
