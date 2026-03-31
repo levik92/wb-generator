@@ -136,6 +136,8 @@ export function PromptManager() {
   const [savingTechPrompt, setSavingTechPrompt] = useState(false);
   const [apiProvider, setApiProvider] = useState<'direct' | 'polza'>('direct');
   const [savingProvider, setSavingProvider] = useState(false);
+  const [videoApiProvider, setVideoApiProvider] = useState<'direct' | 'polza'>('direct');
+  const [savingVideoProvider, setSavingVideoProvider] = useState(false);
   useEffect(() => {
     loadPrompts();
     loadActiveModel();
@@ -164,7 +166,7 @@ export function PromptManager() {
       const {
         data,
         error
-      } = await supabase.from('ai_model_settings').select('active_model, api_provider').order('updated_at', {
+      } = await supabase.from('ai_model_settings').select('active_model, api_provider, video_api_provider').order('updated_at', {
         ascending: false
       }).limit(1).maybeSingle();
       if (error) throw error;
@@ -174,6 +176,9 @@ export function PromptManager() {
       }
       if ((data as any)?.api_provider) {
         setApiProvider((data as any).api_provider as 'direct' | 'polza');
+      }
+      if ((data as any)?.video_api_provider) {
+        setVideoApiProvider((data as any).video_api_provider as 'direct' | 'polza');
       }
     } catch (error) {
       console.error('Error loading active model:', error);
@@ -291,6 +296,26 @@ export function PromptManager() {
       toast({ title: "Ошибка", description: "Не удалось сохранить провайдера", variant: "destructive" });
     } finally {
       setSavingProvider(false);
+    }
+  };
+  const saveVideoApiProvider = async (provider: 'direct' | 'polza') => {
+    setSavingVideoProvider(true);
+    try {
+      const { data: existing } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      if (existing) {
+        const { error } = await supabase.from('ai_model_settings').update({ video_api_provider: provider } as any).eq('id', existing.id);
+        if (error) throw error;
+      }
+      setVideoApiProvider(provider);
+      toast({
+        title: "Успешно",
+        description: `Провайдер видео изменён на ${provider === 'direct' ? 'Прямое подключение (Kling)' : 'Польза AI'}`
+      });
+    } catch (error) {
+      console.error('Error saving video provider:', error);
+      toast({ title: "Ошибка", description: "Не удалось сохранить провайдера видео", variant: "destructive" });
+    } finally {
+      setSavingVideoProvider(false);
     }
   };
   const togglePrompt = (promptId: string) => {
@@ -645,18 +670,58 @@ export function PromptManager() {
               </p>
             </div>
 
-            {/* Video Model */}
+            {/* Video API Provider Selection */}
+            <Card className="bg-card border-primary/20">
+              <CardHeader>
+                <CardTitle className="text-lg">API Провайдер видео</CardTitle>
+                <CardDescription>
+                  Отдельный переключатель провайдера для видеогенерации. Можно использовать другой провайдер, чем для изображений.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup value={videoApiProvider} onValueChange={value => saveVideoApiProvider(value as 'direct' | 'polza')} disabled={savingVideoProvider} className="space-y-3">
+                  <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
+                    <RadioGroupItem value="direct" id="video-provider-direct" />
+                    <Label htmlFor="video-provider-direct" className="flex-1 cursor-pointer">
+                      <div className="font-semibold mb-[6px]">Прямое подключение (Kling API)</div>
+                      <div className="text-xs text-muted-foreground">
+                        Прямые вызовы к Kling AI через официальный API. Формат 3:4, модель kling-v2-6.
+                      </div>
+                    </Label>
+                    {videoApiProvider === 'direct' && <Badge variant="default">Активен</Badge>}
+                  </div>
+                  <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
+                    <RadioGroupItem value="polza" id="video-provider-polza" />
+                    <Label htmlFor="video-provider-polza" className="flex-1 cursor-pointer">
+                      <div className="font-semibold mb-[6px]">Польза AI (Polza)</div>
+                      <div className="text-xs text-muted-foreground">
+                        Видеогенерация через Polza AI. Модель kling/v3, формат 9:16.
+                      </div>
+                    </Label>
+                    {videoApiProvider === 'polza' && <Badge variant="default">Активен</Badge>}
+                  </div>
+                </RadioGroup>
+                {savingVideoProvider && <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full border-[2px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+                    Сохранение настроек...
+                  </div>}
+              </CardContent>
+            </Card>
+
+            {/* Video Model Info */}
             <Card className="bg-card">
               <CardHeader>
                 <CardTitle className="text-lg">Модель видеогенерации</CardTitle>
-                <CardDescription>Текущая модель для генерации видеообложек</CardDescription>
+                <CardDescription>Текущая модель зависит от выбранного провайдера</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-3 rounded-lg border p-4 bg-accent/5">
                   <div className="flex-1">
-                    <div className="font-semibold mb-1">Kling AI v2.6</div>
+                    <div className="font-semibold mb-1">{videoApiProvider === 'polza' ? 'Kling 3.0 (через Polza)' : 'Kling AI v2.6 (Direct)'}</div>
                     <div className="text-xs text-muted-foreground">
-                      Image-to-video, 5 секунд, формат 3:4, режим std
+                      {videoApiProvider === 'polza'
+                        ? 'Image-to-video, 5 секунд, формат 9:16, режим std'
+                        : 'Image-to-video, 5 секунд, формат 3:4, режим std'}
                     </div>
                   </div>
                   <Badge variant="default">Активна</Badge>

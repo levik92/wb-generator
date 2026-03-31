@@ -84,7 +84,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
   const AUTO_PROMPT_TEXT = "Самостоятельно придумай и определи наилучшие параметры анимации для достижения максимально качественного результата.";
   
   const { data: aiModelData } = useActiveAiModel();
-  const provider = aiModelData?.provider;
+  const provider = aiModelData?.videoProvider;
 
   // Video promo banner dismissal
   const VIDEO_PROMO_KEY = `video_promo_banner_dismissed_${profile.id}`;
