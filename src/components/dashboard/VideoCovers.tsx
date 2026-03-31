@@ -220,7 +220,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
         // Immediately check actual status before showing loading UI
         try {
-          const { data: statusData } = await supabase.functions.invoke("check-video-status", {
+          const checkFn = getVideoEdgeFunctionName("check-video-status", provider);
+          const { data: statusData } = await supabase.functions.invoke(checkFn, {
             body: { job_id: activeJob.id },
           });
           if (statusData?.status === "completed") {
