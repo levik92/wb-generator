@@ -440,7 +440,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
     setElapsedSeconds(0);
 
     try {
-      const { data, error } = await supabase.functions.invoke("regenerate-video-job", {
+      const regenFn = getVideoEdgeFunctionName("regenerate-video-job", provider);
+      const { data, error } = await supabase.functions.invoke(regenFn, {
         body: { original_job_id: currentJob.id, user_prompt: regenPrompt.trim() || undefined },
       });
 
