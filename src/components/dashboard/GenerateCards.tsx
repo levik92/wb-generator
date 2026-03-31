@@ -602,7 +602,7 @@ export const GenerateCards = ({
         reader.readAsDataURL(file);
       });
       
-      const identifyFn = getIdentifyFunctionName(aiModelData?.provider);
+      const identifyFn = getIdentifyFunctionName(activeModel?.provider);
       const { data, error } = await supabase.functions.invoke(identifyFn, {
         body: { imageBase64: base64 },
       });
