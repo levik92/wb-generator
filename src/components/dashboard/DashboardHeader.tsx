@@ -25,22 +25,43 @@ interface Notification {
   created_at: string;
 }
 
+const TAB_TITLES: Record<string, { title: string; subtitle: string }> = {
+  cards: { title: 'Генерация карточек', subtitle: 'Создайте карточки для Wildberries с помощью ИИ' },
+  video: { title: 'Видеообложки', subtitle: 'Создайте видеообложки для карточек' },
+  description: { title: 'Генерация описаний', subtitle: 'Создайте описание товара для Wildberries' },
+  labels: { title: 'Генератор этикеток', subtitle: 'Создание этикеток для товаров' },
+  history: { title: 'История генераций', subtitle: 'Все ваши созданные карточки и описания' },
+  pricing: { title: 'Баланс', subtitle: 'Пополнение и управление токенами' },
+  bonuses: { title: 'Бонусы', subtitle: 'Бонусные и реферальные программы' },
+  settings: { title: 'Настройки', subtitle: 'Управление профилем и подключениями' },
+  notifications: { title: 'Уведомления', subtitle: 'Ваши уведомления' },
+  news: { title: 'Новости', subtitle: 'Последние обновления сервиса' },
+  learning: { title: 'Обучение', subtitle: 'Видеоуроки и материалы' },
+  support: { title: 'Поддержка', subtitle: 'Чат с поддержкой' },
+};
+
 interface DashboardHeaderProps {
   profile: Profile;
+  activeTab: string;
   onSignOut: () => void;
   onNavigateToSettings: () => void;
   onNavigateToSupport?: () => void;
+  headerActions?: React.ReactNode;
 }
 
 export const DashboardHeader = ({
   profile,
+  activeTab,
   onSignOut,
   onNavigateToSettings,
-  onNavigateToSupport
+  onNavigateToSupport,
+  headerActions
 }: DashboardHeaderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const isMobile = useIsMobile();
+
+  const currentTab = TAB_TITLES[activeTab] || TAB_TITLES.cards;
 
   useEffect(() => {
     fetchNotifications();
@@ -100,16 +121,21 @@ export const DashboardHeader = ({
   };
 
   return (
-    <header className="border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-20">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <div>
-          <h1 className="text-lg md:text-xl font-bold text-foreground">Добро пожаловать!</h1>
-          <p className="text-xs text-muted-foreground hidden sm:block">
-            AI-сервис для создания карточек Wildberries
-          </p>
+    <header className="border-b border-border bg-card sticky top-0 z-20">
+      <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="min-w-0">
+            <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
+            <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
+          </div>
+          {headerActions && (
+            <div className="flex items-center gap-2 shrink-0">
+              {headerActions}
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <ThemeToggle />
           
           {/* Notifications */}
