@@ -34,7 +34,7 @@ serve(async (req) => {
     const { data, error: queryError } = await supabase
       .from('profiles')
       .select('id')
-      .eq('email', email.toLowerCase())
+      .ilike('email', email.trim())
       .limit(1);
 
     if (queryError) {
