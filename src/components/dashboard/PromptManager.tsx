@@ -22,6 +22,7 @@ interface Prompt {
 interface ModelSettings {
   id: string;
   active_model: 'openai' | 'google';
+  api_provider?: 'direct' | 'polza';
 }
 const getPromptDisplayName = (type: string): {
   name: string;
