@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,20 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
       window.open(`/invoice/${data.invoiceNumber}`, '_blank');
     } catch (error) {
       console.error("Create invoice error:", error);
-      toast({ title: "Ошибка", description: "Не удалось создать счёт", variant: "destructive" });
+
+      let description = "Не удалось создать счёт";
+      if (error instanceof FunctionsHttpError) {
+        try {
+          const details = await error.context.json();
+          description = details?.error || details?.message || description;
+        } catch {
+          description = error.message || description;
+        }
+      } else if (error instanceof Error) {
+        description = error.message || description;
+      }
+
+      toast({ title: "Ошибка", description, variant: "destructive" });
     } finally {
       setCreating(false);
     }
