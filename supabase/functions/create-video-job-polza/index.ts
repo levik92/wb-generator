@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
           prompt,
           images: [{ type: "url", data: image_url }],
           aspect_ratio: "9:16",
-          duration: 5,
+          duration: "5",
           mode: "std",
           sound: "false",
         },
