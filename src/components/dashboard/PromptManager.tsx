@@ -298,6 +298,26 @@ export function PromptManager() {
       setSavingProvider(false);
     }
   };
+  const saveVideoApiProvider = async (provider: 'direct' | 'polza') => {
+    setSavingVideoProvider(true);
+    try {
+      const { data: existing } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      if (existing) {
+        const { error } = await supabase.from('ai_model_settings').update({ video_api_provider: provider } as any).eq('id', existing.id);
+        if (error) throw error;
+      }
+      setVideoApiProvider(provider);
+      toast({
+        title: "Успешно",
+        description: `Провайдер видео изменён на ${provider === 'direct' ? 'Прямое подключение (Kling)' : 'Польза AI'}`
+      });
+    } catch (error) {
+      console.error('Error saving video provider:', error);
+      toast({ title: "Ошибка", description: "Не удалось сохранить провайдера видео", variant: "destructive" });
+    } finally {
+      setSavingVideoProvider(false);
+    }
+  };
   const togglePrompt = (promptId: string) => {
     setOpenPrompts(prev => {
       const newSet = new Set(prev);
