@@ -166,7 +166,7 @@ export function PromptManager() {
       const {
         data,
         error
-      } = await supabase.from('ai_model_settings').select('active_model, api_provider').order('updated_at', {
+      } = await supabase.from('ai_model_settings').select('active_model, api_provider, video_api_provider').order('updated_at', {
         ascending: false
       }).limit(1).maybeSingle();
       if (error) throw error;
@@ -176,6 +176,9 @@ export function PromptManager() {
       }
       if ((data as any)?.api_provider) {
         setApiProvider((data as any).api_provider as 'direct' | 'polza');
+      }
+      if ((data as any)?.video_api_provider) {
+        setVideoApiProvider((data as any).video_api_provider as 'direct' | 'polza');
       }
     } catch (error) {
       console.error('Error loading active model:', error);
