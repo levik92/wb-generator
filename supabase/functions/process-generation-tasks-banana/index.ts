@@ -459,9 +459,9 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       },
     });
 
-    // Check if error was already handled by process-google-task
+    // Check if error was already handled by the processor
     if (result.data?.handled === true) {
-      console.log(`Task ${task.id} error already handled by process-google-task: ${result.data?.error}`);
+      console.log(`Task ${task.id} error already handled by ${processorFunction}: ${result.data?.error}`);
       return;
     }
 
