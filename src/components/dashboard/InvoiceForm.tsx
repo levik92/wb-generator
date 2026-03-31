@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, FileDown, Building2 } from "lucide-react";
+import { Loader2, FileDown, Building2, Search } from "lucide-react";
 import type { PaymentPackage } from "@/hooks/usePaymentPackages";
 import {
   ResponsiveDialog,
@@ -37,11 +37,41 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
 
   const [bankName, setBankName] = useState("");
   const [bik, setBik] = useState("");
   const [checkingAccount, setCheckingAccount] = useState("");
   const [corrAccount, setCorrAccount] = useState("");
+
+  const lookupByInn = useCallback(async (inn: string) => {
+    if (!/^\d{10}$|^\d{12}$/.test(inn)) return;
+    setLookingUp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("lookup-counterparty", {
+        body: { inn },
+      });
+      if (error || !data?.found) return;
+
+      // Fill only empty fields
+      setOrgData(prev => ({
+        ...prev,
+        name: prev.name || data.name || "",
+        kpp: prev.kpp || data.kpp || "",
+        legal_address: prev.legal_address || data.legalAddress || "",
+      }));
+      if (!bankName && data.bankName) setBankName(data.bankName);
+      if (!bik && data.bik) setBik(data.bik);
+      if (!checkingAccount && data.checkingAccount) setCheckingAccount(data.checkingAccount);
+      if (!corrAccount && data.corrAccount) setCorrAccount(data.corrAccount);
+
+      toast({ title: "Данные найдены", description: "Реквизиты заполнены автоматически" });
+    } catch (e) {
+      console.error("INN lookup error:", e);
+    } finally {
+      setLookingUp(false);
+    }
+  }, [bankName, bik, checkingAccount, corrAccount]);
 
   const handleCreateInvoice = async () => {
     if (!orgData.name || !orgData.inn) {
@@ -58,12 +88,7 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
       const { data, error } = await supabase.functions.invoke("create-tochka-invoice", {
         body: {
           orgData,
-          bankDetails: {
-            bankName,
-            bik,
-            checkingAccount,
-            corrAccount,
-          },
+          bankDetails: { bankName, bik, checkingAccount, corrAccount },
           packageId: selectedPackage.id,
           packageName: selectedPackage.name,
           packagePrice: selectedPackage.price,
@@ -105,12 +130,31 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2 space-y-1.5">
+              <Label className="text-xs">ИНН *</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={orgData.inn}
+                  onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value.replace(/\D/g, '').slice(0, 12) }))}
+                  onBlur={e => lookupByInn(e.target.value)}
+                  placeholder="10 или 12 цифр"
+                  maxLength={12}
+                  className="min-w-0"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  disabled={lookingUp || !/^\d{10}$|^\d{12}$/.test(orgData.inn)}
+                  onClick={() => lookupByInn(orgData.inn)}
+                  title="Найти по ИНН"
+                >
+                  {lookingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="sm:col-span-2 space-y-1.5">
               <Label className="text-xs">Название организации *</Label>
               <Input value={orgData.name} onChange={e => setOrgData(prev => ({ ...prev, name: e.target.value }))} placeholder="ООО «Название»" className="min-w-0" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">ИНН *</Label>
-              <Input value={orgData.inn} onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value.replace(/\D/g, '').slice(0, 12) }))} placeholder="10 или 12 цифр" maxLength={12} className="min-w-0" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">КПП</Label>
