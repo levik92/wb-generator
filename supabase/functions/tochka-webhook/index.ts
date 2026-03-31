@@ -1,7 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
-  // Tochka requires 200 response always
   const ok = (msg = "ok") =>
     new Response(JSON.stringify({ status: msg }), {
       status: 200,
@@ -20,7 +19,7 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     console.log("Tochka webhook payload:", JSON.stringify(payload));
 
-    // Log every webhook call for security
+    // Log every webhook call
     await supabase.rpc("log_security_event", {
       user_id_param: null,
       event_type_param: "tochka_webhook_received",
@@ -31,8 +30,6 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Parse the webhook data
-    // Tochka sends: { Data: { eventType: "incomingPayment", ... } }
     const data = payload?.Data || payload;
     const eventType = data?.eventType;
 
@@ -76,7 +73,7 @@ Deno.serve(async (req) => {
       return ok("invoice_not_found");
     }
 
-    // Validate: amount must match
+    // Validate amount
     if (Math.abs(invoice.amount - amount) > 0.01) {
       console.warn("Amount mismatch:", { expected: invoice.amount, received: amount });
       await supabase.rpc("log_security_event", {
@@ -93,7 +90,7 @@ Deno.serve(async (req) => {
       return ok("amount_mismatch");
     }
 
-    // Validate: payer ИНН should match (if available)
+    // Validate payer INN (warn only, still process)
     const orgInn = (invoice as any).organization_details?.inn;
     if (payerInn && orgInn && payerInn !== orgInn) {
       console.warn("INN mismatch:", { expected: orgInn, received: payerInn });
@@ -101,54 +98,45 @@ Deno.serve(async (req) => {
         user_id_param: invoice.user_id,
         event_type_param: "tochka_webhook_inn_mismatch",
         event_description_param: `INN mismatch for ${invoiceNumber}`,
-        metadata_param: {
-          invoice_number: invoiceNumber,
-          expected_inn: orgInn,
-          received_inn: payerInn,
-        },
+        metadata_param: { invoice_number: invoiceNumber, expected_inn: orgInn, received_inn: payerInn },
       });
-      // Still process — INN from webhook may differ from buyer org
     }
 
-    // All checks passed — process the payment
-    // 1. Update invoice status
-    await supabase
-      .from("invoice_payments")
-      .update({
-        status: "paid",
-        tochka_status: "payment_paid",
-        reviewed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", invoice.id);
-
-    // 2. Credit tokens via existing RPC
-    const { error: creditError } = await supabase.rpc("process_invoice_payment", {
+    // Process payment via RPC (handles status update + token credit)
+    const { error: rpcError } = await supabase.rpc("process_invoice_payment", {
       p_invoice_id: invoice.id,
-      p_admin_id: invoice.user_id, // system action, use user_id
+      p_admin_id: invoice.user_id,
       p_action: "approve",
     });
 
-    if (creditError) {
-      // Invoice already updated to paid, so just use direct token credit
-      console.error("process_invoice_payment RPC error, using direct credit:", creditError);
-      
-      // Bypass token protection and credit directly
-      const { error: directError } = await supabase.rpc("admin_update_user_tokens", {
-        target_user_id: invoice.user_id,
-        new_balance: -1, // placeholder, we'll use a different approach
-        reason: "auto",
-      });
-      
-      // Actually, let's just use refund_tokens which adds to existing balance
+    if (rpcError) {
+      console.error("process_invoice_payment RPC error, using fallback:", rpcError);
+
+      // Fallback: manually update status and credit tokens
+      await supabase
+        .from("invoice_payments")
+        .update({
+          status: "paid",
+          tochka_status: "payment_paid",
+          reviewed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", invoice.id);
+
       await supabase.rpc("refund_tokens", {
         user_id_param: invoice.user_id,
         tokens_amount: invoice.tokens_amount,
         reason_text: `Оплата по счёту #${invoiceNumber} — ${invoice.package_name}`,
       });
+    } else {
+      // RPC succeeded, just update tochka_status
+      await supabase
+        .from("invoice_payments")
+        .update({ tochka_status: "payment_paid", updated_at: new Date().toISOString() })
+        .eq("id", invoice.id);
     }
 
-    // 3. Log security event for successful payment
+    // Log success
     await supabase.rpc("log_security_event", {
       user_id_param: invoice.user_id,
       event_type_param: "tochka_payment_processed",
