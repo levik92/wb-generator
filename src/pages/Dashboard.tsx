@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, useCallback } from "react";
+import { useState, useEffect, lazy, Suspense, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { forceSignOut } from "@/lib/auth";
@@ -15,7 +15,8 @@ import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones, Filter, CheckCheck, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mobile components
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
