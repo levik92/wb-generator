@@ -10,19 +10,20 @@ export const useActiveAiModel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ai_model_settings')
-        .select('active_model, api_provider')
+        .select('active_model, api_provider, video_api_provider')
         .order('updated_at', { ascending: false })
         .limit(1)
         .single();
 
       if (error) {
         console.error('Error fetching active model:', error);
-        return { model: 'openai' as ActiveModel, provider: 'direct' as ApiProvider };
+        return { model: 'openai' as ActiveModel, provider: 'direct' as ApiProvider, videoProvider: 'direct' as ApiProvider };
       }
 
       return {
         model: (data?.active_model || 'openai') as ActiveModel,
         provider: ((data as any)?.api_provider || 'direct') as ApiProvider,
+        videoProvider: ((data as any)?.video_api_provider || 'direct') as ApiProvider,
       };
     },
     staleTime: 5 * 60 * 1000,
@@ -52,9 +53,9 @@ export const getImageEdgeFunctionName = (baseFunction: string, model: ActiveMode
   return `${baseFunction}-v2`;
 };
 
-// For video functions
-export const getVideoEdgeFunctionName = (baseFunction: string, provider?: ApiProvider): string => {
-  if (provider === 'polza') {
+// For video functions — uses separate videoProvider setting
+export const getVideoEdgeFunctionName = (baseFunction: string, videoProvider?: ApiProvider): string => {
+  if (videoProvider === 'polza') {
     return `${baseFunction}-polza`;
   }
   return baseFunction;

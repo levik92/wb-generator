@@ -46,6 +46,7 @@ export type Database = {
           id: string
           image_resolution: string | null
           updated_at: string | null
+          video_api_provider: string
         }
         Insert: {
           active_model: string
@@ -54,6 +55,7 @@ export type Database = {
           id?: string
           image_resolution?: string | null
           updated_at?: string | null
+          video_api_provider?: string
         }
         Update: {
           active_model?: string
@@ -62,6 +64,7 @@ export type Database = {
           id?: string
           image_resolution?: string | null
           updated_at?: string | null
+          video_api_provider?: string
         }
         Relationships: []
       }

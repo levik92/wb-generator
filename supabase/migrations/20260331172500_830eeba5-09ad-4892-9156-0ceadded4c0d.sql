@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_model_settings ADD COLUMN video_api_provider text NOT NULL DEFAULT 'direct';
