@@ -1,55 +1,159 @@
 
 
-# Plan: Fix Polza Video Generation — Wrong Model ID
+# Plan: Tochka Bank Invoice Automation + Webhook Payment Processing
 
-## Problem
-Error: `Модель "kling-v2-6" не найдена`. The model ID `kling-v2-6` is invalid on Polza AI. According to Polza docs, valid Kling models are:
-- `kling/v3` — Kling 3.0 (latest, 3-15 sec, mode: std/pro, sound support)
-- `kling/v2.5-turbo` — Kling 2.5 Turbo (5 or 10 sec)
+## Overview
 
-## Solution
-Update both video functions to use `kling/v3` and fix the request body to match Polza's API format for Kling 3.0.
+Automate B2B invoice creation via Tochka Bank API and auto-credit tokens when payment is received via bank webhook.
 
-### Changes in `create-video-job-polza/index.ts` and `regenerate-video-job-polza/index.ts`:
+## Current State
 
-**Before:**
+- Invoice form (`InvoiceForm.tsx`) saves org data to `organization_details`, creates a record in `invoice_payments`, and opens a PDF page
+- Invoice is generated client-side as PDF via jsPDF
+- Payment confirmation is manual: user clicks "Я оплатил" → admin reviews in admin panel → manually approves
+- Seller details are hardcoded in `InvoicePage.tsx` (ООО АЛЬТАИР, ИНН 9724238597, bank Точка)
+
+## Architecture
+
+```text
+┌─────────────┐     ┌──────────────────────┐     ┌──────────────────┐
+│ InvoiceForm │────▶│ create-tochka-invoice│────▶│ Tochka API       │
+│ (frontend)  │     │ (Edge Function)      │     │ POST /bills      │
+└─────────────┘     └──────────────────────┘     └──────────────────┘
+                            │                           │
+                            ▼                           │
+                    ┌──────────────┐                     │
+                    │invoice_payments│                    │
+                    │(tochka_doc_id)│                    │
+                    └──────────────┘                     │
+                                                        │
+┌──────────────────┐     ┌─────────────────────────┐    │
+│ Tochka Bank      │────▶│ tochka-webhook          │◀───┘
+│ incomingPayment  │     │ (Edge Function)         │
+│ webhook          │     │ matches by ИНН + сумма  │
+└──────────────────┘     │ + номер счёта           │
+                         └──────────┬──────────────┘
+                                    ▼
+                         ┌──────────────────┐
+                         │ Auto-credit      │
+                         │ tokens to user   │
+                         └──────────────────┘
+```
+
+## Step 1: Add Secrets
+
+Request two secrets from the user:
+- `TOCHKA_API_TOKEN` — Bearer token for Tochka API (OAuth2)
+- `TOCHKA_CLIENT_ID` — Application client_id for webhook management
+- `TOCHKA_ACCOUNT_ID` — Bank account identifier (e.g., `40702810120000295325/044525104`)
+- `TOCHKA_CUSTOMER_CODE` — Customer code from Get Customers List
+
+## Step 2: Database Migration
+
+Add columns to `invoice_payments`:
+- `tochka_document_id` (text, nullable) — documentId returned by Tochka
+- `tochka_status` (text, nullable) — payment status from Tochka (`payment_waiting`, `payment_paid`, `payment_expired`)
+
+## Step 3: Edge Function — `create-tochka-invoice`
+
+New edge function that:
+1. Receives authenticated request with invoice data (org details, package info)
+2. Saves org data to `organization_details`
+3. Creates invoice record in `invoice_payments`
+4. Calls Tochka API `POST https://enter.tochka.com/uapi/invoice/v1.0/bills` with:
+   - `accountId` — from secret
+   - `customerCode` — from secret
+   - `SecondSide` — buyer's ИНН, КПП, name, address, bank details
+   - `Content.Invoice` — position name, amount, number, payment purpose
+5. Saves returned `documentId` to `invoice_payments.tochka_document_id`
+6. Returns invoice number and document ID
+
+**Tochka API request body:**
 ```json
 {
-  "model": "kling-v2-6",
-  "input": {
-    "prompt": "...",
-    "images": [{ "type": "url", "data": "..." }],
-    "aspect_ratio": "3:4",
-    "duration": "5",
-    "mode": "std"
+  "Data": {
+    "accountId": "SELLER_ACCOUNT_ID",
+    "customerCode": "SELLER_CUSTOMER_CODE",
+    "SecondSide": {
+      "taxCode": "BUYER_INN",
+      "type": "company",
+      "secondSideName": "BUYER_NAME",
+      "kpp": "BUYER_KPP",
+      "legalAddress": "BUYER_ADDRESS",
+      "accountId": "BUYER_RS/BUYER_BIK",
+      "bankName": "BUYER_BANK",
+      "bankCorrAccount": "BUYER_KS"
+    },
+    "Content": {
+      "Invoice": {
+        "Positions": [{
+          "positionName": "Пополнение тарифа ...",
+          "unitCode": "услуга.",
+          "ndsKind": "without_nds",
+          "price": AMOUNT,
+          "quantity": 1,
+          "totalAmount": AMOUNT
+        }],
+        "totalAmount": AMOUNT,
+        "number": "WBG-XXXX",
+        "comment": "Без НДС",
+        "paymentExpiryDate": "+5 days"
+      }
+    }
   }
 }
 ```
 
-**After (per Polza docs for Kling 3.0):**
-```json
+## Step 4: Edge Function — `tochka-webhook`
+
+Public endpoint (no JWT) that:
+1. Receives `incomingPayment` webhook from Tochka
+2. Payload contains `SidePayer` (ИНН, name, amount) and `purpose` (payment description)
+3. Parses invoice number from `purpose` field (regex for `WBG-\d+`)
+4. Looks up `invoice_payments` by invoice_number + amount + payer ИНН
+5. If match found:
+   - Updates `invoice_payments.status` → `paid`, `tochka_status` → `payment_paid`
+   - Calls existing `process_payment_success` or equivalent RPC to credit tokens
+   - Creates notification for the user
+   - Logs security event
+6. Returns 200 OK (Tochka requires 200 response)
+
+## Step 5: Update Frontend
+
+**InvoiceForm.tsx:**
+- Change `handleCreateInvoice` to call `create-tochka-invoice` edge function instead of direct DB inserts
+- Show success with invoice number
+
+**InvoicePage.tsx:**
+- Remove "Я оплатил" button — payments are now auto-detected
+- Add info banner: "Оплата будет зачислена автоматически после поступления средств"
+- Keep PDF download functionality
+
+## Step 6: Webhook Registration (Manual)
+
+After deployment, the user needs to register the webhook URL in Tochka:
+```
+PUT https://enter.tochka.com/uapi/webhook/v1.0/{client_id}
 {
-  "model": "kling/v3",
-  "input": {
-    "prompt": "...",
-    "images": [{ "type": "url", "data": "..." }],
-    "aspect_ratio": "9:16",
-    "duration": 5,
-    "mode": "std",
-    "sound": "false"
-  },
-  "async": true
+  "webhooksList": ["incomingPayment"],
+  "url": "https://xguiyabpngjkavyosbza.supabase.co/functions/v1/tochka-webhook"
 }
 ```
+This can be done via curl or we can create a one-time admin action.
 
-Key differences:
-1. Model: `kling-v2-6` → `kling/v3`
-2. `duration`: string `"5"` → number `5`
-3. `aspect_ratio`: `"3:4"` → `"9:16"` (Kling 3.0 supports 16:9, 9:16, 1:1 only — no 3:4)
-4. Add required `sound: "false"`
-5. Add `async: true` for proper async handling
+## Files to Create/Modify
 
-## Files
-1. `supabase/functions/create-video-job-polza/index.ts` — line ~115-124
-2. `supabase/functions/regenerate-video-job-polza/index.ts` — line ~137-146
+| File | Action |
+|------|--------|
+| `supabase/migrations/...` | Add `tochka_document_id`, `tochka_status` to `invoice_payments` |
+| `supabase/functions/create-tochka-invoice/index.ts` | New — creates invoice via Tochka API |
+| `supabase/functions/tochka-webhook/index.ts` | New — processes incoming payment webhooks |
+| `src/components/dashboard/InvoiceForm.tsx` | Call edge function instead of direct inserts |
+| `src/pages/InvoicePage.tsx` | Remove manual confirmation, add auto-payment info |
+
+## Security Considerations
+
+- Webhook endpoint is public but validates payment data (ИНН + amount + invoice number match)
+- All token credits go through existing `process_invoice_payment` RPC with service_role
+- Security events logged for every webhook call
 
