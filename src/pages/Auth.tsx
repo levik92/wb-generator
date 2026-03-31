@@ -95,6 +95,17 @@ const Auth = () => {
     setCaptchaKey(k => k + 1);
   }, [activeTab]);
 
+  const getStableAuthBaseUrl = () => {
+    if (typeof window === "undefined") return "https://wbgen.ru";
+
+    const { hostname, origin } = window.location;
+    const isPreviewHost = hostname.endsWith(".lovableproject.com") || hostname.endsWith(".lovable.app");
+
+    return isPreviewHost ? "https://wbgen.ru" : origin;
+  };
+
+  const getAuthRedirectUrl = (path = "/auth?tab=signin") => `${getStableAuthBaseUrl()}${path}`;
+
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
     if (password.length < 8) {
       return { isValid: false, message: "Пароль должен содержать минимум 8 символов" };
@@ -174,11 +185,11 @@ const Auth = () => {
         return;
       }
 
-      const redirectUrl = `${window.location.origin}/dashboard`;
-      const signupOptions: any = { emailRedirectTo: redirectUrl };
+      const signupOptions: any = {
+        emailRedirectTo: getAuthRedirectUrl("/auth?tab=signin"),
+      };
 
       if (captchaToken) signupOptions.captchaToken = captchaToken;
-      // Build signup metadata with referral, partner, and UTM data
       const utmSourceId = getStoredUtmSourceId();
       const metaData: Record<string, string> = {};
       if (referralCode) metaData.referral_code = referralCode;
@@ -186,7 +197,7 @@ const Auth = () => {
       if (utmSourceId) metaData.utm_source_id = utmSourceId;
       if (Object.keys(metaData).length > 0) signupOptions.data = metaData;
 
-      const { data: signUpData, error } = await supabase.auth.signUp({ email, password, options: signupOptions });
+      const { error } = await supabase.auth.signUp({ email, password, options: signupOptions });
 
       if (error) {
         await logLoginAttempt(email, false, error.message);
@@ -197,15 +208,17 @@ const Auth = () => {
       setPendingConfirmationEmail(email);
       setActiveTab("confirm-email");
       setCaptchaToken(null);
-      setCaptchaKey(k => k + 1);
+      setCaptchaKey((k) => k + 1);
     } catch (error: any) {
-      console.error('Signup error:', error?.message, error?.status, error);
-      const msg = error?.message?.includes('already registered')
-        ? 'Аккаунт с таким email уже зарегистрирован. Войдите через вкладку «Вход».'
-        : 'Не удалось создать аккаунт. Попробуйте позже';
+      console.error("Signup error:", error?.message, error?.status, error);
+      const msg = error?.message?.includes("already registered")
+        ? "Аккаунт с таким email уже зарегистрирован. Войдите через вкладку «Вход»."
+        : error?.message?.includes("Error sending confirmation email")
+          ? "Не удалось отправить письмо подтверждения. Попробуйте ещё раз через минуту."
+          : "Не удалось создать аккаунт. Попробуйте позже";
       toast({ title: "Ошибка регистрации", description: msg, variant: "destructive" });
       setCaptchaToken(null);
-      setCaptchaKey(k => k + 1);
+      setCaptchaKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
@@ -218,6 +231,9 @@ const Auth = () => {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: pendingConfirmationEmail,
+        options: {
+          emailRedirectTo: getAuthRedirectUrl("/auth?tab=signin"),
+        },
       });
       if (error) throw error;
       toast({
