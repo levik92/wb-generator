@@ -95,16 +95,7 @@ const Auth = () => {
     setCaptchaKey(k => k + 1);
   }, [activeTab]);
 
-  const getStableAuthBaseUrl = () => {
-    if (typeof window === "undefined") return "https://wbgen.ru";
-
-    const { hostname, origin } = window.location;
-    const isPreviewHost = hostname.endsWith(".lovableproject.com") || hostname.endsWith(".lovable.app");
-
-    return isPreviewHost ? "https://wbgen.ru" : origin;
-  };
-
-  const getAuthRedirectUrl = (path = "/auth?tab=signin") => `${getStableAuthBaseUrl()}${path}`;
+  const getAuthRedirectUrl = (path = "/auth?tab=signin") => `${window.location.origin}${path}`;
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
     if (password.length < 8) {
