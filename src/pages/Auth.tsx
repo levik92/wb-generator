@@ -764,6 +764,63 @@ const Auth = () => {
               </form>
             )}
 
+            {/* Email Confirmation Screen */}
+            {activeTab === "confirm-email" && (
+              <div className="space-y-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[hsl(268,83%,58%)]/20 flex items-center justify-center">
+                  <Mail className="w-8 h-8 text-[hsl(268,83%,65%)]" />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-white text-sm">
+                    Мы отправили письмо с подтверждением на
+                  </p>
+                  <p className="text-[hsl(268,83%,65%)] font-medium text-sm break-all">
+                    {pendingConfirmationEmail}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-left space-y-2">
+                  <p className="text-white/70 text-sm font-medium">Что нужно сделать:</p>
+                  <ol className="text-white/50 text-sm space-y-1 list-decimal list-inside">
+                    <li>Откройте почту и найдите письмо от WBGen</li>
+                    <li>Нажмите кнопку подтверждения в письме</li>
+                    <li>Вернитесь сюда и войдите в аккаунт</li>
+                  </ol>
+                  <p className="text-white/40 text-xs mt-2">
+                    💡 Если письмо не пришло — проверьте папку «Спам»
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resending}
+                    variant="outline"
+                    className="w-full h-12 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white rounded-xl"
+                  >
+                    {resending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "Отправить письмо повторно"
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("signin");
+                      setPendingConfirmationEmail("");
+                    }}
+                    className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  >
+                    Перейти ко входу
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Referral badge */}
             {(referralCode || partnerCode) && (activeTab === "signin" || activeTab === "signup") && (
               <div className="mt-6 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
