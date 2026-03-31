@@ -29,16 +29,18 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
-    const response = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?email=ilike.${encodeURIComponent(email.trim())}&select=id&limit=1`,
-      {
-        headers: {
-          'apikey': serviceRoleKey,
-          'Authorization': `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const url = new URL(`${supabaseUrl}/rest/v1/profiles`);
+    url.searchParams.set('email', `ilike.${email.trim()}`);
+    url.searchParams.set('select', 'id');
+    url.searchParams.set('limit', '1');
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'apikey': serviceRoleKey,
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       console.error('Error checking profiles:', response.status, await response.text());
