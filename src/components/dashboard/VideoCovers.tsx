@@ -12,6 +12,7 @@ import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard, Coins, HelpCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useActiveAiModel, getVideoEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
   id: string;
@@ -81,6 +82,9 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
   const [regenAutoOptimize, setRegenAutoOptimize] = useState(false);
   const [autoOptimize, setAutoOptimize] = useState(false);
   const AUTO_PROMPT_TEXT = "Самостоятельно придумай и определи наилучшие параметры анимации для достижения максимально качественного результата.";
+  
+  const { data: aiModelData } = useActiveAiModel();
+  const provider = aiModelData?.provider;
 
   // Video promo banner dismissal
   const VIDEO_PROMO_KEY = `video_promo_banner_dismissed_${profile.id}`;
@@ -216,7 +220,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
         // Immediately check actual status before showing loading UI
         try {
-          const { data: statusData } = await supabase.functions.invoke("check-video-status", {
+          const checkFn = getVideoEdgeFunctionName("check-video-status", provider);
+          const { data: statusData } = await supabase.functions.invoke(checkFn, {
             body: { job_id: activeJob.id },
           });
           if (statusData?.status === "completed") {
@@ -280,7 +285,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
     if (pollingRef.current) clearInterval(pollingRef.current);
     pollingRef.current = setInterval(async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("check-video-status", {
+        const checkFn = getVideoEdgeFunctionName("check-video-status", provider);
+        const { data, error } = await supabase.functions.invoke(checkFn, {
           body: { job_id: jobId },
         });
 
@@ -353,7 +359,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
       setGenerationStartTime(Date.now());
       setElapsedSeconds(0);
 
-      const { data, error } = await supabase.functions.invoke("create-video-job", {
+      const createFn = getVideoEdgeFunctionName("create-video-job", provider);
+      const { data, error } = await supabase.functions.invoke(createFn, {
         body: { image_url: imageUrl, user_prompt: userPrompt.trim() || undefined },
       });
 
@@ -433,7 +440,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
     setElapsedSeconds(0);
 
     try {
-      const { data, error } = await supabase.functions.invoke("regenerate-video-job", {
+      const regenFn = getVideoEdgeFunctionName("regenerate-video-job", provider);
+      const { data, error } = await supabase.functions.invoke(regenFn, {
         body: { original_job_id: currentJob.id, user_prompt: regenPrompt.trim() || undefined },
       });
 

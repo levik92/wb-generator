@@ -202,15 +202,40 @@ serve(async (req) => {
                 })),
             ];
 
-            const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-            if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+            // Check API provider setting
+            const { data: modelSettings } = await supabase
+              .from("ai_model_settings")
+              .select("api_provider")
+              .order("updated_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
 
-            const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-              method: "POST",
-              headers: {
+            const apiProvider = (modelSettings as any)?.api_provider || 'direct';
+            
+            let aiUrl: string;
+            let aiHeaders: Record<string, string>;
+
+            if (apiProvider === 'polza') {
+              const polzaApiKey = Deno.env.get("POLZA_AI_API_KEY");
+              if (!polzaApiKey) throw new Error("POLZA_AI_API_KEY not configured");
+              aiUrl = "https://polza.ai/api/v1/chat/completions";
+              aiHeaders = {
+                Authorization: `Bearer ${polzaApiKey}`,
+                "Content-Type": "application/json",
+              };
+            } else {
+              const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+              if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+              aiUrl = "https://ai.gateway.lovable.dev/v1/chat/completions";
+              aiHeaders = {
                 Authorization: `Bearer ${LOVABLE_API_KEY}`,
                 "Content-Type": "application/json",
-              },
+              };
+            }
+
+            const aiResp = await fetch(aiUrl, {
+              method: "POST",
+              headers: aiHeaders,
               body: JSON.stringify({
                 model: "google/gemini-3.1-pro-preview",
                 messages,
