@@ -64,6 +64,9 @@ const Dashboard = () => {
   const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
   const [pendingVideoImageUrl, setPendingVideoImageUrl] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'cards' | 'description' | 'video'>('all');
+  const newsMarkAllReadRef = useRef<(() => void) | null>(null);
+  const notifMarkAllReadRef = useRef<(() => void) | null>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const {
