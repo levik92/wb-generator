@@ -1495,8 +1495,8 @@ export const GenerateCards = ({
       }
 
       // Use dynamic model-based function name for editing
-      const editFunction = getImageEdgeFunctionName('edit-card', activeModel);
-      console.log('[GenerateCards] Edit - Active model:', activeModel, '| Function:', editFunction);
+      const editFunction = getImageEdgeFunctionName('edit-card', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateCards] Edit - Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', editFunction);
 
       // Try to get product name from jobData or form field
       const productNameToUse = jobData?.productName || productName;
