@@ -612,6 +612,8 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
+          tochka_document_id: string | null
+          tochka_status: string | null
           tokens_amount: number
           updated_at: string
           user_id: string
@@ -630,6 +632,8 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          tochka_document_id?: string | null
+          tochka_status?: string | null
           tokens_amount: number
           updated_at?: string
           user_id: string
@@ -648,6 +652,8 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          tochka_document_id?: string | null
+          tochka_status?: string | null
           tokens_amount?: number
           updated_at?: string
           user_id?: string
