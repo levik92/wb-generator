@@ -269,7 +269,12 @@ serve(async (req) => {
             }
 
             const aiData = await aiResp.json();
-            const aiContent = aiData.choices?.[0]?.message?.content || "";
+            let aiContent = '';
+            if (apiProvider === 'direct') {
+              aiContent = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            } else {
+              aiContent = aiData.choices?.[0]?.message?.content || '';
+            }
 
             // Check for escalation
             const needsEscalation = aiContent.includes("[ESCALATE]");
