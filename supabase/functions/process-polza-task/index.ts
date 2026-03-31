@@ -200,6 +200,10 @@ ${referenceImage ? `2. Последнее изображение (референ
           aspect_ratio: '3:4',
           image_resolution: imageResolution,
         },
+        provider: {
+          order: ["Google AI Studio", "Google"],
+          allow_fallbacks: true,
+        },
       }),
     });
 

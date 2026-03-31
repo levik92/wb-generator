@@ -140,6 +140,10 @@ serve(async (req) => {
           body: JSON.stringify({
             model: 'google/gemini-3.1-pro-preview',
             messages: [{ role: 'user', content: finalPrompt }],
+            provider: {
+              order: ["Google AI Studio", "Google"],
+              allow_fallbacks: true,
+            },
           }),
         });
 

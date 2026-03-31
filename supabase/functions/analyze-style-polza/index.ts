@@ -71,6 +71,10 @@ serve(async (req) => {
         }],
         temperature: 0.3,
         max_tokens: 500,
+        provider: {
+          order: ["Google AI Studio", "Google"],
+          allow_fallbacks: true,
+        },
       }),
     });
 

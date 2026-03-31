@@ -73,6 +73,10 @@ serve(async (req) => {
             },
           ],
         }],
+        provider: {
+          order: ["Google AI Studio", "Google"],
+          allow_fallbacks: true,
+        },
       }),
     });
 
