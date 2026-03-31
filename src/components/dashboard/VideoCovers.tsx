@@ -285,7 +285,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
     if (pollingRef.current) clearInterval(pollingRef.current);
     pollingRef.current = setInterval(async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("check-video-status", {
+        const checkFn = getVideoEdgeFunctionName("check-video-status", provider);
+        const { data, error } = await supabase.functions.invoke(checkFn, {
           body: { job_id: jobId },
         });
 
