@@ -1,159 +1,75 @@
 
 
-# Plan: Tochka Bank Invoice Automation + Webhook Payment Processing
+# Plan: Fix and Finalize Tochka Bank Integration
 
-## Overview
+## Problems Found in Current Code
 
-Automate B2B invoice creation via Tochka Bank API and auto-credit tokens when payment is received via bank webhook.
+1. **`customerCode` set to `accountId`** -- wrong. Must be fetched via `GET /open-banking/v1.0/customers` API at startup
+2. **`unitCode: "услуга"`** -- API requires `"услуга."` (with period)
+3. **`type: "individual"`** -- API only accepts `"ip"` or `"company"`
+4. **Amounts as numbers** -- Tochka curl example passes them as strings (`"1234.56"`)
+5. **`tochka-webhook` missing from `config.toml`** -- needs `verify_jwt = false` (public endpoint)
+6. **`create-tochka-invoice` missing from `config.toml`** -- needs `verify_jwt = false` (validates JWT in code)
+7. **Webhook double-update bug** -- updates invoice to `paid` manually, then calls `process_invoice_payment` RPC which also updates to `paid` and will fail with "Invoice not found" because the status already changed
+8. **No auto-fill buyer data by INN** -- Tochka has `GET /invoice/v1.0/counterparty/{inn}` to look up company details by INN
 
-## Current State
+## Changes
 
-- Invoice form (`InvoiceForm.tsx`) saves org data to `organization_details`, creates a record in `invoice_payments`, and opens a PDF page
-- Invoice is generated client-side as PDF via jsPDF
-- Payment confirmation is manual: user clicks "Я оплатил" → admin reviews in admin panel → manually approves
-- Seller details are hardcoded in `InvoicePage.tsx` (ООО АЛЬТАИР, ИНН 9724238597, bank Точка)
+### 1. `supabase/config.toml`
+Add entries for both new functions:
+```toml
+[functions.create-tochka-invoice]
+verify_jwt = false
 
-## Architecture
-
-```text
-┌─────────────┐     ┌──────────────────────┐     ┌──────────────────┐
-│ InvoiceForm │────▶│ create-tochka-invoice│────▶│ Tochka API       │
-│ (frontend)  │     │ (Edge Function)      │     │ POST /bills      │
-└─────────────┘     └──────────────────────┘     └──────────────────┘
-                            │                           │
-                            ▼                           │
-                    ┌──────────────┐                     │
-                    │invoice_payments│                    │
-                    │(tochka_doc_id)│                    │
-                    └──────────────┘                     │
-                                                        │
-┌──────────────────┐     ┌─────────────────────────┐    │
-│ Tochka Bank      │────▶│ tochka-webhook          │◀───┘
-│ incomingPayment  │     │ (Edge Function)         │
-│ webhook          │     │ matches by ИНН + сумма  │
-└──────────────────┘     │ + номер счёта           │
-                         └──────────┬──────────────┘
-                                    ▼
-                         ┌──────────────────┐
-                         │ Auto-credit      │
-                         │ tokens to user   │
-                         └──────────────────┘
+[functions.tochka-webhook]
+verify_jwt = false
 ```
 
-## Step 1: Add Secrets
+### 2. `supabase/functions/create-tochka-invoice/index.ts`
+- **Fetch `customerCode`** dynamically: call `GET /open-banking/v1.0/customers` with the bearer token, find the customer whose account matches `TOCHKA_ACCOUNT_ID`, extract `customerCode`
+- **Fix `unitCode`**: `"услуга"` -> `"услуга."`
+- **Fix `type`**: `"individual"` -> `"ip"` (for 12-digit INN)
+- **Convert amounts to strings** for the Tochka API body
+- **Add counterparty lookup**: before building the invoice body, call `GET /invoice/v1.0/counterparty/{inn}` to auto-fill buyer's bank details, legal address, KPP, name if available (user-provided data takes priority as override)
 
-Request two secrets from the user:
-- `TOCHKA_API_TOKEN` — Bearer token for Tochka API (OAuth2)
-- `TOCHKA_CLIENT_ID` — Application client_id for webhook management
-- `TOCHKA_ACCOUNT_ID` — Bank account identifier (e.g., `40702810120000295325/044525104`)
-- `TOCHKA_CUSTOMER_CODE` — Customer code from Get Customers List
+### 3. `supabase/functions/tochka-webhook/index.ts`
+- **Fix double-update bug**: remove the manual status update before `process_invoice_payment` RPC call. The RPC already handles status update + token credit + notifications. Only use fallback (`refund_tokens`) if the RPC fails, and remove the broken `admin_update_user_tokens` call (which requires admin role check via `auth.uid()`)
 
-## Step 2: Database Migration
+### 4. `src/components/dashboard/InvoiceForm.tsx`
+- **Add INN auto-lookup**: when user enters 10 or 12 digit INN and tabs out, call the edge function to look up counterparty data and auto-fill name, KPP, legal address, bank details
+- Add loading indicator during lookup
 
-Add columns to `invoice_payments`:
-- `tochka_document_id` (text, nullable) — documentId returned by Tochka
-- `tochka_status` (text, nullable) — payment status from Tochka (`payment_waiting`, `payment_paid`, `payment_expired`)
+### 5. New Edge Function: `supabase/functions/lookup-counterparty/index.ts`
+- Authenticated endpoint that proxies `GET /invoice/v1.0/counterparty/{inn}` from Tochka API
+- Returns company name, KPP, legal address, bank details
+- Called from InvoiceForm on INN blur
 
-## Step 3: Edge Function — `create-tochka-invoice`
+## How It Works (for the user)
 
-New edge function that:
-1. Receives authenticated request with invoice data (org details, package info)
-2. Saves org data to `organization_details`
-3. Creates invoice record in `invoice_payments`
-4. Calls Tochka API `POST https://enter.tochka.com/uapi/invoice/v1.0/bills` with:
-   - `accountId` — from secret
-   - `customerCode` — from secret
-   - `SecondSide` — buyer's ИНН, КПП, name, address, bank details
-   - `Content.Invoice` — position name, amount, number, payment purpose
-5. Saves returned `documentId` to `invoice_payments.tochka_document_id`
-6. Returns invoice number and document ID
+1. User opens invoice form, enters ИНН
+2. System auto-fills company name, КПП, address, bank details from Tochka's counterparty database
+3. User reviews, adjusts if needed, clicks "Сформировать счёт"
+4. Edge function creates invoice in DB + sends to Tochka API
+5. Tochka generates official invoice with `documentId`
+6. When buyer pays, Tochka sends `incomingPayment` webhook
+7. Webhook matches invoice by number in payment purpose, validates amount, auto-credits tokens
 
-**Tochka API request body:**
-```json
-{
-  "Data": {
-    "accountId": "SELLER_ACCOUNT_ID",
-    "customerCode": "SELLER_CUSTOMER_CODE",
-    "SecondSide": {
-      "taxCode": "BUYER_INN",
-      "type": "company",
-      "secondSideName": "BUYER_NAME",
-      "kpp": "BUYER_KPP",
-      "legalAddress": "BUYER_ADDRESS",
-      "accountId": "BUYER_RS/BUYER_BIK",
-      "bankName": "BUYER_BANK",
-      "bankCorrAccount": "BUYER_KS"
-    },
-    "Content": {
-      "Invoice": {
-        "Positions": [{
-          "positionName": "Пополнение тарифа ...",
-          "unitCode": "услуга.",
-          "ndsKind": "without_nds",
-          "price": AMOUNT,
-          "quantity": 1,
-          "totalAmount": AMOUNT
-        }],
-        "totalAmount": AMOUNT,
-        "number": "WBG-XXXX",
-        "comment": "Без НДС",
-        "paymentExpiryDate": "+5 days"
-      }
-    }
-  }
-}
+### Webhook Registration (manual, one-time)
+After deployment, register via curl:
+```bash
+curl -X PUT "https://enter.tochka.com/uapi/webhook/v1.0/{TOCHKA_CLIENT_ID}" \
+  -H "Authorization: Bearer {TOCHKA_API_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"webhooksList":["incomingPayment"],"url":"https://xguiyabpngjkavyosbza.supabase.co/functions/v1/tochka-webhook"}'
 ```
 
-## Step 4: Edge Function — `tochka-webhook`
-
-Public endpoint (no JWT) that:
-1. Receives `incomingPayment` webhook from Tochka
-2. Payload contains `SidePayer` (ИНН, name, amount) and `purpose` (payment description)
-3. Parses invoice number from `purpose` field (regex for `WBG-\d+`)
-4. Looks up `invoice_payments` by invoice_number + amount + payer ИНН
-5. If match found:
-   - Updates `invoice_payments.status` → `paid`, `tochka_status` → `payment_paid`
-   - Calls existing `process_payment_success` or equivalent RPC to credit tokens
-   - Creates notification for the user
-   - Logs security event
-6. Returns 200 OK (Tochka requires 200 response)
-
-## Step 5: Update Frontend
-
-**InvoiceForm.tsx:**
-- Change `handleCreateInvoice` to call `create-tochka-invoice` edge function instead of direct DB inserts
-- Show success with invoice number
-
-**InvoicePage.tsx:**
-- Remove "Я оплатил" button — payments are now auto-detected
-- Add info banner: "Оплата будет зачислена автоматически после поступления средств"
-- Keep PDF download functionality
-
-## Step 6: Webhook Registration (Manual)
-
-After deployment, the user needs to register the webhook URL in Tochka:
-```
-PUT https://enter.tochka.com/uapi/webhook/v1.0/{client_id}
-{
-  "webhooksList": ["incomingPayment"],
-  "url": "https://xguiyabpngjkavyosbza.supabase.co/functions/v1/tochka-webhook"
-}
-```
-This can be done via curl or we can create a one-time admin action.
-
-## Files to Create/Modify
+## Files
 
 | File | Action |
 |------|--------|
-| `supabase/migrations/...` | Add `tochka_document_id`, `tochka_status` to `invoice_payments` |
-| `supabase/functions/create-tochka-invoice/index.ts` | New — creates invoice via Tochka API |
-| `supabase/functions/tochka-webhook/index.ts` | New — processes incoming payment webhooks |
-| `src/components/dashboard/InvoiceForm.tsx` | Call edge function instead of direct inserts |
-| `src/pages/InvoicePage.tsx` | Remove manual confirmation, add auto-payment info |
-
-## Security Considerations
-
-- Webhook endpoint is public but validates payment data (ИНН + amount + invoice number match)
-- All token credits go through existing `process_invoice_payment` RPC with service_role
-- Security events logged for every webhook call
+| `supabase/config.toml` | Add function entries |
+| `supabase/functions/create-tochka-invoice/index.ts` | Fix customerCode, unitCode, type, amounts |
+| `supabase/functions/tochka-webhook/index.ts` | Fix double-update bug |
+| `supabase/functions/lookup-counterparty/index.ts` | New -- proxy counterparty search by INN |
+| `src/components/dashboard/InvoiceForm.tsx` | Add INN auto-lookup |
 
