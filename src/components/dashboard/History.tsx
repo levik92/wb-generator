@@ -845,27 +845,27 @@ export const History = ({
 
       {/* Info Alert + Filter */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-        <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <div className="flex items-center gap-3">
               <Info className="h-4 w-4 shrink-0 text-primary" />
               <span className="text-sm leading-relaxed text-muted-foreground">
                 Данные хранятся <span className="font-semibold">1 месяц</span> и затем автоматически удаляются.
               </span>
             </div>
-            <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-              <SelectTrigger className="w-auto h-8 gap-2 px-3 bg-background border-border/50 shrink-0 text-xs">
-                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все</SelectItem>
-                <SelectItem value="cards">Карточки</SelectItem>
-                <SelectItem value="description">Описания</SelectItem>
-                <SelectItem value="video">Видеообложки</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
+          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+            <SelectTrigger className="w-auto h-10 gap-2 px-3 bg-background border-border/50 shrink-0 text-xs">
+              <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все</SelectItem>
+              <SelectItem value="cards">Карточки</SelectItem>
+              <SelectItem value="description">Описания</SelectItem>
+              <SelectItem value="video">Видеообложки</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </motion.div>
 
