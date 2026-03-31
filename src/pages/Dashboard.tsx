@@ -304,14 +304,6 @@ const Dashboard = () => {
     setShouldRefreshHistory(false);
     resetCompletedJobsFlag();
   };
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
-      </div>;
-  }
-  if (!user || !profile) {
-    return null;
-  }
   const headerActions = useMemo(() => {
     if (activeTab === 'history') {
       return (
@@ -346,6 +338,15 @@ const Dashboard = () => {
     }
     return null;
   }, [activeTab, historyFilter]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+      </div>;
+  }
+  if (!user || !profile) {
+    return null;
+  }
 
   const renderContent = () => {
     switch (activeTab) {
