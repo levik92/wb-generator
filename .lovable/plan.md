@@ -1,35 +1,55 @@
 
 
-# Plan: Замыкание на Google AI Studio через `only`
+# Plan: Fix Polza Video Generation — Wrong Model ID
 
-## Проблема
-Текущий параметр `provider: { order: [...], allow_fallbacks: true }` не блокирует автопулинг — Polza может отправить запрос другому провайдеру. Нужно использовать `only` (белый список) вместо `order`.
+## Problem
+Error: `Модель "kling-v2-6" не найдена`. The model ID `kling-v2-6` is invalid on Polza AI. According to Polza docs, valid Kling models are:
+- `kling/v3` — Kling 3.0 (latest, 3-15 sec, mode: std/pro, sound support)
+- `kling/v2.5-turbo` — Kling 2.5 Turbo (5 or 10 sec)
 
-## Решение
-Заменить во всех 5 файлах:
+## Solution
+Update both video functions to use `kling/v3` and fix the request body to match Polza's API format for Kling 3.0.
+
+### Changes in `create-video-job-polza/index.ts` and `regenerate-video-job-polza/index.ts`:
+
+**Before:**
 ```json
-"provider": {
-  "order": ["Google AI Studio", "Google"],
-  "allow_fallbacks": true
+{
+  "model": "kling-v2-6",
+  "input": {
+    "prompt": "...",
+    "images": [{ "type": "url", "data": "..." }],
+    "aspect_ratio": "3:4",
+    "duration": "5",
+    "mode": "std"
+  }
 }
 ```
-на:
+
+**After (per Polza docs for Kling 3.0):**
 ```json
-"provider": {
-  "only": ["Google AI Studio"]
+{
+  "model": "kling/v3",
+  "input": {
+    "prompt": "...",
+    "images": [{ "type": "url", "data": "..." }],
+    "aspect_ratio": "9:16",
+    "duration": 5,
+    "mode": "std",
+    "sound": "false"
+  },
+  "async": true
 }
 ```
 
-## Затронутые файлы
+Key differences:
+1. Model: `kling-v2-6` → `kling/v3`
+2. `duration`: string `"5"` → number `5`
+3. `aspect_ratio`: `"3:4"` → `"9:16"` (Kling 3.0 supports 16:9, 9:16, 1:1 only — no 3:4)
+4. Add required `sound: "false"`
+5. Add `async: true` for proper async handling
 
-1. **`supabase/functions/analyze-style-polza/index.ts`** — строка ~74
-2. **`supabase/functions/identify-product-polza/index.ts`** — строка ~76
-3. **`supabase/functions/generate-description-polza/index.ts`** — строка ~143
-4. **`supabase/functions/support-chat/index.ts`** — строка ~263
-5. **`supabase/functions/process-polza-task/index.ts`** — строка ~203
-
-Видео-функции (Kling) не трогаем — там Google AI Studio не подходит.
-
-## Технические детали
-Одинаковая замена 3 строк на 1 строку в каждом файле. Клиентский код не меняется.
+## Files
+1. `supabase/functions/create-video-job-polza/index.ts` — line ~115-124
+2. `supabase/functions/regenerate-video-job-polza/index.ts` — line ~137-146
 
