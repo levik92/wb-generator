@@ -141,8 +141,7 @@ serve(async (req) => {
             model: 'google/gemini-3.1-pro-preview',
             messages: [{ role: 'user', content: finalPrompt }],
             provider: {
-              order: ["Google AI Studio", "Google"],
-              allow_fallbacks: true,
+              only: ["Google AI Studio"],
             },
           }),
         });
