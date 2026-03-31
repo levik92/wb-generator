@@ -242,7 +242,7 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
     >
       {/* Mark all as read button */}
       <div className="flex justify-end">
-        <Button onClick={markAllAsRead} variant="outline" size="sm" className="gap-2">
+        <Button onClick={markAllAsRead} variant="outline" size="sm" className="gap-2 bg-card">
           <CheckCheck className="w-4 h-4" />
           Прочитать все
         </Button>
