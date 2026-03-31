@@ -257,8 +257,13 @@ serve(async (req) => {
                 method: "POST",
                 headers: aiHeaders,
                 body: JSON.stringify({
+                  model: 'google/gemini-3.1-pro-preview',
                   messages,
                   stream: false,
+                  provider: {
+                    order: ["Google AI Studio", "Google"],
+                    allow_fallbacks: true,
+                  },
                 }),
               });
             }
