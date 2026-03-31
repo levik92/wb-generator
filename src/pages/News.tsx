@@ -240,28 +240,7 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <Newspaper className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">Новости</h2>
-            <p className="text-muted-foreground text-sm">Последние обновления сервиса</p>
-          </div>
-        </div>
-        {news.length > 0 && (
-          <Button
-            onClick={markAllAsRead}
-            variant="outline"
-            size="icon"
-            className="shrink-0 border-primary/20 hover:bg-primary/10 w-10 h-10 group"
-            title="Прочитать все"
-          >
-            <CheckCheck className="w-5 h-5 transition-colors group-hover:text-primary" />
-          </Button>
-        )}
-      </div>
+
 
       {news.length === 0 ? (
         <Card className="bg-card/80 backdrop-blur-xl border-border/50">
