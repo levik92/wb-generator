@@ -1825,16 +1825,6 @@ export const GenerateCards = ({
     };
   }, []);
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <Images className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Генерация карточек</h2>
-          <p className="text-muted-foreground text-sm">Создайте профессиональные карточки для Wildberries с помощью ИИ</p>
-        </div>
-      </div>
 
       <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">

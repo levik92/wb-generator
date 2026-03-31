@@ -491,19 +491,6 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
   return (
     <div className="space-y-6">
-      {/* Header - matching other pages */}
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <Video className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">
-            Видеообложки
-          </h2>
-          <p className="text-muted-foreground text-sm">Загрузите фото товара и получите 5-секундную видеообложку</p>
-        </div>
-      </div>
-
       {/* Benefits block */}
       <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">

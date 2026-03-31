@@ -40,16 +40,22 @@ interface HistoryProps {
   shouldRefresh?: boolean;
   onRefreshComplete?: () => void;
   onTokensUpdate?: () => void;
+  filter?: 'all' | 'cards' | 'description' | 'video';
+  onFilterChange?: (filter: 'all' | 'cards' | 'description' | 'video') => void;
 }
 export const History = ({
   profile,
   shouldRefresh,
   onRefreshComplete,
-  onTokensUpdate
+  onTokensUpdate,
+  filter: externalFilter,
+  onFilterChange
 }: HistoryProps) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'cards' | 'description' | 'video'>('all');
+  const [internalFilter, setInternalFilter] = useState<'all' | 'cards' | 'description' | 'video'>('all');
+  const filter = externalFilter ?? internalFilter;
+  const setFilter = onFilterChange ?? setInternalFilter;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
@@ -629,14 +635,8 @@ export const History = ({
   };
   if (loading) {
     return <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <HistoryIcon className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">История генераций</h2>
-            <p className="text-muted-foreground text-sm">Загрузка...</p>
-          </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
         </div>
       </div>;
   }
@@ -841,41 +841,7 @@ export const History = ({
         </EditDialog>
       )}
 
-      {/* Header */}
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      duration: 0.5
-    }} className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <HistoryIcon className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">История генераций</h2>
-            <p className="text-muted-foreground text-sm">Все ваши созданные карточки и описания</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-muted-foreground hidden sm:block" />
-          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="w-full sm:w-48 bg-background border-border/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все генерации</SelectItem>
-              <SelectItem value="cards">Карточки</SelectItem>
-              <SelectItem value="description">Описания</SelectItem>
-              <SelectItem value="video">Видеообложки</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </motion.div>
+
 
       {/* Info Alert */}
       <motion.div initial={{

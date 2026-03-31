@@ -55,21 +55,6 @@ export default function LabelGenerator() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <BarChart3 className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-            Генератор этикеток
-            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0 text-[10px] font-medium rounded-[10px] hover:bg-emerald-500/15 size-7 flex items-center justify-center p-0 shrink-0">
-              Free
-            </Badge>
-          </h2>
-          <p className="text-muted-foreground text-sm mt-0.5">Создавайте этикетки, штрихкоды и QR-коды</p>
-        </div>
-      </div>
 
       <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
         <Info className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
