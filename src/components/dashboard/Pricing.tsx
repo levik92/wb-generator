@@ -158,9 +158,10 @@ export default function Pricing({
             },
             onFail: (reason: any, options: any) => {
               console.error('[CloudPayments] Payment failed:', reason);
+              const isCanceled = typeof reason === 'string' && reason.toLowerCase().includes('cancel');
               toast({
-                title: "Ошибка оплаты",
-                description: "Платёж отменён. Попробуйте ещё раз.",
+                title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
+                description: isCanceled ? "Платёж отменён пользователем." : "Платёж не прошёл. Попробуйте ещё раз.",
                 variant: "destructive"
               });
               setLoading(null);
