@@ -75,7 +75,7 @@ const getNotificationColor = (type: string) => {
   }
 };
 
-export const NotificationCenter = ({ profile }: NotificationCenterProps) => {
+export const NotificationCenter = ({ profile, onMarkAllReadRef }: NotificationCenterProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
