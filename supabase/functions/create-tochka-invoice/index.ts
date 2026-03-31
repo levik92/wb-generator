@@ -2,10 +2,13 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const TOCHKA_BASE = "https://enter.tochka.com/uapi";
+const FALLBACK_CUSTOMER_CODE = "305655317";
+
+const normalizeTochkaToken = (token: string) => token.trim().replace(/^Bearer\s+/i, "");
 
 async function fetchCustomerCode(token: string): Promise<string> {
   const res = await fetch(`${TOCHKA_BASE}/open-banking/v1.0/customers`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${normalizeTochkaToken(token)}` },
   });
   if (!res.ok) {
     const text = await res.text();
@@ -16,11 +19,17 @@ async function fetchCustomerCode(token: string): Promise<string> {
   if (customers.length === 0) {
     throw new Error("No customers found in Tochka account");
   }
-  // Take the first customer's code
-  const code = customers[0]?.customerCode;
+
+  const businessCustomer = customers.find((customer: { customerType?: string; customerCode?: string }) =>
+    customer?.customerType === "Business" && customer?.customerCode
+  );
+  const firstCustomer = customers.find((customer: { customerCode?: string }) => customer?.customerCode);
+  const code = businessCustomer?.customerCode || firstCustomer?.customerCode;
+
   if (!code) {
     throw new Error("customerCode missing in API response");
   }
+
   return code;
 }
 
@@ -40,8 +49,8 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const tochkaToken = Deno.env.get("TOCHKA_API_TOKEN");
-    const tochkaAccountId = Deno.env.get("TOCHKA_ACCOUNT_ID");
+    const tochkaToken = Deno.env.get("TOCHKA_API_TOKEN")?.trim();
+    const tochkaAccountId = Deno.env.get("TOCHKA_ACCOUNT_ID")?.trim();
 
     if (!tochkaToken || !tochkaAccountId) {
       console.error("Missing Tochka secrets");
@@ -77,17 +86,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (!/^\d{10}$|^\d{12}$/.test(orgData.inn)) {
+      return new Response(JSON.stringify({ error: "ИНН должен содержать 10 или 12 цифр" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Fetch customerCode from Tochka API
     let customerCode: string;
     try {
       customerCode = await fetchCustomerCode(tochkaToken);
       console.log("Resolved customerCode:", customerCode);
     } catch (e) {
-      console.error("Failed to resolve customerCode:", e);
-      return new Response(JSON.stringify({ error: "Ошибка конфигурации банка" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.error("Failed to resolve customerCode, using fallback:", e);
+      customerCode = FALLBACK_CUSTOMER_CODE;
     }
 
     // 1. Upsert organization details
@@ -199,7 +212,7 @@ Deno.serve(async (req) => {
     const tochkaRes = await fetch(`${TOCHKA_BASE}/invoice/v1.0/bills`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${tochkaToken}`,
+        Authorization: `Bearer ${normalizeTochkaToken(tochkaToken)}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(tochkaBody),
