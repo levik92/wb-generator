@@ -140,3 +140,12 @@ verify_jwt = false
 
 [functions.regenerate-video-job-polza]
 verify_jwt = false
+
+[functions.create-tochka-invoice]
+verify_jwt = false
+
+[functions.tochka-webhook]
+verify_jwt = false
+
+[functions.lookup-counterparty]
+verify_jwt = false
