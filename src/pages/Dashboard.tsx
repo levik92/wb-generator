@@ -55,6 +55,22 @@ interface Profile {
   login_count: number;
 }
 type ActiveTab = 'cards' | 'video' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning' | 'support';
+
+const MOBILE_TAB_TITLES: Record<string, string> = {
+  cards: 'Карточки',
+  video: 'Видеообложки',
+  description: 'Описания',
+  labels: 'Этикетки',
+  history: 'История',
+  pricing: 'Баланс',
+  bonuses: 'Бонусы',
+  settings: 'Настройки',
+  notifications: 'Уведомления',
+  news: 'Новости',
+  learning: 'Обучение',
+  support: 'Поддержка',
+};
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -305,39 +321,8 @@ const Dashboard = () => {
     resetCompletedJobsFlag();
   };
   const headerActions = useMemo(() => {
-    if (activeTab === 'history') {
-      return (
-        <Select value={historyFilter} onValueChange={(value: any) => setHistoryFilter(value)}>
-          <SelectTrigger className="w-10 h-9 px-0 justify-center bg-background border-border/50 [&>span]:hidden [&>svg]:ml-0">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все генерации</SelectItem>
-            <SelectItem value="cards">Карточки</SelectItem>
-            <SelectItem value="description">Описания</SelectItem>
-            <SelectItem value="video">Видеообложки</SelectItem>
-          </SelectContent>
-        </Select>
-      );
-    }
-    if (activeTab === 'news') {
-      return (
-        <Button onClick={() => newsMarkAllReadRef.current?.()} variant="outline" size="sm" className="gap-2">
-          <CheckCheck className="w-4 h-4" />
-          Прочитать все
-        </Button>
-      );
-    }
-    if (activeTab === 'notifications') {
-      return (
-        <Button onClick={() => notifMarkAllReadRef.current?.()} variant="outline" size="sm" className="gap-2">
-          <Check className="w-4 h-4" />
-          Отметить все
-        </Button>
-      );
-    }
     return null;
-  }, [activeTab, historyFilter]);
+  }, [activeTab]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
@@ -414,16 +399,11 @@ const Dashboard = () => {
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Mobile Header */}
-        {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
+         {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
             <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20" onClick={() => setMobileMenuOpen(true)}>
               <Menu className="h-5 w-5 text-primary" />
             </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-base font-bold">WBGen</span>
-            </div>
+            <span className="text-base font-bold">{MOBILE_TAB_TITLES[activeTab] || 'WBGen'}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-secondary">
