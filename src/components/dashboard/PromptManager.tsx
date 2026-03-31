@@ -22,6 +22,7 @@ interface Prompt {
 interface ModelSettings {
   id: string;
   active_model: 'openai' | 'google';
+  api_provider?: 'direct' | 'polza';
 }
 const getPromptDisplayName = (type: string): {
   name: string;
@@ -133,6 +134,8 @@ export function PromptManager() {
   const [editingTechPrompt, setEditingTechPrompt] = useState<string | null>(null);
   const [techEditValue, setTechEditValue] = useState('');
   const [savingTechPrompt, setSavingTechPrompt] = useState(false);
+  const [apiProvider, setApiProvider] = useState<'direct' | 'polza'>('direct');
+  const [savingProvider, setSavingProvider] = useState(false);
   useEffect(() => {
     loadPrompts();
     loadActiveModel();
@@ -161,13 +164,16 @@ export function PromptManager() {
       const {
         data,
         error
-      } = await supabase.from('ai_model_settings').select('active_model').order('updated_at', {
+      } = await supabase.from('ai_model_settings').select('active_model, api_provider').order('updated_at', {
         ascending: false
       }).limit(1).maybeSingle();
       if (error) throw error;
       if (data?.active_model) {
         setActiveModel(data.active_model as 'openai' | 'google');
         setActiveTab(data.active_model as 'openai' | 'google');
+      }
+      if ((data as any)?.api_provider) {
+        setApiProvider((data as any).api_provider as 'direct' | 'polza');
       }
     } catch (error) {
       console.error('Error loading active model:', error);
@@ -265,6 +271,26 @@ export function PromptManager() {
       });
     } finally {
       setSavingModel(false);
+    }
+  };
+  const saveApiProvider = async (provider: 'direct' | 'polza') => {
+    setSavingProvider(true);
+    try {
+      const { data: existing } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      if (existing) {
+        const { error } = await supabase.from('ai_model_settings').update({ api_provider: provider } as any).eq('id', existing.id);
+        if (error) throw error;
+      }
+      setApiProvider(provider);
+      toast({
+        title: "Успешно",
+        description: `Провайдер изменён на ${provider === 'direct' ? 'Прямое подключение' : 'Польза AI'}`
+      });
+    } catch (error) {
+      console.error('Error saving provider:', error);
+      toast({ title: "Ошибка", description: "Не удалось сохранить провайдера", variant: "destructive" });
+    } finally {
+      setSavingProvider(false);
     }
   };
   const togglePrompt = (promptId: string) => {

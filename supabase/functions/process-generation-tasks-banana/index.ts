@@ -166,7 +166,15 @@ async function processTasks(
     if (job.style_source_image_url && job.unified_styling && !styleDescription) {
       console.log(`[unified-styling] Pre-analyzing style from source image: ${job.style_source_image_url}`);
       try {
-        const { data: styleResult, error: styleError } = await supabase.functions.invoke('analyze-style', {
+        // Route analyze-style based on provider
+        const { data: pSettings } = await supabase
+          .from('ai_model_settings')
+          .select('api_provider')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const styleFunction = pSettings?.api_provider === 'polza' ? 'analyze-style-polza' : 'analyze-style';
+        const { data: styleResult, error: styleError } = await supabase.functions.invoke(styleFunction, {
           body: { imageUrl: job.style_source_image_url, jobId }
         });
 
@@ -438,8 +446,20 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       throw new Error('No source image available');
     }
 
-    // Call Google task processor
-    const result = await supabase.functions.invoke('process-google-task', {
+    // Determine which task processor to use based on api_provider setting
+    const { data: providerSettings } = await supabase
+      .from('ai_model_settings')
+      .select('api_provider')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const apiProvider = providerSettings?.api_provider || 'direct';
+    const processorFunction = apiProvider === 'polza' ? 'process-polza-task' : 'process-google-task';
+    console.log(`Using ${processorFunction} (provider: ${apiProvider}) for task ${task.id}`);
+
+    // Call task processor
+    const result = await supabase.functions.invoke(processorFunction, {
       body: {
         taskId: task.id,
         sourceImageUrl: sourceImageUrl,
@@ -447,9 +467,9 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
       },
     });
 
-    // Check if error was already handled by process-google-task
+    // Check if error was already handled by the processor
     if (result.data?.handled === true) {
-      console.log(`Task ${task.id} error already handled by process-google-task: ${result.data?.error}`);
+      console.log(`Task ${task.id} error already handled by ${processorFunction}: ${result.data?.error}`);
       return;
     }
 
