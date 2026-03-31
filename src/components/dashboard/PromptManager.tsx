@@ -273,6 +273,26 @@ export function PromptManager() {
       setSavingModel(false);
     }
   };
+  const saveApiProvider = async (provider: 'direct' | 'polza') => {
+    setSavingProvider(true);
+    try {
+      const { data: existing } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      if (existing) {
+        const { error } = await supabase.from('ai_model_settings').update({ api_provider: provider } as any).eq('id', existing.id);
+        if (error) throw error;
+      }
+      setApiProvider(provider);
+      toast({
+        title: "Успешно",
+        description: `Провайдер изменён на ${provider === 'direct' ? 'Прямое подключение' : 'Польза AI'}`
+      });
+    } catch (error) {
+      console.error('Error saving provider:', error);
+      toast({ title: "Ошибка", description: "Не удалось сохранить провайдера", variant: "destructive" });
+    } finally {
+      setSavingProvider(false);
+    }
+  };
   const togglePrompt = (promptId: string) => {
     setOpenPrompts(prev => {
       const newSet = new Set(prev);
