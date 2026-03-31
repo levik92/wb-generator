@@ -1,85 +1,47 @@
 
 
-## Диагностика и исправление Polza AI интеграции
+# Plan: Настройка приоритета провайдера Google AI Studio в Polza AI
 
-### Обнаруженные проблемы
+## Суть
+Polza AI поддерживает параметр `provider` с полем `order` — массив провайдеров в порядке приоритета. Если первый недоступен, запрос идет ко второму. На странице модели `google/gemini-3.1-flash-lite-preview` видно два провайдера: **"Google AI Studio"** и **"Google"**. Приоритет ставим на "Google AI Studio", фолбэк на "Google".
 
-Проанализированы логи Edge Functions и код. Polza AI успешно генерирует изображения (видно в логах), но результат не доходит до пользователя из-за нескольких багов:
-
----
-
-### 1. КРИТИЧНО: Неправильное имя storage bucket
-
-**Проблема**: `process-polza-task` пишет в bucket `generation-results`, но такого bucket не существует. Реальный bucket — `generated-cards`.
-
-```
-ERROR [process-polza-task] Upload error: StorageApiError: Bucket not found
+## Параметр для всех chat/completions запросов
+```json
+"provider": {
+  "order": ["Google AI Studio", "Google"],
+  "allow_fallbacks": true
+}
 ```
 
-**Лог подтверждает**: Polza возвращает картинку (`https://s3.polza.ai/f/215000/...`), она скачивается, но upload в storage падает.
+## Параметр для media запросов (генерация изображений)
+Тот же формат — Polza Media API также поддерживает `provider`.
 
-**Исправление**: Заменить `generation-results` → `generated-cards` в `process-polza-task/index.ts`. Также выровнять формат пути с `process-google-task` (`{userId}/{jobId}/{cardIndex}_{cardType}.png`).
+## Видео (Kling)
+Модель `kling-v2-6` — это не Google-модель, провайдер Google AI Studio её не обслуживает. Для видео-функций **provider НЕ добавляем** — оставляем автопулинг, чтобы Polza сама выбрала нужный провайдер для Kling.
 
----
+## Затронутые файлы (5 штук)
 
-### 2. Не обрабатывается статус `failed` при синхронном ответе Polza
+### 1. `supabase/functions/analyze-style-polza/index.ts`
+В `JSON.stringify()` body запроса к `/chat/completions` добавить `provider: { order: ["Google AI Studio", "Google"], allow_fallbacks: true }`.
 
-**Проблема**: Когда Polza возвращает `status: failed` сразу (синхронно), код не обрабатывает это и передаёт ответ в `handleCompleted`, где падает с "No image generated".
+### 2. `supabase/functions/identify-product-polza/index.ts`
+Аналогично — добавить `provider` в body запроса к `/chat/completions`.
 
-```
-No image URL in response: {"status":"failed","error":{"code":"BAD_GATEWAY"...}}
-```
+### 3. `supabase/functions/generate-description-polza/index.ts`
+Добавить `provider` в body запроса к `/chat/completions`.
 
-**Исправление**: Добавить проверку `if (mediaResult.status === 'failed')` перед вызовом `handleCompleted` в Phase 1.
+### 4. `supabase/functions/support-chat/index.ts`
+В ветке `apiProvider === 'polza'` (строка ~256-263) — добавить `provider` в body. Также добавить `model` (сейчас отсутствует в Polza-ветке).
 
----
+### 5. `supabase/functions/process-polza-task/index.ts`
+В body запроса к `/media` (строка ~195-203) — добавить `provider`.
 
-### 3. Identify-product не роутится через Polza
+### НЕ затрагиваем:
+- `create-video-job-polza/index.ts` — модель Kling, провайдер Google не подходит
+- `regenerate-video-job-polza/index.ts` — модель Kling, аналогично
+- GET-запросы проверки статуса (`/media/{id}`)
 
-**Проблема**: `GenerateCards.tsx` жёстко вызывает `'identify-product'` вместо `getIdentifyFunctionName(provider)`. При включённом Polza наименование товара всё равно определяется через прямой Gemini API.
+## Технические детали
 
-**Исправление**: Использовать `getIdentifyFunctionName(provider)` в `GenerateCards.tsx`.
-
----
-
-### 4. Analyze-style в unified-styling не роутится через Polza (частично)
-
-**Проблема**: В оркестраторе, когда первая карточка завершена и вызывается `analyze-style` для стиля (строка ~295), вызывается `'analyze-style'` без проверки провайдера (хотя pre-analysis на строке 176 уже роутится правильно).
-
-**Исправление**: Добавить проверку провайдера и для второго вызова analyze-style.
-
----
-
-### 5. Саппорт-чат
-
-**Статус**: Работает корректно. Код в `support-chat/index.ts` уже проверяет `api_provider` и при `polza` вызывает `polza.ai/api/v1/chat/completions`. Никаких ошибок в логах не обнаружено.
-
----
-
-### 6. Описания (generate-description-polza)
-
-**Статус**: Код выглядит корректно — использует `chat/completions`, background processing через `EdgeRuntime.waitUntil`. Нужно протестировать после деплоя.
-
----
-
-### 7. Видео (create/check-video-job-polza)
-
-**Статус**: Код выглядит корректно — создаёт задачу через Media API, сохраняет Polza ID в `kling_task_id`, polling через `check-video-status-polza`. Нужно протестировать.
-
----
-
-### Файлы для изменения
-
-| Файл | Что исправить |
-|------|--------------|
-| `supabase/functions/process-polza-task/index.ts` | Bucket `generated-cards`, формат пути, обработка `failed` статуса |
-| `src/components/dashboard/GenerateCards.tsx` | Роутинг identify-product через провайдера |
-| `supabase/functions/process-generation-tasks-banana/index.ts` | Роутинг analyze-style при unified-styling (строка ~295) |
-
-### Порядок
-
-1. Исправить bucket и обработку ошибок в `process-polza-task`
-2. Добавить роутинг identify-product в GenerateCards
-3. Исправить роутинг analyze-style в оркестраторе
-4. Задеплоить и протестировать
+Изменение одинаковое во всех 5 файлах — добавление поля `provider` в JSON body fetch-запроса. Клиентский код и база данных не затрагиваются. Деплой Edge Functions автоматический.
 
