@@ -305,39 +305,8 @@ const Dashboard = () => {
     resetCompletedJobsFlag();
   };
   const headerActions = useMemo(() => {
-    if (activeTab === 'history') {
-      return (
-        <Select value={historyFilter} onValueChange={(value: any) => setHistoryFilter(value)}>
-          <SelectTrigger className="w-10 h-9 px-0 justify-center bg-background border-border/50 [&>span]:hidden [&>svg]:ml-0">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все генерации</SelectItem>
-            <SelectItem value="cards">Карточки</SelectItem>
-            <SelectItem value="description">Описания</SelectItem>
-            <SelectItem value="video">Видеообложки</SelectItem>
-          </SelectContent>
-        </Select>
-      );
-    }
-    if (activeTab === 'news') {
-      return (
-        <Button onClick={() => newsMarkAllReadRef.current?.()} variant="outline" size="sm" className="gap-2">
-          <CheckCheck className="w-4 h-4" />
-          Прочитать все
-        </Button>
-      );
-    }
-    if (activeTab === 'notifications') {
-      return (
-        <Button onClick={() => notifMarkAllReadRef.current?.()} variant="outline" size="sm" className="gap-2">
-          <Check className="w-4 h-4" />
-          Отметить все
-        </Button>
-      );
-    }
     return null;
-  }, [activeTab, historyFilter]);
+  }, [activeTab]);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
