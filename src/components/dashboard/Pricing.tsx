@@ -131,36 +131,47 @@ export default function Pricing({
           setLoading(null);
           return;
         }
-        
-        const widget = new cpLib.CloudPayments();
-        
-        widget.oncomplete = (result: any) => {
-          if (result?.status === 'success') {
-            toast({
-              title: "Оплата прошла успешно!",
-              description: `Начислено ${data.tokens || finalTokens} токенов`,
-            });
-            window.location.href = '/dashboard?payment=success';
-          } else if (result?.status === 'fail') {
-            toast({
-              title: "Ошибка оплаты",
-              description: result?.message || "Платёж не прошёл. Попробуйте ещё раз.",
-              variant: "destructive"
-            });
-          }
-        };
 
-        try {
-          await widget.start(data.intentParams);
-        } catch (widgetError: any) {
-          console.error('CloudPayments widget error:', widgetError);
-          toast({
-            title: "Ошибка оплаты",
-            description: "Не удалось открыть форму оплаты.",
-            variant: "destructive"
-          });
-        }
-        setLoading(null);
+        const widget = new cpLib.CloudPayments();
+        const params = data.intentParams;
+        console.log('[CloudPayments] Starting payment with params:', params);
+
+        widget.pay('auth',
+          {
+            publicId: params.publicTerminalId,
+            description: params.description,
+            amount: params.amount,
+            currency: params.currency,
+            invoiceId: params.externalId,
+            accountId: params.userInfo?.accountId,
+            email: params.userInfo?.email,
+            skin: params.skin || 'modern',
+            data: params.metadata,
+          },
+          {
+            onSuccess: (options: any) => {
+              toast({
+                title: "Оплата прошла успешно!",
+                description: `Начислено ${data.tokens || finalTokens} токенов`,
+              });
+              window.location.href = '/dashboard?payment=success';
+            },
+            onFail: (reason: any, options: any) => {
+              console.error('[CloudPayments] Payment failed:', reason);
+              toast({
+                title: "Ошибка оплаты",
+                description: reason || "Платёж не прошёл. Попробуйте ещё раз.",
+                variant: "destructive"
+              });
+              setLoading(null);
+            },
+            onComplete: (paymentResult: any, options: any) => {
+              console.log('[CloudPayments] Payment complete:', paymentResult);
+              setLoading(null);
+              isPaymentInProgress.current = false;
+            },
+          }
+        );
         return;
       }
 
