@@ -199,7 +199,11 @@ const Auth = () => {
       setCaptchaToken(null);
       setCaptchaKey(k => k + 1);
     } catch (error: any) {
-      toast({ title: "Ошибка регистрации", description: "Не удалось создать аккаунт. Попробуйте позже", variant: "destructive" });
+      console.error('Signup error:', error?.message, error?.status, error);
+      const msg = error?.message?.includes('already registered')
+        ? 'Аккаунт с таким email уже зарегистрирован. Войдите через вкладку «Вход».'
+        : 'Не удалось создать аккаунт. Попробуйте позже';
+      toast({ title: "Ошибка регистрации", description: msg, variant: "destructive" });
       setCaptchaToken(null);
       setCaptchaKey(k => k + 1);
     } finally {

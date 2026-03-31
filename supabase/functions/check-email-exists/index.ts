@@ -25,25 +25,33 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    // Use direct PostgREST call with service role key to bypass RLS
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
-    // Check if user exists in auth.users table
-    const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers();
-    
-    if (listError) {
-      console.error('Error checking auth users:', listError);
+    const url = new URL(`${supabaseUrl}/rest/v1/profiles`);
+    url.searchParams.set('email', `ilike.${email.trim()}`);
+    url.searchParams.set('select', 'id');
+    url.searchParams.set('limit', '1');
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'apikey': serviceRoleKey,
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Error checking profiles:', response.status, await response.text());
       return new Response(
         JSON.stringify({ error: 'Failed to check user existence' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const emailExists = authUsers.users.some(user => 
-      user.email?.toLowerCase() === email.toLowerCase()
-    );
+    const data = await response.json();
+    const emailExists = Array.isArray(data) && data.length > 0;
 
     console.log(`Email check for ${email}: exists=${emailExists}`);
 
