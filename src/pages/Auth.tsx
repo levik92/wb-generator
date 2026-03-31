@@ -269,10 +269,18 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
+      // Check if error is "Email not confirmed" — show confirmation screen
+      if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+        setPendingConfirmationEmail(email);
+        setActiveTab("confirm-email");
+        setCaptchaToken(null);
+        setCaptchaKey(k => k + 1);
+        setLoading(false);
+        return;
+      }
       const localizeAuthError = (msg: string): string => {
         const map: Record<string, string> = {
           'Invalid login credentials': 'Неверный email или пароль',
-          'Email not confirmed': 'Подтвердите email перед входом. Проверьте почту.',
         };
         return map[msg] || msg;
       };
