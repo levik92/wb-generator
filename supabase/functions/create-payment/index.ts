@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { PUBLIC_SITE_URL } from "../_shared/runtime-config.ts";
+import {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_ANON_KEY,
+  YOOKASSA_SECRET_KEY,
+  PUBLIC_SITE_URL,
+} from "../_shared/runtime-config.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
