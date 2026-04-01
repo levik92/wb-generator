@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminImageSettings } from "@/components/admin/AdminImageSettings";
+import { AdminProxySettings } from "@/components/admin/AdminProxySettings";
 interface Prompt {
   id: string;
   prompt_type: string;
@@ -658,6 +659,9 @@ export function PromptManager() {
 
             {/* Настройки генерации изображений */}
             <AdminImageSettings />
+
+            {/* Настройки прокси */}
+            <AdminProxySettings />
           </div>
         </TabsContent>
 

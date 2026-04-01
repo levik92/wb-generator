@@ -94,19 +94,44 @@ async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
   }
 }
 
+// Create fetch function that optionally routes through proxy
+function createProxiedFetch(proxySettings?: any): typeof fetch {
+  if (!proxySettings?.proxy_enabled || !proxySettings?.proxy_url) {
+    return fetch;
+  }
+  try {
+    const proxyOpts: any = { url: proxySettings.proxy_url };
+    if (proxySettings.proxy_username) {
+      proxyOpts.basicAuth = {
+        username: proxySettings.proxy_username,
+        password: proxySettings.proxy_password || '',
+      };
+    }
+    const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+    console.log(`[proxy] Using proxy: ${proxySettings.proxy_url}`);
+    return (input: any, init?: any) => fetch(input, { ...init, client });
+  } catch (e) {
+    console.warn('[proxy] Failed to create proxy client, falling back to direct:', (e as Error).message);
+    return fetch;
+  }
+}
+
 // Call Google Gemini API with specified API key and resolution
 async function callGeminiApi(
   apiKey: string,
   contentParts: any[],
   keyName: string,
-  imageResolution: string = '2K'
+  imageResolution: string = '2K',
+  proxySettings?: any
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
   const modelName = 'gemini-3-pro-image-preview';
   const normalizedRes = (imageResolution || '2K').toUpperCase() === '1K' ? '1K' : '2K';
   console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: 3:4`);
   
+  const proxiedFetch = createProxiedFetch(proxySettings);
+  
   try {
-    const response = await fetch(
+    const response = await proxiedFetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
@@ -284,16 +309,17 @@ serve(async (req) => {
 
     console.log(`Processing with ${productImageBase64.length} product images${referenceBase64 ? ' and 1 reference' : ''}`);
 
-    // Fetch image resolution setting from database
+    // Fetch image resolution and proxy settings from database
     const { data: modelSettings } = await supabase
       .from('ai_model_settings')
-      .select('image_resolution')
+      .select('image_resolution, proxy_enabled, proxy_url, proxy_username, proxy_password')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
     
     const imageResolution = modelSettings?.image_resolution || '2K';
-    console.log(`Using image resolution: ${imageResolution}`);
+    const proxySettings = modelSettings;
+    console.log(`Using image resolution: ${imageResolution}, proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
 
     // Build content parts for Google Gemini API
     const contentParts: any[] = [];
@@ -336,7 +362,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     }
 
     // Try primary API key first
-    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution);
+    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution, proxySettings);
     
     // Retryable statuses (including 400 which can be transient with Gemini)
     const RETRYABLE_STATUSES = [400, 403, 429, 500, 503];
@@ -346,7 +372,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       if (geminiApiKey2) {
         console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
         await new Promise(resolve => setTimeout(resolve, FALLBACK_DELAY_MS));
-        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY', imageResolution);
+        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY', imageResolution, proxySettings);
         
         if (aiResult.ok) {
           console.log('Fallback API key succeeded!');
@@ -354,7 +380,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           // Fallback also failed, wait 10 seconds and try primary key one more time
           console.log(`Fallback API key also returned ${aiResult.status}, waiting ${FINAL_RETRY_DELAY_MS}ms before final retry on primary key...`);
           await new Promise(resolve => setTimeout(resolve, FINAL_RETRY_DELAY_MS));
-          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY', imageResolution);
+          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY', imageResolution, proxySettings);
           
           if (aiResult.ok) {
             console.log('Final retry on primary API key succeeded!');

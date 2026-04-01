@@ -45,6 +45,10 @@ export type Database = {
           created_at: string | null
           id: string
           image_resolution: string | null
+          proxy_enabled: boolean
+          proxy_password: string | null
+          proxy_url: string | null
+          proxy_username: string | null
           updated_at: string | null
           video_api_provider: string
         }
@@ -54,6 +58,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_resolution?: string | null
+          proxy_enabled?: boolean
+          proxy_password?: string | null
+          proxy_url?: string | null
+          proxy_username?: string | null
           updated_at?: string | null
           video_api_provider?: string
         }
@@ -63,6 +71,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_resolution?: string | null
+          proxy_enabled?: boolean
+          proxy_password?: string | null
+          proxy_url?: string | null
+          proxy_username?: string | null
           updated_at?: string | null
           video_api_provider?: string
         }

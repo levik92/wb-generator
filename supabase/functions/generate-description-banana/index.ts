@@ -129,9 +129,32 @@ serve(async (req) => {
           .replace('{competitors}', sanitizedCompetitors.join(', ') || 'не указано')
           .replace('{keywords}', sanitizedKeywords.join(', ') || 'не указано');
 
+        // Load proxy settings
+        const { data: proxyData } = await supabase
+          .from('ai_model_settings')
+          .select('proxy_enabled, proxy_url, proxy_username, proxy_password')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        let proxiedFetch = fetch;
+        if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
+          try {
+            const proxyOpts: any = { url: proxyData.proxy_url };
+            if (proxyData.proxy_username) {
+              proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || '' };
+            }
+            const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+            proxiedFetch = (input: any, init?: any) => fetch(input, { ...init, client });
+            console.log('[generate-description-banana] Using proxy');
+          } catch (e) {
+            console.warn('[generate-description-banana] Proxy setup failed:', (e as any).message);
+          }
+        }
+
         console.log('Calling Google Gemini 3.1 Pro API for description generation');
 
-        const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`, {
+        const aiResponse = await proxiedFetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
