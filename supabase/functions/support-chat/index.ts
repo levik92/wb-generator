@@ -231,9 +231,8 @@ serve(async (req) => {
                 "Content-Type": "application/json",
               };
             } else {
-              const geminiApiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-              if (!geminiApiKey) throw new Error("GOOGLE_GEMINI_API_KEY not configured");
-              aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`;
+              if (!GOOGLE_GEMINI_API_KEY) throw new Error("GOOGLE_GEMINI_API_KEY not configured");
+              aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${GOOGLE_GEMINI_API_KEY}`;
               aiHeaders = {
                 "Content-Type": "application/json",
               };
