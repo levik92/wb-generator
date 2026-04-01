@@ -52,8 +52,8 @@ serve(async (req) => {
     const userAgent = req.headers.get('user-agent');
     
     const supabaseServiceRole = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY,
       { auth: { persistSession: false } }
     );
 
