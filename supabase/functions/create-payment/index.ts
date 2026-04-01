@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { PUBLIC_SITE_URL } from "../_shared/runtime-config.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -171,7 +172,7 @@ serve(async (req) => {
         metadata_param: { payment_provider: 'cloudpayments', package_name: body.packageName, promo: appliedPromo }
       });
       
-      const originUrl = req.headers.get("origin") || 'https://wbgen.ru';
+      const originUrl = req.headers.get("origin") || PUBLIC_SITE_URL;
       
       return new Response(JSON.stringify({
         provider: 'cloudpayments',
@@ -217,7 +218,7 @@ serve(async (req) => {
       },
       confirmation: {
         type: 'redirect',
-        return_url: `${req.headers.get("origin") || 'https://wbgen.ru'}/dashboard?payment=success`
+        return_url: `${req.headers.get("origin") || PUBLIC_SITE_URL}/dashboard?payment=success`
       },
       capture: true,
       description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,

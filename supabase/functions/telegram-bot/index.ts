@@ -1,17 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+  TELEGRAM_BOT_TOKEN,
+  PUBLIC_SITE_URL,
+  SUPPORT_TELEGRAM_URL,
+  TELEGRAM_GROUP_URL,
+  TELEGRAM_WEBHOOK_BASE_URL,
+} from "../_shared/runtime-config.ts";
 
-const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
-const SUPABASE_URL = "https://xguiyabpngjkavyosbza.supabase.co";
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-// Mini app and support URLs
-const DASHBOARD_URL = "https://wbgen.ru/dashboard";
-const CASES_URL = "https://wbgen.ru/cases";
-const KNOWLEDGE_BASE_URL = "https://wbgen.ru/baza-znaniy";
-const SUPPORT_URL = "https://t.me/wbgen_support";
-const GROUP_URL = "https://t.me/wbgen_official";
+// Mini app and support URLs — derived from env/config
+const DASHBOARD_URL = `${PUBLIC_SITE_URL}/dashboard`;
+const CASES_URL = `${PUBLIC_SITE_URL}/cases`;
+const KNOWLEDGE_BASE_URL = `${PUBLIC_SITE_URL}/baza-znaniy`;
+const SUPPORT_URL = SUPPORT_TELEGRAM_URL;
+const GROUP_URL = TELEGRAM_GROUP_URL;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,7 +26,7 @@ const corsHeaders = {
 
 // Create Supabase client
 function getSupabaseClient() {
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 }
 
 // Save subscriber to database
@@ -590,7 +596,7 @@ serve(async (req) => {
 
     // Setup endpoint - call this once to configure webhook
     if (url.pathname.endsWith("/setup")) {
-      const webhookUrl = `https://xguiyabpngjkavyosbza.supabase.co/functions/v1/telegram-bot`;
+      const webhookUrl = `${TELEGRAM_WEBHOOK_BASE_URL}/telegram-bot`;
       const result = await setupWebhook(webhookUrl);
       
       return new Response(
