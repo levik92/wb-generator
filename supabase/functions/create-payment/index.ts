@@ -172,7 +172,7 @@ serve(async (req) => {
         metadata_param: { payment_provider: 'cloudpayments', package_name: body.packageName, promo: appliedPromo }
       });
       
-      const originUrl = req.headers.get("origin") || 'https://wbgen.ru';
+      const originUrl = req.headers.get("origin") || PUBLIC_SITE_URL;
       
       return new Response(JSON.stringify({
         provider: 'cloudpayments',
