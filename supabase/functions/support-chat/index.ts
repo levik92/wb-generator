@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+  SUPPORT_ENCRYPTION_KEY,
+  GOOGLE_GEMINI_API_KEY,
+  POLZA_AI_API_KEY,
+} from "../_shared/runtime-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,12 +17,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const encryptionKey = Deno.env.get("SUPPORT_ENCRYPTION_KEY");
+    const encryptionKey = SUPPORT_ENCRYPTION_KEY;
     if (!encryptionKey) throw new Error("Encryption key not configured");
 
     const { action, conversation_id, message, visitor_id, user_id, channel, attachment_url, before_id, limit: reqLimit } = await req.json();
