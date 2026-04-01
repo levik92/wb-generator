@@ -94,19 +94,44 @@ async function fetchImageAsBase64(url: string): Promise<FetchImageResult> {
   }
 }
 
+// Create fetch function that optionally routes through proxy
+function createProxiedFetch(proxySettings?: any): typeof fetch {
+  if (!proxySettings?.proxy_enabled || !proxySettings?.proxy_url) {
+    return fetch;
+  }
+  try {
+    const proxyOpts: any = { url: proxySettings.proxy_url };
+    if (proxySettings.proxy_username) {
+      proxyOpts.basicAuth = {
+        username: proxySettings.proxy_username,
+        password: proxySettings.proxy_password || '',
+      };
+    }
+    const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+    console.log(`[proxy] Using proxy: ${proxySettings.proxy_url}`);
+    return (input: any, init?: any) => fetch(input, { ...init, client });
+  } catch (e) {
+    console.warn('[proxy] Failed to create proxy client, falling back to direct:', (e as Error).message);
+    return fetch;
+  }
+}
+
 // Call Google Gemini API with specified API key and resolution
 async function callGeminiApi(
   apiKey: string,
   contentParts: any[],
   keyName: string,
-  imageResolution: string = '2K'
+  imageResolution: string = '2K',
+  proxySettings?: any
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
   const modelName = 'gemini-3-pro-image-preview';
   const normalizedRes = (imageResolution || '2K').toUpperCase() === '1K' ? '1K' : '2K';
   console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: 3:4`);
   
+  const proxiedFetch = createProxiedFetch(proxySettings);
+  
   try {
-    const response = await fetch(
+    const response = await proxiedFetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
