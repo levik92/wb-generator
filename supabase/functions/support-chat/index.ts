@@ -65,7 +65,6 @@ serve(async (req) => {
       case "create_conversation": {
         const convChannel = channel || "widget";
         
-        // Get AI default for this channel
         const { data: aiDefault } = await supabase
           .from("support_ai_defaults")
           .select("ai_enabled")
@@ -88,7 +87,6 @@ serve(async (req) => {
 
         if (error) throw error;
 
-        // Send system welcome message for dashboard channel
         if (channel === "dashboard") {
           const welcomeText = "Ваше сообщение зафиксировано! Менеджер скоро вам ответит.";
           const { data: encData } = await supabase.rpc("encrypt_support_message_edge", {
@@ -110,7 +108,6 @@ serve(async (req) => {
       case "send_message": {
         if (!conversation_id || !message) throw new Error("Missing conversation_id or message");
 
-        // Encrypt and store user message
         const { data: encData } = await supabase.rpc("encrypt_support_message_edge", {
           content: message,
           enc_key: encryptionKey,
@@ -123,14 +120,12 @@ serve(async (req) => {
           ...(attachment_url ? { attachment_url } : {}),
         });
 
-        // Check if this is the first user message in a dashboard conversation
         const { data: convData } = await supabase
           .from("support_conversations")
           .select("channel, ai_enabled, status")
           .eq("id", conversation_id)
           .single();
 
-        // If conversation was closed, reopen it
         if (convData?.status === "closed") {
           await supabase
             .from("support_conversations")
@@ -140,21 +135,18 @@ serve(async (req) => {
             })
             .eq("id", conversation_id);
         } else {
-          // Mark as needing attention for active conversations too
           await supabase
             .from("support_conversations")
             .update({ needs_admin_attention: true })
             .eq("id", conversation_id);
         }
 
-        // Count existing user messages
         const { count: msgCount } = await supabase
           .from("support_messages")
           .select("id", { count: "exact", head: true })
           .eq("conversation_id", conversation_id)
           .eq("sender_type", "user");
 
-        // If first message in dashboard, send system notification
         if (convData?.channel === "dashboard" && msgCount === 1) {
           const systemMsg = "Ваше сообщение зафиксировано! Менеджер скоро вам ответит.";
           const { data: sysEnc } = await supabase.rpc("encrypt_support_message_edge", {
@@ -168,11 +160,9 @@ serve(async (req) => {
           });
         }
 
-        // If AI is enabled (widget), get AI response
         let aiResponse = null;
         if (convData?.ai_enabled) {
           try {
-            // Get conversation history for context
             const { data: history } = await supabase
               .from("support_messages")
               .select("*")
@@ -182,7 +172,6 @@ serve(async (req) => {
 
             const decryptedHistory = await decryptMessages(history || []);
 
-            // Get AI prompt from ai_prompts table
             const { data: promptData } = await supabase
               .from("ai_prompts")
               .select("prompt_template")
@@ -202,16 +191,31 @@ serve(async (req) => {
                 })),
             ];
 
-            // Check API provider setting
             const { data: modelSettings } = await supabase
               .from("ai_model_settings")
-              .select("api_provider")
+              .select("api_provider, proxy_enabled, proxy_url, proxy_username, proxy_password")
               .order("updated_at", { ascending: false })
               .limit(1)
               .maybeSingle();
 
             const apiProvider = (modelSettings as any)?.api_provider || 'direct';
             
+            // Build proxied fetch for direct mode
+            let proxiedFetch: typeof fetch = fetch;
+            if (apiProvider === 'direct' && (modelSettings as any)?.proxy_enabled && (modelSettings as any)?.proxy_url) {
+              try {
+                const proxyOpts: any = { url: (modelSettings as any).proxy_url };
+                if ((modelSettings as any).proxy_username) {
+                  proxyOpts.basicAuth = { username: (modelSettings as any).proxy_username, password: (modelSettings as any).proxy_password || '' };
+                }
+                const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+                proxiedFetch = (input: any, init?: any) => fetch(input, { ...init, client });
+                console.log(`[support-chat] Using proxy: ${(modelSettings as any).proxy_url}`);
+              } catch (e) {
+                console.warn('[support-chat] Proxy setup failed, using direct:', (e as any).message);
+              }
+            }
+
             let aiUrl: string;
             let aiHeaders: Record<string, string>;
 
@@ -235,13 +239,12 @@ serve(async (req) => {
             let aiResp: Response;
 
             if (apiProvider === 'direct') {
-              // Direct Gemini API uses different format
               const geminiMessages = messages.map((m: any) => ({
                 role: m.role === 'assistant' ? 'model' : m.role === 'system' ? 'user' : m.role,
                 parts: [{ text: m.role === 'system' ? `[System Instructions]: ${m.content}` : m.content }],
               }));
 
-              aiResp = await fetch(aiUrl, {
+              aiResp = await proxiedFetch(aiUrl, {
                 method: "POST",
                 headers: aiHeaders,
                 body: JSON.stringify({
@@ -280,11 +283,9 @@ serve(async (req) => {
               aiContent = aiData.choices?.[0]?.message?.content || '';
             }
 
-            // Check for escalation
             const needsEscalation = aiContent.includes("[ESCALATE]");
             const cleanContent = aiContent.replace(/\[ESCALATE\]/g, "").trim();
 
-            // Store AI response
             if (cleanContent) {
               const { data: aiEnc } = await supabase.rpc("encrypt_support_message_edge", {
                 content: cleanContent,
@@ -298,7 +299,6 @@ serve(async (req) => {
               aiResponse = cleanContent;
             }
 
-            // Handle escalation
             if (needsEscalation) {
               await supabase
                 .from("support_conversations")
@@ -310,7 +310,6 @@ serve(async (req) => {
                 })
                 .eq("id", conversation_id);
 
-              // Add system message about escalation
               const escalationMsg = "Я передал ваш вопрос менеджеру. Он скоро подключится к чату.";
               const { data: escEnc } = await supabase.rpc("encrypt_support_message_edge", {
                 content: escalationMsg,
@@ -324,7 +323,6 @@ serve(async (req) => {
             }
           } catch (aiError) {
             console.error("AI response error:", aiError);
-            // Continue without AI response
           }
         }
 

@@ -49,6 +49,30 @@ async function generateKlingJWT(): Promise<string> {
   return `${signingInput}.${signatureB64}`;
 }
 
+async function createProxiedFetch(adminClient: any): Promise<typeof fetch> {
+  try {
+    const { data: proxyData } = await adminClient
+      .from("ai_model_settings")
+      .select("proxy_enabled, proxy_url, proxy_username, proxy_password")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
+      const proxyOpts: any = { url: proxyData.proxy_url };
+      if (proxyData.proxy_username) {
+        proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || "" };
+      }
+      const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+      console.log(`[check-video-status] Using proxy: ${proxyData.proxy_url}`);
+      return (input: any, init?: any) => fetch(input, { ...init, client });
+    }
+  } catch (e) {
+    console.warn("[check-video-status] Proxy setup failed, using direct:", (e as any).message);
+  }
+  return fetch;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -124,9 +148,12 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get proxied fetch
+    const proxiedFetch = await createProxiedFetch(adminClient);
+
     // Poll Kling API
     const klingJwt = await generateKlingJWT();
-    const klingResponse = await fetch(
+    const klingResponse = await proxiedFetch(
       `https://api.klingai.com/v1/videos/image2video/${job.kling_task_id}`,
       {
         method: "GET",
@@ -138,7 +165,6 @@ Deno.serve(async (req) => {
     console.log("Kling status response:", JSON.stringify(klingResult));
 
     if (klingResult.code !== 0) {
-      // API error — refund tokens and mark failed
       await adminClient
         .from("video_generation_jobs")
         .update({

@@ -28,12 +28,13 @@ serve(async (req) => {
       throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     // Fetch prompt from DB
     let prompt = DEFAULT_PROMPT;
     try {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
       const { data } = await supabase
         .from('ai_prompts')
         .select('prompt_template')
