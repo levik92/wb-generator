@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, useCallback } from "react";
+import { useState, useEffect, lazy, Suspense, useCallback, useRef, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { forceSignOut } from "@/lib/auth";
@@ -15,7 +15,8 @@ import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones, Filter, CheckCheck, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mobile components
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
@@ -54,6 +55,22 @@ interface Profile {
   login_count: number;
 }
 type ActiveTab = 'cards' | 'video' | 'description' | 'labels' | 'history' | 'pricing' | 'bonuses' | 'settings' | 'notifications' | 'news' | 'learning' | 'support';
+
+const MOBILE_TAB_TITLES: Record<string, string> = {
+  cards: 'Карточки',
+  video: 'Видеообложки',
+  description: 'Описания',
+  labels: 'Этикетки',
+  history: 'История',
+  pricing: 'Баланс',
+  bonuses: 'Бонусы',
+  settings: 'Настройки',
+  notifications: 'Уведомления',
+  news: 'Новости',
+  learning: 'Обучение',
+  support: 'Поддержка',
+};
+
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -63,6 +80,9 @@ const Dashboard = () => {
   const [shouldRefreshHistory, setShouldRefreshHistory] = useState(false);
   const [pendingVideoImageUrl, setPendingVideoImageUrl] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'cards' | 'description' | 'video'>('all');
+  const newsMarkAllReadRef = useRef<(() => void) | null>(null);
+  const notifMarkAllReadRef = useRef<(() => void) | null>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -300,6 +320,10 @@ const Dashboard = () => {
     setShouldRefreshHistory(false);
     resetCompletedJobsFlag();
   };
+  const headerActions = useMemo(() => {
+    return null;
+  }, [activeTab]);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
@@ -308,6 +332,7 @@ const Dashboard = () => {
   if (!user || !profile) {
     return null;
   }
+
   const renderContent = () => {
     switch (activeTab) {
       case 'cards':
@@ -326,17 +351,18 @@ const Dashboard = () => {
       case 'description':
         return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'notifications':
-        return <NotificationCenter profile={profile} />;
+        return <NotificationCenter profile={profile} onMarkAllReadRef={notifMarkAllReadRef} />;
       case 'labels':
         return <LabelGenerator />;
       case 'history':
-        return <History profile={profile} shouldRefresh={shouldRefreshHistory} onRefreshComplete={handleHistoryRefreshComplete} onTokensUpdate={refreshProfile} />;
+        return <History profile={profile} shouldRefresh={shouldRefreshHistory} onRefreshComplete={handleHistoryRefreshComplete} onTokensUpdate={refreshProfile} filter={historyFilter} onFilterChange={setHistoryFilter} />;
       case 'pricing':
         return <Balance />;
       case 'bonuses':
         return <Bonuses profile={profile} />;
       case 'news':
-        return <News />;
+        return <News onMarkAllReadRef={newsMarkAllReadRef} />;
+
       case 'learning':
         return <Learning />;
       case 'support':
@@ -373,16 +399,11 @@ const Dashboard = () => {
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Mobile Header */}
-        {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
+         {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
             <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20" onClick={() => setMobileMenuOpen(true)}>
               <Menu className="h-5 w-5 text-primary" />
             </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-base font-bold">WBGen</span>
-            </div>
+            <span className="text-base font-bold">{MOBILE_TAB_TITLES[activeTab] || 'WBGen'}</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-secondary">
@@ -425,7 +446,7 @@ const Dashboard = () => {
           </div>}
         
         {/* Desktop Header */}
-        {!isMobile && <DashboardHeader profile={profile} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} />}
+        {!isMobile && <DashboardHeader profile={profile} activeTab={activeTab} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} headerActions={headerActions} />}
         
         <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
           <SystemStatusBanner />

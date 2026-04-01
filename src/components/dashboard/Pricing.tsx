@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export default function Pricing({
   appliedPromo
 }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const isPaymentInProgress = useRef(false);
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const {
@@ -68,6 +69,8 @@ export default function Pricing({
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
   const videoPrice = generationPrices?.find(p => p.price_type === 'video_generation')?.tokens_cost || 10;
   const handlePayment = async (packageName: string, amount: number, tokens: number) => {
+    if (isPaymentInProgress.current) return;
+    isPaymentInProgress.current = true;
     try {
       setLoading(packageName);
       const {
@@ -81,6 +84,7 @@ export default function Pricing({
           description: "Необходимо войти в систему",
           variant: "destructive"
         });
+        setLoading(null);
         return;
       }
 
@@ -112,11 +116,11 @@ export default function Pricing({
           description: "Не удалось создать платеж",
           variant: "destructive"
         });
+        setLoading(null);
         return;
       }
 
       if (data.provider === 'cloudpayments') {
-        // Open CloudPayments widget (new API: widget.start)
         const cpLib = (window as any).cp;
         if (!cpLib) {
           toast({
@@ -124,48 +128,61 @@ export default function Pricing({
             description: "Виджет CloudPayments не загружен. Попробуйте обновить страницу.",
             variant: "destructive"
           });
+          setLoading(null);
           return;
         }
-        
-        const widget = new cpLib.CloudPayments();
-        
-        widget.oncomplete = (result: any) => {
-          setLoading(null);
-          if (result?.status === 'success') {
-            toast({
-              title: "Оплата прошла успешно!",
-              description: `Начислено ${data.tokens || finalTokens} токенов`,
-            });
-            window.location.href = '/dashboard?payment=success';
-          } else if (result?.status === 'fail') {
-            toast({
-              title: "Ошибка оплаты",
-              description: result?.message || "Платёж не прошёл. Попробуйте ещё раз.",
-              variant: "destructive"
-            });
-          }
-        };
 
-        widget.start(data.intentParams)
-          .then((widgetResult: any) => {
-            console.log('CloudPayments widget result:', widgetResult);
-          })
-          .catch((error: any) => {
-            console.error('CloudPayments widget error:', error);
-            setLoading(null);
-            toast({
-              title: "Ошибка оплаты",
-              description: "Не удалось открыть форму оплаты.",
-              variant: "destructive"
-            });
-          });
+        const widget = new cpLib.CloudPayments();
+        const params = data.intentParams;
+        console.log('[CloudPayments] Starting payment with params:', params);
+
+        widget.pay('auth',
+          {
+            publicId: params.publicTerminalId,
+            description: params.description,
+            amount: params.amount,
+            currency: params.currency,
+            invoiceId: params.externalId,
+            accountId: params.userInfo?.accountId,
+            email: params.userInfo?.email,
+            skin: params.skin || 'modern',
+            data: params.metadata,
+          },
+          {
+            onSuccess: (options: any) => {
+              toast({
+                title: "Оплата прошла успешно!",
+                description: `Начислено ${data.tokens || finalTokens} токенов`,
+              });
+              window.location.href = '/dashboard?payment=success';
+            },
+            onFail: (reason: any, options: any) => {
+              console.error('[CloudPayments] Payment failed:', reason);
+              const isCanceled = typeof reason === 'string' && reason.toLowerCase().includes('cancel');
+              toast({
+                title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
+                description: isCanceled ? "Платёж отменён пользователем." : "Платёж не прошёл. Попробуйте ещё раз.",
+                variant: "destructive"
+              });
+              setLoading(null);
+            },
+            onComplete: (paymentResult: any, options: any) => {
+              console.log('[CloudPayments] Payment complete:', paymentResult);
+              setLoading(null);
+              isPaymentInProgress.current = false;
+            },
+          }
+        );
         return;
       }
 
       // YooKassa flow - redirect to payment URL
       if (data.payment_url) {
         window.location.href = data.payment_url;
+        return;
       }
+
+      setLoading(null);
     } catch (error) {
       console.error('Payment error:', error);
       toast({
@@ -173,8 +190,9 @@ export default function Pricing({
         description: "Произошла ошибка при создании платежа",
         variant: "destructive"
       });
-    } finally {
       setLoading(null);
+    } finally {
+      isPaymentInProgress.current = false;
     }
   };
   if (packagesLoading || pricesLoading) {

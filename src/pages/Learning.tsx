@@ -67,17 +67,6 @@ const Learning = () => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <GraduationCap className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Обучение</h2>
-          <p className="text-muted-foreground text-sm">Изучите все возможности WB Генератор</p>
-        </div>
-      </div>
-
       {/* Telegram Group Promo */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
         <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">

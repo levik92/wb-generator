@@ -204,9 +204,83 @@ serve(async (req) => {
                 })),
             ];
 
-            // Self-hosted mode keeps support chat operational without Lovable AI.
-            // If support AI is reintroduced later, wire a provider here.
-            const aiContent = "";
+            // Check API provider setting
+            const { data: modelSettings } = await supabase
+              .from("ai_model_settings")
+              .select("api_provider")
+              .order("updated_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            const apiProvider = (modelSettings as any)?.api_provider || 'direct';
+            
+            let aiUrl: string;
+            let aiHeaders: Record<string, string>;
+
+            if (apiProvider === 'polza') {
+              const polzaApiKey = Deno.env.get("POLZA_AI_API_KEY");
+              if (!polzaApiKey) throw new Error("POLZA_AI_API_KEY not configured");
+              aiUrl = "https://polza.ai/api/v1/chat/completions";
+              aiHeaders = {
+                Authorization: `Bearer ${polzaApiKey}`,
+                "Content-Type": "application/json",
+              };
+            } else {
+              const geminiApiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+              if (!geminiApiKey) throw new Error("GOOGLE_GEMINI_API_KEY not configured");
+              aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`;
+              aiHeaders = {
+                "Content-Type": "application/json",
+              };
+            }
+
+            let aiResp: Response;
+
+            if (apiProvider === 'direct') {
+              // Direct Gemini API uses different format
+              const geminiMessages = messages.map((m: any) => ({
+                role: m.role === 'assistant' ? 'model' : m.role === 'system' ? 'user' : m.role,
+                parts: [{ text: m.role === 'system' ? `[System Instructions]: ${m.content}` : m.content }],
+              }));
+
+              aiResp = await fetch(aiUrl, {
+                method: "POST",
+                headers: aiHeaders,
+                body: JSON.stringify({
+                  contents: geminiMessages,
+                  generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1000,
+                  },
+                }),
+              });
+            } else {
+              aiResp = await fetch(aiUrl, {
+                method: "POST",
+                headers: aiHeaders,
+                body: JSON.stringify({
+                  model: 'google/gemini-3.1-pro-preview',
+                  messages,
+                  stream: false,
+                  provider: {
+                    only: ["Google AI Studio"],
+                  },
+                }),
+              });
+            }
+
+            if (!aiResp.ok) {
+              console.error("AI gateway error:", aiResp.status, await aiResp.text());
+              throw new Error("AI gateway error");
+            }
+
+            const aiData = await aiResp.json();
+            let aiContent = '';
+            if (apiProvider === 'direct') {
+              aiContent = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            } else {
+              aiContent = aiData.choices?.[0]?.message?.content || '';
+            }
 
             // Check for escalation
             const needsEscalation = aiContent.includes("[ESCALATE]");

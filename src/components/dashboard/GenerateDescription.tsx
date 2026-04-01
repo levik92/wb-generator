@@ -242,8 +242,8 @@ export const GenerateDescription = ({
     try {
       const competitors = [competitor1, competitor2, competitor3].filter(Boolean);
       const keywordsList = keywords.split(',').map(k => k.trim()).filter(Boolean);
-      const functionName = getEdgeFunctionName('generate-description', activeModel);
-      console.log('[GenerateDescription] Active model:', activeModel, '| Function:', functionName);
+      const functionName = getEdgeFunctionName('generate-description', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateDescription] Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', functionName);
 
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: {
@@ -302,22 +302,11 @@ export const GenerateDescription = ({
   };
 
   return <div className="space-y-6 max-w-full overflow-hidden">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <FileText className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Генерация описаний</h2>
-          <p className="text-muted-foreground text-sm">Создайте профессиональное описание товара для Wildberries</p>
-        </div>
-      </motion.div>
-
       {/* Feature Card */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6">
         <div className="space-y-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <div className="hidden sm:flex w-12 h-12 rounded-xl bg-primary/15 items-center justify-center shrink-0">
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1">

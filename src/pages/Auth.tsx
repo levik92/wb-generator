@@ -23,7 +23,7 @@ const Auth = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const [activeTab, setActiveTab] = useState<"signin" | "signup" | "reset" | "new-password">("signin");
+  const [activeTab, setActiveTab] = useState<"signin" | "signup" | "reset" | "new-password" | "confirm-email">("signin");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showTermsError, setShowTermsError] = useState(false);
@@ -31,6 +31,8 @@ const Auth = () => {
   const [captchaKey, setCaptchaKey] = useState(0);
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(true);
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState("");
+  const [resending, setResending] = useState(false);
   const { toast } = useToast();
   const { logLoginAttempt } = useSecurityLogger();
   const navigate = useNavigate();
@@ -92,6 +94,8 @@ const Auth = () => {
     setCaptchaToken(null);
     setCaptchaKey(k => k + 1);
   }, [activeTab]);
+
+  const getAuthRedirectUrl = (path = "/auth?tab=signin") => `${window.location.origin}${path}`;
 
   const validatePassword = (password: string): { isValid: boolean; message?: string } => {
     if (password.length < 8) {
@@ -172,11 +176,11 @@ const Auth = () => {
         return;
       }
 
-      const redirectUrl = `${window.location.origin}/dashboard`;
-      const signupOptions: any = { emailRedirectTo: redirectUrl };
+      const signupOptions: any = {
+        emailRedirectTo: getAuthRedirectUrl("/auth?tab=signin"),
+      };
 
       if (captchaToken) signupOptions.captchaToken = captchaToken;
-      // Build signup metadata with referral, partner, and UTM data
       const utmSourceId = getStoredUtmSourceId();
       const metaData: Record<string, string> = {};
       if (referralCode) metaData.referral_code = referralCode;
@@ -184,7 +188,7 @@ const Auth = () => {
       if (utmSourceId) metaData.utm_source_id = utmSourceId;
       if (Object.keys(metaData).length > 0) signupOptions.data = metaData;
 
-      const { data: signUpData, error } = await supabase.auth.signUp({ email, password, options: signupOptions });
+      const { error } = await supabase.auth.signUp({ email, password, options: signupOptions });
 
       if (error) {
         await logLoginAttempt(email, false, error.message);
@@ -192,19 +196,50 @@ const Auth = () => {
       }
 
       await logLoginAttempt(email, true);
-      toast({
-        title: "Аккаунт создан! 📧",
-        description: "Перейдите в почту и подтвердите email. После — войдите через вкладку 'Вход'.",
-        duration: 10000,
-      });
+      setPendingConfirmationEmail(email);
+      setActiveTab("confirm-email");
       setCaptchaToken(null);
-      setCaptchaKey(k => k + 1);
+      setCaptchaKey((k) => k + 1);
     } catch (error: any) {
-      toast({ title: "Ошибка регистрации", description: "Не удалось создать аккаунт. Попробуйте позже", variant: "destructive" });
+      console.error("Signup error:", error?.message, error?.status, error);
+      const msg = error?.message?.includes("already registered")
+        ? "Аккаунт с таким email уже зарегистрирован. Войдите через вкладку «Вход»."
+        : error?.message?.includes("Error sending confirmation email")
+          ? "Не удалось отправить письмо подтверждения. Попробуйте ещё раз через минуту."
+          : "Не удалось создать аккаунт. Попробуйте позже";
+      toast({ title: "Ошибка регистрации", description: msg, variant: "destructive" });
       setCaptchaToken(null);
-      setCaptchaKey(k => k + 1);
+      setCaptchaKey((k) => k + 1);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!pendingConfirmationEmail || resending) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: pendingConfirmationEmail,
+        options: {
+          emailRedirectTo: getAuthRedirectUrl("/auth?tab=signin"),
+        },
+      });
+      if (error) throw error;
+      toast({
+        title: "Письмо отправлено!",
+        description: "Проверьте почту, включая папку «Спам».",
+        duration: 6000,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Не удалось отправить",
+        description: "Попробуйте через минуту. Если проблема сохраняется — напишите в поддержку.",
+        variant: "destructive",
+      });
+    } finally {
+      setResending(false);
     }
   };
 
@@ -245,10 +280,18 @@ const Auth = () => {
         navigate("/dashboard");
       }
     } catch (error: any) {
+      // Check if error is "Email not confirmed" — show confirmation screen
+      if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+        setPendingConfirmationEmail(email);
+        setActiveTab("confirm-email");
+        setCaptchaToken(null);
+        setCaptchaKey(k => k + 1);
+        setLoading(false);
+        return;
+      }
       const localizeAuthError = (msg: string): string => {
         const map: Record<string, string> = {
           'Invalid login credentials': 'Неверный email или пароль',
-          'Email not confirmed': 'Подтвердите email перед входом. Проверьте почту.',
         };
         return map[msg] || msg;
       };
@@ -426,12 +469,14 @@ const Auth = () => {
                 {activeTab === "signup" && "Создание аккаунта"}
                 {activeTab === "reset" && "Восстановление пароля"}
                 {activeTab === "new-password" && "Новый пароль"}
+                {activeTab === "confirm-email" && "Подтвердите почту"}
               </h1>
               <p className="text-white/50 text-sm">
                 {activeTab === "signin" && "Войдите, чтобы продолжить"}
                 {activeTab === "signup" && "Создавайте карточки за 3 минуты"}
                 {activeTab === "reset" && "Введите email для восстановления"}
                 {activeTab === "new-password" && "Придумайте новый пароль"}
+                {activeTab === "confirm-email" && "Мы отправили письмо на вашу почту"}
               </p>
             </div>
 
@@ -728,6 +773,63 @@ const Auth = () => {
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Сохранить пароль"}
                 </Button>
               </form>
+            )}
+
+            {/* Email Confirmation Screen */}
+            {activeTab === "confirm-email" && (
+              <div className="space-y-6 text-center">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[hsl(268,83%,58%)]/20 flex items-center justify-center">
+                  <Mail className="w-8 h-8 text-[hsl(268,83%,65%)]" />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-white text-sm">
+                    Мы отправили письмо с подтверждением на
+                  </p>
+                  <p className="text-[hsl(268,83%,65%)] font-medium text-sm break-all">
+                    {pendingConfirmationEmail}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-left space-y-2">
+                  <p className="text-white/70 text-sm font-medium">Что нужно сделать:</p>
+                  <ol className="text-white/50 text-sm space-y-1 list-decimal list-inside">
+                    <li>Откройте почту и найдите письмо от WBGen</li>
+                    <li>Нажмите кнопку подтверждения в письме</li>
+                    <li>Вернитесь сюда и войдите в аккаунт</li>
+                  </ol>
+                  <p className="text-white/40 text-xs mt-2">
+                    💡 Если письмо не пришло — проверьте папку «Спам»
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resending}
+                    variant="outline"
+                    className="w-full h-12 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white rounded-xl"
+                  >
+                    {resending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "Отправить письмо повторно"
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("signin");
+                      setPendingConfirmationEmail("");
+                    }}
+                    className="w-full h-12 bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 text-white font-semibold rounded-xl"
+                  >
+                    Перейти ко входу
+                  </Button>
+                </div>
+              </div>
             )}
 
             {/* Referral badge */}

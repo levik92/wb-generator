@@ -41,24 +41,42 @@ export type Database = {
       ai_model_settings: {
         Row: {
           active_model: string
+          api_provider: string
           created_at: string | null
           id: string
           image_resolution: string | null
+          proxy_enabled: boolean
+          proxy_password: string | null
+          proxy_url: string | null
+          proxy_username: string | null
           updated_at: string | null
+          video_api_provider: string
         }
         Insert: {
           active_model: string
+          api_provider?: string
           created_at?: string | null
           id?: string
           image_resolution?: string | null
+          proxy_enabled?: boolean
+          proxy_password?: string | null
+          proxy_url?: string | null
+          proxy_username?: string | null
           updated_at?: string | null
+          video_api_provider?: string
         }
         Update: {
           active_model?: string
+          api_provider?: string
           created_at?: string | null
           id?: string
           image_resolution?: string | null
+          proxy_enabled?: boolean
+          proxy_password?: string | null
+          proxy_url?: string | null
+          proxy_username?: string | null
           updated_at?: string | null
+          video_api_provider?: string
         }
         Relationships: []
       }
@@ -606,6 +624,8 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
+          tochka_document_id: string | null
+          tochka_status: string | null
           tokens_amount: number
           updated_at: string
           user_id: string
@@ -624,6 +644,8 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          tochka_document_id?: string | null
+          tochka_status?: string | null
           tokens_amount: number
           updated_at?: string
           user_id: string
@@ -642,6 +664,8 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          tochka_document_id?: string | null
+          tochka_status?: string | null
           tokens_amount?: number
           updated_at?: string
           user_id?: string

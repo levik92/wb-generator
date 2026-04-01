@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface CheckEmailRequest {
@@ -11,66 +11,60 @@ interface CheckEmailRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
     const { email }: CheckEmailRequest = await req.json();
     
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'Email is required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if user exists in auth.users table
-    const { data: authUsers, error: listUsersError } = await supabase.auth.admin.listUsers();
-    
-    if (listUsersError) {
-      console.error('Error checking auth users:', listUsersError);
+    // Use direct PostgREST call with service role key to bypass RLS
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+    const url = new URL(`${supabaseUrl}/rest/v1/profiles`);
+    url.searchParams.set('email', `ilike.${email.trim()}`);
+    url.searchParams.set('select', 'id');
+    url.searchParams.set('limit', '1');
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'apikey': serviceRoleKey,
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Error checking profiles:', response.status, await response.text());
       return new Response(
         JSON.stringify({ error: 'Failed to check user existence' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if email exists in the users list
-    const emailExists = authUsers.users.some(user => 
-      user.email?.toLowerCase() === email.toLowerCase()
-    );
+    const data = await response.json();
+    const emailExists = Array.isArray(data) && data.length > 0;
 
     console.log(`Email check for ${email}: exists=${emailExists}`);
 
     return new Response(
       JSON.stringify({ exists: emailExists }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in check-email-exists function:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

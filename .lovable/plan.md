@@ -1,49 +1,71 @@
 
 
-## Audit Results: B2B Invoice System
+## Прокси для прямых API-запросов генерации
 
-### What Works Correctly
-1. **Database schema** — `invoice_payments`, `organization_details` tables are properly configured with correct columns, constraints, and unique key on `user_id`
-2. **RLS policies** — Both tables have proper policies (users see own data, admins see all, users can create/update own)
-3. **Invoice numbering** — `invoice_number_seq` sequence exists, RPC `nextval_invoice_number` works, prefix is `WBG-`
-4. **Font support** — `arialFont.ts` has both `ARIAL_REGULAR_BASE64` and `ARIAL_BOLD_BASE64` exports
-5. **PDF generation** — Properly registers Arial font, uses thin lines (0.15), includes contract terms, supplier info, signature
-6. **Electronic invoice UI** — Matching layout with bank details, contract terms, status badges, "Я оплатил" button
-7. **Payment history** — Fetches both `payments` and `invoice_payments`, shows combined chronological list
-8. **Invoice creation flow** — Upserts org data, generates invoice number, inserts record, opens in new tab
-9. **Admin processing** — `process_invoice_payment` RPC correctly handles approve/reject with token crediting
-10. **AI prompt in DB** — `inn_lookup` prompt exists in `ai_prompts` table
+### Что делаем
 
-### Issues Found
+Добавляем в админку (раздел «Модель») блок управления HTTP-прокси. Когда прокси включён, все прямые запросы к Google Gemini API и другим провайдерам (кроме Polza AI) проходят через указанный прокси-сервер.
 
-#### 1. CRITICAL: `lookup-inn` Edge Function Returns "not_found" for All INNs
-- **Tested**: Called with INN `9724238597` (your own company) and `7707083893` (Sberbank) — both returned `{"error":"not_found"}`
-- **Root cause**: The function has zero log output beyond "booted", meaning the AI gateway call is either failing silently or the model name `google/gemini-3.1-pro-preview` is returning empty/invalid responses
-- **The catch block** on line 105-107 swallows all errors and returns `not_found` with no logging
-- **Fix**: Add `console.error` logging before the AI call and after receiving the response. Also add a fallback model or validate the AI response. Need to add detailed logging to diagnose the exact failure point.
+### Шаг 1. Миграция БД — добавить колонки прокси в `ai_model_settings`
 
-#### 2. MINOR: Model name may need verification
-- The model `google/gemini-3.1-pro-preview` is used — same as in `support-chat`. If support chat works, the model is valid, but the INN lookup task may need a different prompt approach since Gemini may refuse to provide organization data it's not confident about.
+```sql
+ALTER TABLE ai_model_settings
+  ADD COLUMN proxy_enabled boolean NOT NULL DEFAULT false,
+  ADD COLUMN proxy_url text,
+  ADD COLUMN proxy_username text,
+  ADD COLUMN proxy_password text;
+```
 
-### Proposed Fixes
+### Шаг 2. Новый компонент `AdminProxySettings.tsx`
 
-**File: `supabase/functions/lookup-inn/index.ts`**
-- Add detailed `console.log` statements for: prompt sent, AI response status, raw AI text, parsed JSON
-- Log AI gateway errors with response body text
-- Consider using a simpler model like `google/gemini-2.0-flash` for faster/more reliable responses
-- Add proper error differentiation so users know why lookup failed (API error vs not found vs rate limit)
+Создать `src/components/admin/AdminProxySettings.tsx` — карточка с:
+- Switch «Включить прокси»
+- Поля: URL прокси (например `http://proxy.example.com:8080`), логин, пароль
+- Кнопка «Сохранить»
+- Предупреждение: «Не влияет на Polza AI»
 
-**No other files need changes** — the rest of the system (forms, PDF, history, admin) is correctly wired up.
+Разместить в `PromptManager.tsx` рядом с `AdminImageSettings` на вкладке «Изображения».
 
-### Technical Details
+### Шаг 3. Хелпер `fetchViaProxy` для Edge Functions
 
-The edge function needs these specific logging additions:
-1. Before AI call: log the constructed prompt
-2. After AI response: log `aiRes.status` and response body if not OK
-3. After parsing: log the raw text and parsed result
-4. In catch block: log the actual error object
+Создать утилиту, которую будут использовать все edge-функции с прямыми API-вызовами. Логика:
+1. Читает `proxy_enabled`, `proxy_url`, `proxy_username`, `proxy_password` из `ai_model_settings`
+2. Если прокси выключен — обычный `fetch()`
+3. Если включён — делает `CONNECT` через прокси (Deno поддерживает `Deno.connect` для TCP-туннелирования) или использует HTTP-прокси через заголовок `Proxy-Authorization`
 
-Additionally, the model should be changed from `google/gemini-3.1-pro-preview` to `google/gemini-2.0-flash` which is more reliable for structured data extraction tasks.
+Вариант реализации: в Deno проще всего использовать переменные окружения `HTTP_PROXY` / `HTTPS_PROXY` которые Deno `fetch` подхватывает автоматически. Но так как настройки динамические (из БД), придётся использовать библиотеку типа `deno-fetch-proxy` или ручной CONNECT-туннель.
 
-After deploying these changes, a re-test via `curl_edge_functions` will confirm whether the INN lookup works.
+**Более простой подход**: использовать прокси как промежуточный URL. То есть вместо прямого запроса к `generativelanguage.googleapis.com`, отправлять запрос через прокси-URL с заголовками авторизации. Это стандартный HTTP forward proxy.
+
+### Шаг 4. Модификация Edge Functions
+
+Обновить следующие функции, добавив проверку прокси-настроек перед API-вызовами (только когда `api_provider !== 'polza'`):
+
+- `process-google-task/index.ts` — функция `callGeminiApi()` 
+- `generate-description-banana/index.ts` — вызов Gemini для описаний
+- `analyze-style/index.ts` — анализ стиля
+- `identify-product/index.ts` — идентификация товара
+- `support-chat/index.ts` — AI-чат поддержки
+
+В каждой функции:
+1. Загрузить настройки прокси из `ai_model_settings`
+2. Если `proxy_enabled === true` и текущий провайдер не Polza — проксировать запрос
+3. Иначе — работать как раньше
+
+### Шаг 5. Кеширование настроек
+
+Чтобы не делать запрос в БД на каждый вызов, настройки прокси загружаются один раз в начале обработки задачи (в оркестраторе `process-generation-tasks-banana`) и передаются в процессор через параметры.
+
+### Файлы
+
+| Действие | Файл |
+|---|---|
+| Миграция | `ai_model_settings` — 4 новых колонки |
+| Создать | `src/components/admin/AdminProxySettings.tsx` |
+| Изменить | `src/components/dashboard/PromptManager.tsx` — добавить `AdminProxySettings` |
+| Изменить | `supabase/functions/process-google-task/index.ts` — прокси в `callGeminiApi` |
+| Изменить | `supabase/functions/generate-description-banana/index.ts` |
+| Изменить | `supabase/functions/analyze-style/index.ts` |
+| Изменить | `supabase/functions/identify-product/index.ts` |
+| Изменить | `supabase/functions/process-generation-tasks-banana/index.ts` — передача настроек |
 

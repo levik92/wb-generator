@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -55,64 +56,43 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
 
     setCreating(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const { data, error } = await supabase.functions.invoke("create-tochka-invoice", {
+        body: {
+          orgData,
+          bankDetails: { bankName, bik, checkingAccount, corrAccount },
+          packageId: selectedPackage.id,
+          packageName: selectedPackage.name,
+          packagePrice: selectedPackage.price,
+          packageTokens: selectedPackage.tokens,
+        },
+      });
 
-      const { data: orgRecord, error: orgError } = await supabase
-        .from('organization_details')
-        .upsert({
-          user_id: session.user.id,
-          inn: orgData.inn,
-          name: orgData.name,
-          kpp: orgData.kpp || null,
-          ogrn: orgData.ogrn || null,
-          legal_address: orgData.legal_address || null,
-          director_name: orgData.director_name || null,
-          bank_name: bankName || null,
-          bik: bik || null,
-          checking_account: checkingAccount || null,
-          correspondent_account: corrAccount || null,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' })
-        .select()
-        .single();
+      if (error) throw error;
 
-      if (orgError) throw orgError;
-
-      const { data: seqData, error: seqError } = await (supabase.rpc as any)('nextval_invoice_number');
-      let invoiceNum = '1001';
-      if (!seqError && seqData) {
-        invoiceNum = String(seqData);
+      if (data?.tochkaError) {
+        toast({ title: "Счёт создан", description: data.message || "Счёт создан, но возникла ошибка при отправке в банк" });
       } else {
-        invoiceNum = `${Date.now().toString().slice(-6)}`;
+        toast({ title: "Счёт сформирован", description: `Счёт ${data.invoiceNumber} создан` });
       }
 
-      const invoiceNumber = `WBG-${invoiceNum}`;
-      const paymentPurpose = `Оплата за пополнение тарифа "${selectedPackage.name}" в сервисе WBGen. Без НДС.`;
-
-      const { error: invError } = await supabase
-        .from('invoice_payments')
-        .insert({
-          user_id: session.user.id,
-          organization_id: orgRecord.id,
-          package_id: selectedPackage.id,
-          package_name: selectedPackage.name,
-          amount: selectedPackage.price,
-          tokens_amount: selectedPackage.tokens,
-          invoice_number: invoiceNumber,
-          payment_purpose: paymentPurpose,
-          status: 'invoice_issued',
-        });
-
-      if (invError) throw invError;
-
-      toast({ title: "Счёт сформирован", description: `Счёт ${invoiceNumber} создан` });
       onOpenChange(false);
-
-      window.open(`/invoice/${invoiceNumber}`, '_blank');
+      window.open(`/invoice/${data.invoiceNumber}`, '_blank');
     } catch (error) {
       console.error("Create invoice error:", error);
-      toast({ title: "Ошибка", description: "Не удалось создать счёт", variant: "destructive" });
+
+      let description = "Не удалось создать счёт";
+      if (error instanceof FunctionsHttpError) {
+        try {
+          const details = await error.context.json();
+          description = details?.error || details?.message || description;
+        } catch {
+          description = error.message || description;
+        }
+      } else if (error instanceof Error) {
+        description = error.message || description;
+      }
+
+      toast({ title: "Ошибка", description, variant: "destructive" });
     } finally {
       setCreating(false);
     }
@@ -134,12 +114,18 @@ export default function InvoiceForm({ selectedPackage, open, onOpenChange }: Inv
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2 space-y-1.5">
+              <Label className="text-xs">ИНН *</Label>
+              <Input
+                value={orgData.inn}
+                onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value.replace(/\D/g, '').slice(0, 12) }))}
+                placeholder="10 или 12 цифр"
+                maxLength={12}
+                className="min-w-0"
+              />
+            </div>
+            <div className="sm:col-span-2 space-y-1.5">
               <Label className="text-xs">Название организации *</Label>
               <Input value={orgData.name} onChange={e => setOrgData(prev => ({ ...prev, name: e.target.value }))} placeholder="ООО «Название»" className="min-w-0" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">ИНН *</Label>
-              <Input value={orgData.inn} onChange={e => setOrgData(prev => ({ ...prev, inn: e.target.value.replace(/\D/g, '').slice(0, 12) }))} placeholder="10 или 12 цифр" maxLength={12} className="min-w-0" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">КПП</Label>

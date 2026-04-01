@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const POLZA_BASE_URL = 'https://polza.ai/api/v1';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -37,10 +39,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    const polzaApiKey = Deno.env.get('POLZA_AI_API_KEY');
 
-    if (!geminiApiKey) {
-      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
+    if (!polzaApiKey) {
+      throw new Error('POLZA_AI_API_KEY not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -76,7 +78,7 @@ serve(async (req) => {
       );
     }
 
-    // Create 'processing' generation record FIRST
+    // Create 'processing' generation record
     const { data: genRecord, error: genInsertError } = await supabase
       .from('generations')
       .insert({
@@ -95,12 +97,10 @@ serve(async (req) => {
       .single();
 
     if (genInsertError || !genRecord) {
-      console.error('Error creating generation record:', genInsertError);
       throw new Error('Failed to create generation record');
     }
 
     const generationId = genRecord.id;
-    console.log('[generate-description-banana] Created generation record:', generationId);
 
     // Return immediately
     const immediateResponse = new Response(
@@ -111,7 +111,7 @@ serve(async (req) => {
     // Background processing
     const backgroundTask = (async () => {
       try {
-        // Get prompt template for Google model
+        // Get prompt template (same as direct Gemini - uses google model_type prompts)
         const { data: promptData, error: promptError } = await supabase
           .from('ai_prompts')
           .select('prompt_template')
@@ -129,61 +129,41 @@ serve(async (req) => {
           .replace('{competitors}', sanitizedCompetitors.join(', ') || 'не указано')
           .replace('{keywords}', sanitizedKeywords.join(', ') || 'не указано');
 
-        // Load proxy settings
-        const { data: proxyData } = await supabase
-          .from('ai_model_settings')
-          .select('proxy_enabled, proxy_url, proxy_username, proxy_password')
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        console.log('[generate-description-polza] Calling Polza AI for description generation');
 
-        let proxiedFetch = fetch;
-        if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
-          try {
-            const proxyOpts: any = { url: proxyData.proxy_url };
-            if (proxyData.proxy_username) {
-              proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || '' };
-            }
-            const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
-            proxiedFetch = (input: any, init?: any) => fetch(input, { ...init, client });
-            console.log('[generate-description-banana] Using proxy');
-          } catch (e) {
-            console.warn('[generate-description-banana] Proxy setup failed:', (e as any).message);
-          }
-        }
-
-        console.log('Calling Google Gemini 3.1 Pro API for description generation');
-
-        const aiResponse = await proxiedFetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${geminiApiKey}`, {
+        const aiResponse = await fetch(`${POLZA_BASE_URL}/chat/completions`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${polzaApiKey}`,
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: finalPrompt }] }]
+            model: 'google/gemini-3.1-pro-preview',
+            messages: [{ role: 'user', content: finalPrompt }],
+            provider: {
+              only: ["Google AI Studio"],
+            },
           }),
         });
 
         if (!aiResponse.ok) {
           const errorText = await aiResponse.text();
-          console.error('Google Gemini API error:', aiResponse.status, errorText);
-          throw new Error(`Gemini API error: ${aiResponse.status}`);
+          console.error('[generate-description-polza] Polza API error:', aiResponse.status, errorText);
+          throw new Error(`Polza API error: ${aiResponse.status}`);
         }
 
         const aiData = await aiResponse.json();
-        const generatedText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        const generatedText = aiData.choices?.[0]?.message?.content;
 
         if (!generatedText) {
           throw new Error('No content generated');
         }
 
         // Spend tokens
-        const { error: spendError } = await supabase.rpc('spend_tokens', {
+        await supabase.rpc('spend_tokens', {
           user_id_param: userId,
           tokens_amount: tokensCost,
         });
-
-        if (spendError) {
-          console.error('Failed to spend tokens:', spendError);
-        }
 
         // Update to completed
         await supabase
@@ -195,10 +175,10 @@ serve(async (req) => {
           })
           .eq('id', generationId);
 
-        console.log('[generate-description-banana] Generation completed:', generationId);
+        console.log('[generate-description-polza] Generation completed:', generationId);
 
       } catch (error) {
-        console.error('[generate-description-banana] Background error:', error);
+        console.error('[generate-description-polza] Background error:', error);
         
         await supabase
           .from('generations')
@@ -209,11 +189,10 @@ serve(async (req) => {
           })
           .eq('id', generationId);
 
-        // Refund tokens
         await supabase.rpc('refund_tokens', {
           user_id_param: userId,
           tokens_amount: tokensCost,
-          reason_text: 'Возврат за неудачную генерацию описания'
+          reason_text: 'Возврат за неудачную генерацию описания (Polza)'
         });
       }
     })();
@@ -227,7 +206,7 @@ serve(async (req) => {
     return immediateResponse;
 
   } catch (error) {
-    console.error('Error in generate-description-banana:', error);
+    console.error('Error in generate-description-polza:', error);
     return new Response(
       JSON.stringify({ error: error.message || 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

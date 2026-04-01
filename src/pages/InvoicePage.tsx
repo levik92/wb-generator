@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, Loader2, CheckCircle2, XCircle, Clock, MessageCircle, Info } from "lucide-react";
+import { Download, Loader2, CheckCircle2, XCircle, Clock, MessageCircle, Info, BanknoteIcon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const SELLER = {
@@ -48,7 +48,7 @@ export default function InvoicePage() {
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [org, setOrg] = useState<OrgData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [confirming, setConfirming] = useState(false);
+  const [_confirming, _setConfirming] = useState(false);
 
   useEffect(() => {
     loadInvoice();
@@ -84,25 +84,6 @@ export default function InvoicePage() {
       console.error(e);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!invoice) return;
-    setConfirming(true);
-    try {
-      const { error } = await supabase
-        .from('invoice_payments')
-        .update({ status: 'awaiting_confirmation', updated_at: new Date().toISOString() })
-        .eq('invoice_number', invoice.invoice_number);
-
-      if (error) throw error;
-      setInvoice(prev => prev ? { ...prev, status: 'awaiting_confirmation' } : null);
-      toast({ title: "Статус обновлён", description: "Ваш платёж ожидает подтверждения" });
-    } catch {
-      toast({ title: "Ошибка", variant: "destructive" });
-    } finally {
-      setConfirming(false);
     }
   };
 
@@ -301,12 +282,6 @@ export default function InvoicePage() {
             <Button variant="outline" onClick={handleDownloadPDF} className="gap-2">
               <Download className="w-4 h-4" /> Скачать PDF
             </Button>
-            {invoice.status === 'invoice_issued' && (
-              <Button onClick={handleConfirmPayment} disabled={confirming} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
-                {confirming ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Я оплатил
-              </Button>
-            )}
           </div>
         </div>
 
@@ -431,14 +406,26 @@ export default function InvoicePage() {
           </CardContent>
         </Card>
 
-        {/* Info note */}
-        <div className="rounded-lg border border-border/50 bg-muted/30 p-4 flex gap-3">
-          <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-          <div className="text-sm text-muted-foreground space-y-1">
-            <p>Начисление баланса при оплате по счёту происходит в течение <strong className="text-foreground">24 часов</strong>.</p>
-            <p>Для ускорения начисления баланса, после оплаты нажмите «Я оплатил» (это не обязательно). В любом случае после оплаты вам начислят токены в течение суток.</p>
+        {/* Auto-payment info */}
+        {invoice.status !== 'paid' && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 flex gap-3">
+            <BanknoteIcon className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Оплата будет зачислена автоматически</p>
+              <p>После поступления средств на расчётный счёт токены будут начислены автоматически. Обычно это занимает от нескольких минут до 1 рабочего дня.</p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {invoice.status === 'paid' && (
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 flex gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <div className="text-sm space-y-1">
+              <p className="font-medium text-foreground">Оплата получена</p>
+              <p className="text-muted-foreground">Токены начислены на ваш баланс.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

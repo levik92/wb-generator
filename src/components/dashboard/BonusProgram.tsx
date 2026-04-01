@@ -284,16 +284,6 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <Sparkles className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Бонусная программа</h2>
-          <p className="text-muted-foreground text-sm">Получайте токены за контент о нашем сервисе</p>
-        </div>
-      </div>
 
       {/* Main Bonus Program Card - similar to Balance.tsx generation costs */}
       <Card className="border-border/50 w-full overflow-hidden bg-card">

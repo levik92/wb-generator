@@ -25,7 +25,7 @@ import { isTelegramWebApp, safeBlobDownload } from "@/lib/telegram";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { useActiveAiModel, getImageEdgeFunctionName, getIdentifyFunctionName } from "@/hooks/useActiveAiModel";
 import { compressImage, compressImages } from "@/lib/imageCompression";
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 interface Profile {
@@ -602,7 +602,8 @@ export const GenerateCards = ({
         reader.readAsDataURL(file);
       });
       
-      const { data, error } = await supabase.functions.invoke('identify-product', {
+      const identifyFn = getIdentifyFunctionName(activeModel?.provider);
+      const { data, error } = await supabase.functions.invoke(identifyFn, {
         body: { imageBase64: base64 },
       });
       
@@ -1055,8 +1056,8 @@ export const GenerateCards = ({
       }
 
       // Create generation job with dynamic model-based function name
-      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel);
-      console.log('[GenerateCards] Active model:', activeModel, '| Function:', createJobFunction);
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateCards] Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', createJobFunction);
       const {
         data,
         error
@@ -1220,8 +1221,8 @@ export const GenerateCards = ({
       }
 
       // Use dynamic model-based function name for regeneration
-      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel);
-      console.log('[GenerateCards] Regenerate - Active model:', activeModel, '| Function:', regenerateFunction);
+      const regenerateFunction = getImageEdgeFunctionName('regenerate-single-card', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateCards] Regenerate - Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', regenerateFunction);
 
       // Collect all product images and reference image for regeneration
       // PRIORITY: Database is the source of truth (has complete data incl. reference)
@@ -1495,8 +1496,8 @@ export const GenerateCards = ({
       }
 
       // Use dynamic model-based function name for editing
-      const editFunction = getImageEdgeFunctionName('edit-card', activeModel);
-      console.log('[GenerateCards] Edit - Active model:', activeModel, '| Function:', editFunction);
+      const editFunction = getImageEdgeFunctionName('edit-card', activeModel?.model || 'google', activeModel?.provider);
+      console.log('[GenerateCards] Edit - Active model:', activeModel?.model, '| Provider:', activeModel?.provider, '| Function:', editFunction);
 
       // Try to get product name from jobData or form field
       const productNameToUse = jobData?.productName || productName;
@@ -1712,7 +1713,7 @@ export const GenerateCards = ({
       setSelectedCards(styleSelectedCards);
       setUnifiedStyling(true); // Style generation always uses unified styling for correct timer
 
-      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel!);
+      const createJobFunction = getImageEdgeFunctionName('create-generation-job', activeModel?.model || 'google', activeModel?.provider);
       
       const { data, error } = await supabase.functions.invoke(createJobFunction, {
         body: {
@@ -1824,16 +1825,6 @@ export const GenerateCards = ({
     };
   }, []);
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-          <Images className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Генерация карточек</h2>
-          <p className="text-muted-foreground text-sm">Создайте профессиональные карточки для Wildberries с помощью ИИ</p>
-        </div>
-      </div>
 
       <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
         <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">

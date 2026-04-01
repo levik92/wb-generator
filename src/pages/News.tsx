@@ -35,7 +35,11 @@ const tagColors: Record<string, string> = {
   'Кейсы': 'bg-pink-500/10 text-pink-600 border-pink-500/20 dark:bg-pink-500/20 dark:text-pink-400',
 };
 
-const News = () => {
+interface NewsProps {
+  onMarkAllReadRef?: React.MutableRefObject<(() => void) | null>;
+}
+
+const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,6 +52,18 @@ const News = () => {
     loadNews();
     loadReadNews();
   }, [currentPage]);
+
+  // Expose markAllAsRead to parent via ref
+  useEffect(() => {
+    if (onMarkAllReadRef) {
+      onMarkAllReadRef.current = markAllAsRead;
+    }
+    return () => {
+      if (onMarkAllReadRef) {
+        onMarkAllReadRef.current = null;
+      }
+    };
+  });
 
   const loadNews = async () => {
     try {
@@ -211,21 +227,9 @@ const News = () => {
 
   if (loading) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="space-y-6"
-      >
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <Newspaper className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">Новости</h2>
-            <p className="text-muted-foreground text-sm">Загрузка новостей...</p>
-          </div>
-        </div>
-      </motion.div>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+      </div>
     );
   }
 
@@ -236,27 +240,12 @@ const News = () => {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 items-center justify-center">
-            <Newspaper className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold">Новости</h2>
-            <p className="text-muted-foreground text-sm">Последние обновления сервиса</p>
-          </div>
-        </div>
-        {news.length > 0 && (
-          <Button
-            onClick={markAllAsRead}
-            variant="outline"
-            size="icon"
-            className="shrink-0 border-primary/20 hover:bg-primary/10 w-10 h-10 group"
-            title="Прочитать все"
-          >
-            <CheckCheck className="w-5 h-5 transition-colors group-hover:text-primary" />
-          </Button>
-        )}
+      {/* Mark all as read button */}
+      <div className="flex justify-end">
+        <Button onClick={markAllAsRead} variant="outline" size="sm" className="gap-2 bg-card">
+          <CheckCheck className="w-4 h-4" />
+          Прочитать все
+        </Button>
       </div>
 
       {news.length === 0 ? (
