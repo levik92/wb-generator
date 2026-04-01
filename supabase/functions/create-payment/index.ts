@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { PUBLIC_SITE_URL } from "../_shared/runtime-config.ts";
+import {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_ANON_KEY,
+  YOOKASSA_SECRET_KEY,
+  PUBLIC_SITE_URL,
+} from "../_shared/runtime-config.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -46,8 +52,8 @@ serve(async (req) => {
     const userAgent = req.headers.get('user-agent');
     
     const supabaseServiceRole = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY,
       { auth: { persistSession: false } }
     );
 
@@ -60,8 +66,8 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
       {
         auth: { persistSession: false },
         global: { headers: { Authorization: authHeader } }
@@ -252,8 +258,7 @@ serve(async (req) => {
 
     console.log('Sending request to YooKassa API...');
     
-    const yookassaSecretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
-    if (!yookassaSecretKey) {
+    if (!YOOKASSA_SECRET_KEY) {
       throw new Error('YooKassa secret key not configured');
     }
     
@@ -271,7 +276,7 @@ serve(async (req) => {
           {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${btoa(`1267489:${yookassaSecretKey}`)}`,
+              'Authorization': `Basic ${btoa(`1267489:${YOOKASSA_SECRET_KEY}`)}`,
               'Content-Type': 'application/json',
               'Idempotence-Key': idempotenceKey,
               'Connection': 'close',
@@ -370,8 +375,8 @@ serve(async (req) => {
       const clientIP = forwardedFor ? forwardedFor.split(',')[0].trim() : req.headers.get('x-real-ip');
       const userAgent = req.headers.get('user-agent');
       const supabaseServiceRole = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+        SUPABASE_URL,
+        SUPABASE_SERVICE_ROLE_KEY
       );
       
       await supabaseServiceRole.rpc('log_security_event', {

@@ -34,6 +34,7 @@ export const GOOGLE_GEMINI_API_KEY_2 = Deno.env.get("GOOGLE_GEMINI_API_KEY_2") |
 export const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") || "";
 export const YOOKASSA_SECRET_KEY = Deno.env.get("YOOKASSA_SECRET_KEY") || "";
 export const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
+export const SUPPORT_ENCRYPTION_KEY = Deno.env.get("SUPPORT_ENCRYPTION_KEY") || "";
 
 // ── Feature flags ──────────────────────────────────────────────
 export const SUPPORT_AI_ENABLED = Deno.env.get("SUPPORT_AI_ENABLED") !== "false";
