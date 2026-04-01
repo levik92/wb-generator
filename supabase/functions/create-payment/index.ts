@@ -276,7 +276,7 @@ serve(async (req) => {
           {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${btoa(`1267489:${yookassaSecretKey}`)}`,
+              'Authorization': `Basic ${btoa(`1267489:${YOOKASSA_SECRET_KEY}`)}`,
               'Content-Type': 'application/json',
               'Idempotence-Key': idempotenceKey,
               'Connection': 'close',
