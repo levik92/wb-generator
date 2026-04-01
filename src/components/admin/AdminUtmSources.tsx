@@ -126,7 +126,7 @@ export function AdminUtmSources() {
       toast.success("UTM-источник создан");
       setDialogOpen(false);
       setFormName(""); setFormSource(""); setFormMedium(""); setFormCampaign("");
-      setFormBaseUrl("https://wbgen.ru");
+      setFormBaseUrl(publicSiteUrl);
       fetchData();
     } catch (error: any) {
       toast.error("Ошибка: " + error.message);

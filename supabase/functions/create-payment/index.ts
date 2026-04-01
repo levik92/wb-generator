@@ -218,7 +218,7 @@ serve(async (req) => {
       },
       confirmation: {
         type: 'redirect',
-        return_url: `${req.headers.get("origin") || 'https://wbgen.ru'}/dashboard?payment=success`
+        return_url: `${req.headers.get("origin") || PUBLIC_SITE_URL}/dashboard?payment=success`
       },
       capture: true,
       description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
