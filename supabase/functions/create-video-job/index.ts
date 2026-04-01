@@ -26,7 +26,7 @@ async function generateKlingJWT(): Promise<string> {
   const header = { alg: "HS256", typ: "JWT" };
   const payload = {
     iss: ak,
-    exp: now + 1800, // 30 minutes
+    exp: now + 1800,
     nbf: now - 5,
     iat: now,
   };
@@ -47,6 +47,30 @@ async function generateKlingJWT(): Promise<string> {
   const signatureB64 = base64UrlEncode(new Uint8Array(signature));
 
   return `${signingInput}.${signatureB64}`;
+}
+
+async function createProxiedFetch(adminClient: any): Promise<typeof fetch> {
+  try {
+    const { data: proxyData } = await adminClient
+      .from("ai_model_settings")
+      .select("proxy_enabled, proxy_url, proxy_username, proxy_password")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
+      const proxyOpts: any = { url: proxyData.proxy_url };
+      if (proxyData.proxy_username) {
+        proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || "" };
+      }
+      const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+      console.log(`[create-video-job] Using proxy: ${proxyData.proxy_url}`);
+      return (input: any, init?: any) => fetch(input, { ...init, client });
+    }
+  } catch (e) {
+    console.warn("[create-video-job] Proxy setup failed, using direct:", (e as any).message);
+  }
+  return fetch;
 }
 
 Deno.serve(async (req) => {
@@ -133,11 +157,9 @@ Deno.serve(async (req) => {
       .eq("model_type", "kling")
       .single();
     let prompt = promptData?.prompt_template || "A smooth, cinematic product showcase animation.";
-    // Append user wishes if provided
     if (user_prompt && typeof user_prompt === "string" && user_prompt.trim().length > 0) {
       prompt = `${prompt} User wishes: ${user_prompt.trim().slice(0, 150)}`;
     }
-    // Truncate to Kling API limit of 2500 characters
     if (prompt.length > 2500) {
       prompt = prompt.slice(0, 2500);
     }
@@ -147,7 +169,6 @@ Deno.serve(async (req) => {
     try {
       klingJwt = await generateKlingJWT();
     } catch (e) {
-      // Refund tokens on Kling auth failure
       await adminClient.rpc("refund_tokens", {
         user_id_param: userId,
         tokens_amount: tokensCost,
@@ -159,8 +180,11 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get proxied fetch
+    const proxiedFetch = await createProxiedFetch(adminClient);
+
     // Call Kling API
-    const klingResponse = await fetch("https://api.klingai.com/v1/videos/image2video", {
+    const klingResponse = await proxiedFetch("https://api.klingai.com/v1/videos/image2video", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -180,7 +204,6 @@ Deno.serve(async (req) => {
     console.log("Kling API response:", JSON.stringify(klingResult));
 
     if (klingResult.code !== 0 || !klingResult.data?.task_id) {
-      // Refund tokens
       await adminClient.rpc("refund_tokens", {
         user_id_param: userId,
         tokens_amount: tokensCost,
