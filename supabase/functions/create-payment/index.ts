@@ -258,8 +258,7 @@ serve(async (req) => {
 
     console.log('Sending request to YooKassa API...');
     
-    const yookassaSecretKey = Deno.env.get("YOOKASSA_SECRET_KEY");
-    if (!yookassaSecretKey) {
+    if (!YOOKASSA_SECRET_KEY) {
       throw new Error('YooKassa secret key not configured');
     }
     
