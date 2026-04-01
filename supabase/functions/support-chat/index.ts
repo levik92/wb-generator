@@ -227,7 +227,7 @@ serve(async (req) => {
               if (!POLZA_AI_API_KEY) throw new Error("POLZA_AI_API_KEY not configured");
               aiUrl = "https://polza.ai/api/v1/chat/completions";
               aiHeaders = {
-                Authorization: `Bearer ${polzaApiKey}`,
+                Authorization: `Bearer ${POLZA_AI_API_KEY}`,
                 "Content-Type": "application/json",
               };
             } else {
