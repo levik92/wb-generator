@@ -596,7 +596,7 @@ serve(async (req) => {
 
     // Setup endpoint - call this once to configure webhook
     if (url.pathname.endsWith("/setup")) {
-      const webhookUrl = `${TELEGRAM_WEBHOOK_BASE_URL}/functions/v1/telegram-bot`;
+      const webhookUrl = `${TELEGRAM_WEBHOOK_BASE_URL}/telegram-bot`;
       const result = await setupWebhook(webhookUrl);
       
       return new Response(
