@@ -502,7 +502,7 @@ const Partner = () => {
                   </h3>
                   <div className="flex gap-2">
                     <Input value={`${window.location.origin}/auth?partner=${partner?.partner_code}`} readOnly className="flex-1 bg-background/80 rounded-xl" />
-                    <Button onClick={copyPartnerLink} variant="outline" className="px-4 rounded-xl hover:bg-primary/5 hover:border-primary/30">
+                    <Button onClick={copyPartnerLink} variant="outline" className="px-4 rounded-xl hover:bg-primary/5 hover:border-primary/30 hover:text-primary">
                       <Copy className="h-4 w-4 mr-2" />
                       Копировать
                     </Button>
