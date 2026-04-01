@@ -51,7 +51,30 @@ serve(async (req) => {
     // Strip data URL prefix if present
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
-    const aiResponse = await fetch(
+    // Load proxy settings
+    const { data: proxyData } = await supabase
+      .from('ai_model_settings')
+      .select('proxy_enabled, proxy_url, proxy_username, proxy_password')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let proxiedFetch = fetch;
+    if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
+      try {
+        const proxyOpts: any = { url: proxyData.proxy_url };
+        if (proxyData.proxy_username) {
+          proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || '' };
+        }
+        const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+        proxiedFetch = (input: any, init?: any) => fetch(input, { ...init, client });
+        console.log(`[identify-product] Using proxy: ${proxyData.proxy_url}`);
+      } catch (e) {
+        console.warn('[identify-product] Proxy setup failed, using direct:', (e as any).message);
+      }
+    }
+
+    const aiResponse = await proxiedFetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',

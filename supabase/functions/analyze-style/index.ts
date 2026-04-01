@@ -63,11 +63,34 @@ serve(async (req) => {
       throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
+    // Load proxy settings
+    const { data: proxyData } = await supabase
+      .from('ai_model_settings')
+      .select('proxy_enabled, proxy_url, proxy_username, proxy_password')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let proxiedFetch = fetch;
+    if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
+      try {
+        const proxyOpts: any = { url: proxyData.proxy_url };
+        if (proxyData.proxy_username) {
+          proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || '' };
+        }
+        const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+        proxiedFetch = (input: any, init?: any) => fetch(input, { ...init, client });
+        console.log(`[analyze-style] Using proxy: ${proxyData.proxy_url}`);
+      } catch (e) {
+        console.warn('[analyze-style] Proxy setup failed, using direct:', (e as any).message);
+      }
+    }
+
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${geminiApiKey}`;
 
     console.log(`[analyze-style] Calling Gemini for style analysis, job: ${jobId}`);
 
-    const geminiResponse = await fetch(geminiUrl, {
+    const geminiResponse = await proxiedFetch(geminiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
