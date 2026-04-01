@@ -41,7 +41,7 @@ export function AdminUtmSources() {
   const [formSource, setFormSource] = useState("");
   const [formMedium, setFormMedium] = useState("");
   const [formCampaign, setFormCampaign] = useState("");
-  const [formBaseUrl, setFormBaseUrl] = useState("https://wbgen.ru");
+  const [formBaseUrl, setFormBaseUrl] = useState(publicSiteUrl);
 
   useEffect(() => {
     fetchData();
