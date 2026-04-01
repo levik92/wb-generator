@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, TrendingDown, Loader2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { publicSiteUrl } from "@/config/runtime";
 
 interface UtmSource {
   id: string;
