@@ -1,71 +1,56 @@
 
 
-## Прокси для прямых API-запросов генерации
+## Результаты проверки прокси
 
-### Что делаем
+### Что работает
 
-Добавляем в админку (раздел «Модель») блок управления HTTP-прокси. Когда прокси включён, все прямые запросы к Google Gemini API и другим провайдерам (кроме Polza AI) проходят через указанный прокси-сервер.
+Прокси корректно подключён в 4 Edge Functions:
+- **process-google-task** — генерация карточек (Google Gemini). Реализовано через отдельную функцию `createProxiedFetch()`, настройки подгружаются из БД
+- **generate-description-banana** — генерация описаний (Google Gemini). Работает
+- **analyze-style** — анализ стиля (Google Gemini). Работает
+- **identify-product** — идентификация товара (Google Gemini). Работает
 
-### Шаг 1. Миграция БД — добавить колонки прокси в `ai_model_settings`
+Админ-компонент `AdminProxySettings.tsx` создан и встроен в PromptManager.
 
-```sql
-ALTER TABLE ai_model_settings
-  ADD COLUMN proxy_enabled boolean NOT NULL DEFAULT false,
-  ADD COLUMN proxy_url text,
-  ADD COLUMN proxy_username text,
-  ADD COLUMN proxy_password text;
-```
+### Баг в identify-product
 
-### Шаг 2. Новый компонент `AdminProxySettings.tsx`
+В `identify-product/index.ts` (строка 55) переменная `supabase` используется **за пределами try-catch блока**, где она была объявлена (строка 36). Это вызовет **ReferenceError** при runtime — прокси-код не сможет выполниться. Клиент Supabase нужно создавать на верхнем уровне функции.
 
-Создать `src/components/admin/AdminProxySettings.tsx` — карточка с:
-- Switch «Включить прокси»
-- Поля: URL прокси (например `http://proxy.example.com:8080`), логин, пароль
-- Кнопка «Сохранить»
-- Предупреждение: «Не влияет на Polza AI»
+### Что НЕ покрыто прокси
 
-Разместить в `PromptManager.tsx` рядом с `AdminImageSettings` на вкладке «Изображения».
+| Функция | API | Прокси |
+|---|---|---|
+| `create-video-job` | Kling AI (klingai.com) | Нет |
+| `check-video-status` | Kling AI (klingai.com) | Нет |
+| `regenerate-video-job` | Kling AI (klingai.com) | Нет |
+| `support-chat` | Google Gemini (direct mode) | Нет |
 
-### Шаг 3. Хелпер `fetchViaProxy` для Edge Functions
+По плану видеогенерация (Kling) и чат поддержки должны тоже проходить через прокси при `proxy_enabled = true` и провайдере не-Polza.
 
-Создать утилиту, которую будут использовать все edge-функции с прямыми API-вызовами. Логика:
-1. Читает `proxy_enabled`, `proxy_url`, `proxy_username`, `proxy_password` из `ai_model_settings`
-2. Если прокси выключен — обычный `fetch()`
-3. Если включён — делает `CONNECT` через прокси (Deno поддерживает `Deno.connect` для TCP-туннелирования) или использует HTTP-прокси через заголовок `Proxy-Authorization`
+### План исправлений
 
-Вариант реализации: в Deno проще всего использовать переменные окружения `HTTP_PROXY` / `HTTPS_PROXY` которые Deno `fetch` подхватывает автоматически. Но так как настройки динамические (из БД), придётся использовать библиотеку типа `deno-fetch-proxy` или ручной CONNECT-туннель.
+**Шаг 1. Исправить баг в `identify-product/index.ts`**
+Вынести создание Supabase-клиента из try-catch наверх, чтобы прокси-код имел доступ к `supabase`.
 
-**Более простой подход**: использовать прокси как промежуточный URL. То есть вместо прямого запроса к `generativelanguage.googleapis.com`, отправлять запрос через прокси-URL с заголовками авторизации. Это стандартный HTTP forward proxy.
+**Шаг 2. Добавить прокси в `support-chat/index.ts`**
+Загрузить настройки прокси из `ai_model_settings` и использовать `proxiedFetch` при `apiProvider === 'direct'` для вызовов Google Gemini.
 
-### Шаг 4. Модификация Edge Functions
+**Шаг 3. Добавить прокси в видео-функции (Kling AI)**
+- `create-video-job/index.ts` — обернуть вызов `fetch("https://api.klingai.com/...")` в proxiedFetch
+- `check-video-status/index.ts` — аналогично
+- `regenerate-video-job/index.ts` — аналогично
 
-Обновить следующие функции, добавив проверку прокси-настроек перед API-вызовами (только когда `api_provider !== 'polza'`):
+Во всех случаях — только при `proxy_enabled = true`, Polza-функции не трогаем.
 
-- `process-google-task/index.ts` — функция `callGeminiApi()` 
-- `generate-description-banana/index.ts` — вызов Gemini для описаний
-- `analyze-style/index.ts` — анализ стиля
-- `identify-product/index.ts` — идентификация товара
-- `support-chat/index.ts` — AI-чат поддержки
-
-В каждой функции:
-1. Загрузить настройки прокси из `ai_model_settings`
-2. Если `proxy_enabled === true` и текущий провайдер не Polza — проксировать запрос
-3. Иначе — работать как раньше
-
-### Шаг 5. Кеширование настроек
-
-Чтобы не делать запрос в БД на каждый вызов, настройки прокси загружаются один раз в начале обработки задачи (в оркестраторе `process-generation-tasks-banana`) и передаются в процессор через параметры.
+**Шаг 4. Деплой обновлённых функций**
 
 ### Файлы
 
 | Действие | Файл |
 |---|---|
-| Миграция | `ai_model_settings` — 4 новых колонки |
-| Создать | `src/components/admin/AdminProxySettings.tsx` |
-| Изменить | `src/components/dashboard/PromptManager.tsx` — добавить `AdminProxySettings` |
-| Изменить | `supabase/functions/process-google-task/index.ts` — прокси в `callGeminiApi` |
-| Изменить | `supabase/functions/generate-description-banana/index.ts` |
-| Изменить | `supabase/functions/analyze-style/index.ts` |
-| Изменить | `supabase/functions/identify-product/index.ts` |
-| Изменить | `supabase/functions/process-generation-tasks-banana/index.ts` — передача настроек |
+| Исправить | `supabase/functions/identify-product/index.ts` — баг с областью видимости supabase |
+| Изменить | `supabase/functions/support-chat/index.ts` — добавить прокси для direct-режима |
+| Изменить | `supabase/functions/create-video-job/index.ts` — прокси для Kling API |
+| Изменить | `supabase/functions/check-video-status/index.ts` — прокси для Kling API |
+| Изменить | `supabase/functions/regenerate-video-job/index.ts` — прокси для Kling API |
 
