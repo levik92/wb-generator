@@ -659,6 +659,9 @@ export function PromptManager() {
 
             {/* Настройки генерации изображений */}
             <AdminImageSettings />
+
+            {/* Настройки прокси */}
+            <AdminProxySettings />
           </div>
         </TabsContent>
 
