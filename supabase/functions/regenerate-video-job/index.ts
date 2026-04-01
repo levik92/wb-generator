@@ -49,6 +49,30 @@ async function generateKlingJWT(): Promise<string> {
   return `${signingInput}.${signatureB64}`;
 }
 
+async function createProxiedFetch(adminClient: any): Promise<typeof fetch> {
+  try {
+    const { data: proxyData } = await adminClient
+      .from("ai_model_settings")
+      .select("proxy_enabled, proxy_url, proxy_username, proxy_password")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (proxyData?.proxy_enabled && proxyData?.proxy_url) {
+      const proxyOpts: any = { url: proxyData.proxy_url };
+      if (proxyData.proxy_username) {
+        proxyOpts.basicAuth = { username: proxyData.proxy_username, password: proxyData.proxy_password || "" };
+      }
+      const client = (Deno as any).createHttpClient({ proxy: proxyOpts });
+      console.log(`[regenerate-video-job] Using proxy: ${proxyData.proxy_url}`);
+      return (input: any, init?: any) => fetch(input, { ...init, client });
+    }
+  } catch (e) {
+    console.warn("[regenerate-video-job] Proxy setup failed, using direct:", (e as any).message);
+  }
+  return fetch;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -158,7 +182,6 @@ Deno.serve(async (req) => {
     if (user_prompt && typeof user_prompt === "string" && user_prompt.trim().length > 0) {
       prompt = `${prompt} User wishes: ${user_prompt.trim().slice(0, 150)}`;
     }
-    // Truncate to Kling API limit of 2500 characters
     if (prompt.length > 2500) {
       prompt = prompt.slice(0, 2500);
     }
@@ -179,8 +202,11 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get proxied fetch
+    const proxiedFetch = await createProxiedFetch(adminClient);
+
     // Call Kling API
-    const klingResponse = await fetch("https://api.klingai.com/v1/videos/image2video", {
+    const klingResponse = await proxiedFetch("https://api.klingai.com/v1/videos/image2video", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
