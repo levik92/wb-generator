@@ -224,8 +224,7 @@ serve(async (req) => {
             let aiHeaders: Record<string, string>;
 
             if (apiProvider === 'polza') {
-              const polzaApiKey = Deno.env.get("POLZA_AI_API_KEY");
-              if (!polzaApiKey) throw new Error("POLZA_AI_API_KEY not configured");
+              if (!POLZA_AI_API_KEY) throw new Error("POLZA_AI_API_KEY not configured");
               aiUrl = "https://polza.ai/api/v1/chat/completions";
               aiHeaders = {
                 Authorization: `Bearer ${polzaApiKey}`,
