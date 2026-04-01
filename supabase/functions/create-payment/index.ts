@@ -66,8 +66,8 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
       {
         auth: { persistSession: false },
         global: { headers: { Authorization: authHeader } }
