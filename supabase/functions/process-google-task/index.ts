@@ -309,16 +309,17 @@ serve(async (req) => {
 
     console.log(`Processing with ${productImageBase64.length} product images${referenceBase64 ? ' and 1 reference' : ''}`);
 
-    // Fetch image resolution setting from database
+    // Fetch image resolution and proxy settings from database
     const { data: modelSettings } = await supabase
       .from('ai_model_settings')
-      .select('image_resolution')
+      .select('image_resolution, proxy_enabled, proxy_url, proxy_username, proxy_password')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
     
     const imageResolution = modelSettings?.image_resolution || '2K';
-    console.log(`Using image resolution: ${imageResolution}`);
+    const proxySettings = modelSettings;
+    console.log(`Using image resolution: ${imageResolution}, proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
 
     // Build content parts for Google Gemini API
     const contentParts: any[] = [];
