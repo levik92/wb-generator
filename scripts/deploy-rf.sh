@@ -6,6 +6,7 @@ SELFHOSTED_DIR="${SELFHOSTED_DIR:-/home/wbgen/apps/supabase-project}"
 FRONTEND_WEB_ROOT="${FRONTEND_WEB_ROOT:-/var/www/wbgen}"
 BRANCH="${BRANCH:-main}"
 REMOTE="${REMOTE:-origin}"
+APPLY_DB_MIGRATIONS="${APPLY_DB_MIGRATIONS:-true}"
 
 cd "$APP_DIR"
 
@@ -24,16 +25,16 @@ npm run build
 mkdir -p "$FRONTEND_WEB_ROOT"
 rsync -a --delete "$APP_DIR/dist/" "$FRONTEND_WEB_ROOT/"
 
-"$APP_DIR/scripts/sync-selfhosted-functions.sh" \
+bash "$APP_DIR/scripts/sync-selfhosted-functions.sh" \
   "$APP_DIR/supabase/functions" \
   "$SELFHOSTED_DIR/volumes/functions"
 
 cd "$SELFHOSTED_DIR"
-docker compose up -d --force-recreate --no-deps functions
 
-if docker compose ps db >/dev/null 2>&1; then
-  echo "Database container detected. Remember to apply SQL migrations separately before prod deploy if schema changed."
+if [[ "$APPLY_DB_MIGRATIONS" == "true" ]]; then
+  bash "$APP_DIR/scripts/apply-selfhosted-migrations.sh"
 fi
 
-echo "Deploy completed successfully."
+docker compose up -d --force-recreate --no-deps functions
 
+echo "Deploy completed successfully."
