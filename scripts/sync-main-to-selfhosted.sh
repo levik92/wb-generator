@@ -42,7 +42,7 @@ if [[ "$PUSH_TARGET" == "true" ]]; then
 fi
 
 if [[ "$RUN_DEPLOY" == "true" ]]; then
-  BRANCH="$TARGET_BRANCH" "$REPO_DIR/scripts/deploy-rf.sh"
+  BRANCH="$TARGET_BRANCH" bash "$REPO_DIR/scripts/deploy-rf.sh"
 fi
 
 echo "Synced $SOURCE_BRANCH into $TARGET_BRANCH successfully."
