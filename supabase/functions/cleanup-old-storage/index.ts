@@ -17,6 +17,8 @@ serve(async (req) => {
     // Auth: accept service_role key or admin user token
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "") ?? "";
+    console.log("Token length:", token.length, "ServiceKey length:", serviceKey.length);
+    console.log("Token first 10:", token.substring(0, 10), "Key first 10:", serviceKey.substring(0, 10));
     
     // Check if it's service_role key
     if (token !== serviceKey) {
