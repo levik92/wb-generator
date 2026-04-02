@@ -1,56 +1,64 @@
 
 
-## Результаты проверки прокси
+## План: Восстановление очистки storage + ручное удаление файлов
 
-### Что работает
+### Проблема
 
-Прокси корректно подключён в 4 Edge Functions:
-- **process-google-task** — генерация карточек (Google Gemini). Реализовано через отдельную функцию `createProxiedFetch()`, настройки подгружаются из БД
-- **generate-description-banana** — генерация описаний (Google Gemini). Работает
-- **analyze-style** — анализ стиля (Google Gemini). Работает
-- **identify-product** — идентификация товара (Google Gemini). Работает
+1. **Cron-функция `cleanup_old_generations()`** удаляет только записи из БД, но не файлы из storage (регрессия миграции `20260214`). Оригинальная миграция (`20251125`) содержала `storage.delete_object()`, но для неправильного бакета (`generation-images` вместо `generated-cards`).
 
-Админ-компонент `AdminProxySettings.tsx` создан и встроен в PromptManager.
+2. **Ручное удаление** в History.tsx удаляет только записи из `generations` / `video_generation_jobs`, но не файлы из бакетов `generated-cards` и `product-images`.
 
-### Баг в identify-product
+3. **Накопилось ~33 ГБ** файлов-сирот в storage.
 
-В `identify-product/index.ts` (строка 55) переменная `supabase` используется **за пределами try-catch блока**, где она была объявлена (строка 36). Это вызовет **ReferenceError** при runtime — прокси-код не сможет выполниться. Клиент Supabase нужно создавать на верхнем уровне функции.
+### Что будет сделано
 
-### Что НЕ покрыто прокси
+#### Шаг 1. SQL-миграция — обновить `cleanup_old_generations()`
 
-| Функция | API | Прокси |
-|---|---|---|
-| `create-video-job` | Kling AI (klingai.com) | Нет |
-| `check-video-status` | Kling AI (klingai.com) | Нет |
-| `regenerate-video-job` | Kling AI (klingai.com) | Нет |
-| `support-chat` | Google Gemini (direct mode) | Нет |
+Восстановить удаление файлов из storage перед удалением записей из БД:
 
-По плану видеогенерация (Kling) и чат поддержки должны тоже проходить через прокси при `proxy_enabled = true` и провайдере не-Polza.
+```text
+1. Собрать storage_path из generation_tasks для записей старше 1 месяца
+2. Удалить файлы из бакета 'generated-cards' через storage.delete_object()
+3. Собрать пути product-images из generation_jobs.product_images (JSONB)
+4. Удалить файлы из бакета 'product-images' через storage.delete_object()
+5. Удалить записи из таблиц (как сейчас)
+```
 
-### План исправлений
+Каждый вызов `storage.delete_object()` обёрнут в `EXCEPTION WHEN OTHERS` — сбой одного файла не блокирует остальные. Бакет `blog-images` не затрагивается.
 
-**Шаг 1. Исправить баг в `identify-product/index.ts`**
-Вынести создание Supabase-клиента из try-catch наверх, чтобы прокси-код имел доступ к `supabase`.
+#### Шаг 2. Одноразовая Edge Function `cleanup-old-storage`
 
-**Шаг 2. Добавить прокси в `support-chat/index.ts`**
-Загрузить настройки прокси из `ai_model_settings` и использовать `proxiedFetch` при `apiProvider === 'direct'` для вызовов Google Gemini.
+Для очистки накопившихся ~33 ГБ файлов:
+- Запрос к `storage.objects` для бакетов `generated-cards` и `product-images`, файлы старше 30 дней
+- Удаление пакетами по 100 через Supabase Storage API
+- Возврат количества удалённых файлов
+- Защита: авторизация по service_role_key, `blog-images` не трогается
+- Функцию можно удалить после однократного запуска
 
-**Шаг 3. Добавить прокси в видео-функции (Kling AI)**
-- `create-video-job/index.ts` — обернуть вызов `fetch("https://api.klingai.com/...")` в proxiedFetch
-- `check-video-status/index.ts` — аналогично
-- `regenerate-video-job/index.ts` — аналогично
+#### Шаг 3. Исправить ручное удаление в History.tsx
 
-Во всех случаях — только при `proxy_enabled = true`, Polza-функции не трогаем.
+**`deleteGeneration()`** — перед удалением записи из `generations`:
+1. Загрузить связанные `generation_jobs` и их `generation_tasks` с `storage_path`
+2. Удалить файлы из `generated-cards` через `supabase.storage.from('generated-cards').remove(paths)`
+3. Загрузить `product_images` из `generation_jobs` и удалить из `product-images`
+4. Удалить записи `generation_tasks`, `generation_jobs`, затем `generations`
 
-**Шаг 4. Деплой обновлённых функций**
+**`deleteVideoGeneration()`** — без изменений (видео хранятся на серверах Kling, не в нашем storage).
 
 ### Файлы
 
 | Действие | Файл |
 |---|---|
-| Исправить | `supabase/functions/identify-product/index.ts` — баг с областью видимости supabase |
-| Изменить | `supabase/functions/support-chat/index.ts` — добавить прокси для direct-режима |
-| Изменить | `supabase/functions/create-video-job/index.ts` — прокси для Kling API |
-| Изменить | `supabase/functions/check-video-status/index.ts` — прокси для Kling API |
-| Изменить | `supabase/functions/regenerate-video-job/index.ts` — прокси для Kling API |
+| Новая миграция | `supabase/migrations/xxx.sql` — обновлённая `cleanup_old_generations()` с правильными бакетами |
+| Новая функция | `supabase/functions/cleanup-old-storage/index.ts` — одноразовая batch-очистка |
+| Изменить | `src/components/dashboard/History.tsx` — добавить удаление storage-файлов при ручном удалении |
+
+### Что НЕ меняется
+
+- UI/дизайн/маршруты
+- Бизнес-логика генерации
+- Proxy/config/Polza изменения
+- Другие Edge Functions
+- Бакет `blog-images`
+- `support-attachments` (у него своя функция очистки)
 
