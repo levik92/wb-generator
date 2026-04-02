@@ -605,8 +605,51 @@ export const History = ({
     }
   };
 
+  const extractStoragePath = (url: string, bucket: string): string | null => {
+    if (!url) return null;
+    const marker = `${bucket}/`;
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    return url.substring(idx + marker.length);
+  };
+
   const deleteGeneration = async (generationId: string) => {
     try {
+      // Find the generation to get image URLs before deleting
+      const gen = generations.find(g => g.id === generationId);
+      
+      // Delete storage files for card generations
+      if (gen?.generation_type === 'cards' && gen.output_data?.images) {
+        const cardPaths: string[] = [];
+        for (const img of gen.output_data.images) {
+          if (img.image_url) {
+            const path = extractStoragePath(img.image_url, 'generated-cards');
+            if (path) cardPaths.push(path);
+          }
+        }
+        if (cardPaths.length > 0) {
+          await supabase.storage.from('generated-cards').remove(cardPaths);
+        }
+      }
+
+      // Delete product images if stored in input_data
+      if (gen?.input_data?.productImages) {
+        const productPaths: string[] = [];
+        const imgs = Array.isArray(gen.input_data.productImages) ? gen.input_data.productImages : [gen.input_data.productImages];
+        for (const imgUrl of imgs) {
+          if (typeof imgUrl === 'string') {
+            const path = extractStoragePath(imgUrl, 'product-images');
+            if (path) productPaths.push(path);
+          } else if (imgUrl?.url) {
+            const path = extractStoragePath(imgUrl.url, 'product-images');
+            if (path) productPaths.push(path);
+          }
+        }
+        if (productPaths.length > 0) {
+          await supabase.storage.from('product-images').remove(productPaths);
+        }
+      }
+
       const {
         error
       } = await supabase.from('generations').delete().eq('id', generationId).eq('user_id', profile.id);
