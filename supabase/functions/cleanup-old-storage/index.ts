@@ -14,15 +14,21 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Auth: accept service_role key or admin user token
+    // Auth: decode JWT to check role claim, or verify admin user
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "") ?? "";
-    console.log("Token length:", token.length, "ServiceKey length:", serviceKey.length);
-    console.log("Token first 10:", token.substring(0, 10), "Key first 10:", serviceKey.substring(0, 10));
     
-    // Check if it's service_role key
-    if (token !== serviceKey) {
-      // Try as user token
+    // Try to decode JWT payload to check role
+    let isServiceRole = false;
+    try {
+      const payloadB64 = token.split(".")[1];
+      if (payloadB64) {
+        const payload = JSON.parse(atob(payloadB64));
+        isServiceRole = payload.role === "service_role";
+      }
+    } catch { /* not a valid JWT */ }
+
+    if (!isServiceRole) {
       const { data: { user }, error: authError } = await supabase.auth.getUser(token);
       if (authError || !user) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
