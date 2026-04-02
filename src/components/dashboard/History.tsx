@@ -619,6 +619,7 @@ export const History = ({
       const gen = generations.find(g => g.id === generationId);
       
       // Delete storage files for card generations
+      let storageErrors: string[] = [];
       if (gen?.generation_type === 'cards' && gen.output_data?.images) {
         const cardPaths: string[] = [];
         for (const img of gen.output_data.images) {
@@ -628,7 +629,11 @@ export const History = ({
           }
         }
         if (cardPaths.length > 0) {
-          await supabase.storage.from('generated-cards').remove(cardPaths);
+          const { error: cardRemoveError } = await supabase.storage.from('generated-cards').remove(cardPaths);
+          if (cardRemoveError) {
+            console.warn('Failed to remove generated-cards files:', cardRemoveError);
+            storageErrors.push('карточки');
+          }
         }
       }
 
@@ -646,7 +651,11 @@ export const History = ({
           }
         }
         if (productPaths.length > 0) {
-          await supabase.storage.from('product-images').remove(productPaths);
+          const { error: productRemoveError } = await supabase.storage.from('product-images').remove(productPaths);
+          if (productRemoveError) {
+            console.warn('Failed to remove product-images files:', productRemoveError);
+            storageErrors.push('фото товаров');
+          }
         }
       }
 
@@ -657,7 +666,9 @@ export const History = ({
       setGenerations(prev => prev.filter(gen => gen.id !== generationId));
       toast({
         title: "Удалено",
-        description: "Генерация успешно удалена"
+        description: storageErrors.length > 0
+          ? `Запись удалена, но не удалось очистить файлы: ${storageErrors.join(', ')}`
+          : "Генерация успешно удалена"
       });
     } catch (error: any) {
       toast({
