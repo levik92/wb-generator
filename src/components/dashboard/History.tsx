@@ -825,38 +825,40 @@ export const History = ({
       {/* Video Edit - Responsive */}
       {isMobile ? (
         <Drawer open={videoEditDialogOpen} onOpenChange={setVideoEditDialogOpen}>
-          <DrawerContent className="bg-card border-border/50">
-            <DrawerHeader className="text-left space-y-2">
-              <DrawerTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Video className="w-4 h-4 text-primary" />
+          <DrawerContent className="bg-card border-border/50 max-h-[85dvh]">
+            <div className="overflow-y-auto overscroll-contain">
+              <DrawerHeader className="text-left space-y-2">
+                <DrawerTitle className="flex items-center gap-2 text-lg">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <Video className="w-4 h-4 text-primary" />
+                  </div>
+                  Редактировать видеообложку
+                </DrawerTitle>
+                <DrawerDescription className="text-sm">
+                  Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="space-y-4 px-4 pb-2">
+                <div className="space-y-2">
+                  <Label htmlFor="video-edit-instructions-m" className="font-semibold">Что нужно изменить?</Label>
+                  <Textarea id="video-edit-instructions-m" placeholder="Например: добавить плавное вращение товара, изменить освещение..." value={videoEditInstructions} onChange={e => { if (e.target.value.length <= 300) setVideoEditInstructions(e.target.value); }} maxLength={300} className="min-h-[100px] bg-background/50 border-border/50 rounded-lg" onFocus={e => { setTimeout(() => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300); }} />
                 </div>
-                Редактировать видеообложку
-              </DrawerTitle>
-              <DrawerDescription className="text-sm">
-                Опишите, какие изменения нужны. AI перегенерирует видео с новым промтом.
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="space-y-4 px-4 pb-2">
-              <div className="space-y-2">
-                <Label htmlFor="video-edit-instructions-m" className="font-semibold">Что нужно изменить?</Label>
-                <Textarea id="video-edit-instructions-m" placeholder="Например: добавить плавное вращение товара, изменить освещение..." value={videoEditInstructions} onChange={e => { if (e.target.value.length <= 300) setVideoEditInstructions(e.target.value); }} maxLength={300} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg" />
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
-                  <span>Стоимость: <span className="font-semibold">{videoRegenPrice || 2} {(videoRegenPrice || 2) === 1 ? 'токен' : 'токена'}</span></span>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
+                    <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+                    <span>Стоимость: <span className="font-semibold">{videoRegenPrice || 2} {(videoRegenPrice || 2) === 1 ? 'токен' : 'токена'}</span></span>
+                  </div>
+                  <span className={videoEditInstructions.length >= 300 ? 'text-destructive' : ''}>{videoEditInstructions.length}/300</span>
                 </div>
-                <span className={videoEditInstructions.length >= 300 ? 'text-destructive' : ''}>{videoEditInstructions.length}/300</span>
               </div>
+              <DrawerFooter className="gap-2">
+                <Button onClick={editVideoCard} disabled={!videoEditInstructions.trim() || videoEditInstructions.length > 300} className="rounded-lg gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Начать редактирование
+                </Button>
+                <Button variant="outline" onClick={() => setVideoEditDialogOpen(false)} className="rounded-lg">Отмена</Button>
+              </DrawerFooter>
             </div>
-            <DrawerFooter className="gap-2">
-              <Button onClick={editVideoCard} disabled={!videoEditInstructions.trim() || videoEditInstructions.length > 300} className="rounded-lg gap-2">
-                <Sparkles className="w-4 h-4" />
-                Начать редактирование
-              </Button>
-              <Button variant="outline" onClick={() => setVideoEditDialogOpen(false)} className="rounded-lg">Отмена</Button>
-            </DrawerFooter>
           </DrawerContent>
         </Drawer>
       ) : (
