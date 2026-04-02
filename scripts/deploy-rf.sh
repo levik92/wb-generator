@@ -10,9 +10,31 @@ APPLY_DB_MIGRATIONS="${APPLY_DB_MIGRATIONS:-true}"
 
 cd "$APP_DIR"
 
+ENV_BACKUP=""
+
+preserve_local_env() {
+  if git ls-files --error-unmatch .env >/dev/null 2>&1 && ! git diff --quiet -- .env; then
+    ENV_BACKUP="$(mktemp)"
+    cp .env "$ENV_BACKUP"
+    git restore --source=HEAD --worktree -- .env
+  fi
+}
+
+restore_local_env() {
+  if [[ -n "$ENV_BACKUP" && -f "$ENV_BACKUP" ]]; then
+    cp "$ENV_BACKUP" .env
+    rm -f "$ENV_BACKUP"
+    ENV_BACKUP=""
+  fi
+}
+
+trap restore_local_env EXIT
+
+preserve_local_env
 git fetch "$REMOTE"
 git checkout "$BRANCH"
 git pull --ff-only "$REMOTE" "$BRANCH"
+restore_local_env
 
 if [[ -f package-lock.json ]]; then
   npm ci
