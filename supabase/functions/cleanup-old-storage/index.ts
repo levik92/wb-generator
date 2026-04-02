@@ -105,9 +105,9 @@ serve(async (req) => {
           // Don't increment offset since files were deleted
         }
 
-        // Safety: if we've processed many batches, yield control
-        if (deleted + errors > 10000) {
-          hasMore = false; // Stop after 10k files per bucket per invocation
+        // Safety: stop early to avoid timeout (edge functions have ~60s limit)
+        if (deleted + errors > 500) {
+          hasMore = false;
         }
       }
 
