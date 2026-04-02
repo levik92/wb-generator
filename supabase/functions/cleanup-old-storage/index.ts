@@ -105,8 +105,7 @@ serve(async (req) => {
           // Don't increment offset since files were deleted
         }
 
-        // Safety: stop early to avoid timeout (edge functions have ~60s limit)
-        if (deleted + errors > 500) {
+        if (deleted + errors > 100) {
           hasMore = false;
         }
       }
