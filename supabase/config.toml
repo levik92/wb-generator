@@ -149,3 +149,9 @@ verify_jwt = false
 
 [functions.lookup-counterparty]
 verify_jwt = false
+
+[functions.cleanup-old-storage]
+verify_jwt = false
+
+[functions.cleanup-support-attachments]
+verify_jwt = false
