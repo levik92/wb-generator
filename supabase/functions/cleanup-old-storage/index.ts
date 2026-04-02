@@ -14,34 +14,26 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Allow service_role key OR admin user token
+    // Auth: accept service_role key or admin user token
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const isServiceRole = token === serviceKey;
-
-    if (!isServiceRole) {
+    const token = authHeader?.replace("Bearer ", "") ?? "";
+    
+    // Check if it's service_role key
+    if (token !== serviceKey) {
+      // Try as user token
       const { data: { user }, error: authError } = await supabase.auth.getUser(token);
       if (authError || !user) {
-        return new Response(JSON.stringify({ error: "Invalid token" }), {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
       const { data: roleData } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
         .eq("role", "admin")
         .maybeSingle();
-
       if (!roleData) {
         return new Response(JSON.stringify({ error: "Admin only" }), {
           status: 403,
@@ -49,6 +41,8 @@ serve(async (req) => {
         });
       }
     }
+    
+    console.log("Auth passed, starting cleanup...");
 
     const buckets = ["generated-cards", "product-images"];
     const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
