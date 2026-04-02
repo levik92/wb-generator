@@ -146,3 +146,45 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
     </div>
   );
 }
+
+function StorageCleanup() {
+  const [cleaning, setCleaning] = useState(false);
+  const [result, setResult] = useState<{ totalDeleted: number; totalRemaining: number; has_more: boolean } | null>(null);
+
+  const runCleanup = async () => {
+    setCleaning(true);
+    setResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('cleanup-old-storage');
+      if (error) throw error;
+      setResult(data);
+      toast.success(`Удалено файлов: ${data.totalDeleted}${data.has_more ? '. Есть ещё — запустите повторно.' : ''}`);
+    } catch (e: any) {
+      toast.error(`Ошибка очистки: ${e.message}`);
+    } finally {
+      setCleaning(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Trash2 className="w-4 h-4" />
+          Очистка Storage (30+ дней)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-wrap items-center gap-3">
+        <Button variant="destructive" size="sm" onClick={runCleanup} disabled={cleaning}>
+          {cleaning ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Очистка...</> : 'Запустить'}
+        </Button>
+        {result && (
+          <span className="text-sm text-muted-foreground">
+            Удалено: {result.totalDeleted} · Осталось: {result.totalRemaining}
+            {result.has_more && ' · Требуется повтор'}
+          </span>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
