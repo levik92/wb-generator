@@ -2,9 +2,12 @@ import { AdminAnalyticsChart, AdminAdditionalMetrics, AdminLifetimeMetrics } fro
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Users, Activity } from "lucide-react";
+import { CreditCard, Users, Activity, Trash2, Loader2 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface AdminAnalyticsProps {
   users: { id: string; is_blocked: boolean; wb_connected: boolean }[];
@@ -115,6 +118,9 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
         <AdminLifetimeMetrics />
       </motion.div>
 
+      {/* Storage Cleanup */}
+      <StorageCleanup />
+
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <StatCard
@@ -141,5 +147,47 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
         />
       </div>
     </div>
+  );
+}
+
+function StorageCleanup() {
+  const [cleaning, setCleaning] = useState(false);
+  const [result, setResult] = useState<{ totalDeleted: number; totalRemaining: number; has_more: boolean } | null>(null);
+
+  const runCleanup = async () => {
+    setCleaning(true);
+    setResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('cleanup-old-storage');
+      if (error) throw error;
+      setResult(data);
+      toast.success(`Удалено файлов: ${data.totalDeleted}${data.has_more ? '. Есть ещё — запустите повторно.' : ''}`);
+    } catch (e: any) {
+      toast.error(`Ошибка очистки: ${e.message}`);
+    } finally {
+      setCleaning(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Trash2 className="w-4 h-4" />
+          Очистка Storage (30+ дней)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-wrap items-center gap-3">
+        <Button variant="destructive" size="sm" onClick={runCleanup} disabled={cleaning}>
+          {cleaning ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Очистка...</> : 'Запустить'}
+        </Button>
+        {result && (
+          <span className="text-sm text-muted-foreground">
+            Удалено: {result.totalDeleted} · Осталось: {result.totalRemaining}
+            {result.has_more && ' · Требуется повтор'}
+          </span>
+        )}
+      </CardContent>
+    </Card>
   );
 }
