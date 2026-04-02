@@ -13,7 +13,7 @@ export const useActiveAiModel = () => {
         .select('active_model, api_provider, video_api_provider')
         .order('updated_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching active model:', error);
@@ -26,7 +26,9 @@ export const useActiveAiModel = () => {
         videoProvider: ((data as any)?.video_api_provider || 'direct') as ApiProvider,
       };
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
     refetchInterval: 60 * 1000,
   });
 };

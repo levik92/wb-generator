@@ -50,20 +50,25 @@ export const AdminProxySettings = () => {
       const { data: existing } = await supabase
         .from('ai_model_settings')
         .select('id')
+        .order('updated_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (!existing) throw new Error('Settings row not found');
+      const payload = {
+        proxy_enabled: proxyEnabled,
+        proxy_url: proxyUrl || null,
+        proxy_username: proxyUsername || null,
+        proxy_password: proxyPassword || null,
+      } as any;
 
-      const { error } = await supabase
-        .from('ai_model_settings')
-        .update({
-          proxy_enabled: proxyEnabled,
-          proxy_url: proxyUrl || null,
-          proxy_username: proxyUsername || null,
-          proxy_password: proxyPassword || null,
-        } as any)
-        .eq('id', existing.id);
+      const { error } = existing
+        ? await supabase
+            .from('ai_model_settings')
+            .update(payload)
+            .eq('id', existing.id)
+        : await supabase
+            .from('ai_model_settings')
+            .insert(payload);
 
       if (error) throw error;
 

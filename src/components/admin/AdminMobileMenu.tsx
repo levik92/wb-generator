@@ -91,7 +91,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
           <Separator className="opacity-50" />
 
           {/* Menu Items */}
-          <nav className="flex-1 p-3">
+          <nav className="flex-1 overflow-y-auto p-3">
             <ul className="space-y-2">
               {menuItems.map((item) => {
                 const Icon = item.icon;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,6 +119,7 @@ const getPromptDisplayName = (type: string): {
   };
 };
 export function PromptManager() {
+  const queryClient = useQueryClient();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
@@ -244,10 +246,11 @@ export function PromptManager() {
   const saveActiveModel = async (model: 'openai' | 'google') => {
     setSavingModel(true);
     try {
-      // Update the settings table (should only have one row)
       const {
         data: existing
-      } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      } = await supabase.from('ai_model_settings').select('id').order('updated_at', {
+        ascending: false
+      }).limit(1).maybeSingle();
       if (existing) {
         const {
           error
@@ -264,6 +267,10 @@ export function PromptManager() {
         if (error) throw error;
       }
       setActiveModel(model);
+      setActiveTab(model);
+      queryClient.invalidateQueries({
+        queryKey: ['active-ai-model']
+      });
       toast({
         title: "Успешно",
         description: `Активная модель изменена на ${model === 'openai' ? 'OpenAI' : 'Gemini (Nanabanana Pro)'}`
@@ -282,12 +289,20 @@ export function PromptManager() {
   const saveApiProvider = async (provider: 'direct' | 'polza') => {
     setSavingProvider(true);
     try {
-      const { data: existing } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      const { data: existing } = await supabase.from('ai_model_settings').select('id').order('updated_at', {
+        ascending: false
+      }).limit(1).maybeSingle();
       if (existing) {
         const { error } = await supabase.from('ai_model_settings').update({ api_provider: provider } as any).eq('id', existing.id);
         if (error) throw error;
+      } else {
+        const { error } = await supabase.from('ai_model_settings').insert({ api_provider: provider } as any);
+        if (error) throw error;
       }
       setApiProvider(provider);
+      queryClient.invalidateQueries({
+        queryKey: ['active-ai-model']
+      });
       toast({
         title: "Успешно",
         description: `Провайдер изменён на ${provider === 'direct' ? 'Прямое подключение' : 'Польза AI'}`
@@ -302,12 +317,20 @@ export function PromptManager() {
   const saveVideoApiProvider = async (provider: 'direct' | 'polza') => {
     setSavingVideoProvider(true);
     try {
-      const { data: existing } = await supabase.from('ai_model_settings').select('id').limit(1).single();
+      const { data: existing } = await supabase.from('ai_model_settings').select('id').order('updated_at', {
+        ascending: false
+      }).limit(1).maybeSingle();
       if (existing) {
         const { error } = await supabase.from('ai_model_settings').update({ video_api_provider: provider } as any).eq('id', existing.id);
         if (error) throw error;
+      } else {
+        const { error } = await supabase.from('ai_model_settings').insert({ video_api_provider: provider } as any);
+        if (error) throw error;
       }
       setVideoApiProvider(provider);
+      queryClient.invalidateQueries({
+        queryKey: ['active-ai-model']
+      });
       toast({
         title: "Успешно",
         description: `Провайдер видео изменён на ${provider === 'direct' ? 'Прямое подключение (Kling)' : 'Польза AI'}`
