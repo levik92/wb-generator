@@ -159,7 +159,7 @@ serve(async (req) => {
                 deleted += subPaths.length;
               }
 
-              if (deleted + errors > 10000) {
+              if (deleted + errors > 500) {
                 folderHasMore = false;
               }
             }
