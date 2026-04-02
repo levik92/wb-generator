@@ -2,7 +2,7 @@ import { AdminAnalyticsChart, AdminAdditionalMetrics, AdminLifetimeMetrics } fro
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Users, Activity } from "lucide-react";
+import { CreditCard, Users, Activity, Trash2, Loader2 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
 
