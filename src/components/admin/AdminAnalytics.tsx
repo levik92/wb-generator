@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreditCard, Users, Activity, Trash2, Loader2 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface AdminAnalyticsProps {
   users: { id: string; is_blocked: boolean; wb_connected: boolean }[];
