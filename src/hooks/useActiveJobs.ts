@@ -20,15 +20,17 @@ export const useActiveJobs = (userId: string): UseActiveJobsResult => {
   const [activeJobs, setActiveJobs] = useState<ActiveJob[]>([]);
   const [hasCompletedJobs, setHasCompletedJobs] = useState(false);
   const lastCheckRef = useRef<Set<string>>(new Set());
+  const inFlightRef = useRef(false);
 
   const resetCompletedJobsFlag = useCallback(() => {
     setHasCompletedJobs(false);
   }, []);
 
   const checkActiveJobs = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || inFlightRef.current) return;
 
     try {
+      inFlightRef.current = true;
       const { data, error } = await supabase.functions.invoke('get-active-jobs', {
         body: { userId }
       });
@@ -38,26 +40,24 @@ export const useActiveJobs = (userId: string): UseActiveJobsResult => {
       const jobs = data?.jobs || [];
       setActiveJobs(jobs);
 
-      // Check if any jobs were completed since last check
-      const completedJobIds = jobs
-        .filter((job: ActiveJob) => job.status === 'completed')
-        .map((job: ActiveJob) => job.id);
-
-      const newlyCompleted = completedJobIds.filter(
-        (id: string) => !lastCheckRef.current.has(id)
+      // This endpoint returns only pending/processing jobs.
+      // If a previously active job disappears from the response, it likely moved
+      // to completed/failed and the history tab should refresh.
+      const currentIds = new Set(jobs.map((job: ActiveJob) => job.id));
+      const disappearedIds = [...lastCheckRef.current].filter(
+        (id: string) => !currentIds.has(id)
       );
 
-      if (newlyCompleted.length > 0) {
+      if (disappearedIds.length > 0) {
         setHasCompletedJobs(true);
       }
 
-      // Update last check to include all current job IDs
-      lastCheckRef.current = new Set([
-        ...jobs.map((job: ActiveJob) => job.id)
-      ]);
+      lastCheckRef.current = currentIds;
 
     } catch (error: any) {
       console.error('Error checking active jobs:', error);
+    } finally {
+      inFlightRef.current = false;
     }
   }, [userId]);
 

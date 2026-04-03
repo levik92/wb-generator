@@ -30,23 +30,15 @@ serve(async (req) => {
       });
     }
 
-    // Get active jobs for user
+    // Keep the payload intentionally small because this endpoint is polled
+    // frequently by the dashboard and should not pull whole job/task trees.
     const { data: jobs, error } = await supabase
       .from('generation_jobs')
-      .select(`
-        *,
-        generation_tasks (
-          id,
-          card_index,
-          card_type,
-          status,
-          image_url,
-          storage_path
-        )
-      `)
+      .select('id, status, total_cards, created_at')
       .eq('user_id', userId)
       .in('status', ['pending', 'processing'])
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10);
 
     if (error) {
       console.error('Error fetching active jobs:', error);
@@ -56,9 +48,41 @@ serve(async (req) => {
       });
     }
 
+    const jobIds = (jobs || []).map((job: any) => job.id);
+
+    let tasksByJob = new Map<string, number>();
+    if (jobIds.length > 0) {
+      const { data: completedTasks, error: tasksError } = await supabase
+        .from('generation_tasks')
+        .select('job_id')
+        .in('job_id', jobIds)
+        .eq('status', 'completed');
+
+      if (tasksError) {
+        console.error('Error fetching completed task counts:', tasksError);
+        return new Response(JSON.stringify({ error: 'Failed to fetch active jobs' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      for (const task of completedTasks || []) {
+        const current = tasksByJob.get(task.job_id) || 0;
+        tasksByJob.set(task.job_id, current + 1);
+      }
+    }
+
+    const normalizedJobs = (jobs || []).map((job: any) => ({
+      id: job.id,
+      status: job.status,
+      total_cards: job.total_cards || 0,
+      created_at: job.created_at,
+      completed_cards: tasksByJob.get(job.id) || 0,
+    }));
+
     return new Response(JSON.stringify({ 
       success: true,
-      jobs: jobs || []
+      jobs: normalizedJobs
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
