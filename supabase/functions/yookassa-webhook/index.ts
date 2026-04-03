@@ -42,7 +42,8 @@ serve(async (req) => {
       console.log(`Processing successful payment: ${paymentId}`);
 
       const { data, error } = await supabaseServiceRole.rpc('process_payment_success', {
-        payment_id_param: paymentId
+        payment_id_param: paymentId,
+        external_id_param: null,
       });
 
       if (error) {
