@@ -77,6 +77,27 @@ const CARD_STAGES = [{
 // Global polling control - только один polling в любой момент времени
 let globalPollingInterval: NodeJS.Timeout | null = null;
 let currentPollingJobId: string | null = null;
+
+const sanitizeApiErrorMessage = (message?: string | null) => {
+  if (!message) return "Ошибка работы в API";
+
+  const normalized = message.toLowerCase();
+  const providerMentions = [
+    "gemini",
+    "google",
+    "openai",
+    "kling",
+    "polza",
+    "api error",
+  ];
+
+  if (providerMentions.some((term) => normalized.includes(term))) {
+    return "Ошибка работы в API";
+  }
+
+  return message;
+};
+
 export const GenerateCards = ({
   profile,
   onTokensUpdate,
@@ -908,7 +929,7 @@ export const GenerateCards = ({
             } else if (job.status === 'failed') {
               toast({
                 title: "Ошибка генерации",
-                description: job.error_message || "Генерация не удалась",
+                description: sanitizeApiErrorMessage(job.error_message) || "Генерация не удалась",
                 variant: "destructive"
               });
             }
@@ -1429,7 +1450,7 @@ export const GenerateCards = ({
         } else if (task.status === 'failed') {
           toast({
             title: "Ошибка перегенерации",
-            description: task.last_error || 'Перегенерация не удалась',
+            description: sanitizeApiErrorMessage(task.last_error) || 'Перегенерация не удалась',
             variant: "destructive"
           });
           clearInterval(pollInterval);
@@ -1620,7 +1641,7 @@ export const GenerateCards = ({
         } else if (task.status === 'failed') {
           toast({
             title: "Ошибка редактирования",
-            description: task.last_error || 'Редактирование не удалось',
+            description: sanitizeApiErrorMessage(task.last_error) || 'Редактирование не удалось',
             variant: "destructive"
           });
           clearInterval(pollInterval);
