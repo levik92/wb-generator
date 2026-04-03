@@ -1,48 +1,49 @@
 
-Проблема подтверждена: прямой `DELETE FROM storage.objects ...` не сработает в этом проекте, потому что Supabase блокирует такие удаления триггером `storage.protect_delete()`. То есть файлы этим SQL-запросом не удалялись.
 
-Что видно сейчас по проекту:
-- В Storage реально остаются старые изображения:
-  - `generated-cards`: 13 311 файлов старше 30 дней, около 26 GB
-  - `product-images`: 5 300 файлов, около 3042 MB
-  - `generation-images`: 79 файлов, около 135 MB
-- Видео сейчас не хранятся в Supabase Storage: в коде используются внешние `result_video_url`.
-- Описания тоже не лежат в Storage: они берутся из `generations.output_data.description`.
+## Диагноз: виджет CloudPayments не открывает окно оплаты
 
-План исправления
+### Что происходит
+1. Edge Function `create-payment` **работает корректно** — записи `pending` создаются в БД (видно 10+ записей за последние минуты)
+2. Ответ приходит с `provider: 'cloudpayments'` и `intentParams`
+3. Скрипт `cloudpayments.js` подключен в `index.html` с атрибутом `defer`
+4. На фронте код вызывает `widget.pay('auth', ...)`, но **окно оплаты не появляется**
 
-1. Переделать разовую очистку `cleanup-old-storage`
-- Не удалять через SQL и не обходить bucket только через `.list()`.
-- Брать список старых объектов через `SELECT` из `storage.objects`, а удалять только через Storage API: `supabase.storage.from(bucket).remove(paths)`.
-- Удалять батчами до 1000 объектов за вызов.
-- Добавить все нужные bucket’ы: `generated-cards`, `product-images`, `generation-images`.
-- Возвращать прогресс: `deleted`, `remaining`, `has_more`.
+### Вероятные причины
 
-2. Исправить архитектурную причину, почему текущая edge function не дочищает storage
-- Сейчас она режет выполнение примерно после 100 удалений.
-- Она ненадежно работает с вложенными путями и legacy-структурой файлов.
-- После переделки очистка будет идти по реальным именам объектов, а не по попыткам “угадать” структуру папок.
+**1. Ошибка в колбэках CloudPayments (главная гипотеза)**
+В коде `Pricing.tsx` колбэк `onComplete` вызывается **всегда** (даже при отмене), а `onFail` — при ошибке. Но если `widget.pay()` выбрасывает исключение синхронно (например, невалидный `publicId` или проблема с iframe), оно **проглатывается** — нет try/catch вокруг вызова `widget.pay()`.
 
-3. Проверить ежедневную автоочистку
-- Отдельно проверить, работает ли текущая SQL-функция `public.cleanup_old_generations()` с `storage.delete_object(...)`.
-- Если на этом проекте она тоже конфликтует с защитой Storage, вынести удаление файлов из SQL и оставить в SQL только очистку БД, а файлы чистить edge function через Storage API.
+**2. `defer` скрипт может не загрузиться вовремя**
+Маловероятно, но `window.cp` может быть `undefined` на момент клика, если скрипт ещё грузится.
 
-4. Довести ручное удаление в `History.tsx`
-- Оставить удаление через `supabase.storage.remove(...)`, но начать проверять ошибки удаления.
-- Не показывать “успешно удалено”, если storage-файлы не удалились.
-- При необходимости расширить поддержку legacy-путей для старых изображений.
+**3. CloudPayments Public ID невалиден**
+Ключ `pk_b1cfae068ef78d5d1e6fad1807682` — нужно убедиться, что он активен в панели CloudPayments. Если терминал отключен или ID невалиден, виджет молча не показывается.
 
-Технически нужно менять:
-- `supabase/functions/cleanup-old-storage/index.ts`
-- возможно новую миграцию для корректировки `public.cleanup_old_generations()`
-- `src/components/dashboard/History.tsx`
+### План исправлений
 
-Что не нужно чистить в Storage:
-- видеофайлы — они не лежат в Supabase Storage по текущей реализации;
-- описания — они хранятся в БД, а не в bucket’ах;
-- `blog-images` и `support-attachments` не затрагиваем.
+**Файл: `src/components/dashboard/Pricing.tsx`**
 
-Ожидаемый результат после реализации:
-- 0 файлов старше 30 дней в `generated-cards`, `product-images`, `generation-images`;
-- без прямых SQL-удалений из `storage.objects`;
-- без повторного накопления устаревших image-файлов.
+1. **Обернуть `widget.pay()` в try/catch** — если виджет выбрасывает ошибку, показать toast и сбросить состояние
+2. **Добавить логирование** — `console.log` перед вызовом `widget.pay()` для отладки
+3. **Проверить `window.cp` более надёжно** — не только на наличие объекта, но и на наличие метода `CloudPayments`
+4. **Сбросить `isPaymentInProgress` в `onFail`** — сейчас он там не сбрасывается, что блокирует повторные попытки
+
+```typescript
+// Ключевое изменение — обернуть widget.pay в try/catch:
+try {
+  const widget = new cpLib.CloudPayments();
+  widget.pay('auth', { ... }, { onSuccess, onFail, onComplete });
+} catch (widgetError) {
+  console.error('[CloudPayments] Widget error:', widgetError);
+  toast({ title: "Ошибка", description: "Не удалось открыть окно оплаты", variant: "destructive" });
+  setLoading(null);
+  isPaymentInProgress.current = false;
+}
+```
+
+5. **Добавить `isPaymentInProgress.current = false` в `onFail`** — чтобы кнопка не блокировалась после неудачи
+
+### Дополнительно
+- Проверить в панели CloudPayments, что терминал с `publicId = pk_b1cfae068ef78d5d1e6fad1807682` активен
+- В БД скопились ~10+ зависших `pending` записей — они будут очищены cron-задачей `cleanup-stale-payments` через час
+

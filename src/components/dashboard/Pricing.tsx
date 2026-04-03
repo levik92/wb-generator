@@ -132,47 +132,71 @@ export default function Pricing({
           return;
         }
 
-        const widget = new cpLib.CloudPayments();
         const params = data.intentParams;
         console.log('[CloudPayments] Starting payment with params:', params);
 
-        widget.pay('auth',
-          {
-            publicId: params.publicTerminalId,
-            description: params.description,
-            amount: params.amount,
-            currency: params.currency,
-            invoiceId: params.externalId,
-            accountId: params.userInfo?.accountId,
-            email: params.userInfo?.email,
-            skin: params.skin || 'modern',
-            data: params.metadata,
-          },
-          {
-            onSuccess: (options: any) => {
-              toast({
-                title: "Оплата прошла успешно!",
-                description: `Начислено ${data.tokens || finalTokens} токенов`,
-              });
-              window.location.href = '/dashboard?payment=success';
+        if (!cpLib.CloudPayments) {
+          console.error('[CloudPayments] CloudPayments constructor not found on cp object');
+          toast({
+            title: "Ошибка",
+            description: "Виджет CloudPayments не инициализирован. Обновите страницу.",
+            variant: "destructive"
+          });
+          setLoading(null);
+          isPaymentInProgress.current = false;
+          return;
+        }
+
+        try {
+          const widget = new cpLib.CloudPayments();
+          widget.pay('auth',
+            {
+              publicId: params.publicTerminalId,
+              description: params.description,
+              amount: params.amount,
+              currency: params.currency,
+              invoiceId: params.externalId,
+              accountId: params.userInfo?.accountId,
+              email: params.userInfo?.email,
+              skin: params.skin || 'modern',
+              data: params.metadata,
             },
-            onFail: (reason: any, options: any) => {
-              console.error('[CloudPayments] Payment failed:', reason);
-              const isCanceled = typeof reason === 'string' && reason.toLowerCase().includes('cancel');
-              toast({
-                title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
-                description: isCanceled ? "Платёж отменён пользователем." : "Платёж не прошёл. Попробуйте ещё раз.",
-                variant: "destructive"
-              });
-              setLoading(null);
-            },
-            onComplete: (paymentResult: any, options: any) => {
-              console.log('[CloudPayments] Payment complete:', paymentResult);
-              setLoading(null);
-              isPaymentInProgress.current = false;
-            },
-          }
-        );
+            {
+              onSuccess: (options: any) => {
+                toast({
+                  title: "Оплата прошла успешно!",
+                  description: `Начислено ${data.tokens || finalTokens} токенов`,
+                });
+                window.location.href = '/dashboard?payment=success';
+              },
+              onFail: (reason: any, options: any) => {
+                console.error('[CloudPayments] Payment failed:', reason);
+                const isCanceled = typeof reason === 'string' && reason.toLowerCase().includes('cancel');
+                toast({
+                  title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
+                  description: isCanceled ? "Платёж отменён пользователем." : "Платёж не прошёл. Попробуйте ещё раз.",
+                  variant: "destructive"
+                });
+                setLoading(null);
+                isPaymentInProgress.current = false;
+              },
+              onComplete: (paymentResult: any, options: any) => {
+                console.log('[CloudPayments] Payment complete:', paymentResult);
+                setLoading(null);
+                isPaymentInProgress.current = false;
+              },
+            }
+          );
+        } catch (widgetError) {
+          console.error('[CloudPayments] Widget error:', widgetError);
+          toast({
+            title: "Ошибка",
+            description: "Не удалось открыть окно оплаты. Попробуйте обновить страницу.",
+            variant: "destructive"
+          });
+          setLoading(null);
+          isPaymentInProgress.current = false;
+        }
         return;
       }
 
