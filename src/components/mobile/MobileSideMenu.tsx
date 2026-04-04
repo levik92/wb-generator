@@ -187,8 +187,8 @@ export const MobileSideMenu = ({
                         <button className={`
                             w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left
                             transition-all duration-200
-                            ${isActive && !item.external ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50'}
-                          `} onClick={() => handleTabChange(item.id, item.external)}>
+                            ${isActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50'}
+                          `} onClick={() => handleTabChange(item.id)}>
                           <div className={`
                             w-8 h-8 rounded-lg flex items-center justify-center
                             ${isActive && !item.external ? 'bg-primary/15' : 'bg-muted/30'}
