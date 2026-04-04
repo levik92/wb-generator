@@ -82,12 +82,7 @@ export const MobileSideMenu = ({
     label: 'Настройки',
     icon: Settings
   }];
-  const handleTabChange = (tabId: string, external?: string) => {
-    if (external) {
-      window.open(external, '_blank', 'noopener,noreferrer');
-      onClose();
-      return;
-    }
+  const handleTabChange = (tabId: string) => {
     onTabChange(tabId);
     onClose();
   };
