@@ -191,10 +191,10 @@ export const MobileSideMenu = ({
                           `} onClick={() => handleTabChange(item.id)}>
                           <div className={`
                             w-8 h-8 rounded-lg flex items-center justify-center
-                            ${isActive && !item.external ? 'bg-primary/15' : 'bg-muted/30'}
+                            ${isActive ? 'bg-primary/15' : 'bg-muted/30'}
                             transition-colors duration-200
                           `}>
-                            <Icon className={`w-4 h-4 ${isActive && !item.external ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                           </div>
                           <span className="text-sm font-medium">{item.label}</span>
                           {item.badge && <Badge className={`ml-auto text-[10px] px-1.5 py-0.5 ${item.badgeColor || 'bg-muted text-muted-foreground'}`}>
