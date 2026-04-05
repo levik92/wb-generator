@@ -71,6 +71,12 @@ interface BonusSubmission {
   user_email?: string;
 }
 
+interface ProfileLookup {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+}
+
 interface BonusStats {
   totalSubmissions: number;
   pendingSubmissions: number;
@@ -141,16 +147,16 @@ export const AdminBonuses = () => {
         const userIds = [...new Set(submissionsData.map(s => s.user_id))];
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('id, email')
+          .select('id, email, full_name')
           .in('id', userIds);
 
-        const emailMap = new Map(profiles?.map(p => [p.id, p.email]));
+        const profileMap = new Map((profiles as ProfileLookup[] | null | undefined)?.map(p => [p.id, p]));
         const programMap = new Map(programsData?.map(p => [p.id, p]));
 
         const enrichedSubmissions = submissionsData.map(s => ({
           ...s,
           status: s.status as SubmissionStatus,
-          user_email: emailMap.get(s.user_id) || 'Неизвестно',
+          user_email: profileMap.get(s.user_id)?.full_name || profileMap.get(s.user_id)?.email || 'Неизвестно',
           program: programMap.get(s.program_id)
         }));
 
