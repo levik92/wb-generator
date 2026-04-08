@@ -299,7 +299,7 @@ export const History = ({
                 const response = await fetch(image.image_url);
                 const blob = await response.blob();
                 const fileName = `${safeProductName}_${image.type || 'card'}.png`;
-                safeBlobDownload(blob, fileName);
+                historyBlobDownload(blob, fileName);
               }
             }
           } else {
@@ -329,7 +329,7 @@ export const History = ({
               return;
             }
             const zipBlob = await zip.generateAsync({ type: 'blob' });
-            safeBlobDownload(zipBlob, `${safeProductName}.zip`);
+            historyBlobDownload(zipBlob, `${safeProductName}.zip`);
           }
         } else {
           toast({
@@ -345,7 +345,7 @@ export const History = ({
           try {
             const response = await fetch(videoUrl);
             const blob = await response.blob();
-            safeBlobDownload(blob, `${safeProductName}_video.mp4`);
+            historyBlobDownload(blob, `${safeProductName}_video.mp4`);
           } catch {
             window.open(videoUrl, '_blank');
           }
@@ -354,7 +354,7 @@ export const History = ({
         // For descriptions, download as text file
         const description = generation.output_data?.description || 'Описание товара';
         const blob = new Blob([description], { type: 'text/plain;charset=utf-8' });
-        safeBlobDownload(blob, `${safeProductName}_description.txt`);
+        historyBlobDownload(blob, `${safeProductName}_description.txt`);
       }
       
       const imagesCount = generation.output_data?.images?.length || 0;
@@ -393,7 +393,7 @@ export const History = ({
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-      safeBlobDownload(blob, fileName);
+      historyBlobDownload(blob, fileName);
     } catch {
       toast({ title: "Ошибка скачивания", variant: "destructive" });
     }
