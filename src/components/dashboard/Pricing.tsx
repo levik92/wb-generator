@@ -159,6 +159,7 @@ export default function Pricing({
               accountId: params.userInfo?.accountId,
               email: params.userInfo?.email,
               skin: params.skin || 'modern',
+              paymentSchema: 'Single',
               data: params.metadata,
             },
             {
