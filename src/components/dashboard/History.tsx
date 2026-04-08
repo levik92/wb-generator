@@ -13,10 +13,49 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { isTelegramWebApp, telegramSafeDownload, safeBlobDownload } from "@/lib/telegram";
+import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
+
+/**
+ * Detect iOS / iPadOS (including iPadOS in desktop mode).
+ * iPadOS reports "MacIntel" but has touch support.
+ */
+const isIOSorIPadOS = (): boolean => {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) return true;
+  // iPadOS desktop mode
+  if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return true;
+  return false;
+};
+
+/**
+ * Local blob download helper for History page.
+ * - iOS/iPadOS Safari: opens blob in new tab (direct download doesn't work)
+ * - Desktop Safari & all other desktops: forces file download via <a download>
+ */
+const historyBlobDownload = (blob: Blob, filename: string): void => {
+  const url = URL.createObjectURL(blob);
+
+  if (isIOSorIPadOS()) {
+    // On iOS/iPadOS, programmatic <a download> is ignored — open in new tab
+    const newTab = window.open(url, '_blank');
+    if (!newTab) window.location.href = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } else {
+    // Desktop (including desktop Safari) — standard download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    // Delay revoke so Safari has time to start the download
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  }
+};
 interface Generation {
   id: string;
   generation_type: string;
