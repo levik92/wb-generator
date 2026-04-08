@@ -13,7 +13,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SUPPORT_AI_ENABLED = Deno.env.get("SUPPORT_AI_ENABLED") === "true";
+const SUPPORT_AI_ENABLED_RAW = Deno.env.get("SUPPORT_AI_ENABLED");
+const SUPPORT_AI_ENABLED = SUPPORT_AI_ENABLED_RAW == null
+  ? true
+  : SUPPORT_AI_ENABLED_RAW === "true";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -77,7 +80,7 @@ serve(async (req) => {
           .eq("channel", convChannel)
           .maybeSingle();
         
-        const aiEnabled = SUPPORT_AI_ENABLED && (aiDefault?.ai_enabled ?? false);
+        const aiEnabled = SUPPORT_AI_ENABLED && (aiDefault?.ai_enabled ?? (convChannel === "widget"));
 
         const { data: conv, error } = await supabase
           .from("support_conversations")
