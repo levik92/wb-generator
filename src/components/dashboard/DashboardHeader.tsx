@@ -230,10 +230,6 @@ export const DashboardHeader = ({
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSettings}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Профиль</span>
-              </DropdownMenuItem>
               <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={() => window.location.href = '/partners/cabinet'}>
                 <Users className="mr-2 h-4 w-4" />
                 <span>Партнерам</span>
@@ -244,6 +240,10 @@ export const DashboardHeader = ({
                   <span>Поддержка</span>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSettings}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Настройки</span>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
                 <LogOut className="mr-2 h-4 w-4" />

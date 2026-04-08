@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Zap, Image, FileText, History, CreditCard, Gift, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun, X, ChevronRight, HeartHandshake } from "lucide-react";
+import { Zap, Image, FileText, History, CreditCard, Gift, Settings, Tags, Newspaper, GraduationCap, Video, Moon, Sun, X, ChevronRight } from "lucide-react";
 import { useTheme } from "next-themes";
 interface Profile {
   id: string;
@@ -78,21 +78,11 @@ export const MobileSideMenu = ({
     label: 'Бонусы',
     icon: Gift
   }, {
-    id: 'friends',
-    label: 'Наши друзья',
-    icon: HeartHandshake,
-    external: '/friends'
-  }, {
     id: 'settings',
     label: 'Настройки',
     icon: Settings
   }];
-  const handleTabChange = (tabId: string, external?: string) => {
-    if (external) {
-      window.open(external, '_blank', 'noopener,noreferrer');
-      onClose();
-      return;
-    }
+  const handleTabChange = (tabId: string) => {
     onTabChange(tabId);
     onClose();
   };
@@ -197,14 +187,14 @@ export const MobileSideMenu = ({
                         <button className={`
                             w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left
                             transition-all duration-200
-                            ${isActive && !item.external ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50'}
-                          `} onClick={() => handleTabChange(item.id, item.external)}>
+                            ${isActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50'}
+                          `} onClick={() => handleTabChange(item.id)}>
                           <div className={`
                             w-8 h-8 rounded-lg flex items-center justify-center
-                            ${isActive && !item.external ? 'bg-primary/15' : 'bg-muted/30'}
+                            ${isActive ? 'bg-primary/15' : 'bg-muted/30'}
                             transition-colors duration-200
                           `}>
-                            <Icon className={`w-4 h-4 ${isActive && !item.external ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                           </div>
                           <span className="text-sm font-medium">{item.label}</span>
                           {item.badge && <Badge className={`ml-auto text-[10px] px-1.5 py-0.5 ${item.badgeColor || 'bg-muted text-muted-foreground'}`}>

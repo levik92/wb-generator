@@ -13,10 +13,38 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { isTelegramWebApp, telegramSafeDownload, safeBlobDownload } from "@/lib/telegram";
+import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
+
+const isIOSorIPadOS = (): boolean => {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua)) return true;
+  if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) return true;
+  return false;
+};
+
+const historyBlobDownload = (blob: Blob, filename: string): void => {
+  const url = URL.createObjectURL(blob);
+
+  if (isIOSorIPadOS()) {
+    const newTab = window.open(url, "_blank");
+    if (!newTab) window.location.href = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+};
+
 interface Generation {
   id: string;
   generation_type: string;
@@ -251,28 +279,46 @@ export const History = ({
               }
             }
           } else if (images.length === 1) {
-            // Single image — download directly
+            // Single image
             const image = images[0];
             if (image.image_url) {
-              const response = await fetch(image.image_url);
-              const blob = await response.blob();
-              const fileName = `${safeProductName}_${image.type || 'card'}.png`;
-              safeBlobDownload(blob, fileName);
+              if (isMobile) {
+                window.open(image.image_url, '_blank');
+              } else {
+                const response = await fetch(image.image_url);
+                const blob = await response.blob();
+                const fileName = `${safeProductName}_${image.type || 'card'}.png`;
+                historyBlobDownload(blob, fileName);
+              }
             }
           } else {
             // Multiple images — pack into ZIP archive
             const zip = new JSZip();
+            let addedFiles = 0;
             for (let i = 0; i < images.length; i++) {
               const image = images[i];
               if (image.image_url) {
-                const response = await fetch(image.image_url);
-                const blob = await response.blob();
-                const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-                zip.file(`${safeProductName}_${safeStageName}.png`, blob);
+                try {
+                  const response = await fetch(image.image_url);
+                  if (!response.ok) continue;
+                  const blob = await response.blob();
+                  const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+                  const uniqueName = addedFiles > 0 && zip.files[`${safeProductName}_${safeStageName}.png`]
+                    ? `${safeProductName}_${safeStageName}_${i}.png`
+                    : `${safeProductName}_${safeStageName}.png`;
+                  zip.file(uniqueName, blob);
+                  addedFiles++;
+                } catch (e) {
+                  console.warn(`Failed to fetch image ${i}:`, e);
+                }
               }
             }
+            if (addedFiles === 0) {
+              toast({ title: "Ошибка", description: "Не удалось загрузить изображения для архива", variant: "destructive" });
+              return;
+            }
             const zipBlob = await zip.generateAsync({ type: 'blob' });
-            safeBlobDownload(zipBlob, `${safeProductName}.zip`);
+            historyBlobDownload(zipBlob, `${safeProductName}.zip`);
           }
         } else {
           toast({
@@ -288,7 +334,7 @@ export const History = ({
           try {
             const response = await fetch(videoUrl);
             const blob = await response.blob();
-            safeBlobDownload(blob, `${safeProductName}_video.mp4`);
+            historyBlobDownload(blob, `${safeProductName}_video.mp4`);
           } catch {
             window.open(videoUrl, '_blank');
           }
@@ -297,7 +343,7 @@ export const History = ({
         // For descriptions, download as text file
         const description = generation.output_data?.description || 'Описание товара';
         const blob = new Blob([description], { type: 'text/plain;charset=utf-8' });
-        safeBlobDownload(blob, `${safeProductName}_description.txt`);
+        historyBlobDownload(blob, `${safeProductName}_description.txt`);
       }
       
       const imagesCount = generation.output_data?.images?.length || 0;
@@ -329,10 +375,14 @@ export const History = ({
       telegramSafeDownload(imageUrl, fileName);
       return;
     }
+    if (isMobile) {
+      window.open(imageUrl, '_blank');
+      return;
+    }
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-      safeBlobDownload(blob, fileName);
+      historyBlobDownload(blob, fileName);
     } catch {
       toast({ title: "Ошибка скачивания", variant: "destructive" });
     }
