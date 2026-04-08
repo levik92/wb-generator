@@ -251,25 +251,43 @@ export const History = ({
               }
             }
           } else if (images.length === 1) {
-            // Single image — download directly
+            // Single image
             const image = images[0];
             if (image.image_url) {
-              const response = await fetch(image.image_url);
-              const blob = await response.blob();
-              const fileName = `${safeProductName}_${image.type || 'card'}.png`;
-              safeBlobDownload(blob, fileName);
+              if (isMobile) {
+                window.open(image.image_url, '_blank');
+              } else {
+                const response = await fetch(image.image_url);
+                const blob = await response.blob();
+                const fileName = `${safeProductName}_${image.type || 'card'}.png`;
+                safeBlobDownload(blob, fileName);
+              }
             }
           } else {
             // Multiple images — pack into ZIP archive
             const zip = new JSZip();
+            let addedFiles = 0;
             for (let i = 0; i < images.length; i++) {
               const image = images[i];
               if (image.image_url) {
-                const response = await fetch(image.image_url);
-                const blob = await response.blob();
-                const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-                zip.file(`${safeProductName}_${safeStageName}.png`, blob);
+                try {
+                  const response = await fetch(image.image_url);
+                  if (!response.ok) continue;
+                  const blob = await response.blob();
+                  const safeStageName = (image.type || `card_${i + 1}`).replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
+                  const uniqueName = addedFiles > 0 && zip.files[`${safeProductName}_${safeStageName}.png`]
+                    ? `${safeProductName}_${safeStageName}_${i}.png`
+                    : `${safeProductName}_${safeStageName}.png`;
+                  zip.file(uniqueName, blob);
+                  addedFiles++;
+                } catch (e) {
+                  console.warn(`Failed to fetch image ${i}:`, e);
+                }
               }
+            }
+            if (addedFiles === 0) {
+              toast({ title: "Ошибка", description: "Не удалось загрузить изображения для архива", variant: "destructive" });
+              return;
             }
             const zipBlob = await zip.generateAsync({ type: 'blob' });
             safeBlobDownload(zipBlob, `${safeProductName}.zip`);
@@ -327,6 +345,10 @@ export const History = ({
   const downloadSingleImage = async (imageUrl: string, fileName: string) => {
     if (isTelegramWebApp()) {
       telegramSafeDownload(imageUrl, fileName);
+      return;
+    }
+    if (isMobile) {
+      window.open(imageUrl, '_blank');
       return;
     }
     try {
