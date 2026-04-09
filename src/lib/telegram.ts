@@ -4,17 +4,63 @@
  * and provides helper functions for TMA-specific behavior.
  */
 
+const TELEGRAM_WEB_APP_SCRIPT_URL = "https://telegram.org/js/telegram-web-app.js";
+let telegramScriptLoadStarted = false;
+
+const getTelegramGlobal = () => (window as any).Telegram?.WebApp;
+
+const isTelegramLikeEnvironment = (): boolean => {
+  const ua = navigator.userAgent || "";
+  const referrer = document.referrer || "";
+
+  return (
+    /Telegram/i.test(ua) ||
+    /TDesktop/i.test(ua) ||
+    /TelegramWebview/i.test(ua) ||
+    /(?:^|\/\/)(t\.me|telegram\.me)\//i.test(referrer)
+  );
+};
+
+const ensureTelegramSdkLoaded = (): void => {
+  if (telegramScriptLoadStarted || getTelegramGlobal() || !isTelegramLikeEnvironment()) {
+    return;
+  }
+
+  telegramScriptLoadStarted = true;
+
+  const script = document.createElement("script");
+  script.src = TELEGRAM_WEB_APP_SCRIPT_URL;
+  script.async = true;
+  script.defer = true;
+  script.onerror = () => {
+    console.warn("[telegram] Failed to load Telegram Web App SDK, continuing without it");
+  };
+  document.head.appendChild(script);
+};
+
 export const isTelegramWebApp = (): boolean => {
-  const tg = (window as any).Telegram?.WebApp;
-  // The SDK script creates window.Telegram.WebApp even in regular browsers.
-  // To distinguish real TMA usage, check for initData or platform which are
-  // only populated when launched from Telegram.
-  if (!tg) return false;
-  return !!(tg.initData || tg.initDataUnsafe?.user || tg.platform === 'android' || tg.platform === 'ios' || tg.platform === 'android_x');
+  const tg = getTelegramGlobal();
+
+  if (tg) {
+    // The SDK script creates window.Telegram.WebApp even in regular browsers.
+    // To distinguish real TMA usage, check for initData or platform which are
+    // only populated when launched from Telegram.
+    return !!(
+      tg.initData ||
+      tg.initDataUnsafe?.user ||
+      tg.platform === "android" ||
+      tg.platform === "ios" ||
+      tg.platform === "android_x"
+    );
+  }
+
+  ensureTelegramSdkLoaded();
+  return isTelegramLikeEnvironment();
 };
 
 export const getTelegramWebApp = () => {
-  return (window as any).Telegram?.WebApp;
+  ensureTelegramSdkLoaded();
+  return getTelegramGlobal();
 };
 
 /**
@@ -71,3 +117,5 @@ export const telegramSafeDownload = (url: string, filename?: string): void => {
     document.body.removeChild(link);
   }
 };
+
+ensureTelegramSdkLoaded();
