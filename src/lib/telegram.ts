@@ -37,16 +37,25 @@ const scheduleTelegramSdkLoad = (): void => {
 
   telegramScriptLoadStarted = true;
 
-  runWhenBrowserIsIdle(() => {
-    const script = document.createElement("script");
-    script.src = TELEGRAM_WEB_APP_SCRIPT_URL;
-    script.async = true;
-    script.defer = true;
-    script.onerror = () => {
-      console.warn("[telegram] Failed to load Telegram Web App SDK, continuing without it");
-    };
-    document.head.appendChild(script);
-  });
+  const appendScript = () => {
+    runWhenBrowserIsIdle(() => {
+      const script = document.createElement("script");
+      script.src = TELEGRAM_WEB_APP_SCRIPT_URL;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => {
+        console.warn("[telegram] Failed to load Telegram Web App SDK, continuing without it");
+      };
+      document.head.appendChild(script);
+    });
+  };
+
+  if (document.readyState === "complete") {
+    appendScript();
+    return;
+  }
+
+  window.addEventListener("load", appendScript, { once: true });
 };
 
 export const isTelegramWebApp = (): boolean => {
@@ -128,5 +137,3 @@ export const telegramSafeDownload = (url: string, filename?: string): void => {
     document.body.removeChild(link);
   }
 };
-
-scheduleTelegramSdkLoad();
