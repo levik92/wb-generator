@@ -21,21 +21,32 @@ const isTelegramLikeEnvironment = (): boolean => {
   );
 };
 
-const ensureTelegramSdkLoaded = (): void => {
+const runWhenBrowserIsIdle = (callback: () => void): void => {
+  if ("requestIdleCallback" in window) {
+    (window as any).requestIdleCallback(callback, { timeout: 3000 });
+    return;
+  }
+
+  window.setTimeout(callback, 1500);
+};
+
+const scheduleTelegramSdkLoad = (): void => {
   if (telegramScriptLoadStarted || getTelegramGlobal() || !isTelegramLikeEnvironment()) {
     return;
   }
 
   telegramScriptLoadStarted = true;
 
-  const script = document.createElement("script");
-  script.src = TELEGRAM_WEB_APP_SCRIPT_URL;
-  script.async = true;
-  script.defer = true;
-  script.onerror = () => {
-    console.warn("[telegram] Failed to load Telegram Web App SDK, continuing without it");
-  };
-  document.head.appendChild(script);
+  runWhenBrowserIsIdle(() => {
+    const script = document.createElement("script");
+    script.src = TELEGRAM_WEB_APP_SCRIPT_URL;
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => {
+      console.warn("[telegram] Failed to load Telegram Web App SDK, continuing without it");
+    };
+    document.head.appendChild(script);
+  });
 };
 
 export const isTelegramWebApp = (): boolean => {
@@ -54,12 +65,12 @@ export const isTelegramWebApp = (): boolean => {
     );
   }
 
-  ensureTelegramSdkLoaded();
+  scheduleTelegramSdkLoad();
   return isTelegramLikeEnvironment();
 };
 
 export const getTelegramWebApp = () => {
-  ensureTelegramSdkLoaded();
+  scheduleTelegramSdkLoad();
   return getTelegramGlobal();
 };
 
@@ -118,4 +129,4 @@ export const telegramSafeDownload = (url: string, filename?: string): void => {
   }
 };
 
-ensureTelegramSdkLoaded();
+scheduleTelegramSdkLoad();
