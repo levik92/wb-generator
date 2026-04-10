@@ -161,6 +161,27 @@ async function processTasks(
     // Track whether we've completed the style analysis phase for unified styling
     let styleAnalysisDone = !job.unified_styling; // Skip if not using unified styling
     let styleDescription: string | null = job.style_description || null;
+    let styleSourceTaskId: string | null = null;
+
+    if (!styleAnalysisDone) {
+      const { data: orderedTasks, error: orderedTasksError } = await supabase
+        .from('generation_tasks')
+        .select('id, card_index')
+        .eq('job_id', jobId)
+        .order('card_index', { ascending: true })
+        .limit(1);
+
+      if (orderedTasksError) {
+        console.error('[unified-styling] Failed to determine style source task:', orderedTasksError);
+        styleAnalysisDone = true;
+      } else {
+        styleSourceTaskId = orderedTasks?.[0]?.id ?? null;
+        if (!styleSourceTaskId) {
+          console.log('[unified-styling] No tasks available for style analysis, proceeding normally');
+          styleAnalysisDone = true;
+        }
+      }
+    }
 
     // If style_source_image_url is provided, analyze style immediately before processing any tasks
     if (job.style_source_image_url && job.unified_styling && !styleDescription) {
@@ -274,21 +295,21 @@ async function processTasks(
       // Only process tasks that are ready
       let readyTasks = tasks.filter(isTaskReady);
 
-      // UNIFIED STYLING: if style analysis not done yet, only process the first task
-      if (!styleAnalysisDone && readyTasks.length > 0) {
-        const firstTask = readyTasks[0];
-        console.log(`[unified-styling] Processing first task ${firstTask.id} (card_index: ${firstTask.card_index}) for style analysis`);
-        
-        await processTask(supabase, firstTask, job, MAX_RETRIES, styleDescription);
-        
-        // Check if first task completed successfully
-        const { data: firstTaskResult } = await supabase
+      // UNIFIED STYLING: block the queue on the fixed source task until style analysis finishes
+      if (!styleAnalysisDone && styleSourceTaskId) {
+        const { data: firstTaskResult, error: firstTaskError } = await supabase
           .from('generation_tasks')
-          .select('status, image_url')
-          .eq('id', firstTask.id)
+          .select('*')
+          .eq('id', styleSourceTaskId)
           .single();
 
-        if (firstTaskResult?.status === 'completed' && firstTaskResult?.image_url) {
+        if (firstTaskError || !firstTaskResult) {
+          console.error('[unified-styling] Failed to load source task state:', firstTaskError);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue;
+        }
+
+        if (firstTaskResult.status === 'completed' && firstTaskResult.image_url) {
           // Call analyze-style to get style description (route based on provider)
           console.log(`[unified-styling] First task completed, analyzing style...`);
           try {
@@ -317,14 +338,27 @@ async function processTasks(
           // Continue to process remaining tasks with style description
           await new Promise(resolve => setTimeout(resolve, 6000));
           continue;
-        } else if (firstTaskResult?.status === 'failed') {
+        } else if (firstTaskResult.status === 'failed') {
           // First task failed - proceed without style analysis
           console.log('[unified-styling] First task failed, proceeding without style analysis');
           styleAnalysisDone = true;
           continue;
-        } else {
-          // Task still processing or retrying, wait
+        } else if (firstTaskResult.status === 'processing') {
+          // Source task is already in-flight, don't start other cards yet
           await new Promise(resolve => setTimeout(resolve, 5000));
+          continue;
+        } else if (isTaskReady(firstTaskResult)) {
+          console.log(`[unified-styling] Processing first task ${firstTaskResult.id} (card_index: ${firstTaskResult.card_index}) for style analysis`);
+          await processTask(supabase, firstTaskResult, job, MAX_RETRIES, styleDescription);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          continue;
+        } else {
+          // Source task is waiting for retry window, keep the queue blocked on it
+          const baseTs = new Date(firstTaskResult.updated_at || firstTaskResult.created_at || Date.now()).getTime();
+          const nextRetryAt = baseTs + Number(firstTaskResult.retry_after || 0);
+          const waitMs = Math.min(30000, Math.max(1000, nextRetryAt - Date.now()));
+          console.log(`[unified-styling] Waiting ${waitMs}ms for source task ${firstTaskResult.id} retry window`);
+          await new Promise(resolve => setTimeout(resolve, waitMs));
           continue;
         }
       }
