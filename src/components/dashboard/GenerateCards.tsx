@@ -461,7 +461,7 @@ export const GenerateCards = ({
           // Уведомление уже создано database trigger'ом в таблице notifications,
           // пользователь увидит его в NotificationCenter. Не дублируем toast.
         }
-      } else if (latestJob && latestJob.status === 'processing') {
+      } else if (latestJob && (latestJob.status === 'processing' || latestJob.status === 'pending')) {
           // After the category fix, any job here is guaranteed to be a main generation
           // (regeneration jobs have category='regeneration' and are excluded by the query)
           // So always show the full progress bar
@@ -541,7 +541,7 @@ export const GenerateCards = ({
             setGeneratedImages(currentImages => {
               for (const editJob of activeEditJobs!) {
                 const isRegen = editJob.category === 'regeneration';
-                const activeTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'processing' || t.status === 'pending') || [];
+                const activeTasks = editJob.generation_tasks?.filter((t: any) => t.status === 'processing' || t.status === 'pending' || t.status === 'retrying') || [];
                 for (const task of activeTasks) {
                   // Find the matching image by stageIndex (card_index)
                   const imgIndex = currentImages.findIndex(img => img.stageIndex === task.card_index);
