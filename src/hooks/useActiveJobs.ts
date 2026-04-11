@@ -43,7 +43,7 @@ export const useActiveJobs = (userId: string): UseActiveJobsResult => {
       // This endpoint returns only pending/processing jobs.
       // If a previously active job disappears from the response, it likely moved
       // to completed/failed and the history tab should refresh.
-      const currentIds = new Set(jobs.map((job: ActiveJob) => job.id));
+      const currentIds = new Set<string>(jobs.map((job: ActiveJob) => job.id));
       const disappearedIds = [...lastCheckRef.current].filter(
         (id: string) => !currentIds.has(id)
       );
