@@ -529,7 +529,7 @@ export const GenerateCards = ({
           `)
           .eq('user_id', profile.id)
           .in('category', ['edit', 'regeneration'])
-          .in('status', ['processing', 'pending', 'retrying'])
+          .in('status', ['processing', 'pending'])
           .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // last 10 min
           .order('created_at', { ascending: false })
           .limit(10);
