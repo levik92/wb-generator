@@ -27,7 +27,7 @@ const runWhenBrowserIsIdle = (callback: () => void): void => {
     return;
   }
 
-  window.setTimeout(callback, 1500);
+  globalThis.setTimeout(callback, 1500);
 };
 
 const scheduleTelegramSdkLoad = (): void => {
