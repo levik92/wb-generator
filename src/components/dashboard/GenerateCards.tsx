@@ -110,7 +110,7 @@ export const GenerateCards = ({
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [autoDescription, setAutoDescription] = useState(false);
-  const [selectedCards, setSelectedCards] = useState<number[]>([0]); // По умолчанию выбрана только главная
+  const [selectedCards, setSelectedCards] = useState<number[]>([]); // По умолчанию ничего не выбрано
   const [unifiedStyling, setUnifiedStyling] = useState(false);
   const [unifiedStylingManuallyDisabled, setUnifiedStylingManuallyDisabled] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -755,7 +755,7 @@ export const GenerateCards = ({
   const handleCardToggle = (cardIndex: number) => {
     setSelectedCards(prev => {
       const newSelection = prev.includes(cardIndex)
-        ? (prev.length === 1 ? prev : prev.filter(i => i !== cardIndex))
+        ? prev.filter(i => i !== cardIndex)
         : [...prev, cardIndex].sort((a, b) => a - b);
       
       // Auto-enable unified styling when 2+ cards selected (unless manually disabled)
