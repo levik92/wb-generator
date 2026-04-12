@@ -143,21 +143,6 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  // Listen for hash changes (for Telegram Mini App deep links)
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hashParam = window.location.hash.replace('#', '');
-      const validTabs = ['cards', 'video', 'description', 'labels', 'history', 'pricing', 'bonuses', 'settings', 'notifications', 'news', 'learning', 'support'];
-      
-      if (hashParam && validTabs.includes(hashParam)) {
-        setActiveTab(hashParam as ActiveTab);
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({

@@ -21,7 +21,6 @@ import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
-import { isTelegramWebApp, safeBlobDownload } from "@/lib/telegram";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
