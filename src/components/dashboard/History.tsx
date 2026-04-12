@@ -379,9 +379,6 @@ export const History = ({
       window.open(imageUrl, '_blank');
       return;
     }
-      window.open(imageUrl, '_blank');
-      return;
-    }
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
