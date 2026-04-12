@@ -282,13 +282,7 @@ export const History = ({
             return;
           }
           
-          if (isTelegramWebApp()) {
-            for (const image of images) {
-              if (image.image_url) {
-                telegramSafeDownload(image.image_url, `${safeProductName}.png`);
-              }
-            }
-          } else if (images.length === 1) {
+          if (images.length === 1) {
             // Single image
             const image = images[0];
             if (image.image_url) {
@@ -381,11 +375,10 @@ export const History = ({
   };
 
   const downloadSingleImage = async (imageUrl: string, fileName: string) => {
-    if (isTelegramWebApp()) {
-      telegramSafeDownload(imageUrl, fileName);
+    if (isMobile) {
+      window.open(imageUrl, '_blank');
       return;
     }
-    if (isMobile) {
       window.open(imageUrl, '_blank');
       return;
     }
