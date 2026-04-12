@@ -13,7 +13,6 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { isTelegramWebApp, telegramSafeDownload } from "@/lib/telegram";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
@@ -283,13 +282,7 @@ export const History = ({
             return;
           }
           
-          if (isTelegramWebApp()) {
-            for (const image of images) {
-              if (image.image_url) {
-                telegramSafeDownload(image.image_url, `${safeProductName}.png`);
-              }
-            }
-          } else if (images.length === 1) {
+          if (images.length === 1) {
             // Single image
             const image = images[0];
             if (image.image_url) {
@@ -382,10 +375,6 @@ export const History = ({
   };
 
   const downloadSingleImage = async (imageUrl: string, fileName: string) => {
-    if (isTelegramWebApp()) {
-      telegramSafeDownload(imageUrl, fileName);
-      return;
-    }
     if (isMobile) {
       window.open(imageUrl, '_blank');
       return;

@@ -21,7 +21,6 @@ import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
-import { isTelegramWebApp, safeBlobDownload } from "@/lib/telegram";
 import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
@@ -1131,21 +1130,6 @@ export const GenerateCards = ({
     if (downloadingAll || generatedImages.length === 0) return;
     setDownloadingAll(true);
     try {
-      // In Telegram WebView, open each image in a new tab instead of ZIP
-      if (isTelegramWebApp()) {
-        for (const image of generatedImages) {
-          if (image.url) {
-            window.open(image.url, '_blank');
-          }
-        }
-        toast({
-          title: "Изображения открыты",
-          description: `${generatedImages.length} изображений открыто — сохраните их вручную`
-        });
-        setDownloadingAll(false);
-        return;
-      }
-
       const zip = new JSZip();
       const safeProductName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       toast({
@@ -1172,7 +1156,17 @@ export const GenerateCards = ({
       // Generate ZIP and download
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const safeZipName = (productName || 'cards').replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-      safeBlobDownload(zipBlob, `${safeZipName}_all_cards.zip`);
+      
+      // Standard download
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeZipName}_all_cards.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
       toast({
         title: "Скачивание завершено",
         description: `ZIP-архив с ${generatedImages.length} изображениями готов`
@@ -1192,22 +1186,22 @@ export const GenerateCards = ({
     const image = generatedImages[index];
     if (!image) return;
     try {
-      // In Telegram WebView, open image directly instead of blob download
-      if (isTelegramWebApp()) {
-        window.open(image.url, '_blank');
-        toast({
-          title: "Изображение открыто",
-          description: `Сохраните "${image.stage}" из открывшегося окна`
-        });
-        return;
-      }
-
       // Standard browser: fetch as blob for proper download
       const response = await fetch(image.url);
       const blob = await response.blob();
       const safeProductName = productName.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
       const safeStageName = image.stage.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, ' ').trim();
-      safeBlobDownload(blob, `${safeProductName}_${safeStageName}.png`);
+      
+      // Standard download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${safeProductName}_${safeStageName}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
       toast({
         title: "Скачивание началось",
         description: `Карточка "${image.stage}" скачивается`
