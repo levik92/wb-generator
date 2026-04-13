@@ -41,7 +41,7 @@ const VideoModal = ({
 
 // Static stats - no counter animation on mobile for performance
 const stats = [
-  { value: "12 500+", label: "карточек создано" },
+  { value: "120 000+", label: "карточек создано" },
   { value: "3 мин", label: "до результата" },
   { value: "98%", label: "довольны результатом" },
   { value: "х10", label: "дешевле дизайнера" },
