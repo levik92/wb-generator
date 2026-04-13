@@ -131,8 +131,8 @@ const benefits = [
 ];
 
 const stats = [
-  { value: "15 000+", label: "карточек создано", icon: Image },
-  { value: "3 200+", label: "активных селлеров", icon: Users },
+  { value: "120 000+", label: "карточек создано", icon: Image },
+  { value: "22 000+", label: "активных селлеров", icon: Users },
   { value: "+47%", label: "средний рост CTR", icon: TrendingUp },
   { value: "4.9/5", label: "оценка сервиса", icon: Award },
 ];
