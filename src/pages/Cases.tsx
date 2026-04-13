@@ -273,9 +273,9 @@ const allCases = [
 ];
 
 const stats = [
-  { value: "12500+", label: "Созданных карточек" },
+  { value: "120 000+", label: "Созданных карточек" },
   { value: "208%", label: "Средний рост конверсии" },
-  { value: "1 741₽", label: "Средняя экономия" },
+  { value: "5 641₽", label: "Средняя экономия" },
 ];
 
 const ITEMS_PER_PAGE = 6;
