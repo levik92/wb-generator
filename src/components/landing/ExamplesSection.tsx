@@ -9,8 +9,8 @@ import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 const examples = [
   {
     caseId: 2,
-    before: "/lovable-uploads/example-after-lego.jpg",
-    after: "/lovable-uploads/example-before-lego.jpg",
+    before: "/lovable-uploads/case-after-02.jpg",
+    after: "/lovable-uploads/case-before-02.jpg",
     category: "Игрушки",
     conversionGrowth: "+210%",
     ordersChange: "3 → 10",
@@ -20,8 +20,8 @@ const examples = [
   },
   {
     caseId: 11,
-    before: "/lovable-uploads/example-after-dyson.jpg",
-    after: "/lovable-uploads/example-before-dyson.jpg",
+    before: "/lovable-uploads/case-after-11.jpg",
+    after: "/lovable-uploads/case-before-11.jpg",
     category: "Техника",
     conversionGrowth: "+235%",
     ordersChange: "4 → 14",
@@ -31,8 +31,8 @@ const examples = [
   },
   {
     caseId: 18,
-    before: "/lovable-uploads/example-after-dreamies.jpg",
-    after: "/lovable-uploads/example-before-dreamies.jpg",
+    before: "/lovable-uploads/case-after-18.jpg",
+    after: "/lovable-uploads/case-before-18.jpg",
     category: "Зоотовары",
     conversionGrowth: "+175%",
     ordersChange: "5 → 14",
@@ -42,8 +42,8 @@ const examples = [
   },
   {
     caseId: 12,
-    before: "/lovable-uploads/example-after-jeans.jpg",
-    after: "/lovable-uploads/example-before-jeans.jpg",
+    before: "/lovable-uploads/case-after-12.jpg",
+    after: "/lovable-uploads/case-before-12.jpg",
     category: "Одежда",
     conversionGrowth: "+250%",
     ordersChange: "3 → 11",
