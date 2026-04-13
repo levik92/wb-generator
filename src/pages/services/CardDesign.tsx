@@ -419,7 +419,7 @@ const CardDesign = () => {
       <StatsSection stats={stats} />
 
       <ServiceFeatures
-        title="Почему 3 200+ селлеров выбрали WBGen"
+        title="Почему 22 000+ селлеров выбрали WBGen"
         subtitle="Продвинутый ИИ для создания карточек, которые продают"
         features={features}
       />
