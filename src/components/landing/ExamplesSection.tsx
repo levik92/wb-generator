@@ -166,14 +166,12 @@ export const ExamplesSection = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end pt-1">
-                    <CaseStudyDialog caseId={example.caseId}>
-                      <button className="text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center gap-1 transition-colors">
-                        Изучить кейс
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </CaseStudyDialog>
-                  </div>
+                  <CaseStudyDialog caseId={example.caseId}>
+                    <button className="w-full text-center text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[hsl(268,83%,58%)]/10 hover:bg-[hsl(268,83%,58%)]/15 border border-[hsl(268,83%,58%)]/20 transition-all">
+                      Изучить кейс
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </CaseStudyDialog>
                 </div>
               </div>
             </div>
