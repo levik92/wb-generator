@@ -177,7 +177,6 @@ export const ExamplesSection = () => {
                 </div>
               </div>
             </div>
-            </div>
           ))}
         </div>
 
