@@ -138,6 +138,10 @@ const App = () => {
               </ProtectedRoute>
             } />
             
+            {/* Promo pages — isolated for ad traffic */}
+            <Route path="/promo" element={<Promo />} />
+            <Route path="/promo/thanks" element={<PromoThanks />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
