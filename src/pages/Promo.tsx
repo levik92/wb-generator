@@ -7,7 +7,7 @@ import { CasesShowcase } from "@/components/services/CasesShowcase";
 import "@/styles/landing-theme.css";
 
 const stats = [
-  { value: "10 000+", label: "карточек создано" },
+  { value: "120 000+", label: "карточек создано" },
   { value: "3 мин", label: "на одну карточку" },
   { value: "+200%", label: "рост конверсии" },
   { value: "от 490₽", label: "в месяц" },
