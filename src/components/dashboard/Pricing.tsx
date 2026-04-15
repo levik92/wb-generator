@@ -149,7 +149,8 @@ export default function Pricing({
 
         try {
           const widget = new cpLib.CloudPayments();
-          widget.pay('auth',
+          console.log('[CloudPayments] Opening widget with charge method');
+          widget.pay('charge',
             {
               publicId: params.publicTerminalId,
               description: params.description,
@@ -159,7 +160,6 @@ export default function Pricing({
               accountId: params.userInfo?.accountId,
               email: params.userInfo?.email,
               skin: params.skin || 'modern',
-              paymentSchema: 'Single',
               data: params.metadata,
             },
             {
