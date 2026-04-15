@@ -1,53 +1,58 @@
 
 
-## Диагностика: виджет CloudPayments не открывается
+## Диагностика: регистрация зависает на загрузке
 
-### Что выяснено
+### Корневая причина
 
-1. **Edge-функция работает** — у пользователя `feliks-serg@mail.ru` создано 10+ платежей со статусом `pending`/`expired`. Это значит, что кнопка нажимается, API-запрос проходит, данные возвращаются.
+Функция `send-welcome-email` настроена как **Auth Hook** в Supabase (вызывается синхронно при signup). Проблема в обработке ошибок:
 
-2. **Проблема на фронтенде** — после получения данных от API виджет CloudPayments не показывается пользователю.
+Если отправка письма через Resend не удаётся (таймаут API, невалидный ключ, лимит запросов), функция возвращает **HTTP 500**. Когда Auth Hook возвращает не-200 статус, Supabase Auth **откатывает регистрацию** или зависает с ожиданием, что приводит к бесконечной загрузке на фронтенде.
 
-### Вероятные причины
-
-1. **Скрипт CloudPayments не загружается** — пользователь может использовать AdBlock или браузер блокирует `widget.cloudpayments.ru`. В этом случае `window.cp` будет `undefined`, и пользователь увидит toast «Виджет CloudPayments не загружен».
-
-2. **`widget.pay('auth', ...)` — неправильный метод** — в коде вызывается `widget.pay('auth', ...)`, что соответствует двухстадийной схеме оплаты. При этом передаётся `paymentSchema: 'Single'`. По документации CloudPayments, для одностадийной оплаты нужно вызывать `widget.pay('charge', ...)`. Параметр `paymentSchema` не является стандартным параметром виджета и может игнорироваться или вызывать ошибку.
-
-3. **Виджет открывается в popup** — некоторые браузеры блокируют popup-окна. Виджет CloudPayments может не показаться из-за popup-блокера.
+Подтверждение: у предыдущего успешного signup (`syrtbaevaaigerim47@gmail.com`) длительность составила 3.4 секунды — это время работы hook. При этом логов функции `send-welcome-email` в Supabase нет вообще, что указывает на проблемы с деплоем или инициализацией.
 
 ### План исправления
 
-**Файл: `src/components/dashboard/Pricing.tsx`**
+**Файл: `supabase/functions/send-welcome-email/index.ts`**
 
-1. Заменить `widget.pay('auth', ...)` на `widget.pay('charge', ...)` — это правильный метод для одностадийной оплаты (Single)
+1. **Всегда возвращать HTTP 200** — даже если отправка письма провалилась. Auth Hook не должен блокировать регистрацию из-за проблем с email.
 
-2. Убрать нестандартный параметр `paymentSchema: 'Single'` — он не нужен при использовании метода `charge`
+2. **Обернуть отправку в try/catch с логированием** — ошибки логировать, но не бросать дальше.
 
-3. Добавить расширенное логирование ошибок — чтобы понять, если проблема повторится, на каком этапе она возникает
+3. **Добавить таймаут на Resend API** — чтобы функция не зависала, если Resend не отвечает.
+
+```typescript
+// Ключевое изменение в блоке catch:
+// Было: return new Response(..., { status: 500 })
+// Станет: return new Response(JSON.stringify({ success: true }), { status: 200 })
+
+// Логика: регистрация НЕ должна зависеть от доставки email
+```
 
 ### Техническое изменение
 
 ```typescript
-// Было:
-widget.pay('auth', {
-  ...params,
-  paymentSchema: 'Single',
-});
+serve(async (req) => {
+  // ... парсинг запроса ...
 
-// Станет:
-widget.pay('charge', {
-  publicId: params.publicTerminalId,
-  description: params.description,
-  amount: params.amount,
-  currency: params.currency,
-  invoiceId: params.externalId,
-  accountId: params.userInfo?.accountId,
-  email: params.userInfo?.email,
-  skin: params.skin || 'modern',
-  data: params.metadata,
+  try {
+    // отправка письма через Resend
+    const { error } = await resend.emails.send({ ... });
+    if (error) {
+      console.error('Email send failed, but allowing signup:', error);
+      // НЕ бросаем ошибку — возвращаем 200
+    }
+  } catch (error) {
+    console.error('send-welcome-email error (non-blocking):', error);
+    // НЕ возвращаем 500 — всегда 200
+  }
+
+  // ВСЕГДА возвращаем 200, чтобы Auth Hook не блокировал signup
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 });
 ```
 
-Это одна строка — `'auth'` → `'charge'` и удаление `paymentSchema`. После этого виджет должен корректно открываться для одностадийного списания.
+Это одно изменение в одном файле. После деплоя регистрация перестанет зависать, даже если Resend недоступен.
 
