@@ -202,7 +202,29 @@ serve(async (req) => {
             promo_code: appliedPromo?.code || '',
             promo_type: appliedPromo?.type || '',
             promo_value: appliedPromo?.value?.toString() || '',
-            external_payment_id: externalPaymentId
+            external_payment_id: externalPaymentId,
+            cloudPayments: {
+              CustomerReceipt: {
+                Items: [
+                  {
+                    label: `Токены для WB Генератор: ${body.packageName}`,
+                    price: finalAmount,
+                    quantity: 1.00,
+                    amount: finalAmount,
+                    vat: null,
+                    method: 4,
+                    object: 4,
+                  }
+                ],
+                taxationSystem: 1,
+                email: user.email,
+                isBso: false,
+                amounts: {
+                  electronic: finalAmount,
+                },
+                Inn: '9724238597',
+              }
+            }
           },
           successRedirectUrl: `${originUrl}/dashboard?payment=success`,
           failRedirectUrl: `${originUrl}/dashboard?payment=failed`,
