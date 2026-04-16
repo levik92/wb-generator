@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 
 const PromoThanks = () => {
@@ -34,6 +35,7 @@ const PromoThanks = () => {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark flex items-center justify-center">
+      <YandexMetrika />
       <div className="noise-overlay" />
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-25">

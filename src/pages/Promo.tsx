@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Upload, Sparkles, Download, Clock, TrendingUp, Zap, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CasesShowcase } from "@/components/services/CasesShowcase";
+import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 
 const stats = [
@@ -44,6 +45,7 @@ const Promo = () => {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark">
+      <YandexMetrika />
       <div className="noise-overlay" />
 
       {/* Ambient glow */}
