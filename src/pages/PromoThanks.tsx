@@ -35,6 +35,7 @@ const PromoThanks = () => {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark flex items-center justify-center">
+      <YandexMetrika />
       <div className="noise-overlay" />
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-25">

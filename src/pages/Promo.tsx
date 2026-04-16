@@ -45,6 +45,7 @@ const Promo = () => {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark">
+      <YandexMetrika />
       <div className="noise-overlay" />
 
       {/* Ambient glow */}
