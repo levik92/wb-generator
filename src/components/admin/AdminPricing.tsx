@@ -421,34 +421,38 @@ export function AdminPricing() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 sm:pt-0">
-          <div className="space-y-3 sm:space-y-4">
-            {generationPrices.map(price => <div key={price.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 sm:p-0 rounded-lg bg-muted/30 sm:bg-transparent">
-                <div className="flex-1 min-w-0">
-                  <Label className="text-xs sm:text-sm font-medium break-words">
-                    {price.description}
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-2 flex-wrap sm:flex-nowrap">
-                  <Input type="number" min="0" value={price.tokens_cost} onChange={e => {
-                const updated = generationPrices.map(p => p.id === price.id ? {
-                  ...p,
-                  tokens_cost: parseInt(e.target.value) || 0
-                } : p);
-                setGenerationPrices(updated);
-              }} className="w-16 sm:w-20 text-xs sm:text-sm h-8 sm:h-9 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                    токенов
-                  </span>
-                  <Button size="sm" onClick={() => handleGenerationPriceUpdate(price)} disabled={saving} className="h-8 sm:h-9 px-2 sm:px-3 flex-shrink-0">
-                    <Save className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
-                    <span className="hidden sm:inline text-xs">Сохранить</span>
-                  </Button>
-                </div>
-              </div>)}
-            <p className="text-[10px] sm:text-xs text-muted-foreground pt-2 leading-relaxed">
-              * Изменения цен применяются автоматически во всех разделах портала
-            </p>
-          </div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground pb-3">
+            Перетащите строку за иконку слева, чтобы изменить порядок отображения.
+          </p>
+          <SortableList items={generationPrices} onReorder={handleReorderGenerationPrices}>
+            <div className="space-y-3 sm:space-y-4">
+              {generationPrices.map(price => (
+                <SortableItem key={price.id} id={price.id}>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 rounded-lg bg-muted/30">
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-xs sm:text-sm font-medium break-words">
+                        {price.description}
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                      <Input type="number" min="0" value={price.tokens_cost} onChange={e => {
+                        const updated = generationPrices.map(p => p.id === price.id ? { ...p, tokens_cost: parseInt(e.target.value) || 0 } : p);
+                        setGenerationPrices(updated);
+                      }} className="w-16 sm:w-20 text-xs sm:text-sm h-8 sm:h-9 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">токенов</span>
+                      <Button size="sm" onClick={() => handleGenerationPriceUpdate(price)} disabled={saving} className="h-8 sm:h-9 px-2 sm:px-3 flex-shrink-0">
+                        <Save className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                        <span className="hidden sm:inline text-xs">Сохранить</span>
+                      </Button>
+                    </div>
+                  </div>
+                </SortableItem>
+              ))}
+              <p className="text-[10px] sm:text-xs text-muted-foreground pt-2 leading-relaxed">
+                * Изменения цен применяются автоматически во всех разделах портала
+              </p>
+            </div>
+          </SortableList>
         </CardContent>
       </Card>
 
