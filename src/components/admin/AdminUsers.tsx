@@ -529,7 +529,7 @@ export function AdminUsers({
                           };
                           const typeInfo = typeLabels[tx.transaction_type] || { label: tx.transaction_type, variant: 'outline' as const };
                           // Показываем кнопку только для операций, у которых может быть связанная генерация
-                          const hasDetails = tx.transaction_type === 'generation' || tx.transaction_type === 'refund';
+                          const hasDetails = tx.transaction_type === 'generation';
                           // Скрываем у транзакций старше 30 дней (TTL хранения данных)
                           const ageDays = (Date.now() - new Date(tx.created_at).getTime()) / (1000 * 60 * 60 * 24);
                           const detailsAvailable = hasDetails && ageDays <= 30;
