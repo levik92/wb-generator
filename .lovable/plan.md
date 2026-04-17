@@ -1,57 +1,98 @@
 
 
-## План: исправления и улучшения UTM-трекинга в админке
+## План: корректное определение активности пользователей
 
-### Часть 1: Багфиксы
+### Проблема
 
-**Проблема А: UTM на страницах кроме лендинга**
-`useUtmTracking` подключён глобально в `App.tsx` через `<UtmTracker />` и отрабатывает на любой странице. Но в БД у источников `base_url` указан, например, `https://wbgen.ru/cases`, а матчинг идёт только по `utm_source/medium/campaign` — без учёта пути. То есть в теории должно работать. Проверка проблем:
+Сейчас "Актив./Не актив." определяется по `profiles.updated_at`, но это поле обновляется в десятках мест (изменение баланса токенов, настроек, админских действий и т.д.) и НЕ обновляется при обычном возврате пользователя в сервис, если у него уже есть активная сессия (срабатывает `INITIAL_SESSION`/`TOKEN_REFRESHED`, а не `SIGNED_IN`).
 
-1. `INITIAL_PARAMS` читается **один раз** при первой загрузке модуля. Если SPA уже загружен, а пользователь переходит по UTM-ссылке через прямую вставку — параметры захватываются. Это ОК.
-2. Реальная проблема — `getStoredUtmSourceId()` вызывается в `AuthRedirect` для привязки UTM к профилю при регистрации. На страницах типа `/cases` пользователь может перейти на `/auth` уже без UTM в URL, но `localStorage` хранит ID — это ОК.
-3. **Главный баг**: при exact-match запрос требует `utm_medium=''` и `utm_campaign=''`, если в ссылке их нет. Но если админ создал источник с пустым medium, а в URL они тоже пустые — должно матчиться. Однако если URL содержит **дополнительные** UTM-параметры (например `utm_content`, `utm_term`), сам матчинг не ломается, но если в `utm_medium` URL стоит значение, а в БД — пусто, exact-match падает, и срабатывает fallback только по `utm_source` — берётся **первая попавшаяся** запись с этим источником (часто не та).
+В результате:
+- Пользователь, заходящий каждый день, но не разлогинивающийся → числится "Не актив".
+- Пользователь, у которого админ что-то поменял в профиле → выглядит "Актив", хотя не заходил месяцами.
+- Возврат после 35 дней → может не отразиться, если событие — не `SIGNED_IN`.
 
-**Решение**: улучшить логику матчинга — забирать ВСЕ источники с данным `utm_source` и выбирать самый точный матч в коде (приоритет: exact source+medium+campaign → source+medium → source+campaign → source only).
+### Решение
 
-**Проблема Б: `base_url` игнорируется при трекинге**
-Сейчас матчинг не учитывает страницу-приземление. Если две UTM-ссылки имеют одинаковые `utm_source/medium/campaign`, но разные `base_url` (например, `/cases` и `/promo`) — они конфликтуют. Это менее частый кейс, но добавим в матчинг проверку совпадения pathname как ещё один уровень приоритета.
+Завести отдельное поле `last_active_at` именно для трекинга визитов, независимое от `updated_at`.
 
-### Часть 2: UX-улучшения админки
+### Часть 1: Миграция БД
 
-**1. Кнопка "Дублировать" UTM**
-Добавить иконку `Copy` (рядом с Trash) → открывает диалог создания с предзаполненными полями (имя + " (копия)"). Используем единый диалог с режимами `create` / `duplicate`.
-
-**2. Подгрузка по 20 штук (бесконечная прокрутка)**
-- Заменить `fetchData` на пагинированный `fetchPage(offset, limit=20)`.
-- Использовать `IntersectionObserver` на сентинеле в конце списка.
-- Статистика подгружается параллельно для свежей пачки.
-- Сводная статистика сверху остаётся (агрегат по уже загруженным).
-
-**3. Закрепление UTM наверх списка**
-- Добавить в БД поле `is_pinned boolean default false` через миграцию.
-- Кнопка-иконка `Pin` в каждой карточке (toggle).
-- Сортировка: `is_pinned DESC, created_at DESC`.
-- Закреплённые получают визуальный индикатор (бейдж "Закреплено" + лёгкий фон).
-
-### Технические изменения
-
-**Миграция БД:**
 ```sql
-ALTER TABLE utm_sources ADD COLUMN is_pinned boolean NOT NULL DEFAULT false;
-CREATE INDEX idx_utm_sources_pinned_created ON utm_sources(is_pinned DESC, created_at DESC);
+-- Новое поле для трекинга активности
+ALTER TABLE public.profiles 
+  ADD COLUMN IF NOT EXISTS last_active_at timestamptz NOT NULL DEFAULT now();
+
+-- Бэкфилл: используем updated_at как стартовое значение для существующих юзеров
+UPDATE public.profiles SET last_active_at = updated_at WHERE last_active_at IS NULL OR last_active_at < updated_at;
+
+-- Индекс для быстрых выборок активных пользователей
+CREATE INDEX IF NOT EXISTS idx_profiles_last_active_at ON public.profiles(last_active_at DESC);
+
+-- Обновляем функцию: пишем в last_active_at, а не в updated_at
+CREATE OR REPLACE FUNCTION public.update_profile_on_login(user_id_param uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  UPDATE profiles
+  SET last_active_at = now(),
+      login_count = login_count + 1
+  WHERE id = user_id_param;
+END;
+$$;
+
+-- Лёгкая функция для тача активности без инкремента login_count (для возвратов с активной сессией)
+CREATE OR REPLACE FUNCTION public.touch_profile_activity(user_id_param uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  UPDATE profiles
+  SET last_active_at = now()
+  WHERE id = user_id_param 
+    AND (last_active_at IS NULL OR last_active_at < now() - interval '10 minutes');
+END;
+$$;
 ```
 
-**Файлы:**
-- `src/hooks/useUtmTracking.ts` — улучшить логику матчинга (приоритет точности + учёт pathname).
-- `src/components/admin/AdminUtmSources.tsx`:
-  - Пагинация по 20 + IntersectionObserver.
-  - Кнопки "Дублировать" и "Закрепить".
-  - Универсальный диалог create/duplicate.
-  - Бейдж "Закреплено" + фоновая подсветка для закреплённых.
-- `src/integrations/supabase/types.ts` — обновится автоматически после миграции.
+Гард `< now() - 10 minutes` нужен, чтобы не дёргать UPDATE при каждой навигации внутри SPA — апдейт раз в 10 минут более чем достаточен.
+
+### Часть 2: Фронтенд — `src/components/ProtectedRoute.tsx`
+
+Расширить логику апдейта:
+- `SIGNED_IN` → `update_profile_on_login` (как сейчас, инкремент `login_count`).
+- `INITIAL_SESSION` / `TOKEN_REFRESHED` (т.е. возврат в сервис с уже валидной сессией) → `touch_profile_activity` (только `last_active_at`).
+
+Это даёт ровно описанное пользователем поведение: открыл сервис — сегодня активен; не открывал 35 дней — был "Не актив", вернулся — снова "Актив", счётчик 30 дней пошёл заново.
+
+### Часть 3: Места, где метрика читает активность
+
+Заменить чтение `updated_at` → `last_active_at`:
+
+1. **`src/components/admin/AdminUsers.tsx`** (строка ~305): расчёт `isActive`.
+2. **`src/components/admin/AdminAnalytics.tsx`** (строки ~50–55): запрос "Активные (30 дней)" — `recentLoginCount` через `.gte('updated_at', ...)` → `.gte('last_active_at', ...)`. Также убрать «или это пользователи, которые тратили токены» (`Math.max` с `tokenUserIds.size`) — это раздувает цифру и противоречит чёткому правилу "был ли визит за 30 дней". Оставить только проверку `last_active_at`.
+3. **`src/pages/Admin.tsx`** (`loadUsers`): добавить `last_active_at` в `SELECT`, чтобы фронт мог считать.
+4. **Сортировка/фильтры по «активности»** в `AdminUsers.tsx`, если они опираются на `updated_at` — переключить на `last_active_at`. Проверю при имплементации.
+
+### Часть 4: Типы Supabase
+
+`src/integrations/supabase/types.ts` — обновится автоматически после миграции (новая колонка + сигнатура новой функции).
 
 ### Что НЕ меняем
-- Структуру визитов (`utm_visits`).
-- RLS-политики (уже корректны).
-- Глобальный трекер `<UtmTracker />` в `App.tsx` — он уже на всех страницах.
+
+- Поле `updated_at` оставляем как есть — оно по-прежнему корректно отражает «когда профиль последний раз менялся» (используется триггерами/аналитикой по другим целям).
+- `login_count` — логика без изменений (инкремент только при реальном SIGNED_IN).
+- RLS политики — не трогаем, новое поле наследует существующие политики `profiles`.
+
+### Технические файлы
+
+- **Миграция**: новая SQL (ALTER + бэкфилл + 2 функции).
+- **`src/components/ProtectedRoute.tsx`**: вызов `touch_profile_activity` на `INITIAL_SESSION`/`TOKEN_REFRESHED`.
+- **`src/components/admin/AdminUsers.tsx`**: чтение `last_active_at`.
+- **`src/components/admin/AdminAnalytics.tsx`**: метрика «Активные (30 дней)» строго по `last_active_at`.
+- **`src/pages/Admin.tsx`**: добавить `last_active_at` в выборку профилей + расширить интерфейс `User`.
 
