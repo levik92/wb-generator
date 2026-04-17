@@ -24,9 +24,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           checkBlocked(session.user.id);
-          // Update profile activity on sign in
+          // Track user activity
           if (event === 'SIGNED_IN') {
+            // Real login: increment login_count + update last_active_at
             supabase.rpc('update_profile_on_login' as any, { user_id_param: session.user.id });
+          } else if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+            // Returning user with valid session: only touch last_active_at (throttled to 10 min)
+            supabase.rpc('touch_profile_activity' as any, { user_id_param: session.user.id });
           }
         } else {
           setLoading(false);
