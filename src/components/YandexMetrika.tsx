@@ -50,14 +50,19 @@ const YandexMetrika = () => {
 
     const path = location.pathname;
     const url = window.location.origin + path + location.search + location.hash;
+    const goal = ROUTE_GOALS[path];
 
     window.ym(YM_COUNTER_ID, "hit", url, {
       title: document.title,
       referer: document.referrer,
+      callback: goal
+        ? () => {
+            if (typeof window.ym === "function") {
+              window.ym(YM_COUNTER_ID, "reachGoal", goal);
+            }
+          }
+        : undefined,
     });
-
-    const goal = ROUTE_GOALS[path];
-    if (goal) reachGoal(goal);
   }, [location.pathname, location.search, location.hash]);
 
   return null;

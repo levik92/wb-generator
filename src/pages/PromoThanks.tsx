@@ -5,19 +5,37 @@ import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import "@/styles/landing-theme.css";
 
+const YM_COUNTER_ID = 105111303;
+const PROMO_THANKS_GOAL = "promo_thanks_loaded";
+
+const fireGoal = () => {
+  if (typeof window === "undefined" || typeof window.ym !== "function") return;
+  window.ym(YM_COUNTER_ID, "reachGoal", PROMO_THANKS_GOAL);
+};
+
 const PromoThanks = () => {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(7);
+  const [countdown, setCountdown] = useState(10);
+
+  const goToAuth = () => {
+    fireGoal();
+    navigate("/auth?tab=register");
+  };
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
     document.body.style.backgroundColor = "#111111";
     window.scrollTo(0, 0);
 
+    // Explicit goal fire on mount as a safety net in case the YandexMetrika
+    // component's hit-callback path doesn't deliver before navigation.
+    fireGoal();
+
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
+          fireGoal();
           navigate("/auth?tab=register");
           return 0;
         }
@@ -63,7 +81,7 @@ const PromoThanks = () => {
         </p>
 
         <Button
-          onClick={() => navigate("/auth?tab=register")}
+          onClick={goToAuth}
           size="lg"
           className="h-12 px-8 rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0 font-semibold"
         >
