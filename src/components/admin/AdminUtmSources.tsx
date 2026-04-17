@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, TrendingDown, Loader2, ExternalLink } from "lucide-react";
+import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { publicSiteUrl } from "@/config/runtime";
 
@@ -21,6 +20,7 @@ interface UtmSource {
   utm_campaign: string;
   base_url: string;
   created_at: string;
+  is_pinned: boolean;
 }
 
 interface UtmStats {
@@ -29,12 +29,17 @@ interface UtmStats {
   payments: number;
 }
 
+const PAGE_SIZE = 20;
+
 export function AdminUtmSources() {
   const [sources, setSources] = useState<UtmSource[]>([]);
   const [stats, setStats] = useState<Record<string, UtmStats>>({});
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   
   // Form
   const [formName, setFormName] = useState("");
@@ -43,66 +48,137 @@ export function AdminUtmSources() {
   const [formCampaign, setFormCampaign] = useState("");
   const [formBaseUrl, setFormBaseUrl] = useState(publicSiteUrl);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const resetForm = () => {
+    setFormName("");
+    setFormSource("");
+    setFormMedium("");
+    setFormCampaign("");
+    setFormBaseUrl(publicSiteUrl);
+  };
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // Fetch sources
-      const { data: sourcesData, error: sourcesError } = await supabase
-        .from('utm_sources')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const fetchStatsFor = async (items: UtmSource[]): Promise<Record<string, UtmStats>> => {
+    const statsMap: Record<string, UtmStats> = {};
+    for (const source of items) {
+      const { count: visitsCount } = await supabase
+        .from('utm_visits')
+        .select('id', { count: 'exact', head: true })
+        .eq('utm_source_id', source.id);
       
-      if (sourcesError) throw sourcesError;
-      setSources(sourcesData || []);
-
-      // Fetch stats for each source
-      const statsMap: Record<string, UtmStats> = {};
+      const { count: regsCount } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('utm_source_id', source.id);
       
-      for (const source of (sourcesData || [])) {
-        // Visits count
-        const { count: visitsCount } = await supabase
-          .from('utm_visits')
+      const { data: utmProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('utm_source_id', source.id);
+      
+      let paymentsCount = 0;
+      if (utmProfiles && utmProfiles.length > 0) {
+        const userIds = utmProfiles.map(p => p.id);
+        const { count } = await supabase
+          .from('payments')
           .select('id', { count: 'exact', head: true })
-          .eq('utm_source_id', source.id);
-        
-        // Registrations count
-        const { count: regsCount } = await supabase
-          .from('profiles')
-          .select('id', { count: 'exact', head: true })
-          .eq('utm_source_id', source.id);
-        
-        // Payments count - get user_ids from profiles with this utm, then count payments
-        const { data: utmProfiles } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('utm_source_id', source.id);
-        
-        let paymentsCount = 0;
-        if (utmProfiles && utmProfiles.length > 0) {
-          const userIds = utmProfiles.map(p => p.id);
-          const { count } = await supabase
-            .from('payments')
-            .select('id', { count: 'exact', head: true })
-            .in('user_id', userIds)
-            .eq('status', 'succeeded');
-          paymentsCount = count || 0;
-        }
-        
-        statsMap[source.id] = {
-          visits: visitsCount || 0,
-          registrations: regsCount || 0,
-          payments: paymentsCount,
-        };
+          .in('user_id', userIds)
+          .eq('status', 'succeeded');
+        paymentsCount = count || 0;
       }
       
-      setStats(statsMap);
-    } catch (error) {
-      console.error('Error fetching UTM data:', error);
+      statsMap[source.id] = {
+        visits: visitsCount || 0,
+        registrations: regsCount || 0,
+        payments: paymentsCount,
+      };
+    }
+    return statsMap;
+  };
+
+  const fetchPage = useCallback(async (offset: number) => {
+    const { data, error } = await supabase
+      .from('utm_sources')
+      .select('*')
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+    
+    if (error) throw error;
+    return (data || []) as UtmSource[];
+  }, []);
+
+  const loadInitial = useCallback(async () => {
+    setLoading(true);
+    try {
+      const page = await fetchPage(0);
+      setSources(page);
+      setHasMore(page.length === PAGE_SIZE);
+      const newStats = await fetchStatsFor(page);
+      setStats(newStats);
+    } catch (e) {
+      console.error(e);
       toast.error("Не удалось загрузить данные UTM");
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchPage]);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || loading) return;
+    setLoadingMore(true);
+    try {
+      const page = await fetchPage(sources.length);
+      if (page.length === 0) {
+        setHasMore(false);
+      } else {
+        setSources(prev => [...prev, ...page]);
+        setHasMore(page.length === PAGE_SIZE);
+        const newStats = await fetchStatsFor(page);
+        setStats(prev => ({ ...prev, ...newStats }));
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Ошибка подгрузки");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [fetchPage, sources.length, loadingMore, hasMore, loading]);
+
+  useEffect(() => {
+    loadInitial();
+  }, [loadInitial]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore || loading) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore();
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [loadMore, hasMore, loading, sources.length]);
+
+  const refresh = async () => {
+    // Reload from start, preserving page count
+    const targetCount = Math.max(sources.length, PAGE_SIZE);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('utm_sources')
+        .select('*')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .range(0, targetCount - 1);
+      if (error) throw error;
+      const items = (data || []) as UtmSource[];
+      setSources(items);
+      setHasMore(items.length === targetCount);
+      const newStats = await fetchStatsFor(items);
+      setStats(newStats);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -125,9 +201,8 @@ export function AdminUtmSources() {
       if (error) throw error;
       toast.success("UTM-источник создан");
       setDialogOpen(false);
-      setFormName(""); setFormSource(""); setFormMedium(""); setFormCampaign("");
-      setFormBaseUrl(publicSiteUrl);
-      fetchData();
+      resetForm();
+      refresh();
     } catch (error: any) {
       toast.error("Ошибка: " + error.message);
     } finally {
@@ -141,9 +216,43 @@ export function AdminUtmSources() {
       const { error } = await supabase.from('utm_sources').delete().eq('id', id);
       if (error) throw error;
       toast.success("Источник удалён");
-      fetchData();
+      setSources(prev => prev.filter(s => s.id !== id));
     } catch (error: any) {
       toast.error("Ошибка: " + error.message);
+    }
+  };
+
+  const handleDuplicate = (source: UtmSource) => {
+    setFormName(source.name + " (копия)");
+    setFormSource(source.utm_source);
+    setFormMedium(source.utm_medium || "");
+    setFormCampaign(source.utm_campaign || "");
+    setFormBaseUrl(source.base_url || publicSiteUrl);
+    setDialogOpen(true);
+  };
+
+  const handleTogglePin = async (source: UtmSource) => {
+    const next = !source.is_pinned;
+    // Optimistic
+    setSources(prev => {
+      const updated = prev.map(s => s.id === source.id ? { ...s, is_pinned: next } : s);
+      // Re-sort: pinned first, then by created_at DESC
+      return [...updated].sort((a, b) => {
+        if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+    });
+    try {
+      const { error } = await supabase
+        .from('utm_sources')
+        .update({ is_pinned: next })
+        .eq('id', source.id);
+      if (error) throw error;
+      toast.success(next ? "Закреплено" : "Откреплено");
+    } catch (e: any) {
+      toast.error("Ошибка: " + e.message);
+      // Rollback
+      setSources(prev => prev.map(s => s.id === source.id ? { ...s, is_pinned: !next } : s));
     }
   };
 
@@ -165,7 +274,7 @@ export function AdminUtmSources() {
     return ((to / from) * 100).toFixed(1) + '%';
   };
 
-  if (loading) {
+  if (loading && sources.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -182,7 +291,7 @@ export function AdminUtmSources() {
             Создавайте UTM-ссылки и отслеживайте эффективность каналов
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)} className="gap-2">
+        <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
           <Plus className="w-4 h-4" />
           Добавить источник
         </Button>
@@ -245,15 +354,24 @@ export function AdminUtmSources() {
                 key={source.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.3) }}
               >
-                <Card className="overflow-hidden">
+                <Card className={cn(
+                  "overflow-hidden transition-colors",
+                  source.is_pinned && "border-amber-500/40 bg-amber-500/[0.03]"
+                )}>
                   <CardContent className="p-4 md:p-5">
                     <div className="flex flex-col gap-4">
                       {/* Top row: name + actions */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
+                            {source.is_pinned && (
+                              <Badge className="text-[10px] bg-amber-500/15 text-amber-600 border-amber-500/30 hover:bg-amber-500/20">
+                                <Pin className="w-2.5 h-2.5 mr-1" />
+                                Закреплено
+                              </Badge>
+                            )}
                             <h3 className="font-semibold text-sm md:text-base">{source.name}</h3>
                             <Badge variant="secondary" className="text-[10px]">
                               {source.utm_source}
@@ -270,14 +388,26 @@ export function AdminUtmSources() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyUrl(source)}>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn("h-8 w-8", source.is_pinned && "text-amber-500 hover:text-amber-600")}
+                            onClick={() => handleTogglePin(source)}
+                            title={source.is_pinned ? "Открепить" : "Закрепить наверх"}
+                          >
+                            {source.is_pinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDuplicate(source)} title="Дублировать">
+                            <CopyPlus className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyUrl(source)} title="Копировать ссылку">
                             <Copy className="w-3.5 h-3.5" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(buildUtmUrl(source), '_blank')}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(buildUtmUrl(source), '_blank')} title="Открыть">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(source.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(source.id)} title="Удалить">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
@@ -324,11 +454,28 @@ export function AdminUtmSources() {
               </motion.div>
             );
           })}
+
+          {/* Sentinel + load more indicator */}
+          {hasMore && (
+            <div ref={sentinelRef} className="flex justify-center py-6">
+              {loadingMore ? (
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              ) : (
+                <span className="text-xs text-muted-foreground/60">Прокрутите для загрузки</span>
+              )}
+            </div>
+          )}
+          {!hasMore && sources.length >= PAGE_SIZE && (
+            <p className="text-center text-xs text-muted-foreground/60 py-4">Все источники загружены</p>
+          )}
         </div>
       )}
 
-      {/* Create Dialog */}
-      <ResponsiveDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Create/Duplicate Dialog */}
+      <ResponsiveDialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) resetForm();
+      }}>
         <ResponsiveDialogContent>
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>Новый UTM-источник</ResponsiveDialogTitle>
