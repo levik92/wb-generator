@@ -617,6 +617,13 @@ export function AdminUsers({
         </ResponsiveDialogContent>
       </ResponsiveDialog>
 
+      {/* Transaction details popup */}
+      <TransactionDetailDialog
+        open={!!selectedTransaction}
+        onOpenChange={(open) => { if (!open) setSelectedTransaction(null); }}
+        transaction={selectedTransaction}
+      />
+
       {/* Survey Statistics */}
       <SurveyStats />
     </div>;
