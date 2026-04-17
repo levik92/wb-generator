@@ -69,6 +69,7 @@ export function AdminUsers({
   const [paidUserIds, setPaidUserIds] = useState<Set<string>>(new Set());
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
   const [paidDataLoading, setPaidDataLoading] = useState(true);
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
   const isMobile = useIsMobile();
   const usersPerPage = 20;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
