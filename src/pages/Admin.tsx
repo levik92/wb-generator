@@ -240,7 +240,7 @@ export default function Admin() {
 
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Header - matches DashboardHeader */}
-        <header className="border-b border-border bg-card sticky top-0 z-20">
+        <header className="border-b border-border bg-card fixed top-0 left-0 right-0 z-30 md:sticky md:left-auto md:right-auto md:z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
               {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />}
@@ -290,7 +290,7 @@ export default function Admin() {
           </div>
         </header>
 
-        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0">
+        <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 pt-[88px] md:pt-4 lg:pt-6">
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-[calc(100vh-180px)]">
               <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
