@@ -19,7 +19,11 @@ const YandexMetrika = () => {
         k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
       })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105111303', 'ym');
 
-      ym(105111303, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+      ym(105111303, 'init', {defer:false, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+      ym(105111303, 'hit', window.location.href, {
+        title: document.title,
+        referer: document.referrer
+      });
     `;
     document.head.appendChild(script);
 
