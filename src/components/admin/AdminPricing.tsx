@@ -321,11 +321,15 @@ export function AdminPricing() {
           </div>
         </CardHeader>
         <CardContent className="p-0 sm:p-6 sm:pt-0">
+          <p className="text-[10px] sm:text-xs text-muted-foreground px-3 sm:px-0 pb-2">
+            Перетащите тариф за иконку слева, чтобы изменить порядок отображения у пользователей.
+          </p>
           <div className="overflow-x-auto -mx-2 sm:mx-0">
             <div className="inline-block min-w-full align-middle">
               <Table className="w-full">
                 <TableHeader>
                   <TableRow>
+                     <TableHead className="w-8 px-1 sm:px-2"></TableHead>
                      <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Название</TableHead>
                      <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Цена (₽)</TableHead>
                      <TableHead className="text-xs sm:text-sm whitespace-nowrap px-2 sm:px-4">Токены</TableHead>
@@ -336,87 +340,72 @@ export function AdminPricing() {
                      <TableHead className="text-xs sm:text-sm text-right whitespace-nowrap px-2 sm:px-4">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {packages.map(pkg => <TableRow key={pkg.id}>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Input value={pkg.name} onChange={e => {
-                      const updated = packages.map(p => p.id === pkg.id ? {
-                        ...p,
-                        name: e.target.value
-                      } : p);
-                      setPackages(updated);
-                    }} className="w-28 sm:w-32 md:max-w-xs text-xs sm:text-sm h-8 sm:h-9" />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Input type="number" value={pkg.price} onChange={e => {
-                      const updated = packages.map(p => p.id === pkg.id ? {
-                        ...p,
-                        price: parseInt(e.target.value) || 0
-                      } : p);
-                      setPackages(updated);
-                    }} className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9" />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Input type="number" value={pkg.tokens} onChange={e => {
-                      const updated = packages.map(p => p.id === pkg.id ? {
-                        ...p,
-                        tokens: parseInt(e.target.value) || 0
-                      } : p);
-                      setPackages(updated);
-                    }} className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9" />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Switch 
-                          checked={pkg.is_popular} 
-                          onCheckedChange={checked => {
-                            // When setting popular, unset all others (DB trigger handles this too)
-                            const updated = packages.map(p => ({
-                              ...p,
-                              is_popular: p.id === pkg.id ? checked : (checked ? false : p.is_popular)
-                            }));
+                <SortableList items={packages} onReorder={handleReorderPackages}>
+                  <TableBody>
+                    {packages.map(pkg => (
+                      <SortableItem key={pkg.id} id={pkg.id} asTableRow>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Input value={pkg.name} onChange={e => {
+                            const updated = packages.map(p => p.id === pkg.id ? { ...p, name: e.target.value } : p);
                             setPackages(updated);
-                          }} 
-                        />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Switch checked={pkg.is_trial} onCheckedChange={checked => {
-                      const updated = packages.map(p => p.id === pkg.id ? {
-                        ...p,
-                        is_trial: checked
-                      } : p);
-                      setPackages(updated);
-                    }} />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Switch checked={pkg.invoice_enabled} onCheckedChange={checked => {
-                      const updated = packages.map(p => p.id === pkg.id ? {
-                        ...p,
-                        invoice_enabled: checked
-                      } : p);
-                      setPackages(updated);
-                    }} />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <Switch checked={pkg.is_active} onCheckedChange={checked => {
-                      const updated = packages.map(p => p.id === pkg.id ? {
-                        ...p,
-                        is_active: checked
-                      } : p);
-                      setPackages(updated);
-                    }} />
-                      </TableCell>
-                      <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                        <div className="flex items-center justify-end gap-1 sm:gap-2">
-                          <Button size="sm" onClick={() => handlePackageUpdate(pkg)} disabled={saving} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
-                            <Save className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handlePackageDelete(pkg.id)} disabled={saving} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
-                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>)}
-                </TableBody>
+                          }} className="w-28 sm:w-32 md:max-w-xs text-xs sm:text-sm h-8 sm:h-9" />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Input type="number" value={pkg.price} onChange={e => {
+                            const updated = packages.map(p => p.id === pkg.id ? { ...p, price: parseInt(e.target.value) || 0 } : p);
+                            setPackages(updated);
+                          }} className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9" />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Input type="number" value={pkg.tokens} onChange={e => {
+                            const updated = packages.map(p => p.id === pkg.id ? { ...p, tokens: parseInt(e.target.value) || 0 } : p);
+                            setPackages(updated);
+                          }} className="w-20 sm:w-24 text-xs sm:text-sm h-8 sm:h-9" />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Switch
+                            checked={pkg.is_popular}
+                            onCheckedChange={checked => {
+                              const updated = packages.map(p => ({
+                                ...p,
+                                is_popular: p.id === pkg.id ? checked : (checked ? false : p.is_popular)
+                              }));
+                              setPackages(updated);
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Switch checked={pkg.is_trial} onCheckedChange={checked => {
+                            const updated = packages.map(p => p.id === pkg.id ? { ...p, is_trial: checked } : p);
+                            setPackages(updated);
+                          }} />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Switch checked={pkg.invoice_enabled} onCheckedChange={checked => {
+                            const updated = packages.map(p => p.id === pkg.id ? { ...p, invoice_enabled: checked } : p);
+                            setPackages(updated);
+                          }} />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <Switch checked={pkg.is_active} onCheckedChange={checked => {
+                            const updated = packages.map(p => p.id === pkg.id ? { ...p, is_active: checked } : p);
+                            setPackages(updated);
+                          }} />
+                        </TableCell>
+                        <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
+                          <div className="flex items-center justify-end gap-1 sm:gap-2">
+                            <Button size="sm" onClick={() => handlePackageUpdate(pkg)} disabled={saving} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+                              <Save className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handlePackageDelete(pkg.id)} disabled={saving} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </SortableItem>
+                    ))}
+                  </TableBody>
+                </SortableList>
               </Table>
             </div>
           </div>
