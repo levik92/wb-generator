@@ -14,12 +14,13 @@ import {
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
 import { Label } from "@/components/ui/label";
-import { Ban, Pencil, Search, UserCheck, Eye, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Ban, Pencil, Search, UserCheck, Eye, ChevronLeft, ChevronRight, Filter, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SurveyStats } from "./SurveyStats";
+import { TransactionDetailDialog } from "./TransactionDetailDialog";
 
 interface User {
   id: string;
@@ -68,6 +69,7 @@ export function AdminUsers({
   const [paidUserIds, setPaidUserIds] = useState<Set<string>>(new Set());
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
   const [paidDataLoading, setPaidDataLoading] = useState(true);
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
   const isMobile = useIsMobile();
   const usersPerPage = 20;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
@@ -511,6 +513,7 @@ export function AdminUsers({
                           <TableHead className="min-w-[80px]">Кол-во</TableHead>
                           <TableHead className="min-w-[100px]">Тип</TableHead>
                           <TableHead className="min-w-[150px]">Описание</TableHead>
+                          <TableHead className="min-w-[90px] text-right">Детали</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -525,6 +528,11 @@ export function AdminUsers({
                             direct_sql_update: { label: 'Прямой SQL', variant: 'destructive' },
                           };
                           const typeInfo = typeLabels[tx.transaction_type] || { label: tx.transaction_type, variant: 'outline' as const };
+                          // Показываем кнопку только для операций, у которых может быть связанная генерация
+                          const hasDetails = tx.transaction_type === 'generation' || tx.transaction_type === 'refund';
+                          // Скрываем у транзакций старше 30 дней (TTL хранения данных)
+                          const ageDays = (Date.now() - new Date(tx.created_at).getTime()) / (1000 * 60 * 60 * 24);
+                          const detailsAvailable = hasDetails && ageDays <= 30;
                           return (
                             <TableRow key={tx.id}>
                               <TableCell className="text-xs">
@@ -541,12 +549,28 @@ export function AdminUsers({
                               <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
                                 {tx.description || '—'}
                               </TableCell>
+                              <TableCell className="text-right">
+                                {detailsAvailable ? (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-2 gap-1 text-xs"
+                                    onClick={() => setSelectedTransaction(tx)}
+                                  >
+                                    <Info className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Подробнее</span>
+                                  </Button>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground">—</span>
+                                )}
+                              </TableCell>
                             </TableRow>
                           );
                         })}
                         {userDetails.tokenTransactions.length === 0 && (
                           <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground text-xs">
+                            <TableCell colSpan={5} className="text-center text-muted-foreground text-xs">
                               Нет транзакций
                             </TableCell>
                           </TableRow>
@@ -592,6 +616,13 @@ export function AdminUsers({
             </div>}
         </ResponsiveDialogContent>
       </ResponsiveDialog>
+
+      {/* Transaction details popup */}
+      <TransactionDetailDialog
+        open={!!selectedTransaction}
+        onOpenChange={(open) => { if (!open) setSelectedTransaction(null); }}
+        transaction={selectedTransaction}
+      />
 
       {/* Survey Statistics */}
       <SurveyStats />
