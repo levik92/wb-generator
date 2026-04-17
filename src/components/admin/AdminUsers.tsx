@@ -31,6 +31,7 @@ interface User {
   created_at: string;
   referral_code: string;
   updated_at: string;
+  last_active_at?: string;
 }
 interface UserDetails {
   totalPaid: number;
