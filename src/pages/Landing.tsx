@@ -3,7 +3,6 @@ import { useEffect, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
-import YandexMetrika from "@/components/YandexMetrika";
 
 // Lazy load below-the-fold sections for better performance
 const FeaturesSection = lazy(() => import("@/components/landing/FeaturesSection").then(m => ({ default: m.FeaturesSection })));
@@ -47,8 +46,6 @@ const Landing = () => {
         <meta property="og:description" content="Создавайте продающие карточки для Wildberries, Ozon и Яндекс Маркет за 3 минуты." />
         <meta property="og:type" content="website" />
       </Helmet>
-      
-      <YandexMetrika />
       
       <div className="min-h-screen bg-[#111111] text-white landing-dark">
         {/* Noise overlay for texture */}
