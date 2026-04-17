@@ -2670,7 +2670,7 @@ export const GenerateCards = ({
                       onCheckedChange={(checked) => {
                         setStyleAutoDescription(!!checked);
                         if (checked) {
-                          setStyleDescription(jobData?.description || '');
+                          setStyleDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
                         } else {
                           setStyleDescription('');
                         }
@@ -2773,7 +2773,7 @@ export const GenerateCards = ({
                       onCheckedChange={(checked) => {
                         setStyleAutoDescription(!!checked);
                         if (checked) {
-                          setStyleDescription(jobData?.description || '');
+                          setStyleDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
                         } else {
                           setStyleDescription('');
                         }
