@@ -303,7 +303,8 @@ export function AdminUsers({
                         }
                         const thirtyDaysAgo = new Date();
                         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                        const isActive = new Date(user.updated_at) > thirtyDaysAgo;
+                        const activityTimestamp = user.last_active_at ?? user.updated_at;
+                        const isActive = new Date(activityTimestamp) > thirtyDaysAgo;
                         return isActive
                           ? <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30">Актив.</Badge>
                           : <Badge variant="secondary" className="text-xs">Не актив.</Badge>;
