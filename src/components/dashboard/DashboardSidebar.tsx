@@ -54,9 +54,7 @@ export const DashboardSidebar = ({
   }, {
     id: 'video',
     label: 'Видеообложки',
-    icon: Video,
-    badge: 'New',
-    badgeColor: 'bg-muted text-muted-foreground border-border'
+    icon: Video
   }, {
     id: 'description',
     label: 'Описания товара',
@@ -74,19 +72,19 @@ export const DashboardSidebar = ({
     label: 'Баланс',
     icon: CreditCard
   }, {
-    id: 'news',
-    label: 'Новости',
-    icon: Newspaper,
-    badge: unreadCount > 0 ? unreadCount.toString() : undefined,
-    badgeColor: unreadCount > 0 ? 'bg-primary text-primary-foreground border-primary' : undefined
+    id: 'learning',
+    label: 'Обучение',
+    icon: GraduationCap
   }, {
     id: 'bonuses',
     label: 'Бонусы',
     icon: Gift
   }, {
-    id: 'learning',
-    label: 'Обучение',
-    icon: GraduationCap
+    id: 'news',
+    label: 'Новости',
+    icon: Newspaper,
+    badge: unreadCount > 0 ? unreadCount.toString() : undefined,
+    badgeColor: unreadCount > 0 ? 'bg-primary text-primary-foreground border-primary' : undefined
   }, {
     id: 'settings',
     label: 'Настройки',
