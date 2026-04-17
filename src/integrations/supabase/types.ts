@@ -258,6 +258,7 @@ export type Database = {
           link_placeholder: string | null
           requires_contact: boolean
           requires_link: boolean
+          task_url: string | null
           title: string
           tokens_reward: number
           updated_at: string
@@ -275,6 +276,7 @@ export type Database = {
           link_placeholder?: string | null
           requires_contact?: boolean
           requires_link?: boolean
+          task_url?: string | null
           title: string
           tokens_reward: number
           updated_at?: string
@@ -292,6 +294,7 @@ export type Database = {
           link_placeholder?: string | null
           requires_contact?: boolean
           requires_link?: boolean
+          task_url?: string | null
           title?: string
           tokens_reward?: number
           updated_at?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.bonus_programs ADD COLUMN task_url text;

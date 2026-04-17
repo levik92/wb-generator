@@ -51,6 +51,7 @@ interface BonusProgram {
   button_text: string;
   icon_name: string;
   admin_tag: string | null;
+  task_url: string | null;
   created_at: string;
 }
 
@@ -114,7 +115,8 @@ export const AdminBonuses = () => {
     button_text: 'Выполнил',
     icon_name: 'gift',
     display_order: '0',
-    admin_tag: ''
+    admin_tag: '',
+    task_url: ''
   });
 
   useEffect(() => {
@@ -197,7 +199,8 @@ export const AdminBonuses = () => {
         button_text: programForm.button_text,
         icon_name: programForm.icon_name,
         display_order: parseInt(programForm.display_order) || 0,
-        admin_tag: programForm.admin_tag.trim() || null
+        admin_tag: programForm.admin_tag.trim() || null,
+        task_url: programForm.task_url.trim() || null
       };
 
       let error;
@@ -343,7 +346,8 @@ export const AdminBonuses = () => {
       button_text: program.button_text,
       icon_name: program.icon_name,
       display_order: program.display_order.toString(),
-      admin_tag: program.admin_tag || ''
+      admin_tag: program.admin_tag || '',
+      task_url: program.task_url || ''
     });
     setProgramDialogOpen(true);
   };
@@ -361,7 +365,8 @@ export const AdminBonuses = () => {
       button_text: 'Выполнил',
       icon_name: 'gift',
       display_order: '0',
-      admin_tag: ''
+      admin_tag: '',
+      task_url: ''
     });
   };
 
