@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQueryClient } from "@tanstack/react-query";
+import { SortableList, SortableItem } from "./SortableList";
 interface PaymentPackage {
   id: string;
   name: string;
@@ -21,12 +22,14 @@ interface PaymentPackage {
   is_popular: boolean;
   is_trial: boolean;
   invoice_enabled: boolean;
+  display_order: number;
 }
 interface GenerationPrice {
   id: string;
   price_type: string;
   tokens_cost: number;
   description: string;
+  display_order: number;
 }
 export function AdminPricing() {
   const [packages, setPackages] = useState<PaymentPackage[]>([]);
@@ -93,7 +96,9 @@ export function AdminPricing() {
       const {
         data,
         error
-      } = await supabase.from('payment_packages').select('*').order('price', {
+      } = await supabase.from('payment_packages').select('*').order('display_order', {
+        ascending: true
+      }).order('price', {
         ascending: true
       });
       if (error) throw error;
@@ -114,7 +119,7 @@ export function AdminPricing() {
       const {
         data,
         error
-      } = await supabase.from('generation_pricing').select('*').order('price_type');
+      } = await supabase.from('generation_pricing').select('*').order('display_order', { ascending: true }).order('price_type');
       if (error) throw error;
       setGenerationPrices(data || []);
     } catch (error) {
