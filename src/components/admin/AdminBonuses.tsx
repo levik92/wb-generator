@@ -610,6 +610,18 @@ export const AdminBonuses = () => {
                           placeholder="Разместите сторис с отметкой @wbgenerator"
                         />
                       </div>
+                      <div className="space-y-2">
+                        <Label>Ссылка на задание (необязательно)</Label>
+                        <Input
+                          type="url"
+                          value={programForm.task_url}
+                          onChange={(e) => setProgramForm({ ...programForm, task_url: e.target.value })}
+                          placeholder="https://t.me/wbgen_official"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Если указана, у пользователя в задании появится ссылка для перехода (откроется в новом окне)
+                        </p>
+                      </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Токенов за выполнение</Label>
