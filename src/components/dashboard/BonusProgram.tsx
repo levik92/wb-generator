@@ -45,6 +45,7 @@ interface BonusProgram {
   button_text: string;
   icon_name: string;
   display_order: number;
+  task_url: string | null;
 }
 
 type SubmissionStatus = 'pending' | 'approved' | 'rejected';
@@ -423,7 +424,24 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                         )}
                         
                         {/* Action buttons */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {program.task_url && (
+                            <Button
+                              asChild
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              <a
+                                href={program.task_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Перейти к заданию
+                                <ExternalLink className="w-3 h-3 ml-1" />
+                              </a>
+                            </Button>
+                          )}
                           {!submission && (
                             <Button 
                               onClick={() => handleOpenSubmission(program)}

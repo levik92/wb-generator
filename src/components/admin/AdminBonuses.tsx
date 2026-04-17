@@ -51,6 +51,7 @@ interface BonusProgram {
   button_text: string;
   icon_name: string;
   admin_tag: string | null;
+  task_url: string | null;
   created_at: string;
 }
 
@@ -114,7 +115,8 @@ export const AdminBonuses = () => {
     button_text: 'Выполнил',
     icon_name: 'gift',
     display_order: '0',
-    admin_tag: ''
+    admin_tag: '',
+    task_url: ''
   });
 
   useEffect(() => {
@@ -197,7 +199,8 @@ export const AdminBonuses = () => {
         button_text: programForm.button_text,
         icon_name: programForm.icon_name,
         display_order: parseInt(programForm.display_order) || 0,
-        admin_tag: programForm.admin_tag.trim() || null
+        admin_tag: programForm.admin_tag.trim() || null,
+        task_url: programForm.task_url.trim() || null
       };
 
       let error;
@@ -343,7 +346,8 @@ export const AdminBonuses = () => {
       button_text: program.button_text,
       icon_name: program.icon_name,
       display_order: program.display_order.toString(),
-      admin_tag: program.admin_tag || ''
+      admin_tag: program.admin_tag || '',
+      task_url: program.task_url || ''
     });
     setProgramDialogOpen(true);
   };
@@ -361,7 +365,8 @@ export const AdminBonuses = () => {
       button_text: 'Выполнил',
       icon_name: 'gift',
       display_order: '0',
-      admin_tag: ''
+      admin_tag: '',
+      task_url: ''
     });
   };
 
@@ -604,6 +609,18 @@ export const AdminBonuses = () => {
                           onChange={(e) => setProgramForm({ ...programForm, description: e.target.value })}
                           placeholder="Разместите сторис с отметкой @wbgenerator"
                         />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Ссылка на задание (необязательно)</Label>
+                        <Input
+                          type="url"
+                          value={programForm.task_url}
+                          onChange={(e) => setProgramForm({ ...programForm, task_url: e.target.value })}
+                          placeholder="https://t.me/wbgen_official"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Если указана, у пользователя в задании появится ссылка для перехода (откроется в новом окне)
+                        </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
