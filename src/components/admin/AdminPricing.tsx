@@ -265,6 +265,39 @@ export function AdminPricing() {
       setSaving(false);
     }
   };
+  const handleReorderPackages = async (newItems: PaymentPackage[]) => {
+    const reordered = newItems.map((item, idx) => ({ ...item, display_order: idx + 1 }));
+    setPackages(reordered);
+    try {
+      const updates = reordered.map((item) =>
+        supabase.from('payment_packages').update({ display_order: item.display_order }).eq('id', item.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+      queryClient.invalidateQueries({ queryKey: ['payment-packages'] });
+    } catch {
+      toast({ title: "Ошибка", description: "Не удалось сохранить порядок", variant: "destructive" });
+      await loadPackages();
+    }
+  };
+  const handleReorderGenerationPrices = async (newItems: GenerationPrice[]) => {
+    const reordered = newItems.map((item, idx) => ({ ...item, display_order: idx + 1 }));
+    setGenerationPrices(reordered);
+    try {
+      const updates = reordered.map((item) =>
+        supabase.from('generation_pricing').update({ display_order: item.display_order }).eq('id', item.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+      queryClient.invalidateQueries({ queryKey: ['generation-pricing'] });
+    } catch {
+      toast({ title: "Ошибка", description: "Не удалось сохранить порядок", variant: "destructive" });
+      await loadGenerationPrices();
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center py-8">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
