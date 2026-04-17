@@ -1,45 +1,47 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
+const YM_COUNTER_ID = 105111303;
+
+declare global {
+  interface Window {
+    ym?: (id: number, action: string, ...args: unknown[]) => void;
+  }
+}
+
+/**
+ * SPA-friendly Yandex.Metrika route tracker.
+ *
+ * The counter itself is installed globally in index.html so it loads once
+ * and is available on every page (including ad-traffic pages /promo, /promo/thanks).
+ *
+ * This component only fires `hit` on every client-side route change so that
+ * Metrika goals based on URLs (e.g. "url содержит: wbgen.ru/promo/thanks")
+ * fire correctly when users navigate via React Router.
+ */
 const YandexMetrika = () => {
+  const location = useLocation();
+  const isFirstHit = useRef(true);
+
   useEffect(() => {
-    // Проверяем, не был ли скрипт уже добавлен
-    if (document.getElementById('yandex-metrika-script')) {
+    if (typeof window === "undefined" || typeof window.ym !== "function") {
       return;
     }
 
-    // Создаем и добавляем основной скрипт
-    const script = document.createElement('script');
-    script.id = 'yandex-metrika-script';
-    script.type = 'text/javascript';
-    script.innerHTML = `
-      (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-      })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105111303', 'ym');
+    const url = window.location.origin + location.pathname + location.search + location.hash;
 
-      ym(105111303, 'init', {defer:false, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
-      ym(105111303, 'hit', window.location.href, {
-        title: document.title,
-        referer: document.referrer
-      });
-    `;
-    document.head.appendChild(script);
+    // Skip the very first hit because the inline init script already
+    // fires the initial pageview when the counter loads.
+    if (isFirstHit.current) {
+      isFirstHit.current = false;
+      return;
+    }
 
-    // Создаем и добавляем noscript часть
-    const noscript = document.createElement('noscript');
-    noscript.innerHTML = '<div><img src="https://mc.yandex.ru/watch/105111303" style="position:absolute; left:-9999px;" alt="" /></div>';
-    document.body.appendChild(noscript);
-
-    // Cleanup при размонтировании
-    return () => {
-      const scriptElement = document.getElementById('yandex-metrika-script');
-      if (scriptElement) {
-        scriptElement.remove();
-      }
-    };
-  }, []);
+    window.ym(YM_COUNTER_ID, "hit", url, {
+      title: document.title,
+      referer: document.referrer,
+    });
+  }, [location.pathname, location.search, location.hash]);
 
   return null;
 };
