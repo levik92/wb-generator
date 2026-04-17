@@ -10,7 +10,6 @@ import { useSecurityLogger } from "@/hooks/useSecurityLogger";
 import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock, User, Sparkles, Zap } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import YandexMetrika from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 import { SmartCaptcha } from "@yandex/smart-captcha";
 import { getStoredUtmSourceId } from "@/hooks/useUtmTracking";
@@ -427,8 +426,6 @@ const Auth = () => {
 
   return (
     <>
-      <YandexMetrika />
-      
       <div className="min-h-screen bg-[#111111] flex items-center justify-center p-4 relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0">
