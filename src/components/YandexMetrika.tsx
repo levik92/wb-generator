@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const YM_COUNTER_ID = 105111303;
@@ -42,7 +42,6 @@ const ROUTE_GOALS: Record<string, string> = {
  */
 const YandexMetrika = () => {
   const location = useLocation();
-  const isFirstHit = useRef(true);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.ym !== "function") {
@@ -52,14 +51,10 @@ const YandexMetrika = () => {
     const path = location.pathname;
     const url = window.location.origin + path + location.search + location.hash;
 
-    if (isFirstHit.current) {
-      isFirstHit.current = false;
-    } else {
-      window.ym(YM_COUNTER_ID, "hit", url, {
-        title: document.title,
-        referer: document.referrer,
-      });
-    }
+    window.ym(YM_COUNTER_ID, "hit", url, {
+      title: document.title,
+      referer: document.referrer,
+    });
 
     const goal = ROUTE_GOALS[path];
     if (goal) reachGoal(goal);
