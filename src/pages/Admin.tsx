@@ -109,17 +109,30 @@ export default function Admin() {
     } catch {}
   }, []);
 
-  // Polling for unread support & pending invoices - proper cleanup
+  const fetchPendingBonuses = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('bonus_submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count) setPendingBonusesCount(count);
+      else setPendingBonusesCount(0);
+    } catch {}
+  }, []);
+
+  // Polling for unread support, pending invoices & bonus submissions - proper cleanup
   useEffect(() => {
     if (!isAdmin) return;
     fetchUnreadSupport();
     fetchPendingInvoices();
+    fetchPendingBonuses();
     const interval = setInterval(() => {
       fetchUnreadSupport();
       fetchPendingInvoices();
+      fetchPendingBonuses();
     }, 20000);
     return () => clearInterval(interval);
-  }, [isAdmin, fetchUnreadSupport, fetchPendingInvoices]);
+  }, [isAdmin, fetchUnreadSupport, fetchPendingInvoices, fetchPendingBonuses]);
 
   const checkAdminAccess = async () => {
     try {
