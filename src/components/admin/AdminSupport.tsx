@@ -350,6 +350,11 @@ export const AdminSupport = () => {
 
   const closeConversationInline = async (convId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    setClosingIds((prev) => {
+      const next = new Set(prev);
+      next.add(convId);
+      return next;
+    });
     try {
       await callApi({
         action: "update_status",
@@ -360,13 +365,29 @@ export const AdminSupport = () => {
         setSelectedConv(null);
         setMessages([]);
       }
-      loadConversations(false);
+      await loadConversations(false);
     } catch (err) {
       console.error("Close error:", err);
+    } finally {
+      setClosingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(convId);
+        return next;
+      });
     }
   };
 
+  const renderClosingBadge = () => (
+    <Badge className="bg-muted text-muted-foreground border-border text-[10px] px-1.5 inline-flex items-center gap-1">
+      <Loader2 className="w-3 h-3 animate-spin" />
+      Закрытие…
+    </Badge>
+  );
+
   const getStatusBadge = (conv: Conversation) => {
+    if (closingIds.has(conv.id)) {
+      return renderClosingBadge();
+    }
     if (conv.needs_admin_attention) {
       return (
         <span className="group/badge relative">
