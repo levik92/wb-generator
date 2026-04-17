@@ -283,6 +283,7 @@ export const AdminBonuses = () => {
     }
   };
 
+  const handleApprove = async () => {
     if (!selectedSubmission) return;
 
     try {
