@@ -214,7 +214,7 @@ const Promo = () => {
             >
               <Zap className="w-10 h-10 text-[hsl(268,83%,60%)] mx-auto mb-4" />
               <h2 className="text-2xl sm:text-3xl font-bold mb-4">Начните прямо сейчас</h2>
-              <p className="text-white/50 mb-8">Регистрация бесплатна. Первая карточка — за наш счёт.</p>
+              <p className="text-white/50 mb-8">Регистрация бесплатна. Создание карточек - всего от 50 руб.</p>
               <Link to="/promo/thanks">
                 <Button
                   size="lg"
