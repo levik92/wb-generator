@@ -14,12 +14,13 @@ import {
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
 import { Label } from "@/components/ui/label";
-import { Ban, Pencil, Search, UserCheck, Eye, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Ban, Pencil, Search, UserCheck, Eye, ChevronLeft, ChevronRight, Filter, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SurveyStats } from "./SurveyStats";
+import { TransactionDetailDialog } from "./TransactionDetailDialog";
 
 interface User {
   id: string;
