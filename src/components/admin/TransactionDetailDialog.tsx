@@ -247,18 +247,25 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Tra
       );
     }
 
+    // Shared section title styling (unified across all blocks)
+    const sectionTitleClass = "text-sm font-semibold text-foreground flex items-center gap-2";
+    const metaCardClass = "bg-muted/40 rounded-lg p-3";
+    const metaLabelClass = "text-xs text-muted-foreground mb-1";
+    const metaValueClass = "text-sm font-medium truncate";
+    const grayBlockClass = "bg-muted/40 rounded-lg p-3";
+
     if (details.kind === 'description') {
       const out = details.output_data || {};
       const text = out.description || out.text || (typeof out === 'string' ? out : '');
       return (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-muted/40 rounded-lg p-2.5">
-              <div className="text-muted-foreground mb-0.5">Товар</div>
-              <div className="font-medium truncate">{details.product_name || '—'}</div>
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-3">
+            <div className={metaCardClass}>
+              <div className={metaLabelClass}>Товар</div>
+              <div className={metaValueClass}>{details.product_name || '—'}</div>
             </div>
-            <div className="bg-muted/40 rounded-lg p-2.5">
-              <div className="text-muted-foreground mb-0.5">Статус</div>
+            <div className={metaCardClass}>
+              <div className={metaLabelClass}>Статус</div>
               <Badge variant={details.status === 'completed' ? 'default' : 'secondary'} className="text-[10px]">
                 {details.status}
               </Badge>
@@ -266,10 +273,10 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Tra
           </div>
 
           <section className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" /> Сгенерированный текст
+            <h4 className={sectionTitleClass}>
+              <FileText className="w-4 h-4 text-muted-foreground" /> Сгенерированный текст
             </h4>
-            <div className="bg-muted/30 rounded-lg p-3 text-sm whitespace-pre-wrap max-h-72 overflow-auto">
+            <div className={cn(grayBlockClass, "text-sm whitespace-pre-wrap max-h-72 overflow-auto")}>
               {text || <span className="text-muted-foreground">Текст не сохранён</span>}
             </div>
           </section>
@@ -286,14 +293,14 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Tra
 
     return (
       <div className="space-y-5">
-        {/* Meta */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-          <div className="bg-muted/40 rounded-lg p-2.5 col-span-2 sm:col-span-2">
-            <div className="text-muted-foreground mb-0.5">Товар</div>
-            <div className="font-medium truncate">{details.product_name || '—'}</div>
+        {/* Meta — Товар + Статус в одну строку */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className={metaCardClass}>
+            <div className={metaLabelClass}>Товар</div>
+            <div className={metaValueClass}>{details.product_name || '—'}</div>
           </div>
-          <div className="bg-muted/40 rounded-lg p-2.5">
-            <div className="text-muted-foreground mb-0.5">Статус</div>
+          <div className={metaCardClass}>
+            <div className={metaLabelClass}>Статус</div>
             <Badge
               variant={details.status === 'completed' ? 'default' : isFailed ? 'destructive' : 'secondary'}
               className="text-[10px]"
@@ -301,61 +308,23 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Tra
               {details.status === 'completed' ? 'Готово' : isFailed ? 'Ошибка' : details.status}
             </Badge>
           </div>
-          <div className="bg-muted/40 rounded-lg p-2.5 col-span-2 sm:col-span-3">
-            <div className="text-muted-foreground mb-0.5">Категория</div>
-            <div className="font-medium truncate">{details.category || '—'}</div>
-          </div>
         </div>
 
         {/* Description / prompt */}
         <section className="space-y-2">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" /> Описание / пожелания пользователя
+          <h4 className={sectionTitleClass}>
+            <Sparkles className="w-4 h-4 text-muted-foreground" /> Описание / пожелания пользователя
           </h4>
-          <div className="bg-muted/30 rounded-lg p-3 text-sm whitespace-pre-wrap max-h-40 overflow-auto">
+          <div className={cn(grayBlockClass, "text-sm whitespace-pre-wrap max-h-40 overflow-auto")}>
             {details.description || <span className="text-muted-foreground">Не указано</span>}
           </div>
-        </section>
-
-        {/* Source images */}
-        <section className="space-y-2">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5" /> Исходные фото товара ({sourceUrls.length})
-          </h4>
-          {sourceUrls.length === 0 ? (
-            <div className="text-xs text-muted-foreground py-2">Исходные изображения не сохранены</div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {sourceUrls.map((url, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setZoomedImage(url);
-                    setView('image');
-                  }}
-                  className="aspect-square rounded-lg overflow-hidden bg-muted/40 group relative focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <img
-                    src={url}
-                    alt={`Исходное фото ${idx + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </section>
 
         {/* Job-level error */}
         {details.error_message && (
           <section className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-destructive flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5" /> Ошибка
+            <h4 className={cn(sectionTitleClass, "text-destructive")}>
+              <AlertTriangle className="w-4 h-4" /> Ошибка
             </h4>
             <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
               {translateError(details.error_message)}
@@ -363,73 +332,114 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Tra
           </section>
         )}
 
-        {/* Generated cards / tasks */}
-        <section className="space-y-2">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-            <Video className="w-3.5 h-3.5" /> Результат генерации ({details.tasks.length})
-          </h4>
-          {details.tasks.length === 0 ? (
-            <div className="text-xs text-muted-foreground py-2">Нет данных по задачам</div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {details.tasks.map((task) => {
+        {/* Source images + Generated cards — side by side on tablet/desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Source images */}
+          <section className="space-y-2">
+            <h4 className={sectionTitleClass}>
+              <ImageIcon className="w-4 h-4 text-muted-foreground" /> Исходные фото товара ({sourceUrls.length})
+            </h4>
+            <div className={cn(grayBlockClass, "min-h-[120px]")}>
+              {sourceUrls.length === 0 ? (
+                <div className="text-xs text-muted-foreground py-2 text-center">Исходные изображения не сохранены</div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {sourceUrls.map((url, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setZoomedImage(url);
+                        setView('image');
+                      }}
+                      className="aspect-square rounded-lg overflow-hidden bg-background/60 group relative focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <img
+                        src={url}
+                        alt={`Исходное фото ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Generated cards / tasks */}
+          <section className="space-y-2">
+            <h4 className={sectionTitleClass}>
+              <Video className="w-4 h-4 text-muted-foreground" /> Результат генерации ({details.tasks.length})
+            </h4>
+            <div className={cn(grayBlockClass, "min-h-[120px]")}>
+              {details.tasks.length === 0 ? (
+                <div className="text-xs text-muted-foreground py-2 text-center">Нет данных по задачам</div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {details.tasks.map((task) => {
                 const label = CARD_TYPE_LABELS[task.card_type] || task.card_type;
                 const failed = task.status === 'failed';
                 return (
-                  <div key={task.id} className="space-y-1.5">
-                    <div className={cn(
-                      "aspect-square rounded-lg overflow-hidden flex items-center justify-center relative",
-                      failed ? "bg-destructive/10 border border-destructive/30" : "bg-muted/40"
-                    )}>
-                      {task.image_url && !failed ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setZoomedImage(task.image_url!);
-                            setView('image');
-                          }}
-                          className="w-full h-full focus:outline-none focus:ring-2 focus:ring-primary group"
-                        >
-                          <img
-                            src={task.image_url}
-                            alt={label}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            loading="lazy"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                    <div key={task.id} className="space-y-1.5">
+                      <div className={cn(
+                        "aspect-square rounded-lg overflow-hidden flex items-center justify-center relative",
+                        failed ? "bg-destructive/10 border border-destructive/30" : "bg-background/60"
+                      )}>
+                        {task.image_url && !failed ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setZoomedImage(task.image_url!);
+                              setView('image');
                             }}
-                          />
-                        </button>
-                      ) : failed ? (
-                        <div className="p-2 text-center space-y-1">
-                          <AlertTriangle className="w-5 h-5 text-destructive mx-auto" />
-                          <p className="text-[10px] text-destructive leading-tight line-clamp-3">
-                            {translateError(task.last_error)}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="text-[10px] text-muted-foreground px-2 text-center">
-                          {task.status === 'pending' || task.status === 'processing' ? 'В обработке' : 'Нет результата'}
-                        </div>
-                      )}
+                            className="w-full h-full focus:outline-none focus:ring-2 focus:ring-primary group"
+                          >
+                            <img
+                              src={task.image_url}
+                              alt={label}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              loading="lazy"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                              }}
+                            />
+                          </button>
+                        ) : failed ? (
+                          <div className="p-2 text-center space-y-1">
+                            <AlertTriangle className="w-5 h-5 text-destructive mx-auto" />
+                            <p className="text-[10px] text-destructive leading-tight line-clamp-3">
+                              {translateError(task.last_error)}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-muted-foreground px-2 text-center">
+                            {task.status === 'pending' || task.status === 'processing' ? 'В обработке' : 'Нет результата'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[11px] font-medium truncate">{label}</span>
+                        <Badge
+                          variant={
+                            task.status === 'completed' ? 'default' : failed ? 'destructive' : 'secondary'
+                          }
+                          className="text-[9px] px-1.5 py-0"
+                        >
+                          {task.status === 'completed' ? '✓' : failed ? '✕' : '…'}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-[11px] font-medium truncate">{label}</span>
-                      <Badge
-                        variant={
-                          task.status === 'completed' ? 'default' : failed ? 'destructive' : 'secondary'
-                        }
-                        className="text-[9px] px-1.5 py-0"
-                      >
-                        {task.status === 'completed' ? '✓' : failed ? '✕' : '…'}
-                      </Badge>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+                </div>
+              )}
             </div>
-          )}
-        </section>
+          </section>
+        </div>
       </div>
     );
   };
