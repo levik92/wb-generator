@@ -27,9 +27,10 @@ interface AdminMobileMenuProps {
   onTabChange: (tab: string) => void;
   unreadSupportCount?: number;
   pendingInvoicesCount?: number;
+  pendingBonusesCount?: number;
 }
 
-export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0, pendingInvoicesCount = 0 }: AdminMobileMenuProps) => {
+export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0, pendingInvoicesCount = 0, pendingBonusesCount = 0 }: AdminMobileMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const menuItems = [
@@ -40,7 +41,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
     { id: 'partners', label: 'Партнеры', icon: Handshake },
     { id: 'payments_admin', label: 'Оплаты', icon: Receipt, badge: pendingInvoicesCount > 0 ? pendingInvoicesCount.toString() : undefined },
     { id: 'prompts', label: 'Модель', icon: Bot },
-    { id: 'bonuses', label: 'Бонусы', icon: Gift },
+    { id: 'bonuses', label: 'Бонусы', icon: Gift, badge: pendingBonusesCount > 0 ? pendingBonusesCount.toString() : undefined },
     { id: 'pricing', label: 'Цены', icon: DollarSign },
     { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
     { id: 'news', label: 'Новости', icon: Megaphone },
