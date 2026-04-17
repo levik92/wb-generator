@@ -1,98 +1,54 @@
 
 
-## План: корректное определение активности пользователей
+## План: исправить некорректный бэкфилл `last_active_at`
 
-### Проблема
+### Корень проблемы
 
-Сейчас "Актив./Не актив." определяется по `profiles.updated_at`, но это поле обновляется в десятках мест (изменение баланса токенов, настроек, админских действий и т.д.) и НЕ обновляется при обычном возврате пользователя в сервис, если у него уже есть активная сессия (срабатывает `INITIAL_SESSION`/`TOKEN_REFRESHED`, а не `SIGNED_IN`).
-
-В результате:
-- Пользователь, заходящий каждый день, но не разлогинивающийся → числится "Не актив".
-- Пользователь, у которого админ что-то поменял в профиле → выглядит "Актив", хотя не заходил месяцами.
-- Возврат после 35 дней → может не отразиться, если событие — не `SIGNED_IN`.
-
-### Решение
-
-Завести отдельное поле `last_active_at` именно для трекинга визитов, независимое от `updated_at`.
-
-### Часть 1: Миграция БД
-
+Миграция выполнила:
 ```sql
--- Новое поле для трекинга активности
-ALTER TABLE public.profiles 
-  ADD COLUMN IF NOT EXISTS last_active_at timestamptz NOT NULL DEFAULT now();
-
--- Бэкфилл: используем updated_at как стартовое значение для существующих юзеров
-UPDATE public.profiles SET last_active_at = updated_at WHERE last_active_at IS NULL OR last_active_at < updated_at;
-
--- Индекс для быстрых выборок активных пользователей
-CREATE INDEX IF NOT EXISTS idx_profiles_last_active_at ON public.profiles(last_active_at DESC);
-
--- Обновляем функцию: пишем в last_active_at, а не в updated_at
-CREATE OR REPLACE FUNCTION public.update_profile_on_login(user_id_param uuid)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public'
-AS $$
-BEGIN
-  UPDATE profiles
-  SET last_active_at = now(),
-      login_count = login_count + 1
-  WHERE id = user_id_param;
-END;
-$$;
-
--- Лёгкая функция для тача активности без инкремента login_count (для возвратов с активной сессией)
-CREATE OR REPLACE FUNCTION public.touch_profile_activity(user_id_param uuid)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public'
-AS $$
-BEGIN
-  UPDATE profiles
-  SET last_active_at = now()
-  WHERE id = user_id_param 
-    AND (last_active_at IS NULL OR last_active_at < now() - interval '10 minutes');
-END;
-$$;
+ALTER TABLE profiles ADD COLUMN last_active_at timestamptz NOT NULL DEFAULT now();
+UPDATE profiles SET last_active_at = updated_at WHERE last_active_at < updated_at;
 ```
 
-Гард `< now() - 10 minutes` нужен, чтобы не дёргать UPDATE при каждой навигации внутри SPA — апдейт раз в 10 минут более чем достаточен.
+Поскольку новая колонка получила `DEFAULT now()` = момент применения миграции, у **всех** записей `last_active_at > updated_at`. Условие `last_active_at < updated_at` ложно → UPDATE не отработал ни на одной строке. Результат: все 6685 профилей имеют одно и то же время (момент миграции), и все выглядят как «активные за 30 дней».
 
-### Часть 2: Фронтенд — `src/components/ProtectedRoute.tsx`
+Подтверждение из БД:
+- `total = 6685`, `active_30d = 6685` (100%)
+- `min(last_active_at) = max(last_active_at) = 2026-04-17 10:45:46`
+- `equal_to_updated = 0` (бэкфилл не сработал)
+- 784 профиля имеют `login_count = 0` (вообще не логинились)
 
-Расширить логику апдейта:
-- `SIGNED_IN` → `update_profile_on_login` (как сейчас, инкремент `login_count`).
-- `INITIAL_SESSION` / `TOKEN_REFRESHED` (т.е. возврат в сервис с уже валидной сессией) → `touch_profile_activity` (только `last_active_at`).
+### Решение: корректирующая миграция
 
-Это даёт ровно описанное пользователем поведение: открыл сервис — сегодня активен; не открывал 35 дней — был "Не актив", вернулся — снова "Актив", счётчик 30 дней пошёл заново.
+Безусловно переписать `last_active_at` исходя из лучших доступных данных:
+- Если `login_count > 0` → `updated_at` (был хотя бы один логин когда-то, `updated_at` — лучшая доступная аппроксимация даты последней активности).
+- Если `login_count = 0` → `created_at` (никогда не логинился, ставим дату регистрации; если регистрация была >30 дней назад — справедливо «не актив»).
 
-### Часть 3: Места, где метрика читает активность
+```sql
+UPDATE public.profiles
+SET last_active_at = CASE
+  WHEN login_count > 0 THEN updated_at
+  ELSE created_at
+END;
+```
 
-Заменить чтение `updated_at` → `last_active_at`:
+После этого реальные визиты пользователей будут обновлять `last_active_at` через `touch_profile_activity` (срабатывает на `INITIAL_SESSION`/`TOKEN_REFRESHED`), и через несколько дней метрика сама придёт в устойчивое состояние, отражающее реальные заходы.
 
-1. **`src/components/admin/AdminUsers.tsx`** (строка ~305): расчёт `isActive`.
-2. **`src/components/admin/AdminAnalytics.tsx`** (строки ~50–55): запрос "Активные (30 дней)" — `recentLoginCount` через `.gte('updated_at', ...)` → `.gte('last_active_at', ...)`. Также убрать «или это пользователи, которые тратили токены» (`Math.max` с `tokenUserIds.size`) — это раздувает цифру и противоречит чёткому правилу "был ли визит за 30 дней". Оставить только проверку `last_active_at`.
-3. **`src/pages/Admin.tsx`** (`loadUsers`): добавить `last_active_at` в `SELECT`, чтобы фронт мог считать.
-4. **Сортировка/фильтры по «активности»** в `AdminUsers.tsx`, если они опираются на `updated_at` — переключить на `last_active_at`. Проверю при имплементации.
+### Важный нюанс по `updated_at`
 
-### Часть 4: Типы Supabase
+`updated_at` обновляется не только при логине (балансом, админскими правками и т.д.), поэтому бэкфилл по нему даст несколько завышенную цифру «активных» в первые дни. Это лучшая доступная аппроксимация для исторических данных — точнее не получится, в БД нет другого источника. Со временем `last_active_at` будет ставиться только `touch_profile_activity` и станет точным.
 
-`src/integrations/supabase/types.ts` — обновится автоматически после миграции (новая колонка + сигнатура новой функции).
+### Дополнительно: проверка фронтенд-логики
+
+Просмотрю `AdminUsers.tsx` и `AdminAnalytics.tsx`, что они уже читают `last_active_at` (после прошлой задачи) — править ничего не нужно, баг исключительно в бэкфилле.
+
+### Файлы
+
+- **Новая миграция SQL**: переписать `last_active_at` по правилу выше для всех существующих записей.
 
 ### Что НЕ меняем
 
-- Поле `updated_at` оставляем как есть — оно по-прежнему корректно отражает «когда профиль последний раз менялся» (используется триггерами/аналитикой по другим целям).
-- `login_count` — логика без изменений (инкремент только при реальном SIGNED_IN).
-- RLS политики — не трогаем, новое поле наследует существующие политики `profiles`.
-
-### Технические файлы
-
-- **Миграция**: новая SQL (ALTER + бэкфилл + 2 функции).
-- **`src/components/ProtectedRoute.tsx`**: вызов `touch_profile_activity` на `INITIAL_SESSION`/`TOKEN_REFRESHED`.
-- **`src/components/admin/AdminUsers.tsx`**: чтение `last_active_at`.
-- **`src/components/admin/AdminAnalytics.tsx`**: метрика «Активные (30 дней)» строго по `last_active_at`.
-- **`src/pages/Admin.tsx`**: добавить `last_active_at` в выборку профилей + расширить интерфейс `User`.
+- Структуру колонки (`NOT NULL DEFAULT now()`) — оставляем как есть, новые регистрации и так корректно получают `now()`.
+- Функции `update_profile_on_login` / `touch_profile_activity` — работают правильно.
+- Фронтенд — уже читает `last_active_at`.
 
