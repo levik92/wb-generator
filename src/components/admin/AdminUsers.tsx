@@ -513,6 +513,7 @@ export function AdminUsers({
                           <TableHead className="min-w-[80px]">Кол-во</TableHead>
                           <TableHead className="min-w-[100px]">Тип</TableHead>
                           <TableHead className="min-w-[150px]">Описание</TableHead>
+                          <TableHead className="min-w-[90px] text-right">Детали</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -527,6 +528,11 @@ export function AdminUsers({
                             direct_sql_update: { label: 'Прямой SQL', variant: 'destructive' },
                           };
                           const typeInfo = typeLabels[tx.transaction_type] || { label: tx.transaction_type, variant: 'outline' as const };
+                          // Показываем кнопку только для операций, у которых может быть связанная генерация
+                          const hasDetails = tx.transaction_type === 'generation' || tx.transaction_type === 'refund';
+                          // Скрываем у транзакций старше 30 дней (TTL хранения данных)
+                          const ageDays = (Date.now() - new Date(tx.created_at).getTime()) / (1000 * 60 * 60 * 24);
+                          const detailsAvailable = hasDetails && ageDays <= 30;
                           return (
                             <TableRow key={tx.id}>
                               <TableCell className="text-xs">
@@ -543,12 +549,28 @@ export function AdminUsers({
                               <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
                                 {tx.description || '—'}
                               </TableCell>
+                              <TableCell className="text-right">
+                                {detailsAvailable ? (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-2 gap-1 text-xs"
+                                    onClick={() => setSelectedTransaction(tx)}
+                                  >
+                                    <Info className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Подробнее</span>
+                                  </Button>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground">—</span>
+                                )}
+                              </TableCell>
                             </TableRow>
                           );
                         })}
                         {userDetails.tokenTransactions.length === 0 && (
                           <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground text-xs">
+                            <TableCell colSpan={5} className="text-center text-muted-foreground text-xs">
                               Нет транзакций
                             </TableCell>
                           </TableRow>
