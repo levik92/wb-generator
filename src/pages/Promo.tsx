@@ -220,7 +220,8 @@ const Promo = () => {
                   size="lg"
                   className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
                 >
-                  Зарегистрироваться бесплатно
+                  <span className="sm:hidden">Зарегистрировать</span>
+                  <span className="hidden sm:inline">Зарегистрироваться бесплатно</span>
                 </Button>
               </Link>
             </motion.div>
