@@ -9,6 +9,7 @@ import { AuthRedirect } from "./components/AuthRedirect";
 import { CookieConsent } from "./components/CookieConsent";
 import { useUtmTracking } from "./hooks/useUtmTracking";
 import YandexMetrika from "./components/YandexMetrika";
+import MetaPixel from "./components/MetaPixel";
 
 // Only NotFound is eagerly loaded (tiny); everything else is lazy
 import NotFound from "./pages/NotFound";
@@ -86,6 +87,7 @@ const App = () => {
       <BrowserRouter>
         <UtmTracker />
         <YandexMetrika />
+        <MetaPixel />
         <SupportWidgetWrapper />
         <Suspense fallback={<PageLoader />}>
           <Routes>
