@@ -1,54 +1,64 @@
 
 
-## План: исправить некорректный бэкфилл `last_active_at`
+## План: переключить Метрику в SPA-режим
 
-### Корень проблемы
+### Проблема
 
-Миграция выполнила:
-```sql
-ALTER TABLE profiles ADD COLUMN last_active_at timestamptz NOT NULL DEFAULT now();
-UPDATE profiles SET last_active_at = updated_at WHERE last_active_at < updated_at;
+Сейчас счётчик инициализируется без `defer:true`, значит `tag.js` сам отправляет автоматический хит при первой загрузке. Параллельно наш `YandexMetrika.tsx` пропускает первый хит (`isFirstHit`), полагая что автохит уже был. Это работает для первой страницы, но создаёт две проблемы:
+
+1. На первой загрузке `/promo` Метрика фиксирует автоматический хит **до** того, как React-роутер смонтирует компонент и вызовет `reachGoal('promo_loaded')` — иногда в момент автохита `document.title` ещё дефолтный, и URL может уйти без правильного контекста. Цель `promo_loaded` при этом всё же срабатывает позже, но Метрика не всегда связывает её с тем же визитом, особенно если пользователь сразу уходит.
+2. При SPA-навигации `/promo → /promo/thanks` мы шлём ручной `hit`, но автохит `tag.js` тут уже не работает — а наша логика «первый хит пропускаем» лишает первой страницы ручного хита, что иногда мешает Метрике корректно атрибутировать цель к визиту.
+
+Официальная документация Яндекса для SPA прямо требует `defer: true` + ручной `hit` на каждое изменение страницы, включая первую. Это и нужно сделать.
+
+### Что меняем
+
+**1. `index.html` — инициализация счётчика**
+
+Добавить `defer: true`. Убрать `ssr: true` (это серверный флаг, для клиентского SPA не нужен и в публичной доке Яндекса для SPA не упоминается). Убрать `referrer`/`url` из init (их передаём в `hit`).
+
+```js
+ym(105111303, 'init', {
+  defer: true,
+  webvisor: true,
+  clickmap: true,
+  ecommerce: 'dataLayer',
+  accurateTrackBounce: true,
+  trackLinks: true
+});
 ```
 
-Поскольку новая колонка получила `DEFAULT now()` = момент применения миграции, у **всех** записей `last_active_at > updated_at`. Условие `last_active_at < updated_at` ложно → UPDATE не отработал ни на одной строке. Результат: все 6685 профилей имеют одно и то же время (момент миграции), и все выглядят как «активные за 30 дней».
+**2. `src/components/YandexMetrika.tsx` — отправлять `hit` на КАЖДОЕ изменение маршрута, включая первое**
 
-Подтверждение из БД:
-- `total = 6685`, `active_30d = 6685` (100%)
-- `min(last_active_at) = max(last_active_at) = 2026-04-17 10:45:46`
-- `equal_to_updated = 0` (бэкфилл не сработал)
-- 784 профиля имеют `login_count = 0` (вообще не логинились)
+Убрать логику `isFirstHit`. Теперь при `defer:true` автохита нет — мы обязаны отправить хит сами на первой странице тоже. Сразу после `hit` дёргаем `reachGoal` для маршрутов из `ROUTE_GOALS`.
 
-### Решение: корректирующая миграция
-
-Безусловно переписать `last_active_at` исходя из лучших доступных данных:
-- Если `login_count > 0` → `updated_at` (был хотя бы один логин когда-то, `updated_at` — лучшая доступная аппроксимация даты последней активности).
-- Если `login_count = 0` → `created_at` (никогда не логинился, ставим дату регистрации; если регистрация была >30 дней назад — справедливо «не актив»).
-
-```sql
-UPDATE public.profiles
-SET last_active_at = CASE
-  WHEN login_count > 0 THEN updated_at
-  ELSE created_at
-END;
+```ts
+useEffect(() => {
+  if (typeof window.ym !== 'function') return;
+  const url = window.location.origin + location.pathname + location.search + location.hash;
+  window.ym(YM_COUNTER_ID, 'hit', url, {
+    title: document.title,
+    referer: document.referrer,
+  });
+  const goal = ROUTE_GOALS[location.pathname];
+  if (goal) window.ym(YM_COUNTER_ID, 'reachGoal', goal);
+}, [location.pathname, location.search, location.hash]);
 ```
 
-После этого реальные визиты пользователей будут обновлять `last_active_at` через `touch_profile_activity` (срабатывает на `INITIAL_SESSION`/`TOKEN_REFRESHED`), и через несколько дней метрика сама придёт в устойчивое состояние, отражающее реальные заходы.
+`ROUTE_GOALS` оставляем как есть (`/promo` → `promo_loaded`, `/promo/thanks` → `promo_thanks_loaded`).
 
-### Важный нюанс по `updated_at`
+### Что НЕ трогаем
 
-`updated_at` обновляется не только при логине (балансом, админскими правками и т.д.), поэтому бэкфилл по нему даст несколько завышенную цифру «активных» в первые дни. Это лучшая доступная аппроксимация для исторических данных — точнее не получится, в БД нет другого источника. Со временем `last_active_at` будет ставиться только `touch_profile_activity` и станет точным.
-
-### Дополнительно: проверка фронтенд-логики
-
-Просмотрю `AdminUsers.tsx` и `AdminAnalytics.tsx`, что они уже читают `last_active_at` (после прошлой задачи) — править ничего не нужно, баг исключительно в бэкфилле.
+- `<noscript>` пиксель в `<body>` — корректен.
+- Конфигурацию целей в кабинете Метрики (это вне кода).
+- Остальные страницы — они тоже выиграют, потому что теперь каждый SPA-переход даёт чистый `hit` с актуальным `document.title`.
 
 ### Файлы
 
-- **Новая миграция SQL**: переписать `last_active_at` по правилу выше для всех существующих записей.
+- `index.html` — заменить объект init.
+- `src/components/YandexMetrika.tsx` — убрать `isFirstHit`, слать `hit` всегда.
 
-### Что НЕ меняем
+### После публикации
 
-- Структуру колонки (`NOT NULL DEFAULT now()`) — оставляем как есть, новые регистрации и так корректно получают `now()`.
-- Функции `update_profile_on_login` / `touch_profile_activity` — работают правильно.
-- Фронтенд — уже читает `last_active_at`.
+Нужно опубликовать сайт, затем зайти на `wbgen.ru/promo` и `wbgen.ru/promo/thanks` с открытой вкладкой Network → фильтр `mc.yandex`. Должны увидеть подряд: `watch/...?page-url=https%3A%2F%2Fwbgen.ru%2Fpromo` и `watch/...?page-url=goal%3A%2F%2Fwbgen.ru%2Fpromo_loaded`. Данные в отчёте «Конверсии» появятся в течение часа.
 
