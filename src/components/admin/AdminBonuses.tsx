@@ -741,68 +741,43 @@ export const AdminBonuses = () => {
               </div>
             </CardHeader>
             <CardContent className="p-2 md:p-4">
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Тег / Название</TableHead>
-                      <TableHead>Токены</TableHead>
-                      <TableHead>Статус</TableHead>
-                      <TableHead>Действия</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {programs.map((program) => (
-                      <TableRow key={program.id}>
-                        <TableCell className="font-medium">
+              <p className="text-xs text-muted-foreground mb-3 px-1">Перетаскивайте программы за иконку слева, чтобы изменить порядок отображения у пользователей.</p>
+              <SortableList items={programs} onReorder={handleReorderPrograms}>
+                <div className="space-y-2">
+                  {programs.map((program) => (
+                    <SortableItem key={program.id} id={program.id}>
+                      <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
+                        <div className="flex-1 min-w-0">
                           {program.admin_tag ? (
                             <div className="flex flex-col">
-                              <span className="text-primary font-semibold">{program.admin_tag}</span>
-                              <span className="text-xs text-muted-foreground">{program.title}</span>
+                              <span className="text-primary font-semibold text-sm truncate">{program.admin_tag}</span>
+                              <span className="text-xs text-muted-foreground truncate">{program.title}</span>
                             </div>
                           ) : (
-                            program.title
+                            <span className="font-medium text-sm truncate">{program.title}</span>
                           )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            +{program.tokens_reward}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={program.is_active ? 'default' : 'secondary'}
-                            className="cursor-pointer"
-                            onClick={() => handleToggleActive(program.id, program.is_active)}
-                          >
-                            {program.is_active ? 'Активна' : 'Неактивна'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => openEditProgram(program)}
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleDeleteProgram(program.id)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                        </div>
+                        <Badge variant="secondary" className="shrink-0">+{program.tokens_reward}</Badge>
+                        <Badge
+                          variant={program.is_active ? 'default' : 'secondary'}
+                          className="cursor-pointer shrink-0 hidden sm:inline-flex"
+                          onClick={() => handleToggleActive(program.id, program.is_active)}
+                        >
+                          {program.is_active ? 'Активна' : 'Неактивна'}
+                        </Badge>
+                        <div className="flex gap-1 shrink-0">
+                          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => openEditProgram(program)}>
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => handleDeleteProgram(program.id)}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </SortableItem>
+                  ))}
+                </div>
+              </SortableList>
             </CardContent>
           </Card>
         </TabsContent>
