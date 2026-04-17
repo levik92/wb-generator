@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { PromoCodeManager } from "@/components/dashboard/PromoCodeManager";
+import { SortableList, SortableItem } from "./SortableList";
 
 interface BonusProgram {
   id: string;
@@ -266,7 +267,22 @@ export const AdminBonuses = () => {
     }
   };
 
-  const handleApprove = async () => {
+  const handleReorderPrograms = async (newItems: BonusProgram[]) => {
+    const reordered = newItems.map((item, idx) => ({ ...item, display_order: idx + 1 }));
+    setPrograms(reordered);
+    try {
+      const updates = reordered.map((item) =>
+        supabase.from('bonus_programs').update({ display_order: item.display_order }).eq('id', item.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+    } catch {
+      toast({ title: "Ошибка", description: "Не удалось сохранить порядок", variant: "destructive" });
+      loadData();
+    }
+  };
+
     if (!selectedSubmission) return;
 
     try {
