@@ -384,60 +384,62 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Tra
                 const label = CARD_TYPE_LABELS[task.card_type] || task.card_type;
                 const failed = task.status === 'failed';
                 return (
-                  <div key={task.id} className="space-y-1.5">
-                    <div className={cn(
-                      "aspect-square rounded-lg overflow-hidden flex items-center justify-center relative",
-                      failed ? "bg-destructive/10 border border-destructive/30" : "bg-muted/40"
-                    )}>
-                      {task.image_url && !failed ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setZoomedImage(task.image_url!);
-                            setView('image');
-                          }}
-                          className="w-full h-full focus:outline-none focus:ring-2 focus:ring-primary group"
-                        >
-                          <img
-                            src={task.image_url}
-                            alt={label}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            loading="lazy"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                    <div key={task.id} className="space-y-1.5">
+                      <div className={cn(
+                        "aspect-square rounded-lg overflow-hidden flex items-center justify-center relative",
+                        failed ? "bg-destructive/10 border border-destructive/30" : "bg-background/60"
+                      )}>
+                        {task.image_url && !failed ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setZoomedImage(task.image_url!);
+                              setView('image');
                             }}
-                          />
-                        </button>
-                      ) : failed ? (
-                        <div className="p-2 text-center space-y-1">
-                          <AlertTriangle className="w-5 h-5 text-destructive mx-auto" />
-                          <p className="text-[10px] text-destructive leading-tight line-clamp-3">
-                            {translateError(task.last_error)}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="text-[10px] text-muted-foreground px-2 text-center">
-                          {task.status === 'pending' || task.status === 'processing' ? 'В обработке' : 'Нет результата'}
-                        </div>
-                      )}
+                            className="w-full h-full focus:outline-none focus:ring-2 focus:ring-primary group"
+                          >
+                            <img
+                              src={task.image_url}
+                              alt={label}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              loading="lazy"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                              }}
+                            />
+                          </button>
+                        ) : failed ? (
+                          <div className="p-2 text-center space-y-1">
+                            <AlertTriangle className="w-5 h-5 text-destructive mx-auto" />
+                            <p className="text-[10px] text-destructive leading-tight line-clamp-3">
+                              {translateError(task.last_error)}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-muted-foreground px-2 text-center">
+                            {task.status === 'pending' || task.status === 'processing' ? 'В обработке' : 'Нет результата'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[11px] font-medium truncate">{label}</span>
+                        <Badge
+                          variant={
+                            task.status === 'completed' ? 'default' : failed ? 'destructive' : 'secondary'
+                          }
+                          className="text-[9px] px-1.5 py-0"
+                        >
+                          {task.status === 'completed' ? '✓' : failed ? '✕' : '…'}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-[11px] font-medium truncate">{label}</span>
-                      <Badge
-                        variant={
-                          task.status === 'completed' ? 'default' : failed ? 'destructive' : 'secondary'
-                        }
-                        className="text-[9px] px-1.5 py-0"
-                      >
-                        {task.status === 'completed' ? '✓' : failed ? '✕' : '…'}
-                      </Badge>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+                </div>
+              )}
             </div>
-          )}
-        </section>
+          </section>
+        </div>
       </div>
     );
   };
