@@ -72,6 +72,7 @@ export default function Admin() {
   const [adminEmail, setAdminEmail] = useState('');
   const [unreadSupportCount, setUnreadSupportCount] = useState(0);
   const [pendingInvoicesCount, setPendingInvoicesCount] = useState(0);
+  const [pendingBonusesCount, setPendingBonusesCount] = useState(0);
   const isMobile = useIsMobile();
 
   const fetchUnreadSupport = useCallback(async () => {
@@ -108,17 +109,30 @@ export default function Admin() {
     } catch {}
   }, []);
 
-  // Polling for unread support & pending invoices - proper cleanup
+  const fetchPendingBonuses = useCallback(async () => {
+    try {
+      const { count, error } = await supabase
+        .from('bonus_submissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (!error && count) setPendingBonusesCount(count);
+      else setPendingBonusesCount(0);
+    } catch {}
+  }, []);
+
+  // Polling for unread support, pending invoices & bonus submissions - proper cleanup
   useEffect(() => {
     if (!isAdmin) return;
     fetchUnreadSupport();
     fetchPendingInvoices();
+    fetchPendingBonuses();
     const interval = setInterval(() => {
       fetchUnreadSupport();
       fetchPendingInvoices();
+      fetchPendingBonuses();
     }, 20000);
     return () => clearInterval(interval);
-  }, [isAdmin, fetchUnreadSupport, fetchPendingInvoices]);
+  }, [isAdmin, fetchUnreadSupport, fetchPendingInvoices, fetchPendingBonuses]);
 
   const checkAdminAccess = async () => {
     try {
@@ -220,7 +234,7 @@ export default function Admin() {
     <div className="min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
-          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} />
+          <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />
         </div>
       )}
 
@@ -229,7 +243,7 @@ export default function Admin() {
         <header className="border-b border-border bg-card sticky top-0 z-20">
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
-              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} />}
+              {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />}
               <div className="min-w-0 flex-1 overflow-hidden">
                 <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
