@@ -143,7 +143,23 @@ export const AdminVideoLessons = () => {
     }
   };
 
-  const openEditDialog = (lesson: VideoLesson) => {
+  const handleReorder = async (newItems: VideoLesson[]) => {
+    const reordered = newItems.map((item, idx) => ({ ...item, display_order: idx + 1 }));
+    setLessons(reordered);
+    try {
+      const updates = reordered.map((item) =>
+        (supabase as any).from('video_lessons').update({ display_order: item.display_order }).eq('id', item.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r: any) => r.error)?.error;
+      if (firstError) throw firstError;
+    } catch {
+      toast({ title: "Ошибка", description: "Не удалось сохранить порядок", variant: "destructive" });
+      loadLessons();
+    }
+  };
+
+
     setEditingLesson(lesson);
     setFormData({
       title: lesson.title,
