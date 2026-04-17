@@ -28,9 +28,10 @@ interface AdminSidebarProps {
   onTabChange: (tab: string) => void;
   unreadSupportCount?: number;
   pendingInvoicesCount?: number;
+  pendingBonusesCount?: number;
 }
 
-export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, pendingInvoicesCount = 0 }: AdminSidebarProps) => {
+export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, pendingInvoicesCount = 0, pendingBonusesCount = 0 }: AdminSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const menuItems = [
@@ -41,7 +42,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
     { id: 'partners', label: 'Партнеры', icon: Handshake },
     { id: 'payments_admin', label: 'Оплаты', icon: Receipt, badge: pendingInvoicesCount > 0 ? pendingInvoicesCount.toString() : undefined, badgeColor: 'bg-orange-500 text-white border-orange-500' },
     { id: 'prompts', label: 'Модель', icon: Bot },
-    { id: 'bonuses', label: 'Бонусы', icon: Gift },
+    { id: 'bonuses', label: 'Бонусы', icon: Gift, badge: pendingBonusesCount > 0 ? pendingBonusesCount.toString() : undefined, badgeColor: 'bg-amber-500 text-white border-amber-500' },
     { id: 'pricing', label: 'Цены', icon: DollarSign },
     { id: 'banners', label: 'Баннеры', icon: LayoutDashboard },
     { id: 'news', label: 'Новости', icon: Megaphone },
