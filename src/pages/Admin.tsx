@@ -42,6 +42,7 @@ interface User {
   created_at: string;
   referral_code: string;
   updated_at: string;
+  last_active_at?: string;
 }
 
 type ActiveTab = 'analytics' | 'users' | 'partners' | 'prompts' | 'bonuses' | 'news' | 'pricing' | 'payments_admin' | 'banners' | 'blog' | 'video_lessons' | 'support' | 'utm';
@@ -152,7 +153,7 @@ export default function Admin() {
       while (hasMore) {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, email, full_name, tokens_balance, referral_code, wb_connected, is_blocked, created_at, updated_at')
+          .select('id, email, full_name, tokens_balance, referral_code, wb_connected, is_blocked, created_at, updated_at, last_active_at')
           .order('created_at', { ascending: false })
           .range(offset, offset + limit - 1);
         if (error) {

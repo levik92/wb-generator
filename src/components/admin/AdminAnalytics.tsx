@@ -47,30 +47,9 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
         const { count: recentLoginCount } = await supabase
           .from('profiles')
           .select('id', { count: 'exact', head: true })
-          .gte('updated_at', thirtyDaysAgoISO);
+          .gte('last_active_at', thirtyDaysAgoISO);
 
-        const tokenUserIds = new Set<string>();
-        let offset = 0;
-        const pageSize = 1000;
-        let hasMore = true;
-        while (hasMore) {
-          const { data: tokenPage } = await supabase
-            .from('token_transactions')
-            .select('user_id')
-            .eq('transaction_type', 'generation')
-            .gte('created_at', thirtyDaysAgoISO)
-            .range(offset, offset + pageSize - 1);
-          if (tokenPage && tokenPage.length > 0) {
-            tokenPage.forEach(t => tokenUserIds.add(t.user_id));
-            offset += pageSize;
-            hasMore = tokenPage.length === pageSize;
-          } else {
-            hasMore = false;
-          }
-        }
-
-        const activeEstimate = Math.max(recentLoginCount || 0, tokenUserIds.size);
-        setActiveUsersCount(activeEstimate);
+        setActiveUsersCount(recentLoginCount || 0);
       } catch (error) {
         console.error('Error fetching analytics stats:', error);
         setTotalUsers(users.length);

@@ -1230,6 +1230,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_blocked: boolean
+          last_active_at: string
           login_count: number
           referral_code: string | null
           referred_by: string | null
@@ -1244,6 +1245,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_blocked?: boolean
+          last_active_at?: string
           login_count?: number
           referral_code?: string | null
           referred_by?: string | null
@@ -1258,6 +1260,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_blocked?: boolean
+          last_active_at?: string
           login_count?: number
           referral_code?: string | null
           referred_by?: string | null
@@ -2151,6 +2154,10 @@ export type Database = {
       store_user_api_key_secure: {
         Args: { api_key: string; provider_name: string }
         Returns: boolean
+      }
+      touch_profile_activity: {
+        Args: { user_id_param: string }
+        Returns: undefined
       }
       track_api_key_access: { Args: { key_id: string }; Returns: undefined }
       update_job_progress: {
