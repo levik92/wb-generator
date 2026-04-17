@@ -378,9 +378,8 @@ export const AdminSupport = () => {
   };
 
   const renderClosingBadge = () => (
-    <Badge className="bg-muted text-muted-foreground border-border text-[10px] px-1.5 inline-flex items-center gap-1">
+    <Badge className="bg-muted text-muted-foreground border-border text-[10px] px-1.5 inline-flex items-center justify-center min-w-[24px]">
       <Loader2 className="w-3 h-3 animate-spin" />
-      Закрытие…
     </Badge>
   );
 
