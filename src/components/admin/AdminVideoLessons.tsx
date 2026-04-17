@@ -18,6 +18,7 @@ import {
 import { Plus, Edit, Trash2, Play, Clock, Eye, EyeOff, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SortableList, SortableItem } from "./SortableList";
 
 interface VideoLesson {
   id: string;
@@ -142,6 +143,22 @@ export const AdminVideoLessons = () => {
     }
   };
 
+  const handleReorder = async (newItems: VideoLesson[]) => {
+    const reordered = newItems.map((item, idx) => ({ ...item, display_order: idx + 1 }));
+    setLessons(reordered);
+    try {
+      const updates = reordered.map((item) =>
+        (supabase as any).from('video_lessons').update({ display_order: item.display_order }).eq('id', item.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r: any) => r.error)?.error;
+      if (firstError) throw firstError;
+    } catch {
+      toast({ title: "Ошибка", description: "Не удалось сохранить порядок", variant: "destructive" });
+      loadLessons();
+    }
+  };
+
   const openEditDialog = (lesson: VideoLesson) => {
     setEditingLesson(lesson);
     setFormData({
@@ -261,69 +278,75 @@ export const AdminVideoLessons = () => {
             </CardContent>
           </Card>
         ) : (
-          lessons.map((lesson) => (
-            <Card key={lesson.id} className={`rounded-2xl border-border/50 ${lesson.is_active ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
-              <CardHeader className="py-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Play className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <Badge variant="outline" className="text-xs">#{lesson.display_order}</Badge>
-                        {lesson.duration && (
-                          <Badge variant="secondary" className="text-xs gap-1">
-                            <Clock className="w-3 h-3" />
-                            {lesson.duration}
-                          </Badge>
-                        )}
-                        {lesson.is_active ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/10">
-                            <Eye className="w-3 h-3 mr-1" /> Активно
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/10">
-                            <EyeOff className="w-3 h-3 mr-1" /> Скрыто
-                          </Badge>
-                        )}
+          <SortableList items={lessons} onReorder={handleReorder}>
+            <div className="grid gap-3">
+              {lessons.map((lesson) => (
+                <SortableItem key={lesson.id} id={lesson.id}>
+                  <Card className={`rounded-2xl border-border/50 ${lesson.is_active ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
+                    <CardHeader className="py-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <Play className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-xs">#{lesson.display_order}</Badge>
+                              {lesson.duration && (
+                                <Badge variant="secondary" className="text-xs gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {lesson.duration}
+                                </Badge>
+                              )}
+                              {lesson.is_active ? (
+                                <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/10">
+                                  <Eye className="w-3 h-3 mr-1" /> Активно
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/10">
+                                  <EyeOff className="w-3 h-3 mr-1" /> Скрыто
+                                </Badge>
+                              )}
+                            </div>
+                            <CardTitle className="text-base lg:text-lg break-words">{lesson.title}</CardTitle>
+                            {lesson.subtitle && (
+                              <CardDescription className="text-xs mt-1">{lesson.subtitle}</CardDescription>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1 font-mono">ID: {lesson.kinescope_id}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                          <Switch checked={lesson.is_active} onCheckedChange={() => toggleActive(lesson)} />
+                          <Button variant="outline" size="sm" onClick={() => openEditDialog(lesson)} className="h-8 w-8 p-0">
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white h-8 w-8 p-0">
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="mx-2">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Удалить видеоурок?</AlertDialogTitle>
+                                <AlertDialogDescription>Это действие нельзя отменить.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteLesson(lesson.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                                  Удалить
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
-                      <CardTitle className="text-base lg:text-lg break-words">{lesson.title}</CardTitle>
-                      {lesson.subtitle && (
-                        <CardDescription className="text-xs mt-1">{lesson.subtitle}</CardDescription>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1 font-mono">ID: {lesson.kinescope_id}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-                    <Switch checked={lesson.is_active} onCheckedChange={() => toggleActive(lesson)} />
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(lesson)} className="h-8 w-8 p-0">
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white h-8 w-8 p-0">
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent className="mx-2">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Удалить видеоурок?</AlertDialogTitle>
-                          <AlertDialogDescription>Это действие нельзя отменить.</AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Отмена</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteLesson(lesson.id)} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
-                            Удалить
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          ))
+                    </CardHeader>
+                  </Card>
+                </SortableItem>
+              ))}
+            </div>
+          </SortableList>
         )}
       </div>
     </div>
