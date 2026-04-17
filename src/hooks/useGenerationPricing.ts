@@ -17,6 +17,7 @@ export const useGenerationPricing = () => {
       const { data, error } = await supabase
         .from('generation_pricing')
         .select('*')
+        .order('display_order', { ascending: true })
         .order('price_type');
 
       if (error) throw error;

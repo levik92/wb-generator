@@ -56,6 +56,7 @@ export const usePaymentPackages = (options: UsePaymentPackagesOptions = {}) => {
         .from('payment_packages')
         .select('*')
         .eq('is_active', true)
+        .order('display_order', { ascending: true })
         .order('price', { ascending: true });
 
       if (error) throw error;
