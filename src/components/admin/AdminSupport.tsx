@@ -42,6 +42,7 @@ const MSGS_PER_PAGE = 15;
 export const AdminSupport = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
+  const [closingIds, setClosingIds] = useState<Set<string>>(new Set());
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
