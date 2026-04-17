@@ -1831,6 +1831,7 @@ export type Database = {
           base_url: string
           created_at: string
           id: string
+          is_pinned: boolean
           name: string
           updated_at: string
           utm_campaign: string
@@ -1841,6 +1842,7 @@ export type Database = {
           base_url?: string
           created_at?: string
           id?: string
+          is_pinned?: boolean
           name: string
           updated_at?: string
           utm_campaign?: string
@@ -1851,6 +1853,7 @@ export type Database = {
           base_url?: string
           created_at?: string
           id?: string
+          is_pinned?: boolean
           name?: string
           updated_at?: string
           utm_campaign?: string

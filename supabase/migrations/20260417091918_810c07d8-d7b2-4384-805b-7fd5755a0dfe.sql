@@ -1,0 +1,2 @@
+ALTER TABLE public.utm_sources ADD COLUMN IF NOT EXISTS is_pinned boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_utm_sources_pinned_created ON public.utm_sources(is_pinned DESC, created_at DESC);
