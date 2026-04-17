@@ -468,6 +468,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          display_order: number
           id: string
           price_type: string
           tokens_cost: number
@@ -476,6 +477,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          display_order?: number
           id?: string
           price_type: string
           tokens_cost: number
@@ -484,6 +486,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          display_order?: number
           id?: string
           price_type?: string
           tokens_cost?: number
@@ -1072,6 +1075,7 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          display_order: number
           id: string
           invoice_enabled: boolean
           is_active: boolean
@@ -1084,6 +1088,7 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          display_order?: number
           id?: string
           invoice_enabled?: boolean
           is_active?: boolean
@@ -1096,6 +1101,7 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          display_order?: number
           id?: string
           invoice_enabled?: boolean
           is_active?: boolean
