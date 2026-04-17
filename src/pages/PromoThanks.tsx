@@ -7,7 +7,7 @@ import "@/styles/landing-theme.css";
 
 const PromoThanks = () => {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(7);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
