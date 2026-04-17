@@ -384,7 +384,7 @@ const Dashboard = () => {
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Mobile Header */}
-         {isMobile && <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-card/80 backdrop-blur-xl z-30">
+         {isMobile && <div className="flex items-center justify-between p-4 border-b border-border fixed top-0 left-0 right-0 bg-card/80 backdrop-blur-xl z-30">
             <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20" onClick={() => setMobileMenuOpen(true)}>
               <Menu className="h-5 w-5 text-primary" />
             </Button>
@@ -433,7 +433,7 @@ const Dashboard = () => {
         {/* Desktop Header */}
         {!isMobile && <DashboardHeader profile={profile} activeTab={activeTab} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} headerActions={headerActions} />}
         
-        <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pb-24' : ''}`}>
+        <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pt-[88px] pb-24' : ''}`}>
           <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
           <Suspense fallback={<TabLoader />}>
