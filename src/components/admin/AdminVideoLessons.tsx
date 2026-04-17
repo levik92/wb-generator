@@ -159,7 +159,7 @@ export const AdminVideoLessons = () => {
     }
   };
 
-
+  const openEditDialog = (lesson: VideoLesson) => {
     setEditingLesson(lesson);
     setFormData({
       title: lesson.title,
