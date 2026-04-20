@@ -10,23 +10,23 @@ declare global {
 }
 
 /**
- * Send a Yandex.Metrika goal reliably via sendBeacon. Falls back to ym().
- * sendBeacon is critical because it survives page unmount/navigation.
+ * Send a Yandex.Metrika goal via the official ym() API.
+ * Returns a Promise that resolves after the goal is dispatched
+ * (using the ym callback) or after a 500ms timeout — whichever
+ * comes first. Callers can `await` before navigating away.
  */
-const reachGoal = (goal: string) => {
-  if (typeof window === "undefined") return;
-  try {
-    const url = `https://mc.yandex.ru/watch/${YM_COUNTER_ID}?reachGoal=${encodeURIComponent(goal)}&page-url=${encodeURIComponent(window.location.href)}&charset=utf-8`;
-    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
-      navigator.sendBeacon(url, "");
-      return;
+const reachGoal = (goal: string): Promise<void> => {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (typeof window.ym !== "function") return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const timeout = setTimeout(resolve, 500);
+    try {
+      window.ym(YM_COUNTER_ID, "reachGoal", goal, { callback: () => { clearTimeout(timeout); resolve(); } });
+    } catch {
+      clearTimeout(timeout);
+      resolve();
     }
-  } catch {
-    // fall through to ym()
-  }
-  if (typeof window.ym === "function") {
-    window.ym(YM_COUNTER_ID, "reachGoal", goal);
-  }
+  });
 };
 
 const ROUTE_GOALS: Record<string, string> = {
@@ -58,7 +58,7 @@ const YandexMetrika = () => {
       // Still fire a route-mapped goal on the initial page if applicable,
       // because the inline init only sends a hit, not custom goals.
       const initialGoal = ROUTE_GOALS[location.pathname];
-      if (initialGoal) reachGoal(initialGoal);
+      if (initialGoal) void reachGoal(initialGoal);
       return;
     }
 
@@ -73,7 +73,7 @@ const YandexMetrika = () => {
     });
 
     const goal = ROUTE_GOALS[path];
-    if (goal) reachGoal(goal);
+    if (goal) void reachGoal(goal);
   }, [location.pathname, location.search, location.hash]);
 
   return null;
