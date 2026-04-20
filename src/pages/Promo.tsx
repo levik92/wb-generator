@@ -41,7 +41,7 @@ const Promo = () => {
     window.scrollTo(0, 0);
     // Safety net: fire the promo_loaded goal explicitly on mount so it
     // is recorded even if the YandexMetrika component is racing the unmount.
-    reachGoal("promo_loaded");
+    void reachGoal("promo_loaded");
     return () => {
       document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
@@ -50,9 +50,9 @@ const Promo = () => {
 
   // Fire the goal again right before navigation and delay 100ms so the
   // sendBeacon has a guaranteed window before React unmounts the page.
-  const goToThanks = () => {
-    reachGoal("promo_loaded");
-    setTimeout(() => navigate("/promo/thanks"), 100);
+  const goToThanks = async () => {
+    await reachGoal("promo_loaded");
+    navigate("/promo/thanks");
   };
 
   return (

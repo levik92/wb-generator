@@ -12,10 +12,8 @@ const PromoThanks = () => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(10);
 
-  const goToAuth = () => {
-    // Fire goal synchronously via sendBeacon BEFORE navigation so the
-    // request survives React unmounting this page.
-    reachGoal(PROMO_THANKS_GOAL);
+  const goToAuth = async () => {
+    await reachGoal(PROMO_THANKS_GOAL);
     navigate("/auth?tab=register");
   };
 
@@ -25,14 +23,15 @@ const PromoThanks = () => {
     window.scrollTo(0, 0);
 
     // Safety net: explicitly fire the goal on mount as well.
-    reachGoal(PROMO_THANKS_GOAL);
+    void reachGoal(PROMO_THANKS_GOAL);
 
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          reachGoal(PROMO_THANKS_GOAL);
-          navigate("/auth?tab=register");
+          void reachGoal(PROMO_THANKS_GOAL).finally(() => {
+            navigate("/auth?tab=register");
+          });
           return 0;
         }
         return prev - 1;
