@@ -1,72 +1,77 @@
 
 
-# План: исправление целей `/promo` и `/promo/thanks` в Яндекс.Метрике
+# План: устранение дублей событий и стабилизация Метрики
 
-## Что я обнаружил
+## Проблемы, которые я нашёл при анализе кода
 
-При сравнении текущего поведения и того, что должно работать, нашёл **три причины**, почему цели перестали засчитываться (особенно после добавления Meta Pixel).
+### 1. Дубль `promo_loaded` при заходе на `/promo` (двойная отправка)
 
-### Причина 1. `defer: true` в инициализации Метрики (главная)
+В `Promo.tsx` цель `promo_loaded` отправляется **дважды на одном и том же монтировании**:
+- В `useEffect` страницы (строка 44): `void reachGoal("promo_loaded")` — «safety net».
+- В `YandexMetrika.tsx` (строка 60–61): на первом рендере для `/promo` тоже срабатывает `reachGoal("promo_loaded")` через `ROUTE_GOALS`.
 
-В `index.html` стр. 30–37:
-```js
-ym(105111303, "init", { defer: true, ... })
-```
+Итог: Метрика получает **2 одинаковых события `reachGoal=promo_loaded`** за один визит → в отчётах конверсия завышена и выглядит «странно».
 
-Флаг `defer: true` означает: **Метрика не отправляет первый автоматический хит при загрузке** — мы должны отправить его сами. Раньше это работало, потому что наш `YandexMetrika.tsx` шлёт `hit` в `useEffect` на каждое изменение роута — включая первое монтирование. Но в комментарии кода написано: *"The very first hit is skipped because the inline `ym('init', ...)` call in index.html already counts the initial pageview"*. **Это противоречие:** инициализация с `defer:true` НЕ отправляет первый хит, а код всё равно его шлёт — поэтому хит уходит, но описание комментария неверное. Это не баг само по себе, но указывает на путаницу.
+### 2. Тройной дубль `promo_thanks_loaded` при переходе с `/promo` на `/promo/thanks`
 
-### Причина 2. Конкуренция Meta Pixel + Yandex Metrika при размонтировании страницы
+В `PromoThanks.tsx` цель отправляется **трижды**:
+- В `YandexMetrika.tsx` `useEffect` на смену роута → `hit` + `reachGoal("promo_thanks_loaded")` (строка 76).
+- В `useEffect` самой страницы (строка 26): `void reachGoal(PROMO_THANKS_GOAL)` — «safety net».
+- В коллбэке таймера через 10 сек (строка 32): снова `reachGoal(PROMO_THANKS_GOAL)` перед навигацией.
 
-После добавления `MetaPixel.tsx` оба трекера на каждый route change шлют запросы **в одном и том же тике**. На `/promo/thanks` пользователь нажимает кнопку или срабатывает таймер — и React **мгновенно** размонтирует страницу, переходя на `/auth`. Браузер обрывает незавершённые `fetch`/`sendBeacon` запросы Метрики (хит + reachGoal), потому что Meta Pixel первым занимает сетевой канал своим PageView и iframe-формой (видно в session_replay: `Form added`, `Iframe added`).
+Если пользователь нажмёт «Перейти сейчас» — добавится **четвёртый** вызов из `goToAuth`. Все они уйдут.
 
-### Причина 3. На `/promo` цель тоже сломалась
+### 3. Дубль `promo_loaded` при клике на CTA
 
-Пользователь говорит «не работают цели на промо И промосэнкс» — то есть теперь **обе**. На `/promo` Кнопка `<Link to="/promo/thanks">` мгновенно меняет роут — это ещё одна навигация в одном тике с `MetaPixel`. То есть Meta Pixel срабатывает на `/promo` сразу после монтирования и забивает очередь до того, как Метрика успевает отправить `promo_loaded`.
+В `Promo.tsx` обработчик `goToThanks` вызывает `await reachGoal("promo_loaded")` ещё раз перед навигацией (строка 54), хотя цель уже была отправлена при загрузке страницы. Это **логически некорректно**: цель «promo_loaded» = «страница промо загружена», а не «клик по кнопке». Должна срабатывать ровно один раз.
+
+### 4. Дубль PageView в Meta Pixel
+
+В `index.html` строка 51 вызывается `fbq('track', 'PageView')` при первой загрузке. А `MetaPixel.tsx` шлёт `PageView` в `useEffect` на каждое изменение роута, **включая первый рендер** (нет защиты `isFirstRender`). Итог: на первой загрузке любой страницы PageView в Meta уходит **дважды**.
 
 ## Решение
 
-### 1. Убрать `defer: true` из инициализации Метрики
+### A. Убрать дубли отправки целей Метрики
 
-В `index.html` поменять `defer: true` на `defer: false` (или просто убрать ключ). Тогда Метрика автоматически шлёт первый хит при загрузке — это надёжнее, чем полагаться на React. А в `YandexMetrika.tsx` оставить только хиты на **последующие** SPA-переходы (пропустить первый рендер через `useRef`).
+**`src/pages/Promo.tsx`:**
+- Удалить вызов `void reachGoal("promo_loaded")` из `useEffect` (стр. 44) — за это уже отвечает `YandexMetrika.tsx`.
+- В `goToThanks` убрать `await reachGoal("promo_loaded")` — цель уже отправлена при монтировании. Достаточно просто `navigate("/promo/thanks")`.
 
-### 2. Отложить вызов Meta Pixel на следующий тик
+**`src/pages/PromoThanks.tsx`:**
+- Удалить «safety net» вызов `void reachGoal(PROMO_THANKS_GOAL)` из `useEffect` (стр. 26).
+- Убрать `await reachGoal(PROMO_THANKS_GOAL)` из обработчика таймера (стр. 32) и из `goToAuth` (стр. 16) — `YandexMetrika.tsx` уже отправил цель при монтировании страницы.
 
-В `MetaPixel.tsx` обернуть `fbq('track', 'PageView')` в `setTimeout(..., 0)` или `requestIdleCallback`, чтобы Метрика всегда успевала первой. Meta Pixel некритичен к задержке в 1 кадр.
+После этих правок каждая цель будет отправляться **ровно один раз** при первом попадании на страницу — централизованно через `YandexMetrika.tsx`.
 
-### 3. На `/promo/thanks` — отправить цель **через `sendBeacon` явно**, не через `ym('reachGoal')`
+### B. Защитить Meta Pixel от дубля PageView на первом рендере
 
-`ym.reachGoal` использует обычный `fetch`/`Image`, который браузер обрывает при навигации. Заменим на прямой вызов:
-```ts
-navigator.sendBeacon(
-  `https://mc.yandex.ru/watch/105111303?reachGoal=promo_thanks_loaded&...`,
-  ''
-);
-```
-`sendBeacon` гарантированно доставляется браузером даже при размонтировании. Будем вызывать его **до** `navigate('/auth')` — синхронно в обработчике клика и в коллбэке таймера.
+**`src/components/MetaPixel.tsx`:**
+- Добавить `useRef(true)` флаг как в `YandexMetrika.tsx` и пропускать первый `useEffect`-вызов, потому что инлайн-код в `index.html` уже отправил `PageView`. Шлём только на SPA-переходах.
 
-### 4. Аналогично для `/promo` — отложить `Link` на 100мс после клика
+### C. Дополнительная стабильность
 
-Кнопка «Попробовать бесплатно» на `/promo` — обернуть в `onClick` обработчик, который сначала шлёт `sendBeacon` для цели `promo_loaded` (если ещё не отправлена) и затем через `setTimeout(100)` переходит на `/promo/thanks`. Это даёт Метрике гарантированное окно для отправки.
+**`src/components/YandexMetrika.tsx`:**
+- Текущая логика «первый рендер не шлёт `hit`, но шлёт `reachGoal` для маршрута» — корректна (хит уже отправлен инлайн-кодом, а кастомные цели — нет). Логику не трогаем.
+- `reachGoal` через официальный `ym('reachGoal', goal, {callback})` с фоллбэк-таймаутом 500мс — оставляем как есть. После удаления дублей навигация не «обгонит» отправку, потому что в кнопках перехода больше не будет лишнего `await reachGoal`, и React не размонтирует страницу до того, как ym() поставит запрос в очередь (хит ушёл при монтировании, у браузера было время).
 
 ## Файлы к изменению
 
-1. **`index.html`** — убрать `defer: true` из `ym('init')`.
-2. **`src/components/YandexMetrika.tsx`** — пропустить первый рендер (`useRef` флаг), оставить отправку только на SPA-переходах.
-3. **`src/components/MetaPixel.tsx`** — отложить `fbq('track', 'PageView')` через `setTimeout(0)`.
-4. **`src/pages/PromoThanks.tsx`** — заменить `ym(reachGoal)` на `navigator.sendBeacon` к URL `mc.yandex.ru/watch/...?reachGoal=...`.
-5. **`src/pages/Promo.tsx`** — обернуть оба `<Link to="/promo/thanks">` в `<Button onClick>` с `sendBeacon` для `promo_loaded` + отложенной навигацией через `useNavigate`.
+1. **`src/pages/Promo.tsx`** — убрать `reachGoal` из `useEffect` и из `goToThanks`.
+2. **`src/pages/PromoThanks.tsx`** — убрать `reachGoal` из `useEffect`, из таймера и из `goToAuth`.
+3. **`src/components/MetaPixel.tsx`** — добавить `useRef`, пропустить первый рендер.
 
 ## Что НЕ трогаем
 
-- Конфигурацию целей в кабинете Метрики.
+- `index.html` (Метрика и Meta Pixel инициализируются корректно).
+- `YandexMetrika.tsx` (центральная логика правильная).
 - Дизайн страниц `/promo` и `/promo/thanks`.
 - Логику счётчика 10 секунд.
-- Meta Pixel сам по себе — только меняем порядок выполнения.
 
 ## Как проверить после деплоя
 
-1. Открыть `/promo` в Incognito с открытым DevTools → Network → фильтр `mc.yandex`.
-2. Должны увидеть запросы: `tag.js` → `watch/...?page-url=...promo` → `watch/...?reachGoal=promo_loaded`.
-3. Нажать кнопку «Попробовать бесплатно» → должен пройти `sendBeacon` к `watch/...?reachGoal=promo_loaded` (если ещё не было) → переход на `/promo/thanks` → `watch/...?reachGoal=promo_thanks_loaded` → переход на `/auth`.
-4. В отчёте «Конверсии» Метрики данные появятся в течение часа.
+1. Incognito → `/promo` → DevTools → Network → фильтр `mc.yandex`. Должен быть **1 хит** + **1 reachGoal=promo_loaded**.
+2. Кликнуть «Попробовать бесплатно» → переход на `/promo/thanks` → **1 хит** + **1 reachGoal=promo_thanks_loaded**.
+3. Дождаться авто-перехода (или нажать «Перейти сейчас») → переход на `/auth`. Доп. событий цели быть не должно.
+4. Фильтр `facebook.com/tr` → на каждой странице **ровно 1 PageView**, не 2.
+5. В кабинете Метрики через ~30 минут число конверсий по `promo_loaded` и `promo_thanks_loaded` должно совпадать с числом уникальных визитов на эти страницы.
 
