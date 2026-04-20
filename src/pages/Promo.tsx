@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Upload, Sparkles, Download, Clock, TrendingUp, Zap, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CasesShowcase } from "@/components/services/CasesShowcase";
+import { reachGoal } from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 
 const stats = [
@@ -32,15 +33,27 @@ const steps = [
 ];
 
 const Promo = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.documentElement.classList.add("dark");
     document.body.style.backgroundColor = "#111111";
     window.scrollTo(0, 0);
+    // Safety net: fire the promo_loaded goal explicitly on mount so it
+    // is recorded even if the YandexMetrika component is racing the unmount.
+    reachGoal("promo_loaded");
     return () => {
       document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
+
+  // Fire the goal again right before navigation and delay 100ms so the
+  // sendBeacon has a guaranteed window before React unmounts the page.
+  const goToThanks = () => {
+    reachGoal("promo_loaded");
+    setTimeout(() => navigate("/promo/thanks"), 100);
+  };
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark">
@@ -75,14 +88,13 @@ const Promo = () => {
                 ИИ-сервис создаёт продающие карточки с инфографикой для Wildberries и Ozon — без дизайнера и Photoshop
               </p>
 
-              <Link to="/promo/thanks">
-                <Button
-                  size="lg"
-                  className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
-                >
-                  Попробовать бесплатно
-                </Button>
-              </Link>
+              <Button
+                onClick={goToThanks}
+                size="lg"
+                className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
+              >
+                Попробовать бесплатно
+              </Button>
             </motion.div>
           </div>
         </section>
@@ -215,15 +227,14 @@ const Promo = () => {
               <Zap className="w-10 h-10 text-[hsl(268,83%,60%)] mx-auto mb-4" />
               <h2 className="text-2xl sm:text-3xl font-bold mb-4">Начните прямо сейчас</h2>
               <p className="text-white/50 mb-8">Регистрация бесплатна. Создание результативных карточек всего от 49 рублей.</p>
-              <Link to="/promo/thanks">
-                <Button
-                  size="lg"
-                  className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
-                >
-                  <span className="sm:hidden">Зарегистрироваться</span>
-                  <span className="hidden sm:inline">Зарегистрироваться бесплатно</span>
-                </Button>
-              </Link>
+              <Button
+                onClick={goToThanks}
+                size="lg"
+                className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
+              >
+                <span className="sm:hidden">Зарегистрироваться</span>
+                <span className="hidden sm:inline">Зарегистрироваться бесплатно</span>
+              </Button>
             </motion.div>
           </div>
         </section>

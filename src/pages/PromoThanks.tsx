@@ -3,22 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { reachGoal } from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 
-const YM_COUNTER_ID = 105111303;
 const PROMO_THANKS_GOAL = "promo_thanks_loaded";
-
-const fireGoal = () => {
-  if (typeof window === "undefined" || typeof window.ym !== "function") return;
-  window.ym(YM_COUNTER_ID, "reachGoal", PROMO_THANKS_GOAL);
-};
 
 const PromoThanks = () => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(10);
 
   const goToAuth = () => {
-    fireGoal();
+    // Fire goal synchronously via sendBeacon BEFORE navigation so the
+    // request survives React unmounting this page.
+    reachGoal(PROMO_THANKS_GOAL);
     navigate("/auth?tab=register");
   };
 
@@ -27,15 +24,14 @@ const PromoThanks = () => {
     document.body.style.backgroundColor = "#111111";
     window.scrollTo(0, 0);
 
-    // Explicit goal fire on mount as a safety net in case the YandexMetrika
-    // component's hit-callback path doesn't deliver before navigation.
-    fireGoal();
+    // Safety net: explicitly fire the goal on mount as well.
+    reachGoal(PROMO_THANKS_GOAL);
 
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          fireGoal();
+          reachGoal(PROMO_THANKS_GOAL);
           navigate("/auth?tab=register");
           return 0;
         }
