@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 declare global {
@@ -9,17 +9,27 @@ declare global {
 
 /**
  * Tracks SPA navigation as PageView events for Meta (Facebook) Pixel.
- * The base pixel is initialized in index.html; this component fires
- * an additional PageView on every client-side route change.
+ * The base pixel is initialized in index.html and already fires the
+ * initial PageView automatically, so this component skips the first
+ * render and only sends PageView on subsequent client-side route changes.
  */
 const MetaPixel = () => {
   const location = useLocation();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+    if (typeof window === "undefined") return;
+
+    // Skip the initial render — the inline fbq('track', 'PageView') in
+    // index.html already counted the first pageview. Without this guard
+    // every initial page load would record a duplicate PageView.
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (typeof window.fbq !== "function") return;
     // Defer to the next tick so Yandex.Metrika gets the network slot first.
-    // Meta Pixel is not latency-sensitive; a 0ms delay is invisible to users
-    // but prevents fbq from blocking critical conversion-tracking requests.
     const timer = setTimeout(() => {
       if (typeof window.fbq === "function") window.fbq("track", "PageView");
     }, 0);
