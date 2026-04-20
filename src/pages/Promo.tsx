@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Upload, Sparkles, Download, Clock, TrendingUp, Zap, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CasesShowcase } from "@/components/services/CasesShowcase";
-import { reachGoal } from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
 
 const stats = [
@@ -39,19 +38,15 @@ const Promo = () => {
     document.documentElement.classList.add("dark");
     document.body.style.backgroundColor = "#111111";
     window.scrollTo(0, 0);
-    // Safety net: fire the promo_loaded goal explicitly on mount so it
-    // is recorded even if the YandexMetrika component is racing the unmount.
-    void reachGoal("promo_loaded");
     return () => {
       document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
   }, []);
 
-  // Fire the goal again right before navigation and delay 100ms so the
-  // sendBeacon has a guaranteed window before React unmounts the page.
-  const goToThanks = async () => {
-    await reachGoal("promo_loaded");
+  // The promo_loaded goal is sent centrally by YandexMetrika.tsx on mount,
+  // so this handler only needs to navigate.
+  const goToThanks = () => {
     navigate("/promo/thanks");
   };
 

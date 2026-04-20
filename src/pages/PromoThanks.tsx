@@ -3,17 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { reachGoal } from "@/components/YandexMetrika";
 import "@/styles/landing-theme.css";
-
-const PROMO_THANKS_GOAL = "promo_thanks_loaded";
 
 const PromoThanks = () => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(10);
 
-  const goToAuth = async () => {
-    await reachGoal(PROMO_THANKS_GOAL);
+  // The promo_thanks_loaded goal is sent centrally by YandexMetrika.tsx
+  // on mount, so handlers only need to navigate.
+  const goToAuth = () => {
     navigate("/auth?tab=register");
   };
 
@@ -22,16 +20,11 @@ const PromoThanks = () => {
     document.body.style.backgroundColor = "#111111";
     window.scrollTo(0, 0);
 
-    // Safety net: explicitly fire the goal on mount as well.
-    void reachGoal(PROMO_THANKS_GOAL);
-
     const interval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          void reachGoal(PROMO_THANKS_GOAL).finally(() => {
-            navigate("/auth?tab=register");
-          });
+          navigate("/auth?tab=register");
           return 0;
         }
         return prev - 1;
