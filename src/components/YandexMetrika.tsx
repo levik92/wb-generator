@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 const YM_COUNTER_ID = 105111303;
@@ -10,18 +10,25 @@ declare global {
 }
 
 /**
- * Fire a Yandex.Metrika goal. Safe to call before the counter has loaded —
- * the global stub queues the call and replays it once tag.js arrives.
+ * Send a Yandex.Metrika goal reliably via sendBeacon. Falls back to ym().
+ * sendBeacon is critical because it survives page unmount/navigation.
  */
 const reachGoal = (goal: string) => {
-  if (typeof window === "undefined" || typeof window.ym !== "function") return;
-  window.ym(YM_COUNTER_ID, "reachGoal", goal);
+  if (typeof window === "undefined") return;
+  try {
+    const url = `https://mc.yandex.ru/watch/${YM_COUNTER_ID}?reachGoal=${encodeURIComponent(goal)}&page-url=${encodeURIComponent(window.location.href)}&charset=utf-8`;
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      navigator.sendBeacon(url, "");
+      return;
+    }
+  } catch {
+    // fall through to ym()
+  }
+  if (typeof window.ym === "function") {
+    window.ym(YM_COUNTER_ID, "reachGoal", goal);
+  }
 };
 
-/**
- * Map specific routes to JavaScript-event goals defined in Metrika.
- * Add new entries here when adding goals in the Metrika dashboard.
- */
 const ROUTE_GOALS: Record<string, string> = {
   "/promo": "promo_loaded",
   "/promo/thanks": "promo_thanks_loaded",
@@ -30,39 +37,43 @@ const ROUTE_GOALS: Record<string, string> = {
 /**
  * SPA-friendly Yandex.Metrika route tracker.
  *
- * The counter itself is installed globally in index.html so it loads once
- * and is available on every page. This component:
- *  1) sends a `hit` on every client-side route change so URL-based goals
- *     (e.g. "url содержит: wbgen.ru/promo/thanks") fire on SPA navigation;
- *  2) sends a `reachGoal` for routes mapped above so JavaScript-event
- *     goals fire as well.
- *
- * The very first hit is skipped because the inline `ym('init', ...)` call
- * in index.html already counts the initial pageview.
+ * The counter itself is installed globally in index.html (without `defer`),
+ * so it sends the very first pageview automatically. This component:
+ *  1) skips the initial mount to avoid a duplicate first hit;
+ *  2) sends a `hit` on each subsequent client-side route change;
+ *  3) fires a `reachGoal` (via sendBeacon) for routes mapped above so
+ *     JavaScript-event goals are recorded even if the page unmounts fast.
  */
 const YandexMetrika = () => {
   const location = useLocation();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.ym !== "function") {
+    if (typeof window === "undefined") return;
+
+    // Skip the initial render — the inline counter in index.html already
+    // counted the first pageview (defer is OFF).
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      // Still fire a route-mapped goal on the initial page if applicable,
+      // because the inline init only sends a hit, not custom goals.
+      const initialGoal = ROUTE_GOALS[location.pathname];
+      if (initialGoal) reachGoal(initialGoal);
       return;
     }
 
+    if (typeof window.ym !== "function") return;
+
     const path = location.pathname;
     const url = window.location.origin + path + location.search + location.hash;
-    const goal = ROUTE_GOALS[path];
 
     window.ym(YM_COUNTER_ID, "hit", url, {
       title: document.title,
       referer: document.referrer,
-      callback: goal
-        ? () => {
-            if (typeof window.ym === "function") {
-              window.ym(YM_COUNTER_ID, "reachGoal", goal);
-            }
-          }
-        : undefined,
     });
+
+    const goal = ROUTE_GOALS[path];
+    if (goal) reachGoal(goal);
   }, [location.pathname, location.search, location.hash]);
 
   return null;
