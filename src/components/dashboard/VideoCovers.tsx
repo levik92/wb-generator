@@ -998,7 +998,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
           {/* Block 2: Generate button + hint */}
           <Card>
-            <CardContent className="p-4 sm:p-6 space-y-3">
+            <CardContent className="p-6 space-y-3">
               <Button
                 onClick={handleGenerate}
                 disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
