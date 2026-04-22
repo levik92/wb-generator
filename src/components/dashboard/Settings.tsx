@@ -371,7 +371,7 @@ export const Settings = ({
                 {/* Thumb */}
                 <motion.div
                   className={`
-                    absolute top-1 left-1 w-7 h-7 rounded-full shadow-md
+                    absolute top-1/2 left-1 -translate-y-1/2 w-7 h-7 rounded-full shadow-md
                     flex items-center justify-center bg-white
                     ${mounted && resolvedTheme !== 'dark' ? 'border border-border/50' : ''}
                   `}
@@ -383,6 +383,7 @@ export const Settings = ({
                     duration: 0.2,
                     ease: "easeOut",
                   }}
+                  style={{ y: '-50%' }}
                 >
                   {mounted && resolvedTheme === 'dark' ? (
                     <Moon className="w-4 h-4 text-primary" />
