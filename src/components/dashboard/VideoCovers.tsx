@@ -589,6 +589,13 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                   <p className="text-sm text-white/80 line-clamp-2">
                     Примеры работ и возможности нейросети — живые обложки для ваших товаров
                   </p>
+
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
+                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium text-white">
+                      100% гарантия возврата средств, если не понравится
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-shrink-0">
