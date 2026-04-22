@@ -95,7 +95,7 @@ export default function Balance() {
     }} transition={{
       duration: 0.4,
       delay: 0.1
-    }} className="relative overflow-hidden rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+    }} className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
