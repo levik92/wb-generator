@@ -880,7 +880,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
         >
           {/* Block 1: Upload + wishes */}
           <Card>
-            <CardContent className="p-4 sm:p-6 space-y-4">
+            <CardContent className="p-6 space-y-4">
               {/* Image upload header */}
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
