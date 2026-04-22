@@ -69,7 +69,7 @@ export default function Balance() {
     duration: 0.4
   }} className="space-y-4 sm:space-y-6 w-full min-w-0">
       {/* Subtle support hint — moved from pricing to top */}
-      <div className="rounded-lg border border-border/40 bg-muted/30 px-4 py-2.5 opacity-80 hover:opacity-100 transition-opacity">
+      <div className="rounded-lg border border-border bg-card px-4 py-2.5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <AlertCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
