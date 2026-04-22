@@ -1933,7 +1933,7 @@ export const GenerateCards = ({
               </button>
 
               <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 pr-8">
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 hidden lg:block">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                     <Images className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
@@ -1944,7 +1944,7 @@ export const GenerateCards = ({
                     Посмотрите кейсы — карточки, которые продают
                   </h3>
                   <p className="text-sm text-white/80 line-clamp-2">
-                    Реальные примеры роста конверсии до +260% после редизайна карточек на WBGen
+                    Реальные примеры роста конверсии до +260% после создания карточек на WBGen
                   </p>
 
                   <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
@@ -1955,7 +1955,7 @@ export const GenerateCards = ({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-shrink-0">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
                   <Button
                     className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                     asChild
