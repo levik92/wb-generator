@@ -243,39 +243,28 @@ export default function Pricing({
         </p>
       </div>
 
-      {/* 100% money-back guarantee — bright accent block */}
-      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-5 sm:p-6">
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+      {/* 100% money-back guarantee — compact liquid glass info block */}
+      <div className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl p-3 sm:p-4">
+        <div className="absolute -top-8 -right-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:items-start">
-          <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-            <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+        <div className="relative z-10 flex gap-3 items-start">
+          <div className="shrink-0 w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/80 to-emerald-600/80 backdrop-blur flex items-center justify-center shadow-sm shadow-emerald-500/20 border border-emerald-400/20">
+            <ShieldCheck className="w-4.5 h-4.5 text-white" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <h3 className="text-lg sm:text-xl font-bold text-foreground">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground">
                 100% гарантия возврата средств
               </h3>
-              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/20">
+              <Badge className="h-5 px-1.5 text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/20">
                 2 дня
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-              Мы уверены в своём продукте. Если результат не понравится — в течение <strong className="text-foreground">2 дней</strong> с момента оплаты вернём <strong className="text-foreground">всю сумму</strong>. Гарантия действует на тарифы <strong className="text-foreground">«Пробный»</strong>, <strong className="text-foreground">«Стартовый»</strong> и <strong className="text-foreground">«Базовый»</strong>.
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Если результат не понравится — в течение <strong className="text-foreground">2 дней</strong> с момента оплаты вернём <strong className="text-foreground">всю сумму</strong>. Действует на тарифы <strong className="text-foreground">«Пробный»</strong>, <strong className="text-foreground">«Стартовый»</strong> и <strong className="text-foreground">«Базовый»</strong>. Для возврата — напишите в поддержку.
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Чтобы оформить возврат — просто напишите нам в поддержку, мы быстро решим вопрос.
-            </p>
-            <Button
-              size="sm"
-              className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white"
-              onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
-            >
-              <MessageCircle className="h-4 w-4" />
-              Написать в поддержку
-            </Button>
           </div>
         </div>
       </div>
