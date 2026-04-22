@@ -69,7 +69,10 @@ export default function Balance() {
     duration: 0.4
   }} className="space-y-4 sm:space-y-6 w-full min-w-0">
       {/* Subtle support hint — moved from pricing to top */}
-      <div className="rounded-lg border border-border/50 bg-white/5 backdrop-blur-sm px-4 py-2.5">
+      <div
+        className="rounded-lg border border-border/50 backdrop-blur-sm px-4 py-2.5"
+        style={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
+      >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <AlertCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
