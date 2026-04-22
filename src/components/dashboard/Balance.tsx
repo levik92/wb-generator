@@ -142,11 +142,11 @@ export default function Balance() {
       delay: 0.2
     }}>
         <Card className="border-border/50 w-full overflow-hidden bg-card">
-          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardHeader className="p-6 pb-3 sm:pb-4">
             <CardTitle className="text-lg sm:text-xl font-semibold">Стоимость генерации</CardTitle>
-            <CardDescription>Стоимость указана в токенах</CardDescription>
+            <CardDescription className="mt-1">Стоимость указана в токенах</CardDescription>
           </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
+          <CardContent className="p-6 pt-0">
             {pricesLoading ? <div className="flex items-center justify-center py-8">
                 <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
               </div> : <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
