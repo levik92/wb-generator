@@ -503,15 +503,10 @@ export const Settings = ({
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              Функция интеграции с Wildberries находится в разработке
-            </p>
-            <Button variant="outline" disabled className="w-full bg-muted text-muted-foreground border-muted hover:bg-muted hover:text-muted-foreground cursor-not-allowed">
-              В разработке
-            </Button>
-          </div>
+        <CardContent>
+          <Button variant="outline" disabled className="w-full bg-muted text-muted-foreground border-muted hover:bg-muted hover:text-muted-foreground cursor-not-allowed">
+            В разработке
+          </Button>
         </CardContent>
       </Card>
 
