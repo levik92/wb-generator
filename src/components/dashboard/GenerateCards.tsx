@@ -1931,7 +1931,7 @@ export const GenerateCards = ({
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative p-4 pt-8 sm:p-6 sm:pt-6">
+            <div className="relative p-6 pt-12 sm:p-6 sm:pt-6">
               <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:pr-8">
                 <div className="flex-shrink-0 hidden lg:block">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
