@@ -103,7 +103,7 @@ const Learning = () => {
             <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {videoLessons.map((lesson, index) => (
               <motion.div key={lesson.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 * index }}>
                 <Card className="overflow-hidden backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full bg-card">
