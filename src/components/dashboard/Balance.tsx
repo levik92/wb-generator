@@ -77,10 +77,10 @@ export default function Balance() {
         <Button
           size="sm"
           variant="ghost"
-          className="shrink-0 h-8 w-8 p-0 sm:h-7 sm:w-auto sm:px-2.5 sm:gap-1.5 rounded-md text-xs bg-muted text-muted-foreground hover:bg-muted hover:text-primary"
+          className="shrink-0 h-10 w-10 p-0 sm:h-7 sm:w-auto sm:px-2.5 sm:gap-1.5 rounded-lg text-xs bg-muted text-muted-foreground hover:bg-muted hover:text-primary"
           onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
         >
-          <MessageCircle className="h-3.5 w-3.5" />
+          <MessageCircle className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
           <span className="hidden sm:inline">Поддержка</span>
         </Button>
       </div>
