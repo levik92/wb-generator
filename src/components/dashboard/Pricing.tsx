@@ -244,7 +244,7 @@ export default function Pricing({
       </div>
 
       {/* 100% money-back guarantee — compact liquid glass info block */}
-      <div className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl p-3 sm:p-4">
+      <div className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-xl p-6 sm:p-4">
         <div className="absolute -top-8 -right-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
 
