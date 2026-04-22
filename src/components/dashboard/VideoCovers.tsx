@@ -583,6 +583,13 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 </div>
 
                 <div className="flex-1 min-w-0">
+                  <div className="mb-3 lg:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
+                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium text-white">
+                      100% гарантия возврата средств, если не понравится
+                    </span>
+                  </div>
+
                   <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
                     Посмотрите, какие видеообложки можно создавать
                   </h3>
@@ -590,7 +597,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                     Примеры работ и возможности нейросети — живые обложки для ваших товаров
                   </p>
 
-                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
+                  <div className="mt-3 hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
                     <ShieldCheck className="w-4 h-4 text-white shrink-0" />
                     <span className="text-xs sm:text-sm font-medium text-white">
                       100% гарантия возврата средств, если не понравится
@@ -598,7 +605,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
                   <Button
                     className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                     asChild
