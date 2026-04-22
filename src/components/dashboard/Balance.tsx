@@ -69,7 +69,7 @@ export default function Balance() {
     duration: 0.4
   }} className="space-y-4 sm:space-y-6 w-full min-w-0">
       {/* Subtle support hint — moved from pricing to top */}
-      <div className="rounded-lg border border-border bg-card px-4 py-2.5 shadow-sm">
+      <div className="rounded-lg border border-border/50 bg-card/10 backdrop-blur-sm px-4 py-2.5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <AlertCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -80,7 +80,7 @@ export default function Balance() {
           <Button
             size="sm"
             variant="ghost"
-            className="shrink-0 h-7 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full sm:w-auto"
+            className="shrink-0 h-7 gap-1.5 px-2.5 text-xs bg-muted text-muted-foreground hover:bg-muted hover:text-primary w-full sm:w-auto"
             onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
           >
             <MessageCircle className="h-3.5 w-3.5" />
