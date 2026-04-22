@@ -69,27 +69,20 @@ export default function Balance() {
     duration: 0.4
   }} className="space-y-4 sm:space-y-6 w-full min-w-0">
       {/* Subtle support hint — moved from pricing to top */}
-      <div
-        className="rounded-lg border border-border/50 backdrop-blur-sm px-4 py-2.5"
-        style={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
-      >
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <span className="text-xs leading-relaxed text-muted-foreground">
-              Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Поможем пополнить баланс.
-            </span>
-          </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="shrink-0 h-7 gap-1.5 px-2.5 text-xs bg-muted text-muted-foreground hover:bg-muted hover:text-primary w-full sm:w-auto"
-            onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
-          >
-            <MessageCircle className="h-3.5 w-3.5" />
-            Поддержка
-          </Button>
-        </div>
+      <div className="flex items-center gap-2.5 w-full">
+        <AlertCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span className="flex-1 min-w-0 text-xs leading-relaxed text-muted-foreground">
+          Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Поможем пополнить баланс.
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="shrink-0 h-7 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-primary hover:bg-transparent sm:bg-muted sm:hover:bg-muted"
+          onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Поддержка</span>
+        </Button>
       </div>
 
       {/* Balance Header */}
