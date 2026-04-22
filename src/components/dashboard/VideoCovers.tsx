@@ -566,16 +566,16 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
             {/* Shimmer */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
 
-            <div className="relative p-4 sm:p-6">
-              <button
-                onClick={handleDismissPromo}
-                className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-10"
-                aria-label="Закрыть"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <button
+              onClick={handleDismissPromo}
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-20"
+              aria-label="Закрыть"
+            >
+              <X className="w-4 h-4" />
+            </button>
 
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 pr-8">
+            <div className="relative p-4 pt-8 sm:p-6 sm:pt-6">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:pr-8">
                 <div className="flex-shrink-0 hidden lg:block">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                     <Video className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
