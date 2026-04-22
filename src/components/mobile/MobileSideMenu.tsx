@@ -143,7 +143,7 @@ export const MobileSideMenu = ({
         touchAction: 'pan-y'
       }}>
             {/* Glass effect background */}
-            <div className="absolute inset-0 bg-background/95 backdrop-blur-xl border-r border-border/50 shadow-2xl" />
+            <div className="absolute inset-0 bg-background border-r border-border/50 shadow-2xl" />
             
             <div className="relative flex flex-col h-full pb-20">
               {/* Header */}
