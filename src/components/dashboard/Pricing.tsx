@@ -263,7 +263,7 @@ export default function Pricing({
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              Если результат не понравится — в течение <strong className="text-foreground">2 дней</strong> с момента оплаты вернём <strong className="text-foreground">всю сумму</strong>. Действует на тарифы <strong className="text-foreground">«Пробный»</strong>, <strong className="text-foreground">«Стартовый»</strong> и <strong className="text-foreground">«Базовый»</strong>. Для возврата — напишите в поддержку.
+              Если результат не понравится — в течение 2 дней с момента оплаты вернём всю сумму. Действует на тарифы «Пробный», «Стартовый» и «Базовый». Для возврата — напишите в поддержку.
             </p>
           </div>
         </div>
