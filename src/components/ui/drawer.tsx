@@ -40,8 +40,12 @@ const DrawerContent = React.forwardRef<
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
+      style={{
+        // Lift the drawer above the on-screen keyboard so focused inputs stay visible
+        bottom: "var(--keyboard-inset-height, 0px)",
+      }}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        "fixed inset-x-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background transition-[bottom] duration-150",
         className
       )}
       {...props}
