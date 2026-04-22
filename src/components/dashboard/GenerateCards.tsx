@@ -17,7 +17,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn, ExternalLink, Coins, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GenerationPopups } from "./GenerationPopups";
 import JSZip from 'jszip';
@@ -127,6 +128,16 @@ export const GenerateCards = ({
   const [isIdentifying, setIsIdentifying] = useState(false);
   const [previousJobStatus, setPreviousJobStatus] = useState<string | null>(null);
   const [downloadingAll, setDownloadingAll] = useState(false);
+
+  // Cards promo banner dismissal
+  const CARDS_PROMO_KEY = `cards_promo_banner_dismissed_${profile.id}`;
+  const [isCardsPromoVisible, setIsCardsPromoVisible] = useState(() => {
+    return localStorage.getItem(CARDS_PROMO_KEY) !== "true";
+  });
+  const handleDismissCardsPromo = () => {
+    localStorage.setItem(CARDS_PROMO_KEY, "true");
+    setIsCardsPromoVisible(false);
+  };
   const [isDragOver, setIsDragOver] = useState(false);
   const [isRefDragOver, setIsRefDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
@@ -1887,6 +1898,90 @@ export const GenerateCards = ({
         </CardContent>
       </Card>
 
+
+      {/* Cards Promo Banner */}
+      <AnimatePresence>
+        {isCardsPromoVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="relative overflow-hidden rounded-2xl"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-primary to-fuchsia-500 animate-gradient-x" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
+
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <Images className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
+              <Sparkles className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
+              <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
+              <TrendingUp className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
+              <Images className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
+              <Sparkles className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+
+            <div className="relative p-4 sm:p-6">
+              <button
+                onClick={handleDismissCardsPromo}
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-10"
+                aria-label="Закрыть"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 pr-8">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Images className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
+                    Посмотрите кейсы — карточки, которые продают
+                  </h3>
+                  <p className="text-sm text-white/80 line-clamp-2">
+                    Реальные примеры роста конверсии до +260% после редизайна карточек на WBGen
+                  </p>
+
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
+                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium text-white">
+                      100% гарантия возврата средств, если не понравится
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-shrink-0">
+                  <Button
+                    className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
+                    asChild
+                  >
+                    <a href="/cases" target="_blank" rel="noopener noreferrer">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Посмотреть
+                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                    </a>
+                  </Button>
+                  {onNavigateToBalance && (
+                    <Button
+                      variant="outline"
+                      onClick={onNavigateToBalance}
+                      className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                    >
+                      <Coins className="w-4 h-4 mr-2" />
+                      Пополнить баланс
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Generation Popups */}
       {onNavigateToLearning && (
