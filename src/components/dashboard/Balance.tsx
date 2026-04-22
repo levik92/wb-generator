@@ -68,6 +68,27 @@ export default function Balance() {
   }} transition={{
     duration: 0.4
   }} className="space-y-4 sm:space-y-6 w-full min-w-0">
+      {/* Subtle support hint — moved from pricing to top */}
+      <div className="rounded-lg border border-border/40 bg-muted/30 px-4 py-2.5 opacity-80 hover:opacity-100 transition-opacity">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <span className="text-xs leading-relaxed text-muted-foreground">
+              Если платёж не создаётся или возникает ошибка — обратитесь в поддержку. Поможем пополнить баланс.
+            </span>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="shrink-0 h-7 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 w-full sm:w-auto"
+            onClick={() => window.open('https://t.me/wbgen_support', '_blank')}
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            Поддержка
+          </Button>
+        </div>
+      </div>
+
       {/* Balance Header */}
       <motion.div initial={{
       opacity: 0,
