@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, BookOpen, Smartphone, Download, Share, PlusSquare } from "lucide-react";
+import { BookOpen, Smartphone, Download, Share, PlusSquare } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface GenerationPopupsProps {
@@ -12,7 +12,6 @@ interface GenerationPopupsProps {
 }
 
 // Storage keys
-const WELCOME_POPUP_KEY = "welcome_cases_popup_shown";
 const FIRST_GEN_POPUP_KEY = "first_generation_learning_shown";
 const PWA_POPUP_KEY = "pwa_install_popup_count";
 
@@ -21,22 +20,9 @@ export const GenerationPopups = ({
   generationCount,
   onNavigateToLearning
 }: GenerationPopupsProps) => {
-  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showLearningPopup, setShowLearningPopup] = useState(false);
   const [showPwaPopup, setShowPwaPopup] = useState(false);
   const [previousGenerationCount, setPreviousGenerationCount] = useState<number | null>(null);
-
-  // Check for welcome popup on mount
-  useEffect(() => {
-    const welcomeShown = localStorage.getItem(`${WELCOME_POPUP_KEY}_${userId}`);
-    if (!welcomeShown) {
-      // Delay to allow page to load
-      const timer = setTimeout(() => {
-        setShowWelcomePopup(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [userId]);
 
   // Track generation count changes
   useEffect(() => {
@@ -70,17 +56,6 @@ export const GenerationPopups = ({
     }
   };
 
-  const handleWelcomeClose = () => {
-    localStorage.setItem(`${WELCOME_POPUP_KEY}_${userId}`, "true");
-    setShowWelcomePopup(false);
-  };
-
-  const handleWelcomeViewCases = () => {
-    localStorage.setItem(`${WELCOME_POPUP_KEY}_${userId}`, "true");
-    window.open("/cases", "_blank");
-    setShowWelcomePopup(false);
-  };
-
   const handleLearningClose = () => {
     localStorage.setItem(`${FIRST_GEN_POPUP_KEY}_${userId}`, "true");
     setShowLearningPopup(false);
@@ -109,38 +84,6 @@ export const GenerationPopups = ({
 
   return (
     <>
-      {/* Welcome popup - View cases before paying */}
-      <Dialog open={showWelcomePopup} onOpenChange={(open) => { if (!open) handleWelcomeClose(); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <ExternalLink className="w-8 h-8 text-primary" />
-              </motion.div>
-            </div>
-            <DialogTitle className="text-center text-xl">
-              Перед оплатой — посмотрите результаты
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              Узнайте, какие карточки создают другие селлеры в нашем сервисе. 
-              Это поможет вам понять возможности генерации и принять решение.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button variant="outline" onClick={handleWelcomeClose} className="w-full sm:w-auto">
-              Позже
-            </Button>
-            <Button onClick={handleWelcomeViewCases} className="w-full sm:w-auto">
-              Смотреть примеры
-              <ExternalLink className="w-4 h-4 ml-2" />
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Learning popup - After first generation */}
       <ResponsiveDialog open={showLearningPopup} onOpenChange={handleLearningOpenChange}>
         <ResponsiveDialogContent className="sm:max-w-md">
