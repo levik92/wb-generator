@@ -108,8 +108,17 @@ export default function PaymentHistory() {
         return <Badge variant="default">Успешно</Badge>;
       case 'pending':
         return <Badge variant="secondary">В обработке</Badge>;
+      case 'waiting_for_capture':
+        return <Badge variant="secondary">Ожидает списания</Badge>;
       case 'canceled':
-        return <Badge variant="destructive">Отменен</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive">Отменён</Badge>;
+      case 'expired':
+        return <Badge variant="destructive">Истёк</Badge>;
+      case 'failed':
+        return <Badge variant="destructive">Ошибка</Badge>;
+      case 'refunded':
+        return <Badge variant="outline">Возвращён</Badge>;
       default:
         return <Badge variant="secondary">{payment.status}</Badge>;
     }
