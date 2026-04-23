@@ -30,7 +30,7 @@ export const WithdrawalButton = ({
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const minWithdrawal = 5000;
+  const minWithdrawal = 1000;
   const canWithdraw = balance >= minWithdrawal;
 
   const handleWithdraw = async () => {
@@ -80,7 +80,7 @@ export const WithdrawalButton = ({
         onClick={handleWithdraw}
         disabled={!canWithdraw || loading}
         size="sm"
-        className="w-full sm:w-auto sm:order-1"
+        className="w-full sm:w-auto sm:order-2"
       >
         Вывести средства
       </Button>

@@ -334,9 +334,9 @@ const Partner = () => {
                   </div>
                   {partner && (
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
-                      {partner.current_balance < 5000 && (
-                        <p className="text-xs text-muted-foreground sm:order-2">
-                          Минимум для вывода: 5 000 ₽
+                      {partner.current_balance < 1000 && (
+                        <p className="text-xs text-muted-foreground sm:order-1">
+                          Минимум для вывода: 1 000 ₽
                         </p>
                       )}
                       <WithdrawalButton balance={partner.current_balance} partnerId={partner.id} hasBankDetails={hasBankDetails} onSuccess={loadPartnerData} />
