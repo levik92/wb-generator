@@ -1258,21 +1258,36 @@ export const GenerateCards = ({
 
       // Find the job ID to query (current active job or the one this image belongs to)
       // CRITICAL: prioritize image.jobId since currentJobId is cleared after job completion
-      let jobIdForRegeneration = image.jobId || currentJobId;
-      
-      // Fallback: fetch job_id from generation_tasks if still not available
+      let jobIdForRegeneration = image.jobId || image.job_id || currentJobId;
+
+      // Fallback 1: image came from History — use generation_id to find the job
+      if (!jobIdForRegeneration && (image.generationId || image.generation_id)) {
+        const genId = image.generationId || image.generation_id;
+        const { data: genRow } = await supabase
+          .from('generations')
+          .select('input_data, output_data')
+          .eq('id', genId)
+          .maybeSingle();
+        const inputJobId = (genRow?.input_data as any)?.job_id;
+        const outputJobId = (genRow?.output_data as any)?.job_id;
+        if (inputJobId || outputJobId) {
+          jobIdForRegeneration = inputJobId || outputJobId;
+        }
+      }
+
+      // Fallback 2: try generation_tasks lookup by image.id (if it happens to be a task id)
       if (!jobIdForRegeneration && image.id) {
         const { data: taskData } = await supabase
           .from('generation_tasks')
           .select('job_id')
           .eq('id', image.id)
           .maybeSingle();
-        
+
         if (taskData?.job_id) {
           jobIdForRegeneration = taskData.job_id;
         }
       }
-      
+
       if (jobIdForRegeneration) {
         // BEST SOURCE: Fetch from database - contains complete data including reference
         const { data: job, error: jobError } = await supabase
@@ -1280,12 +1295,12 @@ export const GenerateCards = ({
           .select('product_name, category, description, product_images')
           .eq('id', jobIdForRegeneration)
           .single();
-        
+
         if (!jobError && job) {
           productNameToUse = job.product_name || '';
           categoryToUse = job.category || 'товар';
           descriptionToUse = job.description || '';
-          
+
           if (job.product_images && Array.isArray(job.product_images) && job.product_images.length > 0) {
             allProductImages = (job.product_images as Array<{ url: string; name?: string; type?: string }>).map((img, idx) => ({
               url: img.url,
@@ -1293,9 +1308,11 @@ export const GenerateCards = ({
               type: img.type || 'product'
             }));
           }
+        } else if (jobError) {
+          console.error('[Regenerate] generation_jobs fetch failed', { jobIdForRegeneration, jobError });
         }
       }
-      
+
       // Fallback to jobData if DB fetch didn't work
       if (allProductImages.length === 0 && jobData?.productImages && jobData.productImages.length > 0) {
         allProductImages = jobData.productImages.map((img: { url: string; name?: string; type?: string }, idx: number) => ({
@@ -1307,7 +1324,7 @@ export const GenerateCards = ({
         categoryToUse = categoryToUse || jobData.category || 'товар';
         descriptionToUse = descriptionToUse || jobData.description || '';
       }
-      
+
       // Last fallback: uploadedProductImages state
       if (allProductImages.length === 0 && uploadedProductImages.length > 0) {
         allProductImages = uploadedProductImages.map((img, idx) => ({
@@ -1316,25 +1333,43 @@ export const GenerateCards = ({
           type: img.type || 'product'
         }));
       }
-      
+
       // Final fallback for text fields: form fields
       if (!productNameToUse) productNameToUse = productName;
       if (!categoryToUse || categoryToUse === 'товар') categoryToUse = category || 'товар';
       if (!descriptionToUse) descriptionToUse = description;
-      
+
       if (allProductImages.length === 0) {
+        console.error('[Regenerate] aborted: no source images', {
+          reason: 'no_source_images',
+          imageId: image?.id,
+          imageJobId: image?.jobId,
+          imageGenerationId: image?.generationId || image?.generation_id,
+          jobIdForRegeneration,
+          hasJobData: !!jobData,
+          jobDataImages: jobData?.productImages?.length || 0,
+          uploadedCount: uploadedProductImages.length,
+          currentJobId,
+        });
         throw new Error('Оригинальные изображения недоступны');
       }
-      
+
       // Log regeneration context for debugging
       const referenceCount = allProductImages.filter(img => img.type === 'reference').length;
       const productCount = allProductImages.filter(img => img.type === 'product').length;
       console.log(`[Regeneration] cardType: ${image.cardType}, images: ${allProductImages.length} (product: ${productCount}, reference: ${referenceCount})`);
-      
+
       // First product image URL for backward compatibility
       const sourceImageUrl = allProductImages.find(img => img.type === 'product')?.url || allProductImages[0].url;
 
       if (!productNameToUse?.trim()) {
+        console.error('[Regenerate] aborted: no product name', {
+          reason: 'no_product_name',
+          imageId: image?.id,
+          jobIdForRegeneration,
+          hasJobData: !!jobData,
+          formProductName: productName,
+        });
         throw new Error('Название товара недоступно');
       }
 
@@ -1387,9 +1422,35 @@ export const GenerateCards = ({
       }
     } catch (error: any) {
       console.error('Error regenerating card:', error);
+
+      // Map specific errors to actionable user-friendly messages
+      let title = "Ошибка перегенерации";
+      let description = "Не удалось перегенерировать карточку. Попробуйте позже";
+
+      const message = error?.message || '';
+      const errorName = error?.name || '';
+      const isNetworkError =
+        errorName === 'FunctionsFetchError' ||
+        message.toLowerCase().includes('failed to fetch') ||
+        message.toLowerCase().includes('network');
+
+      if (message === 'Оригинальные изображения недоступны') {
+        title = "Не найдены исходные изображения";
+        description = "Откройте генерацию заново из истории и попробуйте снова";
+      } else if (message === 'Название товара недоступно') {
+        title = "Не определено название товара";
+        description = "Перезагрузите страницу и попробуйте ещё раз";
+      } else if (isNetworkError) {
+        title = "Нет связи с сервером";
+        description = "Проверьте интернет-соединение и попробуйте снова";
+      } else if (error?.context?.status === 402 || message.toLowerCase().includes('insufficient')) {
+        title = "Недостаточно токенов";
+        description = "Пополните баланс, чтобы продолжить";
+      }
+
       toast({
-        title: "Ошибка перегенерации",
-        description: "Не удалось перегенерировать карточку. Попробуйте позже",
+        title,
+        description,
         variant: "destructive"
       });
 
