@@ -230,6 +230,14 @@ export const GenerateCards = ({
       }
     };
   }, [pollingInterval]);
+
+  // Reset stuck regenerating buttons when component unmounts
+  // (e.g. user switches tabs while regeneration polling was in flight)
+  useEffect(() => {
+    return () => {
+      setRegeneratingCards(new Set());
+    };
+  }, []);
   const checkForActiveJobs = async () => {
     try {
       // Check for any recent jobs that might have completed while user was offline
