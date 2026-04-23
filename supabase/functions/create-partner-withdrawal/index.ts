@@ -42,8 +42,8 @@ Deno.serve(async (req) => {
     }
 
     // Check minimum amount
-    if (amount < 5000) {
-      throw new Error('Минимальная сумма для вывода 5000 ₽');
+    if (amount < 1000) {
+      throw new Error('Минимальная сумма для вывода 1000 ₽');
     }
 
     // Check sufficient balance
