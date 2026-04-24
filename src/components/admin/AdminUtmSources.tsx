@@ -453,23 +453,23 @@ export function AdminUtmSources() {
                       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
                         <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Переходы</p>
-                          <p className="text-lg font-bold text-blue-500">{s.visits}</p>
+                          {renderNum(s.visits, "text-blue-500")}
                         </div>
                         <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
-                          <p className="text-sm font-semibold text-muted-foreground">{getConversion(s.visits, s.registrations)}</p>
+                          {renderConv(s.visits, s.registrations)}
                         </div>
                         <div className="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Регистрации</p>
-                          <p className="text-lg font-bold text-emerald-500">{s.registrations}</p>
+                          {renderNum(s.registrations, "text-emerald-500")}
                         </div>
                         <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
-                          <p className="text-sm font-semibold text-muted-foreground">{getConversion(s.registrations, s.payments)}</p>
+                          {renderConv(s.registrations, s.payments)}
                         </div>
                         <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
-                          <p className="text-lg font-bold text-amber-500">{s.payments}</p>
+                          {renderNum(s.payments, "text-amber-500")}
                         </div>
                       </div>
                       
@@ -477,11 +477,11 @@ export function AdminUtmSources() {
                       <div className="flex sm:hidden gap-2">
                         <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground">Переход → Рег.</p>
-                          <p className="text-xs font-semibold">{getConversion(s.visits, s.registrations)}</p>
+                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.visits, s.registrations)}</p>}
                         </div>
                         <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground">Рег. → Оплата</p>
-                          <p className="text-xs font-semibold">{getConversion(s.registrations, s.payments)}</p>
+                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.registrations, s.payments)}</p>}
                         </div>
                       </div>
                     </div>
