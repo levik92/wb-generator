@@ -236,7 +236,7 @@ serve(async (req) => {
               };
             } else {
               if (!GOOGLE_GEMINI_API_KEY) throw new Error("GOOGLE_GEMINI_API_KEY not configured");
-              aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`;
+              aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${GOOGLE_GEMINI_API_KEY}`;
               aiHeaders = {
                 "Content-Type": "application/json",
               };
