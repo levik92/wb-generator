@@ -52,7 +52,7 @@ interface AdminUsersProps {
   onUsersUpdate: () => void;
 }
 
-type PaymentFilter = 'all' | 'paid' | 'free';
+
 
 export function AdminUsers({
   users,
