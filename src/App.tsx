@@ -48,6 +48,8 @@ const Friends = lazy(() => import("./pages/Friends"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage"));
 const Promo = lazy(() => import("./pages/Promo"));
 const PromoThanks = lazy(() => import("./pages/PromoThanks"));
+const PromoTwo = lazy(() => import("./pages/PromoTwo"));
+const PromoTwoThanks = lazy(() => import("./pages/PromoTwoThanks"));
 
 const queryClient = new QueryClient();
 
@@ -145,6 +147,8 @@ const App = () => {
             {/* Promo pages — isolated for ad traffic */}
             <Route path="/promo" element={<Promo />} />
             <Route path="/promo/thanks" element={<PromoThanks />} />
+            <Route path="/promotwo" element={<PromoTwo />} />
+            <Route path="/promotwo/thanks" element={<PromoTwoThanks />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
