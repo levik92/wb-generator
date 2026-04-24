@@ -34,6 +34,7 @@ const PAGE_SIZE = 20;
 export function AdminUtmSources() {
   const [sources, setSources] = useState<UtmSource[]>([]);
   const [stats, setStats] = useState<Record<string, UtmStats>>({});
+  const [statsLoading, setStatsLoading] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -56,42 +57,72 @@ export function AdminUtmSources() {
     setFormBaseUrl(publicSiteUrl);
   };
 
-  const fetchStatsFor = async (items: UtmSource[]): Promise<Record<string, UtmStats>> => {
-    const statsMap: Record<string, UtmStats> = {};
-    for (const source of items) {
-      const { count: visitsCount } = await supabase
+  const fetchStatsForOne = async (source: UtmSource): Promise<UtmStats> => {
+    const [visitsRes, regsRes, utmProfilesRes] = await Promise.all([
+      supabase
         .from('utm_visits')
         .select('id', { count: 'exact', head: true })
-        .eq('utm_source_id', source.id);
-      
-      const { count: regsCount } = await supabase
+        .eq('utm_source_id', source.id),
+      supabase
         .from('profiles')
         .select('id', { count: 'exact', head: true })
-        .eq('utm_source_id', source.id);
-      
-      const { data: utmProfiles } = await supabase
+        .eq('utm_source_id', source.id),
+      supabase
         .from('profiles')
         .select('id')
-        .eq('utm_source_id', source.id);
-      
-      let paymentsCount = 0;
-      if (utmProfiles && utmProfiles.length > 0) {
-        const userIds = utmProfiles.map(p => p.id);
-        const { count } = await supabase
-          .from('payments')
-          .select('id', { count: 'exact', head: true })
-          .in('user_id', userIds)
-          .eq('status', 'succeeded');
-        paymentsCount = count || 0;
-      }
-      
-      statsMap[source.id] = {
-        visits: visitsCount || 0,
-        registrations: regsCount || 0,
-        payments: paymentsCount,
-      };
+        .eq('utm_source_id', source.id),
+    ]);
+
+    let paymentsCount = 0;
+    const utmProfiles = utmProfilesRes.data;
+    if (utmProfiles && utmProfiles.length > 0) {
+      const userIds = utmProfiles.map(p => p.id);
+      const { count } = await supabase
+        .from('payments')
+        .select('id', { count: 'exact', head: true })
+        .in('user_id', userIds)
+        .eq('status', 'succeeded');
+      paymentsCount = count || 0;
     }
-    return statsMap;
+
+    return {
+      visits: visitsRes.count || 0,
+      registrations: regsRes.count || 0,
+      payments: paymentsCount,
+    };
+  };
+
+  /**
+   * Stream stats per source: marks each as loading, then fills as it resolves.
+   * Returns the final aggregated map (for callers that need it).
+   */
+  const streamStatsFor = async (items: UtmSource[]): Promise<Record<string, UtmStats>> => {
+    if (items.length === 0) return {};
+    // Mark all as loading
+    setStatsLoading(prev => {
+      const next = { ...prev };
+      for (const it of items) next[it.id] = true;
+      return next;
+    });
+
+    const results: Record<string, UtmStats> = {};
+    await Promise.all(
+      items.map(async (source) => {
+        try {
+          const s = await fetchStatsForOne(source);
+          results[source.id] = s;
+          // Update progressively as each one resolves
+          setStats(prev => ({ ...prev, [source.id]: s }));
+        } catch (e) {
+          console.error('UTM stats fetch error:', e);
+          results[source.id] = { visits: 0, registrations: 0, payments: 0 };
+          setStats(prev => ({ ...prev, [source.id]: results[source.id] }));
+        } finally {
+          setStatsLoading(prev => ({ ...prev, [source.id]: false }));
+        }
+      })
+    );
+    return results;
   };
 
   const fetchPage = useCallback(async (offset: number) => {
@@ -112,12 +143,12 @@ export function AdminUtmSources() {
       const page = await fetchPage(0);
       setSources(page);
       setHasMore(page.length === PAGE_SIZE);
-      const newStats = await fetchStatsFor(page);
-      setStats(newStats);
+      // Show cards immediately; stats stream in with per-card spinners
+      setLoading(false);
+      streamStatsFor(page);
     } catch (e) {
       console.error(e);
       toast.error("Не удалось загрузить данные UTM");
-    } finally {
       setLoading(false);
     }
   }, [fetchPage]);
@@ -132,8 +163,7 @@ export function AdminUtmSources() {
       } else {
         setSources(prev => [...prev, ...page]);
         setHasMore(page.length === PAGE_SIZE);
-        const newStats = await fetchStatsFor(page);
-        setStats(prev => ({ ...prev, ...newStats }));
+        streamStatsFor(page);
       }
     } catch (e) {
       console.error(e);
@@ -175,8 +205,7 @@ export function AdminUtmSources() {
       const items = (data || []) as UtmSource[];
       setSources(items);
       setHasMore(items.length === targetCount);
-      const newStats = await fetchStatsFor(items);
-      setStats(newStats);
+      streamStatsFor(items);
     } catch (e) {
       console.error(e);
     } finally {
@@ -298,7 +327,15 @@ export function AdminUtmSources() {
       </div>
 
       {/* Summary stats */}
-      {sources.length > 0 && (
+      {sources.length > 0 && (() => {
+        const anyLoading = Object.values(statsLoading).some(Boolean);
+        const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
+        const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
+        const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
+        const summaryNum = (val: number) => anyLoading
+          ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
+        return (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -317,24 +354,25 @@ export function AdminUtmSources() {
               <MousePointerClick className="w-4 h-4 text-blue-500" />
               <span className="text-xs text-muted-foreground">Переходов</span>
             </div>
-            <p className="text-xl font-bold">{Object.values(stats).reduce((s, v) => s + v.visits, 0).toLocaleString('ru-RU')}</p>
+            {summaryNum(sumVisits)}
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-4 h-4 text-emerald-500" />
               <span className="text-xs text-muted-foreground">Регистраций</span>
             </div>
-            <p className="text-xl font-bold">{Object.values(stats).reduce((s, v) => s + v.registrations, 0).toLocaleString('ru-RU')}</p>
+            {summaryNum(sumRegs)}
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
               <CreditCard className="w-4 h-4 text-amber-500" />
               <span className="text-xs text-muted-foreground">Оплат</span>
             </div>
-            <p className="text-xl font-bold">{Object.values(stats).reduce((s, v) => s + v.payments, 0).toLocaleString('ru-RU')}</p>
+            {summaryNum(sumPay)}
           </div>
         </motion.div>
-      )}
+        );
+      })()}
 
       {/* Sources list */}
       {sources.length === 0 ? (
@@ -349,6 +387,13 @@ export function AdminUtmSources() {
         <div className="space-y-3">
           {sources.map((source, index) => {
             const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0 };
+            const isStatLoading = !!statsLoading[source.id];
+            const renderNum = (val: number, color: string) => isStatLoading
+              ? <Loader2 className={cn("w-4 h-4 mx-auto animate-spin", color)} />
+              : <p className={cn("text-lg font-bold", color)}>{val}</p>;
+            const renderConv = (from: number, to: number) => isStatLoading
+              ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" />
+              : <p className="text-sm font-semibold text-muted-foreground">{getConversion(from, to)}</p>;
             return (
               <motion.div
                 key={source.id}
@@ -417,23 +462,23 @@ export function AdminUtmSources() {
                       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
                         <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Переходы</p>
-                          <p className="text-lg font-bold text-blue-500">{s.visits}</p>
+                          {renderNum(s.visits, "text-blue-500")}
                         </div>
                         <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
-                          <p className="text-sm font-semibold text-muted-foreground">{getConversion(s.visits, s.registrations)}</p>
+                          {renderConv(s.visits, s.registrations)}
                         </div>
                         <div className="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Регистрации</p>
-                          <p className="text-lg font-bold text-emerald-500">{s.registrations}</p>
+                          {renderNum(s.registrations, "text-emerald-500")}
                         </div>
                         <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
-                          <p className="text-sm font-semibold text-muted-foreground">{getConversion(s.registrations, s.payments)}</p>
+                          {renderConv(s.registrations, s.payments)}
                         </div>
                         <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
-                          <p className="text-lg font-bold text-amber-500">{s.payments}</p>
+                          {renderNum(s.payments, "text-amber-500")}
                         </div>
                       </div>
                       
@@ -441,11 +486,11 @@ export function AdminUtmSources() {
                       <div className="flex sm:hidden gap-2">
                         <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground">Переход → Рег.</p>
-                          <p className="text-xs font-semibold">{getConversion(s.visits, s.registrations)}</p>
+                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.visits, s.registrations)}</p>}
                         </div>
                         <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground">Рег. → Оплата</p>
-                          <p className="text-xs font-semibold">{getConversion(s.registrations, s.payments)}</p>
+                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.registrations, s.payments)}</p>}
                         </div>
                       </div>
                     </div>
