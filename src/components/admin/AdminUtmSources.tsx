@@ -378,6 +378,13 @@ export function AdminUtmSources() {
         <div className="space-y-3">
           {sources.map((source, index) => {
             const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0 };
+            const isStatLoading = !!statsLoading[source.id];
+            const renderNum = (val: number, color: string) => isStatLoading
+              ? <Loader2 className={cn("w-4 h-4 mx-auto animate-spin", color)} />
+              : <p className={cn("text-lg font-bold", color)}>{val}</p>;
+            const renderConv = (from: number, to: number) => isStatLoading
+              ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" />
+              : <p className="text-sm font-semibold text-muted-foreground">{getConversion(from, to)}</p>;
             return (
               <motion.div
                 key={source.id}
