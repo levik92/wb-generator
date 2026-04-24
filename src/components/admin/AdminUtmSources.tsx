@@ -327,7 +327,15 @@ export function AdminUtmSources() {
       </div>
 
       {/* Summary stats */}
-      {sources.length > 0 && (
+      {sources.length > 0 && (() => {
+        const anyLoading = Object.values(statsLoading).some(Boolean);
+        const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
+        const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
+        const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
+        const summaryNum = (val: number) => anyLoading
+          ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
+        return (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -346,24 +354,25 @@ export function AdminUtmSources() {
               <MousePointerClick className="w-4 h-4 text-blue-500" />
               <span className="text-xs text-muted-foreground">Переходов</span>
             </div>
-            <p className="text-xl font-bold">{Object.values(stats).reduce((s, v) => s + v.visits, 0).toLocaleString('ru-RU')}</p>
+            {summaryNum(sumVisits)}
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-4 h-4 text-emerald-500" />
               <span className="text-xs text-muted-foreground">Регистраций</span>
             </div>
-            <p className="text-xl font-bold">{Object.values(stats).reduce((s, v) => s + v.registrations, 0).toLocaleString('ru-RU')}</p>
+            {summaryNum(sumRegs)}
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
               <CreditCard className="w-4 h-4 text-amber-500" />
               <span className="text-xs text-muted-foreground">Оплат</span>
             </div>
-            <p className="text-xl font-bold">{Object.values(stats).reduce((s, v) => s + v.payments, 0).toLocaleString('ru-RU')}</p>
+            {summaryNum(sumPay)}
           </div>
         </motion.div>
-      )}
+        );
+      })()}
 
       {/* Sources list */}
       {sources.length === 0 ? (
