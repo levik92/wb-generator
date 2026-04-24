@@ -5,7 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import "@/styles/landing-theme.css";
 
-const PromoThanks = () => {
+const PromoTwoThanks = () => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(10);
 
@@ -84,4 +84,4 @@ const PromoThanks = () => {
   );
 };
 
-export default PromoThanks;
+export default PromoTwoThanks;

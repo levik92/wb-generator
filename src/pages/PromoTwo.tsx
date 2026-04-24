@@ -31,7 +31,7 @@ const steps = [
   { icon: Download, title: "Скачайте и разместите", desc: "Готовый результат сразу подходит для Wildberries и Ozon" },
 ];
 
-const Promo = () => {
+const PromoTwo = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const Promo = () => {
   // The promo_loaded goal is sent centrally by YandexMetrika.tsx on mount,
   // so this handler only needs to navigate.
   const goToThanks = () => {
-    navigate("/promo/thanks");
+    navigate("/promotwo/thanks");
   };
 
   return (
@@ -238,4 +238,4 @@ const Promo = () => {
   );
 };
 
-export default Promo;
+export default PromoTwo;
