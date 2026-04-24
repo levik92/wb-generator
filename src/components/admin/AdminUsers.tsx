@@ -20,7 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SurveyStats } from "./SurveyStats";
 import { TransactionDetailDialog } from "./TransactionDetailDialog";
-import { UserFiltersPopover, EMPTY_FILTERS, type UserFiltersState } from "./UserFiltersPopover";
+import { UserFiltersPopover, type UserFiltersState } from "./UserFiltersPopover";
 
 interface User {
   id: string;
