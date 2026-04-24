@@ -143,12 +143,12 @@ export function AdminUtmSources() {
       const page = await fetchPage(0);
       setSources(page);
       setHasMore(page.length === PAGE_SIZE);
-      const newStats = await fetchStatsFor(page);
-      setStats(newStats);
+      // Show cards immediately; stats stream in with per-card spinners
+      setLoading(false);
+      streamStatsFor(page);
     } catch (e) {
       console.error(e);
       toast.error("Не удалось загрузить данные UTM");
-    } finally {
       setLoading(false);
     }
   }, [fetchPage]);
@@ -163,8 +163,7 @@ export function AdminUtmSources() {
       } else {
         setSources(prev => [...prev, ...page]);
         setHasMore(page.length === PAGE_SIZE);
-        const newStats = await fetchStatsFor(page);
-        setStats(prev => ({ ...prev, ...newStats }));
+        streamStatsFor(page);
       }
     } catch (e) {
       console.error(e);
