@@ -34,6 +34,7 @@ const PAGE_SIZE = 20;
 export function AdminUtmSources() {
   const [sources, setSources] = useState<UtmSource[]>([]);
   const [stats, setStats] = useState<Record<string, UtmStats>>({});
+  const [statsLoading, setStatsLoading] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
