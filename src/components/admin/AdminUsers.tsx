@@ -67,9 +67,21 @@ export function AdminUsers({
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [paidUserIds, setPaidUserIds] = useState<Set<string>>(new Set());
-  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
+  const [filters, setFilters] = useState<UserFiltersState>({
+    payment: new Set(),
+    activity: new Set(),
+    utm: new Set(),
+    who: new Set(),
+    volume: new Set(),
+    channel: new Set(),
+  });
   const [paidDataLoading, setPaidDataLoading] = useState(true);
   const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  // Filter source data
+  const [profileUtmMap, setProfileUtmMap] = useState<Record<string, string>>({}); // user_id -> utm_source_id
+  const [surveyByUser, setSurveyByUser] = useState<Record<string, Record<string, string>>>({});
+  // user_id -> { question_key: answer }
+  const [utmSources, setUtmSources] = useState<{ id: string; name: string }[]>([]);
   const isMobile = useIsMobile();
   const usersPerPage = 20;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
@@ -99,19 +111,135 @@ export function AdminUsers({
     loadPaidUsers();
   }, []);
 
-  // Update filtered users when users prop, search, or filter changes
+  // Load filter source data: UTM mapping, survey responses, UTM source list
   useEffect(() => {
-    let filtered = users.filter(user => user.email.toLowerCase().includes(searchEmail.toLowerCase()));
-    
-    if (paymentFilter === 'paid') {
-      filtered = filtered.filter(user => paidUserIds.has(user.id));
-    } else if (paymentFilter === 'free') {
-      filtered = filtered.filter(user => !paidUserIds.has(user.id));
+    const loadFilterData = async () => {
+      try {
+        // UTM sources list
+        const { data: sourcesData } = await supabase
+          .from('utm_sources')
+          .select('id, name')
+          .order('name', { ascending: true });
+        setUtmSources((sourcesData || []) as { id: string; name: string }[]);
+
+        // Profile -> UTM source mapping (batch fetch all profiles with utm_source_id)
+        const profileMap: Record<string, string> = {};
+        let from = 0;
+        const batchSize = 1000;
+        while (true) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('id, utm_source_id')
+            .not('utm_source_id', 'is', null)
+            .range(from, from + batchSize - 1);
+          if (error || !data || data.length === 0) break;
+          for (const p of data as { id: string; utm_source_id: string | null }[]) {
+            if (p.utm_source_id) profileMap[p.id] = p.utm_source_id;
+          }
+          if (data.length < batchSize) break;
+          from += batchSize;
+        }
+        setProfileUtmMap(profileMap);
+
+        // Survey responses (only the 3 keys we filter on)
+        const surveyMap: Record<string, Record<string, string>> = {};
+        let sFrom = 0;
+        while (true) {
+          const { data, error } = await (supabase as any)
+            .from('user_survey_responses')
+            .select('user_id, question_key, answer')
+            .in('question_key', ['who_are_you', 'monthly_volume', 'acquisition_channel'])
+            .range(sFrom, sFrom + batchSize - 1);
+          if (error || !data || data.length === 0) break;
+          for (const r of data as { user_id: string; question_key: string; answer: string }[]) {
+            if (!surveyMap[r.user_id]) surveyMap[r.user_id] = {};
+            surveyMap[r.user_id][r.question_key] = r.answer;
+          }
+          if (data.length < batchSize) break;
+          sFrom += batchSize;
+        }
+        setSurveyByUser(surveyMap);
+      } catch (e) {
+        console.error('Error loading filter data:', e);
+      }
+    };
+    loadFilterData();
+  }, []);
+
+  // Build dynamic option lists for survey questions from collected data
+  const surveyOptionsByKey = useMemo(() => {
+    const sets: Record<string, Set<string>> = {
+      who_are_you: new Set(),
+      monthly_volume: new Set(),
+      acquisition_channel: new Set(),
+    };
+    for (const userId in surveyByUser) {
+      const r = surveyByUser[userId];
+      for (const k of Object.keys(sets)) {
+        if (r[k]) {
+          // Normalize "Другое: ..." into "Другое" for filter grouping
+          const val = r[k].startsWith('Другое:') ? 'Другое' : r[k];
+          sets[k].add(val);
+        }
+      }
     }
-    
+    return {
+      who: Array.from(sets.who_are_you).sort(),
+      volume: Array.from(sets.monthly_volume).sort(),
+      channel: Array.from(sets.acquisition_channel).sort(),
+    };
+  }, [surveyByUser]);
+
+  // Apply all filters
+  useEffect(() => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const filtered = users.filter(user => {
+      // Search
+      if (searchEmail && !user.email.toLowerCase().includes(searchEmail.toLowerCase())) {
+        return false;
+      }
+      // Payment
+      if (filters.payment.size > 0) {
+        const isPaid = paidUserIds.has(user.id);
+        const wantsPaid = filters.payment.has('paid');
+        const wantsFree = filters.payment.has('free');
+        if (!((isPaid && wantsPaid) || (!isPaid && wantsFree))) return false;
+      }
+      // Activity
+      if (filters.activity.size > 0) {
+        const ts = user.last_active_at ?? user.updated_at;
+        const isActive = !user.is_blocked && new Date(ts) > thirtyDaysAgo;
+        const wantsActive = filters.activity.has('active');
+        const wantsInactive = filters.activity.has('inactive');
+        if (!((isActive && wantsActive) || (!isActive && wantsInactive))) return false;
+      }
+      // UTM
+      if (filters.utm.size > 0) {
+        const utmId = profileUtmMap[user.id];
+        const matches = utmId ? filters.utm.has(utmId) : filters.utm.has('__direct__');
+        if (!matches) return false;
+      }
+      // Survey filters
+      const survey = surveyByUser[user.id] || {};
+      const surveyMatch = (set: Set<string>, key: string) => {
+        if (set.size === 0) return true;
+        const ans = survey[key];
+        if (!ans) return false;
+        const norm = ans.startsWith('Другое:') ? 'Другое' : ans;
+        return set.has(norm);
+      };
+      if (!surveyMatch(filters.who, 'who_are_you')) return false;
+      if (!surveyMatch(filters.volume, 'monthly_volume')) return false;
+      if (!surveyMatch(filters.channel, 'acquisition_channel')) return false;
+
+      return true;
+    });
+
     setFilteredUsers(filtered);
     setCurrentPage(1);
-  }, [users, searchEmail, paymentFilter, paidUserIds]);
+  }, [users, searchEmail, filters, paidUserIds, profileUtmMap, surveyByUser]);
 
   const loadUserDetails = async (user: User) => {
     setDetailsLoading(true);
