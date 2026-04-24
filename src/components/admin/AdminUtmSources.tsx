@@ -57,42 +57,72 @@ export function AdminUtmSources() {
     setFormBaseUrl(publicSiteUrl);
   };
 
-  const fetchStatsFor = async (items: UtmSource[]): Promise<Record<string, UtmStats>> => {
-    const statsMap: Record<string, UtmStats> = {};
-    for (const source of items) {
-      const { count: visitsCount } = await supabase
+  const fetchStatsForOne = async (source: UtmSource): Promise<UtmStats> => {
+    const [visitsRes, regsRes, utmProfilesRes] = await Promise.all([
+      supabase
         .from('utm_visits')
         .select('id', { count: 'exact', head: true })
-        .eq('utm_source_id', source.id);
-      
-      const { count: regsCount } = await supabase
+        .eq('utm_source_id', source.id),
+      supabase
         .from('profiles')
         .select('id', { count: 'exact', head: true })
-        .eq('utm_source_id', source.id);
-      
-      const { data: utmProfiles } = await supabase
+        .eq('utm_source_id', source.id),
+      supabase
         .from('profiles')
         .select('id')
-        .eq('utm_source_id', source.id);
-      
-      let paymentsCount = 0;
-      if (utmProfiles && utmProfiles.length > 0) {
-        const userIds = utmProfiles.map(p => p.id);
-        const { count } = await supabase
-          .from('payments')
-          .select('id', { count: 'exact', head: true })
-          .in('user_id', userIds)
-          .eq('status', 'succeeded');
-        paymentsCount = count || 0;
-      }
-      
-      statsMap[source.id] = {
-        visits: visitsCount || 0,
-        registrations: regsCount || 0,
-        payments: paymentsCount,
-      };
+        .eq('utm_source_id', source.id),
+    ]);
+
+    let paymentsCount = 0;
+    const utmProfiles = utmProfilesRes.data;
+    if (utmProfiles && utmProfiles.length > 0) {
+      const userIds = utmProfiles.map(p => p.id);
+      const { count } = await supabase
+        .from('payments')
+        .select('id', { count: 'exact', head: true })
+        .in('user_id', userIds)
+        .eq('status', 'succeeded');
+      paymentsCount = count || 0;
     }
-    return statsMap;
+
+    return {
+      visits: visitsRes.count || 0,
+      registrations: regsRes.count || 0,
+      payments: paymentsCount,
+    };
+  };
+
+  /**
+   * Stream stats per source: marks each as loading, then fills as it resolves.
+   * Returns the final aggregated map (for callers that need it).
+   */
+  const streamStatsFor = async (items: UtmSource[]): Promise<Record<string, UtmStats>> => {
+    if (items.length === 0) return {};
+    // Mark all as loading
+    setStatsLoading(prev => {
+      const next = { ...prev };
+      for (const it of items) next[it.id] = true;
+      return next;
+    });
+
+    const results: Record<string, UtmStats> = {};
+    await Promise.all(
+      items.map(async (source) => {
+        try {
+          const s = await fetchStatsForOne(source);
+          results[source.id] = s;
+          // Update progressively as each one resolves
+          setStats(prev => ({ ...prev, [source.id]: s }));
+        } catch (e) {
+          console.error('UTM stats fetch error:', e);
+          results[source.id] = { visits: 0, registrations: 0, payments: 0 };
+          setStats(prev => ({ ...prev, [source.id]: results[source.id] }));
+        } finally {
+          setStatsLoading(prev => ({ ...prev, [source.id]: false }));
+        }
+      })
+    );
+    return results;
   };
 
   const fetchPage = useCallback(async (offset: number) => {
