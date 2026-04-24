@@ -205,8 +205,7 @@ export function AdminUtmSources() {
       const items = (data || []) as UtmSource[];
       setSources(items);
       setHasMore(items.length === targetCount);
-      const newStats = await fetchStatsFor(items);
-      setStats(newStats);
+      streamStatsFor(items);
     } catch (e) {
       console.error(e);
     } finally {
