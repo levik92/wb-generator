@@ -1118,6 +1118,7 @@ export const GenerateCards = ({
         description: description,
         productImages: allImagesForJob
       });
+      stage = 'invoke';
       setJobStatus('Создание задачи генерации...');
 
       // Check if model is loaded
