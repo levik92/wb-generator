@@ -1264,7 +1264,7 @@ export const History = ({
                     {generation.output_data.videos.map((video: any, vidIndex: number) => (
                       <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4]">
                         {generation.output_data?.source_image ? (
-                          <img src={generation.output_data.source_image} alt={`Видео ${vidIndex + 1}`} className="w-full h-full object-cover" />
+                          <img src={previewUrl(generation.output_data.source_image)} alt={`Видео ${vidIndex + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
                             <Video className="w-8 h-8 text-primary" />
