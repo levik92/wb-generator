@@ -1183,8 +1183,10 @@ export const History = ({
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
                       <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4]">
                         <img 
-                          src={img.image_url} 
+                          src={previewUrl(img.image_url)} 
                           alt={`Карточка ${imgIndex + 1}`} 
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover cursor-pointer"
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
