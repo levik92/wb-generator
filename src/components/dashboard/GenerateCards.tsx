@@ -1027,11 +1027,13 @@ export const GenerateCards = ({
     let stage: 'compress' | 'upload' | 'invoke' | 'unknown' = 'unknown';
     try {
       // Compress images before upload
+      stage = 'compress';
       setIsUploading(true);
       setJobStatus('Оптимизация изображений...');
       const compressedFiles = await compressImages(files);
 
       // Upload files to Supabase Storage first
+      stage = 'upload';
       const productImagesData = [];
       for (let i = 0; i < compressedFiles.length; i++) {
         const file = compressedFiles[i];
