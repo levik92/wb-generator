@@ -1024,6 +1024,7 @@ export const GenerateCards = ({
     setProgress(0);
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
+    let stage: 'compress' | 'upload' | 'invoke' | 'unknown' = 'unknown';
     try {
       // Compress images before upload
       setIsUploading(true);
