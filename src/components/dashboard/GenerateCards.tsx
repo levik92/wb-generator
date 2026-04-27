@@ -1170,11 +1170,13 @@ export const GenerateCards = ({
         throw new Error(data.error || 'Job creation failed');
       }
     } catch (error: any) {
-      console.error('Generation error:', error);
+      console.error('[GenerateCards] Generation error at stage:', stage, error);
+      const { title, description } = classifyClientStartError(error, stage);
       toast({
-        title: "Ошибка генерации",
-        description: "Не удалось запустить генерацию. Попробуйте позже",
-        variant: "destructive"
+        title,
+        description,
+        variant: "destructive",
+        duration: 8000,
       });
       setGenerating(false);
       setIsUploading(false);
