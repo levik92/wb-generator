@@ -2286,6 +2286,9 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
+            <p className="text-[11px] text-muted-foreground/80 leading-snug px-1">
+              ⚠️ Не указывайте названия брендов и лицензионных персонажей (например, Disney, Marvel, Topps, Formula 1, Pokemon) — ИИ их блокирует и генерация не пройдёт.
+            </p>
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
                 <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
