@@ -1044,7 +1044,7 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <img src={generation.output_data.source_image} alt="Превью" className="w-full h-full object-cover" />
+                          <img src={thumbUrl(generation.output_data.source_image)} alt="Превью" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
                             <Video className="w-6 h-6 text-primary" />
