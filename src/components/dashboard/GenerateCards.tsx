@@ -97,7 +97,31 @@ const sanitizeApiErrorMessage = (message?: string | null) => {
 
   return message;
 };
-export const GenerateCards = ({
+
+// Classify a client-side error from the generation start flow into a user-friendly message.
+const classifyClientStartError = (error: any, stage: string): { title: string; description: string } => {
+  const raw = (error?.message || error?.error_description || error?.toString?.() || '').toString();
+  const status = error?.context?.status ?? error?.status;
+  const lower = raw.toLowerCase();
+
+  if (status === 402 || lower.includes('insufficient') || lower.includes('недостаточно')) {
+    return { title: "Недостаточно токенов", description: "Пополните баланс, чтобы запустить генерацию." };
+  }
+  if (status === 401 || status === 403 || lower.includes('jwt') || lower.includes('unauthor')) {
+    return { title: "Сессия истекла", description: "Войдите в аккаунт заново и попробуйте ещё раз." };
+  }
+  if (lower.includes('upload') || lower.includes('storage') || stage === 'upload') {
+    return { title: "Не удалось загрузить фото", description: "Проверьте интернет и попробуйте снова. Если фото больше 3 МБ — уменьшите размер." };
+  }
+  if (lower.includes('failed to fetch') || lower.includes('networkerror') || lower.includes('network error') || lower.includes('functionsfetcherror')) {
+    return { title: "Нет связи с сервером", description: "Проверьте интернет-соединение и повторите попытку." };
+  }
+  if (lower.includes('timeout') || lower.includes('aborted')) {
+    return { title: "Превышено время ожидания", description: "Сервер отвечает медленно. Повторите попытку через минуту." };
+  }
+  return { title: "Ошибка генерации", description: "Не удалось запустить генерацию. Попробуйте позже." };
+};
+
   profile,
   onTokensUpdate,
   onNavigateToBalance,
