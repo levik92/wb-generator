@@ -257,7 +257,7 @@ async function processTasks(
         // Check if all tasks are completed or failed
         const { data: allTasks } = await supabase
           .from('generation_tasks')
-          .select('id, status')
+          .select('id, status, last_error')
           .eq('job_id', jobId);
 
         const allCompleted = allTasks?.every(t => t.status === 'completed');
@@ -284,12 +284,21 @@ async function processTasks(
         } else if (allDone) {
           const failedCount = allTasks?.filter(t => t.status === 'failed').length || 0;
           const completedCount = allTasks?.filter(t => t.status === 'completed').length || 0;
+          const total = allTasks?.length || 0;
+          const failedErrors = (allTasks || [])
+            .filter(t => t.status === 'failed')
+            .map(t => t.last_error || '');
+          const friendlyError = classifyTaskErrors(failedErrors);
+          const fallbackError = `Не удалось сгенерировать ${failedCount} из ${total} карточек`;
+          const errorMessage = friendlyError
+            ? (completedCount > 0 ? `${friendlyError} (готово ${completedCount} из ${total})` : friendlyError)
+            : fallbackError;
 
           await supabase
             .from('generation_jobs')
             .update({
-              status: failedCount === allTasks?.length ? 'failed' : 'completed',
-              error_message: `Не удалось сгенерировать ${failedCount} из ${allTasks?.length || 0} карточек`,
+              status: failedCount === total ? 'failed' : 'completed',
+              error_message: errorMessage,
               completed_at: new Date().toISOString(),
             })
             .eq('id', jobId);
