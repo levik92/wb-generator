@@ -17,6 +17,7 @@ import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiM
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
 import { thumbUrl, previewUrl } from "@/lib/imageOptimization";
+import { ProgressiveImage } from "./ProgressiveImage";
 
 /**
  * Detect iOS / iPadOS (including iPadOS in desktop mode).
