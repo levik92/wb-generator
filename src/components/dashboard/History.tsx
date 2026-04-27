@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useActiveAiModel, getImageEdgeFunctionName } from "@/hooks/useActiveAiModel";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import JSZip from "jszip";
+import { thumbUrl, previewUrl } from "@/lib/imageOptimization";
 
 /**
  * Detect iOS / iPadOS (including iPadOS in desktop mode).
