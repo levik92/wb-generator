@@ -943,11 +943,20 @@ export const GenerateCards = ({
               if (preStyleImagesRef.current.length > 0) {
                 preStyleImagesRef.current = [];
               }
+            } else if (job.status === 'completed' && hasFailures) {
+              // Partial success — show why some failed
+              toast({
+                title: "Готово частично",
+                description: sanitizeApiErrorMessage(job.error_message) || `Удалось сгенерировать не все карточки. Токены за неудачные возвращены.`,
+                variant: "destructive",
+                duration: 9000,
+              });
             } else if (job.status === 'failed') {
               toast({
                 title: "Ошибка генерации",
-                description: sanitizeApiErrorMessage(job.error_message) || "Генерация не удалась",
-                variant: "destructive"
+                description: sanitizeApiErrorMessage(job.error_message) || "Генерация не удалась. Токены возвращены на баланс.",
+                variant: "destructive",
+                duration: 9000,
               });
             }
 
