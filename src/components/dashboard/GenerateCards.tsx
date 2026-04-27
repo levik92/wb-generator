@@ -97,6 +97,31 @@ const sanitizeApiErrorMessage = (message?: string | null) => {
 
   return message;
 };
+
+// Classify a client-side error from the generation start flow into a user-friendly message.
+const classifyClientStartError = (error: any, stage: string): { title: string; description: string } => {
+  const raw = (error?.message || error?.error_description || error?.toString?.() || '').toString();
+  const status = error?.context?.status ?? error?.status;
+  const lower = raw.toLowerCase();
+
+  if (status === 402 || lower.includes('insufficient') || lower.includes('недостаточно')) {
+    return { title: "Недостаточно токенов", description: "Пополните баланс, чтобы запустить генерацию." };
+  }
+  if (status === 401 || status === 403 || lower.includes('jwt') || lower.includes('unauthor')) {
+    return { title: "Сессия истекла", description: "Войдите в аккаунт заново и попробуйте ещё раз." };
+  }
+  if (lower.includes('upload') || lower.includes('storage') || stage === 'upload') {
+    return { title: "Не удалось загрузить фото", description: "Проверьте интернет и попробуйте снова. Если фото больше 3 МБ — уменьшите размер." };
+  }
+  if (lower.includes('failed to fetch') || lower.includes('networkerror') || lower.includes('network error') || lower.includes('functionsfetcherror')) {
+    return { title: "Нет связи с сервером", description: "Проверьте интернет-соединение и повторите попытку." };
+  }
+  if (lower.includes('timeout') || lower.includes('aborted')) {
+    return { title: "Превышено время ожидания", description: "Сервер отвечает медленно. Повторите попытку через минуту." };
+  }
+  return { title: "Ошибка генерации", description: "Не удалось запустить генерацию. Попробуйте позже." };
+};
+
 export const GenerateCards = ({
   profile,
   onTokensUpdate,
@@ -943,11 +968,20 @@ export const GenerateCards = ({
               if (preStyleImagesRef.current.length > 0) {
                 preStyleImagesRef.current = [];
               }
+            } else if (job.status === 'completed' && hasFailures) {
+              // Partial success — show why some failed
+              toast({
+                title: "Готово частично",
+                description: sanitizeApiErrorMessage(job.error_message) || `Удалось сгенерировать не все карточки. Токены за неудачные возвращены.`,
+                variant: "destructive",
+                duration: 9000,
+              });
             } else if (job.status === 'failed') {
               toast({
                 title: "Ошибка генерации",
-                description: sanitizeApiErrorMessage(job.error_message) || "Генерация не удалась",
-                variant: "destructive"
+                description: sanitizeApiErrorMessage(job.error_message) || "Генерация не удалась. Токены возвращены на баланс.",
+                variant: "destructive",
+                duration: 9000,
               });
             }
 
@@ -990,13 +1024,16 @@ export const GenerateCards = ({
     setProgress(0);
     setCurrentStage(0);
     setJobStatus('Создание задачи генерации...');
+    let stage: 'compress' | 'upload' | 'invoke' | 'unknown' = 'unknown';
     try {
       // Compress images before upload
+      stage = 'compress';
       setIsUploading(true);
       setJobStatus('Оптимизация изображений...');
       const compressedFiles = await compressImages(files);
 
       // Upload files to Supabase Storage first
+      stage = 'upload';
       const productImagesData = [];
       for (let i = 0; i < compressedFiles.length; i++) {
         const file = compressedFiles[i];
@@ -1081,6 +1118,7 @@ export const GenerateCards = ({
         description: description,
         productImages: allImagesForJob
       });
+      stage = 'invoke';
       setJobStatus('Создание задачи генерации...');
 
       // Check if model is loaded
@@ -1132,11 +1170,13 @@ export const GenerateCards = ({
         throw new Error(data.error || 'Job creation failed');
       }
     } catch (error: any) {
-      console.error('Generation error:', error);
+      console.error('[GenerateCards] Generation error at stage:', stage, error);
+      const { title, description } = classifyClientStartError(error, stage);
       toast({
-        title: "Ошибка генерации",
-        description: "Не удалось запустить генерацию. Попробуйте позже",
-        variant: "destructive"
+        title,
+        description,
+        variant: "destructive",
+        duration: 8000,
       });
       setGenerating(false);
       setIsUploading(false);
@@ -2246,6 +2286,9 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
+            <p className="text-[11px] text-muted-foreground/80 leading-snug px-1">
+              ⚠️ Не указывайте названия брендов и лицензионных персонажей (например, Disney, Marvel, Topps, Formula 1, Pokemon) — ИИ их блокирует и генерация не пройдёт.
+            </p>
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
                 <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {

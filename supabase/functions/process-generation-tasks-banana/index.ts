@@ -7,6 +7,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Classify task errors into a human-readable error message for the UI
+function classifyTaskErrors(lastErrors: string[]): string | null {
+  if (!lastErrors || lastErrors.length === 0) return null;
+  const joined = lastErrors.filter(Boolean).join(' | ').toLowerCase();
+  if (!joined) return null;
+
+  if (joined.includes('prohibited_content') || joined.includes('image_other') || joined.includes('image_safety')) {
+    return 'ИИ заблокировал контент. Уберите названия брендов, лицензионных персонажей и торговых марок (например, Disney, Marvel, Topps, Formula 1) из описания и/или фотографии и попробуйте снова.';
+  }
+  if (joined.includes('google_503') || joined.includes('overloaded') || joined.includes('both_keys_failed')) {
+    return 'Серверы ИИ временно перегружены. Попробуйте через 1–2 минуты — токены за неудачные карточки уже возвращены.';
+  }
+  if (joined.includes('timeout')) {
+    return 'Превышено время ожидания. Попробуйте ещё раз — токены возвращены.';
+  }
+  if (joined.includes('no_image_generated') || joined.includes(':stop') || joined === 'unknown' || joined.includes('| unknown')) {
+    return 'ИИ не смог создать изображение. Часто это связано с защищённым контентом, нечитаемым фото или сложным описанием. Попробуйте упростить описание или загрузить другое фото.';
+  }
+  return null;
+}
+
 function calcRefundTokensPerCard(job: any): number {
   const tokensCost = Number(job?.tokens_cost ?? 1);
   const totalCards = Number(job?.total_cards ?? 1);
@@ -236,7 +257,7 @@ async function processTasks(
         // Check if all tasks are completed or failed
         const { data: allTasks } = await supabase
           .from('generation_tasks')
-          .select('id, status')
+          .select('id, status, last_error')
           .eq('job_id', jobId);
 
         const allCompleted = allTasks?.every(t => t.status === 'completed');
@@ -263,12 +284,21 @@ async function processTasks(
         } else if (allDone) {
           const failedCount = allTasks?.filter(t => t.status === 'failed').length || 0;
           const completedCount = allTasks?.filter(t => t.status === 'completed').length || 0;
+          const total = allTasks?.length || 0;
+          const failedErrors = (allTasks || [])
+            .filter(t => t.status === 'failed')
+            .map(t => t.last_error || '');
+          const friendlyError = classifyTaskErrors(failedErrors);
+          const fallbackError = `Не удалось сгенерировать ${failedCount} из ${total} карточек`;
+          const errorMessage = friendlyError
+            ? (completedCount > 0 ? `${friendlyError} (готово ${completedCount} из ${total})` : friendlyError)
+            : fallbackError;
 
           await supabase
             .from('generation_jobs')
             .update({
-              status: failedCount === allTasks?.length ? 'failed' : 'completed',
-              error_message: `Не удалось сгенерировать ${failedCount} из ${allTasks?.length || 0} карточек`,
+              status: failedCount === total ? 'failed' : 'completed',
+              error_message: errorMessage,
               completed_at: new Date().toISOString(),
             })
             .eq('id', jobId);
