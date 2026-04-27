@@ -122,6 +122,7 @@ const classifyClientStartError = (error: any, stage: string): { title: string; d
   return { title: "Ошибка генерации", description: "Не удалось запустить генерацию. Попробуйте позже." };
 };
 
+export const GenerateCards = ({
   profile,
   onTokensUpdate,
   onNavigateToBalance,
