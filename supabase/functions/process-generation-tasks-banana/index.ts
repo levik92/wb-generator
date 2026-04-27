@@ -7,6 +7,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Classify task errors into a human-readable error message for the UI
+function classifyTaskErrors(lastErrors: string[]): string | null {
+  if (!lastErrors || lastErrors.length === 0) return null;
+  const joined = lastErrors.filter(Boolean).join(' | ').toLowerCase();
+  if (!joined) return null;
+
+  if (joined.includes('prohibited_content') || joined.includes('image_other') || joined.includes('image_safety')) {
+    return 'ИИ заблокировал контент. Уберите названия брендов, лицензионных персонажей и торговых марок (например, Disney, Marvel, Topps, Formula 1) из описания и/или фотографии и попробуйте снова.';
+  }
+  if (joined.includes('google_503') || joined.includes('overloaded') || joined.includes('both_keys_failed')) {
+    return 'Серверы ИИ временно перегружены. Попробуйте через 1–2 минуты — токены за неудачные карточки уже возвращены.';
+  }
+  if (joined.includes('timeout')) {
+    return 'Превышено время ожидания. Попробуйте ещё раз — токены возвращены.';
+  }
+  if (joined.includes('no_image_generated') || joined.includes(':stop') || joined === 'unknown' || joined.includes('| unknown')) {
+    return 'ИИ не смог создать изображение. Часто это связано с защищённым контентом, нечитаемым фото или сложным описанием. Попробуйте упростить описание или загрузить другое фото.';
+  }
+  return null;
+}
+
 function calcRefundTokensPerCard(job: any): number {
   const tokensCost = Number(job?.tokens_cost ?? 1);
   const totalCards = Number(job?.total_cards ?? 1);
