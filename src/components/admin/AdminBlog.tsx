@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getProxiedPublicUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -176,9 +177,7 @@ export const AdminBlog = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('blog-images')
-        .getPublicUrl(filePath);
+      const publicUrl = getProxiedPublicUrl('blog-images', filePath);
 
       setFormData(prev => ({ ...prev, image_url: publicUrl }));
       setImagePreview(publicUrl);

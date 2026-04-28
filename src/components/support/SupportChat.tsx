@@ -3,6 +3,7 @@ import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X } f
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { getProxiedPublicUrl } from "@/lib/storage";
 import { compressImage } from "@/lib/imageCompression";
 
 interface Message {
@@ -79,8 +80,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
       console.error("Upload error:", error);
       return null;
     }
-    const { data } = supabase.storage.from("support-attachments").getPublicUrl(path);
-    return data.publicUrl;
+    return getProxiedPublicUrl("support-attachments", path);
   };
 
   const loadMessages = useCallback(async (convId: string, beforeId?: string) => {

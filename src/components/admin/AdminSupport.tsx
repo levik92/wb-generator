@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { getProxiedPublicUrl } from "@/lib/storage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { compressImage } from "@/lib/imageCompression";
 
@@ -94,8 +95,7 @@ export const AdminSupport = () => {
       console.error("Upload error:", error);
       return null;
     }
-    const { data } = supabase.storage.from("support-attachments").getPublicUrl(path);
-    return data.publicUrl;
+    return getProxiedPublicUrl("support-attachments", path);
   };
 
   const loadConversations = useCallback(async (append = false) => {
