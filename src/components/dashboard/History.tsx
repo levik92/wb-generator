@@ -67,14 +67,26 @@ const HistoryAvatarImage = ({
   alt: string;
   onError?: (event: SyntheticEvent<HTMLImageElement, Event>) => void;
 }) => (
-  <ProgressiveImage
-    src={src}
-    alt={alt}
-    previewWidth={180}
-    previewQuality={85}
-    className="w-full h-full object-cover"
-    onError={onError}
-  />
+  <>
+    {/* Размытый фон того же изображения — заполняет пустоты вместо белых полей */}
+    <ProgressiveImage
+      src={src}
+      alt=""
+      previewWidth={40}
+      previewQuality={40}
+      aria-hidden="true"
+      className="absolute inset-0 w-full h-full object-cover scale-125 blur-md opacity-80 pointer-events-none"
+    />
+    {/* Полная карточка поверх — чтобы её можно было идентифицировать */}
+    <ProgressiveImage
+      src={src}
+      alt={alt}
+      previewWidth={180}
+      previewQuality={85}
+      className="relative w-full h-full object-contain"
+      onError={onError}
+    />
+  </>
 );
 
 interface Generation {
