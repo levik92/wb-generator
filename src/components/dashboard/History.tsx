@@ -1058,7 +1058,7 @@ export const History = ({
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
-                        <ProgressiveImage src={generation.output_data.images[0].image_url} alt="Превью" width={64} height={64} previewWidth={160} previewQuality={75} className="w-full h-full object-cover" onError={e => {
+                        <ProgressiveImage src={generation.output_data.images[0].image_url} alt="Превью" width={64} height={64} previewWidth={160} previewQuality={75} className="w-full h-full object-contain bg-muted/40" onError={e => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
