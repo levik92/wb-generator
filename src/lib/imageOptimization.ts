@@ -3,6 +3,8 @@
  * Adds ?width=&quality= to public URLs that point to the project's Supabase storage.
  * Falls back to the original URL for any non-Supabase or unrecognized URL.
  */
+import { rewriteStorageUrl } from './storage';
+
 const SUPABASE_HOST_HINTS = [
   'supabase.co/storage/v1/object/public/',
   'api.wbgen.ru/storage/v1/object/public/',
