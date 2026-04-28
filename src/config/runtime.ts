@@ -5,7 +5,7 @@
  */
 
 export const supabaseUrl: string =
-  import.meta.env.VITE_SUPABASE_URL || "https://xguiyabpngjkavyosbza.supabase.co";
+  import.meta.env.VITE_SUPABASE_URL || "https://api.wbgen.ru";
 
 export const supabasePublishableKey: string =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
