@@ -1,41 +1,59 @@
-## Что не так сейчас
+## Проверка прокси и edge-функций для пользователей из РФ
 
-В `.env`:
+### Что проверил
+
+**Доступность:**
+- `api.wbgen.ru` (прокси) — работает: storage 400 (норм без файла), auth 401 (норм), functions отвечают
+- `wbgen.ru` (фронт) — 200 OK
+- Edge Functions за последние сутки — все ответы 200, ошибок 4xx/5xx нет
+
+**Критическая проблема найдена:** За последние 7 дней в БД сохранено **19 image_url, указывающих напрямую на `xguiyabpngjkavyosbza.supabase.co`** вместо `api.wbgen.ru`. Это значит, что у пользователей из РФ эти карточки **не загрузятся** (Supabase заблокирован у части провайдеров).
+
+Источник проблемы — функция `process-polza-task` (последняя запись 28.04.2026 22:06): несмотря на корректный код (`toProxiedUrl(rawUrl)` на строке 344), в БД пишутся прямые URL. Также обнаружено: `process-google-task`, `process-openai-task`, `regenerate-single-card`, `process-generation-tasks` уже используют `toProxiedUrl` — но 19 свежих "битых" записей пришли именно через polza-роут (job `2687b360` обработан polza-провайдером с моделью google).
+
+Вероятная причина — функция была задеплоена в старой версии до фикса прокси-обёртки (или env-переменная `STORAGE_PROXY_HOST` установлена в пустую строку, что отключает дефолт).
+
+**Хорошие новости:**
+- `video_generation_jobs.product_image_url` — все 15 записей через прокси
+- `generation_jobs.style_source_image_url` — все 5 через прокси
+- `generation_tasks.image_url` — 1631 из 1650 через прокси (ОК), но 19 свежих — мимо
+
+### Что сделать
+
+1. **Передеплой `process-polza-task`** — чтобы текущая версия с `toProxiedUrl` точно работала на проде. Параллельно передеплоить `process-google-task`, `process-openai-task`, `regenerate-single-card`, `regenerate-single-card-banana`, `process-generation-tasks-banana` для надёжности.
+
+2. **Защитный fallback в БД** — миграция: триггер `BEFORE INSERT/UPDATE` на `generation_tasks.image_url`, `video_generation_jobs.result_video_url`, `video_generation_jobs.product_image_url`, `generation_jobs.style_source_image_url`, который автоматически переписывает `*.supabase.co/storage/v1/...` → `api.wbgen.ru/storage/v1/...`. Это страховка от любых будущих регрессий — даже если разработчик забудет вызвать `toProxiedUrl`, БД исправит.
+
+3. **Одноразовый бэкфилл** — UPDATE-запрос, заменяющий все исторические `xguiyabpngjkavyosbza.supabase.co` на `api.wbgen.ru` в указанных колонках, чтобы старые карточки тоже открывались у пользователей из РФ.
+
+4. **Smoke-тест после деплоя** — сгенерировать 1 карточку через Polza и убедиться, что свежий `image_url` начинается с `https://api.wbgen.ru/`.
+
+### Технические детали
+
+Триггер (концепт):
+```sql
+create or replace function public.rewrite_storage_url_to_proxy()
+returns trigger language plpgsql as $$
+begin
+  if NEW.image_url is not null and NEW.image_url ~ 'https?://[a-z0-9-]+\.supabase\.co/storage/v1/' then
+    NEW.image_url := regexp_replace(NEW.image_url, 'https?://[a-z0-9-]+\.supabase\.co', 'https://api.wbgen.ru');
+  end if;
+  return NEW;
+end$$;
 ```
-VITE_SUPABASE_URL="https://xguiyabpngjkavyosbza.supabase.co"
+(аналогичные функции/триггеры на video_generation_jobs и др. колонки)
+
+Бэкфилл:
+```sql
+update generation_tasks
+set image_url = regexp_replace(image_url, 'https?://[a-z0-9-]+\.supabase\.co', 'https://api.wbgen.ru')
+where image_url ~ 'supabase\.co/storage/v1/';
 ```
 
-Это значение попадает в `src/config/runtime.ts → supabaseUrl` и оттуда в `src/integrations/supabase/client.ts`. В итоге **весь Supabase-клиент фронта (auth, rest, realtime, functions, storage)** ходит напрямую на `xguiyabpngjkavyosbza.supabase.co`, который у российских пользователей заблокирован без VPN.
+### Что НЕ будет тронуто
 
-Прокси `api.wbgen.ru` уже полностью настроен и проверен (auth/health, rest, functions, storage отвечают корректно) — нужно просто переключить на него фронт.
+- `index.css`, UI компоненты — без изменений
+- Логика генерации/биллинга — без изменений
+- Таблицы аутентификации/storage — без изменений
 
-## Изменение
-
-Один файл, одна строка — `.env`:
-
-```diff
-- VITE_SUPABASE_URL="https://xguiyabpngjkavyosbza.supabase.co"
-+ VITE_SUPABASE_URL="https://api.wbgen.ru"
-```
-
-Остальное трогать не нужно:
-- `SUPABASE_URL` (без VITE_) уже = `https://api.wbgen.ru` — это для edge-функций/локальных скриптов.
-- `VITE_SUPABASE_PUBLISHABLE_KEY` и `VITE_SUPABASE_PROJECT_ID` остаются прежними — ключ JWT привязан к проекту, а не к домену; project_id используется только как `storageKey` для `localStorage`.
-- Google OAuth не трогаем (по запросу пользователя).
-
-## Что произойдёт после изменения
-
-- `supabase.auth.*` (login/signup/refresh) → пойдёт на `https://api.wbgen.ru/auth/v1/...` ✅
-- `supabase.from(...).select()` → `https://api.wbgen.ru/rest/v1/...` ✅
-- `supabase.functions.invoke(...)` → `https://api.wbgen.ru/functions/v1/...` ✅
-- Realtime WebSocket → `wss://api.wbgen.ru/realtime/v1/websocket` ✅
-- `supabase.storage.from(...).upload(...)` → `https://api.wbgen.ru/storage/v1/...` ✅
-- Картинки и публичные URL — уже идут через прокси (через `optimizeStorageImage`/`getProxiedPublicUrl`).
-
-## Деплой
-
-После правки `.env` нужен **Publish → Update** в Lovable, чтобы новый бандл с правильным `VITE_SUPABASE_URL` уехал к пользователям. Без этого старый бандл с зашитым supabase.co остаётся в браузерах (но при первой загрузке нового JS перейдёт автоматически).
-
-## Риски
-
-Минимальные. Если прокси на каком-то пути отдаст некорректный ответ — клиент Supabase покажет ту же ошибку, что и раньше с прямым доменом. Откат — вернуть строку `VITE_SUPABASE_URL` к старому значению.
+После одобрения переключусь в build-режим, выкачу миграцию и передеплой.
