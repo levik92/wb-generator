@@ -79,6 +79,17 @@ export default defineConfig(({ mode }) => ({
             }
           },
           {
+            urlPattern: /^https:\/\/api\.wbgen\.ru\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-proxy-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+              }
+            }
+          },
+          {
             urlPattern: /\/lovable-uploads\/.*/i,
             handler: 'CacheFirst',
             options: {

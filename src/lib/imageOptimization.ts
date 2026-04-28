@@ -3,7 +3,10 @@
  * Adds ?width=&quality= to public URLs that point to the project's Supabase storage.
  * Falls back to the original URL for any non-Supabase or unrecognized URL.
  */
-const SUPABASE_HOST_HINT = 'supabase.co/storage/v1/object/public/';
+const SUPABASE_HOST_HINTS = [
+  'supabase.co/storage/v1/object/public/',
+  'api.wbgen.ru/storage/v1/object/public/',
+];
 
 export interface OptimizedImageOptions {
   width?: number;
@@ -15,7 +18,7 @@ export interface OptimizedImageOptions {
 export function optimizeStorageImage(url: string | undefined | null, opts: OptimizedImageOptions = {}): string {
   if (!url) return '';
   if (typeof url !== 'string') return url as any;
-  if (!url.includes(SUPABASE_HOST_HINT)) return url;
+  if (!SUPABASE_HOST_HINTS.some((h) => url.includes(h))) return url;
   // Skip if URL already has transformation params
   if (/[?&](width|height|quality)=/.test(url)) return url;
 
