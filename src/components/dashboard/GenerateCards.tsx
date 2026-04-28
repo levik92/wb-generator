@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getProxiedPublicUrl } from "@/lib/storage";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1051,11 +1052,7 @@ export const GenerateCards = ({
         }
 
         // Get public URL
-        const {
-          data: {
-            publicUrl
-          }
-        } = supabase.storage.from('product-images').getPublicUrl(fileName);
+        const publicUrl = getProxiedPublicUrl('product-images', fileName);
         productImagesData.push({
           url: publicUrl,
           name: `image_${i + 1}.${fileExt}`,
@@ -1085,12 +1082,7 @@ export const GenerateCards = ({
             variant: "destructive"
           });
         } else {
-          const {
-            data: {
-              publicUrl
-            }
-          } = supabase.storage.from('product-images').getPublicUrl(fileName);
-          referenceImageUrl = publicUrl;
+          referenceImageUrl = getProxiedPublicUrl('product-images', fileName);
         }
       }
 
