@@ -8,29 +8,42 @@ interface ProgressiveImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>
   lowQualityWidth?: number;
   /** Quality (1-100) for the low-quality placeholder. */
   lowQualityQuality?: number;
-  /** Optional explicit full-quality src. Defaults to original `src`. */
+  /** Width in px for the medium-quality "preview" step (the visible avatar/thumbnail size). */
+  previewWidth?: number;
+  /** Quality (1-100) for the medium-quality preview step. */
+  previewQuality?: number;
+  /** Optional explicit full-quality src. If provided, full-res is fetched after the preview. */
   fullSrc?: string;
-  /** rootMargin for IntersectionObserver — how early to start loading high-res. */
+  /** Force loading the original full-resolution file after the preview step. */
+  loadFull?: boolean;
+  /** rootMargin for IntersectionObserver — how early to start loading. */
   rootMargin?: string;
 }
 
 /**
- * Renders an image with progressive lazy loading:
- *   1. Loads a tiny low-quality version immediately (acts as blurred placeholder/avatar).
- *   2. When the element enters the viewport, starts fetching the full-quality image.
- *   3. Swaps to the full-quality image once it's loaded.
+ * Three-step progressive lazy image:
+ *   1. Tiny blurred placeholder (~40px) — shown immediately as an "avatar".
+ *   2. Medium-quality preview sized to the actual display container (e.g. 200-400px).
+ *      Loaded once the element scrolls near the viewport. This becomes the
+ *      sharp visible image in lists/history.
+ *   3. (Optional) Full-resolution original — only fetched when `loadFull` is set
+ *      or `fullSrc` is provided, after the preview is ready. Useful for zoom/expand.
  */
 export function ProgressiveImage({
   src,
   fullSrc,
   lowQualityWidth = 40,
   lowQualityQuality = 30,
+  previewWidth = 480,
+  previewQuality = 75,
+  loadFull = false,
   rootMargin = "200px",
   className,
   alt = "",
   onError,
   ...rest
 }: ProgressiveImageProps) {
+  const [previewLoaded, setPreviewLoaded] = useState(false);
   const [fullLoaded, setFullLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [inView, setInView] = useState(false);
@@ -40,7 +53,12 @@ export function ProgressiveImage({
     width: lowQualityWidth,
     quality: lowQualityQuality,
   });
-  const highSrc = rewriteStorageUrl(fullSrc ?? src);
+  const previewSrc = optimizeStorageImage(src, {
+    width: previewWidth,
+    quality: previewQuality,
+  });
+  const wantFull = loadFull || !!fullSrc;
+  const fullResolved = rewriteStorageUrl(fullSrc ?? src);
 
   useEffect(() => {
     if (inView) return;
@@ -68,10 +86,13 @@ export function ProgressiveImage({
 
   if (failed) return null;
 
+  // The "current best" image visible to the user at any moment.
+  const sharpReady = previewLoaded || fullLoaded;
+
   return (
     <span ref={containerRef} className="contents">
-      {/* Low-quality blurred placeholder shown until the full image is ready */}
-      {!fullLoaded && (
+      {/* Step 1 — tiny blurred avatar. Stays mounted until the preview step is ready. */}
+      {!sharpReady && (
         <img
           {...rest}
           src={lowSrc}
@@ -82,11 +103,39 @@ export function ProgressiveImage({
           className={cn(className, "blur-md scale-105")}
         />
       )}
-      {/* Full-quality image — only mounted once the element scrolls near the viewport. */}
+
+      {/* Step 2 — medium-quality preview sized to the container. Mounted once visible. */}
       {inView && (
         <img
           {...rest}
-          src={highSrc}
+          src={previewSrc}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setPreviewLoaded(true)}
+          onError={(e) => {
+            setFailed(true);
+            onError?.(e);
+          }}
+          className={cn(
+            className,
+            "transition-opacity duration-300",
+            // Hide preview once full-res is in (avoids double-paint), otherwise show it.
+            fullLoaded
+              ? "opacity-0 absolute inset-0"
+              : previewLoaded
+                ? "opacity-100"
+                : "opacity-0 absolute inset-0"
+          )}
+        />
+      )}
+
+      {/* Step 3 — full-resolution original. Only mounted after preview is ready
+          and only if explicitly requested. */}
+      {inView && wantFull && previewLoaded && (
+        <img
+          {...rest}
+          src={fullResolved}
           alt={alt}
           loading="lazy"
           decoding="async"
