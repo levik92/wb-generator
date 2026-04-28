@@ -159,7 +159,7 @@ export function ProgressiveImage({
       className={cn(
         className,
         "transition-[filter] duration-300",
-        isBlurred && "blur-md scale-105"
+        isBlurred && "blur-md"
       )}
     />
   );
