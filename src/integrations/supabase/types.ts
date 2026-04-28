@@ -2152,6 +2152,10 @@ export type Database = {
         Args: { admin_notes_param?: string; submission_id_param: string }
         Returns: boolean
       }
+      rewrite_supabase_storage_url_to_proxy: {
+        Args: { url: string }
+        Returns: string
+      }
       spend_tokens: {
         Args: { tokens_amount: number; user_id_param: string }
         Returns: boolean
