@@ -67,14 +67,26 @@ const HistoryAvatarImage = ({
   alt: string;
   onError?: (event: SyntheticEvent<HTMLImageElement, Event>) => void;
 }) => (
-  <ProgressiveImage
-    src={src}
-    alt={alt}
-    previewWidth={180}
-    previewQuality={85}
-    className="w-full h-full object-cover"
-    onError={onError}
-  />
+  <>
+    {/* Размытый фон того же изображения — заполняет пустоты вместо белых полей */}
+    <ProgressiveImage
+      src={src}
+      alt=""
+      previewWidth={40}
+      previewQuality={40}
+      aria-hidden="true"
+      className="absolute inset-0 w-full h-full object-cover scale-125 blur-md opacity-80 pointer-events-none"
+    />
+    {/* Полная карточка поверх — чтобы её можно было идентифицировать */}
+    <ProgressiveImage
+      src={src}
+      alt={alt}
+      previewWidth={180}
+      previewQuality={85}
+      className="relative w-full h-full object-contain"
+      onError={onError}
+    />
+  </>
 );
 
 interface Generation {
@@ -1071,7 +1083,7 @@ export const History = ({
                             <Video className="w-6 h-6 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-10 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
@@ -1082,7 +1094,7 @@ export const History = ({
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
                       </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
