@@ -1,6 +1,6 @@
 import { useState, ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
-import { optimizeStorageImage } from "@/lib/imageOptimization";
+import { optimizeStorageImage, rewriteStorageUrl } from "@/lib/imageOptimization";
 
 interface ProgressiveImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
   src: string;
@@ -37,7 +37,7 @@ export function ProgressiveImage({
     width: lowQualityWidth,
     quality: lowQualityQuality,
   });
-  const highSrc = fullSrc ?? src;
+  const highSrc = rewriteStorageUrl(fullSrc ?? src);
 
   if (failed) return null;
 

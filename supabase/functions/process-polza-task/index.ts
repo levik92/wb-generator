@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { toProxiedUrl } from "../_shared/storage-url.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -337,9 +338,10 @@ async function handleCompleted(supabase: any, task: any, finalResult: any, _polz
     throw new Error('Failed to upload to storage');
   }
 
-  const { data: { publicUrl } } = supabase.storage
+  const { data: { publicUrl: rawUrl } } = supabase.storage
     .from('generated-cards')
     .getPublicUrl(storagePath);
+  const publicUrl = toProxiedUrl(rawUrl);
 
   // Update task as completed
   await supabase

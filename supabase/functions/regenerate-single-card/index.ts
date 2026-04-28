@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { toProxiedUrl } from "../_shared/storage-url.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -300,9 +301,10 @@ serve(async (req) => {
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl: rawUrl } } = supabase.storage
       .from('generated-cards')
       .getPublicUrl(fileName);
+    const publicUrl = toProxiedUrl(rawUrl);
 
     // Log the generation - удалено, так как таблицы generation_logs не существует
     

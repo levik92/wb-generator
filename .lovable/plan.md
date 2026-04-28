@@ -1,85 +1,88 @@
-# Переключение фронтенда на `https://api.wbgen.ru`
+## Почему у некоторых не открываются картинки
 
-## Что меняем
-
-Весь фронтенд сейчас стучится напрямую в `https://xguiyabpngjkavyosbza.supabase.co`. Меняем на `https://api.wbgen.ru` — ваш reverse-proxy в РФ. Edge Functions, Auth, Storage, Realtime и REST автоматически пойдут через прокси, потому что `supabase-js` строит все эндпоинты от `supabaseUrl`.
-
-## Важно понимать
-
-1. **Это build-time переменная.** Vite подставляет `VITE_SUPABASE_URL` в бандл во время сборки. Нельзя «поменять на лету» — нужен **Publish → Update** после правок, иначе у пользователей останется старый URL.
-2. **`.env` в Lovable перезаписывается автоматически** из Supabase-интеграции. Поэтому надёжнее всего поменять **fallback** в `src/config/runtime.ts` — он сработает, даже если `.env` снова перезапишется. В `.env` тоже обновим для согласованности.
-3. **Бэкенд НЕ трогаем:**
-   - `supabase/config.toml` (`project_id = "xguiyabpngjkavyosbza"`) — остаётся как есть.
-   - Миграции с pg_cron, которые вызывают `https://xguiyabpngjkavyosbza.supabase.co/functions/v1/...` — остаются (это серверный вызов внутри Supabase, прокси там не нужен и вреден).
-   - Edge Functions и `_shared/runtime-config.ts` — не меняем.
-4. **`src/integrations/supabase/types.ts`** — не редактируем (auto-generated).
-
-## Список правок
-
-### 1. `src/config/runtime.ts` — изменить fallback
+Edge Functions при сохранении сгенерированной карточки делают:
 ```ts
-export const supabaseUrl: string =
-  import.meta.env.VITE_SUPABASE_URL || "https://api.wbgen.ru";
-```
-`supabaseProjectId` оставляем как есть — он используется только для имени ключа в localStorage (`sb-xguiyabpngjkavyosbza-auth-token`), менять нельзя, иначе у всех текущих пользователей слетит сессия.
-
-### 2. `.env` — обновить значение
-```
-VITE_SUPABASE_URL="https://api.wbgen.ru"
-SUPABASE_URL="https://api.wbgen.ru"
-```
-(Если Lovable перезапишет — fallback из п.1 страхует.)
-
-### 3. `index.html` — preconnect/dns-prefetch на новый домен
-Заменить две строки (строки 20 и 54) с `xguiyabpngjkavyosbza.supabase.co` на `api.wbgen.ru`. Это даст прирост к TTFB на первом запросе.
-
-### 4. `vite.config.ts` — Workbox runtime cache
-Сейчас правило кеша:
-```js
-urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i
-```
-Добавить второе правило для `api.wbgen.ru`, чтобы PWA-кеш продолжал работать:
-```js
-urlPattern: /^https:\/\/api\.wbgen\.ru\/.*/i,
-handler: 'NetworkFirst',
-options: { cacheName: 'api-proxy-cache', expiration: { maxEntries: 50, maxAgeSeconds: 604800 } }
+supabase.storage.from('generated-cards').getPublicUrl(fileName)
 ```
 
-### 5. `src/lib/imageOptimization.ts` — host hint для Storage
-Сейчас:
+Эта функция **внутри Supabase SDK** использует переменную окружения `SUPABASE_URL`, которая на сервере = `https://xguiyabpngjkavyosbza.supabase.co` (это внутренняя переменная Supabase, мы её не контролируем). В итоге в БД в колонку `image_url` записывается:
+
+```
+https://xguiyabpngjkavyosbza.supabase.co/storage/v1/object/public/generated-cards/...
+```
+
+Фронт получает этот URL из `generation_tasks.image_url` и пытается загрузить картинку **напрямую с supabase.co** — у пользователей из РФ, у которых заблокирован Supabase, картинка не открывается. Генерация работает (она идёт через прокси `api.wbgen.ru`), а отображение — нет.
+
+То же самое будет с:
+- `product-images` (фото товаров, загруженные пользователем — `getPublicUrl` на фронте сейчас тоже возвращает supabase.co, потому что ENV ещё не пересобран — но даже после пересборки старые записи в БД останутся со старым доменом)
+- `support-attachments`, `service_friends_logos`, blog covers, видеообложки
+
+## Решение
+
+Переписывать домен на лету при чтении/формировании URL. Делать это в **двух местах**:
+
+### 1. Фронт — единая утилита `rewriteStorageUrl`
+
+В `src/lib/imageOptimization.ts` добавить функцию, которая заменяет любой `*.supabase.co/storage/v1/...` на `api.wbgen.ru/storage/v1/...`. Использовать её внутри уже существующей `optimizeStorageImage` — она применяется ко всем картинкам, проходящим через `ProgressiveImage` и thumb/preview helpers.
+
+Это автоматически починит все старые записи в БД с захардкоженным `xguiyabpngjkavyosbza.supabase.co`.
+
+### 2. Точечно для прямых `getPublicUrl` на фронте
+
+Создать обёртку `getProxiedPublicUrl(bucket, path)` в `src/lib/storage.ts`:
 ```ts
-const SUPABASE_HOST_HINT = 'supabase.co/storage/v1/object/public/';
+export function getProxiedPublicUrl(bucket: string, path: string) {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return rewriteStorageUrl(data.publicUrl);
+}
 ```
-Это используется, чтобы определять «свои» картинки и применять трансформации. После прокси картинки будут отдаваться с `api.wbgen.ru/storage/v1/...`. Добавим второй хинт, чтобы сохранить совместимость со старыми ссылками в БД:
-```ts
-const SUPABASE_HOST_HINTS = ['supabase.co/storage/v1/object/public/', 'api.wbgen.ru/storage/v1/object/public/'];
-```
-и обновим проверку `includes` на любую из строк.
+И заменить `supabase.storage.from(...).getPublicUrl(...)` на эту обёртку в:
+- `src/components/dashboard/GenerateCards.tsx` (загрузка product-images)
+- `src/components/dashboard/VideoCovers.tsx`
+- `src/components/admin/AdminSupport.tsx`
+- `src/components/admin/AdminFriends.tsx`
+- `src/components/admin/AdminBlog.tsx`
+- `src/components/support/SupportChat.tsx`
 
-## Проверка после деплоя
+### 3. Edge Functions — переписывать URL перед записью в БД
 
-После **Publish → Update**:
-1. Открыть DevTools → Network на `wbgen.ru`. Все запросы должны идти на `https://api.wbgen.ru/...` (auth, rest, storage, functions, realtime ws).
-2. Проверить логин/регистрацию — токен сессии должен сохраниться (ключ `sb-xguiyabpngjkavyosbza-auth-token` остаётся прежним).
-3. Сгенерировать карточку — Edge Functions должны отвечать через прокси.
-4. Открыть историю — картинки из Storage загружаются через `api.wbgen.ru`.
-5. Realtime (уведомления, чат поддержки) — WebSocket `wss://api.wbgen.ru/realtime/v1/...` должен апгрейдиться.
+В edge functions, которые сохраняют `image_url` в `generation_tasks` / другие таблицы, добавить ту же замену домена перед `.update({ image_url: ... })`. Файлы:
+- `supabase/functions/process-google-task/index.ts`
+- `supabase/functions/process-openai-task/index.ts`
+- `supabase/functions/process-polza-task/index.ts`
+- `supabase/functions/process-generation-tasks/index.ts`
+- `supabase/functions/regenerate-single-card/index.ts`
 
-## Что должен пропускать ваш Caddy/Nginx
+Создать общий helper `supabase/functions/_shared/storage-url.ts` с функцией `toProxiedUrl(url)` и брать домен прокси из переменной окружения (по умолчанию `https://api.wbgen.ru`).
 
-Убедитесь, что прокси проксирует **все** пути Supabase, а не только REST:
-- `/auth/v1/*` — аутентификация
-- `/rest/v1/*` — PostgREST
-- `/storage/v1/*` — файлы (важно: большие изображения, нужен `client_max_body_size`/`request_body_size_limit` ≥ 10 МБ)
-- `/functions/v1/*` — Edge Functions (долгие запросы — таймаут ≥ 9 минут под генерацию)
-- `/realtime/v1/*` — WebSocket (`Connection: Upgrade`, `Upgrade: websocket`)
-- Заголовки `apikey`, `Authorization`, `x-client-info` — пропускать без изменений
-- CORS — лучше отдавать с **апстрима** (Supabase сам ставит правильные), прокси не должен их перезаписывать
+### 4. Бэкфилл существующих записей в БД
 
-## Откат
+Одна миграция: `UPDATE` для уже сохранённых ссылок в основных таблицах:
+- `generation_tasks.image_url`, `storage_path`-производные колонки
+- `generation_jobs.style_source_image_url`, любые `*_url` колонки
+- `support_messages.attachment_url`, `blog_posts.cover_url`, `service_friends.logo_url` и т.п. — пройдусь по схеме и составлю полный список перед выполнением
 
-Если что-то сломается — вернуть в `src/config/runtime.ts` fallback на `https://xguiyabpngjkavyosbza.supabase.co`, обновить `.env`, `index.html`, `vite.config.ts`, `imageOptimization.ts` обратно и сделать Publish.
+Замена `https://xguiyabpngjkavyosbza.supabase.co/storage/` → `https://api.wbgen.ru/storage/`.
 
-## Память
+## Технические детали
 
-Сохраню новую memory `mem://infrastructure/regional-proxy-architecture` с зафиксированным доменом `api.wbgen.ru` и списком путей, которые должны проксироваться (обновление существующей записи).
+- **Реверс-прокси**: убедитесь, что Caddy/Nginx проксирует `/storage/v1/object/public/*` (статика картинок, GET, без авторизации) и `/storage/v1/object/sign/*` (если когда-то будут signed URL). По логам видно — у вас `/storage/v1/` уже работает, иначе бы вообще никто не открыл.
+- **CORS**: для `<img src=...>` CORS не требуется, поэтому проблем не должно быть. Но если включаете `crossorigin` атрибут — прокси должен возвращать `Access-Control-Allow-Origin: *` (Supabase Storage по умолчанию это делает, прокси должен пробросить заголовок).
+- **Кэширование браузера**: после смены домена картинки перекачаются один раз — это ок.
+- **Совместимость со старым доменом**: оставим прямые ссылки на `supabase.co` валидными (никаких редиректов), просто новые URL пойдут через прокси.
+
+## Что сделаю после approval
+
+1. `src/lib/imageOptimization.ts` — добавить `rewriteStorageUrl`, применить в `optimizeStorageImage`.
+2. `src/lib/storage.ts` — новый файл с `getProxiedPublicUrl`.
+3. Обновить 6 фронтовых файлов — заменить `getPublicUrl` на обёртку.
+4. `supabase/functions/_shared/storage-url.ts` — новый shared helper.
+5. Обновить 5 edge-функций — переписывать URL перед сохранением.
+6. SQL-миграция: бэкфилл `image_url` и других URL-колонок (предварительно соберу полный список через схему БД).
+
+После этого:
+- Новые генерации сразу пишут URL через прокси.
+- Старые записи перепишутся миграцией.
+- Даже если что-то пропустим — фронтовая `optimizeStorageImage` всё равно перепишет домен на лету как защитный слой.
+
+Нужен **Publish → Update** после изменений, чтобы новый бандл доехал до пользователей.

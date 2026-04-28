@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { encode as base64Encode, decode as base64Decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { toProxiedUrl } from "../_shared/storage-url.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -589,12 +590,14 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       );
     }
 
+    const proxiedUrl = toProxiedUrl(urlData.publicUrl);
+
     // Update task as completed
     await supabase
       .from('generation_tasks')
       .update({
         status: 'completed',
-        image_url: urlData.publicUrl,
+        image_url: proxiedUrl,
         storage_path: fileName,
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -604,12 +607,13 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     // Update job progress
     await supabase.rpc('update_job_progress', { job_id_param: task.job_id });
 
-    console.log(`Task ${taskId} completed successfully`);
+    console.log(`Task ${taskId} completed successfully, public URL: ${proxiedUrl}`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        imageUrl: urlData.publicUrl,
+        taskId,
+        imageUrl: proxiedUrl,
         storagePath: fileName,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

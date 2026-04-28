@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getProxiedPublicUrl } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,8 +125,7 @@ export const AdminFriends = () => {
       .from("service_friends_logos")
       .upload(path, file, { contentType: file.type, upsert: true });
     if (error) throw new Error("Ошибка загрузки логотипа: " + error.message);
-    const { data } = supabase.storage.from("service_friends_logos").getPublicUrl(path);
-    return data.publicUrl;
+    return getProxiedPublicUrl("service_friends_logos", path);
   };
 
   const handleSave = async () => {

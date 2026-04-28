@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { toProxiedUrl } from "../_shared/storage-url.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -333,9 +334,10 @@ async function processTask(supabase: any, openAIApiKey: string, job: any, task: 
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl: rawUrl } } = supabase.storage
       .from('generated-cards')
       .getPublicUrl(fileName);
+    const publicUrl = toProxiedUrl(rawUrl);
 
     console.log(`Public URL for task ${task.id}:`, publicUrl);
 

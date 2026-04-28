@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { getProxiedPublicUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -348,11 +349,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("generation-images")
-        .getPublicUrl(fileName);
-
-      const imageUrl = urlData.publicUrl;
+      const imageUrl = getProxiedPublicUrl("generation-images", fileName);
 
       setIsUploading(false);
       setIsGenerating(true);
