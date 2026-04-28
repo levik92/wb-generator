@@ -1206,7 +1206,7 @@ export const History = ({
                         <ProgressiveImage 
                           src={img.image_url} 
                           alt={`Карточка ${imgIndex + 1}`} 
-                          className="w-full h-full object-fill cursor-pointer"
+                          className="w-full h-full object-cover cursor-pointer"
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
