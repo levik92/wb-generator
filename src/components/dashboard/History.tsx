@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type SyntheticEvent } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +65,7 @@ const HistoryAvatarImage = ({
 }: {
   src: string;
   alt: string;
-  onError?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+  onError?: (event: SyntheticEvent<HTMLImageElement, Event>) => void;
 }) => (
   <>
     <ProgressiveImage
