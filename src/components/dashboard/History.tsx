@@ -57,6 +57,36 @@ const historyBlobDownload = (blob: Blob, filename: string): void => {
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
   }
 };
+
+const HistoryAvatarImage = ({
+  src,
+  alt,
+  onError,
+}: {
+  src: string;
+  alt: string;
+  onError?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+}) => (
+  <>
+    <ProgressiveImage
+      src={src}
+      alt=""
+      aria-hidden="true"
+      previewWidth={160}
+      previewQuality={65}
+      className="absolute inset-0 h-full w-full scale-110 object-cover blur-md opacity-70"
+    />
+    <ProgressiveImage
+      src={src}
+      alt={alt}
+      previewWidth={180}
+      previewQuality={85}
+      className="relative z-[1] h-full w-full object-contain"
+      onError={onError}
+    />
+  </>
+);
+
 interface Generation {
   id: string;
   generation_type: string;
