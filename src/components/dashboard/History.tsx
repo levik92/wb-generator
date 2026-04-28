@@ -1094,7 +1094,7 @@ export const History = ({
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
                       </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
