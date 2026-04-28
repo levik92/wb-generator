@@ -21,13 +21,12 @@ interface ProgressiveImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>
 }
 
 /**
- * Three-step progressive lazy image:
- *   1. Tiny blurred placeholder (~40px) — shown immediately as an "avatar".
- *   2. Medium-quality preview sized to the actual display container (e.g. 200-400px).
- *      Loaded once the element scrolls near the viewport. This becomes the
- *      sharp visible image in lists/history.
- *   3. (Optional) Full-resolution original — only fetched when `loadFull` is set
- *      or `fullSrc` is provided, after the preview is ready. Useful for zoom/expand.
+ * Single <img> element that progressively swaps its src:
+ *   1. Tiny blurred placeholder shown immediately (with blur filter).
+ *   2. When the element is near the viewport, preload the medium-quality
+ *      preview in the background. As soon as it's ready, swap src and
+ *      remove the blur — same DOM node, no layout shift, no overlap.
+ *   3. (Optional) Same swap again to full resolution if `loadFull` / `fullSrc`.
  */
 export function ProgressiveImage({
   src,
@@ -41,14 +40,9 @@ export function ProgressiveImage({
   className,
   alt = "",
   onError,
+  style,
   ...rest
 }: ProgressiveImageProps) {
-  const [previewLoaded, setPreviewLoaded] = useState(false);
-  const [fullLoaded, setFullLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [inView, setInView] = useState(false);
-  const containerRef = useRef<HTMLSpanElement | null>(null);
-
   const lowSrc = optimizeStorageImage(src, {
     width: lowQualityWidth,
     quality: lowQualityQuality,
@@ -60,9 +54,23 @@ export function ProgressiveImage({
   const wantFull = loadFull || !!fullSrc;
   const fullResolved = rewriteStorageUrl(fullSrc ?? src);
 
+  const [currentSrc, setCurrentSrc] = useState<string>(lowSrc);
+  const [stage, setStage] = useState<"low" | "preview" | "full">("low");
+  const [failed, setFailed] = useState(false);
+  const [inView, setInView] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  // Reset when src changes.
+  useEffect(() => {
+    setCurrentSrc(lowSrc);
+    setStage("low");
+    setFailed(false);
+  }, [lowSrc]);
+
+  // Intersection observer to trigger preview load.
   useEffect(() => {
     if (inView) return;
-    const el = containerRef.current;
+    const el = imgRef.current;
     if (!el) return;
     if (typeof IntersectionObserver === "undefined") {
       setInView(true);
@@ -84,73 +92,75 @@ export function ProgressiveImage({
     return () => observer.disconnect();
   }, [inView, rootMargin]);
 
+  // Preload preview, then swap src.
+  useEffect(() => {
+    if (!inView || stage !== "low" || !previewSrc || previewSrc === lowSrc) return;
+    const img = new Image();
+    let cancelled = false;
+    img.onload = () => {
+      if (cancelled) return;
+      setCurrentSrc(previewSrc);
+      setStage("preview");
+    };
+    img.onerror = () => {
+      if (cancelled) return;
+      // Fall back to original URL if transform endpoint fails.
+      const fallback = rewriteStorageUrl(src);
+      const f = new Image();
+      f.onload = () => {
+        if (cancelled) return;
+        setCurrentSrc(fallback);
+        setStage("preview");
+      };
+      f.onerror = () => {
+        if (!cancelled) setFailed(true);
+      };
+      f.src = fallback;
+    };
+    img.src = previewSrc;
+    return () => {
+      cancelled = true;
+    };
+  }, [inView, stage, previewSrc, lowSrc, src]);
+
+  // Optional step 3 — full resolution.
+  useEffect(() => {
+    if (!wantFull || stage !== "preview" || !fullResolved) return;
+    const img = new Image();
+    let cancelled = false;
+    img.onload = () => {
+      if (cancelled) return;
+      setCurrentSrc(fullResolved);
+      setStage("full");
+    };
+    img.src = fullResolved;
+    return () => {
+      cancelled = true;
+    };
+  }, [wantFull, stage, fullResolved]);
+
   if (failed) return null;
 
-  // The "current best" image visible to the user at any moment.
-  const sharpReady = previewLoaded || fullLoaded;
+  const isBlurred = stage === "low";
 
   return (
-    <span ref={containerRef} className="contents">
-      {/* Step 1 — tiny blurred avatar. Stays mounted until the preview step is ready. */}
-      {!sharpReady && (
-        <img
-          {...rest}
-          src={lowSrc}
-          alt={alt}
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-          className={cn(className, "blur-md scale-105")}
-        />
+    <img
+      {...rest}
+      ref={imgRef}
+      src={currentSrc}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      onError={(e) => {
+        setFailed(true);
+        onError?.(e);
+      }}
+      style={style}
+      className={cn(
+        className,
+        "transition-[filter] duration-300",
+        isBlurred && "blur-md scale-105"
       )}
-
-      {/* Step 2 — medium-quality preview sized to the container. Mounted once visible. */}
-      {inView && (
-        <img
-          {...rest}
-          src={previewSrc}
-          alt={alt}
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setPreviewLoaded(true)}
-          onError={(e) => {
-            setFailed(true);
-            onError?.(e);
-          }}
-          className={cn(
-            className,
-            "transition-opacity duration-300",
-            // Hide preview once full-res is in (avoids double-paint), otherwise show it.
-            fullLoaded
-              ? "opacity-0 absolute inset-0"
-              : previewLoaded
-                ? "opacity-100"
-                : "opacity-0 absolute inset-0"
-          )}
-        />
-      )}
-
-      {/* Step 3 — full-resolution original. Only mounted after preview is ready
-          and only if explicitly requested. */}
-      {inView && wantFull && previewLoaded && (
-        <img
-          {...rest}
-          src={fullResolved}
-          alt={alt}
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setFullLoaded(true)}
-          onError={(e) => {
-            setFailed(true);
-            onError?.(e);
-          }}
-          className={cn(
-            className,
-            "transition-opacity duration-300",
-            fullLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
-          )}
-        />
-      )}
-    </span>
+    />
   );
 }
