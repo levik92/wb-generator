@@ -1045,7 +1045,7 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <ProgressiveImage src={generation.output_data.source_image} alt="Превью" previewWidth={160} previewQuality={75} className="w-full h-full object-cover" />
+                          <ProgressiveImage src={generation.output_data.source_image} alt="Превью" previewWidth={160} previewQuality={75} className="w-full h-full object-contain bg-muted/40" />
                         ) : (
                           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
                             <Video className="w-6 h-6 text-primary" />
