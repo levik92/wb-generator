@@ -67,24 +67,14 @@ const HistoryAvatarImage = ({
   alt: string;
   onError?: (event: SyntheticEvent<HTMLImageElement, Event>) => void;
 }) => (
-  <>
-    <ProgressiveImage
-      src={src}
-      alt=""
-      aria-hidden="true"
-      previewWidth={160}
-      previewQuality={65}
-      className="absolute inset-0 h-full w-full scale-110 object-cover blur-md opacity-70"
-    />
-    <ProgressiveImage
-      src={src}
-      alt={alt}
-      previewWidth={180}
-      previewQuality={85}
-      className="relative z-[1] h-full w-full object-contain"
-      onError={onError}
-    />
-  </>
+  <ProgressiveImage
+    src={src}
+    alt={alt}
+    previewWidth={180}
+    previewQuality={85}
+    className="w-full h-full object-cover"
+    onError={onError}
+  />
 );
 
 interface Generation {
