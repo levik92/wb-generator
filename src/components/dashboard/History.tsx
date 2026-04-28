@@ -1045,7 +1045,7 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <ProgressiveImage src={generation.output_data.source_image} alt="Превью" previewWidth={160} previewQuality={75} className="w-full h-full object-contain bg-muted/40" />
+                          <ProgressiveImage src={generation.output_data.source_image} alt="Превью" previewWidth={160} previewQuality={75} className="w-full h-full object-cover object-top" />
                         ) : (
                           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
                             <Video className="w-6 h-6 text-primary" />
@@ -1058,7 +1058,7 @@ export const History = ({
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
-                        <ProgressiveImage src={generation.output_data.images[0].image_url} alt="Превью" previewWidth={160} previewQuality={75} className="w-full h-full object-contain bg-muted/40" onError={e => {
+                        <ProgressiveImage src={generation.output_data.images[0].image_url} alt="Превью" previewWidth={160} previewQuality={75} className="w-full h-full object-cover object-top" onError={e => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
