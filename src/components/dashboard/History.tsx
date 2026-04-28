@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type SyntheticEvent } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,36 @@ const historyBlobDownload = (blob: Blob, filename: string): void => {
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
   }
 };
+
+const HistoryAvatarImage = ({
+  src,
+  alt,
+  onError,
+}: {
+  src: string;
+  alt: string;
+  onError?: (event: SyntheticEvent<HTMLImageElement, Event>) => void;
+}) => (
+  <>
+    <ProgressiveImage
+      src={src}
+      alt=""
+      aria-hidden="true"
+      previewWidth={160}
+      previewQuality={65}
+      className="absolute inset-0 h-full w-full scale-110 object-cover blur-md opacity-70"
+    />
+    <ProgressiveImage
+      src={src}
+      alt={alt}
+      previewWidth={180}
+      previewQuality={85}
+      className="relative z-[1] h-full w-full object-contain"
+      onError={onError}
+    />
+  </>
+);
+
 interface Generation {
   id: string;
   generation_type: string;
@@ -1045,7 +1075,7 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <ProgressiveImage src={generation.output_data.source_image} alt="Превью" previewWidth={160} previewQuality={75} className="absolute left-0 top-1/2 w-full h-auto -translate-y-1/2" />
+                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" />
                         ) : (
                           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
                             <Video className="w-6 h-6 text-primary" />
@@ -1058,7 +1088,7 @@ export const History = ({
                         className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
-                        <ProgressiveImage src={generation.output_data.images[0].image_url} alt="Превью" previewWidth={160} previewQuality={75} className="absolute left-0 top-1/2 w-full h-auto -translate-y-1/2" onError={e => {
+                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
