@@ -48,6 +48,34 @@ function rewriteSrcset(value: string): string {
 }
 
 let installed = false;
+let expiredJwtHandled = false;
+
+function handleExpiredJwt(): void {
+  if (expiredJwtHandled) return;
+  expiredJwtHandled = true;
+  try {
+    // Очищаем все токены supabase из storage и редиректим на /auth.
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        try { localStorage.removeItem(key); } catch {}
+      }
+    }
+    for (const key of Object.keys(sessionStorage)) {
+      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
+        try { sessionStorage.removeItem(key); } catch {}
+      }
+    }
+  } catch {
+    /* noop */
+  }
+  try {
+    if (window.location.pathname !== "/auth") {
+      window.location.replace("/auth");
+    }
+  } catch {
+    /* noop */
+  }
+}
 
 export function installStorageProxyGuard(): void {
   if (installed || typeof window === "undefined") return;
