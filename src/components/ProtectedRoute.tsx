@@ -52,13 +52,30 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   const checkBlocked = async (userId: string) => {
     try {
+      // Принудительно валидируем сессию: supabase-js при необходимости обновит access token.
+      // Если refresh token мёртвый — getSession вернёт null и мы выйдем из аккаунта.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session) {
+        await forceSignOut();
+        return;
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('is_blocked')
         .eq('id', userId)
         .single();
 
-      if (!error && data?.is_blocked) {
+      if (error) {
+        // JWT истёк / невалиден — выкидываем на /auth, чтобы пользователь перелогинился
+        const code = (error as any)?.code;
+        const msg = (error as any)?.message?.toLowerCase?.() ?? '';
+        if (code === 'PGRST303' || msg.includes('jwt expired') || msg.includes('invalid jwt')) {
+          await forceSignOut();
+          return;
+        }
+        console.error('Error checking block status:', error);
+      } else if (data?.is_blocked) {
         setIsBlocked(true);
         toast({
           title: "Аккаунт заблокирован",
