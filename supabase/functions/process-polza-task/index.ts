@@ -204,7 +204,7 @@ ${referenceImage ? `2. Последнее изображение (референ
         provider: {
           only: ["Google AI Studio"],
         },
-        async: true,
+        async: false,
       }),
     });
 
