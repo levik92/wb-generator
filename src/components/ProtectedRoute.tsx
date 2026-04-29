@@ -9,6 +9,16 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+function withTimeout<T>(promise: PromiseLike<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`Timeout: ${label} after ${ms}ms`)), ms);
+    Promise.resolve(promise).then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); }
+    );
+  });
+}
+
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,66 +29,93 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     if (initialized.current) return;
     initialized.current = true;
 
+    // Hard safety: never let the loading spinner show longer than 8s.
+    // If anything hangs (network, proxy, expired refresh token), kick to /auth.
+    const safetyTimer = setTimeout(() => {
+      if (loading) {
+        console.warn('[ProtectedRoute] Auth check timed out, forcing sign out');
+        forceSignOut();
+      }
+    }, 8000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           checkBlocked(session.user.id);
-          // Track user activity
           if (event === 'SIGNED_IN') {
-            // Real login: increment login_count + update last_active_at
             supabase.rpc('update_profile_on_login' as any, { user_id_param: session.user.id });
           } else if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-            // Returning user with valid session: only touch last_active_at (throttled to 10 min)
             supabase.rpc('touch_profile_activity' as any, { user_id_param: session.user.id });
           }
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           setLoading(false);
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkBlocked(session.user.id);
-      } else {
-        setLoading(false);
+    (async () => {
+      try {
+        const { data: { session } } = await withTimeout(
+          supabase.auth.getSession(),
+          5000,
+          'getSession'
+        );
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          checkBlocked(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      } catch (e) {
+        console.error('[ProtectedRoute] getSession failed:', e);
+        // Session unrecoverable — clear and bounce.
+        await forceSignOut();
       }
-    });
+    })();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(safetyTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkBlocked = async (userId: string) => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData?.session) {
-        setUser(null);
-        return;
-      }
-
-      let { data, error } = await supabase
-        .from('profiles')
-        .select('is_blocked')
-        .eq('id', userId)
-        .single();
+      let { data, error } = await withTimeout(
+        supabase.from('profiles').select('is_blocked').eq('id', userId).single(),
+        6000,
+        'profiles.select'
+      );
 
       if (error) {
         const code = (error as any)?.code;
         const msg = (error as any)?.message?.toLowerCase?.() ?? '';
-        if (code === 'PGRST303' || msg.includes('jwt expired') || msg.includes('invalid jwt')) {
-          const { data: refreshed } = await supabase.auth.refreshSession();
-          if (refreshed.session) {
-            const retry = await supabase
-              .from('profiles')
-              .select('is_blocked')
-              .eq('id', userId)
-              .single();
+        const isJwtError = code === 'PGRST303' || msg.includes('jwt expired') || msg.includes('invalid jwt');
+        if (isJwtError) {
+          let refreshed: any = null;
+          try {
+            const res = await withTimeout(
+              supabase.auth.refreshSession(),
+              5000,
+              'refreshSession'
+            );
+            refreshed = res.data;
+          } catch (refreshErr) {
+            console.warn('[ProtectedRoute] refreshSession failed:', refreshErr);
+          }
+
+          if (refreshed?.session) {
+            const retry = await withTimeout(
+              supabase.from('profiles').select('is_blocked').eq('id', userId).single(),
+              6000,
+              'profiles.retry'
+            );
             data = retry.data;
             error = retry.error;
           } else {
-            setUser(null);
+            // Refresh token is dead — boot to /auth immediately.
+            await forceSignOut();
             return;
           }
         }
