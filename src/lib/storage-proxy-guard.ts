@@ -56,14 +56,18 @@ export function installStorageProxyGuard(): void {
   // 1. fetch
   try {
     const origFetch = window.fetch.bind(window);
-    window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
+    window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      let urlForCheck = "";
       try {
         if (typeof input === "string") {
+          urlForCheck = input;
           input = rewrite(input);
         } else if (input instanceof URL) {
-          const fixed = rewrite(input.toString());
-          if (fixed !== input.toString()) input = fixed;
+          urlForCheck = input.toString();
+          const fixed = rewrite(urlForCheck);
+          if (fixed !== urlForCheck) input = fixed;
         } else if (input instanceof Request) {
+          urlForCheck = input.url;
           const fixed = rewrite(input.url);
           if (fixed !== input.url) {
             input = new Request(fixed, input);
@@ -72,7 +76,31 @@ export function installStorageProxyGuard(): void {
       } catch {
         /* fall through */
       }
-      return origFetch(input as any, init);
+
+      const response = await origFetch(input as any, init);
+
+      // Detect expired JWT on PostgREST/auth endpoints and force a clean logout once.
+      try {
+        if (
+          response.status === 401 &&
+          urlForCheck.includes(PROXY_HOST) &&
+          (urlForCheck.includes("/rest/v1/") || urlForCheck.includes("/auth/v1/"))
+        ) {
+          const cloned = response.clone();
+          const text = await cloned.text();
+          if (
+            text.includes("PGRST303") ||
+            /jwt expired/i.test(text) ||
+            /invalid jwt/i.test(text)
+          ) {
+            handleExpiredJwt();
+          }
+        }
+      } catch {
+        /* noop */
+      }
+
+      return response;
     }) as typeof window.fetch;
   } catch (e) {
     console.warn("[storage-proxy-guard] fetch patch failed", e);
