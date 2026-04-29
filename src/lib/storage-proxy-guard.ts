@@ -48,34 +48,6 @@ function rewriteSrcset(value: string): string {
 }
 
 let installed = false;
-let expiredJwtHandled = false;
-
-function handleExpiredJwt(): void {
-  if (expiredJwtHandled) return;
-  expiredJwtHandled = true;
-  try {
-    // Очищаем все токены supabase из storage и редиректим на /auth.
-    for (const key of Object.keys(localStorage)) {
-      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-        try { localStorage.removeItem(key); } catch {}
-      }
-    }
-    for (const key of Object.keys(sessionStorage)) {
-      if (key.startsWith("sb-") && key.endsWith("-auth-token")) {
-        try { sessionStorage.removeItem(key); } catch {}
-      }
-    }
-  } catch {
-    /* noop */
-  }
-  try {
-    if (window.location.pathname !== "/auth") {
-      window.location.replace("/auth");
-    }
-  } catch {
-    /* noop */
-  }
-}
 
 export function installStorageProxyGuard(): void {
   if (installed || typeof window === "undefined") return;
@@ -105,30 +77,7 @@ export function installStorageProxyGuard(): void {
         /* fall through */
       }
 
-      const response = await origFetch(input as any, init);
-
-      // Detect expired JWT on PostgREST/auth endpoints and force a clean logout once.
-      try {
-        if (
-          response.status === 401 &&
-          urlForCheck.includes(PROXY_HOST) &&
-          (urlForCheck.includes("/rest/v1/") || urlForCheck.includes("/auth/v1/"))
-        ) {
-          const cloned = response.clone();
-          const text = await cloned.text();
-          if (
-            text.includes("PGRST303") ||
-            /jwt expired/i.test(text) ||
-            /invalid jwt/i.test(text)
-          ) {
-            handleExpiredJwt();
-          }
-        }
-      } catch {
-        /* noop */
-      }
-
-      return response;
+      return origFetch(input as any, init);
     }) as typeof window.fetch;
   } catch (e) {
     console.warn("[storage-proxy-guard] fetch patch failed", e);
