@@ -1,26 +1,44 @@
-## Что сделаю
+# Исправление race condition CloudPayments + backfill записи платежа
 
-Создам файл `/mnt/documents/niggamaxxx_polza_titles.txt` — пронумерованный список всех 217 завершённых карточек пользователя `niggamaxxx@yandex.ru` за 27.04.2026 14:51 — 29.04.2026 18:27 МСК.
+## Контекст
 
-Формат каждой строки:
-```
-№   ДД.ММ ЧЧ:ММ (МСК)   |   Название товара   |   job_id
-```
+Платёж [pekz25@bk.ru](mailto:pekz25@bk.ru) (`d187d89e-e62e-4232-bd51-96a56b1ebc55`, 9 990 ₽ / 850 токенов) застрял в статусе `failed`, хотя банковская транзакция прошла успешно со второй попытки. Причина: CloudPayments прислал `fail` webhook (DoNotHonor) → мы перевели payment в `failed`. Через 53 секунды пришёл `pay` webhook на тот же `InvoiceId`, но `process_payment_success` ищет только `status='pending'` → молча вышел.
 
-Сортировка — от новых к старым (как в админке).
+Токены пользователю уже начислены вручную (admin bonus, +850 в `token_transactions`). Повторно НЕ начислять.
 
-Дополнительно сгенерирую `/mnt/documents/niggamaxxx_polza_titles_grouped.txt` — те же товары, сгруппированные по названию с подсчётом «сколько раз генерилось», чтобы быстрее ориентироваться при ручном просмотре в Polza:
-```
-[N шт.]  Название товара
-   - 29.04 18:24  job_id
-   - 29.04 18:23  job_id
-   ...
-```
+## Что делаем
 
-## Технически
+### 1. Backfill записи платежа (без повторного начисления токенов)
 
-- Один SQL-запрос: `generation_tasks JOIN generation_jobs` с фильтром по `user_id`, периоду `completed_at` и `status='completed'`, `image_url IS NOT NULL`. Сортировка `completed_at DESC`.
-- Python-скрипт сформирует оба .txt-файла из результата.
-- Проверка: `wc -l` = 217 в первом файле; во втором сумма счётчиков = 217.
+Через миграцию (data update):
 
-ZIP / картинки трогать не буду — только текстовые списки названий.
+- `UPDATE payments SET status='succeeded', confirmed_at='2026-05-06 11:49:16+00' WHERE id='d187d89e-e62e-4232-bd51-96a56b1ebc55'`
+  - Триггер `process_partner_commission` сработает, но у пользователя `referred_by IS NULL` и в `partner_referrals` его нет — комиссия не начислится. Безопасно.
+- Токены НЕ трогаем (уже начислены админом).
+
+### 2. Чиним webhook `cloudpayments-webhook/index.ts`
+
+В ветке `notificationType === 'fail'`:
+
+- Перестаём переводить платёж в `failed`, если `status != 'pending'` (защита от race с уже succeeded).
+- Если `status = 'pending'` — оставляем `pending`, не помечаем `failed`. Это позволит следующему `pay` webhook на тот же `InvoiceId` (CloudPayments переиспользует InvoiceId при retry после DoNotHonor / InsufficientFunds) корректно отработать через существующую `process_payment_success`. Стейл-платежи всё равно подчистит `cleanup-stale-payments` через 30 минут.
+- Уведомление о неудаче пользователю не шлём в этой ветке (иначе при успешном retry он получит и «не прошла», и «прошла»). Если очень нужно — можно слать через 30 минут из cleanup'а, но это отдельная задача.
+
+В ветке `pay` оставляем как есть — `process_payment_success` уже идемпотентна по `status='pending'`.
+
+### 3. Деплой и проверка
+
+- Деплой `cloudpayments-webhook`.
+- SQL-проверка: запись `d187d89e...` имеет статус `succeeded`, токены не задвоены.
+
+## Технические детали
+
+- Файл: `supabase/functions/cloudpayments-webhook/index.ts`, замена блока в строках 169–200 (ветка `fail`).
+- Миграция: `UPDATE payments` + `INSERT INTO notifications`. Без изменений схемы.
+- `process_payment_success` менять не требуется — после фикса webhook она будет вызываться по pending-записи как и задумано.
+
+## Что НЕ делаем
+
+- Не трогаем `tokens_balance` пользователя.
+- Не вставляем в `token_transactions` (там уже есть admin bonus +850).
+- Не меняем `process_payment_success` RPC.
