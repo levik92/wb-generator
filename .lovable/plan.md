@@ -1,45 +1,39 @@
-# Что выяснил
+Новая гипотеза: предыдущая правка не сработала, потому что проект одновременно смешивает старый API `widget.pay('charge', ...)` и новый формат параметров CloudPayments (`publicTerminalId`, `paymentSchema`, `externalId`), а CSS-исключение не покрывает реальную DOM-структуру мобильного виджета.
 
-**Бэкенд работает корректно.** В БД у пользователя `karinakracyk@gmail.com` 16+ платежей со статусом `pending` за последний час — функция `create-payment` каждый раз успешно создаёт запись и возвращает параметры виджета. Проблема целиком на стороне клиентского виджета CloudPayments.
+Что уже подтверждено:
+- У пользователя `karinakracyk@gmail.com` новые платежи всё ещё создаются в БД как `pending`, значит backend `create-payment` дорабатывает успешно.
+- За эти попытки нет ни одного webhook от CloudPayments, значит пользователь не доходит до реальной оплаты/транзакции; проблема на этапе открытия/работы виджета.
+- Официальная документация CloudPayments для текущего виджета показывает основной метод `widget.start(intentParams)` с параметрами `publicTerminalId`, `paymentSchema`, `externalId`, `metadata`, `receipt`.
+- В коде сейчас используется старый вызов `widget.pay('charge', ...)`, но в него передаются частично новые параметры, переименованные обратно в старые (`publicId`, `invoiceId`, `data`). Это вероятная причина закрытия/сбоя виджета.
 
-**Симптомы:**
-1. Десктоп: виджет открывается и сразу закрывается (доли секунды). 
-2. Мобильный: открывается поле ввода номера карты, при наборе цифры «перепрыгивают» и появляется ошибка «некорректная дата», хотя поле ещё на номере карты.
+План исправления:
 
-**Корневые причины (наиболее вероятные):**
+1. Перевести фронтенд на актуальный API CloudPayments
+   - В `src/components/dashboard/Pricing.tsx` заменить `widget.pay('charge', ...)` на `widget.start(intentParams)`.
+   - Передавать параметры в формате, который уже возвращает edge function: `publicTerminalId`, `description`, `amount`, `currency`, `paymentSchema: 'Single'`, `externalId`, `userInfo`, `metadata`, `receipt`, `skin`, `autoClose`, `successRedirectUrl`, `failRedirectUrl`.
+   - Оставить ожидание загрузки библиотеки, но проверять именно наличие конструктора `cp.CloudPayments` перед созданием виджета.
+   - Обработать Promise от `widget.start(...)`: success/fail/cancel показывать русскими сообщениями и корректно сбрасывать состояние кнопки.
 
-а) В `src/components/dashboard/Pricing.tsx` (вызов `widget.pay('charge', ...)`) передаются параметры, не входящие в схему `pay()` нового SDK CloudPayments:
-- `paymentSchema: 'Single'` — параметр старого `CloudPayments({...}).charge()`, в новом `pay('charge', options)` отсутствует, может приводить к раннему отказу/закрытию виджета.
-- `autoClose: 3` — также параметр старого API инициализации, не виджета `pay()`.
-- `successRedirectUrl` / `failRedirectUrl` — для встроенного виджета не используются (они для hosted-checkout). Виджет работает через `onSuccess` / `onFail` колбэки. Их наличие безопасно, но мы их зря таскаем.
+2. Упростить и привести ответ `create-payment` к новому формату
+   - В `supabase/functions/create-payment/index.ts` оставить `paymentSchema`, `externalId`, `autoClose`, `successRedirectUrl`, `failRedirectUrl`, потому что они нужны именно для `start()`.
+   - Дублировать чек в новом поле `receipt` и сохранить метаданные в `metadata`, чтобы виджет не зависел только от legacy `data.CloudPayments.CustomerReceipt`.
+   - При необходимости оставить legacy `data.CloudPayments.CustomerReceipt` для совместимости, но основной путь сделать через `receipt`/`metadata`.
 
-б) В `src/index.css` (строки 412–423) глобальный селектор `input:not(...) { ... !important }` применяется ко **всем** инпутам страницы. Виджет CloudPayments на мобиле рендерится **в том же DOM** (без iframe — это inline-форма), и наши `!important` правила перебивают его собственные стили + transition. Это **классическая** причина «прыгающих цифр» в полях с маской ввода: `font-size`/`transition` ломают позиционирование курсора в маске карты, и набранные символы попадают не в тот сегмент → «дата некорректна» сразу после нескольких цифр.
+3. Полностью изолировать CloudPayments от глобальных CSS
+   - В `src/index.css` заменить точечные исключения для input на безопасную стратегию: не применять глобальные стили к элементам внутри CloudPayments overlay/iframe/container, включая классы/ID/атрибуты с `cloudpayments`, `cp`, `widget`, а также поля `cardNumber`, `expDateMonthYear`, `cvv`, `name`.
+   - Убрать рискованный `border: initial !important`/`font-size: initial !important` для CP-полей и заменить на `all: revert`/минимальные сбросы только для реально принадлежащих виджету элементов, чтобы не ломать маски ввода.
+   - Добавить исключения для `textarea/select/button[role="combobox"]` только там, где они не находятся в платёжном оверлее.
 
-в) Скрипт CloudPayments подключён с `defer` (`index.html:174`). При быстром нажатии «Пополнить» сразу после загрузки страницы `window.cp.CloudPayments` ещё не определён → срабатывает наш fallback-toast «Виджет не инициализирован». На десктопе у пользователя возможно именно это и происходит (загрузка → мгновенный «сброс»).
+4. Почистить зависшие попытки пользователя
+   - Добавить миграцию, которая переведёт старые `pending` CloudPayments-платежи пользователя `karinakracyk@gmail.com` в `expired`/`canceled` только если они старше нескольких минут.
+   - Не трогать успешные платежи и не менять балансы.
 
-# Что сделаю
+5. Проверка после правки
+   - Проверить, что код больше не содержит смешанного вызова `widget.pay('charge', ...)` для нового формата.
+   - Проверить в БД, что новые попытки будут создаваться с корректным `external_payment_id`.
+   - Проверить логи edge function после деплоя/вызова: `create-payment` создаёт intent, а webhook остаётся готов принимать `InvoiceId`/`metadata.external_payment_id`.
 
-1. **Очистить параметры виджета** в `src/components/dashboard/Pricing.tsx`:
-   - Убрать `paymentSchema`, `autoClose`, `successRedirectUrl`, `failRedirectUrl` из объекта `widget.pay('charge', ...)`.
-   - Также убрать их из `intentParams` в `supabase/functions/create-payment/index.ts` (необязательно, но чище).
-
-2. **Изолировать стили инпутов от CloudPayments** в `src/index.css`:
-   - Добавить исключения к глобальному правилу `input:not(...)` для селекторов виджета CloudPayments: `:not([class*="cp-"]):not([class*="CP"]):not([data-cp]):not([name="cardNumber"]):not([name="expDateMonthYear"]):not([name="cvv"]):not([name="name"])`.
-   - Аналогично для focus-правила.
-   - Это устранит «прыгающие цифры» и сообщение о неверной дате на мобильном.
-
-3. **Дождаться загрузки CloudPayments перед открытием**:
-   - В `Pricing.tsx` перед `new cpLib.CloudPayments()` сделать короткий `await` поллер (до ~3 сек) на `window.cp?.CloudPayments`. Если за это время не появится — показать понятный тост «Платёжный модуль ещё загружается, попробуйте через секунду».
-   - В `index.html` убрать `defer` со скрипта CloudPayments (загружать раньше) — либо оставить `defer`, но компенсировать поллером в шаге 3 (предпочтительнее `defer` + поллер, чтобы не блокировать рендер).
-
-4. **Подчистить «висящие» pending-платежи** этого пользователя (16+ за час) — переведу их в `canceled`, чтобы не путались в статистике (cron `cleanup-stale-payments` это уже делает раз в 30 мин, но ускорим вручную).
-
-# Технические детали
-
-Файлы:
-- `src/components/dashboard/Pricing.tsx` — упростить объект виджета, добавить поллер `window.cp.CloudPayments`.
-- `src/index.css` — расширить `:not(...)` исключения для CP-полей и убрать `transition` `!important` для инпутов виджета.
-- `supabase/functions/create-payment/index.ts` — почистить `intentParams` (опционально).
-- Миграция: `UPDATE payments SET status='canceled' WHERE user_id=... AND status='pending' AND created_at < now() - interval '5 minutes'`.
-
-После правок попрошу пользователя ещё раз попробовать оплату и приложить консольные логи `[CloudPayments]`, если воспроизведётся.
+Ожидаемый результат:
+- На ноутбуке окно оплаты не должно закрываться сразу после загрузки.
+- На телефоне поля карты должны работать штатно, без перемешивания цифр и ошибочной валидации даты.
+- Если оплата не прошла или пользователь закрыл окно, кнопка корректно разблокируется и покажет понятное сообщение на русском.
