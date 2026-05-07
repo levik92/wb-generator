@@ -410,28 +410,17 @@
 }
 
 /* Standardized borders for all inputs - 1px gray, lighter background */
-/* Excludes CloudPayments widget fields (cardNumber, expDateMonthYear, cvv, name) and any element inside .cp- container */
-input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):not([name="cardNumber"]):not([name="expDateMonthYear"]):not([name="cvv"]):not([name="name"]):not([class*="cp-"]):not([data-cp]),
-textarea, 
-select,
-button[role="combobox"] {
+/* Scoped to app root only — CloudPayments widget renders outside #root and stays untouched */
+#root input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden),
+#root textarea,
+#root select,
+#root button[role="combobox"] {
   border-width: 1px !important;
   border-style: solid !important;
   border-color: hsl(var(--input-border)) !important;
   background-color: hsl(var(--input)) !important;
   font-size: 0.875rem;
   transition: border-color 0.3s ease, background-color 0.3s ease !important;
-}
-
-/* Hard reset for any input rendered inside CloudPayments widget — let CP own its styles */
-[class*="cp-"] input,
-[class*="CP"] input,
-[id^="cp-"] input,
-.cp-widget input {
-  border: initial !important;
-  background: initial !important;
-  font-size: initial !important;
-  transition: none !important;
 }
 
 /* Remove border from HCaptcha */
@@ -444,12 +433,12 @@ button[role="combobox"] {
   outline: none !important;
 }
 
-/* Focus state - purple border for all inputs */
-input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):not([name="cardNumber"]):not([name="expDateMonthYear"]):not([name="cvv"]):not([name="name"]):not([class*="cp-"]):not([data-cp]):focus,
-textarea:focus, 
-select:focus,
-button[role="combobox"]:focus,
-[data-state="open"] > button[role="combobox"] {
+/* Focus state - purple border for all inputs (scoped to app root) */
+#root input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):focus,
+#root textarea:focus,
+#root select:focus,
+#root button[role="combobox"]:focus,
+#root [data-state="open"] > button[role="combobox"] {
   outline: none !important;
   border-color: hsl(var(--wb-purple)) !important;
   box-shadow: none !important;
