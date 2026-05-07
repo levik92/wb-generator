@@ -1,44 +1,33 @@
-# Исправление race condition CloudPayments + backfill записи платежа
-
-## Контекст
-
-Платёж [pekz25@bk.ru](mailto:pekz25@bk.ru) (`d187d89e-e62e-4232-bd51-96a56b1ebc55`, 9 990 ₽ / 850 токенов) застрял в статусе `failed`, хотя банковская транзакция прошла успешно со второй попытки. Причина: CloudPayments прислал `fail` webhook (DoNotHonor) → мы перевели payment в `failed`. Через 53 секунды пришёл `pay` webhook на тот же `InvoiceId`, но `process_payment_success` ищет только `status='pending'` → молча вышел.
-
-Токены пользователю уже начислены вручную (admin bonus, +850 в `token_transactions`). Повторно НЕ начислять.
-
 ## Что делаем
 
-### 1. Backfill записи платежа (без повторного начисления токенов)
+Пользователь `ai3606849@gmail.com` (id: `dce168a0-7d54-4fd8-a030-b75e84896c6b`) оплатил по безналу пакет «Профессиональный» (9990₽ / 850 токенов). Токены уже начислены вручную (баланс сейчас 853). Нужно отразить факт оплаты в системе для статистики и истории.
 
-Через миграцию (data update):
+## Шаги
 
-- `UPDATE payments SET status='succeeded', confirmed_at='2026-05-06 11:49:16+00' WHERE id='d187d89e-e62e-4232-bd51-96a56b1ebc55'`
-  - Триггер `process_partner_commission` сработает, но у пользователя `referred_by IS NULL` и в `partner_referrals` его нет — комиссия не начислится. Безопасно.
-- Токены НЕ трогаем (уже начислены админом).
+1. **Создать запись в `organization_details`** (заглушка, т.к. реквизитов нет):
+   - `user_id`: `dce168a0-7d54-4fd8-a030-b75e84896c6b`
+   - `name`: `Оплата по счёту (ai3606849@gmail.com)`
+   - `inn`: `0000000000`
 
-### 2. Чиним webhook `cloudpayments-webhook/index.ts`
+2. **Создать запись в `invoice_payments`**:
+   - `user_id`: `dce168a0-7d54-4fd8-a030-b75e84896c6b`
+   - `organization_id`: id из шага 1
+   - `package_id`: `f0f1dad8-08bc-4c1b-9af6-b399d49f3d29` (Профессиональный)
+   - `package_name`: `Профессиональный`
+   - `amount`: `9990`
+   - `tokens_amount`: `850`
+   - `invoice_number`: `MANUAL-{timestamp}`
+   - `payment_purpose`: `Ручное внесение оплаты по безналу (токены начислены администратором)`
+   - `status`: `paid`
+   - `invoice_date`, `created_at`, `reviewed_at`: текущая дата
+   - `admin_notes`: `Внесено вручную администратором. Токены (850) уже начислены отдельной операцией.`
 
-В ветке `notificationType === 'fail'`:
+3. **Токены НЕ трогаем** — `tokens_balance` и `token_transactions` без изменений (баланс 853 сохраняется).
 
-- Перестаём переводить платёж в `failed`, если `status != 'pending'` (защита от race с уже succeeded).
-- Если `status = 'pending'` — оставляем `pending`, не помечаем `failed`. Это позволит следующему `pay` webhook на тот же `InvoiceId` (CloudPayments переиспользует InvoiceId при retry после DoNotHonor / InsufficientFunds) корректно отработать через существующую `process_payment_success`. Стейл-платежи всё равно подчистит `cleanup-stale-payments` через 30 минут.
-- Уведомление о неудаче пользователю не шлём в этой ветке (иначе при успешном retry он получит и «не прошла», и «прошла»). Если очень нужно — можно слать через 30 минут из cleanup'а, но это отдельная задача.
+## Результат
 
-В ветке `pay` оставляем как есть — `process_payment_success` уже идемпотентна по `status='pending'`.
+- В админке во вкладке «Оплаты» появится запись о безналичной оплате 9990₽.
+- В аналитике/выручке учтётся +9990₽.
+- Двойного начисления токенов не будет.
 
-### 3. Деплой и проверка
-
-- Деплой `cloudpayments-webhook`.
-- SQL-проверка: запись `d187d89e...` имеет статус `succeeded`, токены не задвоены.
-
-## Технические детали
-
-- Файл: `supabase/functions/cloudpayments-webhook/index.ts`, замена блока в строках 169–200 (ветка `fail`).
-- Миграция: `UPDATE payments` + `INSERT INTO notifications`. Без изменений схемы.
-- `process_payment_success` менять не требуется — после фикса webhook она будет вызываться по pending-записи как и задумано.
-
-## Что НЕ делаем
-
-- Не трогаем `tokens_balance` пользователя.
-- Не вставляем в `token_transactions` (там уже есть admin bonus +850).
-- Не меняем `process_payment_success` RPC.
+Подтвердите выполнение — выполню вставку через insert-инструмент.
