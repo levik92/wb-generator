@@ -604,7 +604,7 @@ export const AdminSupport = () => {
             title={selectedConv?.ai_enabled ? "Выключить AI" : "Включить AI"}>
             {selectedConv?.ai_enabled ? <BotOff className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg text-destructive hover:text-destructive" onClick={handleCloseConv}>
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleCloseConv}>
             <X className="w-3.5 h-3.5" />
           </Button>
         </div>
