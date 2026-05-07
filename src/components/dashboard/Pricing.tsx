@@ -121,31 +121,29 @@ export default function Pricing({
       }
 
       if (data.provider === 'cloudpayments') {
-        const cpLib = (window as any).cp;
-        if (!cpLib) {
+        // Wait up to 4s for CloudPayments script to finish loading (defer in index.html)
+        const waitForCp = async () => {
+          for (let i = 0; i < 40; i++) {
+            const lib = (window as any).cp;
+            if (lib?.CloudPayments) return lib;
+            await new Promise(r => setTimeout(r, 100));
+          }
+          return null;
+        };
+        const cpLib = await waitForCp();
+        if (!cpLib?.CloudPayments) {
           toast({
             title: "Ошибка",
-            description: "Виджет CloudPayments не загружен. Попробуйте обновить страницу.",
-            variant: "destructive"
-          });
-          setLoading(null);
-          return;
-        }
-
-        const params = data.intentParams;
-        console.log('[CloudPayments] Starting payment with params:', params);
-
-        if (!cpLib.CloudPayments) {
-          console.error('[CloudPayments] CloudPayments constructor not found on cp object');
-          toast({
-            title: "Ошибка",
-            description: "Виджет CloudPayments не инициализирован. Обновите страницу.",
+            description: "Платёжный модуль ещё загружается. Подождите секунду и попробуйте снова.",
             variant: "destructive"
           });
           setLoading(null);
           isPaymentInProgress.current = false;
           return;
         }
+
+        const params = data.intentParams;
+        console.log('[CloudPayments] Starting payment with params:', params);
 
         try {
           const widget = new cpLib.CloudPayments();
