@@ -410,7 +410,8 @@
 }
 
 /* Standardized borders for all inputs - 1px gray, lighter background */
-input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden), 
+/* Excludes CloudPayments widget fields (cardNumber, expDateMonthYear, cvv, name) and any element inside .cp- container */
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):not([name="cardNumber"]):not([name="expDateMonthYear"]):not([name="cvv"]):not([name="name"]):not([class*="cp-"]):not([data-cp]),
 textarea, 
 select,
 button[role="combobox"] {
@@ -420,6 +421,17 @@ button[role="combobox"] {
   background-color: hsl(var(--input)) !important;
   font-size: 0.875rem;
   transition: border-color 0.3s ease, background-color 0.3s ease !important;
+}
+
+/* Hard reset for any input rendered inside CloudPayments widget — let CP own its styles */
+[class*="cp-"] input,
+[class*="CP"] input,
+[id^="cp-"] input,
+.cp-widget input {
+  border: initial !important;
+  background: initial !important;
+  font-size: initial !important;
+  transition: none !important;
 }
 
 /* Remove border from HCaptcha */
@@ -433,7 +445,7 @@ button[role="combobox"] {
 }
 
 /* Focus state - purple border for all inputs */
-input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):focus, 
+input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not(.hidden):not([name="cardNumber"]):not([name="expDateMonthYear"]):not([name="cvv"]):not([name="name"]):not([class*="cp-"]):not([data-cp]):focus,
 textarea:focus, 
 select:focus,
 button[role="combobox"]:focus,
