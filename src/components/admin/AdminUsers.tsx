@@ -272,7 +272,7 @@ export function AdminUsers({
       }
 
       const [paymentsRes, tokensRes, generationsCountRes, generationsRes, allTransactionsRes, surveyRes] = await Promise.all([
-        supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded'),
+        supabase.from('payments').select('*').eq('user_id', user.id).eq('status', 'succeeded').order('created_at', { ascending: false }),
         supabase.from('token_transactions').select('*').eq('user_id', user.id).eq('transaction_type', 'generation'),
         supabase.from('generations').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('generations').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
