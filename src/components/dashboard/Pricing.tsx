@@ -192,7 +192,7 @@ export default function Pricing({
             })
             .then((widgetResult: any) => {
               console.log('[CloudPayments] start result:', widgetResult);
-              const success = widgetResult?.success ?? widgetResult?.status === 'success' ?? widgetResult?.type === 'payment';
+              const success = !!(widgetResult?.success || widgetResult?.status === 'success' || widgetResult?.type === 'payment');
               if (success) {
                 // onSuccess already handled UX
                 return;
