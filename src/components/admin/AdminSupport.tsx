@@ -412,46 +412,72 @@ export const AdminSupport = () => {
 
   const attentionCount = conversations.filter((c) => c.needs_admin_attention).length;
 
-  const renderMessageBubble = (msg: Message) => (
-    <div
-      key={msg.id}
-      className={`flex flex-col ${msg.sender_type === "admin" ? "items-end" : "items-start"}`}
-    >
-      <span className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-        {msg.sender_type === "user" && <User className="w-3 h-3" />}
-        {msg.sender_type === "ai" && <Bot className="w-3 h-3" />}
-        {msg.sender_type === "admin" && <Headphones className="w-3 h-3" />}
-        {msg.sender_type === "system" && <AlertTriangle className="w-3 h-3" />}
-        {msg.sender_type === "user" ? "Пользователь" : msg.sender_type === "ai" ? "AI" : msg.sender_type === "admin" ? "Вы" : "Система"}
-      </span>
-      <div
-        className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-          msg.sender_type === "admin"
-            ? "bg-primary text-primary-foreground rounded-br-md"
-            : msg.sender_type === "user"
-            ? "bg-secondary text-secondary-foreground rounded-bl-md"
-            : msg.sender_type === "system"
-            ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
-            : "bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-bl-md border border-blue-500/20"
-        }`}
-      >
-        {msg.attachment_url && (
-          <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
-            <img
-              src={msg.attachment_url}
-              alt="Вложение"
-              className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
-              loading="lazy"
-            />
-          </button>
-        )}
-        {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
-      </div>
-      <span className="text-[10px] text-muted-foreground mt-0.5">
-        {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-      </span>
-    </div>
-  );
+  const senderLabel = (type: string) => {
+    if (type === "user") return { icon: <User className="w-3 h-3" />, label: "Пользователь" };
+    if (type === "ai") return { icon: <Bot className="w-3 h-3" />, label: "AI" };
+    if (type === "admin") return { icon: <Headphones className="w-3 h-3" />, label: "Вы" };
+    return { icon: <AlertTriangle className="w-3 h-3" />, label: "Система" };
+  };
+
+  const timeline = useMemo(() => buildChatTimeline(messages), [messages]);
+
+  const renderTimeline = () =>
+    timeline.map((item) => {
+      if (item.type === "date") {
+        return (
+          <div key={item.key} className="flex items-center justify-center py-1">
+            <span className="text-[10px] text-muted-foreground bg-muted/40 px-2.5 py-0.5 rounded-full">
+              {formatChatDateSeparator(item.date)}
+            </span>
+          </div>
+        );
+      }
+      const group = item.group;
+      const isOwn = group.sender_type === "admin";
+      const { icon, label } = senderLabel(group.sender_type);
+      return (
+        <div
+          key={group.key}
+          className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"}`}
+        >
+          <span className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1">
+            {icon}
+            {label}
+          </span>
+          {group.items.map(({ msg, position }) => (
+            <div
+              key={msg.id}
+              className={`max-w-[80%] px-3 py-2 text-sm leading-relaxed ${
+                bubbleRoundingClasses(isOwn ? "own" : "other", position)
+              } ${
+                msg.sender_type === "admin"
+                  ? "bg-primary text-primary-foreground"
+                  : msg.sender_type === "user"
+                  ? "bg-secondary text-secondary-foreground"
+                  : msg.sender_type === "system"
+                  ? "bg-muted/50 text-muted-foreground italic text-xs"
+                  : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20"
+              }`}
+            >
+              {msg.attachment_url && (
+                <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
+                  <img
+                    src={msg.attachment_url}
+                    alt="Вложение"
+                    className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
+                    loading="lazy"
+                  />
+                </button>
+              )}
+              {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+            </div>
+          ))}
+          <span className="text-[10px] text-muted-foreground mt-0.5">
+            {formatChatTime(group.endedAt)}
+          </span>
+        </div>
+      );
+    });
 
   const conversationListContent = (
     <div className="flex flex-col h-full">
