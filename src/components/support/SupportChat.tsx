@@ -275,10 +275,13 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
   const getSenderName = (type: string) => {
     switch (type) {
       case "admin": return "Менеджер";
+      case "ai": return "Ассистент";
       case "system": return "Система";
       default: return "Вы";
     }
   };
+
+  const timeline = useMemo(() => buildChatTimeline(messages), [messages]);
 
   if (initialLoading) {
     return (
