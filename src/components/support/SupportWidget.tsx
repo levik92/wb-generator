@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { MessageCircle, X, Send, Loader2, Bot, User, Headphones, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { buildChatTimeline, bubbleRoundingClasses, type ChatMessage } from "@/lib/groupMessages";
+import { formatChatDateSeparator, formatChatTime } from "@/lib/formatChatDate";
 
-interface Message {
-  id: string;
+interface Message extends ChatMessage {
   sender_type: "user" | "ai" | "admin" | "system";
-  content: string;
-  created_at: string;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/support-chat`;
