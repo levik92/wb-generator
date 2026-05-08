@@ -322,7 +322,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         {/* Messages */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-3 [&>*+*]:!mt-3"
+          className="flex-1 overflow-y-auto p-4 space-y-3"
           onScroll={handleScroll}
         >
           {/* Load more indicator */}
