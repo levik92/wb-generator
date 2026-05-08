@@ -110,22 +110,10 @@ export const AdminSupport = () => {
       });
       const incoming = convs || [];
 
-      // Sort: needs_admin_attention first, then by last_message_at descending
-      const sortConvs = (list: Conversation[]) =>
-        [...list].sort((a, b) => {
-          // Attention-needed conversations always on top
-          if (a.needs_admin_attention && !b.needs_admin_attention) return -1;
-          if (!a.needs_admin_attention && b.needs_admin_attention) return 1;
-          // Then by last message time, newest first
-          const timeA = a.last_message_at ? new Date(a.last_message_at).getTime() : new Date(a.updated_at).getTime();
-          const timeB = b.last_message_at ? new Date(b.last_message_at).getTime() : new Date(b.updated_at).getTime();
-          return timeB - timeA;
-        });
-
       if (append) {
-        setConversations(prev => sortConvs([...prev, ...incoming]));
+        setConversations((prev) => [...prev, ...incoming]);
       } else {
-        setConversations(sortConvs(incoming));
+        setConversations(incoming);
       }
       setHasMoreConvs(hasMore);
     } catch (e) {
