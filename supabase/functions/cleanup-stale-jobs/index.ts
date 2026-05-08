@@ -57,12 +57,26 @@ serve(async (req) => {
       console.error('[cleanup-stale-jobs] Error fetching stale jobs by created_at:', jobsError2);
     }
 
+    // Pending jobs that never advanced to processing (background invoke failed/dropped)
+    const { data: stalePendingJobs, error: jobsError3 } = await supabase
+      .from('generation_jobs')
+      .select('id, user_id, product_name, tokens_cost, total_cards, started_at, created_at')
+      .eq('status', 'pending')
+      .lt('created_at', staleThreshold);
+
+    if (jobsError3) {
+      console.error('[cleanup-stale-jobs] Error fetching stale pending jobs:', jobsError3);
+    }
+
     // Combine and deduplicate
     const staleJobsMap = new Map();
     for (const job of (staleJobsByStarted || [])) {
       staleJobsMap.set(job.id, job);
     }
     for (const job of (staleJobsByCreated || [])) {
+      staleJobsMap.set(job.id, job);
+    }
+    for (const job of (stalePendingJobs || [])) {
       staleJobsMap.set(job.id, job);
     }
     const staleJobs = Array.from(staleJobsMap.values());
@@ -181,7 +195,7 @@ serve(async (req) => {
     const { data: staleVideoJobs, error: videoJobsError } = await supabase
       .from('video_generation_jobs')
       .select('id, user_id, tokens_cost, prompt, created_at')
-      .eq('status', 'processing')
+      .in('status', ['processing', 'pending'])
       .lt('created_at', staleThreshold);
 
     if (videoJobsError) {
