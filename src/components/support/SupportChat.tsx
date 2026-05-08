@@ -352,43 +352,60 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
               </p>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex flex-col ${msg.sender_type === "user" ? "items-end" : "items-start"}`}
-              >
-                <span className="text-[10px] text-muted-foreground mb-1">
-                  {getSenderName(msg.sender_type)}
-                </span>
+            timeline.map((item) => {
+              if (item.type === "date") {
+                return (
+                  <div key={item.key} className="flex items-center justify-center py-1">
+                    <span className="text-[10px] text-muted-foreground bg-muted/40 px-2.5 py-0.5 rounded-full">
+                      {formatChatDateSeparator(item.date)}
+                    </span>
+                  </div>
+                );
+              }
+              const group = item.group;
+              const isOwn = group.sender_type === "user";
+              return (
                 <div
-                  className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                    msg.sender_type === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : msg.sender_type === "system"
-                      ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
-                      : "bg-secondary text-secondary-foreground rounded-bl-md"
-                  }`}
+                  key={group.key}
+                  className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"}`}
                 >
-                  {msg.attachment_url && (
-                    <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
-                      <img
-                        src={msg.attachment_url}
-                        alt="Вложение"
-                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
-                        loading="lazy"
-                      />
-                    </button>
+                  {!isOwn && (
+                    <span className="text-[10px] text-muted-foreground mb-0.5">
+                      {getSenderName(group.sender_type)}
+                    </span>
                   )}
-                  {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+                  {group.items.map(({ msg, position }) => (
+                    <div
+                      key={msg.id}
+                      className={`max-w-[80%] px-4 py-2.5 text-sm leading-relaxed ${
+                        bubbleRoundingClasses(isOwn ? "own" : "other", position)
+                      } ${
+                        msg.sender_type === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : msg.sender_type === "system"
+                          ? "bg-muted/50 text-muted-foreground italic text-xs"
+                          : "bg-secondary text-secondary-foreground"
+                      }`}
+                    >
+                      {msg.attachment_url && (
+                        <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
+                          <img
+                            src={msg.attachment_url}
+                            alt="Вложение"
+                            className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
+                            loading="lazy"
+                          />
+                        </button>
+                      )}
+                      {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+                    </div>
+                  ))}
+                  <span className="text-[10px] text-muted-foreground mt-0.5">
+                    {formatChatTime(group.endedAt)}
+                  </span>
                 </div>
-                <span className="text-[10px] text-muted-foreground mt-0.5">
-                  {new Date(msg.created_at).toLocaleTimeString("ru-RU", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            ))
+              );
+            })
           )}
           {aiTyping && (
             <div className="flex flex-col items-start">
