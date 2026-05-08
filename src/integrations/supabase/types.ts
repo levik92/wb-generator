@@ -2066,6 +2066,10 @@ export type Database = {
       generate_partner_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_active_ai_model: { Args: never; Returns: string }
+      get_admin_conversations: {
+        Args: { _enc_key: string; _limit?: number; _offset?: number }
+        Returns: Json
+      }
       get_payment_summary: {
         Args: { payment_ids: string[] }
         Returns: {
