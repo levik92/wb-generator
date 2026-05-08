@@ -165,6 +165,8 @@ export const SupportWidget = () => {
     }
   };
 
+  const timeline = useMemo(() => buildChatTimeline(messages), [messages]);
+
   return (
     <>
       {/* Chat Button */}
