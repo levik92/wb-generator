@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getProxiedPublicUrl } from "@/lib/storage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { compressImage } from "@/lib/imageCompression";
+import { buildChatTimeline, bubbleRoundingClasses, type ChatMessage } from "@/lib/groupMessages";
+import { formatChatDateSeparator, formatChatTime } from "@/lib/formatChatDate";
 
 interface Conversation {
   id: string;
