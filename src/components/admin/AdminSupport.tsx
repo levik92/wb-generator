@@ -644,7 +644,7 @@ export const AdminSupport = () => {
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          messages.map(renderMessageBubble)
+          renderTimeline()
         )}
         <div ref={messagesEndRef} />
       </div>
