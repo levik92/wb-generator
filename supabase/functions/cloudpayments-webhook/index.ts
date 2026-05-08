@@ -104,17 +104,31 @@ serve(async (req) => {
     const status = webhookData.Status;
     const dataJson = webhookData.Data || webhookData.JsonData;
     const userId = webhookData.AccountId;
-    const invoiceId = webhookData.InvoiceId; // maps to externalId from widget.start()
+    // CloudPayments may send legacy InvoiceId or new ExternalId; both map to our externalPaymentId
+    const invoiceId = webhookData.InvoiceId || webhookData.ExternalId || webhookData.externalId;
     
     let metadata: any = {};
     try {
-      metadata = dataJson ? (typeof dataJson === 'string' ? JSON.parse(dataJson) : dataJson) : {};
+      if (dataJson) {
+        metadata = typeof dataJson === 'string' ? JSON.parse(dataJson) : dataJson;
+        // Sometimes wrapped twice
+        if (typeof metadata === 'string') {
+          try { metadata = JSON.parse(metadata); } catch { /* ignore */ }
+        }
+      }
     } catch {
       console.warn('Failed to parse Data field:', dataJson);
     }
     
-    // Get external_payment_id: first from metadata, then fallback to InvoiceId (externalId from widget)
-    const externalPaymentId = metadata.external_payment_id || invoiceId || null;
+    // Resolve external_payment_id from any known source
+    const externalPaymentId =
+      metadata?.external_payment_id ||
+      metadata?.externalId ||
+      metadata?.ExternalId ||
+      invoiceId ||
+      null;
+    
+    console.log(`[cloudpayments-webhook] resolved externalPaymentId=${externalPaymentId}, invoiceId=${invoiceId}, hasMetadata=${!!metadata}`);
     
     const url = new URL(req.url);
     const notificationType = url.searchParams.get('type') || 'pay';

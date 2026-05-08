@@ -1,39 +1,67 @@
-Новая гипотеза: предыдущая правка не сработала, потому что проект одновременно смешивает старый API `widget.pay('charge', ...)` и новый формат параметров CloudPayments (`publicTerminalId`, `paymentSchema`, `externalId`), а CSS-исключение не покрывает реальную DOM-структуру мобильного виджета.
+## Итог проверки
 
-Что уже подтверждено:
-- У пользователя `karinakracyk@gmail.com` новые платежи всё ещё создаются в БД как `pending`, значит backend `create-payment` дорабатывает успешно.
-- За эти попытки нет ни одного webhook от CloudPayments, значит пользователь не доходит до реальной оплаты/транзакции; проблема на этапе открытия/работы виджета.
-- Официальная документация CloudPayments для текущего виджета показывает основной метод `widget.start(intentParams)` с параметрами `publicTerminalId`, `paymentSchema`, `externalId`, `metadata`, `receipt`.
-- В коде сейчас используется старый вызов `widget.pay('charge', ...)`, но в него передаются частично новые параметры, переименованные обратно в старые (`publicId`, `invoiceId`, `data`). Это вероятная причина закрытия/сбоя виджета.
+Проверил текущую цепочку оплаты по коду, базе, документации CloudPayments, событиям в БД и загрузке скрипта в браузере.
 
-План исправления:
+### Что работает
 
-1. Перевести фронтенд на актуальный API CloudPayments
-   - В `src/components/dashboard/Pricing.tsx` заменить `widget.pay('charge', ...)` на `widget.start(intentParams)`.
-   - Передавать параметры в формате, который уже возвращает edge function: `publicTerminalId`, `description`, `amount`, `currency`, `paymentSchema: 'Single'`, `externalId`, `userInfo`, `metadata`, `receipt`, `skin`, `autoClose`, `successRedirectUrl`, `failRedirectUrl`.
-   - Оставить ожидание загрузки библиотеки, но проверять именно наличие конструктора `cp.CloudPayments` перед созданием виджета.
-   - Обработать Promise от `widget.start(...)`: success/fail/cancel показывать русскими сообщениями и корректно сбрасывать состояние кнопки.
+- Активный провайдер в БД: `cloudpayments`.
+- Public ID CloudPayments настроен, секрет `CLOUDPAYMENTS_API_SECRET` есть.
+- Активные пакеты оплаты доступны.
+- Скрипт `https://widget.cloudpayments.ru/bundles/cloudpayments.js` в браузере загружается с HTTP 200.
+- В коде больше нет старого `widget.pay('charge', ...)`; фронт вызывает `widget.start(...)`.
+- `create-payment` создаёт записи `payments` со статусом `pending` и `external_payment_id` формата `cp_user_timestamp`.
+- Успешные CloudPayments-платежи до 6 мая в основном корректно проходили webhook → `process_payment_success` → начисление токенов → запись в `token_transactions` → уведомление.
 
-2. Упростить и привести ответ `create-payment` к новому формату
-   - В `supabase/functions/create-payment/index.ts` оставить `paymentSchema`, `externalId`, `autoClose`, `successRedirectUrl`, `failRedirectUrl`, потому что они нужны именно для `start()`.
-   - Дублировать чек в новом поле `receipt` и сохранить метаданные в `metadata`, чтобы виджет не зависел только от legacy `data.CloudPayments.CustomerReceipt`.
-   - При необходимости оставить legacy `data.CloudPayments.CustomerReceipt` для совместимости, но основной путь сделать через `receipt`/`metadata`.
+### Что не в порядке
 
-3. Полностью изолировать CloudPayments от глобальных CSS
-   - В `src/index.css` заменить точечные исключения для input на безопасную стратегию: не применять глобальные стили к элементам внутри CloudPayments overlay/iframe/container, включая классы/ID/атрибуты с `cloudpayments`, `cp`, `widget`, а также поля `cardNumber`, `expDateMonthYear`, `cvv`, `name`.
-   - Убрать рискованный `border: initial !important`/`font-size: initial !important` для CP-полей и заменить на `all: revert`/минимальные сбросы только для реально принадлежащих виджету элементов, чтобы не ломать маски ввода.
-   - Добавить исключения для `textarea/select/button[role="combobox"]` только там, где они не находятся в платёжном оверлее.
+- После последней правки видны новые попытки оплаты, но они остаются `pending` и затем уходят в `expired`; новых успешных оплат после исправления не видно.
+- Для `karinakracyk@gmail.com` свежая попытка создалась в БД, но webhook от CloudPayments по ней не пришёл, значит пользователь снова не дошёл до успешной транзакции.
+- В `create-payment` новый формат CloudPayments реализован не полностью: в ответе нет top-level `receipt`, `items`, `receiptEmail`, `culture`, а чек сейчас лежит только в старом/вложенном формате внутри `metadata.cloudPayments.CustomerReceipt`.
+- В webhook нужно расширить поиск идентификатора платежа: CloudPayments в новом API может прислать `ExternalId`, `InvoiceId`, `Data`, `JsonData`; сейчас надёжно покрыт не весь набор вариантов.
+- Найден один исторический успешный CloudPayments-платёж без записи покупки в `token_transactions` и без корректного уведомления — его нужно отдельно сверить и доначислить токены один раз, если баланс действительно не был пополнен.
 
-4. Почистить зависшие попытки пользователя
-   - Добавить миграцию, которая переведёт старые `pending` CloudPayments-платежи пользователя `karinakracyk@gmail.com` в `expired`/`canceled` только если они старше нескольких минут.
-   - Не трогать успешные платежи и не менять балансы.
+## Вывод
 
-5. Проверка после правки
-   - Проверить, что код больше не содержит смешанного вызова `widget.pay('charge', ...)` для нового формата.
-   - Проверить в БД, что новые попытки будут создаваться с корректным `external_payment_id`.
-   - Проверить логи edge function после деплоя/вызова: `create-payment` создаёт intent, а webhook остаётся готов принимать `InvoiceId`/`metadata.external_payment_id`.
+Сейчас нельзя считать систему оплаты полностью исправной: создание платежа работает, но по свежим данным успешное завершение и начисление после недавней правки не подтверждаются.
 
-Ожидаемый результат:
-- На ноутбуке окно оплаты не должно закрываться сразу после загрузки.
-- На телефоне поля карты должны работать штатно, без перемешивания цифр и ошибочной валидации даты.
-- Если оплата не прошла или пользователь закрыл окно, кнопка корректно разблокируется и покажет понятное сообщение на русском.
+## План исправления
+
+1. **Довести `create-payment` до актуального формата CloudPayments**
+   - Вернуть `intentParams` строго по документации `widget.start(...)`.
+   - Добавить top-level поля:
+     - `externalId`
+     - `receiptEmail`
+     - `receipt`
+     - `items`
+     - `metadata`
+     - `userInfo`
+     - `culture: 'ru-RU'`
+     - `retryPayment: true`
+   - Оставить legacy-дубль в `metadata.cloudPayments.CustomerReceipt` только как совместимость, но не как основной чек.
+
+2. **Усилить frontend-открытие виджета в `Pricing.tsx`**
+   - Перед `widget.start` валидировать обязательные поля `publicTerminalId`, `amount`, `currency`, `paymentSchema`.
+   - Передавать callbacks вторым аргументом в `widget.start(params, { onComplete, onSuccess, onFail })`, а не полагаться только на `widget.oncomplete`.
+   - Исправить состояние кнопки так, чтобы оно сбрасывалось только после закрытия/ошибки виджета, а не сразу после запуска промиса.
+   - Оставить русские сообщения без технических деталей.
+
+3. **Усилить `cloudpayments-webhook`**
+   - Читать внешний ID из всех вариантов: `ExternalId`, `externalId`, `InvoiceId`, `metadata.external_payment_id`, `metadata.externalId`.
+   - Нормализовать `Data`/`JsonData`, если они приходят строкой, объектом или вложенным JSON.
+   - На `fail` не переводить запись из `pending` в `failed`, чтобы повторная попытка в том же виджете могла успешно начислить токены.
+   - Добавить более подробное логирование без секретов: какой внешний ID найден, какой статус платежа был до обработки, что вернул RPC.
+
+4. **Сверить и восстановить начисления**
+   - Сделать безопасную миграцию/скрипт сверки: найти `succeeded` CloudPayments-платежи без purchase-транзакции.
+   - Для найденных случаев доначислить токены только один раз, создать `token_transactions` и уведомление.
+   - Не трогать `pending`, `expired`, `failed` и уже корректно начисленные платежи.
+
+5. **Проверить систему после правки**
+   - Проверить, что `create-payment` создаёт новый `pending` с корректным `external_payment_id`.
+   - Проверить, что виджет открывается на desktop/mobile и CloudPayments JS не выдаёт ошибок в консоли.
+   - Проверить webhook synthetic-тестом на обработку `ExternalId`/`InvoiceId` и `metadata`.
+   - После реальной/тестовой успешной оплаты проверить цепочку: `payments.status = succeeded`, `confirmed_at` заполнен, баланс увеличен, есть `token_transactions`, есть уведомление.
+
+## Что нужно учитывать
+
+Полностью подтвердить реальное списание без тестового терминала или контрольной оплаты нельзя, но текущие данные уже показывают проблему: свежие платежи создаются, а до успешного webhook не доходят.

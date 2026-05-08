@@ -143,57 +143,85 @@ export default function Pricing({
         }
 
         const params = data.intentParams;
-        console.log('[CloudPayments] Starting payment with params:', params);
+        console.log('[CloudPayments] Starting payment');
+
+        if (!params?.publicTerminalId || !params?.amount || !params?.currency || !params?.paymentSchema) {
+          toast({
+            title: "Ошибка",
+            description: "Не удалось подготовить платёж. Попробуйте ещё раз.",
+            variant: "destructive",
+          });
+          setLoading(null);
+          isPaymentInProgress.current = false;
+          return;
+        }
 
         try {
           const widget = new cpLib.CloudPayments();
-          console.log('[CloudPayments] Opening widget via start()');
 
           widget.oncomplete = (result: any) => {
             console.log('[CloudPayments] oncomplete:', result);
           };
 
+          const finishWith = (toastArgs: { title: string; description: string; variant?: 'destructive' }) => {
+            toast(toastArgs);
+            setLoading(null);
+            isPaymentInProgress.current = false;
+          };
+
           widget
-            .start(params)
-            .then((widgetResult: any) => {
-              console.log('[CloudPayments] start result:', widgetResult);
-              const success = widgetResult?.success ?? widgetResult?.status === 'success';
-              if (success) {
+            .start(params, {
+              onSuccess: () => {
                 toast({
                   title: "Оплата прошла успешно!",
                   description: `Начислено ${data.tokens || finalTokens} токенов`,
                 });
-                window.location.href = '/dashboard?payment=success';
+                setTimeout(() => { window.location.href = '/dashboard?payment=success'; }, 600);
+              },
+              onFail: (reason: any) => {
+                console.warn('[CloudPayments] onFail:', reason);
+                finishWith({
+                  title: "Ошибка оплаты",
+                  description: "Платёж не прошёл. Попробуйте ещё раз или используйте другую карту.",
+                  variant: "destructive",
+                });
+              },
+              onComplete: (result: any) => {
+                console.log('[CloudPayments] onComplete:', result);
+              },
+            })
+            .then((widgetResult: any) => {
+              console.log('[CloudPayments] start result:', widgetResult);
+              const success = !!(widgetResult?.success || widgetResult?.status === 'success' || widgetResult?.type === 'payment');
+              if (success) {
+                // onSuccess already handled UX
                 return;
               }
               const reason: string = widgetResult?.message || widgetResult?.reason || '';
               const isCanceled =
                 widgetResult?.canceled ||
                 widgetResult?.status === 'cancelled' ||
+                widgetResult?.type === 'cancel' ||
                 /cancel|отмен/i.test(reason);
-              toast({
-                title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
+              finishWith({
+                title: isCanceled ? "Оплата отменена" : "Оплата не завершена",
                 description: isCanceled
-                  ? "Платёж отменён пользователем."
+                  ? "Платёж отменён. Вы можете попробовать ещё раз."
                   : "Платёж не прошёл. Попробуйте ещё раз.",
                 variant: "destructive",
               });
-              setLoading(null);
-              isPaymentInProgress.current = false;
             })
             .catch((err: any) => {
               console.error('[CloudPayments] start() error:', err);
               const reason = String(err?.message || err || '');
               const isCanceled = /cancel|отмен|close/i.test(reason);
-              toast({
+              finishWith({
                 title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
                 description: isCanceled
-                  ? "Платёж отменён пользователем."
+                  ? "Платёж отменён."
                   : "Не удалось завершить оплату. Попробуйте ещё раз.",
                 variant: "destructive",
               });
-              setLoading(null);
-              isPaymentInProgress.current = false;
             });
         } catch (widgetError) {
           console.error('[CloudPayments] Widget error:', widgetError);
