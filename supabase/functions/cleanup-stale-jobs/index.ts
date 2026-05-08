@@ -195,7 +195,7 @@ serve(async (req) => {
     const { data: staleVideoJobs, error: videoJobsError } = await supabase
       .from('video_generation_jobs')
       .select('id, user_id, tokens_cost, prompt, created_at')
-      .eq('status', 'processing')
+      .in('status', ['processing', 'pending'])
       .lt('created_at', staleThreshold);
 
     if (videoJobsError) {
