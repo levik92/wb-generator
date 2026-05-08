@@ -11,12 +11,6 @@ import { formatChatDateSeparator, formatChatTime } from "@/lib/formatChatDate";
 interface Message extends ChatMessage {
   sender_type: "user" | "ai" | "admin" | "system";
 }
-  id: string;
-  sender_type: "user" | "ai" | "admin" | "system";
-  content: string;
-  created_at: string;
-  attachment_url?: string | null;
-}
 
 interface SupportChatProps {
   profile: { id: string; email: string; full_name: string | null };
