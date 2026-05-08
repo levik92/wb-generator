@@ -1,12 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { getProxiedPublicUrl } from "@/lib/storage";
 import { compressImage } from "@/lib/imageCompression";
+import { buildChatTimeline, bubbleRoundingClasses, type ChatMessage } from "@/lib/groupMessages";
+import { formatChatDateSeparator, formatChatTime } from "@/lib/formatChatDate";
 
-interface Message {
+interface Message extends ChatMessage {
+  sender_type: "user" | "ai" | "admin" | "system";
+}
   id: string;
   sender_type: "user" | "ai" | "admin" | "system";
   content: string;
