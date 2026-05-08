@@ -224,33 +224,49 @@ export const SupportWidget = () => {
                 </p>
               </div>
             ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col ${msg.sender_type === "user" ? "items-end" : "items-start"}`}
-                >
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      {getSenderIcon(msg.sender_type)}
-                      {getSenderName(msg.sender_type)}
+              timeline.map((item) => {
+                if (item.type === "date") {
+                  return (
+                    <div key={item.key} className="flex items-center justify-center py-1">
+                      <span className="text-[10px] text-muted-foreground bg-muted/40 px-2.5 py-0.5 rounded-full">
+                        {formatChatDateSeparator(item.date)}
+                      </span>
+                    </div>
+                  );
+                }
+                const group = item.group;
+                const isOwn = group.sender_type === "user";
+                return (
+                  <div
+                    key={group.key}
+                    className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"}`}
+                  >
+                    <span className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1">
+                      {getSenderIcon(group.sender_type)}
+                      {getSenderName(group.sender_type)}
+                    </span>
+                    {group.items.map(({ msg, position }) => (
+                      <div
+                        key={msg.id}
+                        className={`max-w-[85%] px-3 py-2 text-sm leading-relaxed ${
+                          bubbleRoundingClasses(isOwn ? "own" : "other", position)
+                        } ${
+                          msg.sender_type === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : msg.sender_type === "system"
+                            ? "bg-muted/50 text-muted-foreground italic text-xs"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    ))}
+                    <span className="text-[10px] text-muted-foreground mt-0.5">
+                      {formatChatTime(group.endedAt)}
                     </span>
                   </div>
-                  <div
-                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                      msg.sender_type === "user"
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : msg.sender_type === "system"
-                        ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
-                        : "bg-secondary text-secondary-foreground rounded-bl-md"
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-                  <span className="text-[10px] text-muted-foreground mt-0.5">
-                    {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-              ))
+                );
+              })
             )}
             {loading && (
               <div className="flex items-start gap-2">
