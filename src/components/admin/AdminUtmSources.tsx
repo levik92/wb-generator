@@ -307,6 +307,8 @@ export function AdminUtmSources() {
     return ((to / from) * 100).toFixed(1) + '%';
   };
 
+  const formatRub = (val: number) => `${Math.round(val).toLocaleString('ru-RU')} ₽`;
+
   if (loading && sources.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
