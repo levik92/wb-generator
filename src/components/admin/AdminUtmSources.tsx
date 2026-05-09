@@ -403,7 +403,7 @@ export function AdminUtmSources() {
       ) : (
         <div className="space-y-3">
           {sources.map((source, index) => {
-            const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0 };
+            const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0, revenue: 0 };
             const isStatLoading = !!statsLoading[source.id];
             const renderNum = (val: number, color: string) => isStatLoading
               ? <Loader2 className={cn("w-4 h-4 mx-auto animate-spin", color)} />
