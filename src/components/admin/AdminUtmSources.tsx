@@ -476,7 +476,7 @@ export function AdminUtmSources() {
                       </div>
 
                       {/* Funnel stats */}
-                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 md:gap-3">
                         <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Переходы</p>
                           {renderNum(s.visits, "text-blue-500")}
@@ -496,6 +496,12 @@ export function AdminUtmSources() {
                         <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
                           {renderNum(s.payments, "text-amber-500")}
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1">
+                          <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
+                          {isStatLoading
+                            ? <Loader2 className="w-4 h-4 mx-auto animate-spin text-violet-500" />
+                            : <p className="text-base font-bold text-violet-500">{formatRub(s.revenue)}</p>}
                         </div>
                       </div>
                       
