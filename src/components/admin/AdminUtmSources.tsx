@@ -27,6 +27,7 @@ interface UtmStats {
   visits: number;
   registrations: number;
   payments: number;
+  revenue: number;
 }
 
 const PAGE_SIZE = 20;
