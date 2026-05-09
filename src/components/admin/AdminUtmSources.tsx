@@ -75,21 +75,24 @@ export function AdminUtmSources() {
     ]);
 
     let paymentsCount = 0;
+    let revenue = 0;
     const utmProfiles = utmProfilesRes.data;
     if (utmProfiles && utmProfiles.length > 0) {
       const userIds = utmProfiles.map(p => p.id);
-      const { count } = await supabase
+      const { data: paid } = await supabase
         .from('payments')
-        .select('id', { count: 'exact', head: true })
+        .select('amount')
         .in('user_id', userIds)
         .eq('status', 'succeeded');
-      paymentsCount = count || 0;
+      paymentsCount = paid?.length || 0;
+      revenue = (paid || []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
     }
 
     return {
       visits: visitsRes.count || 0,
       registrations: regsRes.count || 0,
       payments: paymentsCount,
+      revenue,
     };
   };
 
