@@ -338,15 +338,19 @@ export function AdminUtmSources() {
         const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
         const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
         const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
+        const sumRevenue = Object.values(stats).reduce((s, v) => s + (v.revenue || 0), 0);
         const summaryNum = (val: number) => anyLoading
           ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
+        const summaryRub = (val: number) => anyLoading
+          ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          : <p className="text-xl font-bold">{formatRub(val)}</p>;
         return (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
         >
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
@@ -375,6 +379,13 @@ export function AdminUtmSources() {
               <span className="text-xs text-muted-foreground">Оплат</span>
             </div>
             {summaryNum(sumPay)}
+          </div>
+          <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30 col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Wallet className="w-4 h-4 text-violet-500" />
+              <span className="text-xs text-muted-foreground">Сумма оплат</span>
+            </div>
+            {summaryRub(sumRevenue)}
           </div>
         </motion.div>
         );
