@@ -119,7 +119,7 @@ export function AdminUtmSources() {
           setStats(prev => ({ ...prev, [source.id]: s }));
         } catch (e) {
           console.error('UTM stats fetch error:', e);
-          results[source.id] = { visits: 0, registrations: 0, payments: 0 };
+          results[source.id] = { visits: 0, registrations: 0, payments: 0, revenue: 0 };
           setStats(prev => ({ ...prev, [source.id]: results[source.id] }));
         } finally {
           setStatsLoading(prev => ({ ...prev, [source.id]: false }));
