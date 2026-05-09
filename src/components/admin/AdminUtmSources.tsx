@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus } from "lucide-react";
+import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { publicSiteUrl } from "@/config/runtime";
 
@@ -27,6 +27,7 @@ interface UtmStats {
   visits: number;
   registrations: number;
   payments: number;
+  revenue: number;
 }
 
 const PAGE_SIZE = 20;
@@ -74,21 +75,24 @@ export function AdminUtmSources() {
     ]);
 
     let paymentsCount = 0;
+    let revenue = 0;
     const utmProfiles = utmProfilesRes.data;
     if (utmProfiles && utmProfiles.length > 0) {
       const userIds = utmProfiles.map(p => p.id);
-      const { count } = await supabase
+      const { data: paid } = await supabase
         .from('payments')
-        .select('id', { count: 'exact', head: true })
+        .select('amount')
         .in('user_id', userIds)
         .eq('status', 'succeeded');
-      paymentsCount = count || 0;
+      paymentsCount = paid?.length || 0;
+      revenue = (paid || []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
     }
 
     return {
       visits: visitsRes.count || 0,
       registrations: regsRes.count || 0,
       payments: paymentsCount,
+      revenue,
     };
   };
 
@@ -115,7 +119,7 @@ export function AdminUtmSources() {
           setStats(prev => ({ ...prev, [source.id]: s }));
         } catch (e) {
           console.error('UTM stats fetch error:', e);
-          results[source.id] = { visits: 0, registrations: 0, payments: 0 };
+          results[source.id] = { visits: 0, registrations: 0, payments: 0, revenue: 0 };
           setStats(prev => ({ ...prev, [source.id]: results[source.id] }));
         } finally {
           setStatsLoading(prev => ({ ...prev, [source.id]: false }));
@@ -303,6 +307,8 @@ export function AdminUtmSources() {
     return ((to / from) * 100).toFixed(1) + '%';
   };
 
+  const formatRub = (val: number) => `${Math.round(val).toLocaleString('ru-RU')} ₽`;
+
   if (loading && sources.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
@@ -332,15 +338,19 @@ export function AdminUtmSources() {
         const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
         const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
         const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
+        const sumRevenue = Object.values(stats).reduce((s, v) => s + (v.revenue || 0), 0);
         const summaryNum = (val: number) => anyLoading
           ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
+        const summaryRub = (val: number) => anyLoading
+          ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          : <p className="text-xl font-bold">{formatRub(val)}</p>;
         return (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
         >
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
@@ -370,6 +380,13 @@ export function AdminUtmSources() {
             </div>
             {summaryNum(sumPay)}
           </div>
+          <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30 col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Wallet className="w-4 h-4 text-violet-500" />
+              <span className="text-xs text-muted-foreground">Сумма оплат</span>
+            </div>
+            {summaryRub(sumRevenue)}
+          </div>
         </motion.div>
         );
       })()}
@@ -386,7 +403,7 @@ export function AdminUtmSources() {
       ) : (
         <div className="space-y-3">
           {sources.map((source, index) => {
-            const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0 };
+            const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0, revenue: 0 };
             const isStatLoading = !!statsLoading[source.id];
             const renderNum = (val: number, color: string) => isStatLoading
               ? <Loader2 className={cn("w-4 h-4 mx-auto animate-spin", color)} />
@@ -459,7 +476,7 @@ export function AdminUtmSources() {
                       </div>
 
                       {/* Funnel stats */}
-                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 md:gap-3">
                         <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Переходы</p>
                           {renderNum(s.visits, "text-blue-500")}
@@ -479,6 +496,12 @@ export function AdminUtmSources() {
                         <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
                           {renderNum(s.payments, "text-amber-500")}
+                        </div>
+                        <div className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1">
+                          <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
+                          {isStatLoading
+                            ? <Loader2 className="w-4 h-4 mx-auto animate-spin text-violet-500" />
+                            : <p className="text-base font-bold text-violet-500">{formatRub(s.revenue)}</p>}
                         </div>
                       </div>
                       
