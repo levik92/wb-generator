@@ -46,7 +46,9 @@ serve(async (req) => {
     } = requestBody;
 
     const ALLOWED_ASPECT_RATIOS = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
-    const safeAspectRatio = ALLOWED_ASPECT_RATIOS.includes(aspectRatio) ? aspectRatio : '3:4';
+    const requestedAspectRatio = typeof aspectRatio === 'string' ? aspectRatio.trim() : '';
+    const safeAspectRatio = ALLOWED_ASPECT_RATIOS.includes(requestedAspectRatio) ? requestedAspectRatio : '3:4';
+    console.log(`[create-generation-job-banana] aspectRatio requested="${requestedAspectRatio}" -> saved="${safeAspectRatio}"`);
 
     // Validate input
     if (!productName || !description || !userId) {

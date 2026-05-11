@@ -543,13 +543,15 @@ async function processTask(supabase: any, task: any, job: any, MAX_RETRIES: numb
     console.log(`Using ${processorFunction} (provider: ${apiProvider}) for task ${task.id}`);
 
     // Call task processor
-    const invokeBody: any = { taskId: task.id };
+    const jobAspectRatio = (job as any)?.aspect_ratio || '3:4';
+    const invokeBody: any = { taskId: task.id, aspectRatio: jobAspectRatio };
     if (polzaGenerationId) {
       invokeBody.polzaGenerationId = polzaGenerationId;
     } else {
       invokeBody.sourceImageUrl = sourceImageUrl;
       invokeBody.prompt = prompt;
     }
+    console.log(`[orchestrator] Invoking ${processorFunction} for task ${task.id} with aspectRatio=${jobAspectRatio}`);
 
     const result = await supabase.functions.invoke(processorFunction, {
       body: invokeBody,
