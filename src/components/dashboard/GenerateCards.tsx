@@ -2428,7 +2428,7 @@ export const GenerateCards = ({
                             key={r.value}
                             disabled={generating}
                             onClick={() => setAspectRatio(r.value)}
-                            className={`text-left border rounded-lg p-2.5 sm:p-3 transition-all flex items-start gap-2.5 ${
+                            className={`border rounded-lg p-2.5 sm:p-3 transition-all flex items-start gap-2.5 sm:flex-col sm:items-center sm:gap-2 sm:text-center ${
                               selected
                                 ? 'border-primary bg-primary/10'
                                 : 'border-border hover:border-muted-foreground/50 bg-background'
