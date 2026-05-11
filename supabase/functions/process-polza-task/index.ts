@@ -201,7 +201,7 @@ ${referenceImage ? `2. Последнее изображение (референ
         input: {
           prompt: structuredPrompt,
           images: inputImages,
-          aspect_ratio: '3:4',
+          aspect_ratio: aspectRatio,
           image_resolution: imageResolution,
         },
         provider: {
