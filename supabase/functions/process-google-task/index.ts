@@ -323,7 +323,8 @@ serve(async (req) => {
     
     const imageResolution = modelSettings?.image_resolution || '2K';
     const proxySettings = modelSettings;
-    console.log(`Using image resolution: ${imageResolution}, proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
+    const aspectRatio = (task.job as any)?.aspect_ratio || '3:4';
+    console.log(`Using image resolution: ${imageResolution}, aspectRatio: ${aspectRatio}, proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
 
     // Build content parts for Google Gemini API
     const contentParts: any[] = [];
