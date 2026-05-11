@@ -2372,6 +2372,94 @@ export const GenerateCards = ({
               />
             </div>
           </div>
+
+          {/* Aspect Ratio (collapsible) */}
+          {(() => {
+            const ASPECT_RATIOS: Array<{ value: string; label: string; usage: string }> = [
+              { value: '3:4', label: '3:4 вертикаль', usage: 'Wildberries, Ozon — карточка товара' },
+              { value: '1:1', label: '1:1 квадрат', usage: 'Avito, Instagram, превью' },
+              { value: '4:5', label: '4:5 портрет', usage: 'Instagram пост, Pinterest' },
+              { value: '9:16', label: '9:16 вертикаль', usage: 'Stories, Reels, TikTok, VK Клипы' },
+              { value: '16:9', label: '16:9 горизонталь', usage: 'Баннеры, YouTube‑превью' },
+              { value: '4:3', label: '4:3 классика', usage: 'Универсальный горизонтальный' },
+              { value: '2:3', label: '2:3 портрет', usage: 'Постеры, Pinterest' },
+              { value: '3:2', label: '3:2 альбом', usage: 'Фото, обложки' },
+            ];
+            const parseRatio = (v: string) => {
+              const [w, h] = v.split(':').map(Number);
+              return w && h ? `${w} / ${h}` : '3 / 4';
+            };
+            return (
+              <div className={`mt-4 border rounded-lg transition-all border-primary/30 bg-primary/5 ${generating ? 'opacity-60' : ''}`}>
+                <button
+                  type="button"
+                  onClick={() => !generating && setAspectRatioOpen((v) => !v)}
+                  disabled={generating}
+                  className="w-full flex items-center justify-between gap-3 p-3 sm:p-4 text-left"
+                  aria-expanded={aspectRatioOpen}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Images className="w-4 h-4 text-primary shrink-0" />
+                      <h4 className="font-medium text-sm sm:text-base">Формат изображения</h4>
+                    </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                      Выберите соотношение сторон под маркетплейс или площадку
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5 bg-primary/10 text-primary border-none">
+                      {aspectRatio}
+                    </Badge>
+                    <ChevronDown
+                      className={`w-4 h-4 text-muted-foreground transition-transform ${aspectRatioOpen ? 'rotate-180' : ''}`}
+                    />
+                  </div>
+                </button>
+
+                {aspectRatioOpen && (
+                  <div className="px-3 pb-3 sm:px-4 sm:pb-4 pt-0">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                      {ASPECT_RATIOS.map((r) => {
+                        const selected = aspectRatio === r.value;
+                        return (
+                          <button
+                            type="button"
+                            key={r.value}
+                            disabled={generating}
+                            onClick={() => setAspectRatio(r.value)}
+                            className={`text-left border rounded-lg p-2.5 sm:p-3 transition-all flex items-start gap-2.5 ${
+                              selected
+                                ? 'border-primary bg-primary/10'
+                                : 'border-border hover:border-muted-foreground/50 bg-background'
+                            } ${generating ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            <div
+                              className={`shrink-0 rounded border-2 ${
+                                selected ? 'border-primary bg-primary/20' : 'border-muted-foreground/40 bg-muted/30'
+                              }`}
+                              style={{ width: 24, aspectRatio: parseRatio(r.value) }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
+                                {r.value === '3:4' && (
+                                  <span className="text-[10px] text-muted-foreground">по умолчанию</span>
+                                )}
+                              </div>
+                              <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug mt-0.5">
+                                {r.usage}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 
