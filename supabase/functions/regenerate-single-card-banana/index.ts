@@ -128,13 +128,14 @@ serve(async (req) => {
           type: 'product'
         }];
 
-    // Check if the source generation had unified styling - load style_description BEFORE creating job
+    // Check if the source generation had unified styling - load style_description and aspect_ratio BEFORE creating job
     let styleDescription: string | null = null;
+    let inheritedAspectRatio: string = '3:4';
     const jobIdToCheck = sourceJobId || sourceGenerationId;
     if (jobIdToCheck) {
       const { data: sourceJob } = await supabase
         .from('generation_jobs')
-        .select('style_description')
+        .select('style_description, aspect_ratio')
         .eq('id', jobIdToCheck)
         .single();
       
@@ -143,6 +144,10 @@ serve(async (req) => {
         console.log(`[Regeneration] Using style_description from source job (${styleDescription.length} chars)`);
       } else {
         console.log(`[Regeneration] No style_description found for job ${jobIdToCheck}`);
+      }
+      if ((sourceJob as any)?.aspect_ratio) {
+        inheritedAspectRatio = (sourceJob as any).aspect_ratio;
+        console.log(`[Regeneration] Inheriting aspect_ratio: ${inheritedAspectRatio}`);
       }
     }
 
@@ -160,6 +165,7 @@ serve(async (req) => {
         total_cards: 1,
         tokens_cost: tokensCost,
         product_images: imagesToUse,
+        aspect_ratio: inheritedAspectRatio,
         ...(styleDescription ? { style_description: styleDescription } : {}),
       })
       .select()
