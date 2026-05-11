@@ -177,7 +177,7 @@ serve(async (req) => {
   }
 
   try {
-    const { taskId, sourceImageUrl, prompt } = await req.json();
+    const { taskId, sourceImageUrl, prompt, aspectRatio: bodyAspectRatio } = await req.json();
 
     if (!taskId || !sourceImageUrl || !prompt) {
       return new Response(
@@ -323,8 +323,8 @@ serve(async (req) => {
     
     const imageResolution = modelSettings?.image_resolution || '2K';
     const proxySettings = modelSettings;
-    const aspectRatio = (task.job as any)?.aspect_ratio || '3:4';
-    console.log(`Using image resolution: ${imageResolution}, aspectRatio: ${aspectRatio}, proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
+    const aspectRatio = bodyAspectRatio || (task.job as any)?.aspect_ratio || '3:4';
+    console.log(`Using image resolution: ${imageResolution}, aspectRatio: ${aspectRatio} (body=${bodyAspectRatio}, job=${(task.job as any)?.aspect_ratio}), proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
 
     // Build content parts for Google Gemini API
     const contentParts: any[] = [];

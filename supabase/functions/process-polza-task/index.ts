@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { taskId, sourceImageUrl, prompt, polzaGenerationId } = await req.json();
+    const { taskId, sourceImageUrl, prompt, polzaGenerationId, aspectRatio: bodyAspectRatio } = await req.json();
 
     if (!taskId) {
       return new Response(
@@ -157,8 +157,9 @@ Deno.serve(async (req) => {
       .maybeSingle();
     const imageResolution = modelSettings?.image_resolution || '2K';
     const ALLOWED_AR = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
-    const jobAspect = (task.job as any)?.aspect_ratio || '3:4';
+    const jobAspect = bodyAspectRatio || (task.job as any)?.aspect_ratio || '3:4';
     const aspectRatio = ALLOWED_AR.includes(jobAspect) ? jobAspect : '3:4';
+    console.log(`[process-polza-task] aspectRatio resolved=${aspectRatio} (body=${bodyAspectRatio}, job=${(task.job as any)?.aspect_ratio})`);
 
     console.log(`[process-polza-task] Phase 1: Submitting task ${taskId} to Polza, resolution: ${imageResolution}, aspectRatio: ${aspectRatio}`);
 
