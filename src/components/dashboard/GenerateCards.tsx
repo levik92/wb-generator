@@ -1140,7 +1140,8 @@ export const GenerateCards = ({
           productImages: productImagesData,
           referenceImageUrl,
           selectedCards: selectedCards,
-          unifiedStyling: unifiedStyling && selectedCards.length >= 2
+          unifiedStyling: unifiedStyling && selectedCards.length >= 2,
+          aspectRatio
         }
       });
       if (error) {
