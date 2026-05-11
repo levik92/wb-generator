@@ -156,7 +156,8 @@ serve(async (req) => {
       total_cards: selectedCards.length,
       tokens_cost: tokensRequired,
       unified_styling: unifiedStyling,
-      style_source_image_url: styleSourceImageUrl
+      style_source_image_url: styleSourceImageUrl,
+      aspect_ratio: safeAspectRatio
     };
     if (sourceJobId) {
       jobInsert.source_job_id = sourceJobId;
