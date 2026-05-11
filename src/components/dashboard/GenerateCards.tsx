@@ -18,7 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn, ExternalLink, Coins, ShieldCheck } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn, ExternalLink, Coins, ShieldCheck, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GenerationPopups } from "./GenerationPopups";
@@ -2390,7 +2390,7 @@ export const GenerateCards = ({
               return w && h ? `${w} / ${h}` : '3 / 4';
             };
             return (
-              <div className={`mt-4 border rounded-lg transition-all border-primary/30 bg-primary/5 ${generating ? 'opacity-60' : ''}`}>
+              <div className={`mt-4 border border-border bg-muted/30 rounded-lg transition-all ${generating ? 'opacity-60' : ''}`}>
                 <button
                   type="button"
                   onClick={() => !generating && setAspectRatioOpen((v) => !v)}
@@ -2404,7 +2404,7 @@ export const GenerateCards = ({
                       <h4 className="font-medium text-sm sm:text-base">Формат изображения</h4>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      Выберите соотношение сторон под маркетплейс или площадку
+                      Нажмите, чтобы выбрать соотношение сторон под маркетплейс или площадку
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -2435,18 +2435,15 @@ export const GenerateCards = ({
                             } ${generating ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                           >
                             <div
-                              className={`shrink-0 rounded border-2 ${
-                                selected ? 'border-primary bg-primary/20' : 'border-muted-foreground/40 bg-muted/30'
+                              className={`shrink-0 rounded border-2 flex items-center justify-center ${
+                                selected ? 'border-primary bg-primary' : 'border-muted-foreground/40 bg-muted/30'
                               }`}
                               style={{ width: 24, aspectRatio: parseRatio(r.value) }}
-                            />
+                            >
+                              {selected && <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />}
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
-                                {r.value === '3:4' && (
-                                  <span className="text-[10px] text-muted-foreground">по умолчанию</span>
-                                )}
-                              </div>
+                              <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
                               <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug mt-0.5">
                                 {r.usage}
                               </p>
