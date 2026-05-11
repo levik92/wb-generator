@@ -392,6 +392,7 @@ export type Database = {
       }
       generation_jobs: {
         Row: {
+          aspect_ratio: string
           category: string
           completed_at: string | null
           completed_cards: number | null
@@ -413,6 +414,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          aspect_ratio?: string
           category: string
           completed_at?: string | null
           completed_cards?: number | null
@@ -434,6 +436,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          aspect_ratio?: string
           category?: string
           completed_at?: string | null
           completed_cards?: number | null
