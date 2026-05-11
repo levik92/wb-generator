@@ -156,8 +156,11 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
     const imageResolution = modelSettings?.image_resolution || '2K';
+    const ALLOWED_AR = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
+    const jobAspect = (task.job as any)?.aspect_ratio || '3:4';
+    const aspectRatio = ALLOWED_AR.includes(jobAspect) ? jobAspect : '3:4';
 
-    console.log(`[process-polza-task] Phase 1: Submitting task ${taskId} to Polza, resolution: ${imageResolution}`);
+    console.log(`[process-polza-task] Phase 1: Submitting task ${taskId} to Polza, resolution: ${imageResolution}, aspectRatio: ${aspectRatio}`);
 
     // Build images array
     const inputImages: Array<{type: string; data: string}> = [];
