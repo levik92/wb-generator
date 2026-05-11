@@ -41,8 +41,12 @@ serve(async (req) => {
       selectedCards = [0, 1, 2, 3, 4, 5], // Default all cards
       unifiedStyling = false,
       styleSourceImageUrl = null,
-      sourceJobId = null
+      sourceJobId = null,
+      aspectRatio = '3:4'
     } = requestBody;
+
+    const ALLOWED_ASPECT_RATIOS = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
+    const safeAspectRatio = ALLOWED_ASPECT_RATIOS.includes(aspectRatio) ? aspectRatio : '3:4';
 
     // Validate input
     if (!productName || !description || !userId) {
