@@ -2428,7 +2428,7 @@ export const GenerateCards = ({
                             key={r.value}
                             disabled={generating}
                             onClick={() => setAspectRatio(r.value)}
-                            className={`border rounded-lg p-2.5 sm:p-3 transition-all flex items-start justify-start gap-2.5 sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
+                            className={`border rounded-lg p-2.5 sm:p-3 transition-all flex items-start justify-start gap-2.5 text-left sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
                               selected
                                 ? 'border-primary bg-primary/10'
                                 : 'border-border hover:border-muted-foreground/50 bg-background'
@@ -2442,7 +2442,7 @@ export const GenerateCards = ({
                             >
                               {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-foreground" strokeWidth={3} />}
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0 text-left sm:text-center lg:text-left">
                               <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
                               <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug mt-0.5">
                                 {r.usage}
