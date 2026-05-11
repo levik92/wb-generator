@@ -2380,8 +2380,8 @@ export const GenerateCards = ({
               { value: '1:1', label: '1:1 квадрат', usage: 'Avito, Instagram, превью' },
               { value: '4:5', label: '4:5 портрет', usage: 'Instagram пост, Pinterest' },
               { value: '9:16', label: '9:16 вертикаль', usage: 'Stories, Reels, TikTok, VK Клипы' },
-              { value: '16:9', label: '16:9 горизонталь', usage: 'Баннеры, YouTube‑превью' },
-              { value: '4:3', label: '4:3 классика', usage: 'Универсальный горизонтальный' },
+              { value: '16:9', label: '16:9 горизонталь', usage: 'Баннеры, обложки каналов' },
+              { value: '4:3', label: '4:3 классика', usage: 'Доски объявлений, посты и прочее' },
               { value: '2:3', label: '2:3 портрет', usage: 'Постеры, Pinterest' },
               { value: '3:2', label: '3:2 альбом', usage: 'Фото, обложки' },
             ];
@@ -2428,7 +2428,7 @@ export const GenerateCards = ({
                             key={r.value}
                             disabled={generating}
                             onClick={() => setAspectRatio(r.value)}
-                            className={`text-left border rounded-lg p-2.5 sm:p-3 transition-all flex items-start gap-2.5 ${
+                            className={`border rounded-lg p-2.5 sm:p-3 transition-all flex items-start gap-2.5 sm:flex-col sm:items-center sm:gap-2 sm:text-center ${
                               selected
                                 ? 'border-primary bg-primary/10'
                                 : 'border-border hover:border-muted-foreground/50 bg-background'
