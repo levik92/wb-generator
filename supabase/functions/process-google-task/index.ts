@@ -123,11 +123,14 @@ async function callGeminiApi(
   contentParts: any[],
   keyName: string,
   imageResolution: string = '2K',
-  proxySettings?: any
+  proxySettings?: any,
+  aspectRatio: string = '3:4'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
   const modelName = 'gemini-3-pro-image-preview';
   const normalizedRes = (imageResolution || '2K').toUpperCase() === '1K' ? '1K' : '2K';
-  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: 3:4`);
+  const ALLOWED = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
+  const ar = ALLOWED.includes(aspectRatio) ? aspectRatio : '3:4';
+  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: ${ar}`);
   
   const proxiedFetch = createProxiedFetch(proxySettings);
   
@@ -147,7 +150,7 @@ async function callGeminiApi(
             responseModalities: ["IMAGE", "TEXT"],
             imageConfig: {
               imageSize: normalizedRes,
-              aspectRatio: "3:4"
+              aspectRatio: ar
             }
           }
         }),
