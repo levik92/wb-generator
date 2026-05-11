@@ -2435,12 +2435,12 @@ export const GenerateCards = ({
                             } ${generating ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                           >
                             <div
-                              className={`shrink-0 rounded border-2 flex items-center justify-center ${
+                              className={`shrink-0 rounded border-2 flex items-center justify-center w-5 sm:w-6 ${
                                 selected ? 'border-primary bg-primary' : 'border-muted-foreground/40 bg-muted/30'
                               }`}
-                              style={{ width: 24, aspectRatio: parseRatio(r.value) }}
+                              style={{ aspectRatio: parseRatio(r.value) }}
                             >
-                              {selected && <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />}
+                              {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-foreground" strokeWidth={3} />}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
