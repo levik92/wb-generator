@@ -1,0 +1,1 @@
+ALTER TABLE public.generation_jobs ADD COLUMN IF NOT EXISTS aspect_ratio text NOT NULL DEFAULT '3:4';
