@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Upload,
   Sparkles,
@@ -12,15 +12,22 @@ import {
   Layers,
   Tag,
   Clock,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 import "@/styles/landing-theme.css";
 
-import beforeAfter1 from "@/assets/example-before-after-1.jpg";
-import beforeAfter2 from "@/assets/example-before-after-2.jpg";
-import beforeAfter3 from "@/assets/example-before-after-3.jpg";
+import chairBefore from "@/assets/avito/chair-before.png";
+import chairAfter from "@/assets/avito/chair-after.jpg";
+import roomBefore from "@/assets/avito/room-before.png";
+import roomAfter from "@/assets/avito/room-after.jpg";
+import headphonesBefore from "@/assets/avito/headphones-before.png";
+import headphonesAfter from "@/assets/avito/headphones-after.jpg";
+import sneakersBefore from "@/assets/avito/sneakers-before.png";
+import sneakersAfter from "@/assets/avito/sneakers-after.jpg";
 
-// Avito brand accent (хорошо узнаваемый зелёный)
+// Avito brand accent
 const AVITO = "hsl(78, 68%, 48%)";
 const AVITO_LIGHT = "hsl(82, 75%, 58%)";
 
@@ -45,10 +52,47 @@ const solutions = [
   { icon: CheckCircle2, text: "Без дизайнера и Photoshop — нужен только смартфон" },
 ];
 
-const beforeAfterPairs = [
-  { src: beforeAfter1, label: "Товар для дома" },
-  { src: beforeAfter2, label: "Электроника" },
-  { src: beforeAfter3, label: "Одежда и аксессуары" },
+const cases = [
+  {
+    id: 101,
+    before: chairBefore,
+    after: chairAfter,
+    category: "Мебель",
+    title: "Офисное кресло",
+    conversion: "+239%",
+    ordersChange: "3 → 11",
+    description: "Светлая обложка с инфографикой подняла CTR в 3.4 раза",
+  },
+  {
+    id: 102,
+    before: roomBefore,
+    after: roomAfter,
+    category: "Недвижимость",
+    title: "Аренда студии",
+    conversion: "+217%",
+    ordersChange: "6 → 19",
+    description: "Тёплый свет и студийная подача — уровень Booking",
+  },
+  {
+    id: 103,
+    before: headphonesBefore,
+    after: headphonesAfter,
+    category: "Электроника",
+    title: "Наушники Xiaomi",
+    conversion: "+192%",
+    ordersChange: "5 → 17",
+    description: "Премиальная обложка убрала вопросы «новый или б/у?»",
+  },
+  {
+    id: 104,
+    before: sneakersBefore,
+    after: sneakersAfter,
+    category: "Одежда",
+    title: "Женские слипоны",
+    conversion: "+184%",
+    ordersChange: "4 → 14",
+    description: "Студийный мрамор вместо подсобки — возвраты −31%",
+  },
 ];
 
 const steps = [
@@ -59,6 +103,14 @@ const steps = [
 
 const Avito = () => {
   const navigate = useNavigate();
+  const { scrollY } = useScroll();
+
+  // Параллакс: салатовый градиент уходит вверх за экран
+  const greenY = useTransform(scrollY, [0, 800], [0, -500]);
+  const greenOpacity = useTransform(scrollY, [0, 600], [1, 0]);
+  // Фиолетовое радиальное пятно — мягкий параллакс вниз
+  const purpleY = useTransform(scrollY, [0, 1500], [0, 250]);
+  const purpleX = useTransform(scrollY, [0, 1500], [0, -80]);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -70,24 +122,52 @@ const Avito = () => {
     };
   }, []);
 
-  const goToThanks = () => {
-    navigate("/avito/thanks");
-  };
+  const goToThanks = () => navigate("/avito/thanks");
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white landing-dark">
+    <div className="min-h-screen bg-[#111111] text-white landing-dark relative overflow-x-hidden">
       <div className="noise-overlay" />
 
-      {/* Ambient glow — авито-зелёный */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-25">
-        <div
-          className="absolute w-[700px] h-[700px] -top-1/4 left-1/2 -translate-x-1/2 rounded-full"
-          style={{ background: `radial-gradient(circle, ${AVITO} 0%, transparent 70%)` }}
-        />
-        <div
-          className="absolute w-[500px] h-[500px] top-1/2 -right-40 rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(268,50%,30%) 0%, transparent 70%)" }}
-        />
+      {/* ===== Параллакс-фон ===== */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Салатовый градиент сверху — уезжает вверх при скролле */}
+        <motion.div
+          style={{ y: greenY, opacity: greenOpacity }}
+          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1100px] h-[900px]"
+        >
+          <div
+            className="w-full h-full rounded-full blur-[140px] opacity-40"
+            style={{
+              background: `radial-gradient(closest-side, ${AVITO_LIGHT} 0%, ${AVITO} 35%, transparent 70%)`,
+            }}
+          />
+        </motion.div>
+
+        {/* Фиолетовый радиальный — лёгкий параллакс */}
+        <motion.div
+          style={{ y: purpleY, x: purpleX }}
+          className="absolute top-[60%] -right-40 w-[700px] h-[700px]"
+        >
+          <div
+            className="w-full h-full rounded-full blur-[160px] opacity-50"
+            style={{
+              background: "radial-gradient(closest-side, hsl(268,83%,45%) 0%, hsl(280,70%,30%) 45%, transparent 75%)",
+            }}
+          />
+        </motion.div>
+
+        {/* Доп. фиолетовое пятно ниже */}
+        <motion.div
+          style={{ y: useTransform(scrollY, [0, 2000], [0, -300]) }}
+          className="absolute top-[120%] left-[10%] w-[500px] h-[500px]"
+        >
+          <div
+            className="w-full h-full rounded-full blur-[140px] opacity-30"
+            style={{
+              background: "radial-gradient(closest-side, hsl(268,83%,40%) 0%, transparent 70%)",
+            }}
+          />
+        </motion.div>
       </div>
 
       <main className="relative z-10">
@@ -125,7 +205,7 @@ const Avito = () => {
               <Button
                 onClick={goToThanks}
                 size="lg"
-                className="h-14 px-10 text-base font-semibold rounded-xl hover:opacity-90 transition-opacity text-white border-0"
+                className="h-14 px-10 text-base font-semibold rounded-xl hover:opacity-90 transition-opacity text-black border-0"
                 style={{ background: `linear-gradient(90deg, ${AVITO}, ${AVITO_LIGHT})` }}
               >
                 Попробовать бесплатно
@@ -218,7 +298,7 @@ const Avito = () => {
           </div>
         </section>
 
-        {/* ===== BEFORE / AFTER ===== */}
+        {/* ===== BEFORE / AFTER — реальные кейсы ===== */}
         <section className="py-14 sm:py-20">
           <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
             <motion.h2
@@ -227,40 +307,69 @@ const Avito = () => {
               viewport={{ once: true }}
               className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-4"
             >
-              Было / Стало
+              Было / Стало на Авито
             </motion.h2>
             <p className="text-center text-white/50 mb-12 max-w-2xl mx-auto">
-              Слева — обычное фото товара. Справа — обложка, которую WBGen собрал за 3 минуты.
+              4 реальных кейса наших клиентов: рост заявок, CTR и снижение цены клика.
             </p>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {beforeAfterPairs.map((p, i) => (
+            <div className="grid sm:grid-cols-2 gap-6">
+              {cases.map((c, i) => (
                 <motion.div
-                  key={i}
+                  key={c.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="glass-card rounded-2xl border border-white/5 overflow-hidden"
+                  transition={{ delay: i * 0.08 }}
+                  className="glass-card rounded-2xl border border-white/5 overflow-hidden flex flex-col"
                 >
-                  <div className="relative">
-                    <img
-                      src={p.src}
-                      alt={`Было и стало — ${p.label}`}
-                      loading="lazy"
-                      className="w-full h-auto block"
-                    />
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs font-bold bg-black/60 text-white/80 backdrop-blur-sm">
-                      Было
+                  <div className="grid grid-cols-2 gap-1 bg-black/40 p-1">
+                    <div className="relative aspect-square overflow-hidden rounded-l-md bg-black/40">
+                      <img src={c.before} alt={`До — ${c.title}`} loading="lazy" className="w-full h-full object-cover" />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/70 text-white/80 backdrop-blur-sm">
+                        ДО
+                      </div>
                     </div>
-                    <div
-                      className="absolute top-3 right-3 px-2.5 py-1 rounded-md text-xs font-bold text-black"
-                      style={{ background: AVITO_LIGHT }}
-                    >
-                      Стало
+                    <div className="relative aspect-square overflow-hidden rounded-r-md bg-black/40">
+                      <img src={c.after} alt={`После — ${c.title}`} loading="lazy" className="w-full h-full object-cover" />
+                      <div
+                        className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold text-black"
+                        style={{ background: AVITO_LIGHT }}
+                      >
+                        ПОСЛЕ
+                      </div>
                     </div>
                   </div>
-                  <div className="p-4 text-center text-sm text-white/60">{p.label}</div>
+
+                  <div className="p-5 flex flex-col gap-3 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] text-white/70">
+                        {c.category}
+                      </span>
+                      <span className="text-xl font-bold" style={{ color: AVITO_LIGHT }}>
+                        {c.conversion}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white">{c.title}</h3>
+                    <p className="text-sm text-white/50 -mt-1">{c.description}</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-white/40">Заявки/день:</span>
+                      <span className="font-semibold text-white">{c.ordersChange}</span>
+                    </div>
+                    <CaseStudyDialog caseId={c.id}>
+                      <button
+                        className="w-full text-center text-xs font-medium flex items-center justify-center gap-1.5 py-2.5 rounded-lg transition-all border mt-1"
+                        style={{
+                          background: `${AVITO}14`,
+                          borderColor: `${AVITO}33`,
+                          color: AVITO_LIGHT,
+                        }}
+                      >
+                        Изучить подробнее
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </CaseStudyDialog>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -322,11 +431,10 @@ const Avito = () => {
               <Button
                 onClick={goToThanks}
                 size="lg"
-                className="h-14 px-10 text-base font-semibold rounded-xl hover:opacity-90 transition-opacity text-white border-0"
+                className="h-14 px-10 text-base font-semibold rounded-xl hover:opacity-90 transition-opacity text-black border-0"
                 style={{ background: `linear-gradient(90deg, ${AVITO}, ${AVITO_LIGHT})` }}
               >
-                <span className="sm:hidden">Зарегистрироваться</span>
-                <span className="hidden sm:inline">Зарегистрироваться бесплатно</span>
+                Зарегистрироваться
               </Button>
             </motion.div>
           </div>
