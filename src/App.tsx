@@ -50,6 +50,8 @@ const Promo = lazy(() => import("./pages/Promo"));
 const PromoThanks = lazy(() => import("./pages/PromoThanks"));
 const PromoTwo = lazy(() => import("./pages/PromoTwo"));
 const PromoTwoThanks = lazy(() => import("./pages/PromoTwoThanks"));
+const Avito = lazy(() => import("./pages/Avito"));
+const AvitoThanks = lazy(() => import("./pages/AvitoThanks"));
 
 const queryClient = new QueryClient();
 
@@ -149,6 +151,8 @@ const App = () => {
             <Route path="/promo/thanks" element={<PromoThanks />} />
             <Route path="/promotwo" element={<PromoTwo />} />
             <Route path="/promotwo/thanks" element={<PromoTwoThanks />} />
+            <Route path="/avito" element={<Avito />} />
+            <Route path="/avito/thanks" element={<AvitoThanks />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
