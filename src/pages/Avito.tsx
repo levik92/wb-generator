@@ -208,7 +208,7 @@ const Avito = () => {
                 className="h-14 px-10 text-base font-semibold rounded-xl hover:opacity-90 transition-opacity text-black border-0"
                 style={{ background: `linear-gradient(90deg, ${AVITO}, ${AVITO_LIGHT})` }}
               >
-                Попробовать бесплатно
+                Попробовать
               </Button>
             </motion.div>
           </div>
