@@ -291,9 +291,15 @@ export function AdminPayments() {
 
         <TabsContent value="invoices">
           <Card className="bg-card border-border/50 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg">Счета для юр. лиц</CardTitle>
-              <CardDescription>Безналичные оплаты по выставленным счетам ({invoices.length})</CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+              <div>
+                <CardTitle className="text-lg">Счета для юр. лиц</CardTitle>
+                <CardDescription>Безналичные оплаты по выставленным счетам ({invoices.length})</CardDescription>
+              </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => setCreateOpen(true)}>
+                <Plus className="w-4 h-4" />
+                Создать счёт вручную
+              </Button>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
               {invoices.length === 0 ? (
