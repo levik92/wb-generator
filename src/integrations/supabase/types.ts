@@ -623,11 +623,14 @@ export type Database = {
           admin_notes: string | null
           amount: number
           created_at: string
+          created_by: string | null
           id: string
           invoice_date: string
           invoice_number: string
-          organization_id: string
-          package_id: string
+          is_manual: boolean
+          notes: string | null
+          organization_id: string | null
+          package_id: string | null
           package_name: string
           payment_purpose: string
           reviewed_at: string | null
@@ -643,11 +646,14 @@ export type Database = {
           admin_notes?: string | null
           amount: number
           created_at?: string
+          created_by?: string | null
           id?: string
           invoice_date?: string
           invoice_number: string
-          organization_id: string
-          package_id: string
+          is_manual?: boolean
+          notes?: string | null
+          organization_id?: string | null
+          package_id?: string | null
           package_name: string
           payment_purpose: string
           reviewed_at?: string | null
@@ -663,11 +669,14 @@ export type Database = {
           admin_notes?: string | null
           amount?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           invoice_date?: string
           invoice_number?: string
-          organization_id?: string
-          package_id?: string
+          is_manual?: boolean
+          notes?: string | null
+          organization_id?: string | null
+          package_id?: string | null
           package_name?: string
           payment_purpose?: string
           reviewed_at?: string | null
@@ -2003,6 +2012,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_manual_invoice: {
+        Args: {
+          p_amount: number
+          p_email: string
+          p_invoice_date: string
+          p_invoice_number: string
+          p_notes?: string
+          p_package_name: string
+          p_tokens: number
+        }
+        Returns: string
+      }
       admin_get_all_users: {
         Args: never
         Returns: {
