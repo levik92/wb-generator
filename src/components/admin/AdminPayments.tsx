@@ -40,6 +40,7 @@ interface InvoicePayment {
   user_email?: string;
   org_name?: string;
   org_inn?: string;
+  is_manual?: boolean;
 }
 
 const ITEMS_PER_PAGE = 15;
