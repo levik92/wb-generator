@@ -6,8 +6,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Check, X, ChevronLeft, ChevronRight, CreditCard, FileText } from "lucide-react";
+import { Loader2, Check, X, ChevronLeft, ChevronRight, CreditCard, FileText, Plus } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Payment {
   id: string;
@@ -36,6 +40,7 @@ interface InvoicePayment {
   user_email?: string;
   org_name?: string;
   org_inn?: string;
+  is_manual?: boolean;
 }
 
 const ITEMS_PER_PAGE = 15;
@@ -47,6 +52,54 @@ export function AdminPayments() {
   const [paymentsPage, setPaymentsPage] = useState(1);
   const [invoicesPage, setInvoicesPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    package_name: "Ручное пополнение",
+    amount: "",
+    tokens: "",
+    invoice_number: "",
+    invoice_date: new Date().toISOString().slice(0, 10),
+    notes: "",
+  });
+
+  const resetForm = () => setForm({
+    email: "", package_name: "Ручное пополнение", amount: "", tokens: "",
+    invoice_number: "", invoice_date: new Date().toISOString().slice(0, 10), notes: "",
+  });
+
+  const handleCreateManual = async () => {
+    const amount = Number(form.amount);
+    const tokens = Number(form.tokens);
+    if (!form.email.trim() || !form.invoice_number.trim() || !(amount > 0) || !(tokens > 0)) {
+      toast({ title: "Ошибка", description: "Заполните email, номер счёта, сумму и токены", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const { error } = await supabase.rpc('admin_create_manual_invoice', {
+        p_email: form.email.trim(),
+        p_amount: amount,
+        p_tokens: tokens,
+        p_invoice_number: form.invoice_number.trim(),
+        p_invoice_date: new Date(form.invoice_date).toISOString(),
+        p_package_name: form.package_name,
+        p_notes: form.notes || null,
+      });
+      if (error) throw error;
+      toast({ title: "Счёт создан", description: "Счёт добавлен и ожидает подтверждения" });
+      setCreateOpen(false);
+      resetForm();
+      await loadInvoices();
+    } catch (e: any) {
+      const msg = e?.message || "";
+      const desc = msg.includes("not found") ? "Пользователь с таким email не найден" : "Не удалось создать счёт";
+      toast({ title: "Ошибка", description: desc, variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -238,9 +291,15 @@ export function AdminPayments() {
 
         <TabsContent value="invoices">
           <Card className="bg-card border-border/50 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg">Счета для юр. лиц</CardTitle>
-              <CardDescription>Безналичные оплаты по выставленным счетам ({invoices.length})</CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
+              <div>
+                <CardTitle className="text-lg">Счета для юр. лиц</CardTitle>
+                <CardDescription>Безналичные оплаты по выставленным счетам ({invoices.length})</CardDescription>
+              </div>
+              <Button size="sm" className="gap-2 shrink-0" onClick={() => setCreateOpen(true)}>
+                <Plus className="w-4 h-4" />
+                Создать счёт вручную
+              </Button>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
               {invoices.length === 0 ? (
@@ -265,7 +324,12 @@ export function AdminPayments() {
                       <TableBody>
                         {paginatedInvoices.map(inv => (
                           <TableRow key={inv.id}>
-                            <TableCell className="text-xs font-mono">{inv.invoice_number}</TableCell>
+                            <TableCell className="text-xs font-mono">
+                              <div className="flex items-center gap-1.5">
+                                {inv.invoice_number}
+                                {inv.is_manual && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Ручной</Badge>}
+                              </div>
+                            </TableCell>
                             <TableCell className="text-xs max-w-[150px] truncate">{inv.user_email}</TableCell>
                             <TableCell className="text-xs max-w-[150px] truncate">{inv.org_name}</TableCell>
                             <TableCell className="text-xs font-mono">{inv.org_inn}</TableCell>
@@ -343,6 +407,55 @@ export function AdminPayments() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Создать счёт вручную</DialogTitle>
+            <DialogDescription>
+              Создайте счёт-заявку для пользователя. После подтверждения токены будут начислены и операция отразится в истории и общей аналитике.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Email пользователя *</Label>
+              <Input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="user@example.com" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Назначение / название тарифа</Label>
+              <Input value={form.package_name} onChange={e => setForm(f => ({ ...f, package_name: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Сумма, ₽ *</Label>
+                <Input type="number" min="1" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Токены *</Label>
+                <Input type="number" min="1" value={form.tokens} onChange={e => setForm(f => ({ ...f, tokens: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Номер счёта *</Label>
+                <Input value={form.invoice_number} onChange={e => setForm(f => ({ ...f, invoice_number: e.target.value }))} placeholder="2026-0001" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Дата счёта</Label>
+                <Input type="date" value={form.invoice_date} onChange={e => setForm(f => ({ ...f, invoice_date: e.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Примечание (для админа)</Label>
+              <Textarea rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>Отмена</Button>
+            <Button onClick={handleCreateManual} disabled={creating}>
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Создать счёт"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
