@@ -407,6 +407,55 @@ export function AdminPayments() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Создать счёт вручную</DialogTitle>
+            <DialogDescription>
+              Создайте счёт-заявку для пользователя. После подтверждения токены будут начислены и операция отразится в истории и общей аналитике.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Email пользователя *</Label>
+              <Input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="user@example.com" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Назначение / название тарифа</Label>
+              <Input value={form.package_name} onChange={e => setForm(f => ({ ...f, package_name: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Сумма, ₽ *</Label>
+                <Input type="number" min="1" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Токены *</Label>
+                <Input type="number" min="1" value={form.tokens} onChange={e => setForm(f => ({ ...f, tokens: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Номер счёта *</Label>
+                <Input value={form.invoice_number} onChange={e => setForm(f => ({ ...f, invoice_number: e.target.value }))} placeholder="2026-0001" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Дата счёта</Label>
+                <Input type="date" value={form.invoice_date} onChange={e => setForm(f => ({ ...f, invoice_date: e.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Примечание (для админа)</Label>
+              <Textarea rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>Отмена</Button>
+            <Button onClick={handleCreateManual} disabled={creating}>
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Создать счёт"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
