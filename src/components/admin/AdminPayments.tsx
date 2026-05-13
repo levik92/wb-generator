@@ -52,6 +52,54 @@ export function AdminPayments() {
   const [paymentsPage, setPaymentsPage] = useState(1);
   const [invoicesPage, setInvoicesPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    package_name: "Ручное пополнение",
+    amount: "",
+    tokens: "",
+    invoice_number: "",
+    invoice_date: new Date().toISOString().slice(0, 10),
+    notes: "",
+  });
+
+  const resetForm = () => setForm({
+    email: "", package_name: "Ручное пополнение", amount: "", tokens: "",
+    invoice_number: "", invoice_date: new Date().toISOString().slice(0, 10), notes: "",
+  });
+
+  const handleCreateManual = async () => {
+    const amount = Number(form.amount);
+    const tokens = Number(form.tokens);
+    if (!form.email.trim() || !form.invoice_number.trim() || !(amount > 0) || !(tokens > 0)) {
+      toast({ title: "Ошибка", description: "Заполните email, номер счёта, сумму и токены", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const { error } = await supabase.rpc('admin_create_manual_invoice', {
+        p_email: form.email.trim(),
+        p_amount: amount,
+        p_tokens: tokens,
+        p_invoice_number: form.invoice_number.trim(),
+        p_invoice_date: new Date(form.invoice_date).toISOString(),
+        p_package_name: form.package_name,
+        p_notes: form.notes || null,
+      });
+      if (error) throw error;
+      toast({ title: "Счёт создан", description: "Счёт добавлен и ожидает подтверждения" });
+      setCreateOpen(false);
+      resetForm();
+      await loadInvoices();
+    } catch (e: any) {
+      const msg = e?.message || "";
+      const desc = msg.includes("not found") ? "Пользователь с таким email не найден" : "Не удалось создать счёт";
+      toast({ title: "Ошибка", description: desc, variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
+  };
 
   useEffect(() => {
     loadData();
