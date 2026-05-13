@@ -324,7 +324,12 @@ export function AdminPayments() {
                       <TableBody>
                         {paginatedInvoices.map(inv => (
                           <TableRow key={inv.id}>
-                            <TableCell className="text-xs font-mono">{inv.invoice_number}</TableCell>
+                            <TableCell className="text-xs font-mono">
+                              <div className="flex items-center gap-1.5">
+                                {inv.invoice_number}
+                                {inv.is_manual && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Ручной</Badge>}
+                              </div>
+                            </TableCell>
                             <TableCell className="text-xs max-w-[150px] truncate">{inv.user_email}</TableCell>
                             <TableCell className="text-xs max-w-[150px] truncate">{inv.org_name}</TableCell>
                             <TableCell className="text-xs font-mono">{inv.org_inn}</TableCell>
