@@ -418,5 +418,10 @@ export default function Pricing({
           />
         </Suspense>
       )}
+      <PaymentBlockedDialog
+        open={blockedDialog.open}
+        onOpenChange={(open) => setBlockedDialog((s) => ({ ...s, open }))}
+        reason={blockedDialog.reason}
+      />
     </div>;
 }
