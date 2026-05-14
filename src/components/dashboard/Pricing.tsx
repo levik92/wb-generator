@@ -163,8 +163,7 @@ export default function Pricing({
             console.log('[CloudPayments] oncomplete:', result);
           };
 
-          const finishWith = (toastArgs: { title: string; description: string; variant?: 'destructive' }) => {
-            toast(toastArgs);
+          const finishLoading = () => {
             setLoading(null);
             isPaymentInProgress.current = false;
           };
@@ -180,11 +179,8 @@ export default function Pricing({
               },
               onFail: (reason: any) => {
                 console.warn('[CloudPayments] onFail:', reason);
-                finishWith({
-                  title: "Ошибка оплаты",
-                  description: "Платёж не прошёл. Попробуйте ещё раз или используйте другую карту.",
-                  variant: "destructive",
-                });
+                setBlockedDialog({ open: true, reason: "failed" });
+                finishLoading();
               },
               onComplete: (result: any) => {
                 console.log('[CloudPayments] onComplete:', result);
@@ -193,35 +189,22 @@ export default function Pricing({
             .then((widgetResult: any) => {
               console.log('[CloudPayments] start result:', widgetResult);
               const success = !!(widgetResult?.success || widgetResult?.status === 'success' || widgetResult?.type === 'payment');
-              if (success) {
-                // onSuccess already handled UX
-                return;
-              }
+              if (success) return;
               const reason: string = widgetResult?.message || widgetResult?.reason || '';
               const isCanceled =
                 widgetResult?.canceled ||
                 widgetResult?.status === 'cancelled' ||
                 widgetResult?.type === 'cancel' ||
                 /cancel|отмен/i.test(reason);
-              finishWith({
-                title: isCanceled ? "Оплата отменена" : "Оплата не завершена",
-                description: isCanceled
-                  ? "Платёж отменён. Вы можете попробовать ещё раз."
-                  : "Платёж не прошёл. Попробуйте ещё раз.",
-                variant: "destructive",
-              });
+              setBlockedDialog({ open: true, reason: isCanceled ? "cancelled" : "failed" });
+              finishLoading();
             })
             .catch((err: any) => {
               console.error('[CloudPayments] start() error:', err);
               const reason = String(err?.message || err || '');
               const isCanceled = /cancel|отмен|close/i.test(reason);
-              finishWith({
-                title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
-                description: isCanceled
-                  ? "Платёж отменён."
-                  : "Не удалось завершить оплату. Попробуйте ещё раз.",
-                variant: "destructive",
-              });
+              setBlockedDialog({ open: true, reason: isCanceled ? "cancelled" : "failed" });
+              finishLoading();
             });
         } catch (widgetError) {
           console.error('[CloudPayments] Widget error:', widgetError);
