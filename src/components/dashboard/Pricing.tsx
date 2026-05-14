@@ -140,26 +140,7 @@ export default function Pricing({
       }
 
       if (data.provider === 'cloudpayments') {
-        // Wait up to 4s for CloudPayments script to finish loading (defer in index.html)
-        const waitForCp = async () => {
-          for (let i = 0; i < 40; i++) {
-            const lib = (window as any).cp;
-            if (lib?.CloudPayments) return lib;
-            await new Promise(r => setTimeout(r, 100));
-          }
-          return null;
-        };
-        const cpLib = await waitForCp();
-        if (!cpLib?.CloudPayments) {
-          toast({
-            title: "Ошибка",
-            description: "Платёжный модуль ещё загружается. Подождите секунду и попробуйте снова.",
-            variant: "destructive"
-          });
-          setLoading(null);
-          isPaymentInProgress.current = false;
-          return;
-        }
+        const cpLib = cpProbe;
 
         const params = data.intentParams;
         console.log('[CloudPayments] Starting payment');
