@@ -9,6 +9,7 @@ import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PaymentBlockedDialog } from "@/components/payments/PaymentBlockedDialog";
 const InvoiceForm = lazy(() => import("@/components/dashboard/InvoiceForm"));
 
 interface PromoCodeInfo {
@@ -31,6 +32,7 @@ export default function Pricing({
   const isPaymentInProgress = useRef(false);
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [blockedDialog, setBlockedDialog] = useState<{ open: boolean; reason: "blocked" | "failed" | "cancelled" }>({ open: false, reason: "blocked" });
   const {
     data: packages,
     isLoading: packagesLoading
@@ -88,6 +90,23 @@ export default function Pricing({
         return;
       }
 
+      // Pre-check: ensure CloudPayments widget script is reachable BEFORE creating a pending payment.
+      // If the script is blocked (AdBlock/Kaspersky/ISP), abort early — no garbage `pending` rows.
+      const waitForCp = async () => {
+        for (let i = 0; i < 80; i++) {
+          const lib = (window as any).cp;
+          if (lib?.CloudPayments) return lib;
+          await new Promise(r => setTimeout(r, 100));
+        }
+        return null;
+      };
+      const cpProbe = await waitForCp();
+      if (!cpProbe?.CloudPayments) {
+        setBlockedDialog({ open: true, reason: "blocked" });
+        setLoading(null);
+        isPaymentInProgress.current = false;
+        return;
+      }
       // Calculate final amount and tokens with promo
       let finalAmount = amount;
       let finalTokens = tokens;
@@ -121,26 +140,7 @@ export default function Pricing({
       }
 
       if (data.provider === 'cloudpayments') {
-        // Wait up to 4s for CloudPayments script to finish loading (defer in index.html)
-        const waitForCp = async () => {
-          for (let i = 0; i < 40; i++) {
-            const lib = (window as any).cp;
-            if (lib?.CloudPayments) return lib;
-            await new Promise(r => setTimeout(r, 100));
-          }
-          return null;
-        };
-        const cpLib = await waitForCp();
-        if (!cpLib?.CloudPayments) {
-          toast({
-            title: "Ошибка",
-            description: "Платёжный модуль ещё загружается. Подождите секунду и попробуйте снова.",
-            variant: "destructive"
-          });
-          setLoading(null);
-          isPaymentInProgress.current = false;
-          return;
-        }
+        const cpLib = cpProbe;
 
         const params = data.intentParams;
         console.log('[CloudPayments] Starting payment');
@@ -163,8 +163,7 @@ export default function Pricing({
             console.log('[CloudPayments] oncomplete:', result);
           };
 
-          const finishWith = (toastArgs: { title: string; description: string; variant?: 'destructive' }) => {
-            toast(toastArgs);
+          const finishLoading = () => {
             setLoading(null);
             isPaymentInProgress.current = false;
           };
@@ -180,11 +179,8 @@ export default function Pricing({
               },
               onFail: (reason: any) => {
                 console.warn('[CloudPayments] onFail:', reason);
-                finishWith({
-                  title: "Ошибка оплаты",
-                  description: "Платёж не прошёл. Попробуйте ещё раз или используйте другую карту.",
-                  variant: "destructive",
-                });
+                setBlockedDialog({ open: true, reason: "failed" });
+                finishLoading();
               },
               onComplete: (result: any) => {
                 console.log('[CloudPayments] onComplete:', result);
@@ -193,35 +189,22 @@ export default function Pricing({
             .then((widgetResult: any) => {
               console.log('[CloudPayments] start result:', widgetResult);
               const success = !!(widgetResult?.success || widgetResult?.status === 'success' || widgetResult?.type === 'payment');
-              if (success) {
-                // onSuccess already handled UX
-                return;
-              }
+              if (success) return;
               const reason: string = widgetResult?.message || widgetResult?.reason || '';
               const isCanceled =
                 widgetResult?.canceled ||
                 widgetResult?.status === 'cancelled' ||
                 widgetResult?.type === 'cancel' ||
                 /cancel|отмен/i.test(reason);
-              finishWith({
-                title: isCanceled ? "Оплата отменена" : "Оплата не завершена",
-                description: isCanceled
-                  ? "Платёж отменён. Вы можете попробовать ещё раз."
-                  : "Платёж не прошёл. Попробуйте ещё раз.",
-                variant: "destructive",
-              });
+              setBlockedDialog({ open: true, reason: isCanceled ? "cancelled" : "failed" });
+              finishLoading();
             })
             .catch((err: any) => {
               console.error('[CloudPayments] start() error:', err);
               const reason = String(err?.message || err || '');
               const isCanceled = /cancel|отмен|close/i.test(reason);
-              finishWith({
-                title: isCanceled ? "Оплата отменена" : "Ошибка оплаты",
-                description: isCanceled
-                  ? "Платёж отменён."
-                  : "Не удалось завершить оплату. Попробуйте ещё раз.",
-                variant: "destructive",
-              });
+              setBlockedDialog({ open: true, reason: isCanceled ? "cancelled" : "failed" });
+              finishLoading();
             });
         } catch (widgetError) {
           console.error('[CloudPayments] Widget error:', widgetError);
@@ -435,5 +418,10 @@ export default function Pricing({
           />
         </Suspense>
       )}
+      <PaymentBlockedDialog
+        open={blockedDialog.open}
+        onOpenChange={(open) => setBlockedDialog((s) => ({ ...s, open }))}
+        reason={blockedDialog.reason}
+      />
     </div>;
 }
