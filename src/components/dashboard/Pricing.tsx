@@ -32,7 +32,7 @@ export default function Pricing({
   const isPaymentInProgress = useRef(false);
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
-  const {
+  const [blockedDialog, setBlockedDialog] = useState<{ open: boolean; reason: "blocked" | "failed" | "cancelled" }>({ open: false, reason: "blocked" });
     data: packages,
     isLoading: packagesLoading
   } = usePaymentPackages();
