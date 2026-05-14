@@ -90,6 +90,23 @@ export default function Pricing({
         return;
       }
 
+      // Pre-check: ensure CloudPayments widget script is reachable BEFORE creating a pending payment.
+      // If the script is blocked (AdBlock/Kaspersky/ISP), abort early — no garbage `pending` rows.
+      const waitForCp = async () => {
+        for (let i = 0; i < 80; i++) {
+          const lib = (window as any).cp;
+          if (lib?.CloudPayments) return lib;
+          await new Promise(r => setTimeout(r, 100));
+        }
+        return null;
+      };
+      const cpProbe = await waitForCp();
+      if (!cpProbe?.CloudPayments) {
+        setBlockedDialog({ open: true, reason: "blocked" });
+        setLoading(null);
+        isPaymentInProgress.current = false;
+        return;
+      }
       // Calculate final amount and tokens with promo
       let finalAmount = amount;
       let finalTokens = tokens;
