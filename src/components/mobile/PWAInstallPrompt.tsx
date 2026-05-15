@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { X, Share, PlusSquare, MoreVertical, Download, Smartphone } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PWAInstallPromptProps {
   userId: string;
