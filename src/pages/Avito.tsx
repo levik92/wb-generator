@@ -125,44 +125,64 @@ const Avito = () => {
   const goToThanks = () => navigate("/avito/thanks");
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white landing-dark relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#111111] text-white landing-dark relative overflow-x-hidden" style={{ isolation: "isolate" }}>
       <div className="noise-overlay" />
 
-      {/* ===== Параллакс-фон ===== */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Салатовый градиент сверху — уезжает вверх при скролле */}
+      {/* ===== Параллакс-фон =====
+          ВАЖНО: на мобильных (iOS Safari) сочетание position:fixed с
+          большими blur-фильтрами внутри overflow-x-hidden ломает
+          композитор и даёт чёрный экран при скролле. Поэтому фон —
+          absolute, привязан к высоте всей страницы, blur уменьшен,
+          а на мобильных параллакс отключён. */}
+      <div className="absolute inset-0 h-full w-full pointer-events-none overflow-hidden -z-10">
+        {/* Салатовый градиент сверху */}
         <motion.div
-          style={{ y: greenY, opacity: greenOpacity }}
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1100px] h-[900px]"
+          style={{ y: greenY, opacity: greenOpacity, willChange: "transform" }}
+          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1100px] h-[600px] sm:h-[900px] hidden sm:block"
         >
           <div
-            className="w-full h-full rounded-full blur-[140px] opacity-40"
+            className="w-full h-full rounded-full blur-3xl opacity-40"
             style={{
               background: `radial-gradient(closest-side, ${AVITO_LIGHT} 0%, ${AVITO} 35%, transparent 70%)`,
             }}
           />
         </motion.div>
+        {/* Мобильный статичный градиент сверху (без параллакса и без огромных blur) */}
+        <div
+          className="sm:hidden absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[500px] rounded-full blur-2xl opacity-30"
+          style={{
+            background: `radial-gradient(closest-side, ${AVITO_LIGHT} 0%, ${AVITO} 35%, transparent 70%)`,
+          }}
+        />
 
-        {/* Фиолетовый радиальный — лёгкий параллакс */}
+        {/* Фиолетовый радиальный — параллакс только на десктопе */}
         <motion.div
-          style={{ y: purpleY, x: purpleX }}
-          className="absolute top-[60%] -right-40 w-[700px] h-[700px]"
+          style={{ y: purpleY, x: purpleX, willChange: "transform" }}
+          className="absolute top-[60%] -right-40 w-[500px] sm:w-[700px] h-[500px] sm:h-[700px] hidden sm:block"
         >
           <div
-            className="w-full h-full rounded-full blur-[160px] opacity-50"
+            className="w-full h-full rounded-full blur-3xl opacity-50"
             style={{
               background: "radial-gradient(closest-side, hsl(268,83%,45%) 0%, hsl(280,70%,30%) 45%, transparent 75%)",
             }}
           />
         </motion.div>
 
-        {/* Доп. фиолетовое пятно ниже */}
+        {/* Мобильный статичный фиолетовый */}
+        <div
+          className="sm:hidden absolute top-[55%] -right-32 w-[420px] h-[420px] rounded-full blur-2xl opacity-30"
+          style={{
+            background: "radial-gradient(closest-side, hsl(268,83%,45%) 0%, hsl(280,70%,30%) 45%, transparent 75%)",
+          }}
+        />
+
+        {/* Доп. фиолетовое пятно ниже — только десктоп */}
         <motion.div
-          style={{ y: useTransform(scrollY, [0, 2000], [0, -300]) }}
-          className="absolute top-[120%] left-[10%] w-[500px] h-[500px]"
+          style={{ y: useTransform(scrollY, [0, 2000], [0, -300]), willChange: "transform" }}
+          className="absolute top-[120%] left-[10%] w-[500px] h-[500px] hidden sm:block"
         >
           <div
-            className="w-full h-full rounded-full blur-[140px] opacity-30"
+            className="w-full h-full rounded-full blur-3xl opacity-30"
             style={{
               background: "radial-gradient(closest-side, hsl(268,83%,40%) 0%, transparent 70%)",
             }}

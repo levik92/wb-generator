@@ -1255,6 +1255,7 @@ export type Database = {
           login_count: number
           referral_code: string | null
           referred_by: string | null
+          telegram_username: string | null
           tokens_balance: number
           updated_at: string
           utm_source_id: string | null
@@ -1270,6 +1271,7 @@ export type Database = {
           login_count?: number
           referral_code?: string | null
           referred_by?: string | null
+          telegram_username?: string | null
           tokens_balance?: number
           updated_at?: string
           utm_source_id?: string | null
@@ -1285,6 +1287,7 @@ export type Database = {
           login_count?: number
           referral_code?: string | null
           referred_by?: string | null
+          telegram_username?: string | null
           tokens_balance?: number
           updated_at?: string
           utm_source_id?: string | null
