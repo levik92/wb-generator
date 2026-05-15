@@ -71,6 +71,10 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [otherText, setOtherText] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  // Bonus "let's get to know each other" Telegram step (after all questions)
+  const TELEGRAM_STEP = QUESTIONS.length;
+  const [telegram, setTelegram] = useState("");
+  const [consent, setConsent] = useState(false);
 
   useEffect(() => {
     const checkSurvey = async () => {
