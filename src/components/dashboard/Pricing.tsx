@@ -78,7 +78,7 @@ export default function Pricing({
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
   const videoPrice = generationPrices?.find(p => p.price_type === 'video_generation')?.tokens_cost || 10;
-  const handlePayment = async (packageName: string, amount: number, tokens: number) => {
+  const handlePayment = async (packageName: string, amount: number, tokens: number, providerOverride?: 'yookassa' | 'cloudpayments') => {
     if (isPaymentInProgress.current) return;
     isPaymentInProgress.current = true;
     try {
@@ -98,22 +98,25 @@ export default function Pricing({
         return;
       }
 
-      // Pre-check: ensure CloudPayments widget script is reachable BEFORE creating a pending payment.
-      // If the script is blocked (AdBlock/Kaspersky/ISP), abort early — no garbage `pending` rows.
-      const waitForCp = async () => {
-        for (let i = 0; i < 80; i++) {
-          const lib = (window as any).cp;
-          if (lib?.CloudPayments) return lib;
-          await new Promise(r => setTimeout(r, 100));
+      // Pre-check CloudPayments widget only when CP is the chosen path.
+      // For YooKassa override we redirect via URL — no widget needed.
+      let cpProbe: any = null;
+      if (providerOverride !== 'yookassa') {
+        const waitForCp = async () => {
+          for (let i = 0; i < 80; i++) {
+            const lib = (window as any).cp;
+            if (lib?.CloudPayments) return lib;
+            await new Promise(r => setTimeout(r, 100));
+          }
+          return null;
+        };
+        cpProbe = await waitForCp();
+        if (!cpProbe?.CloudPayments) {
+          setBlockedDialog({ open: true, reason: "blocked" });
+          setLoading(null);
+          isPaymentInProgress.current = false;
+          return;
         }
-        return null;
-      };
-      const cpProbe = await waitForCp();
-      if (!cpProbe?.CloudPayments) {
-        setBlockedDialog({ open: true, reason: "blocked" });
-        setLoading(null);
-        isPaymentInProgress.current = false;
-        return;
       }
       // Calculate final amount and tokens with promo
       let finalAmount = amount;
