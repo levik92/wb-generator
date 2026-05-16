@@ -5,6 +5,7 @@ import {
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_ANON_KEY,
   YOOKASSA_SECRET_KEY,
+  YOOKASSA_SHOP_ID,
   PUBLIC_SITE_URL,
 } from "../_shared/runtime-config.ts";
 
@@ -324,7 +325,7 @@ serve(async (req) => {
           {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${btoa(`1267489:${YOOKASSA_SECRET_KEY}`)}`,
+              'Authorization': `Basic ${btoa(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`)}`,
               'Content-Type': 'application/json',
               'Idempotence-Key': idempotenceKey,
               'Connection': 'close',
