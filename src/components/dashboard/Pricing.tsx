@@ -136,7 +136,8 @@ export default function Pricing({
           packageName,
           amount: finalAmount,
           tokens: finalTokens,
-          promoCode: appliedPromo?.code
+          promoCode: appliedPromo?.code,
+          provider: providerOverride,
         }
       });
       if (error) {
