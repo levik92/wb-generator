@@ -138,7 +138,7 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
     
-    const activeProvider = providerSettings?.active_provider || 'yookassa';
+    const activeProvider = body.provider || providerSettings?.active_provider || 'yookassa';
     
     if (activeProvider === 'cloudpayments') {
       // For CloudPayments, we create a pending payment record and return widget data
