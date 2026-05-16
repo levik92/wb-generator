@@ -40,6 +40,7 @@ export default function Pricing({
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const [blockedDialog, setBlockedDialog] = useState<{ open: boolean; reason: "blocked" | "failed" | "cancelled" }>({ open: false, reason: "blocked" });
+  const [altMethodPackage, setAltMethodPackage] = useState<any | null>(null);
   const {
     data: packages,
     isLoading: packagesLoading
