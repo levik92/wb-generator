@@ -18,6 +18,7 @@ interface PaymentRequest {
   amount?: number;
   tokens?: number;
   promoCode?: string;
+  provider?: 'yookassa' | 'cloudpayments';
 }
 
 // Custom fetch with timeout using AbortController
