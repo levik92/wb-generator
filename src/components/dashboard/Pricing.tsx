@@ -3,13 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2, ShieldCheck } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2, ShieldCheck, CreditCard, MoreHorizontal, Wallet, LifeBuoy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PaymentBlockedDialog } from "@/components/payments/PaymentBlockedDialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 const InvoiceForm = lazy(() => import("@/components/dashboard/InvoiceForm"));
 
 interface PromoCodeInfo {
