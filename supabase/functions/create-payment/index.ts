@@ -5,6 +5,7 @@ import {
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_ANON_KEY,
   YOOKASSA_SECRET_KEY,
+  YOOKASSA_SHOP_ID,
   PUBLIC_SITE_URL,
 } from "../_shared/runtime-config.ts";
 
