@@ -441,5 +441,86 @@ export default function Pricing({
         onOpenChange={(open) => setBlockedDialog((s) => ({ ...s, open }))}
         reason={blockedDialog.reason}
       />
+
+      <ResponsiveDialog
+        open={!!altMethodPackage}
+        onOpenChange={(open) => { if (!open) setAltMethodPackage(null); }}
+      >
+        <ResponsiveDialogContent className="sm:max-w-md">
+          <ResponsiveDialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Wallet className="w-5 h-5 text-primary" />
+              </div>
+              <ResponsiveDialogTitle>Другие способы пополнения</ResponsiveDialogTitle>
+            </div>
+            <ResponsiveDialogDescription>
+              Если основной способ оплаты не работает или вам удобнее другой — выберите один из вариантов ниже. При любых сложностях напишите в поддержку, поможем.
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+
+          {altMethodPackage && (
+            <div className="space-y-2 px-1 sm:px-0">
+              <div className="rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5 flex items-center justify-between gap-3 mb-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{altMethodPackage.name}</div>
+                  <div className="text-xs text-muted-foreground">{altMethodPackage.tokens} токенов</div>
+                </div>
+                <div className="text-sm font-semibold shrink-0">{altMethodPackage.price}₽</div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 h-auto py-3"
+                disabled={loading === altMethodPackage.name}
+                onClick={() => {
+                  const pkg = altMethodPackage;
+                  setAltMethodPackage(null);
+                  handlePayment(pkg.name, pkg.price, pkg.tokens, 'yookassa');
+                }}
+              >
+                <CreditCard className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium">Через ЮKassa</div>
+                  <div className="text-xs text-muted-foreground">Карты Visa, MasterCard, МИР, СБП</div>
+                </div>
+              </Button>
+
+              {altMethodPackage.invoice_enabled && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-auto py-3"
+                  onClick={() => {
+                    const pkg = altMethodPackage;
+                    setAltMethodPackage(null);
+                    openInvoiceDialog(pkg);
+                  }}
+                >
+                  <Building2 className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex-1 text-left">
+                    <div className="text-sm font-medium">Счёт для организации</div>
+                    <div className="text-xs text-muted-foreground">Безналичная оплата для юр. лиц и ИП</div>
+                  </div>
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 h-auto py-3"
+                onClick={() => {
+                  setAltMethodPackage(null);
+                  window.dispatchEvent(new CustomEvent("open-support-widget"));
+                }}
+              >
+                <LifeBuoy className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium">Поддержка</div>
+                  <div className="text-xs text-muted-foreground">Поможем с оплатой в онлайн-чате</div>
+                </div>
+              </Button>
+            </div>
+          )}
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </div>;
 }
