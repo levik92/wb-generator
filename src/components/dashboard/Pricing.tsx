@@ -511,7 +511,7 @@ export default function Pricing({
                 className="w-full justify-start gap-3 h-auto py-3 mt-1 bg-transparent text-foreground hover:bg-muted/40 hover:text-foreground"
                 onClick={() => {
                   setAltMethodPackage(null);
-                  window.dispatchEvent(new CustomEvent("open-support-widget"));
+                  setSearchParams({ tab: 'support' });
                 }}
               >
                 <LifeBuoy className="w-4 h-4 text-primary shrink-0" />
