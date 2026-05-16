@@ -372,12 +372,18 @@ export default function Pricing({
                   </div>
                 </div>
                 <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name || !!isTrialUsed}>
-                  {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
+                  {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Пополнить баланс"}
                 </Button>
-                {(plan as any).invoice_enabled && !isTrialUsed && (
-                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => openInvoiceDialog(plan)}>
-                    <Building2 className="w-3.5 h-3.5" />
-                    Счёт для юр. лица
+                {!isTrialUsed && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-2 gap-2 text-xs"
+                    onClick={() => setAltMethodPackage(plan)}
+                    disabled={loading === plan.name}
+                  >
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                    Другой метод
                   </Button>
                 )}
               </CardContent>
