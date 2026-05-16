@@ -42,6 +42,13 @@ export const SupportWidget = () => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
+  // Open widget when other components dispatch the support event
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("open-support-widget", handler);
+    return () => window.removeEventListener("open-support-widget", handler);
+  }, []);
+
   const callApi = async (body: any) => {
     const res = await fetch(CHAT_URL, {
       method: "POST",

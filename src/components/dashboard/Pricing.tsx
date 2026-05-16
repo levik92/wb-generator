@@ -3,13 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2, ShieldCheck } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2, ShieldCheck, CreditCard, MoreHorizontal, Wallet, LifeBuoy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PaymentBlockedDialog } from "@/components/payments/PaymentBlockedDialog";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 const InvoiceForm = lazy(() => import("@/components/dashboard/InvoiceForm"));
 
 interface PromoCodeInfo {
@@ -33,6 +40,7 @@ export default function Pricing({
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const [blockedDialog, setBlockedDialog] = useState<{ open: boolean; reason: "blocked" | "failed" | "cancelled" }>({ open: false, reason: "blocked" });
+  const [altMethodPackage, setAltMethodPackage] = useState<any | null>(null);
   const {
     data: packages,
     isLoading: packagesLoading
@@ -70,7 +78,7 @@ export default function Pricing({
   const photoPrice = generationPrices?.find(p => p.price_type === 'photo_generation')?.tokens_cost || 1;
   const descriptionPrice = generationPrices?.find(p => p.price_type === 'description_generation')?.tokens_cost || 2;
   const videoPrice = generationPrices?.find(p => p.price_type === 'video_generation')?.tokens_cost || 10;
-  const handlePayment = async (packageName: string, amount: number, tokens: number) => {
+  const handlePayment = async (packageName: string, amount: number, tokens: number, providerOverride?: 'yookassa' | 'cloudpayments') => {
     if (isPaymentInProgress.current) return;
     isPaymentInProgress.current = true;
     try {
@@ -90,22 +98,25 @@ export default function Pricing({
         return;
       }
 
-      // Pre-check: ensure CloudPayments widget script is reachable BEFORE creating a pending payment.
-      // If the script is blocked (AdBlock/Kaspersky/ISP), abort early — no garbage `pending` rows.
-      const waitForCp = async () => {
-        for (let i = 0; i < 80; i++) {
-          const lib = (window as any).cp;
-          if (lib?.CloudPayments) return lib;
-          await new Promise(r => setTimeout(r, 100));
+      // Pre-check CloudPayments widget only when CP is the chosen path.
+      // For YooKassa override we redirect via URL — no widget needed.
+      let cpProbe: any = null;
+      if (providerOverride !== 'yookassa') {
+        const waitForCp = async () => {
+          for (let i = 0; i < 80; i++) {
+            const lib = (window as any).cp;
+            if (lib?.CloudPayments) return lib;
+            await new Promise(r => setTimeout(r, 100));
+          }
+          return null;
+        };
+        cpProbe = await waitForCp();
+        if (!cpProbe?.CloudPayments) {
+          setBlockedDialog({ open: true, reason: "blocked" });
+          setLoading(null);
+          isPaymentInProgress.current = false;
+          return;
         }
-        return null;
-      };
-      const cpProbe = await waitForCp();
-      if (!cpProbe?.CloudPayments) {
-        setBlockedDialog({ open: true, reason: "blocked" });
-        setLoading(null);
-        isPaymentInProgress.current = false;
-        return;
       }
       // Calculate final amount and tokens with promo
       let finalAmount = amount;
@@ -125,7 +136,8 @@ export default function Pricing({
           packageName,
           amount: finalAmount,
           tokens: finalTokens,
-          promoCode: appliedPromo?.code
+          promoCode: appliedPromo?.code,
+          provider: providerOverride,
         }
       });
       if (error) {
@@ -360,12 +372,18 @@ export default function Pricing({
                   </div>
                 </div>
                 <Button className="w-full" size="sm" onClick={() => handlePayment(plan.name, plan.price, plan.tokens)} disabled={loading === plan.name || !!isTrialUsed}>
-                  {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Выбрать"}
+                  {isTrialUsed ? "Уже использован" : loading === plan.name ? "Создание..." : "Пополнить баланс"}
                 </Button>
-                {(plan as any).invoice_enabled && !isTrialUsed && (
-                  <Button variant="outline" size="sm" className="w-full mt-2 gap-2 text-xs" onClick={() => openInvoiceDialog(plan)}>
-                    <Building2 className="w-3.5 h-3.5" />
-                    Счёт для юр. лица
+                {!isTrialUsed && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-2 gap-2 text-xs"
+                    onClick={() => setAltMethodPackage(plan)}
+                    disabled={loading === plan.name}
+                  >
+                    <MoreHorizontal className="w-3.5 h-3.5" />
+                    Другой метод
                   </Button>
                 )}
               </CardContent>
@@ -423,5 +441,86 @@ export default function Pricing({
         onOpenChange={(open) => setBlockedDialog((s) => ({ ...s, open }))}
         reason={blockedDialog.reason}
       />
+
+      <ResponsiveDialog
+        open={!!altMethodPackage}
+        onOpenChange={(open) => { if (!open) setAltMethodPackage(null); }}
+      >
+        <ResponsiveDialogContent className="sm:max-w-md">
+          <ResponsiveDialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Wallet className="w-5 h-5 text-primary" />
+              </div>
+              <ResponsiveDialogTitle>Другие способы пополнения</ResponsiveDialogTitle>
+            </div>
+            <ResponsiveDialogDescription>
+              Если основной способ оплаты не работает или вам удобнее другой — выберите один из вариантов ниже. При любых сложностях напишите в поддержку, поможем.
+            </ResponsiveDialogDescription>
+          </ResponsiveDialogHeader>
+
+          {altMethodPackage && (
+            <div className="space-y-2 px-1 sm:px-0">
+              <div className="rounded-lg border border-border/50 bg-muted/30 px-3 py-2.5 flex items-center justify-between gap-3 mb-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{altMethodPackage.name}</div>
+                  <div className="text-xs text-muted-foreground">{altMethodPackage.tokens} токенов</div>
+                </div>
+                <div className="text-sm font-semibold shrink-0">{altMethodPackage.price}₽</div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 h-auto py-3"
+                disabled={loading === altMethodPackage.name}
+                onClick={() => {
+                  const pkg = altMethodPackage;
+                  setAltMethodPackage(null);
+                  handlePayment(pkg.name, pkg.price, pkg.tokens, 'yookassa');
+                }}
+              >
+                <CreditCard className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium">Через ЮKassa</div>
+                  <div className="text-xs text-muted-foreground">Карты Visa, MasterCard, МИР, СБП</div>
+                </div>
+              </Button>
+
+              {altMethodPackage.invoice_enabled && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 h-auto py-3"
+                  onClick={() => {
+                    const pkg = altMethodPackage;
+                    setAltMethodPackage(null);
+                    openInvoiceDialog(pkg);
+                  }}
+                >
+                  <Building2 className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex-1 text-left">
+                    <div className="text-sm font-medium">Счёт для организации</div>
+                    <div className="text-xs text-muted-foreground">Безналичная оплата для юр. лиц и ИП</div>
+                  </div>
+                </Button>
+              )}
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 h-auto py-3"
+                onClick={() => {
+                  setAltMethodPackage(null);
+                  window.dispatchEvent(new CustomEvent("open-support-widget"));
+                }}
+              >
+                <LifeBuoy className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium">Поддержка</div>
+                  <div className="text-xs text-muted-foreground">Поможем с оплатой в онлайн-чате</div>
+                </div>
+              </Button>
+            </div>
+          )}
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </div>;
 }
