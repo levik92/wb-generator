@@ -471,7 +471,7 @@ export default function Pricing({
 
               <Button
                 variant="outline"
-                className="w-full justify-start gap-3 h-auto py-3"
+                className="w-full justify-start gap-3 h-auto py-3 border-border/60 bg-card text-foreground hover:bg-primary/5 hover:text-foreground hover:border-primary/40 [&_.subtitle]:hover:text-muted-foreground"
                 disabled={loading === altMethodPackage.name}
                 onClick={() => {
                   const pkg = altMethodPackage;
@@ -481,15 +481,15 @@ export default function Pricing({
               >
                 <CreditCard className="w-4 h-4 text-primary shrink-0" />
                 <div className="flex-1 text-left">
-                  <div className="text-sm font-medium">Через ЮKassa</div>
-                  <div className="text-xs text-muted-foreground">Карты Visa, MasterCard, МИР, СБП</div>
+                  <div className="text-sm font-medium text-foreground">Через ЮKassa</div>
+                  <div className="subtitle text-xs text-muted-foreground">Карты Visa, MasterCard, МИР, СБП</div>
                 </div>
               </Button>
 
               {altMethodPackage.invoice_enabled && (
                 <Button
                   variant="outline"
-                  className="w-full justify-start gap-3 h-auto py-3"
+                  className="w-full justify-start gap-3 h-auto py-3 border-border/60 bg-card text-foreground hover:bg-primary/5 hover:text-foreground hover:border-primary/40"
                   onClick={() => {
                     const pkg = altMethodPackage;
                     setAltMethodPackage(null);
@@ -498,7 +498,7 @@ export default function Pricing({
                 >
                   <Building2 className="w-4 h-4 text-primary shrink-0" />
                   <div className="flex-1 text-left">
-                    <div className="text-sm font-medium">Счёт для организации</div>
+                    <div className="text-sm font-medium text-foreground">Счёт для организации</div>
                     <div className="text-xs text-muted-foreground">Безналичная оплата для юр. лиц и ИП</div>
                   </div>
                 </Button>
@@ -506,7 +506,7 @@ export default function Pricing({
 
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 h-auto py-3"
+                className="w-full justify-start gap-3 h-auto py-3 mt-1 bg-transparent text-foreground hover:bg-muted/40 hover:text-foreground"
                 onClick={() => {
                   setAltMethodPackage(null);
                   window.dispatchEvent(new CustomEvent("open-support-widget"));
@@ -514,7 +514,7 @@ export default function Pricing({
               >
                 <LifeBuoy className="w-4 h-4 text-primary shrink-0" />
                 <div className="flex-1 text-left">
-                  <div className="text-sm font-medium">Поддержка</div>
+                  <div className="text-sm font-medium text-foreground">Поддержка</div>
                   <div className="text-xs text-muted-foreground">Поможем с оплатой в онлайн-чате</div>
                 </div>
               </Button>
