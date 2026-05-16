@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default function Pricing({
   appliedPromo
 }: PricingProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [, setSearchParams] = useSearchParams();
   const isPaymentInProgress = useRef(false);
   const [invoicePackage, setInvoicePackage] = useState<any | null>(null);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
@@ -509,7 +511,7 @@ export default function Pricing({
                 className="w-full justify-start gap-3 h-auto py-3 mt-1 bg-transparent text-foreground hover:bg-muted/40 hover:text-foreground"
                 onClick={() => {
                   setAltMethodPackage(null);
-                  window.dispatchEvent(new CustomEvent("open-support-widget"));
+                  setSearchParams({ tab: 'support' });
                 }}
               >
                 <LifeBuoy className="w-4 h-4 text-primary shrink-0" />
