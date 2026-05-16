@@ -385,7 +385,7 @@ export default function Pricing({
                     disabled={loading === plan.name}
                   >
                     <MoreHorizontal className="w-3.5 h-3.5" />
-                    Другой метод
+                    Ещё способы
                   </Button>
                 )}
               </CardContent>
