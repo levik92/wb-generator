@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { DateRange } from "react-day-picker";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSettings, fmtRub, toIsoDate, startOfMonth, endOfMonth } from "@/hooks/useFinanceData";
-import { GlassCard } from "@/components/dashboard/GlassCard";
 
 export function DdsReport() {
   const [range, setRange] = useState<DateRange | undefined>({ from: startOfMonth(), to: endOfMonth() });
