@@ -178,7 +178,7 @@ export function OpiuReport() {
                     <TableRow
                       key={row.key}
                       className={cn(
-                        "border-border/40 hover:bg-muted/20 transition-colors",
+                        "border-border/40 hover:bg-transparent transition-colors",
                         rowBgClass(row),
                       )}
                     >
