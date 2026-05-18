@@ -48,12 +48,18 @@ export function AdvancedAnalytics({ onBack }: Props) {
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" onClick={handleBack} className="gap-2">
-          <ArrowLeft className="w-4 h-4" /> Назад
-        </Button>
-        <div className="text-sm text-muted-foreground">
-          Расширенная аналитика <span className="mx-1">›</span>
-          <span className="text-foreground font-medium">{titleMap[section]}</span>
+        <button
+          onClick={handleBack}
+          aria-label="Назад"
+          className="w-10 h-10 rounded-xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/[0.05] flex items-center justify-center transition-colors shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <div className="min-w-0">
+          <div className="text-lg md:text-xl font-bold text-foreground leading-tight truncate">
+            {titleMap[section]}
+          </div>
+          <div className="text-xs text-muted-foreground">Расширенная аналитика</div>
         </div>
       </div>
 
