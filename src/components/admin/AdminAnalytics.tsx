@@ -64,6 +64,10 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
     fetchStats();
   }, [users.length]);
 
+  if (showAdvanced) {
+    return <AdvancedAnalytics onBack={() => setShowAdvanced(false)} />;
+  }
+
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Analytics Charts */}
