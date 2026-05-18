@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { DateRange } from "react-day-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchSettings, fmtRub, toIsoDate, startOfMonth, endOfMonth } from "@/hooks/useFinanceData";
+import { fetchSettings, fmtRub, toIsoDate, endOfMonth } from "@/hooks/useFinanceData";
+import { cn } from "@/lib/utils";
+import { TrendingUp, TrendingDown, Percent, Wallet } from "lucide-react";
 
 interface MonthAgg {
   ym: string;
@@ -15,6 +17,21 @@ interface MonthAgg {
 }
 
 function monthKey(d: string) { return d.slice(0, 7); }
+
+const MONTHS_RU = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
+function fmtMonth(ym: string) {
+  const [y, m] = ym.split("-");
+  return `${MONTHS_RU[Number(m) - 1] ?? m} ${y.slice(2)}`;
+}
+
+type RowGroup = "income" | "expense" | "result";
+interface RowDef {
+  key: string;
+  label: string;
+  group: RowGroup;
+  calc?: (m: MonthAgg) => number;
+  emphasis?: "bold" | "total";
+}
 
 export function OpiuReport() {
   const [range, setRange] = useState<DateRange | undefined>({
@@ -56,53 +73,146 @@ export function OpiuReport() {
     })();
   }, [range?.from?.getTime(), range?.to?.getTime()]);
 
-  const rowsDef = [
-    { key: "revenue", label: "Выручка" },
-    { key: "cogs", label: "Себестоимость" },
-    { key: "gross", label: "Валовая прибыль", calc: (m: MonthAgg) => m.revenue - m.cogs, bold: true },
-    { key: "marketing", label: "Маркетинг" },
-    { key: "opex", label: "OPEX" },
-    { key: "tax", label: `Налоги (${taxRate}%)`, calc: (m: MonthAgg) => m.revenue * (taxRate / 100) },
-    { key: "net", label: "Чистая прибыль", calc: (m: MonthAgg) => m.revenue - m.cogs - m.marketing - m.opex - m.revenue * (taxRate / 100), bold: true },
+  const rowsDef: RowDef[] = [
+    { key: "revenue", label: "Выручка", group: "income" },
+    { key: "cogs", label: "Себестоимость", group: "expense" },
+    { key: "gross", label: "Валовая прибыль", group: "result", calc: (m) => m.revenue - m.cogs, emphasis: "bold" },
+    { key: "marketing", label: "Маркетинг", group: "expense" },
+    { key: "opex", label: "OPEX", group: "expense" },
+    { key: "tax", label: `Налоги (${taxRate}%)`, group: "expense", calc: (m) => m.revenue * (taxRate / 100) },
+    { key: "net", label: "Чистая прибыль", group: "result", calc: (m) => m.revenue - m.cogs - m.marketing - m.opex - m.revenue * (taxRate / 100), emphasis: "total" },
   ];
 
-  const cellValue = (row: typeof rowsDef[number], m: MonthAgg) =>
+  const cellValue = (row: RowDef, m: MonthAgg) =>
     row.calc ? row.calc(m) : (m as any)[row.key] as number;
+
+  const totals = useMemo(() => {
+    const sum = (k: keyof MonthAgg | "tax" | "gross" | "net") => {
+      if (k === "tax") return months.reduce((s, m) => s + m.revenue * (taxRate / 100), 0);
+      if (k === "gross") return months.reduce((s, m) => s + (m.revenue - m.cogs), 0);
+      if (k === "net") return months.reduce((s, m) => s + (m.revenue - m.cogs - m.marketing - m.opex - m.revenue * (taxRate / 100)), 0);
+      return months.reduce((s, m) => s + (m as any)[k], 0);
+    };
+    const revenue = sum("revenue");
+    const net = sum("net");
+    const gross = sum("gross");
+    return {
+      revenue,
+      net,
+      gross,
+      grossMargin: revenue > 0 ? (gross / revenue) * 100 : 0,
+      netMargin: revenue > 0 ? (net / revenue) * 100 : 0,
+    };
+  }, [months, taxRate]);
+
+  const valueClass = (row: RowDef, v: number) => {
+    if (row.group === "expense") return "text-muted-foreground";
+    if (row.key === "net") return v >= 0 ? "text-emerald-500" : "text-destructive";
+    if (row.key === "gross") return "text-emerald-500/90";
+    if (row.key === "revenue") return "text-primary";
+    return "";
+  };
+
+  const rowBgClass = (row: RowDef) => {
+    if (row.emphasis === "total") return "bg-primary/[0.04] border-t-2 border-primary/20";
+    if (row.emphasis === "bold") return "bg-muted/40";
+    return "";
+  };
 
   return (
     <div className="space-y-4">
       <DatePickerWithRange date={range} onDateChange={setRange} />
-      <Card className="bg-card border-border/50 rounded-2xl">
+
+      {/* KPI summary */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <SummaryTile icon={<Wallet className="w-4 h-4" />} label="Выручка" value={fmtRub(totals.revenue)} tone="primary" />
+        <SummaryTile icon={<TrendingUp className="w-4 h-4" />} label="Валовая прибыль" value={fmtRub(totals.gross)} sub={`${totals.grossMargin.toFixed(1)}% маржа`} tone="emerald" />
+        <SummaryTile
+          icon={totals.net >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          label="Чистая прибыль"
+          value={fmtRub(totals.net)}
+          sub={`${totals.netMargin.toFixed(1)}% рентабельность`}
+          tone={totals.net >= 0 ? "emerald" : "destructive"}
+        />
+        <SummaryTile icon={<Percent className="w-4 h-4" />} label="Ставка налога" value={`${taxRate}%`} tone="orange" />
+      </div>
+
+      <Card className="bg-card border-border/50 rounded-2xl overflow-hidden">
         <CardHeader>
           <CardTitle className="text-lg">Отчёт о прибылях и убытках</CardTitle>
           <CardDescription>Помесячная разбивка показателей за выбранный период</CardDescription>
         </CardHeader>
-        <CardContent className="p-0 sm:p-6 sm:pt-0">
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs sticky left-0 bg-card">Показатель</TableHead>
+                <TableRow className="hover:bg-transparent border-border/60">
+                  <TableHead className="text-[11px] uppercase tracking-wide text-muted-foreground sticky left-0 bg-card z-10 border-r border-border/60 min-w-[180px]">
+                    Показатель
+                  </TableHead>
                   {months.map((m) => (
-                    <TableHead key={m.ym} className="text-xs text-right whitespace-nowrap">{m.ym}</TableHead>
+                    <TableHead key={m.ym} className="text-[11px] uppercase tracking-wide text-muted-foreground text-right whitespace-nowrap">
+                      {fmtMonth(m.ym)}
+                    </TableHead>
                   ))}
-                  <TableHead className="text-xs text-right">Итого</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wide text-right bg-muted/40 border-l border-border/60 text-foreground">
+                    Итого
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={months.length + 2} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={months.length + 2} className="text-center text-xs text-muted-foreground py-10">Загрузка…</TableCell></TableRow>
                 ) : months.length === 0 ? (
-                  <TableRow><TableCell colSpan={2} className="text-center text-xs text-muted-foreground py-8">Нет данных за период</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={2} className="text-center text-xs text-muted-foreground py-10">Нет данных за период</TableCell></TableRow>
                 ) : rowsDef.map((row) => {
                   const total = months.reduce((s, m) => s + cellValue(row, m), 0);
                   return (
-                    <TableRow key={row.key} className={row.bold ? "font-semibold bg-muted/30" : ""}>
-                      <TableCell className="text-xs sticky left-0 bg-card">{row.label}</TableCell>
-                      {months.map((m) => (
-                        <TableCell key={m.ym} className="text-xs text-right whitespace-nowrap">{fmtRub(cellValue(row, m))}</TableCell>
-                      ))}
-                      <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(total)}</TableCell>
+                    <TableRow
+                      key={row.key}
+                      className={cn(
+                        "border-border/40 hover:bg-muted/20 transition-colors",
+                        rowBgClass(row),
+                      )}
+                    >
+                      <TableCell
+                        className={cn(
+                          "text-xs sticky left-0 z-10 border-r border-border/60 font-medium",
+                          row.emphasis ? "text-foreground" : "text-muted-foreground",
+                          row.emphasis === "total" ? "bg-primary/[0.04]" : row.emphasis === "bold" ? "bg-muted/40" : "bg-card",
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          {row.group === "income" && <span className="w-1 h-3 rounded-sm bg-primary" />}
+                          {row.group === "expense" && <span className="w-1 h-3 rounded-sm bg-muted-foreground/40" />}
+                          {row.group === "result" && <span className="w-1 h-3 rounded-sm bg-emerald-500" />}
+                          {row.label}
+                        </span>
+                      </TableCell>
+                      {months.map((m) => {
+                        const v = cellValue(row, m);
+                        return (
+                          <TableCell
+                            key={m.ym}
+                            className={cn(
+                              "text-xs text-right whitespace-nowrap tabular-nums",
+                              valueClass(row, v),
+                              row.emphasis && "font-semibold",
+                            )}
+                          >
+                            {v === 0 ? <span className="text-muted-foreground/50">—</span> : fmtRub(v)}
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell
+                        className={cn(
+                          "text-xs text-right whitespace-nowrap tabular-nums font-semibold border-l border-border/60",
+                          valueClass(row, total),
+                          row.emphasis === "total" ? "bg-primary/[0.06]" : "bg-muted/40",
+                        )}
+                      >
+                        {fmtRub(total)}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -111,6 +221,35 @@ export function OpiuReport() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function SummaryTile({
+  icon, label, value, sub, tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  sub?: string;
+  tone: "primary" | "emerald" | "destructive" | "orange";
+}) {
+  const toneMap = {
+    primary: { bg: "bg-primary/10", fg: "text-primary" },
+    emerald: { bg: "bg-emerald-500/10", fg: "text-emerald-500" },
+    destructive: { bg: "bg-destructive/10", fg: "text-destructive" },
+    orange: { bg: "bg-orange-500/10", fg: "text-orange-500" },
+  }[tone];
+  return (
+    <div className="rounded-xl border border-border/50 bg-card p-4">
+      <div className="flex items-center gap-2">
+        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", toneMap.bg, toneMap.fg)}>
+          {icon}
+        </div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+      </div>
+      <div className={cn("text-lg md:text-xl font-bold mt-2 tabular-nums", toneMap.fg)}>{value}</div>
+      {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
     </div>
   );
 }
