@@ -2,7 +2,8 @@ import { AdminAnalyticsChart, AdminAdditionalMetrics, AdminLifetimeMetrics } fro
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Users, Activity, LineChart } from "lucide-react";
+import { CreditCard, Users, Activity, LineChart, ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -130,16 +131,29 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
         />
       </div>
 
-      <div className="pt-2 flex justify-center">
-        <Button
-          size="lg"
-          onClick={() => setShowAdvanced(true)}
-          className="gap-2"
-        >
-          <LineChart className="w-5 h-5" />
-          Расширенная аналитика
-        </Button>
-      </div>
+      <Card className="border border-border/50 bg-card rounded-2xl overflow-hidden">
+        <CardContent className="p-5 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <LineChart className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-semibold text-foreground">Расширенная аналитика</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                ОПиУ, ДДС, учёт расходов и маркетинг — помесячные отчёты, графики и детальные таблицы
+              </p>
+            </div>
+            <Button
+              size="default"
+              onClick={() => setShowAdvanced(true)}
+              className="gap-2 shrink-0 self-start sm:self-auto"
+            >
+              Перейти
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
