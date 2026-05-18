@@ -229,6 +229,9 @@ export default function Admin() {
   if (!isAdmin) return null;
 
   const currentTab = TAB_TITLES[activeTab];
+  const headerOverride = useAdminHeaderOverride();
+  const headerTitle = headerOverride?.title ?? currentTab.title;
+  const headerSubtitle = headerOverride?.subtitle ?? currentTab.subtitle;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -244,9 +247,18 @@ export default function Admin() {
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
               {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />}
+              {headerOverride?.onBack && (
+                <button
+                  onClick={headerOverride.onBack}
+                  aria-label="Назад"
+                  className="w-10 h-10 rounded-xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/[0.05] flex items-center justify-center transition-colors shrink-0"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              )}
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
+                <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{headerTitle}</h1>
+                {headerSubtitle && <p className="text-xs text-muted-foreground hidden sm:block truncate">{headerSubtitle}</p>}
               </div>
             </div>
 
