@@ -72,7 +72,7 @@ export function ExpensesManager() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{editing ? "Редактировать расход" : "Новый расход"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editing?.id ? "Редактировать расход" : "Новый расход"}</DialogTitle></DialogHeader>
             <ExpenseForm
               initial={editing}
               channels={channels}
