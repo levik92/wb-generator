@@ -117,6 +117,9 @@ export function ExpensesManager() {
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(it); setOpen(true); }}>
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Дублировать" onClick={() => { const { id, created_at, ...rest } = it as any; setEditing({ ...rest, expense_date: toIsoDate(new Date()) } as Expense); setOpen(true); }}>
+                          <Copy className="w-3.5 h-3.5" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(it.id)}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
