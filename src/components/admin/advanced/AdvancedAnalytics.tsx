@@ -220,8 +220,12 @@ function RnpDashboard({
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1000)}к`} />
-                    <Tooltip formatter={(v: any) => fmtRub(Number(v))} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
-                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                    <Tooltip
+                      cursor={{ fill: "hsl(var(--muted-foreground) / 0.08)" }}
+                      formatter={(v: any) => [fmtRub(Number(v)), "Сумма"]}
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                    />
+                    <Bar dataKey="value" name="Сумма" radius={[6, 6, 0, 0]}>
                       {profitBars.map((b, i) => (
                         <Cell key={i} fill={
                           b.name === "Выручка" ? "hsl(var(--primary))" :
