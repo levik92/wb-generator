@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, RefreshCw } from "lucide-react";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { DateRange } from "react-day-picker";
 import { fmtRub, toIsoDate, startOfMonth, endOfMonth, MarketingChannel, MarketingRevenue } from "@/hooks/useFinanceData";
@@ -65,6 +65,29 @@ export function MarketingManager() {
 
   useEffect(() => { load(); }, [range?.from?.getTime(), range?.to?.getTime()]);
 
+  // Auto-refresh when user returns to tab/window or component remounts focus
+  useEffect(() => {
+    const onFocus = () => load();
+    const onVisibility = () => { if (document.visibilityState === "visible") load(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [range?.from?.getTime(), range?.to?.getTime()]);
+
+  // Realtime: refresh when expenses or revenues change
+  useEffect(() => {
+    const ch = supabase
+      .channel("marketing-manager-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "expenses" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "marketing_revenues" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "marketing_channels" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [range?.from?.getTime(), range?.to?.getTime()]);
+
   const handleDelete = async (id: string) => {
     if (!confirm("Удалить канал? Связанные данные сохранятся.")) return;
     await supabase.from("marketing_channels").delete().eq("id", id);
@@ -85,7 +108,13 @@ export function MarketingManager() {
             <ChannelForm initial={editing} onSaved={() => { setOpen(false); setEditing(null); load(); }} />
           </DialogContent>
         </Dialog>
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={load} disabled={loading} title="Обновить">
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Обновить</span>
+          </Button>
+          <DatePickerWithRange date={range} onDateChange={setRange} />
+        </div>
       </div>
 
       <Card className="bg-card border-border/50 rounded-2xl">
