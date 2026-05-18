@@ -74,6 +74,7 @@ export function ExpensesManager() {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>{editing?.id ? "Редактировать расход" : "Новый расход"}</DialogTitle></DialogHeader>
             <ExpenseForm
+              key={editing?.id ?? `dup-${editing?.name ?? ''}-${editing?.expense_date ?? ''}-${editing?.channel_id ?? ''}-${open ? '1' : '0'}`}
               initial={editing}
               channels={channels}
               onSaved={() => { setOpen(false); setEditing(null); load(); }}
