@@ -31,6 +31,24 @@ interface UtmStats {
 }
 
 const PAGE_SIZE = 20;
+const HIDDEN_STORAGE_KEY = "admin_utm_hidden_ids";
+
+const loadHiddenIds = (): Set<string> => {
+  try {
+    const raw = localStorage.getItem(HIDDEN_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const saveHiddenIds = (ids: Set<string>) => {
+  try {
+    localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(ids)));
+  } catch {}
+};
 
 export function AdminUtmSources() {
   const [sources, setSources] = useState<UtmSource[]>([]);
@@ -41,6 +59,8 @@ export function AdminUtmSources() {
   const [hasMore, setHasMore] = useState(true);
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => loadHiddenIds());
+  const [showHidden, setShowHidden] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   
   // Form
