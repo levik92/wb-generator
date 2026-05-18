@@ -169,7 +169,7 @@ function ExpenseForm({
       notes: notes.trim() || null,
       created_by: user?.id ?? null,
     };
-    const op = initial
+    const op = initial?.id
       ? supabase.from("expenses").update(payload).eq("id", initial.id)
       : supabase.from("expenses").insert(payload);
     const { error } = await op;
@@ -178,7 +178,7 @@ function ExpenseForm({
       toast({ title: "Ошибка", description: "Не удалось сохранить", variant: "destructive" });
       return;
     }
-    toast({ title: initial ? "Обновлено" : "Добавлено" });
+    toast({ title: initial?.id ? "Обновлено" : "Добавлено" });
     onSaved();
   };
 
