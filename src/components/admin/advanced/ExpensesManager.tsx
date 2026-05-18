@@ -21,6 +21,8 @@ export function ExpensesManager() {
   const [filter, setFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Expense | null>(null);
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 25;
 
   const load = async () => {
     setLoading(true);
