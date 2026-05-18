@@ -129,6 +129,17 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
           delay={0.2}
         />
       </div>
+
+      <div className="pt-2 flex justify-center">
+        <Button
+          size="lg"
+          onClick={() => setShowAdvanced(true)}
+          className="gap-2"
+        >
+          <LineChart className="w-5 h-5" />
+          Расширенная аналитика
+        </Button>
+      </div>
     </div>
   );
 }
