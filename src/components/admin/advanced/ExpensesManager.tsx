@@ -113,8 +113,8 @@ export function ExpensesManager() {
                   <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
                 ) : filtered.length === 0 ? (
                   <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-8">Нет расходов</TableCell></TableRow>
-                ) : filtered.map((it) => (
-                  <TableRow key={it.id}>
+                ) : pageItems.map((it) => (
+                  <TableRow key={it.id} className="hover:bg-transparent">
                     <TableCell className="text-xs whitespace-nowrap">{it.expense_date}</TableCell>
                     <TableCell className="text-xs font-medium max-w-[260px] truncate">{it.name}</TableCell>
                     <TableCell className="text-xs">{categoryLabel(it.category)}</TableCell>
@@ -138,6 +138,17 @@ export function ExpensesManager() {
               </TableBody>
             </Table>
           </div>
+          {filtered.length > PAGE_SIZE && (
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-border/40 text-xs">
+              <div className="text-muted-foreground">
+                Стр. {currentPage} из {pageCount} · показано {pageItems.length} из {filtered.length}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="h-8" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Назад</Button>
+                <Button variant="outline" size="sm" className="h-8" disabled={currentPage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>Вперёд</Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
