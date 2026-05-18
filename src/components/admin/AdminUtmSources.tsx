@@ -362,6 +362,10 @@ export function AdminUtmSources() {
     );
   }
 
+  const visibleSources = showHidden ? sources : sources.filter(s => !hiddenIds.has(s.id));
+  const hiddenCount = sources.reduce((n, s) => n + (hiddenIds.has(s.id) ? 1 : 0), 0);
+  const visibleStats = Object.entries(stats).filter(([id]) => showHidden || !hiddenIds.has(id)).map(([, v]) => v);
+
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
@@ -371,19 +375,38 @@ export function AdminUtmSources() {
             Создавайте UTM-ссылки и отслеживайте эффективность каналов
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Добавить источник
-        </Button>
+        <div className="flex items-center gap-2">
+          {hiddenCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHidden(v => !v)}
+              className="gap-2"
+              title={showHidden ? "Спрятать скрытые" : "Показать скрытые"}
+            >
+              {showHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showHidden ? "Скрыть" : `Скрытые (${hiddenCount})`}
+            </Button>
+          )}
+          {hiddenCount > 0 && showHidden && (
+            <Button variant="ghost" size="sm" onClick={handleUnhideAll}>
+              Сбросить
+            </Button>
+          )}
+          <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Добавить источник
+          </Button>
+        </div>
       </div>
 
       {/* Summary stats */}
-      {sources.length > 0 && (() => {
+      {visibleSources.length > 0 && (() => {
         const anyLoading = Object.values(statsLoading).some(Boolean);
-        const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
-        const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
-        const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
-        const sumRevenue = Object.values(stats).reduce((s, v) => s + (v.revenue || 0), 0);
+        const sumVisits = visibleStats.reduce((s, v) => s + v.visits, 0);
+        const sumRegs = visibleStats.reduce((s, v) => s + v.registrations, 0);
+        const sumPay = visibleStats.reduce((s, v) => s + v.payments, 0);
+        const sumRevenue = visibleStats.reduce((s, v) => s + (v.revenue || 0), 0);
         const summaryNum = (val: number) => anyLoading
           ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
@@ -402,7 +425,7 @@ export function AdminUtmSources() {
               <Link2 className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground">Источников</span>
             </div>
-            <p className="text-xl font-bold">{sources.length}</p>
+            <p className="text-xl font-bold">{visibleSources.length}</p>
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
