@@ -137,9 +137,9 @@ function RnpDashboard({
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap gap-3 items-center">
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+      <div className="flex flex-wrap gap-2 items-center justify-end">
         <FinanceSettingsCard onSaved={reload} />
+        <DatePickerWithRange date={range} onDateChange={setRange} />
       </div>
 
       {loading || !metrics ? (
