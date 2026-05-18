@@ -121,7 +121,9 @@ export function OpiuReport() {
 
   return (
     <div className="space-y-4">
-      <DatePickerWithRange date={range} onDateChange={setRange} />
+      <div className="flex justify-end">
+        <DatePickerWithRange date={range} onDateChange={setRange} />
+      </div>
 
       {/* KPI summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
