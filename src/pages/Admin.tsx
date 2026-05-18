@@ -219,6 +219,11 @@ export default function Admin() {
     }
   };
 
+  const currentTab = TAB_TITLES[activeTab];
+  const headerOverride = useAdminHeaderOverride();
+  const headerTitle = headerOverride?.title ?? currentTab.title;
+  const headerSubtitle = headerOverride?.subtitle ?? currentTab.subtitle;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -228,11 +233,6 @@ export default function Admin() {
   }
 
   if (!isAdmin) return null;
-
-  const currentTab = TAB_TITLES[activeTab];
-  const headerOverride = useAdminHeaderOverride();
-  const headerTitle = headerOverride?.title ?? currentTab.title;
-  const headerSubtitle = headerOverride?.subtitle ?? currentTab.subtitle;
 
   return (
     <div className="min-h-screen bg-background flex">
