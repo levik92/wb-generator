@@ -23,19 +23,17 @@ export function DdsReport() {
       const fromIso = `${from}T00:00:00`;
       const toIso = `${to}T23:59:59`;
 
-      const [settings, payIn, invIn, exp, payAll, invAll, expAll] = await Promise.all([
+      const [settings, payIn, exp, payAll, expAll] = await Promise.all([
         fetchSettings(),
         supabase.from("payments").select("amount").eq("status", "succeeded").gte("created_at", fromIso).lte("created_at", toIso),
-        supabase.from("invoice_payments").select("amount").eq("status", "paid").gte("reviewed_at", fromIso).lte("reviewed_at", toIso),
         supabase.from("expenses").select("amount").gte("expense_date", from).lte("expense_date", to),
         supabase.from("payments").select("amount").eq("status", "succeeded").lt("created_at", fromIso),
-        supabase.from("invoice_payments").select("amount").eq("status", "paid").lt("reviewed_at", fromIso),
         supabase.from("expenses").select("amount").lt("expense_date", from),
       ]);
       const sum = (arr: any) => (arr.data ?? []).reduce((s: number, r: any) => s + Number(r.amount), 0);
-      const inf = sum(payIn) + sum(invIn);
+      const inf = sum(payIn);
       const outf = sum(exp);
-      const before = sum(payAll) + sum(invAll) - sum(expAll);
+      const before = sum(payAll) - sum(expAll);
       setInflow(inf);
       setOutflow(outf);
       setStartingCash(Number(settings?.starting_cash ?? 0));
