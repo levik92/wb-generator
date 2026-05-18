@@ -460,17 +460,21 @@ export function AdminUtmSources() {
       })()}
 
       {/* Sources list */}
-      {sources.length === 0 ? (
+      {visibleSources.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Link2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground text-sm">Нет UTM-источников</p>
-            <p className="text-muted-foreground/60 text-xs mt-1">Создайте первый источник для отслеживания трафика</p>
+            <p className="text-muted-foreground text-sm">
+              {sources.length === 0 ? "Нет UTM-источников" : "Все источники скрыты"}
+            </p>
+            <p className="text-muted-foreground/60 text-xs mt-1">
+              {sources.length === 0 ? "Создайте первый источник для отслеживания трафика" : "Нажмите «Скрытые», чтобы их показать"}
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {sources.map((source, index) => {
+          {visibleSources.map((source, index) => {
             const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0, revenue: 0 };
             const isStatLoading = !!statsLoading[source.id];
             const renderNum = (val: number, color: string) => isStatLoading
