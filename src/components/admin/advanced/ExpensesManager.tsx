@@ -10,7 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Copy } from "lucide-react";
 import { EXPENSE_CATEGORIES, ExpenseCategory, categoryLabel, fmtRub, toIsoDate, Expense, MarketingChannel } from "@/hooks/useFinanceData";
 import { toast } from "@/hooks/use-toast";
 
