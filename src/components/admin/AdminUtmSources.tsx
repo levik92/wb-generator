@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet } from "lucide-react";
+import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet, EyeOff, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { publicSiteUrl } from "@/config/runtime";
 
@@ -31,6 +31,24 @@ interface UtmStats {
 }
 
 const PAGE_SIZE = 20;
+const HIDDEN_STORAGE_KEY = "admin_utm_hidden_ids";
+
+const loadHiddenIds = (): Set<string> => {
+  try {
+    const raw = localStorage.getItem(HIDDEN_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const saveHiddenIds = (ids: Set<string>) => {
+  try {
+    localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(ids)));
+  } catch {}
+};
 
 export function AdminUtmSources() {
   const [sources, setSources] = useState<UtmSource[]>([]);
@@ -41,6 +59,8 @@ export function AdminUtmSources() {
   const [hasMore, setHasMore] = useState(true);
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => loadHiddenIds());
+  const [showHidden, setShowHidden] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   
   // Form
@@ -255,6 +275,31 @@ export function AdminUtmSources() {
     }
   };
 
+  const handleHide = (id: string) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      saveHiddenIds(next);
+      return next;
+    });
+    toast.success("Источник скрыт со страницы");
+  };
+
+  const handleUnhide = (id: string) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      saveHiddenIds(next);
+      return next;
+    });
+  };
+
+  const handleUnhideAll = () => {
+    setHiddenIds(new Set());
+    saveHiddenIds(new Set());
+    toast.success("Скрытые источники показаны");
+  };
+
   const handleDuplicate = (source: UtmSource) => {
     setFormName(source.name + " (копия)");
     setFormSource(source.utm_source);
@@ -317,6 +362,10 @@ export function AdminUtmSources() {
     );
   }
 
+  const visibleSources = showHidden ? sources : sources.filter(s => !hiddenIds.has(s.id));
+  const hiddenCount = sources.reduce((n, s) => n + (hiddenIds.has(s.id) ? 1 : 0), 0);
+  const visibleStats = Object.entries(stats).filter(([id]) => showHidden || !hiddenIds.has(id)).map(([, v]) => v);
+
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Header */}
@@ -326,19 +375,38 @@ export function AdminUtmSources() {
             Создавайте UTM-ссылки и отслеживайте эффективность каналов
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Добавить источник
-        </Button>
+        <div className="flex items-center gap-2">
+          {hiddenCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHidden(v => !v)}
+              className="gap-2"
+              title={showHidden ? "Спрятать скрытые" : "Показать скрытые"}
+            >
+              {showHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showHidden ? "Скрыть" : `Скрытые (${hiddenCount})`}
+            </Button>
+          )}
+          {hiddenCount > 0 && showHidden && (
+            <Button variant="ghost" size="sm" onClick={handleUnhideAll}>
+              Сбросить
+            </Button>
+          )}
+          <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Добавить источник
+          </Button>
+        </div>
       </div>
 
       {/* Summary stats */}
-      {sources.length > 0 && (() => {
+      {visibleSources.length > 0 && (() => {
         const anyLoading = Object.values(statsLoading).some(Boolean);
-        const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
-        const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
-        const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
-        const sumRevenue = Object.values(stats).reduce((s, v) => s + (v.revenue || 0), 0);
+        const sumVisits = visibleStats.reduce((s, v) => s + v.visits, 0);
+        const sumRegs = visibleStats.reduce((s, v) => s + v.registrations, 0);
+        const sumPay = visibleStats.reduce((s, v) => s + v.payments, 0);
+        const sumRevenue = visibleStats.reduce((s, v) => s + (v.revenue || 0), 0);
         const summaryNum = (val: number) => anyLoading
           ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
@@ -357,7 +425,7 @@ export function AdminUtmSources() {
               <Link2 className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground">Источников</span>
             </div>
-            <p className="text-xl font-bold">{sources.length}</p>
+            <p className="text-xl font-bold">{visibleSources.length}</p>
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
@@ -392,17 +460,21 @@ export function AdminUtmSources() {
       })()}
 
       {/* Sources list */}
-      {sources.length === 0 ? (
+      {visibleSources.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Link2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground text-sm">Нет UTM-источников</p>
-            <p className="text-muted-foreground/60 text-xs mt-1">Создайте первый источник для отслеживания трафика</p>
+            <p className="text-muted-foreground text-sm">
+              {sources.length === 0 ? "Нет UTM-источников" : "Все источники скрыты"}
+            </p>
+            <p className="text-muted-foreground/60 text-xs mt-1">
+              {sources.length === 0 ? "Создайте первый источник для отслеживания трафика" : "Нажмите «Скрытые», чтобы их показать"}
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {sources.map((source, index) => {
+          {visibleSources.map((source, index) => {
             const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0, revenue: 0 };
             const isStatLoading = !!statsLoading[source.id];
             const renderNum = (val: number, color: string) => isStatLoading
@@ -469,6 +541,15 @@ export function AdminUtmSources() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(buildUtmUrl(source), '_blank')} title="Открыть">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Button>
+                          {hiddenIds.has(source.id) ? (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleUnhide(source.id)} title="Показать">
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                          ) : (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleHide(source.id)} title="Скрыть со страницы">
+                              <EyeOff className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(source.id)} title="Удалить">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
