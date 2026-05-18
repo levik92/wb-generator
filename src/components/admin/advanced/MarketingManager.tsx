@@ -74,7 +74,6 @@ export function MarketingManager() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <DatePickerWithRange date={range} onDateChange={setRange} />
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-2" onClick={() => setEditing(null)}>
@@ -86,6 +85,7 @@ export function MarketingManager() {
             <ChannelForm initial={editing} onSaved={() => { setOpen(false); setEditing(null); load(); }} />
           </DialogContent>
         </Dialog>
+        <DatePickerWithRange date={range} onDateChange={setRange} />
       </div>
 
       <Card className="bg-card border-border/50 rounded-2xl">
