@@ -141,7 +141,7 @@ export function MarketingManager() {
                 ) : aggs.length === 0 ? (
                   <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
                 ) : aggs.map((a) => (
-                  <TableRow key={a.channel.id}>
+                  <TableRow key={a.channel.id} className="hover:bg-transparent">
                     <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{a.channel.tag || "—"}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
