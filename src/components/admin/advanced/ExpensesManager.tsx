@@ -51,10 +51,9 @@ export function ExpensesManager() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex gap-2 items-center">
-          <Label className="text-xs">Категория:</Label>
+        <div className="flex flex-wrap gap-3 items-center">
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[220px] h-9 text-sm"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Все категории</SelectItem>
               {EXPENSE_CATEGORIES.map((c) => (
@@ -62,7 +61,7 @@ export function ExpensesManager() {
               ))}
             </SelectContent>
           </Select>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             Итого: <span className="font-semibold text-foreground">{fmtRub(total)}</span>
           </div>
         </div>
@@ -83,45 +82,53 @@ export function ExpensesManager() {
         </Dialog>
       </div>
 
-      <div className="border rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Дата</TableHead>
-              <TableHead>Название</TableHead>
-              <TableHead>Категория</TableHead>
-              <TableHead>Тег</TableHead>
-              <TableHead className="text-right">Сумма</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Загрузка…</TableCell></TableRow>
-            ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Нет расходов</TableCell></TableRow>
-            ) : filtered.map((it) => (
-              <TableRow key={it.id}>
-                <TableCell className="text-sm">{it.expense_date}</TableCell>
-                <TableCell className="text-sm">{it.name}</TableCell>
-                <TableCell className="text-xs">{categoryLabel(it.category)}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{it.tag || "—"}</TableCell>
-                <TableCell className="text-right font-medium">{fmtRub(Number(it.amount))}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1 justify-end">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(it); setOpen(true); }}>
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(it.id)}>
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <Card className="bg-card border-border/50 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg">Расходы</CardTitle>
+          <CardDescription>Учёт операционных и маркетинговых расходов ({filtered.length})</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">Дата</TableHead>
+                  <TableHead className="text-xs">Название</TableHead>
+                  <TableHead className="text-xs">Категория</TableHead>
+                  <TableHead className="text-xs">Тег</TableHead>
+                  <TableHead className="text-xs text-right">Сумма</TableHead>
+                  <TableHead className="w-[100px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
+                ) : filtered.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-8">Нет расходов</TableCell></TableRow>
+                ) : filtered.map((it) => (
+                  <TableRow key={it.id}>
+                    <TableCell className="text-xs whitespace-nowrap">{it.expense_date}</TableCell>
+                    <TableCell className="text-xs font-medium max-w-[260px] truncate">{it.name}</TableCell>
+                    <TableCell className="text-xs">{categoryLabel(it.category)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{it.tag || "—"}</TableCell>
+                    <TableCell className="text-xs text-right font-medium whitespace-nowrap">{fmtRub(Number(it.amount))}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 justify-end">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(it); setOpen(true); }}>
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(it.id)}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
