@@ -275,6 +275,31 @@ export function AdminUtmSources() {
     }
   };
 
+  const handleHide = (id: string) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      next.add(id);
+      saveHiddenIds(next);
+      return next;
+    });
+    toast.success("Источник скрыт со страницы");
+  };
+
+  const handleUnhide = (id: string) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      saveHiddenIds(next);
+      return next;
+    });
+  };
+
+  const handleUnhideAll = () => {
+    setHiddenIds(new Set());
+    saveHiddenIds(new Set());
+    toast.success("Скрытые источники показаны");
+  };
+
   const handleDuplicate = (source: UtmSource) => {
     setFormName(source.name + " (копия)");
     setFormSource(source.utm_source);
