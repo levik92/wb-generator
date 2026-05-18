@@ -541,6 +541,15 @@ export function AdminUtmSources() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(buildUtmUrl(source), '_blank')} title="Открыть">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Button>
+                          {hiddenIds.has(source.id) ? (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleUnhide(source.id)} title="Показать">
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                          ) : (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleHide(source.id)} title="Скрыть со страницы">
+                              <EyeOff className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(source.id)} title="Удалить">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
