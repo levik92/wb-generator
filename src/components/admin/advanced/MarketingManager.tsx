@@ -108,7 +108,13 @@ export function MarketingManager() {
             <ChannelForm initial={editing} onSaved={() => { setOpen(false); setEditing(null); load(); }} />
           </DialogContent>
         </Dialog>
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={load} disabled={loading} title="Обновить">
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Обновить</span>
+          </Button>
+          <DatePickerWithRange date={range} onDateChange={setRange} />
+        </div>
       </div>
 
       <Card className="bg-card border-border/50 rounded-2xl">
