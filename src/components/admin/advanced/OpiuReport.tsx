@@ -72,37 +72,45 @@ export function OpiuReport() {
   return (
     <div className="space-y-4">
       <DatePickerWithRange date={range} onDateChange={setRange} />
-      <div className="border rounded-xl overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="sticky left-0 bg-card">Показатель</TableHead>
-              {months.map((m) => (
-                <TableHead key={m.ym} className="text-right">{m.ym}</TableHead>
-              ))}
-              <TableHead className="text-right">Итого</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={months.length + 2} className="text-center text-muted-foreground">Загрузка…</TableCell></TableRow>
-            ) : months.length === 0 ? (
-              <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-8">Нет данных за период</TableCell></TableRow>
-            ) : rowsDef.map((row) => {
-              const total = months.reduce((s, m) => s + cellValue(row, m), 0);
-              return (
-                <TableRow key={row.key} className={row.bold ? "font-semibold bg-muted/30" : ""}>
-                  <TableCell className="sticky left-0 bg-card">{row.label}</TableCell>
+      <Card className="bg-card border-border/50 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg">Отчёт о прибылях и убытках</CardTitle>
+          <CardDescription>Помесячная разбивка показателей за выбранный период</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs sticky left-0 bg-card">Показатель</TableHead>
                   {months.map((m) => (
-                    <TableCell key={m.ym} className="text-right">{fmtRub(cellValue(row, m))}</TableCell>
+                    <TableHead key={m.ym} className="text-xs text-right whitespace-nowrap">{m.ym}</TableHead>
                   ))}
-                  <TableCell className="text-right">{fmtRub(total)}</TableCell>
+                  <TableHead className="text-xs text-right">Итого</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={months.length + 2} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
+                ) : months.length === 0 ? (
+                  <TableRow><TableCell colSpan={2} className="text-center text-xs text-muted-foreground py-8">Нет данных за период</TableCell></TableRow>
+                ) : rowsDef.map((row) => {
+                  const total = months.reduce((s, m) => s + cellValue(row, m), 0);
+                  return (
+                    <TableRow key={row.key} className={row.bold ? "font-semibold bg-muted/30" : ""}>
+                      <TableCell className="text-xs sticky left-0 bg-card">{row.label}</TableCell>
+                      {months.map((m) => (
+                        <TableCell key={m.ym} className="text-xs text-right whitespace-nowrap">{fmtRub(cellValue(row, m))}</TableCell>
+                      ))}
+                      <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(total)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
