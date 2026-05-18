@@ -65,6 +65,29 @@ export function MarketingManager() {
 
   useEffect(() => { load(); }, [range?.from?.getTime(), range?.to?.getTime()]);
 
+  // Auto-refresh when user returns to tab/window or component remounts focus
+  useEffect(() => {
+    const onFocus = () => load();
+    const onVisibility = () => { if (document.visibilityState === "visible") load(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [range?.from?.getTime(), range?.to?.getTime()]);
+
+  // Realtime: refresh when expenses or revenues change
+  useEffect(() => {
+    const ch = supabase
+      .channel("marketing-manager-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "expenses" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "marketing_revenues" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "marketing_channels" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [range?.from?.getTime(), range?.to?.getTime()]);
+
   const handleDelete = async (id: string) => {
     if (!confirm("Удалить канал? Связанные данные сохранятся.")) return;
     await supabase.from("marketing_channels").delete().eq("id", id);
