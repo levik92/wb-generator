@@ -10,7 +10,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Copy } from "lucide-react";
 import { EXPENSE_CATEGORIES, ExpenseCategory, categoryLabel, fmtRub, toIsoDate, Expense, MarketingChannel } from "@/hooks/useFinanceData";
 import { toast } from "@/hooks/use-toast";
 
@@ -72,7 +72,7 @@ export function ExpensesManager() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{editing ? "Редактировать расход" : "Новый расход"}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editing?.id ? "Редактировать расход" : "Новый расход"}</DialogTitle></DialogHeader>
             <ExpenseForm
               initial={editing}
               channels={channels}
@@ -116,6 +116,9 @@ export function ExpensesManager() {
                       <div className="flex gap-1 justify-end">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(it); setOpen(true); }}>
                           <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Дублировать" onClick={() => { const { id, created_at, ...rest } = it as any; setEditing({ ...rest, expense_date: toIsoDate(new Date()) } as Expense); setOpen(true); }}>
+                          <Copy className="w-3.5 h-3.5" />
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(it.id)}>
                           <Trash2 className="w-3.5 h-3.5" />
@@ -166,7 +169,7 @@ function ExpenseForm({
       notes: notes.trim() || null,
       created_by: user?.id ?? null,
     };
-    const op = initial
+    const op = initial?.id
       ? supabase.from("expenses").update(payload).eq("id", initial.id)
       : supabase.from("expenses").insert(payload);
     const { error } = await op;
@@ -175,7 +178,7 @@ function ExpenseForm({
       toast({ title: "Ошибка", description: "Не удалось сохранить", variant: "destructive" });
       return;
     }
-    toast({ title: initial ? "Обновлено" : "Добавлено" });
+    toast({ title: initial?.id ? "Обновлено" : "Добавлено" });
     onSaved();
   };
 
