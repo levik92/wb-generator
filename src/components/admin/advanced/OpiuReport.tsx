@@ -32,9 +32,8 @@ export function OpiuReport() {
       const to = toIsoDate(range.to!);
       const fromIso = `${from}T00:00:00`;
       const toIso = `${to}T23:59:59`;
-      const [{ data: pays }, { data: invs }, { data: exps }, s] = await Promise.all([
+      const [{ data: pays }, { data: exps }, s] = await Promise.all([
         supabase.from("payments").select("amount, created_at").eq("status", "succeeded").gte("created_at", fromIso).lte("created_at", toIso),
-        supabase.from("invoice_payments").select("amount, reviewed_at").eq("status", "paid").gte("reviewed_at", fromIso).lte("reviewed_at", toIso),
         supabase.from("expenses").select("amount, category, expense_date").gte("expense_date", from).lte("expense_date", to),
         fetchSettings(),
       ]);
@@ -43,7 +42,6 @@ export function OpiuReport() {
       const map: Record<string, MonthAgg> = {};
       const ensure = (ym: string) => (map[ym] ||= { ym, revenue: 0, cogs: 0, marketing: 0, opex: 0 });
       (pays ?? []).forEach((p: any) => { ensure(monthKey(p.created_at)).revenue += Number(p.amount); });
-      (invs ?? []).forEach((p: any) => { ensure(monthKey(p.reviewed_at)).revenue += Number(p.amount); });
       (exps ?? []).forEach((e: any) => {
         const m = ensure(monthKey(e.expense_date));
         const amt = Number(e.amount);
