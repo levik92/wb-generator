@@ -55,10 +55,13 @@ export interface FinanceSettings {
   id: string;
   tax_rate: number;
   starting_cash: number;
+  payment_fee_rate: number;
 }
 
 export interface PeriodMetrics {
   revenue: number;
+  paymentFee: number;
+  netRevenue: number;
   cogs: number;
   marketing: number;
   opex: number;
