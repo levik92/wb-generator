@@ -390,6 +390,77 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          channel_id: string | null
+          created_at: string
+          created_by: string | null
+          expense_date: string
+          id: string
+          name: string
+          notes: string | null
+          tag: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          channel_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          name: string
+          notes?: string | null
+          tag?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          channel_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          tag?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_settings: {
+        Row: {
+          id: string
+          starting_cash: number
+          tax_rate: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          starting_cash?: number
+          tax_rate?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          starting_cash?: number
+          tax_rate?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       generation_jobs: {
         Row: {
           aspect_ratio: string
@@ -701,6 +772,68 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "payment_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_channels: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          tag: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          tag?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          tag?: string | null
+        }
+        Relationships: []
+      }
+      marketing_revenues: {
+        Row: {
+          amount: number
+          channel_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          period_month: string
+        }
+        Insert: {
+          amount: number
+          channel_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_month: string
+        }
+        Update: {
+          amount?: number
+          channel_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_month?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_revenues_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_channels"
             referencedColumns: ["id"]
           },
         ]

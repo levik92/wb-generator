@@ -2,15 +2,18 @@ import { AdminAnalyticsChart, AdminAdditionalMetrics, AdminLifetimeMetrics } fro
 import { AdminBreakdownChart } from "@/components/dashboard/AdminBreakdownChart";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Users, Activity } from "lucide-react";
+import { CreditCard, Users, Activity, LineChart } from "lucide-react";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { AdvancedAnalytics } from "./advanced/AdvancedAnalytics";
 
 interface AdminAnalyticsProps {
   users: { id: string; is_blocked: boolean; wb_connected: boolean }[];
 }
 
 export function AdminAnalytics({ users }: AdminAnalyticsProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [paidUsersCount, setPaidUsersCount] = useState<number>(0);
   const [repeatPaidCount, setRepeatPaidCount] = useState<number>(0);
@@ -60,6 +63,10 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
 
     fetchStats();
   }, [users.length]);
+
+  if (showAdvanced) {
+    return <AdvancedAnalytics onBack={() => setShowAdvanced(false)} />;
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -121,6 +128,17 @@ export function AdminAnalytics({ users }: AdminAnalyticsProps) {
           trendUp={true}
           delay={0.2}
         />
+      </div>
+
+      <div className="pt-2 flex justify-center">
+        <Button
+          size="lg"
+          onClick={() => setShowAdvanced(true)}
+          className="gap-2"
+        >
+          <LineChart className="w-5 h-5" />
+          Расширенная аналитика
+        </Button>
       </div>
     </div>
   );
