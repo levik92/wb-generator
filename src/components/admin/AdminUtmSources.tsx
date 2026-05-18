@@ -550,7 +550,7 @@ export function AdminUtmSources() {
                               <EyeOff className="w-3.5 h-3.5" />
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(source.id)} title="Удалить">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(source.id)} title="Удалить">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
