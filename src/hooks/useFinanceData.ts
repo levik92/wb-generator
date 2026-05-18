@@ -83,23 +83,33 @@ export function endOfMonth(d = new Date()): Date {
 async function fetchRevenue(from: string, to: string): Promise<number> {
   const fromIso = `${from}T00:00:00`;
   const toIso = `${to}T23:59:59`;
-  const [p1, p2] = await Promise.all([
-    supabase
-      .from("payments")
-      .select("amount, confirmed_at, created_at")
-      .eq("status", "succeeded")
-      .gte("created_at", fromIso)
-      .lte("created_at", toIso),
-    supabase
-      .from("invoice_payments")
-      .select("amount, reviewed_at")
-      .eq("status", "paid")
-      .gte("reviewed_at", fromIso)
-      .lte("reviewed_at", toIso),
-  ]);
-  const s1 = (p1.data ?? []).reduce((s, r: any) => s + Number(r.amount || 0), 0);
-  const s2 = (p2.data ?? []).reduce((s, r: any) => s + Number(r.amount || 0), 0);
-  return s1 + s2;
+  // Счета по invoice_payments автоматически создают запись в payments
+  // (payment_provider='manual_invoice'), поэтому считаем только payments чтобы избежать задвоения.
+  const { data } = await supabase
+    .from("payments")
+    .select("amount")
+    .eq("status", "succeeded")
+    .gte("created_at", fromIso)
+    .lte("created_at", toIso);
+  return (data ?? []).reduce((s, r: any) => s + Number(r.amount || 0), 0);
+}
+
+export async function fetchRevenueDaily(from: string, to: string): Promise<{ date: string; amount: number }[]> {
+  const fromIso = `${from}T00:00:00`;
+  const toIso = `${to}T23:59:59`;
+  const { data } = await supabase
+    .from("payments")
+    .select("amount, created_at")
+    .eq("status", "succeeded")
+    .gte("created_at", fromIso)
+    .lte("created_at", toIso)
+    .order("created_at", { ascending: true });
+  const map = new Map<string, number>();
+  for (const r of (data ?? []) as any[]) {
+    const d = String(r.created_at).slice(0, 10);
+    map.set(d, (map.get(d) ?? 0) + Number(r.amount || 0));
+  }
+  return Array.from(map.entries()).map(([date, amount]) => ({ date, amount }));
 }
 
 export async function fetchExpensesRange(from: string, to: string): Promise<Expense[]> {
