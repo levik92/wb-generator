@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
@@ -87,48 +88,56 @@ export function MarketingManager() {
         </Dialog>
       </div>
 
-      <div className="border rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Канал</TableHead>
-              <TableHead>Тег</TableHead>
-              <TableHead className="text-right">Расход</TableHead>
-              <TableHead className="text-right">Доход</TableHead>
-              <TableHead className="text-right">ROI</TableHead>
-              <TableHead className="w-[160px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Загрузка…</TableCell></TableRow>
-            ) : aggs.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
-            ) : aggs.map((a) => (
-              <TableRow key={a.channel.id}>
-                <TableCell className="font-medium">{a.channel.name}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{a.channel.tag || "—"}</TableCell>
-                <TableCell className="text-right">{fmtRub(a.cost)}</TableCell>
-                <TableCell className="text-right">{fmtRub(a.revenue)}</TableCell>
-                <TableCell className={`text-right font-semibold ${a.roi === null ? "text-muted-foreground" : a.roi >= 0 ? "text-emerald-500" : "text-destructive"}`}>
-                  {a.roi === null ? "—" : `${a.roi.toFixed(1)}%`}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1 justify-end">
-                    <Button variant="outline" size="sm" className="h-8" onClick={() => setRevenueDialog({ channel: a.channel })}>Доход</Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(a.channel); setOpen(true); }}>
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(a.channel.id)}>
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <Card className="bg-card border-border/50 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg">Каналы маркетинга</CardTitle>
+          <CardDescription>Расход, доход и ROI по каналам ({aggs.length})</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">Канал</TableHead>
+                  <TableHead className="text-xs">Тег</TableHead>
+                  <TableHead className="text-xs text-right">Расход</TableHead>
+                  <TableHead className="text-xs text-right">Доход</TableHead>
+                  <TableHead className="text-xs text-right">ROI</TableHead>
+                  <TableHead className="w-[160px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
+                ) : aggs.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
+                ) : aggs.map((a) => (
+                  <TableRow key={a.channel.id}>
+                    <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{a.channel.tag || "—"}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.revenue)}</TableCell>
+                    <TableCell className={`text-xs text-right font-semibold whitespace-nowrap ${a.roi === null ? "text-muted-foreground" : a.roi >= 0 ? "text-emerald-500" : "text-destructive"}`}>
+                      {a.roi === null ? "—" : `${a.roi.toFixed(1)}%`}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 justify-end">
+                        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setRevenueDialog({ channel: a.channel })}>Доход</Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(a.channel); setOpen(true); }}>
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(a.channel.id)}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       <Dialog open={!!revenueDialog} onOpenChange={(o) => !o && setRevenueDialog(null)}>
         <DialogContent className="max-w-md">

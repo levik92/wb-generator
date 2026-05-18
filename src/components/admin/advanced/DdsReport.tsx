@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { DateRange } from "react-day-picker";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchSettings, fmtRub, toIsoDate, startOfMonth, endOfMonth } from "@/hooks/useFinanceData";
-import { GlassCard } from "@/components/dashboard/GlassCard";
 
 export function DdsReport() {
   const [range, setRange] = useState<DateRange | undefined>({ from: startOfMonth(), to: endOfMonth() });
@@ -49,29 +48,35 @@ export function DdsReport() {
   return (
     <div className="space-y-4">
       <DatePickerWithRange date={range} onDateChange={setRange} />
-      {loading ? (
-        <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Загрузка…</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { l: "Остаток на начало", v: fmtRub(balanceStart), c: "text-foreground" },
-            { l: "Поступления", v: fmtRub(inflow), c: "text-emerald-500" },
-            { l: "Списания", v: fmtRub(outflow), c: "text-destructive" },
-            { l: "Остаток на конец", v: fmtRub(balanceEnd), c: balanceEnd >= 0 ? "text-emerald-500" : "text-destructive" },
-          ].map((x) => (
-            <GlassCard key={x.l}>
-              <div className="p-4">
-                <div className="text-xs text-muted-foreground">{x.l}</div>
-                <div className={`text-xl md:text-2xl font-bold mt-1 ${x.c}`}>{x.v}</div>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
-      )}
-      <div className="text-xs text-muted-foreground">
-        Δ за период: <span className={delta >= 0 ? "text-emerald-500" : "text-destructive"}>{fmtRub(delta)}</span>.
-        Стартовый остаток компании задаётся в настройках РНП.
-      </div>
+      <Card className="bg-card border-border/50 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg">Движение денежных средств</CardTitle>
+          <CardDescription>Остатки и поток за выбранный период</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">Загрузка…</div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { l: "Остаток на начало", v: fmtRub(balanceStart), c: "text-foreground" },
+                { l: "Поступления", v: fmtRub(inflow), c: "text-emerald-500" },
+                { l: "Списания", v: fmtRub(outflow), c: "text-destructive" },
+                { l: "Остаток на конец", v: fmtRub(balanceEnd), c: balanceEnd >= 0 ? "text-emerald-500" : "text-destructive" },
+              ].map((x) => (
+                <div key={x.l} className="p-4 rounded-xl border border-border/60 bg-card">
+                  <div className="text-xs text-muted-foreground">{x.l}</div>
+                  <div className={`text-xl md:text-2xl font-bold mt-1 ${x.c}`}>{x.v}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="text-xs text-muted-foreground mt-4">
+            Δ за период: <span className={delta >= 0 ? "text-emerald-500" : "text-destructive"}>{fmtRub(delta)}</span>.
+            Стартовый остаток компании задаётся в настройках РНП.
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
