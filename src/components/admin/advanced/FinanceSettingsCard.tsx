@@ -12,6 +12,7 @@ export function FinanceSettingsCard({ onSaved }: { onSaved?: () => void }) {
   const [open, setOpen] = useState(false);
   const [s, setS] = useState<FinanceSettings | null>(null);
   const [taxRate, setTaxRate] = useState("6");
+  const [paymentFeeRate, setPaymentFeeRate] = useState("3");
   const [startingCash, setStartingCash] = useState("0");
   const [saving, setSaving] = useState(false);
 
@@ -21,6 +22,7 @@ export function FinanceSettingsCard({ onSaved }: { onSaved?: () => void }) {
       setS(r);
       if (r) {
         setTaxRate(String(r.tax_rate));
+        setPaymentFeeRate(String(r.payment_fee_rate ?? 3));
         setStartingCash(String(r.starting_cash));
       }
     });
@@ -33,6 +35,7 @@ export function FinanceSettingsCard({ onSaved }: { onSaved?: () => void }) {
       .from("finance_settings")
       .update({
         tax_rate: Number(taxRate) || 0,
+        payment_fee_rate: Number(paymentFeeRate) || 0,
         starting_cash: Number(startingCash) || 0,
         updated_at: new Date().toISOString(),
       })
@@ -56,7 +59,11 @@ export function FinanceSettingsCard({ onSaved }: { onSaved?: () => void }) {
       </PopoverTrigger>
       <PopoverContent className="w-80 space-y-3">
         <div>
-          <Label className="text-xs">Налог, % от выручки</Label>
+          <Label className="text-xs">Комиссия платёжных систем, % от выручки</Label>
+          <Input type="number" step="0.01" value={paymentFeeRate} onChange={(e) => setPaymentFeeRate(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Налог, % от выручки после комиссии</Label>
           <Input type="number" step="0.01" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
         </div>
         <div>

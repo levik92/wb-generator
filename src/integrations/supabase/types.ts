@@ -440,6 +440,7 @@ export type Database = {
       finance_settings: {
         Row: {
           id: string
+          payment_fee_rate: number
           starting_cash: number
           tax_rate: number
           updated_at: string
@@ -447,6 +448,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          payment_fee_rate?: number
           starting_cash?: number
           tax_rate?: number
           updated_at?: string
@@ -454,6 +456,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          payment_fee_rate?: number
           starting_cash?: number
           tax_rate?: number
           updated_at?: string

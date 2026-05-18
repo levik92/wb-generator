@@ -120,6 +120,7 @@ function RnpDashboard({
     if (!metrics) return [];
     return [
       { name: "Выручка", value: Math.round(metrics.revenue) },
+      { name: "Комиссия", value: Math.round(metrics.paymentFee) },
       { name: "Себест.", value: Math.round(metrics.cogs) },
       { name: "Маркетинг", value: Math.round(metrics.marketing) },
       { name: "OPEX", value: Math.round(metrics.opex) },
