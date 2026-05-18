@@ -134,7 +134,8 @@ export async function fetchSettings(): Promise<FinanceSettings | null> {
 export function computeMetrics(
   revenue: number,
   expenses: Expense[],
-  taxRate: number
+  taxRate: number,
+  paymentFeeRate: number = 0,
 ): PeriodMetrics {
   let cogs = 0;
   let marketing = 0;
@@ -143,15 +144,17 @@ export function computeMetrics(
     const amt = Number(e.amount);
     if (e.category === "cogs") cogs += amt;
     else if (e.category === "marketing") marketing += amt;
-    else if (e.category === "tax") continue; // налоги считаем авто
+    else if (e.category === "tax") continue;
     else opex += amt;
   }
-  const taxes = revenue * (taxRate / 100);
-  const grossProfit = revenue - cogs;
+  const paymentFee = revenue * (paymentFeeRate / 100);
+  const netRevenue = revenue - paymentFee;
+  const taxes = netRevenue * (taxRate / 100);
+  const grossProfit = netRevenue - cogs;
   const grossMarginPct = revenue > 0 ? (grossProfit / revenue) * 100 : 0;
-  const netProfit = revenue - cogs - marketing - opex - taxes;
+  const netProfit = netRevenue - cogs - marketing - opex - taxes;
   const netMarginPct = revenue > 0 ? (netProfit / revenue) * 100 : 0;
-  return { revenue, cogs, marketing, opex, taxes, grossProfit, grossMarginPct, netProfit, netMarginPct };
+  return { revenue, paymentFee, netRevenue, cogs, marketing, opex, taxes, grossProfit, grossMarginPct, netProfit, netMarginPct };
 }
 
 export function usePeriodMetrics(from: Date | undefined, to: Date | undefined) {
@@ -171,7 +174,7 @@ export function usePeriodMetrics(from: Date | undefined, to: Date | undefined) {
         fetchSettings(),
       ]);
       setSettings(s);
-      setMetrics(computeMetrics(revenue, expenses, s?.tax_rate ?? 6));
+      setMetrics(computeMetrics(revenue, expenses, s?.tax_rate ?? 6, s?.payment_fee_rate ?? 0));
     } finally {
       setLoading(false);
     }
