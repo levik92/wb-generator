@@ -175,10 +175,10 @@ function RnpDashboard({
                       <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(d) => d.slice(5)} />
                       <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1000)}к`} />
                       <Tooltip
-                        formatter={(v: any) => fmtRub(Number(v))}
+                        formatter={(v: any) => [fmtRub(Number(v)), "Сумма"]}
                         contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
                       />
-                      <Area type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)" />
+                      <Area type="monotone" dataKey="amount" name="Сумма" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#revGrad)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
