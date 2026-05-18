@@ -40,6 +40,7 @@ export function OpiuReport() {
   });
   const [months, setMonths] = useState<MonthAgg[]>([]);
   const [taxRate, setTaxRate] = useState(6);
+  const [feeRate, setFeeRate] = useState(3);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export function OpiuReport() {
         fetchSettings(),
       ]);
       setTaxRate(s?.tax_rate ?? 6);
+      setFeeRate(s?.payment_fee_rate ?? 3);
 
       const map: Record<string, MonthAgg> = {};
       const ensure = (ym: string) => (map[ym] ||= { ym, revenue: 0, cogs: 0, marketing: 0, opex: 0 });
@@ -73,37 +75,40 @@ export function OpiuReport() {
     })();
   }, [range?.from?.getTime(), range?.to?.getTime()]);
 
+  const fee = (m: MonthAgg) => m.revenue * (feeRate / 100);
+  const netRev = (m: MonthAgg) => m.revenue - fee(m);
+  const taxOf = (m: MonthAgg) => netRev(m) * (taxRate / 100);
+
   const rowsDef: RowDef[] = [
-    { key: "revenue", label: "Выручка", group: "income" },
+    { key: "revenue", label: "Выручка (валовая)", group: "income" },
+    { key: "fee", label: `Комиссия плат. систем (${feeRate}%)`, group: "expense", calc: (m) => fee(m) },
+    { key: "netRev", label: "Выручка после комиссии", group: "result", calc: (m) => netRev(m), emphasis: "bold" },
     { key: "cogs", label: "Себестоимость", group: "expense" },
-    { key: "gross", label: "Валовая прибыль", group: "result", calc: (m) => m.revenue - m.cogs, emphasis: "bold" },
+    { key: "gross", label: "Валовая прибыль", group: "result", calc: (m) => netRev(m) - m.cogs, emphasis: "bold" },
     { key: "marketing", label: "Маркетинг", group: "expense" },
     { key: "opex", label: "OPEX", group: "expense" },
-    { key: "tax", label: `Налоги (${taxRate}%)`, group: "expense", calc: (m) => m.revenue * (taxRate / 100) },
-    { key: "net", label: "Чистая прибыль", group: "result", calc: (m) => m.revenue - m.cogs - m.marketing - m.opex - m.revenue * (taxRate / 100), emphasis: "total" },
+    { key: "tax", label: `Налоги (${taxRate}%)`, group: "expense", calc: (m) => taxOf(m) },
+    { key: "net", label: "Чистая прибыль", group: "result", calc: (m) => netRev(m) - m.cogs - m.marketing - m.opex - taxOf(m), emphasis: "total" },
   ];
 
   const cellValue = (row: RowDef, m: MonthAgg) =>
     row.calc ? row.calc(m) : (m as any)[row.key] as number;
 
   const totals = useMemo(() => {
-    const sum = (k: keyof MonthAgg | "tax" | "gross" | "net") => {
-      if (k === "tax") return months.reduce((s, m) => s + m.revenue * (taxRate / 100), 0);
-      if (k === "gross") return months.reduce((s, m) => s + (m.revenue - m.cogs), 0);
-      if (k === "net") return months.reduce((s, m) => s + (m.revenue - m.cogs - m.marketing - m.opex - m.revenue * (taxRate / 100)), 0);
-      return months.reduce((s, m) => s + (m as any)[k], 0);
-    };
-    const revenue = sum("revenue");
-    const net = sum("net");
-    const gross = sum("gross");
+    const revenue = months.reduce((s, m) => s + m.revenue, 0);
+    const feeTotal = months.reduce((s, m) => s + fee(m), 0);
+    const gross = months.reduce((s, m) => s + (netRev(m) - m.cogs), 0);
+    const net = months.reduce((s, m) => s + (netRev(m) - m.cogs - m.marketing - m.opex - taxOf(m)), 0);
     return {
       revenue,
+      feeTotal,
       net,
       gross,
       grossMargin: revenue > 0 ? (gross / revenue) * 100 : 0,
       netMargin: revenue > 0 ? (net / revenue) * 100 : 0,
     };
-  }, [months, taxRate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [months, taxRate, feeRate]);
 
   const valueClass = (row: RowDef, v: number) => {
     if (row.group === "expense") return "text-muted-foreground";
