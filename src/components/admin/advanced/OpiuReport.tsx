@@ -127,7 +127,7 @@ export function OpiuReport() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <PeriodSelector date={range} onDateChange={setRange} defaultMode="year" />
       </div>
 
       {/* KPI summary */}
