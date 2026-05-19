@@ -55,7 +55,7 @@ const solutions = [
 const cases = [
   {
     id: 101,
-    before: chairBefore,
+    before: headphonesBefore,
     after: chairAfter,
     category: "Мебель",
     title: "Офисное кресло",
@@ -75,7 +75,7 @@ const cases = [
   },
   {
     id: 103,
-    before: headphonesBefore,
+    before: chairBefore,
     after: headphonesAfter,
     category: "Электроника",
     title: "Наушники Xiaomi",
