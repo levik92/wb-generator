@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
