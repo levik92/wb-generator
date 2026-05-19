@@ -99,13 +99,22 @@ export function AdminUtmSources() {
     const utmProfiles = utmProfilesRes.data;
     if (utmProfiles && utmProfiles.length > 0) {
       const userIds = utmProfiles.map(p => p.id);
-      const { data: paid } = await supabase
-        .from('payments')
-        .select('amount')
-        .in('user_id', userIds)
-        .eq('status', 'succeeded');
-      paymentsCount = paid?.length || 0;
-      revenue = (paid || []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
+      // Batch .in() to avoid hitting URL length limits when there are many users.
+      const CHUNK = 150;
+      for (let i = 0; i < userIds.length; i += CHUNK) {
+        const chunk = userIds.slice(i, i + CHUNK);
+        const { data: paid, error: payErr } = await supabase
+          .from('payments')
+          .select('amount')
+          .in('user_id', chunk)
+          .eq('status', 'succeeded');
+        if (payErr) {
+          console.error('UTM payments fetch error:', payErr);
+          continue;
+        }
+        paymentsCount += paid?.length || 0;
+        revenue += (paid || []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
+      }
     }
 
     return {
