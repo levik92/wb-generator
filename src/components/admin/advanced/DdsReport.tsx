@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
