@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +48,7 @@ export function DdsReport() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <PeriodSelector date={range} onDateChange={setRange} />
       </div>
       <Card className="bg-card border-border/50 rounded-2xl">
         <CardHeader>

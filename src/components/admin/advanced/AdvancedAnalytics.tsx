@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, TrendingUp, Wallet, Receipt, Megaphone } from "lucide-react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import {
   startOfMonth, endOfMonth, usePeriodMetrics, fmtRub,
@@ -140,7 +140,7 @@ function RnpDashboard({
     <div className="space-y-5">
       <div className="flex flex-wrap gap-2 items-center justify-end">
         <FinanceSettingsCard onSaved={reload} />
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <PeriodSelector date={range} onDateChange={setRange} />
       </div>
 
       {loading || !metrics ? (
@@ -149,7 +149,7 @@ function RnpDashboard({
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {kpis.map((c) => (
-              <GlassCard key={c.label}>
+              <GlassCard key={c.label} hover={false}>
                 <div className="p-4">
                   <div className="text-xs text-muted-foreground">{c.label}</div>
                   <div className={`text-xl md:text-2xl font-bold mt-1 ${c.accent}`}>{c.value}</div>
@@ -160,7 +160,7 @@ function RnpDashboard({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <GlassCard>
+            <GlassCard hover={false}>
               <div className="p-4">
                 <div className="text-sm font-semibold mb-3">Выручка по дням</div>
                 <div className="h-64">
@@ -186,7 +186,7 @@ function RnpDashboard({
               </div>
             </GlassCard>
 
-            <GlassCard>
+            <GlassCard hover={false}>
               <div className="p-4">
                 <div className="text-sm font-semibold mb-3">Структура расходов</div>
                 <div className="h-64">
@@ -212,7 +212,7 @@ function RnpDashboard({
             </GlassCard>
           </div>
 
-          <GlassCard>
+          <GlassCard hover={false}>
             <div className="p-4">
               <div className="text-sm font-semibold mb-3">P&L разрез за период</div>
               <div className="h-64">
@@ -227,13 +227,18 @@ function RnpDashboard({
                       contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
                     />
                     <Bar dataKey="value" name="Сумма" radius={[6, 6, 0, 0]}>
-                      {profitBars.map((b, i) => (
-                        <Cell key={i} fill={
-                          b.name === "Выручка" ? "hsl(var(--primary))" :
-                          b.name === "Чистая" ? (metrics.netProfit >= 0 ? "#10b981" : "hsl(var(--destructive))") :
-                          "hsl(var(--muted-foreground) / 0.6)"
-                        } />
-                      ))}
+                      {profitBars.map((b, i) => {
+                        const colorMap: Record<string, string> = {
+                          "Выручка": "hsl(var(--primary))",
+                          "Комиссия": "#f59e0b",
+                          "Себест.": "#ef4444",
+                          "Маркетинг": "#ec4899",
+                          "OPEX": "#6366f1",
+                          "Налоги": "#f97316",
+                          "Чистая": metrics.netProfit >= 0 ? "#10b981" : "hsl(var(--destructive))",
+                        };
+                        return <Cell key={i} fill={colorMap[b.name] ?? "hsl(var(--muted-foreground) / 0.6)"} />;
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -250,7 +255,7 @@ function RnpDashboard({
             <button
               key={t.id}
               onClick={() => onOpen(t.id)}
-              className="group flex items-center gap-4 text-left p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/[0.03] hover:shadow-md transition-all"
+              className="group flex items-center gap-4 text-left p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/[0.03] transition-all"
             >
               <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 {t.icon}

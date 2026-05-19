@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,7 +127,7 @@ export function OpiuReport() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <PeriodSelector date={range} onDateChange={setRange} defaultMode="year" />
       </div>
 
       {/* KPI summary */}
