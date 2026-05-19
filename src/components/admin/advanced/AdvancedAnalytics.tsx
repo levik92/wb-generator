@@ -143,8 +143,6 @@ function RnpDashboard({
         <PeriodSelector date={range} onDateChange={setRange} />
       </div>
 
-      {/* Charts moved below tiles */}
-
       {loading || !metrics ? (
         <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Загрузка…</div>
       ) : (
