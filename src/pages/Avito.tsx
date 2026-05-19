@@ -55,7 +55,7 @@ const solutions = [
 const cases = [
   {
     id: 101,
-    before: chairBefore,
+    before: headphonesBefore,
     after: chairAfter,
     category: "Мебель",
     title: "Офисное кресло",
@@ -75,7 +75,7 @@ const cases = [
   },
   {
     id: 103,
-    before: headphonesBefore,
+    before: chairBefore,
     after: headphonesAfter,
     category: "Электроника",
     title: "Наушники Xiaomi",
@@ -135,10 +135,10 @@ const Avito = () => {
           absolute, привязан к высоте всей страницы, blur уменьшен,
           а на мобильных параллакс отключён. */}
       <div className="absolute inset-0 h-full w-full pointer-events-none overflow-hidden -z-10">
-        {/* Салатовый градиент сверху */}
+        {/* Салатовый градиент сверху по центру */}
         <motion.div
           style={{ y: greenY, opacity: greenOpacity, willChange: "transform" }}
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] sm:w-[1100px] h-[600px] sm:h-[900px] hidden sm:block"
+          className="absolute -top-40 inset-x-0 mx-auto w-[700px] sm:w-[1100px] h-[600px] sm:h-[900px] hidden sm:block"
         >
           <div
             className="w-full h-full rounded-full blur-3xl opacity-40"
@@ -149,7 +149,7 @@ const Avito = () => {
         </motion.div>
         {/* Мобильный статичный градиент сверху (без параллакса и без огромных blur) */}
         <div
-          className="sm:hidden absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[500px] rounded-full blur-2xl opacity-30"
+          className="sm:hidden absolute -top-32 inset-x-0 mx-auto w-[600px] h-[500px] rounded-full blur-2xl opacity-30"
           style={{
             background: `radial-gradient(closest-side, ${AVITO_LIGHT} 0%, ${AVITO} 35%, transparent 70%)`,
           }}
