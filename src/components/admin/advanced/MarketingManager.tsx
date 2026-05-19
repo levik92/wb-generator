@@ -10,7 +10,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, RefreshCw } from "lucide-react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { fmtRub, toIsoDate, startOfMonth, endOfMonth, MarketingChannel, MarketingRevenue } from "@/hooks/useFinanceData";
 import { toast } from "@/hooks/use-toast";
