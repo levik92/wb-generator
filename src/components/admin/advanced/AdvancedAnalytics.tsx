@@ -149,7 +149,7 @@ function RnpDashboard({
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {kpis.map((c) => (
-              <GlassCard key={c.label}>
+              <GlassCard key={c.label} hover={false}>
                 <div className="p-4">
                   <div className="text-xs text-muted-foreground">{c.label}</div>
                   <div className={`text-xl md:text-2xl font-bold mt-1 ${c.accent}`}>{c.value}</div>
@@ -160,7 +160,7 @@ function RnpDashboard({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <GlassCard>
+            <GlassCard hover={false}>
               <div className="p-4">
                 <div className="text-sm font-semibold mb-3">Выручка по дням</div>
                 <div className="h-64">
@@ -186,7 +186,7 @@ function RnpDashboard({
               </div>
             </GlassCard>
 
-            <GlassCard>
+            <GlassCard hover={false}>
               <div className="p-4">
                 <div className="text-sm font-semibold mb-3">Структура расходов</div>
                 <div className="h-64">
@@ -212,7 +212,7 @@ function RnpDashboard({
             </GlassCard>
           </div>
 
-          <GlassCard>
+          <GlassCard hover={false}>
             <div className="p-4">
               <div className="text-sm font-semibold mb-3">P&L разрез за период</div>
               <div className="h-64">
