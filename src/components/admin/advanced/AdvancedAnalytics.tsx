@@ -140,8 +140,10 @@ function RnpDashboard({
     <div className="space-y-5">
       <div className="flex flex-wrap gap-2 items-center justify-end">
         <FinanceSettingsCard onSaved={reload} />
-        <DatePickerWithRange date={range} onDateChange={setRange} />
+        <PeriodSelector date={range} onDateChange={setRange} />
       </div>
+
+      {/* Charts moved below tiles */}
 
       {loading || !metrics ? (
         <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Загрузка…</div>
