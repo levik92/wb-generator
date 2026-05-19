@@ -227,13 +227,18 @@ function RnpDashboard({
                       contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
                     />
                     <Bar dataKey="value" name="Сумма" radius={[6, 6, 0, 0]}>
-                      {profitBars.map((b, i) => (
-                        <Cell key={i} fill={
-                          b.name === "Выручка" ? "hsl(var(--primary))" :
-                          b.name === "Чистая" ? (metrics.netProfit >= 0 ? "#10b981" : "hsl(var(--destructive))") :
-                          "hsl(var(--muted-foreground) / 0.6)"
-                        } />
-                      ))}
+                      {profitBars.map((b, i) => {
+                        const colorMap: Record<string, string> = {
+                          "Выручка": "hsl(var(--primary))",
+                          "Комиссия": "#f59e0b",
+                          "Себест.": "#ef4444",
+                          "Маркетинг": "#ec4899",
+                          "OPEX": "#6366f1",
+                          "Налоги": "#f97316",
+                          "Чистая": metrics.netProfit >= 0 ? "#10b981" : "hsl(var(--destructive))",
+                        };
+                        return <Cell key={i} fill={colorMap[b.name] ?? "hsl(var(--muted-foreground) / 0.6)"} />;
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
