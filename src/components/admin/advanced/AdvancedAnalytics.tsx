@@ -255,7 +255,7 @@ function RnpDashboard({
             <button
               key={t.id}
               onClick={() => onOpen(t.id)}
-              className="group flex items-center gap-4 text-left p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/[0.03] hover:shadow-md transition-all"
+              className="group flex items-center gap-4 text-left p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/50 hover:bg-primary/[0.03] transition-all"
             >
               <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 {t.icon}
