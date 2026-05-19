@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, TrendingUp, Wallet, Receipt, Megaphone } from "lucide-react";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import {
   startOfMonth, endOfMonth, usePeriodMetrics, fmtRub,
