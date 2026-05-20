@@ -77,7 +77,13 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border pt-8 mt-8">
+        <div className="border-t border-border pt-8 mt-8 space-y-6">
+          <div className="text-xs text-muted-foreground leading-relaxed space-y-1">
+            <p className="font-semibold text-foreground/80">Платёжный агент (Республика Беларусь):</p>
+            <p>Индивидуальный предприниматель Левицкий Владислав Сергеевич</p>
+            <p>УНП: 192485539 · Банк: ЗАО «БСБ Банк» · БИК: UNBSBY2X</p>
+            <p>IBAN: BY88UNBS30131128430030001933</p>
+          </div>
           <div className="flex flex-col md:flex-row justify-between items-center gap-2">
             <p className="text-sm text-muted-foreground">
               © 2026. ООО «АЛЬТАИР». Все права защищены.

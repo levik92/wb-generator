@@ -129,9 +129,17 @@ export const LandingFooter = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
-          <p className="text-sm text-white/40"><p className="text-sm text-white/40">© 2026. ООО «АЛЬТАИР». Все права защищены.</p></p>
-          <p className="text-sm text-white/40">ИНН: 9724238597</p>
+        <div className="pt-8 border-t border-white/10 space-y-6">
+          <div className="text-xs text-white/40 leading-relaxed space-y-1">
+            <p className="text-white/60 font-semibold">Платёжный агент (Республика Беларусь):</p>
+            <p>Индивидуальный предприниматель Левицкий Владислав Сергеевич</p>
+            <p>УНП: 192485539 · Банк: ЗАО «БСБ Банк» · БИК: UNBSBY2X</p>
+            <p>IBAN: BY88UNBS30131128430030001933</p>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-center">
+            <p className="text-sm text-white/40">© 2026. ООО «АЛЬТАИР». Все права защищены.</p>
+            <p className="text-sm text-white/40">ИНН: 9724238597</p>
+          </div>
         </div>
       </div>
     </footer>
