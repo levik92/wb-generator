@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Zap } from "lucide-react";
+import { PaymentMethods } from "@/components/PaymentMethods";
 
 const productLinks = [
   { label: "Создание карточек", href: "/sozdanie-kartochek" },
