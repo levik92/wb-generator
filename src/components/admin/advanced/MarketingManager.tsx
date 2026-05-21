@@ -214,16 +214,16 @@ export function MarketingManager() {
                   <TableRow key={a.channel.id} className="hover:bg-transparent">
                     <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
                     <TableCell className="text-xs">
-                      <div className="flex flex-wrap gap-1 max-w-[200px]">
+                      <div className="flex items-center gap-1 flex-nowrap whitespace-nowrap">
                         {a.linkedUtms.length === 0 ? (
                           <span className="text-muted-foreground">—</span>
                         ) : (
                           <>
-                            <Badge variant="secondary" className="text-[10px] font-normal">{a.linkedUtms[0].name}</Badge>
+                            <Badge variant="secondary" className="text-[10px] font-normal whitespace-nowrap">{a.linkedUtms[0].name}</Badge>
                             {a.linkedUtms.length > 1 && (
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] font-normal cursor-help"
+                                className="text-[10px] font-normal cursor-help whitespace-nowrap"
                                 title={a.linkedUtms.slice(1).map((u) => u.name).join(", ")}
                               >
                                 +{a.linkedUtms.length - 1}
