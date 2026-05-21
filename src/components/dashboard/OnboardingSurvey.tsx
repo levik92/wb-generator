@@ -298,7 +298,7 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
                         {option === "Другое" && currentAnswer === "Другое" && (
                           <Input
                             className="mt-2 ml-8 w-[calc(100%-2rem)] h-10 text-sm"
-                            placeholder="Уточните, откуда узнали (необязательно)"
+                            placeholder={currentQuestion.otherPlaceholder || "Уточните"}
                             maxLength={100}
                             value={otherText[currentQuestion.key] || ""}
                             onChange={(e) =>
