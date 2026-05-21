@@ -40,6 +40,10 @@ interface ChannelAgg {
   revenue: number;
   clicks: number;
   cpc: number | null;
+  registrations: number;
+  cpr: number | null;
+  orders: number;
+  cpo: number | null;
   roi: number | null;
   linkedUtms: UtmSource[];
 }
@@ -70,6 +74,7 @@ export function MarketingManager() {
       { data: links },
       { data: visits },
       { data: payments },
+      { data: regs },
     ] = await Promise.all([
       supabase.from("marketing_channels").select("*").order("name"),
       supabase.from("expenses").select("*").eq("category", "marketing").gte("expense_date", from).lte("expense_date", to),
@@ -78,6 +83,7 @@ export function MarketingManager() {
       supabase.from("marketing_channel_utm_sources").select("channel_id,utm_source_id"),
       supabase.from("utm_visits").select("utm_source_id,created_at").gte("created_at", fromIso).lte("created_at", toIso),
       supabase.from("payments").select("user_id,amount,confirmed_at,status").eq("status", "succeeded").gte("confirmed_at", fromIso).lte("confirmed_at", toIso),
+      supabase.from("profiles").select("utm_source_id,created_at").not("utm_source_id", "is", null).gte("created_at", fromIso).lte("created_at", toIso),
     ]);
 
     // Map payments -> utm_source via profiles.utm_source_id
@@ -88,9 +94,18 @@ export function MarketingManager() {
       (profs ?? []).forEach((p: any) => { profMap[p.id] = p.utm_source_id; });
     }
     const revByUtm: Record<string, number> = {};
+    const ordersByUtm: Record<string, number> = {};
     (payments ?? []).forEach((p: any) => {
       const u = profMap[p.user_id];
-      if (u) revByUtm[u] = (revByUtm[u] || 0) + Number(p.amount);
+      if (u) {
+        revByUtm[u] = (revByUtm[u] || 0) + Number(p.amount);
+        ordersByUtm[u] = (ordersByUtm[u] || 0) + 1;
+      }
+    });
+
+    const regsByUtm: Record<string, number> = {};
+    (regs ?? []).forEach((r: any) => {
+      if (r.utm_source_id) regsByUtm[r.utm_source_id] = (regsByUtm[r.utm_source_id] || 0) + 1;
     });
 
     const clicksByUtm: Record<string, number> = {};
@@ -122,10 +137,14 @@ export function MarketingManager() {
       const linkedUtms = linkedIds.map((id) => utmMap[id]).filter(Boolean);
       const utmRevenue = linkedIds.reduce((s, id) => s + (revByUtm[id] || 0), 0);
       const clicks = linkedIds.reduce((s, id) => s + (clicksByUtm[id] || 0), 0);
+      const registrations = linkedIds.reduce((s, id) => s + (regsByUtm[id] || 0), 0);
+      const orders = linkedIds.reduce((s, id) => s + (ordersByUtm[id] || 0), 0);
       const revenue = manualRevenue + utmRevenue;
       const cpc = clicks > 0 ? cost / clicks : null;
+      const cpr = registrations > 0 ? cost / registrations : null;
+      const cpo = orders > 0 ? cost / orders : null;
       const roi = cost > 0 ? ((revenue - cost) / cost) * 100 : null;
-      return { channel: c, cost, manualRevenue, utmRevenue, revenue, clicks, cpc, roi, linkedUtms };
+      return { channel: c, cost, manualRevenue, utmRevenue, revenue, clicks, cpc, registrations, cpr, orders, cpo, roi, linkedUtms };
     });
     setAggs(list);
     setAllUtms((utms ?? []) as UtmSource[]);
@@ -200,6 +219,10 @@ export function MarketingManager() {
                   <TableHead className="text-xs text-right">Расход</TableHead>
                   <TableHead className="text-xs text-right">Клики</TableHead>
                   <TableHead className="text-xs text-right">CPC</TableHead>
+                  <TableHead className="text-xs text-right" title="Стоимость регистрации">Рег.</TableHead>
+                  <TableHead className="text-xs text-right" title="Стоимость регистрации = расход / регистрации">CPR</TableHead>
+                  <TableHead className="text-xs text-right" title="Количество оплат">Заказы</TableHead>
+                  <TableHead className="text-xs text-right" title="Стоимость заказа = расход / заказы">CPO</TableHead>
                   <TableHead className="text-xs text-right">Доход</TableHead>
                   <TableHead className="text-xs text-right">ROI</TableHead>
                   <TableHead className="w-[200px]"></TableHead>
@@ -207,9 +230,9 @@ export function MarketingManager() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
                 ) : aggs.length === 0 ? (
-                  <TableRow><TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
                 ) : aggs.map((a) => (
                   <TableRow key={a.channel.id} className="hover:bg-transparent">
                     <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
@@ -236,6 +259,10 @@ export function MarketingManager() {
                     <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">{a.clicks.toLocaleString("ru-RU")}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">{a.cpc === null ? "—" : fmtRub(a.cpc)}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.registrations.toLocaleString("ru-RU")}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpr === null ? "—" : fmtRub(a.cpr)}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.orders.toLocaleString("ru-RU")}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpo === null ? "—" : fmtRub(a.cpo)}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">
                       <div>{fmtRub(a.revenue)}</div>
                       {a.utmRevenue > 0 && a.manualRevenue > 0 && (
