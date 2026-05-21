@@ -279,7 +279,11 @@ export function AdminPayments() {
     return true;
   }), [payments, statusFilter, utmFilter, acqFilter]);
 
+  const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (utmFilter !== "all" ? 1 : 0) + (acqFilter !== "all" ? 1 : 0);
+
   useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter]);
+
+
 
   if (loading) {
     return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
