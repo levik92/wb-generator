@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Payment {
   id: string;
@@ -279,10 +280,18 @@ export function AdminPayments() {
     return true;
   }), [payments, statusFilter, utmFilter, acqFilter]);
 
+  const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (utmFilter !== "all" ? 1 : 0) + (acqFilter !== "all" ? 1 : 0);
+
   useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter]);
 
+
+
   if (loading) {
-    return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+      </div>
+    );
   }
 
   const statusLabel = (s: string) => ({
@@ -311,42 +320,63 @@ export function AdminPayments() {
         <TabsContent value="payments">
           <Card className="bg-card border-border/50 rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg">Все платежи</CardTitle>
-              <CardDescription>
-                Платежи от физических лиц через платёжные системы — показано {filteredPayments.length} из {payments.length}
-              </CardDescription>
-              <div className="flex flex-wrap items-center gap-2 pt-2">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Filter className="w-3.5 h-3.5" /> Фильтры:
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="text-lg">Все платежи</CardTitle>
+                  <CardDescription className="text-xs">
+                    Показано {filteredPayments.length} из {payments.length}
+                  </CardDescription>
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="Статус" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все статусы</SelectItem>
-                    {statusOptions.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={utmFilter} onValueChange={setUtmFilter}>
-                  <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Источник" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все источники</SelectItem>
-                    <SelectItem value="__none__">Без источника</SelectItem>
-                    {utmOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={acqFilter} onValueChange={setAcqFilter}>
-                  <SelectTrigger className="h-8 w-[200px] text-xs"><SelectValue placeholder="Откуда узнали" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Любой ответ</SelectItem>
-                    <SelectItem value="__none__">Не отвечал</SelectItem>
-                    {acqOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                {(statusFilter !== "all" || utmFilter !== "all" || acqFilter !== "all") && (
-                  <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setStatusFilter("all"); setUtmFilter("all"); setAcqFilter("all"); }}>
-                    Сбросить
-                  </Button>
-                )}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 gap-2 shrink-0">
+                      <Filter className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Фильтры</span>
+                      {activeFiltersCount > 0 && (
+                        <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-[10px]">{activeFiltersCount}</Badge>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-[280px] p-3 space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Статус</Label>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Все статусы</SelectItem>
+                          {statusOptions.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Источник</Label>
+                      <Select value={utmFilter} onValueChange={setUtmFilter}>
+                        <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Все источники</SelectItem>
+                          <SelectItem value="__none__">Без источника</SelectItem>
+                          {utmOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">Откуда узнали</Label>
+                      <Select value={acqFilter} onValueChange={setAcqFilter}>
+                        <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Любой ответ</SelectItem>
+                          <SelectItem value="__none__">Не отвечал</SelectItem>
+                          {acqOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {activeFiltersCount > 0 && (
+                      <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setStatusFilter("all"); setUtmFilter("all"); setAcqFilter("all"); }}>
+                        Сбросить фильтры
+                      </Button>
+                    )}
+                  </PopoverContent>
+                </Popover>
               </div>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
