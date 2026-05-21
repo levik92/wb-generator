@@ -779,6 +779,42 @@ export type Database = {
           },
         ]
       }
+      marketing_channel_utm_sources: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          utm_source_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          utm_source_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          utm_source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_channel_utm_sources_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_channel_utm_sources_utm_source_id_fkey"
+            columns: ["utm_source_id"]
+            isOneToOne: false
+            referencedRelation: "utm_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_channels: {
         Row: {
           created_at: string
