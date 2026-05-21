@@ -287,7 +287,11 @@ export function AdminPayments() {
 
 
   if (loading) {
-    return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+      </div>
+    );
   }
 
   const statusLabel = (s: string) => ({
