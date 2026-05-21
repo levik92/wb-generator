@@ -358,6 +358,37 @@ function ChannelsTable({
   const metricCols = COLS.slice(1);
   const colSpan = COLS.length + 3; // grip + channel + cols + actions
 
+  const HIDDEN_STORAGE_KEY = "marketing_channels_hidden_rows_v1";
+  const [hidden, setHidden] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem(HIDDEN_STORAGE_KEY);
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    } catch { return new Set(); }
+  });
+  const [showHidden, setShowHidden] = useState(false);
+
+  useEffect(() => {
+    try { localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(hidden))); } catch {}
+  }, [hidden]);
+
+  const toggleHidden = (id: string) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const visibleAggs = useMemo(
+    () => (showHidden ? aggs : aggs.filter((a) => !hidden.has(a.channel.id))),
+    [aggs, hidden, showHidden]
+  );
+  const hiddenCount = useMemo(
+    () => aggs.reduce((n, a) => n + (hidden.has(a.channel.id) ? 1 : 0), 0),
+    [aggs, hidden]
+  );
+
   const handleReorder = (items: { id: string }[]) => {
     onReorder(items.map((i) => i.id));
   };
@@ -365,10 +396,25 @@ function ChannelsTable({
   return (
     <Card className="bg-gradient-to-br from-card to-card/60 border-border/50 rounded-xl overflow-hidden shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg">Каналы маркетинга</CardTitle>
-        <CardDescription className="mt-1">
-          Расход, клики, CPC, доход и ROI по каналам ({aggs.length}). Перетащите строки за <span className="inline-flex align-middle"><GripVertical className="w-3 h-3" /></span> для своего порядка.
-        </CardDescription>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
+            <CardTitle className="text-lg">Каналы маркетинга</CardTitle>
+            <CardDescription className="mt-1">
+              Расход, клики, CPC, доход и ROI по каналам ({visibleAggs.length}{hiddenCount > 0 ? ` из ${aggs.length}` : ""}). Перетащите строки за <span className="inline-flex align-middle"><GripVertical className="w-3 h-3" /></span> для своего порядка.
+            </CardDescription>
+          </div>
+          {hiddenCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1.5 shrink-0"
+              onClick={() => setShowHidden((v) => !v)}
+            >
+              {showHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              {showHidden ? "Скрыть скрытые" : `Показать скрытые (${hiddenCount})`}
+            </Button>
+          )}
+        </div>
       </CardHeader>
 
       {/* Desktop / tablet table */}
@@ -388,26 +434,28 @@ function ChannelsTable({
                     {c.short ?? c.label}
                   </TableHead>
                 ))}
-                <TableHead className="w-[200px]"></TableHead>
+                <TableHead className="w-[230px]"></TableHead>
               </TableRow>
             </TableHeader>
             {loading ? (
               <TableBody>
                 <TableRow><TableCell colSpan={colSpan} className="text-center text-xs text-muted-foreground py-8">Загрузка…</TableCell></TableRow>
               </TableBody>
-            ) : aggs.length === 0 ? (
+            ) : visibleAggs.length === 0 ? (
               <TableBody>
                 <TableRow><TableCell colSpan={colSpan} className="text-center text-xs text-muted-foreground py-10">Нет каналов</TableCell></TableRow>
               </TableBody>
             ) : (
-              <SortableList items={aggs.map((a) => ({ id: a.channel.id }))} onReorder={handleReorder}>
+              <SortableList items={visibleAggs.map((a) => ({ id: a.channel.id }))} onReorder={handleReorder}>
                 <TableBody>
-                  {aggs.map((a, idx) => (
+                  {visibleAggs.map((a, idx) => {
+                    const isHidden = hidden.has(a.channel.id);
+                    return (
                     <SortableItem
                       key={a.channel.id}
                       id={a.channel.id}
                       asTableRow
-                      className={cn("border-border/30 transition-colors hover:bg-muted/30", idx % 2 === 1 && "bg-muted/10")}
+                      className={cn("border-border/30 transition-colors hover:bg-muted/30", idx % 2 === 1 && "bg-muted/10", isHidden && "opacity-50")}
                     >
                       <TableCell className="text-xs font-medium whitespace-nowrap">{a.channel.name}</TableCell>
                       {COLS.map((c) => (
@@ -424,13 +472,23 @@ function ChannelsTable({
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(a.channel)}>
                             <Pencil className="w-3.5 h-3.5" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            title={isHidden ? "Показать строку" : "Скрыть строку"}
+                            onClick={() => toggleHidden(a.channel.id)}
+                          >
+                            {isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => onDelete(a.channel.id)}>
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
                       </TableCell>
                     </SortableItem>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </SortableList>
             )}
@@ -442,14 +500,16 @@ function ChannelsTable({
       <CardContent className="md:hidden px-3 pb-4 pt-0">
         {loading ? (
           <div className="text-center text-xs text-muted-foreground py-8">Загрузка…</div>
-        ) : aggs.length === 0 ? (
+        ) : visibleAggs.length === 0 ? (
           <div className="text-center text-xs text-muted-foreground py-10">Нет каналов</div>
         ) : (
-          <SortableList items={aggs.map((a) => ({ id: a.channel.id }))} onReorder={handleReorder}>
+          <SortableList items={visibleAggs.map((a) => ({ id: a.channel.id }))} onReorder={handleReorder}>
             <div className="space-y-3">
-              {aggs.map((a) => (
+              {visibleAggs.map((a) => {
+                const isHidden = hidden.has(a.channel.id);
+                return (
                 <SortableItem key={a.channel.id} id={a.channel.id}>
-                  <div className="rounded-lg border border-border/50 bg-card/80 p-3 shadow-sm">
+                  <div className={cn("rounded-lg border border-border/50 bg-card/80 p-3 shadow-sm", isHidden && "opacity-50")}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="min-w-0">
                         <div className="text-sm font-semibold truncate">{a.channel.name}</div>
@@ -458,6 +518,15 @@ function ChannelsTable({
                       <div className="flex gap-1 shrink-0">
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(a.channel)}>
                           <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title={isHidden ? "Показать строку" : "Скрыть строку"}
+                          onClick={() => toggleHidden(a.channel.id)}
+                        >
+                          {isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => onDelete(a.channel.id)}>
                           <Trash2 className="w-3.5 h-3.5" />
@@ -480,7 +549,8 @@ function ChannelsTable({
                     </div>
                   </div>
                 </SortableItem>
-              ))}
+                );
+              })}
             </div>
           </SortableList>
         )}
