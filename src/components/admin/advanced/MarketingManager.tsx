@@ -104,8 +104,12 @@ export function MarketingManager() {
     const userIds = Array.from(new Set((payments ?? []).map((p: any) => p.user_id)));
     let profMap: Record<string, string | null> = {};
     if (userIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,utm_source_id").in("id", userIds);
-      (profs ?? []).forEach((p: any) => { profMap[p.id] = p.utm_source_id; });
+      const CHUNK = 200;
+      for (let i = 0; i < userIds.length; i += CHUNK) {
+        const ids = userIds.slice(i, i + CHUNK);
+        const { data: profs } = await supabase.from("profiles").select("id,utm_source_id").in("id", ids);
+        (profs ?? []).forEach((p: any) => { profMap[p.id] = p.utm_source_id; });
+      }
     }
     const revByUtm: Record<string, number> = {};
     const ordersByUtm: Record<string, number> = {};
