@@ -262,10 +262,6 @@ export function AdminPayments() {
     return <Badge variant={info.variant}>{info.label}</Badge>;
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
-  }
-
   const statusOptions = useMemo(() => Array.from(new Set(payments.map(p => p.status))).sort(), [payments]);
   const utmOptions = useMemo(() => Array.from(new Set(payments.map(p => p.utm_name).filter(Boolean) as string[])).sort(), [payments]);
   const acqOptions = useMemo(() => Array.from(new Set(payments.map(p => p.acquisition).filter(Boolean) as string[])).sort(), [payments]);
@@ -284,6 +280,10 @@ export function AdminPayments() {
   }), [payments, statusFilter, utmFilter, acqFilter]);
 
   useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
 
   const statusLabel = (s: string) => ({
     succeeded: "Успешно", pending: "В обработке", canceled: "Отменён", expired: "Истёк", failed: "Ошибка",
