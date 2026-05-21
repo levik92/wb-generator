@@ -219,6 +219,10 @@ export function MarketingManager() {
                   <TableHead className="text-xs text-right">Расход</TableHead>
                   <TableHead className="text-xs text-right">Клики</TableHead>
                   <TableHead className="text-xs text-right">CPC</TableHead>
+                  <TableHead className="text-xs text-right" title="Стоимость регистрации">Рег.</TableHead>
+                  <TableHead className="text-xs text-right" title="Стоимость регистрации = расход / регистрации">CPR</TableHead>
+                  <TableHead className="text-xs text-right" title="Количество оплат">Заказы</TableHead>
+                  <TableHead className="text-xs text-right" title="Стоимость заказа = расход / заказы">CPO</TableHead>
                   <TableHead className="text-xs text-right">Доход</TableHead>
                   <TableHead className="text-xs text-right">ROI</TableHead>
                   <TableHead className="w-[200px]"></TableHead>
@@ -226,9 +230,9 @@ export function MarketingManager() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
                 ) : aggs.length === 0 ? (
-                  <TableRow><TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
                 ) : aggs.map((a) => (
                   <TableRow key={a.channel.id} className="hover:bg-transparent">
                     <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
@@ -255,6 +259,10 @@ export function MarketingManager() {
                     <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">{a.clicks.toLocaleString("ru-RU")}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">{a.cpc === null ? "—" : fmtRub(a.cpc)}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.registrations.toLocaleString("ru-RU")}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpr === null ? "—" : fmtRub(a.cpr)}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.orders.toLocaleString("ru-RU")}</TableCell>
+                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpo === null ? "—" : fmtRub(a.cpo)}</TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">
                       <div>{fmtRub(a.revenue)}</div>
                       {a.utmRevenue > 0 && a.manualRevenue > 0 && (
