@@ -162,7 +162,7 @@ export function UtmPaymentsDialog({ open, onOpenChange, utmSourceId, sourceName 
             )}
           </>
         )}
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
