@@ -441,7 +441,7 @@ export function AdminPayments() {
               </div>
               <Button size="sm" className="gap-2 shrink-0" onClick={() => setCreateOpen(true)}>
                 <Plus className="w-4 h-4" />
-                Создать счёт вручную
+                <span className="hidden sm:inline">Создать счёт вручную</span>
               </Button>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
