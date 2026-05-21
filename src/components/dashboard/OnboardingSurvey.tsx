@@ -33,6 +33,7 @@ const QUESTIONS: Question[] = [
       "Производитель/бренд (свой товар)",
       "Другое",
     ],
+    otherPlaceholder: "Уточните, кем вы являетесь",
   },
   {
     key: "monthly_volume",
@@ -46,6 +47,7 @@ const QUESTIONS: Question[] = [
       "16–50 карточек",
       "51+ карточек",
     ],
+    otherPlaceholder: "Уточните объём",
   },
   {
     key: "acquisition_channel",
@@ -63,6 +65,7 @@ const QUESTIONS: Question[] = [
       "Wildberries / чаты селлеров",
       "Другое",
     ],
+    otherPlaceholder: "Уточните, откуда узнали (необязательно)",
   },
 ];
 
