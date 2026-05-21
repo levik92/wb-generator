@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Check, X, ChevronLeft, ChevronRight, CreditCard, FileText, Plus } from "lucide-react";
+import { Loader2, Check, X, ChevronLeft, ChevronRight, CreditCard, FileText, Plus, Filter } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Payment {
   id: string;
@@ -45,7 +46,7 @@ interface InvoicePayment {
   is_manual?: boolean;
 }
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 25;
 
 export function AdminPayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -54,6 +55,9 @@ export function AdminPayments() {
   const [paymentsPage, setPaymentsPage] = useState(1);
   const [invoicesPage, setInvoicesPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [utmFilter, setUtmFilter] = useState<string>("all");
+  const [acqFilter, setAcqFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
@@ -262,9 +266,32 @@ export function AdminPayments() {
     return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
-  const paginatedPayments = payments.slice((paymentsPage - 1) * ITEMS_PER_PAGE, paymentsPage * ITEMS_PER_PAGE);
+  const statusOptions = useMemo(() => Array.from(new Set(payments.map(p => p.status))).sort(), [payments]);
+  const utmOptions = useMemo(() => Array.from(new Set(payments.map(p => p.utm_name).filter(Boolean) as string[])).sort(), [payments]);
+  const acqOptions = useMemo(() => Array.from(new Set(payments.map(p => p.acquisition).filter(Boolean) as string[])).sort(), [payments]);
+
+  const filteredPayments = useMemo(() => payments.filter(p => {
+    if (statusFilter !== "all" && p.status !== statusFilter) return false;
+    if (utmFilter !== "all") {
+      if (utmFilter === "__none__") { if (p.utm_name) return false; }
+      else if (p.utm_name !== utmFilter) return false;
+    }
+    if (acqFilter !== "all") {
+      if (acqFilter === "__none__") { if (p.acquisition) return false; }
+      else if (p.acquisition !== acqFilter) return false;
+    }
+    return true;
+  }), [payments, statusFilter, utmFilter, acqFilter]);
+
+  useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter]);
+
+  const statusLabel = (s: string) => ({
+    succeeded: "Успешно", pending: "В обработке", canceled: "Отменён", expired: "Истёк", failed: "Ошибка",
+  } as Record<string, string>)[s] || s;
+
+  const paginatedPayments = filteredPayments.slice((paymentsPage - 1) * ITEMS_PER_PAGE, paymentsPage * ITEMS_PER_PAGE);
   const paginatedInvoices = invoices.slice((invoicesPage - 1) * ITEMS_PER_PAGE, invoicesPage * ITEMS_PER_PAGE);
-  const totalPaymentPages = Math.ceil(payments.length / ITEMS_PER_PAGE);
+  const totalPaymentPages = Math.ceil(filteredPayments.length / ITEMS_PER_PAGE);
   const totalInvoicePages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
 
   return (
@@ -285,7 +312,42 @@ export function AdminPayments() {
           <Card className="bg-card border-border/50 rounded-2xl">
             <CardHeader>
               <CardTitle className="text-lg">Все платежи</CardTitle>
-              <CardDescription>Платежи от физических лиц через платёжные системы ({payments.length})</CardDescription>
+              <CardDescription>
+                Платежи от физических лиц через платёжные системы — показано {filteredPayments.length} из {payments.length}
+              </CardDescription>
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Filter className="w-3.5 h-3.5" /> Фильтры:
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="Статус" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все статусы</SelectItem>
+                    {statusOptions.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={utmFilter} onValueChange={setUtmFilter}>
+                  <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Источник" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все источники</SelectItem>
+                    <SelectItem value="__none__">Без источника</SelectItem>
+                    {utmOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={acqFilter} onValueChange={setAcqFilter}>
+                  <SelectTrigger className="h-8 w-[200px] text-xs"><SelectValue placeholder="Откуда узнали" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Любой ответ</SelectItem>
+                    <SelectItem value="__none__">Не отвечал</SelectItem>
+                    {acqOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                {(statusFilter !== "all" || utmFilter !== "all" || acqFilter !== "all") && (
+                  <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setStatusFilter("all"); setUtmFilter("all"); setAcqFilter("all"); }}>
+                    Сбросить
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
               <div className="overflow-x-auto">
@@ -328,7 +390,7 @@ export function AdminPayments() {
               </div>
               {totalPaymentPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <span className="text-xs text-muted-foreground">{(paymentsPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(paymentsPage * ITEMS_PER_PAGE, payments.length)} из {payments.length}</span>
+                  <span className="text-xs text-muted-foreground">{(paymentsPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(paymentsPage * ITEMS_PER_PAGE, filteredPayments.length)} из {filteredPayments.length}</span>
                   <div className="flex items-center gap-1">
                     <Button variant="outline" size="icon" className="h-8 w-8" disabled={paymentsPage === 1} onClick={() => setPaymentsPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
                     <span className="text-sm px-2">{paymentsPage} / {totalPaymentPages}</span>
