@@ -165,17 +165,17 @@ export function MarketingManager() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
-          <DialogTrigger asChild>
+        <ResponsiveDialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+          <ResponsiveDialogTrigger asChild>
             <Button size="sm" className="gap-2" onClick={() => setEditing(null)}>
               <Plus className="w-4 h-4" /> Добавить канал
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{editing ? "Редактировать канал" : "Новый канал"}</DialogTitle></DialogHeader>
+          </ResponsiveDialogTrigger>
+          <ResponsiveDialogContent className="max-w-md">
+            <ResponsiveDialogHeader><ResponsiveDialogTitle>{editing ? "Редактировать канал" : "Новый канал"}</ResponsiveDialogTitle></ResponsiveDialogHeader>
             <ChannelForm initial={editing} onSaved={() => { setOpen(false); setEditing(null); load(); }} />
-          </DialogContent>
-        </Dialog>
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2" onClick={load} disabled={loading} title="Обновить">
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
