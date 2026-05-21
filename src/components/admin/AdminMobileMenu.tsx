@@ -69,7 +69,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-5 border-b border-border">
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="flex items-center space-x-3">
               <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 rounded-lg">
                 <Zap className="w-5 h-5 text-white" />
               </div>
