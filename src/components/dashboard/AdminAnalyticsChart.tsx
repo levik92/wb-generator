@@ -635,10 +635,22 @@ export function AdminAdditionalMetrics() {
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Платные пользователи */}
-          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
-            <div className="flex items-center gap-2 mb-2">
-              <CreditCard className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-muted-foreground">Платные пользователи</span>
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px] flex flex-col">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-muted-foreground">Платные пользователи</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-[10px] gap-1"
+                onClick={() => setDetailOpen(true)}
+                title="Подробнее: новые и повторные"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Подробнее
+              </Button>
             </div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {metrics?.paidUsers?.toLocaleString('ru-RU') || 0}
