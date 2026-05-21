@@ -705,6 +705,7 @@ export function AdminAdditionalMetrics() {
           </div>
         </div>
       </CardContent>
+      <PaidUsersDetailDialog open={detailOpen} onOpenChange={setDetailOpen} dateRange={dateRange} />
     </Card>
   );
 }
