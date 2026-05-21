@@ -585,10 +585,15 @@ export function AdminUtmSources() {
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
                           {renderConv(s.registrations, s.payments)}
                         </div>
-                        <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
+                          className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center hover:bg-amber-500/10 transition-colors cursor-pointer"
+                          title="Посмотреть оплаты по источнику"
+                        >
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
                           {renderNum(s.payments, "text-amber-500")}
-                        </div>
+                        </button>
                         <div className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
                           {isStatLoading
