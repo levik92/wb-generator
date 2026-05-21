@@ -225,95 +225,14 @@ export function MarketingManager() {
         </div>
       </div>
 
-      <Card className="bg-card border-border/50 rounded-2xl">
-        <CardHeader>
-          <CardTitle className="text-lg">Каналы маркетинга</CardTitle>
-          <CardDescription>Расход, клики, CPC, доход и ROI по каналам ({aggs.length})</CardDescription>
-        </CardHeader>
-        <CardContent className="p-0 sm:p-6 sm:pt-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs">Канал</TableHead>
-                  <TableHead className="text-xs">UTM метки</TableHead>
-                  <TableHead className="text-xs text-right">Расход</TableHead>
-                  <TableHead className="text-xs text-right">Клики</TableHead>
-                  <TableHead className="text-xs text-right">CPC</TableHead>
-                  <TableHead className="text-xs text-right" title="Стоимость регистрации">Рег.</TableHead>
-                  <TableHead className="text-xs text-right" title="Стоимость регистрации = расход / регистрации">CPR</TableHead>
-                  <TableHead className="text-xs text-right" title="Количество оплат">Заказы</TableHead>
-                  <TableHead className="text-xs text-right" title="Стоимость заказа = расход / заказы">CPO</TableHead>
-                  <TableHead className="text-xs text-right">Доход</TableHead>
-                  <TableHead className="text-xs text-right">ROI</TableHead>
-                  <TableHead className="w-[200px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
-                ) : aggs.length === 0 ? (
-                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
-                ) : aggs.map((a) => (
-                  <TableRow key={a.channel.id} className="hover:bg-transparent">
-                    <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex items-center gap-1 flex-nowrap whitespace-nowrap">
-                        {a.linkedUtms.length === 0 ? (
-                          <span className="text-muted-foreground">—</span>
-                        ) : (
-                          <>
-                            <Badge variant="secondary" className="text-[10px] font-normal whitespace-nowrap">{a.linkedUtms[0].name}</Badge>
-                            {a.linkedUtms.length > 1 && (
-                              <Badge
-                                variant="secondary"
-                                className="text-[10px] font-normal cursor-help whitespace-nowrap"
-                                title={a.linkedUtms.slice(1).map((u) => u.name).join(", ")}
-                              >
-                                +{a.linkedUtms.length - 1}
-                              </Badge>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.clicks.toLocaleString("ru-RU")}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpc === null ? "—" : fmtRub(a.cpc)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.registrations.toLocaleString("ru-RU")}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpr === null ? "—" : fmtRub(a.cpr)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.orders.toLocaleString("ru-RU")}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpo === null ? "—" : fmtRub(a.cpo)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">
-                      <div>{fmtRub(a.revenue)}</div>
-                      {a.utmRevenue > 0 && a.manualRevenue > 0 && (
-                        <div className="text-[10px] text-muted-foreground">UTM {fmtRub(a.utmRevenue)} + ручн. {fmtRub(a.manualRevenue)}</div>
-                      )}
-                    </TableCell>
-                    <TableCell className={`text-xs text-right font-semibold whitespace-nowrap ${a.roi === null ? "text-muted-foreground" : a.roi >= 0 ? "text-emerald-500" : "text-destructive"}`}>
-                      {a.roi === null ? "—" : `${a.roi.toFixed(1)}%`}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 justify-end">
-                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => setUtmDialog({ channel: a.channel, linked: a.linkedUtms })}>
-                          <Link2 className="w-3 h-3" /> UTM
-                        </Button>
-                        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setRevenueDialog({ channel: a.channel })}>Доход</Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(a.channel); setOpen(true); }}>
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(a.channel.id)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <ChannelsTable
+        aggs={aggs}
+        loading={loading}
+        onEdit={(c) => { setEditing(c); setOpen(true); }}
+        onDelete={handleDelete}
+        onUtm={(c, linked) => setUtmDialog({ channel: c, linked })}
+        onRevenue={(c) => setRevenueDialog({ channel: c })}
+      />
 
       <ResponsiveDialog open={!!revenueDialog} onOpenChange={(o) => !o && setRevenueDialog(null)}>
         <ResponsiveDialogContent className="max-w-md">
