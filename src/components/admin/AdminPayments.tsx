@@ -122,15 +122,36 @@ export function AdminPayments() {
         .limit(500);
       if (error) throw error;
 
-      // Get user emails
       const userIds = [...new Set((data || []).map(p => p.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .in('id', userIds);
+      const [profilesRes, surveysRes] = await Promise.all([
+        supabase.from('profiles').select('id, email, utm_source_id').in('id', userIds),
+        supabase.from('user_survey_responses').select('user_id, answer')
+          .in('user_id', userIds).eq('question_key', 'acquisition_channel'),
+      ]);
 
-      const emailMap = new Map(profiles?.map(p => [p.id, p.email]) || []);
-      setPayments((data || []).map(p => ({ ...p, user_email: emailMap.get(p.user_id) || 'N/A' })));
+      const profiles = (profilesRes.data || []) as { id: string; email: string; utm_source_id: string | null }[];
+      const utmIds = [...new Set(profiles.map(p => p.utm_source_id).filter(Boolean) as string[])];
+      let utmMap = new Map<string, string>();
+      if (utmIds.length > 0) {
+        const { data: utms } = await supabase.from('utm_sources').select('id, name').in('id', utmIds);
+        utmMap = new Map((utms || []).map((u: any) => [u.id, u.name]));
+      }
+
+      const emailMap = new Map(profiles.map(p => [p.id, p.email]));
+      const utmByUser = new Map(profiles.map(p => [p.id, p.utm_source_id ? utmMap.get(p.utm_source_id) || null : null]));
+      const surveyMap = new Map<string, string>();
+      for (const r of (surveysRes.data || []) as { user_id: string; answer: string }[]) {
+        if (!surveyMap.has(r.user_id)) {
+          surveyMap.set(r.user_id, r.answer.startsWith('Другое:') ? r.answer.replace(/^Другое:\s*/, '') : r.answer);
+        }
+      }
+
+      setPayments((data || []).map(p => ({
+        ...p,
+        user_email: emailMap.get(p.user_id) || 'N/A',
+        utm_name: utmByUser.get(p.user_id) || undefined,
+        acquisition: surveyMap.get(p.user_id) || undefined,
+      })));
     } catch (error) {
       console.error('Error loading payments:', error);
     }
