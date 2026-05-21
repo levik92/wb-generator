@@ -256,18 +256,18 @@ export function MarketingManager() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!revenueDialog} onOpenChange={(o) => !o && setRevenueDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Ручной доход канала «{revenueDialog?.channel.name}»</DialogTitle></DialogHeader>
+      <ResponsiveDialog open={!!revenueDialog} onOpenChange={(o) => !o && setRevenueDialog(null)}>
+        <ResponsiveDialogContent className="max-w-md">
+          <ResponsiveDialogHeader><ResponsiveDialogTitle>Ручной доход канала «{revenueDialog?.channel.name}»</ResponsiveDialogTitle></ResponsiveDialogHeader>
           {revenueDialog && (
             <RevenuesEditor channel={revenueDialog.channel} onChange={load} onClose={() => setRevenueDialog(null)} />
           )}
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
 
-      <Dialog open={!!utmDialog} onOpenChange={(o) => !o && setUtmDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>UTM метки канала «{utmDialog?.channel.name}»</DialogTitle></DialogHeader>
+      <ResponsiveDialog open={!!utmDialog} onOpenChange={(o) => !o && setUtmDialog(null)}>
+        <ResponsiveDialogContent className="max-w-md">
+          <ResponsiveDialogHeader><ResponsiveDialogTitle>UTM метки канала «{utmDialog?.channel.name}»</ResponsiveDialogTitle></ResponsiveDialogHeader>
           {utmDialog && (
             <UtmLinker
               channel={utmDialog.channel}
@@ -276,8 +276,8 @@ export function MarketingManager() {
               onSaved={() => { setUtmDialog(null); load(); }}
             />
           )}
-        </DialogContent>
-      </Dialog>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
     </div>
   );
 }
