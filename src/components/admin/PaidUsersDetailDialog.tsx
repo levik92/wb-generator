@@ -156,34 +156,34 @@ export function PaidUsersDetailDialog({ open, onOpenChange, dateRange }: PaidUse
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Платные пользователи — детализация</DialogTitle>
-          <DialogDescription>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="max-w-2xl">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>Платные пользователи — детализация</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
             Разбивка оплат по новым и повторным платящим пользователям за выбранный период
-          </DialogDescription>
-        </DialogHeader>
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
 
         {loading ? (
           <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
         ) : (
           <Tabs defaultValue="new" className="w-full">
-            <TabsList className="grid grid-cols-2 mb-3">
-              <TabsTrigger value="new" className="gap-2 text-xs">
-                <UserPlus className="w-3.5 h-3.5" />
-                Новые ({newUsers.length}) · {fmtRub(newTotal)}
+            <TabsList className="grid grid-cols-2 mb-3 h-auto">
+              <TabsTrigger value="new" className="gap-1.5 text-[11px] sm:text-xs px-2 py-1.5 whitespace-normal sm:whitespace-nowrap">
+                <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                <span>Новые ({newUsers.length}) · {fmtRub(newTotal)}</span>
               </TabsTrigger>
-              <TabsTrigger value="repeat" className="gap-2 text-xs">
-                <Repeat className="w-3.5 h-3.5" />
-                Повторные ({repeatUsers.length}) · {fmtRub(repeatTotal)}
+              <TabsTrigger value="repeat" className="gap-1.5 text-[11px] sm:text-xs px-2 py-1.5 whitespace-normal sm:whitespace-nowrap">
+                <Repeat className="w-3.5 h-3.5 shrink-0" />
+                <span>Повторные ({repeatUsers.length}) · {fmtRub(repeatTotal)}</span>
               </TabsTrigger>
             </TabsList>
             <TabsContent value="new">{renderTable(newUsers)}</TabsContent>
             <TabsContent value="repeat">{renderTable(repeatUsers)}</TabsContent>
           </Tabs>
         )}
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
