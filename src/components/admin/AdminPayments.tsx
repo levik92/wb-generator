@@ -277,6 +277,8 @@ export function AdminPayments() {
                       <TableHead className="text-xs">Сумма</TableHead>
                       <TableHead className="text-xs">Токены</TableHead>
                       <TableHead className="text-xs">Провайдер</TableHead>
+                      <TableHead className="text-xs">Источник</TableHead>
+                      <TableHead className="text-xs">Откуда узнали</TableHead>
                       <TableHead className="text-xs">Статус</TableHead>
                       <TableHead className="text-xs">Дата</TableHead>
                     </TableRow>
@@ -289,6 +291,12 @@ export function AdminPayments() {
                         <TableCell className="text-xs">{p.amount}₽</TableCell>
                         <TableCell className="text-xs">{p.tokens_amount}</TableCell>
                         <TableCell className="text-xs capitalize">{p.payment_provider || 'yookassa'}</TableCell>
+                        <TableCell className="text-xs max-w-[140px] truncate">
+                          {p.utm_name ? <Badge variant="outline" className="text-[10px]">{p.utm_name}</Badge> : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-xs max-w-[140px] truncate" title={p.acquisition || ''}>
+                          {p.acquisition || <span className="text-muted-foreground">—</span>}
+                        </TableCell>
                         <TableCell>{getStatusBadge(p.status)}</TableCell>
                         <TableCell className="text-xs whitespace-nowrap">
                           {new Date(p.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
