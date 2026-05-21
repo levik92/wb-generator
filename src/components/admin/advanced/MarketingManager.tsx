@@ -249,6 +249,7 @@ export function MarketingManager() {
         onDelete={handleDelete}
         onUtm={(c, linked) => setUtmDialog({ channel: c, linked })}
         onRevenue={(c) => setRevenueDialog({ channel: c })}
+        onReorder={handleReorder}
       />
 
       <ResponsiveDialog open={!!revenueDialog} onOpenChange={(o) => !o && setRevenueDialog(null)}>
