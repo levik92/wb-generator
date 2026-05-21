@@ -17,6 +17,7 @@ interface Question {
   subtitle: string;
   icon: any;
   options: string[];
+  otherPlaceholder?: string;
 }
 
 const QUESTIONS: Question[] = [
