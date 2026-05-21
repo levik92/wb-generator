@@ -714,6 +714,13 @@ export function AdminUtmSources() {
           </ResponsiveDialogFooter>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
+
+      <UtmPaymentsDialog
+        open={!!paymentsDialog}
+        onOpenChange={(v) => !v && setPaymentsDialog(null)}
+        utmSourceId={paymentsDialog?.id || null}
+        sourceName={paymentsDialog?.name || ""}
+      />
     </div>
   );
 }
