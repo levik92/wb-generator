@@ -62,6 +62,7 @@ export function AdminUtmSources() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => loadHiddenIds());
   const [showHidden, setShowHidden] = useState(false);
+  const [paymentsDialog, setPaymentsDialog] = useState<{ id: string; name: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   
   // Form
