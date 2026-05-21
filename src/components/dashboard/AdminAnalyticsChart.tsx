@@ -485,6 +485,7 @@ export function AdminAdditionalMetrics() {
   });
   const [isSelectingRange, setIsSelectingRange] = useState(false);
   const [pendingRange, setPendingRange] = useState<DateRange | undefined>(undefined);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     // Загружаем данные только когда выбран полный диапазон и мы не в процессе выбора
