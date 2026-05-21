@@ -65,7 +65,7 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
           <Menu className="h-5 w-5 text-muted-foreground" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 p-0 bg-card">
+      <SheetContent side="left" className="w-80 p-0 bg-card [&>button]:top-[30px]">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-5 border-b border-border">
