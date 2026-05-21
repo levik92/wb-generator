@@ -822,6 +822,7 @@ export type Database = {
           is_active: boolean
           name: string
           notes: string | null
+          sort_order: number
           tag: string | null
         }
         Insert: {
@@ -830,6 +831,7 @@ export type Database = {
           is_active?: boolean
           name: string
           notes?: string | null
+          sort_order?: number
           tag?: string | null
         }
         Update: {
@@ -838,6 +840,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           notes?: string | null
+          sort_order?: number
           tag?: string | null
         }
         Relationships: []

@@ -41,6 +41,7 @@ export interface MarketingChannel {
   tag: string | null;
   notes: string | null;
   is_active: boolean;
+  sort_order?: number;
 }
 
 export interface MarketingRevenue {
