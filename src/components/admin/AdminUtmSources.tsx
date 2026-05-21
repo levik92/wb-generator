@@ -617,12 +617,17 @@ export function AdminUtmSources() {
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
                           {renderNum(s.payments, "text-amber-500")}
                         </button>
-                        <div className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
+                          className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1 hover:bg-violet-500/10 transition-colors cursor-pointer"
+                          title="Посмотреть оплаты по источнику"
+                        >
                           <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
                           {isStatLoading
                             ? <Loader2 className="w-4 h-4 mx-auto animate-spin text-violet-500" />
                             : <p className="text-base font-bold text-violet-500">{formatRub(s.revenue)}</p>}
-                        </div>
+                        </button>
                       </div>
                       
                       {/* Mobile conversion row */}
