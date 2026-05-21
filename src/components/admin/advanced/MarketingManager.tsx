@@ -19,7 +19,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Pencil, RefreshCw, Link2, GripVertical } from "lucide-react";
+import { Plus, Trash2, Pencil, RefreshCw, Link2, GripVertical, EyeOff, Eye } from "lucide-react";
 import { SortableList, SortableItem } from "@/components/admin/SortableList";
 import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
