@@ -115,38 +115,58 @@ export function AdminPayments() {
 
   const loadPayments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
+      // Paginate ALL payments (bypass 1000-row Supabase limit)
+      const PAGE = 1000;
+      const all: any[] = [];
+      for (let offset = 0; ; offset += PAGE) {
+        const { data, error } = await supabase
+          .from('payments')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + PAGE - 1);
+        if (error) throw error;
+        const rows = data || [];
+        all.push(...rows);
+        if (rows.length < PAGE) break;
+      }
 
-      const userIds = [...new Set((data || []).map(p => p.user_id))];
-      const [profilesRes, surveysRes] = await Promise.all([
-        supabase.from('profiles').select('id, email, utm_source_id').in('id', userIds),
-        supabase.from('user_survey_responses').select('user_id, answer')
-          .in('user_id', userIds).eq('question_key', 'acquisition_channel'),
-      ]);
+      const userIds = [...new Set(all.map(p => p.user_id))];
 
-      const profiles = (profilesRes.data || []) as { id: string; email: string; utm_source_id: string | null }[];
+      // Chunk .in() lookups to avoid URL length issues and per-request 1000 limits
+      const CHUNK = 200;
+      const profiles: { id: string; email: string; utm_source_id: string | null }[] = [];
+      const surveys: { user_id: string; answer: string }[] = [];
+      for (let i = 0; i < userIds.length; i += CHUNK) {
+        const chunk = userIds.slice(i, i + CHUNK);
+        const [pr, sr] = await Promise.all([
+          supabase.from('profiles').select('id, email, utm_source_id').in('id', chunk),
+          supabase.from('user_survey_responses').select('user_id, answer')
+            .in('user_id', chunk).eq('question_key', 'acquisition_channel'),
+        ]);
+        profiles.push(...((pr.data || []) as any[]));
+        surveys.push(...((sr.data || []) as any[]));
+      }
+
       const utmIds = [...new Set(profiles.map(p => p.utm_source_id).filter(Boolean) as string[])];
       let utmMap = new Map<string, string>();
       if (utmIds.length > 0) {
-        const { data: utms } = await supabase.from('utm_sources').select('id, name').in('id', utmIds);
-        utmMap = new Map((utms || []).map((u: any) => [u.id, u.name]));
+        for (let i = 0; i < utmIds.length; i += CHUNK) {
+          const chunk = utmIds.slice(i, i + CHUNK);
+          const { data: utms } = await supabase.from('utm_sources').select('id, name').in('id', chunk);
+          for (const u of (utms || []) as any[]) utmMap.set(u.id, u.name);
+        }
       }
 
       const emailMap = new Map(profiles.map(p => [p.id, p.email]));
       const utmByUser = new Map(profiles.map(p => [p.id, p.utm_source_id ? utmMap.get(p.utm_source_id) || null : null]));
       const surveyMap = new Map<string, string>();
-      for (const r of (surveysRes.data || []) as { user_id: string; answer: string }[]) {
+      for (const r of surveys) {
         if (!surveyMap.has(r.user_id)) {
           surveyMap.set(r.user_id, r.answer.startsWith('Другое:') ? r.answer.replace(/^Другое:\s*/, '') : r.answer);
         }
       }
 
-      setPayments((data || []).map(p => ({
+      setPayments(all.map(p => ({
         ...p,
         user_email: emailMap.get(p.user_id) || 'N/A',
         utm_name: utmByUser.get(p.user_id) || undefined,
