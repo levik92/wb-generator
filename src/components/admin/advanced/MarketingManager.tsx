@@ -93,7 +93,7 @@ export function MarketingManager() {
       payments,
       regs,
     ] = await Promise.all([
-      supabase.from("marketing_channels").select("*").order("name"),
+      supabase.from("marketing_channels").select("*").order("sort_order", { ascending: true }).order("name"),
       supabase.from("expenses").select("*").eq("category", "marketing").gte("expense_date", from).lte("expense_date", to),
       supabase.from("marketing_revenues").select("*").gte("period_month", from).lte("period_month", to),
       supabase.from("utm_sources").select("id,name,utm_source,utm_medium,utm_campaign"),
