@@ -560,7 +560,7 @@ export function AdminUtmSources() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={cn("h-8 w-8", source.is_pinned && "text-amber-500 hover:text-amber-600")}
+                            className={cn("h-8 w-8", source.is_pinned && "text-amber-500 hover:bg-orange-500 hover:text-white")}
                             onClick={() => handleTogglePin(source)}
                             title={source.is_pinned ? "Открепить" : "Закрепить наверх"}
                           >
