@@ -81,7 +81,8 @@ export function AdminUtmSources() {
   };
 
   const fetchStatsForOne = async (source: UtmSource): Promise<UtmStats> => {
-    const [visitsRes, regsRes, utmProfilesRes] = await Promise.all([
+    // Visits and registrations: exact counts via head requests
+    const [visitsRes, regsRes] = await Promise.all([
       supabase
         .from('utm_visits')
         .select('id', { count: 'exact', head: true })
@@ -90,32 +91,54 @@ export function AdminUtmSources() {
         .from('profiles')
         .select('id', { count: 'exact', head: true })
         .eq('utm_source_id', source.id),
-      supabase
+    ]);
+
+    // Fetch ALL attributed profile ids (paginate to bypass 1000-row Supabase limit)
+    const PROFILE_PAGE = 1000;
+    const userIds: string[] = [];
+    const expected = regsRes.count ?? null;
+    for (let offset = 0; ; offset += PROFILE_PAGE) {
+      const { data, error } = await supabase
         .from('profiles')
         .select('id')
-        .eq('utm_source_id', source.id),
-    ]);
+        .eq('utm_source_id', source.id)
+        .order('id', { ascending: true })
+        .range(offset, offset + PROFILE_PAGE - 1);
+      if (error) {
+        console.error('UTM profile ids fetch error:', error);
+        break;
+      }
+      const chunk = (data || []).map((p: any) => p.id);
+      userIds.push(...chunk);
+      if (chunk.length < PROFILE_PAGE) break;
+      if (expected !== null && userIds.length >= expected) break;
+    }
 
     let paymentsCount = 0;
     let revenue = 0;
-    const utmProfiles = utmProfilesRes.data;
-    if (utmProfiles && utmProfiles.length > 0) {
-      const userIds = utmProfiles.map(p => p.id);
-      // Batch .in() to avoid hitting URL length limits when there are many users.
-      const CHUNK = 150;
+    if (userIds.length > 0) {
+      const CHUNK = 100;
+      const PAY_PAGE = 1000;
       for (let i = 0; i < userIds.length; i += CHUNK) {
         const chunk = userIds.slice(i, i + CHUNK);
-        const { data: paid, error: payErr } = await supabase
-          .from('payments')
-          .select('amount')
-          .in('user_id', chunk)
-          .eq('status', 'succeeded');
-        if (payErr) {
-          console.error('UTM payments fetch error:', payErr);
-          continue;
+        // Paginate payments per chunk in case > 1000 rows
+        for (let payOffset = 0; ; payOffset += PAY_PAGE) {
+          const { data: paid, error: payErr } = await supabase
+            .from('payments')
+            .select('amount')
+            .in('user_id', chunk)
+            .eq('status', 'succeeded')
+            .order('created_at', { ascending: false })
+            .range(payOffset, payOffset + PAY_PAGE - 1);
+          if (payErr) {
+            console.error('UTM payments fetch error:', payErr);
+            break;
+          }
+          const rows = paid || [];
+          paymentsCount += rows.length;
+          revenue += rows.reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
+          if (rows.length < PAY_PAGE) break;
         }
-        paymentsCount += paid?.length || 0;
-        revenue += (paid || []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
       }
     }
 

@@ -33,29 +33,50 @@ export function UtmPaymentsDialog({ open, onOpenChange, utmSourceId, sourceName 
     (async () => {
       setLoading(true);
       try {
-        const { data: profs } = await supabase
-          .from("profiles").select("id, email").eq("utm_source_id", utmSourceId);
-        const list = (profs || []) as { id: string; email: string }[];
+        // Paginate profiles to bypass 1000-row Supabase limit
+        const PROFILE_PAGE = 1000;
+        const list: { id: string; email: string }[] = [];
+        for (let offset = 0; ; offset += PROFILE_PAGE) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("id, email")
+            .eq("utm_source_id", utmSourceId)
+            .order("id", { ascending: true })
+            .range(offset, offset + PROFILE_PAGE - 1);
+          if (error) { console.error("UTM payments profiles error:", error); break; }
+          const rows = (data || []) as { id: string; email: string }[];
+          list.push(...rows);
+          if (rows.length < PROFILE_PAGE) break;
+          if (cancelled) return;
+        }
         const emailMap = new Map(list.map(p => [p.id, p.email]));
         const ids = list.map(p => p.id);
         const all: PayRow[] = [];
-        const CHUNK = 150;
+        const CHUNK = 100;
+        const PAY_PAGE = 1000;
         for (let i = 0; i < ids.length; i += CHUNK) {
           const chunk = ids.slice(i, i + CHUNK);
-          const { data: pays } = await supabase
-            .from("payments")
-            .select("id, user_id, amount, created_at, package_name")
-            .in("user_id", chunk)
-            .eq("status", "succeeded")
-            .order("created_at", { ascending: false });
-          for (const p of (pays || []) as any[]) {
-            all.push({
-              id: p.id,
-              email: emailMap.get(p.user_id) || "—",
-              amount: Number(p.amount || 0),
-              created_at: p.created_at,
-              package_name: p.package_name,
-            });
+          for (let payOffset = 0; ; payOffset += PAY_PAGE) {
+            const { data: pays, error: payErr } = await supabase
+              .from("payments")
+              .select("id, user_id, amount, created_at, package_name")
+              .in("user_id", chunk)
+              .eq("status", "succeeded")
+              .order("created_at", { ascending: false })
+              .range(payOffset, payOffset + PAY_PAGE - 1);
+            if (payErr) { console.error("UTM payments fetch error:", payErr); break; }
+            const rows = (pays || []) as any[];
+            for (const p of rows) {
+              all.push({
+                id: p.id,
+                email: emailMap.get(p.user_id) || "—",
+                amount: Number(p.amount || 0),
+                created_at: p.created_at,
+                package_name: p.package_name,
+              });
+            }
+            if (rows.length < PAY_PAGE) break;
+            if (cancelled) return;
           }
         }
         all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
