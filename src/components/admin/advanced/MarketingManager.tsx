@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,16 @@ import {
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Pencil, RefreshCw, Link2 } from "lucide-react";
+import { Plus, Trash2, Pencil, RefreshCw, Link2, Settings2, Eye, EyeOff } from "lucide-react";
+import { SortableList, SortableItem } from "@/components/admin/SortableList";
 import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { fmtRub, toIsoDate, startOfMonth, endOfMonth, MarketingChannel, MarketingRevenue } from "@/hooks/useFinanceData";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface UtmSource {
   id: string;
@@ -222,95 +225,14 @@ export function MarketingManager() {
         </div>
       </div>
 
-      <Card className="bg-card border-border/50 rounded-2xl">
-        <CardHeader>
-          <CardTitle className="text-lg">Каналы маркетинга</CardTitle>
-          <CardDescription>Расход, клики, CPC, доход и ROI по каналам ({aggs.length})</CardDescription>
-        </CardHeader>
-        <CardContent className="p-0 sm:p-6 sm:pt-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs">Канал</TableHead>
-                  <TableHead className="text-xs">UTM метки</TableHead>
-                  <TableHead className="text-xs text-right">Расход</TableHead>
-                  <TableHead className="text-xs text-right">Клики</TableHead>
-                  <TableHead className="text-xs text-right">CPC</TableHead>
-                  <TableHead className="text-xs text-right" title="Стоимость регистрации">Рег.</TableHead>
-                  <TableHead className="text-xs text-right" title="Стоимость регистрации = расход / регистрации">CPR</TableHead>
-                  <TableHead className="text-xs text-right" title="Количество оплат">Заказы</TableHead>
-                  <TableHead className="text-xs text-right" title="Стоимость заказа = расход / заказы">CPO</TableHead>
-                  <TableHead className="text-xs text-right">Доход</TableHead>
-                  <TableHead className="text-xs text-right">ROI</TableHead>
-                  <TableHead className="w-[200px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-6">Загрузка…</TableCell></TableRow>
-                ) : aggs.length === 0 ? (
-                  <TableRow><TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-8">Нет каналов</TableCell></TableRow>
-                ) : aggs.map((a) => (
-                  <TableRow key={a.channel.id} className="hover:bg-transparent">
-                    <TableCell className="text-xs font-medium">{a.channel.name}</TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex items-center gap-1 flex-nowrap whitespace-nowrap">
-                        {a.linkedUtms.length === 0 ? (
-                          <span className="text-muted-foreground">—</span>
-                        ) : (
-                          <>
-                            <Badge variant="secondary" className="text-[10px] font-normal whitespace-nowrap">{a.linkedUtms[0].name}</Badge>
-                            {a.linkedUtms.length > 1 && (
-                              <Badge
-                                variant="secondary"
-                                className="text-[10px] font-normal cursor-help whitespace-nowrap"
-                                title={a.linkedUtms.slice(1).map((u) => u.name).join(", ")}
-                              >
-                                +{a.linkedUtms.length - 1}
-                              </Badge>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.clicks.toLocaleString("ru-RU")}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpc === null ? "—" : fmtRub(a.cpc)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.registrations.toLocaleString("ru-RU")}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpr === null ? "—" : fmtRub(a.cpr)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.orders.toLocaleString("ru-RU")}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">{a.cpo === null ? "—" : fmtRub(a.cpo)}</TableCell>
-                    <TableCell className="text-xs text-right whitespace-nowrap">
-                      <div>{fmtRub(a.revenue)}</div>
-                      {a.utmRevenue > 0 && a.manualRevenue > 0 && (
-                        <div className="text-[10px] text-muted-foreground">UTM {fmtRub(a.utmRevenue)} + ручн. {fmtRub(a.manualRevenue)}</div>
-                      )}
-                    </TableCell>
-                    <TableCell className={`text-xs text-right font-semibold whitespace-nowrap ${a.roi === null ? "text-muted-foreground" : a.roi >= 0 ? "text-emerald-500" : "text-destructive"}`}>
-                      {a.roi === null ? "—" : `${a.roi.toFixed(1)}%`}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1 justify-end">
-                        <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => setUtmDialog({ channel: a.channel, linked: a.linkedUtms })}>
-                          <Link2 className="w-3 h-3" /> UTM
-                        </Button>
-                        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setRevenueDialog({ channel: a.channel })}>Доход</Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(a.channel); setOpen(true); }}>
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(a.channel.id)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <ChannelsTable
+        aggs={aggs}
+        loading={loading}
+        onEdit={(c) => { setEditing(c); setOpen(true); }}
+        onDelete={handleDelete}
+        onUtm={(c, linked) => setUtmDialog({ channel: c, linked })}
+        onRevenue={(c) => setRevenueDialog({ channel: c })}
+      />
 
       <ResponsiveDialog open={!!revenueDialog} onOpenChange={(o) => !o && setRevenueDialog(null)}>
         <ResponsiveDialogContent className="max-w-md">
@@ -335,6 +257,266 @@ export function MarketingManager() {
         </ResponsiveDialogContent>
       </ResponsiveDialog>
     </div>
+  );
+}
+
+// ─── Channels table with reorderable / hideable columns ──────────────────
+type ColKey = "utms" | "cost" | "clicks" | "cpc" | "regs" | "cpr" | "orders" | "cpo" | "revenue" | "roi";
+
+interface ColDef {
+  key: ColKey;
+  label: string;
+  short?: string;
+  title?: string;
+  align?: "left" | "right";
+  render: (a: ChannelAgg) => React.ReactNode;
+}
+
+const STORAGE_KEY = "marketing_table_cols_v1";
+const DEFAULT_ORDER: ColKey[] = ["utms", "cost", "clicks", "cpc", "regs", "cpr", "orders", "cpo", "revenue", "roi"];
+
+function ChannelsTable({
+  aggs,
+  loading,
+  onEdit,
+  onDelete,
+  onUtm,
+  onRevenue,
+}: {
+  aggs: ChannelAgg[];
+  loading: boolean;
+  onEdit: (c: MarketingChannel) => void;
+  onDelete: (id: string) => void;
+  onUtm: (c: MarketingChannel, linked: UtmSource[]) => void;
+  onRevenue: (c: MarketingChannel) => void;
+}) {
+  const [order, setOrder] = useState<ColKey[]>(DEFAULT_ORDER);
+  const [hidden, setHidden] = useState<Set<ColKey>>(new Set());
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.order)) {
+          const valid = parsed.order.filter((k: string) => DEFAULT_ORDER.includes(k as ColKey)) as ColKey[];
+          const merged = [...valid, ...DEFAULT_ORDER.filter((k) => !valid.includes(k))];
+          setOrder(merged);
+        }
+        if (Array.isArray(parsed.hidden)) {
+          setHidden(new Set(parsed.hidden.filter((k: string) => DEFAULT_ORDER.includes(k as ColKey))));
+        }
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ order, hidden: Array.from(hidden) })); } catch {}
+  }, [order, hidden]);
+
+  const COLS: Record<ColKey, ColDef> = useMemo(() => ({
+    utms: {
+      key: "utms", label: "UTM метки", align: "left",
+      render: (a) => (
+        <div className="flex items-center gap-1 flex-nowrap whitespace-nowrap">
+          {a.linkedUtms.length === 0 ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            <>
+              <Badge variant="secondary" className="text-[10px] font-normal whitespace-nowrap">{a.linkedUtms[0].name}</Badge>
+              {a.linkedUtms.length > 1 && (
+                <Badge variant="secondary" className="text-[10px] font-normal cursor-help whitespace-nowrap" title={a.linkedUtms.slice(1).map((u) => u.name).join(", ")}>
+                  +{a.linkedUtms.length - 1}
+                </Badge>
+              )}
+            </>
+          )}
+        </div>
+      ),
+    },
+    cost: { key: "cost", label: "Расход", align: "right", render: (a) => <span className="tabular-nums">{fmtRub(a.cost)}</span> },
+    clicks: { key: "clicks", label: "Клики", align: "right", render: (a) => <span className="tabular-nums">{a.clicks.toLocaleString("ru-RU")}</span> },
+    cpc: { key: "cpc", label: "CPC", title: "Cost per click", align: "right", render: (a) => <span className="tabular-nums">{a.cpc === null ? "—" : fmtRub(a.cpc)}</span> },
+    regs: { key: "regs", label: "Регистрации", short: "Рег.", align: "right", render: (a) => <span className="tabular-nums">{a.registrations.toLocaleString("ru-RU")}</span> },
+    cpr: { key: "cpr", label: "CPR", title: "Стоимость регистрации", align: "right", render: (a) => <span className="tabular-nums">{a.cpr === null ? "—" : fmtRub(a.cpr)}</span> },
+    orders: { key: "orders", label: "Заказы", align: "right", render: (a) => <span className="tabular-nums">{a.orders.toLocaleString("ru-RU")}</span> },
+    cpo: { key: "cpo", label: "CPO", title: "Стоимость заказа", align: "right", render: (a) => <span className="tabular-nums">{a.cpo === null ? "—" : fmtRub(a.cpo)}</span> },
+    revenue: {
+      key: "revenue", label: "Доход", align: "right",
+      render: (a) => (
+        <div className="tabular-nums">
+          <div>{fmtRub(a.revenue)}</div>
+          {a.utmRevenue > 0 && a.manualRevenue > 0 && (
+            <div className="text-[10px] text-muted-foreground">UTM {fmtRub(a.utmRevenue)} + ручн. {fmtRub(a.manualRevenue)}</div>
+          )}
+        </div>
+      ),
+    },
+    roi: {
+      key: "roi", label: "ROI", align: "right",
+      render: (a) => (
+        <span className={cn("font-semibold tabular-nums", a.roi === null ? "text-muted-foreground" : a.roi >= 0 ? "text-emerald-500" : "text-destructive")}>
+          {a.roi === null ? "—" : `${a.roi.toFixed(1)}%`}
+        </span>
+      ),
+    },
+  }), []);
+
+  const visibleCols = order.filter((k) => !hidden.has(k));
+  const colSpan = visibleCols.length + 2; // + channel + actions
+
+  const toggleHidden = (k: ColKey) => {
+    setHidden((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; });
+  };
+  const resetCols = () => { setOrder(DEFAULT_ORDER); setHidden(new Set()); };
+
+  const settingsButton = (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2 h-8">
+          <Settings2 className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline text-xs">Колонки</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-sm font-medium">Колонки</div>
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={resetCols}>Сброс</Button>
+        </div>
+        <p className="text-[11px] text-muted-foreground mb-2">Перетащите для порядка, иконка — скрыть/показать.</p>
+        <SortableList items={order.map((k) => ({ id: k }))} onReorder={(items) => setOrder(items.map((i) => i.id as ColKey))}>
+          <div className="space-y-1">
+            {order.map((k) => {
+              const isHidden = hidden.has(k);
+              return (
+                <SortableItem key={k} id={k}>
+                  <div className={cn("flex items-center justify-between gap-2 px-2 py-1.5 rounded-md border border-border/50 bg-card", isHidden && "opacity-50")}>
+                    <span className="text-xs truncate">{COLS[k].label}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleHidden(k)}
+                      className="text-muted-foreground hover:text-foreground p-1 rounded"
+                      aria-label={isHidden ? "Показать" : "Скрыть"}
+                    >
+                      {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </SortableItem>
+              );
+            })}
+          </div>
+        </SortableList>
+      </PopoverContent>
+    </Popover>
+  );
+
+  return (
+    <Card className="bg-gradient-to-br from-card to-card/60 border-border/50 rounded-2xl overflow-hidden shadow-sm">
+      <CardHeader className="flex-row items-start justify-between gap-3 space-y-0">
+        <div className="min-w-0">
+          <CardTitle className="text-lg">Каналы маркетинга</CardTitle>
+          <CardDescription className="mt-1">Расход, клики, CPC, доход и ROI по каналам ({aggs.length})</CardDescription>
+        </div>
+        {settingsButton}
+      </CardHeader>
+
+      {/* Desktop / tablet table */}
+      <CardContent className="hidden md:block p-0 md:p-6 md:pt-0">
+        <div className="overflow-x-auto rounded-xl border border-border/40">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/40">
+                <TableHead className="text-xs font-semibold">Канал</TableHead>
+                {visibleCols.map((k) => (
+                  <TableHead
+                    key={k}
+                    title={COLS[k].title}
+                    className={cn("text-xs font-semibold whitespace-nowrap", COLS[k].align === "right" && "text-right")}
+                  >
+                    {COLS[k].short ?? COLS[k].label}
+                  </TableHead>
+                ))}
+                <TableHead className="w-[200px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={colSpan} className="text-center text-xs text-muted-foreground py-8">Загрузка…</TableCell></TableRow>
+              ) : aggs.length === 0 ? (
+                <TableRow><TableCell colSpan={colSpan} className="text-center text-xs text-muted-foreground py-10">Нет каналов</TableCell></TableRow>
+              ) : aggs.map((a, idx) => (
+                <TableRow key={a.channel.id} className={cn("border-border/30 transition-colors hover:bg-muted/30", idx % 2 === 1 && "bg-muted/10")}>
+                  <TableCell className="text-xs font-medium whitespace-nowrap">{a.channel.name}</TableCell>
+                  {visibleCols.map((k) => (
+                    <TableCell key={k} className={cn("text-xs whitespace-nowrap", COLS[k].align === "right" && "text-right")}>
+                      {COLS[k].render(a)}
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    <div className="flex gap-1 justify-end">
+                      <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => onUtm(a.channel, a.linkedUtms)}>
+                        <Link2 className="w-3 h-3" /> UTM
+                      </Button>
+                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => onRevenue(a.channel)}>Доход</Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(a.channel)}>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => onDelete(a.channel.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+
+      {/* Mobile cards */}
+      <CardContent className="md:hidden px-3 pb-4 pt-0">
+        {loading ? (
+          <div className="text-center text-xs text-muted-foreground py-8">Загрузка…</div>
+        ) : aggs.length === 0 ? (
+          <div className="text-center text-xs text-muted-foreground py-10">Нет каналов</div>
+        ) : (
+          <div className="space-y-3">
+            {aggs.map((a) => (
+              <div key={a.channel.id} className="rounded-xl border border-border/50 bg-card/80 p-3 shadow-sm">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate">{a.channel.name}</div>
+                    <div className="mt-1">{COLS.utms.render(a)}</div>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(a.channel)}>
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => onDelete(a.channel.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  {visibleCols.filter((k) => k !== "utms").map((k) => (
+                    <div key={k} className="rounded-lg bg-muted/40 px-2.5 py-1.5">
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{COLS[k].short ?? COLS[k].label}</div>
+                      <div className="text-xs mt-0.5">{COLS[k].render(a)}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1 flex-1" onClick={() => onUtm(a.channel, a.linkedUtms)}>
+                    <Link2 className="w-3 h-3" /> UTM
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-8 text-xs flex-1" onClick={() => onRevenue(a.channel)}>Доход</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
