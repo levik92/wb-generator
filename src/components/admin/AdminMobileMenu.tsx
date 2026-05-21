@@ -75,18 +75,6 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
               </div>
               <span className="text-sm font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">WBGen</span>
             </div>
-            
-            <div className="rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-primary">Админ-панель</span>
-                <Badge className="bg-primary hover:bg-primary text-primary-foreground font-bold px-2.5 py-0.5 text-xs">
-                  Admin
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Управление системой WBGen
-              </p>
-            </div>
           </div>
 
           <Separator className="opacity-50" />
