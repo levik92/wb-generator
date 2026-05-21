@@ -417,14 +417,14 @@ function ChannelsTable({
         </div>
       </CardHeader>
 
-      {/* Desktop / tablet table */}
-      <CardContent className="hidden md:block p-0 md:p-6 md:pt-0">
-        <div className="overflow-x-auto rounded-lg border border-border/40">
+      {/* Table (horizontal scroll on mobile) */}
+      <CardContent className="p-3 md:p-6 md:pt-0">
+        <div className="overflow-x-auto rounded-lg border border-border/40 -mx-3 md:mx-0 px-3 md:px-0">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/40">
                 <TableHead className="w-8 px-1" />
-                <TableHead className="text-xs font-semibold">Канал</TableHead>
+                <TableHead className="text-xs font-semibold whitespace-nowrap">Канал</TableHead>
                 {COLS.map((c) => (
                   <TableHead
                     key={c.key}
@@ -464,7 +464,7 @@ function ChannelsTable({
                         </TableCell>
                       ))}
                       <TableCell>
-                        <div className="flex gap-1 justify-end">
+                        <div className="flex gap-1 justify-end flex-nowrap">
                           <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => onUtm(a.channel, a.linkedUtms)}>
                             <Link2 className="w-3 h-3" /> UTM
                           </Button>
@@ -496,65 +496,6 @@ function ChannelsTable({
         </div>
       </CardContent>
 
-      {/* Mobile cards (with drag handle) */}
-      <CardContent className="md:hidden px-3 pb-4 pt-0">
-        {loading ? (
-          <div className="text-center text-xs text-muted-foreground py-8">Загрузка…</div>
-        ) : visibleAggs.length === 0 ? (
-          <div className="text-center text-xs text-muted-foreground py-10">Нет каналов</div>
-        ) : (
-          <SortableList items={visibleAggs.map((a) => ({ id: a.channel.id }))} onReorder={handleReorder}>
-            <div className="space-y-3">
-              {visibleAggs.map((a) => {
-                const isHidden = hidden.has(a.channel.id);
-                return (
-                <SortableItem key={a.channel.id} id={a.channel.id}>
-                  <div className={cn("rounded-lg border border-border/50 bg-card/80 p-3 shadow-sm", isHidden && "opacity-50")}>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold truncate">{a.channel.name}</div>
-                        <div className="mt-1">{utmsCol.render(a)}</div>
-                      </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(a.channel)}>
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          title={isHidden ? "Показать строку" : "Скрыть строку"}
-                          onClick={() => toggleHidden(a.channel.id)}
-                        >
-                          {isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => onDelete(a.channel.id)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 mt-3">
-                      {metricCols.map((c) => (
-                        <div key={c.key} className="rounded-md bg-muted/40 px-2.5 py-1.5">
-                          <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{c.short ?? c.label}</div>
-                          <div className="text-xs mt-0.5">{c.render(a)}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2 mt-3">
-                      <Button variant="outline" size="sm" className="h-8 text-xs gap-1 flex-1" onClick={() => onUtm(a.channel, a.linkedUtms)}>
-                        <Link2 className="w-3 h-3" /> UTM
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs flex-1" onClick={() => onRevenue(a.channel)}>Доход</Button>
-                    </div>
-                  </div>
-                </SortableItem>
-                );
-              })}
-            </div>
-          </SortableList>
-        )}
-      </CardContent>
     </Card>
   );
 }
