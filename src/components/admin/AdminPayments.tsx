@@ -312,7 +312,42 @@ export function AdminPayments() {
           <Card className="bg-card border-border/50 rounded-2xl">
             <CardHeader>
               <CardTitle className="text-lg">Все платежи</CardTitle>
-              <CardDescription>Платежи от физических лиц через платёжные системы ({payments.length})</CardDescription>
+              <CardDescription>
+                Платежи от физических лиц через платёжные системы — показано {filteredPayments.length} из {payments.length}
+              </CardDescription>
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Filter className="w-3.5 h-3.5" /> Фильтры:
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="Статус" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все статусы</SelectItem>
+                    {statusOptions.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={utmFilter} onValueChange={setUtmFilter}>
+                  <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="Источник" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все источники</SelectItem>
+                    <SelectItem value="__none__">Без источника</SelectItem>
+                    {utmOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={acqFilter} onValueChange={setAcqFilter}>
+                  <SelectTrigger className="h-8 w-[200px] text-xs"><SelectValue placeholder="Откуда узнали" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Любой ответ</SelectItem>
+                    <SelectItem value="__none__">Не отвечал</SelectItem>
+                    {acqOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                {(statusFilter !== "all" || utmFilter !== "all" || acqFilter !== "all") && (
+                  <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => { setStatusFilter("all"); setUtmFilter("all"); setAcqFilter("all"); }}>
+                    Сбросить
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
               <div className="overflow-x-auto">
