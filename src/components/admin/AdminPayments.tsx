@@ -46,7 +46,7 @@ interface InvoicePayment {
   is_manual?: boolean;
 }
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 25;
 
 export function AdminPayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -55,6 +55,9 @@ export function AdminPayments() {
   const [paymentsPage, setPaymentsPage] = useState(1);
   const [invoicesPage, setInvoicesPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [utmFilter, setUtmFilter] = useState<string>("all");
+  const [acqFilter, setAcqFilter] = useState<string>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
