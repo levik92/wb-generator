@@ -24,6 +24,8 @@ interface Payment {
   confirmed_at: string | null;
   payment_provider: string | null;
   user_email?: string;
+  utm_name?: string;
+  acquisition?: string;
 }
 
 interface InvoicePayment {
