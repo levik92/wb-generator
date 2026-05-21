@@ -217,9 +217,20 @@ export function MarketingManager() {
                       <div className="flex flex-wrap gap-1 max-w-[200px]">
                         {a.linkedUtms.length === 0 ? (
                           <span className="text-muted-foreground">—</span>
-                        ) : a.linkedUtms.map((u) => (
-                          <Badge key={u.id} variant="secondary" className="text-[10px] font-normal">{u.name}</Badge>
-                        ))}
+                        ) : (
+                          <>
+                            <Badge variant="secondary" className="text-[10px] font-normal">{a.linkedUtms[0].name}</Badge>
+                            {a.linkedUtms.length > 1 && (
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px] font-normal cursor-help"
+                                title={a.linkedUtms.slice(1).map((u) => u.name).join(", ")}
+                              >
+                                +{a.linkedUtms.length - 1}
+                              </Badge>
+                            )}
+                          </>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-right whitespace-nowrap">{fmtRub(a.cost)}</TableCell>
