@@ -40,6 +40,10 @@ interface ChannelAgg {
   revenue: number;
   clicks: number;
   cpc: number | null;
+  registrations: number;
+  cpr: number | null;
+  orders: number;
+  cpo: number | null;
   roi: number | null;
   linkedUtms: UtmSource[];
 }
