@@ -266,9 +266,32 @@ export function AdminPayments() {
     return <div className="flex items-center justify-center py-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
-  const paginatedPayments = payments.slice((paymentsPage - 1) * ITEMS_PER_PAGE, paymentsPage * ITEMS_PER_PAGE);
+  const statusOptions = useMemo(() => Array.from(new Set(payments.map(p => p.status))).sort(), [payments]);
+  const utmOptions = useMemo(() => Array.from(new Set(payments.map(p => p.utm_name).filter(Boolean) as string[])).sort(), [payments]);
+  const acqOptions = useMemo(() => Array.from(new Set(payments.map(p => p.acquisition).filter(Boolean) as string[])).sort(), [payments]);
+
+  const filteredPayments = useMemo(() => payments.filter(p => {
+    if (statusFilter !== "all" && p.status !== statusFilter) return false;
+    if (utmFilter !== "all") {
+      if (utmFilter === "__none__") { if (p.utm_name) return false; }
+      else if (p.utm_name !== utmFilter) return false;
+    }
+    if (acqFilter !== "all") {
+      if (acqFilter === "__none__") { if (p.acquisition) return false; }
+      else if (p.acquisition !== acqFilter) return false;
+    }
+    return true;
+  }), [payments, statusFilter, utmFilter, acqFilter]);
+
+  useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter]);
+
+  const statusLabel = (s: string) => ({
+    succeeded: "Успешно", pending: "В обработке", canceled: "Отменён", expired: "Истёк", failed: "Ошибка",
+  } as Record<string, string>)[s] || s;
+
+  const paginatedPayments = filteredPayments.slice((paymentsPage - 1) * ITEMS_PER_PAGE, paymentsPage * ITEMS_PER_PAGE);
   const paginatedInvoices = invoices.slice((invoicesPage - 1) * ITEMS_PER_PAGE, invoicesPage * ITEMS_PER_PAGE);
-  const totalPaymentPages = Math.ceil(payments.length / ITEMS_PER_PAGE);
+  const totalPaymentPages = Math.ceil(filteredPayments.length / ITEMS_PER_PAGE);
   const totalInvoicePages = Math.ceil(invoices.length / ITEMS_PER_PAGE);
 
   return (
