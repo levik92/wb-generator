@@ -66,27 +66,41 @@ export function MarketingManager() {
     const fromIso = `${from}T00:00:00`;
     const toIso = `${to}T23:59:59`;
 
+    // Paginate to bypass Supabase 1000-row limit
+    const PAGE = 1000;
+    const fetchAll = async <T,>(builder: () => any): Promise<T[]> => {
+      const out: T[] = [];
+      for (let offset = 0; ; offset += PAGE) {
+        const { data, error } = await builder().range(offset, offset + PAGE - 1);
+        if (error) { console.error("MarketingManager fetch error:", error); break; }
+        const rows = (data || []) as T[];
+        out.push(...rows);
+        if (rows.length < PAGE) break;
+      }
+      return out;
+    };
+
     const [
       { data: channels },
       { data: expenses },
       { data: revs },
       { data: utms },
       { data: links },
-      { data: visits },
-      { data: payments },
-      { data: regs },
+      visits,
+      payments,
+      regs,
     ] = await Promise.all([
       supabase.from("marketing_channels").select("*").order("name"),
       supabase.from("expenses").select("*").eq("category", "marketing").gte("expense_date", from).lte("expense_date", to),
       supabase.from("marketing_revenues").select("*").gte("period_month", from).lte("period_month", to),
       supabase.from("utm_sources").select("id,name,utm_source,utm_medium,utm_campaign"),
       supabase.from("marketing_channel_utm_sources").select("channel_id,utm_source_id"),
-      supabase.from("utm_visits").select("utm_source_id,created_at").gte("created_at", fromIso).lte("created_at", toIso),
-      supabase.from("payments").select("user_id,amount,confirmed_at,status").eq("status", "succeeded").gte("confirmed_at", fromIso).lte("confirmed_at", toIso),
-      supabase.from("profiles").select("utm_source_id,created_at").not("utm_source_id", "is", null).gte("created_at", fromIso).lte("created_at", toIso),
+      fetchAll<any>(() => supabase.from("utm_visits").select("utm_source_id,created_at").gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: true })),
+      fetchAll<any>(() => supabase.from("payments").select("user_id,amount,created_at,status").eq("status", "succeeded").gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: true })),
+      fetchAll<any>(() => supabase.from("profiles").select("id,utm_source_id,created_at").not("utm_source_id", "is", null).gte("created_at", fromIso).lte("created_at", toIso).order("created_at", { ascending: true })),
     ]);
 
-    // Map payments -> utm_source via profiles.utm_source_id
+    // Map payments -> utm_source via profiles.utm_source_id (paginate over paying users)
     const userIds = Array.from(new Set((payments ?? []).map((p: any) => p.user_id)));
     let profMap: Record<string, string | null> = {};
     if (userIds.length) {
