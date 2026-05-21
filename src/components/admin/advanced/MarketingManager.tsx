@@ -520,7 +520,7 @@ function ChannelsTable({
   );
 }
 
-
+function ChannelForm({ initial, onSaved }: { initial: MarketingChannel | null; onSaved: () => void }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [tag, setTag] = useState(initial?.tag ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
