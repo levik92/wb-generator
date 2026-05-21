@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,16 @@ import {
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Pencil, RefreshCw, Link2 } from "lucide-react";
+import { Plus, Trash2, Pencil, RefreshCw, Link2, Settings2, Eye, EyeOff } from "lucide-react";
+import { SortableList, SortableItem } from "@/components/admin/SortableList";
 import { PeriodSelector } from "./PeriodSelector";
 import { DateRange } from "react-day-picker";
 import { fmtRub, toIsoDate, startOfMonth, endOfMonth, MarketingChannel, MarketingRevenue } from "@/hooks/useFinanceData";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface UtmSource {
   id: string;
