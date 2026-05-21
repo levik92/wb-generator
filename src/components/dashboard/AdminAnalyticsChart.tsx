@@ -5,13 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
-import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator, CalendarIcon } from "lucide-react";
+import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator, CalendarIcon, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
+import { PaidUsersDetailDialog } from "@/components/admin/PaidUsersDetailDialog";
 
 interface ChartData {
   date: string;
@@ -484,6 +485,7 @@ export function AdminAdditionalMetrics() {
   });
   const [isSelectingRange, setIsSelectingRange] = useState(false);
   const [pendingRange, setPendingRange] = useState<DateRange | undefined>(undefined);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     // Загружаем данные только когда выбран полный диапазон и мы не в процессе выбора
@@ -633,10 +635,22 @@ export function AdminAdditionalMetrics() {
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Платные пользователи */}
-          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
-            <div className="flex items-center gap-2 mb-2">
-              <CreditCard className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-muted-foreground">Платные пользователи</span>
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px] flex flex-col">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-muted-foreground">Платные пользователи</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-[10px] gap-1"
+                onClick={() => setDetailOpen(true)}
+                title="Подробнее: новые и повторные"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Подробнее
+              </Button>
             </div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {metrics?.paidUsers?.toLocaleString('ru-RU') || 0}
@@ -691,6 +705,7 @@ export function AdminAdditionalMetrics() {
           </div>
         </div>
       </CardContent>
+      <PaidUsersDetailDialog open={detailOpen} onOpenChange={setDetailOpen} dateRange={dateRange} />
     </Card>
   );
 }

@@ -17,6 +17,7 @@ interface Question {
   subtitle: string;
   icon: any;
   options: string[];
+  otherPlaceholder?: string;
 }
 
 const QUESTIONS: Question[] = [
@@ -32,6 +33,7 @@ const QUESTIONS: Question[] = [
       "Производитель/бренд (свой товар)",
       "Другое",
     ],
+    otherPlaceholder: "Уточните, кем вы являетесь",
   },
   {
     key: "monthly_volume",
@@ -45,6 +47,7 @@ const QUESTIONS: Question[] = [
       "16–50 карточек",
       "51+ карточек",
     ],
+    otherPlaceholder: "Уточните объём",
   },
   {
     key: "acquisition_channel",
@@ -62,6 +65,7 @@ const QUESTIONS: Question[] = [
       "Wildberries / чаты селлеров",
       "Другое",
     ],
+    otherPlaceholder: "Уточните, откуда узнали (необязательно)",
   },
 ];
 
@@ -294,7 +298,7 @@ export const OnboardingSurvey = ({ userId, onComplete }: OnboardingSurveyProps) 
                         {option === "Другое" && currentAnswer === "Другое" && (
                           <Input
                             className="mt-2 ml-8 w-[calc(100%-2rem)] h-10 text-sm"
-                            placeholder="Уточните, откуда узнали (необязательно)"
+                            placeholder={currentQuestion.otherPlaceholder || "Уточните"}
                             maxLength={100}
                             value={otherText[currentQuestion.key] || ""}
                             onChange={(e) =>

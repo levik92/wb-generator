@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet, EyeOff, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { publicSiteUrl } from "@/config/runtime";
+import { UtmPaymentsDialog } from "./UtmPaymentsDialog";
 
 interface UtmSource {
   id: string;
@@ -61,6 +62,7 @@ export function AdminUtmSources() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => loadHiddenIds());
   const [showHidden, setShowHidden] = useState(false);
+  const [paymentsDialog, setPaymentsDialog] = useState<{ id: string; name: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   
   // Form
@@ -583,10 +585,15 @@ export function AdminUtmSources() {
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
                           {renderConv(s.registrations, s.payments)}
                         </div>
-                        <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
+                          className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center hover:bg-amber-500/10 transition-colors cursor-pointer"
+                          title="Посмотреть оплаты по источнику"
+                        >
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
                           {renderNum(s.payments, "text-amber-500")}
-                        </div>
+                        </button>
                         <div className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
                           {isStatLoading
@@ -707,6 +714,13 @@ export function AdminUtmSources() {
           </ResponsiveDialogFooter>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
+
+      <UtmPaymentsDialog
+        open={!!paymentsDialog}
+        onOpenChange={(v) => !v && setPaymentsDialog(null)}
+        utmSourceId={paymentsDialog?.id || null}
+        sourceName={paymentsDialog?.name || ""}
+      />
     </div>
   );
 }

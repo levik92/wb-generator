@@ -24,6 +24,8 @@ interface Payment {
   confirmed_at: string | null;
   payment_provider: string | null;
   user_email?: string;
+  utm_name?: string;
+  acquisition?: string;
 }
 
 interface InvoicePayment {
@@ -120,15 +122,36 @@ export function AdminPayments() {
         .limit(500);
       if (error) throw error;
 
-      // Get user emails
       const userIds = [...new Set((data || []).map(p => p.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .in('id', userIds);
+      const [profilesRes, surveysRes] = await Promise.all([
+        supabase.from('profiles').select('id, email, utm_source_id').in('id', userIds),
+        supabase.from('user_survey_responses').select('user_id, answer')
+          .in('user_id', userIds).eq('question_key', 'acquisition_channel'),
+      ]);
 
-      const emailMap = new Map(profiles?.map(p => [p.id, p.email]) || []);
-      setPayments((data || []).map(p => ({ ...p, user_email: emailMap.get(p.user_id) || 'N/A' })));
+      const profiles = (profilesRes.data || []) as { id: string; email: string; utm_source_id: string | null }[];
+      const utmIds = [...new Set(profiles.map(p => p.utm_source_id).filter(Boolean) as string[])];
+      let utmMap = new Map<string, string>();
+      if (utmIds.length > 0) {
+        const { data: utms } = await supabase.from('utm_sources').select('id, name').in('id', utmIds);
+        utmMap = new Map((utms || []).map((u: any) => [u.id, u.name]));
+      }
+
+      const emailMap = new Map(profiles.map(p => [p.id, p.email]));
+      const utmByUser = new Map(profiles.map(p => [p.id, p.utm_source_id ? utmMap.get(p.utm_source_id) || null : null]));
+      const surveyMap = new Map<string, string>();
+      for (const r of (surveysRes.data || []) as { user_id: string; answer: string }[]) {
+        if (!surveyMap.has(r.user_id)) {
+          surveyMap.set(r.user_id, r.answer.startsWith('Другое:') ? r.answer.replace(/^Другое:\s*/, '') : r.answer);
+        }
+      }
+
+      setPayments((data || []).map(p => ({
+        ...p,
+        user_email: emailMap.get(p.user_id) || 'N/A',
+        utm_name: utmByUser.get(p.user_id) || undefined,
+        acquisition: surveyMap.get(p.user_id) || undefined,
+      })));
     } catch (error) {
       console.error('Error loading payments:', error);
     }
@@ -254,6 +277,8 @@ export function AdminPayments() {
                       <TableHead className="text-xs">Сумма</TableHead>
                       <TableHead className="text-xs">Токены</TableHead>
                       <TableHead className="text-xs">Провайдер</TableHead>
+                      <TableHead className="text-xs">Источник</TableHead>
+                      <TableHead className="text-xs">Откуда узнали</TableHead>
                       <TableHead className="text-xs">Статус</TableHead>
                       <TableHead className="text-xs">Дата</TableHead>
                     </TableRow>
@@ -266,6 +291,12 @@ export function AdminPayments() {
                         <TableCell className="text-xs">{p.amount}₽</TableCell>
                         <TableCell className="text-xs">{p.tokens_amount}</TableCell>
                         <TableCell className="text-xs capitalize">{p.payment_provider || 'yookassa'}</TableCell>
+                        <TableCell className="text-xs max-w-[140px] truncate">
+                          {p.utm_name ? <Badge variant="outline" className="text-[10px]">{p.utm_name}</Badge> : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-xs max-w-[140px] truncate" title={p.acquisition || ''}>
+                          {p.acquisition || <span className="text-muted-foreground">—</span>}
+                        </TableCell>
                         <TableCell>{getStatusBadge(p.status)}</TableCell>
                         <TableCell className="text-xs whitespace-nowrap">
                           {new Date(p.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
