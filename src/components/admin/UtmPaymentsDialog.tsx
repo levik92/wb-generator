@@ -92,19 +92,19 @@ export function UtmPaymentsDialog({ open, onOpenChange, utmSourceId, sourceName 
   const avg = rows.length ? total / rows.length : 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden rounded-2xl border-border/50 bg-card">
-        <DialogHeader className="px-5 pt-5 pb-4 border-b border-border/50">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="max-w-2xl p-0 gap-0 overflow-hidden sm:rounded-2xl border-border/50 bg-card">
+        <ResponsiveDialogHeader className="px-5 pt-5 pb-4 border-b border-border/50">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
               <Wallet className="w-5 h-5 text-violet-500" />
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-base font-semibold truncate">Оплаты по источнику</DialogTitle>
+              <ResponsiveDialogTitle className="text-base font-semibold truncate">Оплаты по источнику</ResponsiveDialogTitle>
               <p className="text-xs text-muted-foreground truncate mt-0.5">{sourceName}</p>
             </div>
           </div>
-        </DialogHeader>
+        </ResponsiveDialogHeader>
 
         {loading ? (
           <div className="min-h-[200px] flex items-center justify-center">
