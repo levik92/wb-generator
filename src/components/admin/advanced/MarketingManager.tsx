@@ -202,6 +202,23 @@ export function MarketingManager() {
     load();
   };
 
+  const handleReorder = async (orderedIds: string[]) => {
+    // Optimistic: reorder local aggs immediately
+    setAggs((prev) => {
+      const map = new Map(prev.map((a) => [a.channel.id, a]));
+      return orderedIds.map((id) => map.get(id)!).filter(Boolean);
+    });
+    // Persist new sort_order (multiples of 10)
+    const updates = orderedIds.map((id, idx) =>
+      supabase.from("marketing_channels").update({ sort_order: (idx + 1) * 10 }).eq("id", id)
+    );
+    const results = await Promise.all(updates);
+    if (results.some((r) => r.error)) {
+      toast({ title: "Не удалось сохранить порядок", variant: "destructive" });
+      load();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
