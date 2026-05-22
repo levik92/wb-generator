@@ -155,6 +155,8 @@ const App = () => {
             <Route path="/promotwo/thanks" element={<PromoTwoThanks />} />
             <Route path="/avito" element={<Avito />} />
             <Route path="/avito/thanks" element={<AvitoThanks />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz/thanks" element={<QuizThanks />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
