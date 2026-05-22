@@ -52,6 +52,8 @@ const PromoTwo = lazy(() => import("./pages/PromoTwo"));
 const PromoTwoThanks = lazy(() => import("./pages/PromoTwoThanks"));
 const Avito = lazy(() => import("./pages/Avito"));
 const AvitoThanks = lazy(() => import("./pages/AvitoThanks"));
+const Quiz = lazy(() => import("./pages/Quiz"));
+const QuizThanks = lazy(() => import("./pages/QuizThanks"));
 
 const queryClient = new QueryClient();
 
