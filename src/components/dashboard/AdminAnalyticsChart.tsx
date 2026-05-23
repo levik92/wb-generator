@@ -643,13 +643,12 @@ export function AdminAdditionalMetrics() {
               </div>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-[10px] gap-1"
+                size="icon"
+                className="h-6 w-6 bg-muted hover:bg-muted/80 dark:bg-muted/60 dark:hover:bg-muted/80"
                 onClick={() => setDetailOpen(true)}
                 title="Подробнее: новые и повторные"
               >
                 <ExternalLink className="h-3 w-3" />
-                Подробнее
               </Button>
             </div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
