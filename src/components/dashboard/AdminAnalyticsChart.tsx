@@ -635,21 +635,12 @@ export function AdminAdditionalMetrics() {
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Платные пользователи */}
-          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px] flex flex-col">
+          <div className="relative p-4 pr-14 rounded-lg bg-muted/50 border border-border/50 min-h-[100px] flex flex-col">
             <div className="flex items-center justify-between gap-2 mb-2">
               <div className="flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-green-500" />
                 <span className="text-sm text-muted-foreground">Платные пользователи</span>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 bg-muted hover:bg-muted/80 dark:bg-muted/60 dark:hover:bg-muted/80"
-                onClick={() => setDetailOpen(true)}
-                title="Подробнее: новые и повторные"
-              >
-                <ExternalLink className="h-3 w-3" />
-              </Button>
             </div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {metrics?.paidUsers?.toLocaleString('ru-RU') || 0}
@@ -657,7 +648,17 @@ export function AdminAdditionalMetrics() {
             <p className="text-xs text-muted-foreground mt-1">
               Всего: {metrics?.paidUsersTotal?.toLocaleString('ru-RU') || 0}
             </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-muted-foreground/15 hover:bg-primary text-foreground hover:text-primary-foreground transition-colors"
+              onClick={() => setDetailOpen(true)}
+              title="Подробнее: новые и повторные"
+            >
+              <PieChart className="h-5 w-5" />
+            </Button>
           </div>
+
 
           {/* Средний чек */}
           <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
