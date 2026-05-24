@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Upload,
@@ -103,6 +103,7 @@ const steps = [
 
 const Avito = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { scrollY } = useScroll();
 
   // Параллакс: салатовый градиент уходит вверх за экран
@@ -122,7 +123,7 @@ const Avito = () => {
     };
   }, []);
 
-  const goToThanks = () => navigate("/avito/thanks");
+  const goToThanks = () => navigate({ pathname: "/avito/thanks", search: location.search });
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark relative overflow-x-hidden" style={{ isolation: "isolate" }}>
