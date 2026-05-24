@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Upload, Sparkles, Download, Clock, TrendingUp, Zap, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ const steps = [
 
 const PromoTwo = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -44,10 +45,9 @@ const PromoTwo = () => {
     };
   }, []);
 
-  // The promo_loaded goal is sent centrally by YandexMetrika.tsx on mount,
-  // so this handler only needs to navigate.
+  // Forward UTM query params so Я.Метрика attribution survives the SPA hop.
   const goToThanks = () => {
-    navigate("/promotwo/thanks");
+    navigate({ pathname: "/promotwo/thanks", search: location.search });
   };
 
   return (

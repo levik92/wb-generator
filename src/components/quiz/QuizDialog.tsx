@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import {
@@ -27,6 +27,7 @@ const accentBtn =
 
 export const QuizDialog = ({ open, onOpenChange }: QuizDialogProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState(0); // 0=audience, 1=goals, 2=video
   const [audience, setAudience] = useState<AudienceId | null>(null);
   const [goals, setGoals] = useState<string[]>([]);
@@ -63,12 +64,13 @@ export const QuizDialog = ({ open, onOpenChange }: QuizDialogProps) => {
     // Финальный трекинг
     if (typeof window !== "undefined") {
       // @ts-ignore
-      window.ym?.(window.__ym_id, "reachGoal", "quiz_completed");
+      window.ym?.(105111303, "reachGoal", "quiz_completed");
       // @ts-ignore
       window.fbq?.("trackCustom", "QuizCompleted");
     }
     onOpenChange(false);
-    navigate("/quiz/thanks");
+    // Forward UTM query params so Я.Метрика attribution survives the SPA hop.
+    navigate({ pathname: "/quiz/thanks", search: location.search });
   };
 
   return (
