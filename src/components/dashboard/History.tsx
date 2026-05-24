@@ -72,7 +72,7 @@ const HistoryAvatarImage = ({
     alt={alt}
     previewWidth={180}
     previewQuality={85}
-    className="w-full h-full object-cover"
+    className="absolute inset-x-0 top-1/2 -translate-y-1/2 w-full h-auto"
     onError={onError}
   />
 );
