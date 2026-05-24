@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,18 @@ import "@/styles/landing-theme.css";
 
 const PromoTwoThanks = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [countdown, setCountdown] = useState(10);
 
-  // The promo_thanks_loaded goal is sent centrally by YandexMetrika.tsx
-  // on mount, so handlers only need to navigate.
+  // Preserve UTM params into the auth screen so Я.Метрика keeps attribution.
+  const authTarget = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    params.set("tab", "register");
+    return `/auth?${params.toString()}`;
+  }, [location.search]);
+
   const goToAuth = () => {
-    navigate("/auth?tab=register");
+    navigate(authTarget);
   };
 
   useEffect(() => {
@@ -24,7 +30,7 @@ const PromoTwoThanks = () => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-          navigate("/auth?tab=register");
+          navigate(authTarget);
           return 0;
         }
         return prev - 1;
@@ -36,7 +42,7 @@ const PromoTwoThanks = () => {
       document.documentElement.classList.remove("dark");
       document.body.style.backgroundColor = "";
     };
-  }, [navigate]);
+  }, [navigate, authTarget]);
 
   return (
     <div className="min-h-screen bg-[#111111] text-white landing-dark flex items-center justify-center">
