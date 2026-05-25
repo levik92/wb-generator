@@ -88,11 +88,11 @@ export const VIDEO_BRANCH_BY_AUDIENCE: Record<AudienceId, VideoBranch> = {
   beginner: "designers",
 };
 
-// TODO: замени на реальные embed-ссылки (Kinescope iframe src или YouTube /embed/...)
+// Kinescope embed URLs (формат: https://kinescope.io/embed/{id})
 export const VIDEO_URLS: Record<VideoBranch, string> = {
-  sellers: "",
-  avito: "",
-  designers: "",
+  sellers: "https://kinescope.io/embed/bjBiTi9uQdMHP8RjxgB2Ua",
+  avito: "https://kinescope.io/embed/uZ8QL3KVLFRAoiPpnhQthd",
+  designers: "https://kinescope.io/embed/uPkrVpx2bCALBFK64aggtc",
 };
 
 export const QUIZ_SUBTITLE =
