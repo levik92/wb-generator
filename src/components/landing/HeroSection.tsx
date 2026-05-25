@@ -70,7 +70,7 @@ export const HeroSection = () => {
             <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in">
               <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4 text-[hsl(268,83%,65%)]" />
-                <span className="text-sm text-white/80 text-center">
+                <span className="text-xs sm:text-sm text-white/80 text-center whitespace-nowrap">
                   Нейрокарточки ТОП-дизайнеров "под ключ"   
                 </span>
               </div>
