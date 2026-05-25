@@ -213,7 +213,7 @@ export function PaidUsersDetailDialog({ open, onOpenChange, dateRange }: PaidUse
                 </TabsTrigger>
                 <TabsTrigger
                   value="repeat"
-                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap"
+                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm whitespace-nowrap"
                 >
                   <Repeat className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Повторные · {repeatUsers.length}</span>
