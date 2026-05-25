@@ -651,7 +651,7 @@ export function AdminAdditionalMetrics() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl bg-muted-foreground/15 hover:bg-primary text-foreground hover:text-primary-foreground transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-md bg-muted-foreground/15 hover:bg-primary text-foreground hover:text-primary-foreground transition-colors"
               onClick={() => setDetailOpen(true)}
               title="Подробнее: новые и повторные"
             >
