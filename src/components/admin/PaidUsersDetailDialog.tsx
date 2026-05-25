@@ -206,14 +206,14 @@ export function PaidUsersDetailDialog({ open, onOpenChange, dateRange }: PaidUse
               <TabsList className="grid grid-cols-2 w-full h-auto p-1 bg-muted/60 rounded-xl">
                 <TabsTrigger
                   value="new"
-                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap"
+                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm whitespace-nowrap"
                 >
                   <UserPlus className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Новые · {newUsers.length}</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="repeat"
-                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap"
+                  className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm whitespace-nowrap"
                 >
                   <Repeat className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Повторные · {repeatUsers.length}</span>
