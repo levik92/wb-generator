@@ -5,10 +5,9 @@ import { PaymentMethods } from "@/components/PaymentMethods";
 const Footer = () => {
   return (
     <footer className="relative overflow-hidden border-t border-border bg-card">
-      {/* Decorative gradient orbs */}
+      {/* Decorative gradient orb */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 -left-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-24 -right-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
       <div className="container relative mx-auto px-4 sm:px-6 py-14">
