@@ -271,22 +271,26 @@ export function AdminPayments() {
   const utmOptions = useMemo(() => Array.from(new Set(payments.map(p => p.utm_name).filter(Boolean) as string[])).sort(), [payments]);
   const acqOptions = useMemo(() => Array.from(new Set(payments.map(p => p.acquisition).filter(Boolean) as string[])).sort(), [payments]);
 
-  const filteredPayments = useMemo(() => payments.filter(p => {
-    if (statusFilter !== "all" && p.status !== statusFilter) return false;
-    if (utmFilter !== "all") {
-      if (utmFilter === "__none__") { if (p.utm_name) return false; }
-      else if (p.utm_name !== utmFilter) return false;
-    }
-    if (acqFilter !== "all") {
-      if (acqFilter === "__none__") { if (p.acquisition) return false; }
-      else if (p.acquisition !== acqFilter) return false;
-    }
-    return true;
-  }), [payments, statusFilter, utmFilter, acqFilter]);
+  const filteredPayments = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return payments.filter(p => {
+      if (statusFilter !== "all" && p.status !== statusFilter) return false;
+      if (utmFilter !== "all") {
+        if (utmFilter === "__none__") { if (p.utm_name) return false; }
+        else if (p.utm_name !== utmFilter) return false;
+      }
+      if (acqFilter !== "all") {
+        if (acqFilter === "__none__") { if (p.acquisition) return false; }
+        else if (p.acquisition !== acqFilter) return false;
+      }
+      if (q && !(p.user_email || "").toLowerCase().includes(q) && !(p.package_name || "").toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [payments, statusFilter, utmFilter, acqFilter, searchQuery]);
 
   const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (utmFilter !== "all" ? 1 : 0) + (acqFilter !== "all" ? 1 : 0);
 
-  useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter]);
+  useEffect(() => { setPaymentsPage(1); }, [statusFilter, utmFilter, acqFilter, searchQuery]);
 
 
 
