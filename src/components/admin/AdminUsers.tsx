@@ -76,7 +76,7 @@ export function AdminUsers({
     channel: new Set(),
   });
   const [paidDataLoading, setPaidDataLoading] = useState(true);
-  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  
   // Filter source data
   const [profileUtmMap, setProfileUtmMap] = useState<Record<string, string>>({}); // user_id -> utm_source_id
   const [surveyByUser, setSurveyByUser] = useState<Record<string, Record<string, string>>>({});
