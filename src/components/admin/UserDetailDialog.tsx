@@ -20,6 +20,7 @@ import {
   CircleHelp,
   CreditCard,
   ClipboardList,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TransactionDetailView } from "./TransactionDetailView";
@@ -149,6 +150,15 @@ export function UserDetailDialog({ user, details, loading, onClose }: Props) {
                 <span className="truncate">{user?.email}</span>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 p-0 shrink-0 -mr-1"
+              onClick={onClose}
+              aria-label="Закрыть"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
