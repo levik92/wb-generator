@@ -182,9 +182,9 @@ export const SupportWidget = () => {
           <button
             onClick={() => setIsOpen(true)}
             aria-label="Открыть поддержку"
-            className="group relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 text-white shadow-[0_10px_30px_-8px_hsl(263_70%_55%/0.65)] hover:shadow-[0_14px_34px_-8px_hsl(263_70%_55%/0.8)] hover:scale-105 active:scale-95 transition-all duration-300"
+            className="group relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 via-purple-600 to-purple-700 text-white shadow-[0_10px_30px_-8px_hsl(263_70%_55%/0.65)] hover:shadow-[0_14px_34px_-8px_hsl(263_70%_55%/0.8)] hover:scale-105 active:scale-95 transition-all duration-300"
           >
-            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-400/40 to-indigo-500/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-400/40 to-purple-500/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
             <span className="absolute -inset-1 rounded-full ring-2 ring-violet-400/40 animate-ping pointer-events-none" />
             <MessageCircle className="w-6 h-6 mx-auto relative" strokeWidth={2.2} />
           </button>
@@ -199,7 +199,7 @@ export const SupportWidget = () => {
             sm:bottom-5 sm:right-5 sm:left-auto sm:w-[380px] sm:h-[600px] sm:max-h-[calc(100dvh-2.5rem)] sm:rounded-2xl"
         >
           {/* Header */}
-          <div className="relative px-4 py-3 bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 text-white overflow-hidden shrink-0">
+          <div className="relative px-4 py-3 bg-gradient-to-br from-violet-500 via-purple-600 to-purple-700 text-white overflow-hidden shrink-0">
             <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-white/10 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-16 -left-10 w-28 h-28 rounded-full bg-white/5 blur-2xl pointer-events-none" />
             <div className="relative flex items-center justify-between">
@@ -236,8 +236,8 @@ export const SupportWidget = () => {
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-6">
                 <div className="relative w-16 h-16 mb-4">
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/15 to-indigo-500/15 rotate-6" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/15 rotate-6" />
+                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
                     <MessageCircle className="w-7 h-7 text-violet-500" strokeWidth={2} />
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export const SupportWidget = () => {
                           bubbleRoundingClasses(isOwn ? "own" : "other", position)
                         } ${
                           msg.sender_type === "user"
-                            ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-violet-500/20"
+                            ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-violet-500/20"
                             : msg.sender_type === "system"
                             ? "bg-muted/50 text-muted-foreground italic text-xs"
                             : "bg-secondary/80 text-secondary-foreground border border-border/40"
@@ -329,7 +329,7 @@ export const SupportWidget = () => {
               <Button
                 type="submit"
                 size="icon"
-                className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-indigo-600 hover:from-violet-400 hover:to-indigo-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
+                className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
                 disabled={!input.trim() || loading}
               >
                 <Send className="w-4 h-4" />
