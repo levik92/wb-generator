@@ -126,9 +126,22 @@ export const AdminSupport = () => {
 
   useEffect(() => {
     loadConversations();
-    const interval = setInterval(() => loadConversations(false), 15000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      if (typeof document !== "undefined" && document.hidden) return;
+      loadConversations(false);
+    };
+    const interval = setInterval(tick, 15000);
+    const onVisible = () => { if (!document.hidden) tick(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [callApi]);
+
 
   // Load AI defaults
   useEffect(() => {
