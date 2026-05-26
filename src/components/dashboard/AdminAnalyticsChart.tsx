@@ -315,16 +315,20 @@ export function AdminAnalyticsChart({
       const prevValue = typeof prevEntry?.value === 'number' ? prevEntry.value : 0;
       
       return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium text-foreground mb-1">
+        <div className="bg-popover/95 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-2.5 shadow-xl">
+          <p className="text-[11px] font-medium text-muted-foreground mb-1.5">
             {formatXAxisDate(label, data?.groupFormat || 'day')}
           </p>
-          <p className="text-sm text-foreground">
-            <span className="font-medium">Текущий:</span> {config.formatTooltip(currentValue)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Прошлый:</span> {config.formatTooltip(prevValue)}
-          </p>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
+            <span className="text-muted-foreground">Текущий:</span>
+            <span className="font-semibold tabular-nums text-foreground">{config.formatTooltip(currentValue)}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm mt-0.5">
+            <span className="w-2 h-2 rounded-full opacity-40" style={{ backgroundColor: config.color }} />
+            <span className="text-muted-foreground">Прошлый:</span>
+            <span className="font-medium tabular-nums text-muted-foreground">{config.formatTooltip(prevValue)}</span>
+          </div>
         </div>
       );
     }
@@ -332,36 +336,42 @@ export function AdminAnalyticsChart({
   };
 
   if (loading) {
-    return <Card className="animate-fade-in bg-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-5">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Icon className="h-4 w-4" />
+            <span className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${config.color}1a`, color: config.color }}>
+              <Icon className="h-4 w-4" />
+            </span>
             {config.title}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[200px]">
+        <CardContent className="p-4 sm:p-5 pt-0">
+          <div className="flex items-center justify-center h-[180px] sm:h-[220px]">
             <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
         </CardContent>
       </Card>;
   }
 
-  return <Card className="animate-fade-in">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <CardTitle className="text-sm font-medium">{config.title}</CardTitle>
+  return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden transition-shadow hover:shadow-md">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 gap-2 p-4 sm:p-5">
+
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${config.color}1a`, color: config.color }}>
+            <Icon className="h-4 w-4" />
+          </span>
+          <CardTitle className="text-sm font-semibold truncate">{config.title}</CardTitle>
         </div>
         <Popover>
           <PopoverTrigger asChild>
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-6 px-2 text-xs gap-1"
+              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-muted border-border/60 shrink-0"
             >
               <CalendarIcon className="h-3 w-3" />
-              {formatDateRange()}
+              <span className="hidden sm:inline">{formatDateRange()}</span>
+              <span className="sm:hidden">Период</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="end">
@@ -378,26 +388,26 @@ export function AdminAnalyticsChart({
         </Popover>
       </CardHeader>
       
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-4 sm:p-5 pt-0">
+        <div className="space-y-3 sm:space-y-4">
           {/* Total Value */}
-          <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold">
+          <div className="flex items-end justify-between gap-2 flex-wrap">
+            <div className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
               {data ? config.formatValue(data.totals[type]) : '---'}
             </div>
-            {trend.trend !== 'neutral' && <Badge variant="outline" className={`gap-1 ${trend.trend === 'up' ? 'text-green-600 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800' : 'text-red-600 border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800'}`}>
+            {trend.trend !== 'neutral' && <Badge variant="outline" className={`gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${trend.trend === 'up' ? 'text-emerald-600 border-emerald-500/30 bg-emerald-500/10 dark:text-emerald-400' : 'text-red-600 border-red-500/30 bg-red-500/10 dark:text-red-400'}`}>
                 {trend.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {trend.percentage.toFixed(1)}%
               </Badge>}
           </div>
 
           {/* Chart */}
-          <div className="h-[200px] w-full">
+          <div className="h-[180px] sm:h-[220px] w-full -mx-1">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={combinedChartData}>
+              <AreaChart data={combinedChartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
                 <defs>
                   <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purplePrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -405,7 +415,7 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="violetGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.35} />
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="violetPrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -413,7 +423,7 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleTokenGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.35} />
                     <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleTokenPrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -421,7 +431,7 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleRevenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.35} />
                     <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleRevenuePrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -429,20 +439,20 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <CartesianGrid strokeDasharray="3 3" className="opacity-20" vertical={false} />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{
-                fontSize: 12
-              }} tickFormatter={value => formatXAxisDate(value, data?.groupFormat || 'day')} interval="preserveStartEnd" />
+                fontSize: 11, fill: 'hsl(var(--muted-foreground))'
+              }} tickFormatter={value => formatXAxisDate(value, data?.groupFormat || 'day')} interval="preserveStartEnd" minTickGap={24} />
                 <YAxis axisLine={false} tickLine={false} tick={{
-                fontSize: 12
-              }} tickFormatter={value => value.toLocaleString('ru-RU')} />
-                <Tooltip content={<CustomTooltip />} />
-                {/* Линия предыдущего периода - полупрозрачная, на заднем плане */}
+                fontSize: 11, fill: 'hsl(var(--muted-foreground))'
+              }} tickFormatter={value => value >= 1000 ? `${(value/1000).toFixed(value >= 10000 ? 0 : 1)}k` : value.toLocaleString('ru-RU')} width={40} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: config.color, strokeOpacity: 0.25, strokeWidth: 1 }} />
+                {/* Линия предыдущего периода */}
                 <Area 
                   type="monotone" 
                   dataKey="prevValue" 
                   stroke={config.prevColor} 
-                  strokeOpacity={0.3}
+                  strokeOpacity={0.35}
                   strokeDasharray="4 4"
                   fillOpacity={1} 
                   fill={config.prevGradient} 
@@ -450,14 +460,14 @@ export function AdminAnalyticsChart({
                   animationDuration={1500} 
                   animationEasing="ease-out" 
                 />
-                {/* Линия текущего периода - основная */}
+                {/* Линия текущего периода */}
                 <Area 
                   type="monotone" 
                   dataKey="value" 
                   stroke={config.color} 
                   fillOpacity={1} 
                   fill={config.gradient} 
-                  strokeWidth={2} 
+                  strokeWidth={2.25} 
                   animationDuration={1500} 
                   animationEasing="ease-out" 
                 />
@@ -466,7 +476,7 @@ export function AdminAnalyticsChart({
           </div>
 
           {/* Period Description */}
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-[11px] text-muted-foreground text-center tabular-nums">
             {formatDateRange()}
           </p>
         </div>
