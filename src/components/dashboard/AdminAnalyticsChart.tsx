@@ -161,7 +161,7 @@ export function AdminAnalyticsChart({
       return;
     }
 
-    if (range.from && range.to) {
+    if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
       // Полный диапазон выбран — нормализуем порядок
       const finalFrom = range.from <= range.to ? range.from : range.to;
       const finalTo = range.from <= range.to ? range.to : range.from;
