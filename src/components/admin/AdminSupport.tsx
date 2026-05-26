@@ -753,7 +753,7 @@ export const AdminSupport = () => {
 
   return (
     <>
-      <div className="border border-border rounded-2xl bg-card overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
+      <div className="border border-border/60 rounded-2xl bg-card overflow-hidden flex h-[calc(100dvh-180px)] min-h-[520px] shadow-sm">
         <div className="w-80 border-r border-border flex-shrink-0">{conversationListContent}</div>
         <div className="flex-1 flex flex-col">
           {selectedConv ? chatViewContent : (
