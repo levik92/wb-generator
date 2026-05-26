@@ -754,13 +754,19 @@ export const AdminSupport = () => {
   return (
     <>
       <div className="border border-border/60 rounded-2xl bg-card overflow-hidden flex h-[calc(100dvh-180px)] min-h-[520px] shadow-sm">
-        <div className="w-80 border-r border-border flex-shrink-0">{conversationListContent}</div>
-        <div className="flex-1 flex flex-col">
+        <div className="w-80 border-r border-border/60 flex-shrink-0">{conversationListContent}</div>
+        <div className="flex-1 flex flex-col bg-gradient-to-br from-muted/10 via-card to-card">
           {selectedConv ? chatViewContent : (
             <div className="flex-1 flex items-center justify-center text-center px-8">
               <div>
-                <MessageCircle className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">Выберите диалог для просмотра</p>
+                <div className="relative w-16 h-16 mx-auto mb-4">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 rotate-6" />
+                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/15 to-indigo-500/15 flex items-center justify-center">
+                    <MessageCircle className="w-7 h-7 text-violet-500/70" strokeWidth={2} />
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">Выберите диалог</p>
+                <p className="text-xs text-muted-foreground">Откройте обращение слева, чтобы начать общение</p>
               </div>
             </div>
           )}
