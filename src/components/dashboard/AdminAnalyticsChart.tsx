@@ -362,7 +362,7 @@ export function AdminAnalyticsChart({
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-muted border-border/60 shrink-0"
+              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors"
             >
               <CalendarIcon className="h-3 w-3" />
               <span className="hidden sm:inline">{formatDateRange()}</span>
