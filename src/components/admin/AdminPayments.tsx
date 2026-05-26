@@ -52,6 +52,7 @@ interface InvoicePayment {
 const ITEMS_PER_PAGE = 25;
 
 export function AdminPayments() {
+  const isMobile = useIsMobile();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [invoices, setInvoices] = useState<InvoicePayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,7 @@ export function AdminPayments() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [utmFilter, setUtmFilter] = useState<string>("all");
   const [acqFilter, setAcqFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({
