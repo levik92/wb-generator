@@ -349,7 +349,7 @@ export function AdminAnalyticsChart({
   }
 
   return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden transition-shadow hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 gap-2 p-4 sm:p-5">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 gap-2 p-4 sm:p-5">
 
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${config.color}1a`, color: config.color }}>
@@ -362,7 +362,7 @@ export function AdminAnalyticsChart({
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-muted border-border/60 shrink-0"
+              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors"
             >
               <CalendarIcon className="h-3 w-3" />
               <span className="hidden sm:inline">{formatDateRange()}</span>
@@ -405,9 +405,9 @@ export function AdminAnalyticsChart({
           </div>
 
           {/* Chart */}
-          <div className="h-[180px] sm:h-[220px] w-full -mx-1">
+          <div className="h-[180px] sm:h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={combinedChartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+              <AreaChart data={combinedChartData} margin={{ top: 4, right: 4, left: -4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
@@ -448,7 +448,7 @@ export function AdminAnalyticsChart({
               }} tickFormatter={value => formatXAxisDate(value, data?.groupFormat || 'day')} interval="preserveStartEnd" minTickGap={24} />
                 <YAxis axisLine={false} tickLine={false} tick={{
                 fontSize: 11, fill: 'hsl(var(--muted-foreground))'
-              }} tickFormatter={value => value >= 1000 ? `${(value/1000).toFixed(value >= 10000 ? 0 : 1)}k` : value.toLocaleString('ru-RU')} width={40} />
+              }} tickFormatter={value => value >= 1000 ? `${(value/1000).toFixed(value >= 10000 ? 0 : 1)}k` : value.toLocaleString('ru-RU')} width={52} tickMargin={6} />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: config.color, strokeOpacity: 0.25, strokeWidth: 1 }} />
                 {/* Линия предыдущего периода */}
                 <Area 
