@@ -479,21 +479,28 @@ export const AdminSupport = () => {
       );
     });
 
+  const getAvatarInitial = (conv: Conversation) => {
+    const src = conv.user_email || conv.visitor_id || "А";
+    return src.trim().charAt(0).toUpperCase();
+  };
+
   const conversationListContent = (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <Headphones className="w-5 h-5 text-primary" />
+      <div className="px-4 py-4 border-b border-border/60 bg-gradient-to-br from-violet-500/[0.05] via-card to-card">
+        <div className="flex items-center justify-between mb-1.5">
+          <h3 className="text-base font-bold flex items-center gap-2">
+            <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-violet-500/20">
+              <Headphones className="w-3.5 h-3.5 text-white" strokeWidth={2.2} />
+            </span>
             Поддержка
           </h3>
           {attentionCount > 0 && (
-            <Badge className="bg-destructive text-destructive-foreground text-xs">
-              {attentionCount}
+            <Badge className="bg-destructive text-destructive-foreground text-[10px] px-2 h-5 rounded-full animate-pulse">
+              {attentionCount} {attentionCount === 1 ? "нов." : "нов."}
             </Badge>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">Управление обращениями пользователей</p>
+        <p className="text-[11px] text-muted-foreground">Управление обращениями пользователей</p>
       </div>
       <div ref={convsContainerRef} className="flex-1 overflow-y-auto" onScroll={handleConvsScroll}>
         {loading ? (
@@ -502,45 +509,73 @@ export const AdminSupport = () => {
           </div>
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <MessageCircle className="w-10 h-10 text-muted-foreground/30 mb-3" />
+            <div className="w-12 h-12 rounded-2xl bg-muted/40 flex items-center justify-center mb-3">
+              <MessageCircle className="w-6 h-6 text-muted-foreground/40" />
+            </div>
             <p className="text-sm text-muted-foreground">Обращений пока нет</p>
           </div>
         ) : (
           <>
-            {conversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => selectConversation(conv)}
-                className={`w-full text-left p-4 border-b border-border/50 hover:bg-secondary/50 transition-colors ${
-                  selectedConv?.id === conv.id ? "bg-primary/5" : ""
-                } ${conv.needs_admin_attention ? "bg-destructive/5" : ""}`}
-              >
-                <div className="flex items-start justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium truncate max-w-[160px]">
-                      {conv.user_email || conv.visitor_id?.slice(0, 8) || "Аноним"}
-                    </span>
-                    <Badge variant="outline" className="text-[10px] px-1.5">
-                      {getChannelLabel(conv.channel)}
-                    </Badge>
+            {conversations.map((conv) => {
+              const isSelected = selectedConv?.id === conv.id;
+              const isAttention = conv.needs_admin_attention;
+              return (
+                <button
+                  key={conv.id}
+                  onClick={() => selectConversation(conv)}
+                  className={`relative w-full text-left px-3 py-3 border-b border-border/40 transition-all hover:bg-secondary/40 ${
+                    isSelected ? "bg-violet-500/[0.06]" : ""
+                  } ${isAttention ? "bg-amber-500/[0.04]" : ""}`}
+                >
+                  {isSelected && (
+                    <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-violet-500 to-indigo-600" />
+                  )}
+                  <div className="flex items-start gap-2.5">
+                    <div className="relative shrink-0">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold ${
+                        isAttention
+                          ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white"
+                          : conv.user_id
+                          ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white"
+                          : "bg-gradient-to-br from-slate-400 to-slate-600 text-white"
+                      }`}>
+                        {getAvatarInitial(conv)}
+                      </div>
+                      {isAttention && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-card animate-pulse" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <span className="text-xs sm:text-sm font-medium truncate flex-1 min-w-0">
+                          {conv.user_email || conv.visitor_id?.slice(0, 8) || "Аноним"}
+                        </span>
+                        {getStatusBadge(conv)}
+                      </div>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 rounded font-normal border-border/60 text-muted-foreground">
+                          {getChannelLabel(conv.channel)}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground/70 tabular-nums">
+                          · {conv.message_count}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground truncate leading-snug">
+                        {conv.last_message_sender === "admin" && <span className="text-violet-500/80">Вы: </span>}
+                        {conv.last_message || "Нет сообщений"}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground/60 tabular-nums mt-1 inline-block">
+                        {conv.last_message_at
+                          ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
+                              day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+                            })
+                          : ""}
+                      </span>
+                    </div>
                   </div>
-                  {getStatusBadge(conv)}
-                </div>
-                <p className="text-xs text-muted-foreground truncate mt-1">
-                  {conv.last_message || "Нет сообщений"}
-                </p>
-                <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-[10px] text-muted-foreground">{conv.message_count} сообщ.</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {conv.last_message_at
-                      ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
-                          day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
-                        })
-                      : ""}
-                  </span>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
             {loadingMoreConvs && (
               <div className="flex justify-center p-3">
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
