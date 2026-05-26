@@ -456,7 +456,7 @@ export const AdminSupport = () => {
                   ? "bg-secondary/80 text-secondary-foreground border border-border/40"
                   : msg.sender_type === "system"
                   ? "bg-muted/50 text-muted-foreground italic text-xs"
-                  : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20"
+                  : "bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20"
               }`}
             >
               {msg.attachment_url && (
