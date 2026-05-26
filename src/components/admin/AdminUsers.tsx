@@ -482,7 +482,7 @@ export function AdminUsers({
                               size="sm"
                               title={user.is_blocked ? 'Разблокировать' : 'Заблокировать'}
                               onClick={() => toggleUserBlock(user.id, user.is_blocked)}
-                              className={`h-8 w-8 p-0 ${user.is_blocked ? 'text-emerald-600 hover:bg-emerald-500/10' : 'text-destructive hover:bg-destructive/10'}`}
+                              className={`h-8 w-8 p-0 ${user.is_blocked ? 'text-emerald-600 hover:bg-emerald-500/10' : 'text-destructive hover:bg-red-600 hover:text-white'}`}
                             >
                               {user.is_blocked ? <UserCheck className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
                             </Button>
