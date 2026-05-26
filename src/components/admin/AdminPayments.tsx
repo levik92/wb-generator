@@ -257,14 +257,14 @@ export function AdminPayments() {
   };
 
   const getInvoiceStatusBadge = (status: string) => {
-    const map: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      invoice_issued: { label: "Выставлен", variant: "outline" },
-      awaiting_confirmation: { label: "Ожидает подтверждения", variant: "secondary" },
-      paid: { label: "Оплачен", variant: "default" },
-      rejected: { label: "Отклонён", variant: "destructive" },
+    const map: Record<string, { label: string; className: string }> = {
+      invoice_issued: { label: "Выставлен", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+      awaiting_confirmation: { label: "Ожидает", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" },
+      paid: { label: "Оплачен", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+      rejected: { label: "Отклонён", className: "bg-destructive/10 text-destructive border-destructive/20" },
     };
-    const info = map[status] || { label: status, variant: "secondary" as const };
-    return <Badge variant={info.variant}>{info.label}</Badge>;
+    const info = map[status] || { label: status, className: "bg-muted text-muted-foreground" };
+    return <Badge variant="outline" className={cn("text-[10px] font-medium", info.className)}>{info.label}</Badge>;
   };
 
   const statusOptions = useMemo(() => Array.from(new Set(payments.map(p => p.status))).sort(), [payments]);
