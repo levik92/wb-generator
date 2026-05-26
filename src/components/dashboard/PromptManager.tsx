@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Save, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Pencil, Save, X, ChevronDown, ChevronRight, Image as ImageIcon, Video, Wrench, Sparkles, Zap, Cpu, Check, Settings2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminImageSettings } from "@/components/admin/AdminImageSettings";
 import { AdminProxySettings } from "@/components/admin/AdminProxySettings";
+import { cn } from "@/lib/utils";
 interface Prompt {
   id: string;
   prompt_type: string;
