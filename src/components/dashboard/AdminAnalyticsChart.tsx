@@ -315,16 +315,20 @@ export function AdminAnalyticsChart({
       const prevValue = typeof prevEntry?.value === 'number' ? prevEntry.value : 0;
       
       return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium text-foreground mb-1">
+        <div className="bg-popover/95 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-2.5 shadow-xl">
+          <p className="text-[11px] font-medium text-muted-foreground mb-1.5">
             {formatXAxisDate(label, data?.groupFormat || 'day')}
           </p>
-          <p className="text-sm text-foreground">
-            <span className="font-medium">Текущий:</span> {config.formatTooltip(currentValue)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Прошлый:</span> {config.formatTooltip(prevValue)}
-          </p>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
+            <span className="text-muted-foreground">Текущий:</span>
+            <span className="font-semibold tabular-nums text-foreground">{config.formatTooltip(currentValue)}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm mt-0.5">
+            <span className="w-2 h-2 rounded-full opacity-40" style={{ backgroundColor: config.color }} />
+            <span className="text-muted-foreground">Прошлый:</span>
+            <span className="font-medium tabular-nums text-muted-foreground">{config.formatTooltip(prevValue)}</span>
+          </div>
         </div>
       );
     }
@@ -332,15 +336,17 @@ export function AdminAnalyticsChart({
   };
 
   if (loading) {
-    return <Card className="animate-fade-in bg-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-5">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Icon className="h-4 w-4" />
+            <span className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${config.color}1a`, color: config.color }}>
+              <Icon className="h-4 w-4" />
+            </span>
             {config.title}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[200px]">
+        <CardContent className="p-4 sm:p-5 pt-0">
+          <div className="flex items-center justify-center h-[180px] sm:h-[220px]">
             <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
         </CardContent>
