@@ -199,7 +199,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
 
   return (
     <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden transition-shadow hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 gap-2 p-4 sm:p-5">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accentColor}1a`, color: accentColor }}>
             <Icon className="h-4 w-4" />
