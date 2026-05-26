@@ -153,30 +153,25 @@ export function AdminAnalyticsChart({
   const effectiveDateRange = dateRange ?? internalDateRange;
   const setEffectiveDateRange = onDateRangeChange ?? setInternalDateRange;
 
-  // Обработчик выбора даты в календаре
+  // Обработчик выбора даты: первый клик — начало, второй — конец
   const handleCalendarSelect = (range: DateRange | undefined) => {
-    if (!range) {
+    if (!range || !range.from) {
       setPendingRange(undefined);
       setIsSelectingRange(false);
       return;
     }
 
-    if (!isSelectingRange) {
-      // Первый клик — запоминаем начало диапазона, ждём второй клик
-      setPendingRange({ from: range.from, to: undefined });
-      setIsSelectingRange(true);
-    } else {
-      // Второй клик — диапазон выбран
-      const from = pendingRange?.from || range.from;
-      const to = range.to || range.from;
+    if (range.from && range.to) {
+      // Полный диапазон выбран — нормализуем порядок
+      const finalFrom = range.from <= range.to ? range.from : range.to;
+      const finalTo = range.from <= range.to ? range.to : range.from;
       setPendingRange(undefined);
       setIsSelectingRange(false);
-      if (from && to) {
-        // Убеждаемся что from < to
-        const finalFrom = from <= to ? from : to;
-        const finalTo = from <= to ? to : from;
-        setEffectiveDateRange({ from: finalFrom, to: finalTo });
-      }
+      setEffectiveDateRange({ from: finalFrom, to: finalTo });
+    } else {
+      // Только начало — ждём второго клика
+      setPendingRange({ from: range.from, to: undefined });
+      setIsSelectingRange(true);
     }
   };
 
