@@ -41,8 +41,13 @@ const DialogContent = React.forwardRef<
     >
       <DialogPrimitive.Content
         ref={ref}
+        style={{
+          // Cap height so the dialog always fits within the visible viewport,
+          // accounting for the on-screen keyboard on mobile.
+          maxHeight: "calc(100dvh - 2rem - var(--keyboard-inset-height, 0px))",
+        }}
         className={cn(
-          "relative z-50 my-auto grid w-full max-w-lg gap-4 border border-border/50 bg-card p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+          "relative z-50 my-auto grid w-full max-w-lg gap-4 overflow-y-auto border border-border/50 bg-card p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
           className
         )}
         {...props}
