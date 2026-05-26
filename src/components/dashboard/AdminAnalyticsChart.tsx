@@ -348,7 +348,7 @@ export function AdminAnalyticsChart({
       </Card>;
   }
 
-  return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden transition-shadow hover:shadow-md">
+  return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-0">
 
         <div className="flex items-center gap-2.5 min-w-0">
