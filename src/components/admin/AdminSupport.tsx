@@ -205,23 +205,37 @@ export const AdminSupport = () => {
     }
   }, [loadMessages]);
 
-  // Poll messages for selected conversation
+  // Poll messages for selected conversation (skip when hidden, closed, sending, or uploading)
   useEffect(() => {
     if (!selectedConv) return;
-    const interval = setInterval(async () => {
+    if (selectedConv.status === "closed") return;
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (sending || uploading) return;
       try {
-        shouldScrollRef.current = true;
         const msgs = await loadMessages(selectedConv.id);
+        if (cancelled) return;
         setMessages(prev => {
-          if (msgs.length !== prev.length || msgs[msgs.length - 1]?.id !== prev[prev.length - 1]?.id) {
-            return msgs;
-          }
-          return prev;
+          const sameLen = msgs.length === prev.length;
+          const sameLast = msgs[msgs.length - 1]?.id === prev[prev.length - 1]?.id;
+          if (sameLen && sameLast) return prev;
+          shouldScrollRef.current = true;
+          return msgs;
         });
       } catch {}
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [selectedConv?.id, loadMessages]);
+    };
+    const interval = setInterval(tick, 8000);
+    const onVisible = () => { if (!document.hidden) tick(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [selectedConv?.id, selectedConv?.status, loadMessages, sending, uploading]);
+
 
   useEffect(() => {
     if (!shouldScrollRef.current) return;
