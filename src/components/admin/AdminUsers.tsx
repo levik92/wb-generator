@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SurveyStats } from "./SurveyStats";
-import { TransactionDetailDialog } from "./TransactionDetailDialog";
+import { UserDetailDialog } from "./UserDetailDialog";
 import { UserFiltersPopover, type UserFiltersState } from "./UserFiltersPopover";
 
 interface User {
@@ -76,7 +76,7 @@ export function AdminUsers({
     channel: new Set(),
   });
   const [paidDataLoading, setPaidDataLoading] = useState(true);
-  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  
   // Filter source data
   const [profileUtmMap, setProfileUtmMap] = useState<Record<string, string>>({}); // user_id -> utm_source_id
   const [surveyByUser, setSurveyByUser] = useState<Record<string, Record<string, string>>>({});
@@ -494,243 +494,12 @@ export function AdminUsers({
         </CardContent>
       </Card>
 
-      {/* User Details Modal */}
-      <ResponsiveDialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <ResponsiveDialogContent className="sm:!max-w-4xl lg:!max-w-4xl">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle className="text-base md:text-lg">Детали пользователя</ResponsiveDialogTitle>
-            <ResponsiveDialogDescription className="break-all text-xs md:text-sm">
-              {selectedUser?.email}
-            </ResponsiveDialogDescription>
-          </ResponsiveDialogHeader>
-
-          {detailsLoading ? <div className="flex justify-center py-8">
-              <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
-            </div> : userDetails && <div className="space-y-6 w-full min-w-0 overflow-hidden">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="bg-green-500/10 dark:bg-green-500/20 border border-green-500/30 rounded-lg p-2.5 sm:p-3">
-                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-green-600 dark:text-green-400 truncate">
-                    {userDetails.totalPaid}₽
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-green-600/80 dark:text-green-400/80">Всего оплачено</div>
-                </div>
-                <div className="bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 rounded-lg p-2.5 sm:p-3">
-                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-blue-600 dark:text-blue-400 truncate">
-                    {userDetails.tokensSpent}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-blue-600/80 dark:text-blue-400/80">Потрачено токенов</div>
-                </div>
-                <div className="bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 rounded-lg p-2.5 sm:p-3">
-                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-purple-600 dark:text-purple-400 truncate">
-                    {userDetails.generationsCount}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-purple-600/80 dark:text-purple-400/80">Генераций</div>
-                </div>
-                <div className="bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 rounded-lg p-2.5 sm:p-3">
-                  <div className="text-sm sm:text-base lg:text-lg font-semibold text-orange-600 dark:text-orange-400 truncate">
-                    {userDetails.referralsCount}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-orange-600/80 dark:text-orange-400/80">Рефералов</div>
-                </div>
-              </div>
-
-              {/* UTM Source */}
-              <div className="bg-muted/50 rounded-lg p-2.5 sm:p-3 flex items-center gap-2">
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Источник:</div>
-                <Badge variant="secondary" className="text-xs">
-                  {userDetails.utmSourceName || 'Прямой заход'}
-                </Badge>
-              </div>
-
-              {/* Survey Responses */}
-              <div className="space-y-2">
-                <h3 className="text-sm sm:text-lg font-semibold">Результаты опроса</h3>
-                {userDetails.surveyResponses.length > 0 ? (
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {(() => {
-                      const labels: Record<string, string> = {
-                        who_are_you: "Кто вы?",
-                        monthly_volume: "Объём в месяц",
-                        acquisition_channel: "Откуда узнали?"
-                      };
-                      const order = ["who_are_you", "monthly_volume", "acquisition_channel"];
-                      return order.map(key => {
-                        const resp = userDetails.surveyResponses.find(r => r.question_key === key);
-                        if (!resp) return null;
-                        return (
-                          <div key={key} className="bg-muted/50 rounded-lg p-2.5 space-y-1">
-                            <div className="text-[10px] sm:text-xs text-muted-foreground">{labels[key] || key}</div>
-                            <Badge variant="secondary" className="text-xs">{resp.answer}</Badge>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Опрос не пройден</p>
-                )}
-              </div>
-
-              {/* Payment History */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-sm sm:text-lg font-semibold">История платежей</h3>
-                <div className="max-h-48 overflow-auto border rounded w-full">
-                  <div className="overflow-x-auto w-full">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="min-w-[100px]">Дата</TableHead>
-                          <TableHead className="min-w-[80px]">Сумма</TableHead>
-                          <TableHead className="min-w-[80px]">Токены</TableHead>
-                          <TableHead className="min-w-[80px]">Статус</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {userDetails.paymentHistory.map((payment: any) => <TableRow key={payment.id}>
-                            <TableCell className="text-xs">
-                              {new Date(payment.created_at).toLocaleDateString('ru-RU')}
-                            </TableCell>
-                            <TableCell className="text-xs">{payment.amount}₽</TableCell>
-                            <TableCell className="text-xs">{payment.tokens_amount}</TableCell>
-                            <TableCell>
-                              <Badge variant={payment.status === 'succeeded' ? 'default' : 'secondary'} className="text-xs">
-                                {payment.status === 'succeeded' ? 'Оплачен' : payment.status}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>)}
-                        {userDetails.paymentHistory.length === 0 && <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground text-xs">
-                              Нет платежей
-                            </TableCell>
-                          </TableRow>}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Token Transactions */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-sm sm:text-lg font-semibold">История токенов</h3>
-                <div className="max-h-64 overflow-auto border rounded w-full">
-                  <div className="overflow-x-auto w-full">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="min-w-[100px]">Дата</TableHead>
-                          <TableHead className="min-w-[80px]">Кол-во</TableHead>
-                          <TableHead className="min-w-[100px]">Тип</TableHead>
-                          <TableHead className="min-w-[150px]">Описание</TableHead>
-                          <TableHead className="min-w-[90px] text-right">Детали</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {userDetails.tokenTransactions.map((tx: any) => {
-                          const typeLabels: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-                            purchase: { label: 'Оплата', variant: 'default' },
-                            bonus: { label: 'Бонус', variant: 'secondary' },
-                            generation: { label: 'Генерация', variant: 'outline' },
-                            referral_bonus: { label: 'Реферал', variant: 'secondary' },
-                            promocode: { label: 'Промокод', variant: 'secondary' },
-                            refund: { label: 'Возврат', variant: 'secondary' },
-                            direct_sql_update: { label: 'Прямой SQL', variant: 'destructive' },
-                          };
-                          const typeInfo = typeLabels[tx.transaction_type] || { label: tx.transaction_type, variant: 'outline' as const };
-                          // Показываем кнопку только для операций, у которых может быть связанная генерация
-                          const hasDetails = tx.transaction_type === 'generation';
-                          // Скрываем у транзакций старше 30 дней (TTL хранения данных)
-                          const ageDays = (Date.now() - new Date(tx.created_at).getTime()) / (1000 * 60 * 60 * 24);
-                          const detailsAvailable = hasDetails && ageDays <= 30;
-                          return (
-                            <TableRow key={tx.id}>
-                              <TableCell className="text-xs">
-                                {new Date(tx.created_at).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                              </TableCell>
-                              <TableCell className={`text-xs font-medium ${tx.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {tx.amount > 0 ? '+' : ''}{tx.amount}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={typeInfo.variant} className="text-xs">
-                                  {typeInfo.label}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">
-                                {tx.description || '—'}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {detailsAvailable ? (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 px-2 gap-1 text-xs"
-                                    onClick={() => setSelectedTransaction(tx)}
-                                  >
-                                    <Info className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Подробнее</span>
-                                  </Button>
-                                ) : (
-                                  <span className="text-[10px] text-muted-foreground">—</span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                        {userDetails.tokenTransactions.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground text-xs">
-                              Нет транзакций
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Referrals */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-sm sm:text-lg font-semibold">Рефералы ({userDetails.referralsCount})</h3>
-                {userDetails.referrals.length > 0 ? <div className="max-h-48 overflow-auto border rounded w-full">
-                    <div className="overflow-x-auto w-full">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="min-w-[150px]">Email</TableHead>
-                            <TableHead className="min-w-[100px]">Дата</TableHead>
-                            <TableHead className="min-w-[80px]">Статус</TableHead>
-                            <TableHead className="min-w-[80px]">Токенов</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {userDetails.referrals.map((ref: any) => <TableRow key={ref.id}>
-                              <TableCell className="text-xs">{ref.referred?.email || 'Unknown'}</TableCell>
-                              <TableCell className="text-xs">
-                                {new Date(ref.created_at).toLocaleDateString('ru-RU')}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={ref.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                                  {ref.status === 'completed' ? 'Завершен' : 'Ожидание'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-xs">{ref.tokens_awarded || 0}</TableCell>
-                            </TableRow>)}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div> : <p className="text-sm text-muted-foreground">Нет рефералов</p>}
-              </div>
-            </div>}
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
-
-      {/* Transaction details popup */}
-      <TransactionDetailDialog
-        open={!!selectedTransaction}
-        onOpenChange={(open) => { if (!open) setSelectedTransaction(null); }}
-        transaction={selectedTransaction}
+      {/* User Details Modal (with internal drill-down for transaction details) */}
+      <UserDetailDialog
+        user={selectedUser}
+        details={userDetails}
+        loading={detailsLoading}
+        onClose={() => setSelectedUser(null)}
       />
 
       {/* Survey Statistics */}
