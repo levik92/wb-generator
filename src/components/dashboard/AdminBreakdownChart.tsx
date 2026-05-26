@@ -199,7 +199,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
 
   return (
     <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden transition-shadow hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 gap-2 p-4 sm:p-5">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 gap-2 p-4 sm:p-5">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accentColor}1a`, color: accentColor }}>
             <Icon className="h-4 w-4" />
@@ -208,7 +208,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
         </div>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-muted border-border/60 shrink-0">
+            <Button variant="outline" size="sm" className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors">
               <CalendarIcon className="h-3 w-3" />
               <span className="hidden sm:inline">{formatDateRange()}</span>
               <span className="sm:hidden">Период</span>
