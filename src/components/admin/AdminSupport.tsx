@@ -438,22 +438,22 @@ export const AdminSupport = () => {
       return (
         <div
           key={group.key}
-          className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"}`}
+          className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"} animate-fade-in`}
         >
-          <span className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1">
+          <span className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1 px-1 font-medium">
             {icon}
             {label}
           </span>
           {group.items.map(({ msg, position }) => (
             <div
               key={msg.id}
-              className={`max-w-[80%] px-3 py-2 text-sm leading-relaxed ${
+              className={`max-w-[85%] sm:max-w-[75%] px-3.5 py-2 text-sm leading-relaxed shadow-sm ${
                 bubbleRoundingClasses(isOwn ? "own" : "other", position)
               } ${
                 msg.sender_type === "admin"
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-violet-500/20"
                   : msg.sender_type === "user"
-                  ? "bg-secondary text-secondary-foreground"
+                  ? "bg-secondary/80 text-secondary-foreground border border-border/40"
                   : msg.sender_type === "system"
                   ? "bg-muted/50 text-muted-foreground italic text-xs"
                   : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20"
@@ -472,7 +472,7 @@ export const AdminSupport = () => {
               {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
             </div>
           ))}
-          <span className="text-[10px] text-muted-foreground mt-0.5">
+          <span className="text-[10px] text-muted-foreground/70 mt-0.5 px-1 tabular-nums">
             {formatChatTime(group.endedAt)}
           </span>
         </div>
