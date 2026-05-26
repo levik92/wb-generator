@@ -626,49 +626,59 @@ export const AdminSupport = () => {
 
   const chatViewContent = (
     <div className="flex flex-col h-full">
-      <div className="p-3 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      {/* Chat header */}
+      <div className="px-3 sm:px-4 py-3 border-b border-border/60 bg-gradient-to-br from-violet-500/[0.04] via-card to-card flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
           {(isMobile || !selectedConv) && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg shrink-0"
               onClick={() => { setSelectedConv(null); setMessages([]); }}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
           )}
-          <div>
-            <p className="text-sm font-medium">
+          {selectedConv && (
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
+              {getAvatarInitial(selectedConv)}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold truncate">
               {selectedConv?.user_email || selectedConv?.visitor_id?.slice(0, 8) || "Аноним"}
             </p>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 rounded font-normal border-border/60 text-muted-foreground">
                 {selectedConv && getChannelLabel(selectedConv.channel)}
-              </span>
+              </Badge>
               {selectedConv?.ai_enabled && (
-                <span className="text-[10px] text-primary flex items-center gap-0.5">
+                <span className="text-[10px] text-violet-500 flex items-center gap-0.5 font-medium">
                   <Bot className="w-3 h-3" /> AI активен
                 </span>
+              )}
+              {selectedConv?.status === "closed" && (
+                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 rounded">Закрыт</Badge>
               )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg" onClick={handleToggleAI}
+        <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="icon" className={`h-8 w-8 rounded-lg ${selectedConv?.ai_enabled ? "text-violet-500 bg-violet-500/10" : "text-muted-foreground"}`}
+            onClick={handleToggleAI}
             title={selectedConv?.ai_enabled ? "Выключить AI" : "Включить AI"}>
             {selectedConv?.ai_enabled ? <BotOff className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={handleCloseConv}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"
+            onClick={handleCloseConv} title="Закрыть диалог">
             <X className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
 
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3" onScroll={handleMsgsScroll}>
-        {/* Load more indicator */}
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3 bg-gradient-to-b from-muted/15 via-card to-card" onScroll={handleMsgsScroll}>
         {hasMoreMsgs && (
           <div className="flex justify-center py-2">
             {loadingMoreMsgs ? (
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
             ) : (
-              <button onClick={loadOlderMessages} className="text-xs text-primary hover:underline">
+              <button onClick={loadOlderMessages} className="text-xs text-violet-500 hover:text-violet-600 hover:underline font-medium">
                 Загрузить ранние сообщения
               </button>
             )}
@@ -686,11 +696,11 @@ export const AdminSupport = () => {
 
       {/* Pending file preview */}
       {pendingPreview && (
-        <div className="px-3 pb-2">
-          <div className="relative inline-block">
-            <img src={pendingPreview} alt="Превью" className="h-16 w-16 rounded-lg object-cover border border-border" />
+        <div className="px-3 sm:px-4 pb-2 pt-1 border-t border-border/40 bg-muted/20">
+          <div className="relative inline-block animate-fade-in">
+            <img src={pendingPreview} alt="Превью" className="h-16 w-16 rounded-xl object-cover border border-border/60 shadow-sm" />
             <button onClick={clearPendingFile}
-              className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
+              className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md hover:scale-110 transition-transform">
               <X className="w-3 h-3" />
             </button>
           </div>
@@ -698,20 +708,20 @@ export const AdminSupport = () => {
       )}
 
       {selectedConv?.status !== "closed" && (
-        <div className="border-t border-border p-3">
+        <div className="border-t border-border/60 p-3 bg-card/95">
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-2">
             <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleFileSelect} />
-            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 opacity-40 hover:opacity-100 transition-all"
-              onClick={() => fileInputRef.current?.click()} disabled={sending || uploading}>
+            <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-full shrink-0 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 transition-colors"
+              onClick={() => fileInputRef.current?.click()} disabled={sending || uploading} aria-label="Прикрепить файл">
               <Paperclip className="w-4 h-4" />
             </Button>
             <input
               ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)}
               placeholder="Ответить пользователю..."
-              className="flex-1 bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+              className="flex-1 min-w-0 bg-muted/50 border border-border/60 rounded-full px-4 py-2.5 text-sm outline-none focus:border-violet-500/60 focus:bg-card focus:ring-2 focus:ring-violet-500/20 placeholder:text-muted-foreground/70 transition-all"
               disabled={sending || uploading} maxLength={2000}
             />
-            <Button type="submit" size="icon" className="h-9 w-9 rounded-xl shrink-0"
+            <Button type="submit" size="icon" className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-indigo-600 hover:from-violet-400 hover:to-indigo-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
               disabled={(!input.trim() && !pendingFile) || sending || uploading}>
               {sending || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
