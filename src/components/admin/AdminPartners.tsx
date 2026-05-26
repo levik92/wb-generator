@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, TrendingUp, CreditCard, DollarSign, AlertCircle, Check } from "lucide-react";
+import { Users, TrendingUp, CreditCard, DollarSign, AlertCircle, Check, ChevronRight, Wallet, UserCheck, Copy, Mail, Phone, Landmark, Hash, Calendar, Banknote, Percent, Search } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/dashboard/GlassCard";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { AdminFriends } from "./AdminFriends";
 import {
   ResponsiveDialog,
