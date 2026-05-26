@@ -964,7 +964,7 @@ export function PromptManager() {
                     isEditing && "border-primary/50 ring-1 ring-primary/20"
                   )}>
                     <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
                           <Wrench className="h-4 w-4 text-purple-500" />
                         </div>
