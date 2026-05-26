@@ -88,6 +88,8 @@ export const AdminPartners = () => {
   const [referralPage, setReferralPage] = useState(1);
   const [manualPaymentAmount, setManualPaymentAmount] = useState("");
   const [totalPaidOut, setTotalPaidOut] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
   useEffect(() => {
     loadPartners();
