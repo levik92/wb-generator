@@ -541,257 +541,396 @@ export const AdminPartners = () => {
 
     {/* Partner Details Dialog */}
     <ResponsiveDialog open={!!selectedPartner} onOpenChange={() => setSelectedPartner(null)}>
-      <ResponsiveDialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle className="text-base sm:text-lg">
-            Партнер: {selectedPartner?.user_email || "—"}
-          </ResponsiveDialogTitle>
+      <ResponsiveDialogContent className="sm:max-w-4xl max-h-[92vh] overflow-y-auto p-0">
+        {/* Header */}
+        <ResponsiveDialogHeader className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-border/40">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-base font-semibold text-primary shrink-0">
+              {(selectedPartner?.user_email?.[0] || "?").toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1 text-left">
+              <ResponsiveDialogTitle className="text-base sm:text-lg flex items-center gap-2">
+                <span className="truncate">{selectedPartner?.user_email || "—"}</span>
+              </ResponsiveDialogTitle>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <button
+                  className="text-[11px] font-mono px-2 py-0.5 rounded bg-background/80 border border-border/60 text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+                  onClick={() => {
+                    if (selectedPartner?.partner_code) {
+                      navigator.clipboard.writeText(selectedPartner.partner_code);
+                      toast({ title: "Скопировано", description: selectedPartner.partner_code });
+                    }
+                  }}
+                  title="Скопировать код"
+                >
+                  <Hash className="h-3 w-3" />{selectedPartner?.partner_code}
+                  <Copy className="h-2.5 w-2.5" />
+                </button>
+                {selectedPartner?.has_pending_withdrawal ? (
+                  <Badge variant="destructive" className="gap-1 text-[10px]">
+                    <AlertCircle className="h-3 w-3" />Запрос {selectedPartner.pending_amount?.toLocaleString()} ₽
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                    Активен
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
         </ResponsiveDialogHeader>
 
-        {detailsLoading ? <div className="flex justify-center py-8">
-          <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
-        </div> : <div className="space-y-6">
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Клиентов</p>
-              <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.invited_clients_count}</p>
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Заработано</p>
-              <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.total_earned.toLocaleString()} ₽</p>
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Баланс</p>
-              <p className="text-xl sm:text-2xl font-bold">{selectedPartner?.current_balance.toLocaleString()} ₽</p>
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Ставка комиссии</p>
-              <Select
-                value={String(selectedPartner?.commission_rate || 15)}
-                onValueChange={(val) => {
-                  if (selectedPartner) {
-                    handleChangeCommissionRate(selectedPartner.id, Number(val));
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[100px] h-9 mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMISSION_RATES.map(rate => (
-                    <SelectItem key={rate} value={String(rate)}>{rate}%</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {detailsLoading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
-
-          {/* Referrals List */}
-          <Card className="bg-muted/30">
-            <CardHeader>
-              <CardTitle className="text-base">Привлечённые клиенты ({referrals.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {referrals.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Нет привлечённых клиентов</p>
-              ) : (
-                <div className="space-y-4">
-                  {referrals.slice((referralPage - 1) * REFERRALS_PER_PAGE, referralPage * REFERRALS_PER_PAGE).map(ref => (
-                    <div key={ref.id} className="border border-border/50 rounded-xl overflow-hidden">
-                      {/* Referral header */}
-                      <div className="bg-muted/40 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-medium text-sm truncate">{ref.email}</span>
-                          {ref.full_name && <span className="text-xs text-muted-foreground">({ref.full_name})</span>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={ref.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                            {ref.status === 'active' ? 'Оплатил' : 'Зарегистрирован'}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
-                          </span>
-                        </div>
-                      </div>
-                      {/* Referral summary */}
-                      <div className="px-4 py-2 flex flex-wrap gap-4 text-sm border-b border-border/30">
-                        <div>
-                          <span className="text-muted-foreground">Всего оплат: </span>
-                          <span className="font-semibold">{ref.total_payments > 0 ? `${Number(ref.total_payments).toLocaleString()} ₽` : '—'}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Комиссия: </span>
-                          <span className="font-semibold text-primary">{ref.total_commission > 0 ? `${Number(ref.total_commission).toLocaleString()} ₽` : '—'}</span>
-                        </div>
-                      </div>
-                      {/* Per-payment breakdown */}
-                      {ref.payments && ref.payments.length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="text-xs">Дата</TableHead>
-                                <TableHead className="text-xs">Пакет</TableHead>
-                                <TableHead className="text-xs">Сумма оплаты</TableHead>
-                                <TableHead className="text-xs">Ставка</TableHead>
-                                <TableHead className="text-xs">Комиссия</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {ref.payments.map((p: any, idx: number) => (
-                                <TableRow key={idx}>
-                                  <TableCell className="text-xs">
-                                    {new Date(p.date).toLocaleDateString("ru-RU")}
-                                  </TableCell>
-                                  <TableCell className="text-xs">{p.package_name}</TableCell>
-                                  <TableCell className="text-xs font-medium">
-                                    {Number(p.payment_amount).toLocaleString()} ₽
-                                  </TableCell>
-                                  <TableCell className="text-xs">{p.commission_rate}%</TableCell>
-                                  <TableCell className="text-xs font-medium text-primary">
-                                    {Number(p.commission_amount).toLocaleString()} ₽
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground px-4 py-2">Оплат пока нет</p>
-                      )}
-                    </div>
-                  ))}
-                  {/* Pagination */}
-                  {referrals.length > REFERRALS_PER_PAGE && (
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-xs text-muted-foreground">
-                        {(referralPage - 1) * REFERRALS_PER_PAGE + 1}–{Math.min(referralPage * REFERRALS_PER_PAGE, referrals.length)} из {referrals.length}
-                      </span>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" disabled={referralPage <= 1} onClick={() => setReferralPage(p => p - 1)}>
-                          Назад
-                        </Button>
-                        <Button size="sm" variant="outline" disabled={referralPage >= Math.ceil(referrals.length / REFERRALS_PER_PAGE)} onClick={() => setReferralPage(p => p + 1)}>
-                          Далее
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+        ) : (
+          <div className="px-5 sm:px-6 py-5 space-y-5">
+            {/* Quick stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { icon: UserCheck, label: "Клиентов", value: selectedPartner?.invited_clients_count ?? 0, tone: "text-foreground" },
+                { icon: TrendingUp, label: "Заработано", value: `${(selectedPartner?.total_earned || 0).toLocaleString()} ₽`, tone: "text-emerald-600 dark:text-emerald-400" },
+                { icon: Wallet, label: "Баланс", value: `${(selectedPartner?.current_balance || 0).toLocaleString()} ₽`, tone: "text-primary" },
+              ].map((s, i) => (
+                <div key={i} className="rounded-xl border border-border/60 bg-card p-3">
+                  <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+                    <s.icon className="h-3 w-3" />{s.label}
+                  </div>
+                  <p className={cn("text-lg sm:text-xl font-bold mt-1 tabular-nums", s.tone)}>{s.value}</p>
                 </div>
+              ))}
+              <div className="rounded-xl border border-border/60 bg-card p-3">
+                <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <Percent className="h-3 w-3" />Ставка комиссии
+                </div>
+                <Select
+                  value={String(selectedPartner?.commission_rate || 15)}
+                  onValueChange={(val) => {
+                    if (selectedPartner) handleChangeCommissionRate(selectedPartner.id, Number(val));
+                  }}
+                >
+                  <SelectTrigger className="w-full h-9 mt-1 font-semibold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMMISSION_RATES.map(rate => (
+                      <SelectItem key={rate} value={String(rate)}>{rate}%</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Referrals */}
+            <Card className="border-border/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  Привлечённые клиенты
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {referrals.length}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {referrals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">Нет привлечённых клиентов</p>
+                ) : (
+                  <div className="space-y-3">
+                    {referrals.slice((referralPage - 1) * REFERRALS_PER_PAGE, referralPage * REFERRALS_PER_PAGE).map(ref => {
+                      const isPaid = ref.status === 'active';
+                      return (
+                        <div key={ref.id} className="rounded-xl border border-border/50 overflow-hidden bg-card">
+                          <div className={cn(
+                            "px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-border/40",
+                            isPaid ? "bg-emerald-500/[0.04]" : "bg-muted/40"
+                          )}>
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <div className={cn(
+                                "h-7 w-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0",
+                                isPaid ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+                              )}>
+                                {(ref.email?.[0] || "?").toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium truncate">{ref.email}</p>
+                                {ref.full_name && <p className="text-[11px] text-muted-foreground truncate">{ref.full_name}</p>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Badge
+                                variant="secondary"
+                                className={cn(
+                                  "text-[10px]",
+                                  isPaid
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                    : "bg-muted text-muted-foreground"
+                                )}
+                              >
+                                {isPaid ? 'Оплатил' : 'Зарегистрирован'}
+                              </Badge>
+                              <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {new Date(ref.registered_at).toLocaleDateString("ru-RU")}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="px-3 sm:px-4 py-2 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Всего оплат</p>
+                              <p className="font-semibold tabular-nums">
+                                {ref.total_payments > 0 ? `${Number(ref.total_payments).toLocaleString()} ₽` : '—'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Комиссия</p>
+                              <p className="font-semibold tabular-nums text-primary">
+                                {ref.total_commission > 0 ? `${Number(ref.total_commission).toLocaleString()} ₽` : '—'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {ref.payments && ref.payments.length > 0 && (
+                            isMobile ? (
+                              <div className="border-t border-border/40 divide-y divide-border/30">
+                                {ref.payments.map((p: any, idx: number) => (
+                                  <div key={idx} className="px-3 py-2 flex items-center justify-between gap-2">
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-medium truncate">{p.package_name}</p>
+                                      <p className="text-[10px] text-muted-foreground">
+                                        {new Date(p.date).toLocaleDateString("ru-RU")} · {p.commission_rate}%
+                                      </p>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                      <p className="text-xs font-medium tabular-nums">{Number(p.payment_amount).toLocaleString()} ₽</p>
+                                      <p className="text-[11px] font-semibold text-primary tabular-nums">+{Number(p.commission_amount).toLocaleString()} ₽</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="overflow-x-auto border-t border-border/40">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow className="hover:bg-transparent border-border/30">
+                                      <TableHead className="text-[10px] uppercase tracking-wide h-8">Дата</TableHead>
+                                      <TableHead className="text-[10px] uppercase tracking-wide h-8">Пакет</TableHead>
+                                      <TableHead className="text-[10px] uppercase tracking-wide h-8 text-right">Сумма</TableHead>
+                                      <TableHead className="text-[10px] uppercase tracking-wide h-8 text-center">Ставка</TableHead>
+                                      <TableHead className="text-[10px] uppercase tracking-wide h-8 text-right">Комиссия</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {ref.payments.map((p: any, idx: number) => (
+                                      <TableRow key={idx} className="border-border/30">
+                                        <TableCell className="text-xs py-2">{new Date(p.date).toLocaleDateString("ru-RU")}</TableCell>
+                                        <TableCell className="text-xs py-2">{p.package_name}</TableCell>
+                                        <TableCell className="text-xs font-medium tabular-nums text-right py-2">{Number(p.payment_amount).toLocaleString()} ₽</TableCell>
+                                        <TableCell className="text-xs text-center py-2">{p.commission_rate}%</TableCell>
+                                        <TableCell className="text-xs font-semibold tabular-nums text-primary text-right py-2">+{Number(p.commission_amount).toLocaleString()} ₽</TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {referrals.length > REFERRALS_PER_PAGE && (
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          {(referralPage - 1) * REFERRALS_PER_PAGE + 1}–{Math.min(referralPage * REFERRALS_PER_PAGE, referrals.length)} из {referrals.length}
+                        </span>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" disabled={referralPage <= 1} onClick={() => setReferralPage(p => p - 1)}>Назад</Button>
+                          <Button size="sm" variant="outline" disabled={referralPage >= Math.ceil(referrals.length / REFERRALS_PER_PAGE)} onClick={() => setReferralPage(p => p + 1)}>Далее</Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Bank Details + Manual Payment side-by-side on desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {selectedPartner?.bank_details && (
+                <Card className="border-border/60">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                      <Landmark className="h-4 w-4 text-primary" />Банковские реквизиты
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2.5 pt-0">
+                    {[
+                      { icon: UserCheck, label: "ФИО", value: selectedPartner.bank_details.full_name, mono: false },
+                      { icon: Phone, label: "Телефон", value: selectedPartner.bank_details.phone_number, mono: true },
+                      { icon: Landmark, label: "Банк", value: selectedPartner.bank_details.bank_name, mono: false },
+                      { icon: CreditCard, label: "Номер карты", value: selectedPartner.bank_details.card_number, mono: true, copy: true },
+                    ].map((f, i) => (
+                      <div key={i} className="flex items-start justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                            <f.icon className="h-3 w-3" />{f.label}
+                          </p>
+                          <p className={cn("text-sm font-medium mt-0.5 break-all", f.mono && "font-mono")}>{f.value || "—"}</p>
+                        </div>
+                        {f.copy && f.value && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 shrink-0"
+                            onClick={() => {
+                              navigator.clipboard.writeText(f.value);
+                              toast({ title: "Скопировано" });
+                            }}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-          </Card>
 
-          {/* Bank Details */}
-          {selectedPartner?.bank_details && <Card className="bg-muted/30">
-            <CardHeader>
-              <CardTitle className="text-base">Банковские реквизиты</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground">ФИО</p>
-                  <p className="font-medium">{selectedPartner.bank_details.full_name}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Телефон</p>
-                  <p className="font-medium">{selectedPartner.bank_details.phone_number}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Банк</p>
-                  <p className="font-medium">{selectedPartner.bank_details.bank_name}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Номер карты</p>
-                  <p className="font-medium font-mono">{selectedPartner.bank_details.card_number}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>}
-
-          {/* Manual Payment */}
-          <Card className="bg-primary/5 border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-base">Ручная выплата</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="payment-amount">Сумма выплаты (₽)</Label>
-                <Input id="payment-amount" type="number" placeholder="Введите сумму" value={manualPaymentAmount} onChange={e => setManualPaymentAmount(e.target.value)} min="0" step="100" />
-              </div>
-              <Button className="w-full" onClick={handleManualPayment} disabled={!manualPaymentAmount || parseFloat(manualPaymentAmount) <= 0}>
-                <Check className="h-4 w-4 mr-2" />
-                Подтвердить выплату
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                После подтверждения сумма будет записана как выплаченная и вычтена из баланса партнера
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Withdrawals */}
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold mb-4">История выплат</h3>
-            {isMobile ? <div className="space-y-3">
-              {withdrawals.map(withdrawal => <Card key={withdrawal.id} className="bg-muted/30">
-                <CardContent className="p-3 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Дата запроса</p>
-                      <p className="text-sm font-medium">
-                        {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU")}
-                      </p>
-                    </div>
-                    <Badge variant={withdrawal.status === "completed" ? "default" : withdrawal.status === "processing" ? "secondary" : "outline"}>
-                      {withdrawal.status === "completed" ? "Выплачено" : withdrawal.status === "processing" ? "В обработке" : "Ожидает"}
-                    </Badge>
+              <Card className={cn(
+                "border-primary/20 bg-gradient-to-br from-primary/[0.06] to-transparent",
+                !selectedPartner?.bank_details && "lg:col-span-2"
+              )}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-primary" />Ручная выплата
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 pt-0">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="payment-amount" className="text-xs">Сумма выплаты (₽)</Label>
+                    <Input
+                      id="payment-amount"
+                      type="number"
+                      placeholder="Введите сумму"
+                      value={manualPaymentAmount}
+                      onChange={e => setManualPaymentAmount(e.target.value)}
+                      min="0"
+                      step="100"
+                      className="tabular-nums bg-background"
+                    />
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Сумма</p>
-                    <p className="text-lg font-bold">{withdrawal.amount.toLocaleString()} ₽</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[500, 1000, 2000, 5000].map(v => (
+                      <Button
+                        key={v}
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs"
+                        onClick={() => setManualPaymentAmount(String(v))}
+                      >
+                        {v.toLocaleString()} ₽
+                      </Button>
+                    ))}
+                    {selectedPartner && selectedPartner.current_balance > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs border-primary/40 text-primary"
+                        onClick={() => setManualPaymentAmount(String(selectedPartner.current_balance))}
+                      >
+                        Весь баланс
+                      </Button>
+                    )}
                   </div>
-                  {withdrawal.status === "processing" && <Button size="sm" className="w-full" onClick={() => handleApproveWithdrawal(withdrawal.id)}>
-                    <Check className="h-4 w-4 mr-2" />
-                    Подтвердить
-                  </Button>}
+                  <Button className="w-full" onClick={handleManualPayment} disabled={!manualPaymentAmount || parseFloat(manualPaymentAmount) <= 0}>
+                    <Check className="h-4 w-4 mr-2" />Подтвердить выплату
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    После подтверждения сумма будет записана как выплаченная и вычтена из баланса партнёра.
+                  </p>
                 </CardContent>
-              </Card>)}
-            </div> : <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Дата запроса</TableHead>
-                    <TableHead>Сумма</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {withdrawals.map(withdrawal => <TableRow key={withdrawal.id}>
-                    <TableCell>
-                      {new Date(withdrawal.requested_at).toLocaleDateString("ru-RU")}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {withdrawal.amount.toLocaleString()} ₽
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={withdrawal.status === "completed" ? "default" : withdrawal.status === "processing" ? "secondary" : "outline"}>
-                        {withdrawal.status === "completed" ? "Выплачено" : withdrawal.status === "processing" ? "В обработке" : "Ожидает"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {withdrawal.status === "processing" && <Button size="sm" onClick={() => handleApproveWithdrawal(withdrawal.id)}>
-                        <Check className="h-4 w-4 mr-2" />
-                        Подтвердить
-                      </Button>}
-                    </TableCell>
-                  </TableRow>)}
-                </TableBody>
-              </Table>
-            </div>}
+              </Card>
+            </div>
+
+            {/* Withdrawals history */}
+            <Card className="border-border/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-primary" />История выплат
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    {withdrawals.length}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {withdrawals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">Выплат ещё не было</p>
+                ) : isMobile ? (
+                  <div className="space-y-2">
+                    {withdrawals.map(w => (
+                      <div key={w.id} className="rounded-xl border border-border/50 bg-card p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3" />{new Date(w.requested_at).toLocaleDateString("ru-RU")}
+                          </div>
+                          <Badge variant={w.status === "completed" ? "default" : w.status === "processing" ? "secondary" : "outline"} className={cn(
+                            w.status === "completed" && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                          )}>
+                            {w.status === "completed" ? "Выплачено" : w.status === "processing" ? "В обработке" : "Ожидает"}
+                          </Badge>
+                        </div>
+                        <p className="text-lg font-bold tabular-nums">{Number(w.amount).toLocaleString()} ₽</p>
+                        {w.status === "processing" && (
+                          <Button size="sm" className="w-full" onClick={() => handleApproveWithdrawal(w.id)}>
+                            <Check className="h-4 w-4 mr-2" />Подтвердить
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent border-border/40">
+                          <TableHead className="text-[11px] uppercase tracking-wider">Дата запроса</TableHead>
+                          <TableHead className="text-[11px] uppercase tracking-wider text-right">Сумма</TableHead>
+                          <TableHead className="text-[11px] uppercase tracking-wider">Статус</TableHead>
+                          <TableHead className="text-[11px] uppercase tracking-wider text-right">Действия</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {withdrawals.map(w => (
+                          <TableRow key={w.id} className="border-border/40">
+                            <TableCell className="text-sm">{new Date(w.requested_at).toLocaleDateString("ru-RU")}</TableCell>
+                            <TableCell className="font-semibold tabular-nums text-right">{Number(w.amount).toLocaleString()} ₽</TableCell>
+                            <TableCell>
+                              <Badge variant={w.status === "completed" ? "default" : w.status === "processing" ? "secondary" : "outline"} className={cn(
+                                w.status === "completed" && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              )}>
+                                {w.status === "completed" ? "Выплачено" : w.status === "processing" ? "В обработке" : "Ожидает"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {w.status === "processing" && (
+                                <Button size="sm" onClick={() => handleApproveWithdrawal(w.id)}>
+                                  <Check className="h-4 w-4 mr-2" />Подтвердить
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </div>}
+        )}
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   </div>;
