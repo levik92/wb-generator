@@ -326,112 +326,205 @@ export function AdminPayments() {
         </TabsList>
 
         <TabsContent value="payments">
-          <Card className="bg-card border-border/50 rounded-2xl">
-            <CardHeader>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle className="text-lg">Все платежи</CardTitle>
-                  <CardDescription className="text-xs">
-                    Показано {filteredPayments.length} из {payments.length}
-                  </CardDescription>
+          <Card className="bg-card border-border/50 rounded-2xl overflow-hidden">
+            <CardHeader className="pb-4">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Все платежи
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {filteredPayments.length}
+                      </span>
+                    </CardTitle>
+                    <CardDescription className="text-xs mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+                      <span>Из {payments.length}</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        Сумма: {filteredPayments.filter(p => p.status === 'succeeded').reduce((s, p) => s + Number(p.amount), 0).toLocaleString()} ₽
+                      </span>
+                    </CardDescription>
+                  </div>
                 </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 gap-2 shrink-0">
-                      <Filter className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Фильтры</span>
-                      {activeFiltersCount > 0 && (
-                        <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-[10px]">{activeFiltersCount}</Badge>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-[280px] p-3 space-y-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Статус</Label>
-                      <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Все статусы</SelectItem>
-                          {statusOptions.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Источник</Label>
-                      <Select value={utmFilter} onValueChange={setUtmFilter}>
-                        <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Все источники</SelectItem>
-                          <SelectItem value="__none__">Без источника</SelectItem>
-                          {utmOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Откуда узнали</Label>
-                      <Select value={acqFilter} onValueChange={setAcqFilter}>
-                        <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Любой ответ</SelectItem>
-                          <SelectItem value="__none__">Не отвечал</SelectItem>
-                          {acqOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {activeFiltersCount > 0 && (
-                      <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setStatusFilter("all"); setUtmFilter("all"); setAcqFilter("all"); }}>
-                        Сбросить фильтры
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Email или тариф…"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 h-9 text-sm bg-background"
+                    />
+                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-9 gap-2 shrink-0">
+                        <Filter className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Фильтры</span>
+                        {activeFiltersCount > 0 && (
+                          <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-[10px]">{activeFiltersCount}</Badge>
+                        )}
                       </Button>
-                    )}
-                  </PopoverContent>
-                </Popover>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-[280px] p-3 space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">Статус</Label>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Все статусы</SelectItem>
+                            {statusOptions.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">Источник</Label>
+                        <Select value={utmFilter} onValueChange={setUtmFilter}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Все источники</SelectItem>
+                            <SelectItem value="__none__">Без источника</SelectItem>
+                            {utmOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">Откуда узнали</Label>
+                        <Select value={acqFilter} onValueChange={setAcqFilter}>
+                          <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Любой ответ</SelectItem>
+                            <SelectItem value="__none__">Не отвечал</SelectItem>
+                            {acqOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {activeFiltersCount > 0 && (
+                        <Button variant="ghost" size="sm" className="w-full h-8 text-xs" onClick={() => { setStatusFilter("all"); setUtmFilter("all"); setAcqFilter("all"); }}>
+                          Сбросить фильтры
+                        </Button>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-xs">Email</TableHead>
-                      <TableHead className="text-xs">Тариф</TableHead>
-                      <TableHead className="text-xs">Сумма</TableHead>
-                      <TableHead className="text-xs">Токены</TableHead>
-                      <TableHead className="text-xs">Провайдер</TableHead>
-                      <TableHead className="text-xs">Источник</TableHead>
-                      <TableHead className="text-xs">Откуда узнали</TableHead>
-                      <TableHead className="text-xs">Статус</TableHead>
-                      <TableHead className="text-xs">Дата</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedPayments.map(p => (
-                      <TableRow key={p.id}>
-                        <TableCell className="text-xs font-medium max-w-[200px] truncate">{p.user_email}</TableCell>
-                        <TableCell className="text-xs">{p.package_name}</TableCell>
-                        <TableCell className="text-xs">{p.amount}₽</TableCell>
-                        <TableCell className="text-xs">{p.tokens_amount}</TableCell>
-                        <TableCell className="text-xs capitalize">{p.payment_provider || 'yookassa'}</TableCell>
-                        <TableCell className="text-xs max-w-[140px] truncate">
-                          {p.utm_name ? <Badge variant="outline" className="text-[10px]">{p.utm_name}</Badge> : <span className="text-muted-foreground">—</span>}
-                        </TableCell>
-                        <TableCell className="text-xs max-w-[140px] truncate" title={p.acquisition || ''}>
-                          {p.acquisition || <span className="text-muted-foreground">—</span>}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(p.status)}</TableCell>
-                        <TableCell className="text-xs whitespace-nowrap">
+              {paginatedPayments.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-12 text-center">Ничего не найдено</p>
+              ) : isMobile ? (
+                <div className="space-y-2 px-3 pb-3">
+                  {paginatedPayments.map(p => {
+                    const initial = (p.user_email?.[0] || "?").toUpperCase();
+                    const isSuccess = p.status === 'succeeded';
+                    return (
+                      <div key={p.id} className={cn(
+                        "rounded-xl border border-border/60 bg-card p-3 space-y-2.5",
+                        isSuccess && "border-emerald-500/20"
+                      )}>
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn(
+                            "h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0",
+                            isSuccess ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+                          )}>
+                            {initial}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{p.user_email}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{p.package_name}</p>
+                          </div>
+                          {getStatusBadge(p.status)}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/40">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Сумма</p>
+                            <p className="text-sm font-semibold tabular-nums">{Number(p.amount).toLocaleString()} ₽</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Токены</p>
+                            <p className="text-sm font-semibold tabular-nums text-primary">{p.tokens_amount}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Провайдер</p>
+                            <p className="text-xs font-medium capitalize truncate">{p.payment_provider || 'yookassa'}</p>
+                          </div>
+                        </div>
+
+                        {(p.utm_name || p.acquisition) && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {p.utm_name && <Badge variant="outline" className="text-[10px]">UTM: {p.utm_name}</Badge>}
+                            {p.acquisition && <Badge variant="secondary" className="text-[10px] bg-muted">{p.acquisition}</Badge>}
+                          </div>
+                        )}
+
+                        <div className="text-[10px] text-muted-foreground inline-flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
                           {new Date(p.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </TableCell>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent border-border/40">
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Пользователь</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Тариф</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Сумма</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Токены</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Провайдер</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Источник</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Откуда узнали</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Статус</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Дата</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedPayments.map(p => {
+                        const initial = (p.user_email?.[0] || "?").toUpperCase();
+                        const isSuccess = p.status === 'succeeded';
+                        return (
+                          <TableRow key={p.id} className="border-border/40 hover:bg-muted/40">
+                            <TableCell className="py-2.5">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className={cn(
+                                  "h-7 w-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0",
+                                  isSuccess ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+                                )}>
+                                  {initial}
+                                </div>
+                                <span className="text-xs font-medium truncate max-w-[200px]">{p.user_email}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-xs">{p.package_name}</TableCell>
+                            <TableCell className="text-xs font-semibold tabular-nums text-right whitespace-nowrap">{Number(p.amount).toLocaleString()} ₽</TableCell>
+                            <TableCell className="text-xs tabular-nums text-right text-primary font-medium">{p.tokens_amount}</TableCell>
+                            <TableCell className="text-xs capitalize text-muted-foreground">{p.payment_provider || 'yookassa'}</TableCell>
+                            <TableCell className="text-xs max-w-[140px] truncate">
+                              {p.utm_name ? <Badge variant="outline" className="text-[10px]">{p.utm_name}</Badge> : <span className="text-muted-foreground">—</span>}
+                            </TableCell>
+                            <TableCell className="text-xs max-w-[140px] truncate text-muted-foreground" title={p.acquisition || ''}>
+                              {p.acquisition || '—'}
+                            </TableCell>
+                            <TableCell>{getStatusBadge(p.status)}</TableCell>
+                            <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
+                              {new Date(p.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
               {totalPaymentPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <span className="text-xs text-muted-foreground">{(paymentsPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(paymentsPage * ITEMS_PER_PAGE, filteredPayments.length)} из {filteredPayments.length}</span>
+                <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
+                  <span className="text-xs text-muted-foreground tabular-nums">{(paymentsPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(paymentsPage * ITEMS_PER_PAGE, filteredPayments.length)} из {filteredPayments.length}</span>
                   <div className="flex items-center gap-1">
                     <Button variant="outline" size="icon" className="h-8 w-8" disabled={paymentsPage === 1} onClick={() => setPaymentsPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-                    <span className="text-sm px-2">{paymentsPage} / {totalPaymentPages}</span>
+                    <span className="text-sm px-2 tabular-nums">{paymentsPage} / {totalPaymentPages}</span>
                     <Button variant="outline" size="icon" className="h-8 w-8" disabled={paymentsPage >= totalPaymentPages} onClick={() => setPaymentsPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
                   </div>
                 </div>
