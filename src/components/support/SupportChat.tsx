@@ -317,7 +317,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative shrink-0">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-md shadow-violet-500/25">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/25">
                 <Headphones className="w-5 h-5 text-white" strokeWidth={2.2} />
               </div>
               <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-card ${
@@ -366,8 +366,8 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
               <div className="relative w-16 h-16 mb-4">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/15 to-indigo-500/15 rotate-6" />
-                <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/15 rotate-6" />
+                <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
                   <MessageCircle className="w-7 h-7 text-violet-500" strokeWidth={2} />
                 </div>
               </div>
@@ -406,7 +406,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
                         bubbleRoundingClasses(isOwn ? "own" : "other", position)
                       } ${
                         msg.sender_type === "user"
-                          ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-violet-500/20"
+                          ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-violet-500/20"
                           : msg.sender_type === "system"
                           ? "bg-muted/50 text-muted-foreground italic text-xs"
                           : "bg-secondary/80 text-secondary-foreground border border-border/40"
@@ -501,7 +501,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
             <Button
               type="submit"
               size="icon"
-              className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-indigo-600 hover:from-violet-400 hover:to-indigo-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
+              className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
               disabled={(!input.trim() && !pendingFile) || loading || uploading}
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

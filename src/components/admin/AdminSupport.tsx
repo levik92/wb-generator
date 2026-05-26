@@ -451,7 +451,7 @@ export const AdminSupport = () => {
                 bubbleRoundingClasses(isOwn ? "own" : "other", position)
               } ${
                 msg.sender_type === "admin"
-                  ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-violet-500/20"
+                  ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-violet-500/20"
                   : msg.sender_type === "user"
                   ? "bg-secondary/80 text-secondary-foreground border border-border/40"
                   : msg.sender_type === "system"
@@ -489,7 +489,7 @@ export const AdminSupport = () => {
       <div className="px-4 py-4 border-b border-border/60 bg-gradient-to-br from-violet-500/[0.05] via-card to-card">
         <div className="flex items-center justify-between mb-1.5">
           <h3 className="text-base font-bold flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm shadow-violet-500/20">
+            <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/20">
               <Headphones className="w-3.5 h-3.5 text-white" strokeWidth={2.2} />
             </span>
             Поддержка
@@ -528,7 +528,7 @@ export const AdminSupport = () => {
                   } ${isAttention ? "bg-amber-500/[0.04]" : ""}`}
                 >
                   {isSelected && (
-                    <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-violet-500 to-indigo-600" />
+                    <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-violet-500 to-purple-600" />
                   )}
                   <div className="flex items-start gap-2.5">
                     <div className="relative shrink-0">
@@ -536,7 +536,7 @@ export const AdminSupport = () => {
                         isAttention
                           ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white"
                           : conv.user_id
-                          ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white"
+                          ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white"
                           : "bg-gradient-to-br from-slate-400 to-slate-600 text-white"
                       }`}>
                         {getAvatarInitial(conv)}
@@ -636,7 +636,7 @@ export const AdminSupport = () => {
             </Button>
           )}
           {selectedConv && (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
               {getAvatarInitial(selectedConv)}
             </div>
           )}
@@ -721,7 +721,7 @@ export const AdminSupport = () => {
               className="flex-1 min-w-0 bg-muted/50 border border-border/60 rounded-full px-4 py-2.5 text-sm outline-none focus:border-violet-500/60 focus:bg-card focus:ring-2 focus:ring-violet-500/20 placeholder:text-muted-foreground/70 transition-all"
               disabled={sending || uploading} maxLength={2000}
             />
-            <Button type="submit" size="icon" className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-indigo-600 hover:from-violet-400 hover:to-indigo-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
+            <Button type="submit" size="icon" className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
               disabled={(!input.trim() && !pendingFile) || sending || uploading}>
               {sending || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
@@ -760,8 +760,8 @@ export const AdminSupport = () => {
             <div className="flex-1 flex items-center justify-center text-center px-8">
               <div>
                 <div className="relative w-16 h-16 mx-auto mb-4">
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 rotate-6" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/15 to-indigo-500/15 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 rotate-6" />
+                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/15 flex items-center justify-center">
                     <MessageCircle className="w-7 h-7 text-violet-500/70" strokeWidth={2} />
                   </div>
                 </div>
