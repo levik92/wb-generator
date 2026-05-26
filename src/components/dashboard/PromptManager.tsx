@@ -475,7 +475,7 @@ export function PromptManager() {
                 )}>
                   <CollapsibleTrigger asChild>
                     <button className="w-full text-left p-4 hover:bg-muted/30 transition-colors">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3">
                         <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", cs.bg)}>
                           <Sparkles className={cn("h-4 w-4", cs.text)} />
                         </div>
