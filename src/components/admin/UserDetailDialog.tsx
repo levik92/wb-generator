@@ -20,6 +20,7 @@ import {
   CircleHelp,
   CreditCard,
   ClipboardList,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TransactionDetailView } from "./TransactionDetailView";
