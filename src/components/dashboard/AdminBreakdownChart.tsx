@@ -244,9 +244,9 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
           </div>
 
           {/* Chart */}
-          <div className="h-[180px] sm:h-[220px] w-full -mx-1">
+          <div className="h-[180px] sm:h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={combinedData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+              <AreaChart data={combinedData} margin={{ top: 4, right: 4, left: -4, bottom: 0 }}>
                 <defs>
                   <linearGradient id={`grad-cards-${type}`} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={COLORS.cards} stopOpacity={0.28} />
@@ -276,7 +276,8 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
                   tickLine={false}
                   tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                   tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(v >= 10000 ? 0 : 1)}k` : v.toLocaleString('ru-RU')}
-                  width={40}
+                  width={52}
+                  tickMargin={6}
                 />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: accentColor, strokeOpacity: 0.25, strokeWidth: 1 }} />
                 <Area
