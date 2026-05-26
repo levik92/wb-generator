@@ -453,64 +453,84 @@ export function PromptManager() {
           </CardContent>
         </Card>;
     }
-    return <div className="space-y-3 md:space-y-4">
+    const categoryStyle = (cat: string) => {
+      if (cat === 'Описание') return { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20', dot: 'bg-blue-500' };
+      if (cat === 'Технический') return { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20', dot: 'bg-purple-500' };
+      return { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20', dot: 'bg-emerald-500' };
+    };
+    return <div className="space-y-2.5">
         {[...filteredPrompts].sort((a, b) => {
         const order = ['description', 'edit-card', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle', 'mainEdit'];
         return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
       }).map(prompt => {
-        const {
-          name,
-          description,
-          category
-        } = getPromptDisplayName(prompt.prompt_type);
+        const { name, description, category } = getPromptDisplayName(prompt.prompt_type);
         const isEditing = editingPrompt === prompt.id;
-        return <Collapsible key={prompt.id} open={openPrompts.has(prompt.id)} onOpenChange={() => togglePrompt(prompt.id)}>
-                <Card className="overflow-hidden bg-card">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <CollapsibleTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-1 text-left">
-                        {openPrompts.has(prompt.id) ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
+        const isOpen = openPrompts.has(prompt.id);
+        const cs = categoryStyle(category);
+        return <Collapsible key={prompt.id} open={isOpen} onOpenChange={() => togglePrompt(prompt.id)}>
+                <Card className={cn(
+                  "overflow-hidden bg-card border-border/60 transition-all",
+                  isOpen && "border-primary/30 shadow-sm",
+                  isEditing && "border-primary/50 ring-1 ring-primary/20"
+                )}>
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full text-left p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", cs.bg)}>
+                          <Sparkles className={cn("h-4 w-4", cs.text)} />
+                        </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <CardTitle className="text-base lg:text-lg break-words">{name}</CardTitle>
-                            <Badge variant="secondary" className="text-xs">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold text-sm sm:text-base truncate">{name}</h4>
+                            <Badge variant="outline" className={cn("text-[10px] font-medium", cs.bg, cs.text, cs.border)}>
                               {category}
                             </Badge>
                           </div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
                         </div>
-                      </CollapsibleTrigger>
-                      <Button variant="ghost" size="icon" onClick={() => startEdit(prompt)} className="shrink-0 h-8 w-8">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <CardDescription className="text-sm break-words ml-6 my-[16px] mt-0 pb-[16px] mb-0">{description}</CardDescription>
-                  </CardHeader>
-                  
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => { e.stopPropagation(); startEdit(prompt); }}
+                            className="h-8 w-8"
+                            title="Редактировать"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <div className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground">
+                            {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+
                   <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      <div className="space-y-4">
+                    <div className="px-4 pb-4 pt-0 border-t border-border/40">
+                      <div className="space-y-3 pt-3">
                         {isEditing ? <>
-                            <Textarea value={editValue} onChange={e => setEditValue(e.target.value)} className="min-h-[250px] lg:min-h-[300px] font-mono text-sm resize-none" placeholder="Введите промт..." />
+                            <Textarea value={editValue} onChange={e => setEditValue(e.target.value)} className="min-h-[260px] lg:min-h-[320px] font-mono text-xs sm:text-sm resize-y bg-background" placeholder="Введите промт..." />
                             <div className="flex flex-col sm:flex-row gap-2">
                               <Button onClick={() => savePrompt(prompt.id)} disabled={saving} className="gap-2 flex-1 sm:flex-none">
                                 <Save className="h-4 w-4" />
-                                {saving ? "Сохранение..." : "Сохранить"}
+                                {saving ? "Сохранение…" : "Сохранить"}
                               </Button>
                               <Button variant="outline" onClick={cancelEdit} disabled={saving} className="gap-2 flex-1 sm:flex-none">
-                                <X className="h-4 w-4" />
-                                Отмена
+                                <X className="h-4 w-4" />Отмена
                               </Button>
                             </div>
-                          </> : <div className="bg-muted p-3 lg:p-4 rounded-lg overflow-x-auto">
-                            <pre className="whitespace-pre-wrap text-xs lg:text-sm text-muted-foreground break-words">
+                          </> : <div className="rounded-lg bg-muted/50 border border-border/40 p-3 sm:p-4 max-h-[320px] overflow-auto">
+                            <pre className="whitespace-pre-wrap text-[11px] sm:text-xs text-muted-foreground break-words font-mono leading-relaxed">
                               {prompt.prompt_template}
                             </pre>
                           </div>}
-                        <div className="text-xs text-muted-foreground">
-                          Последнее обновление: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
+                        <div className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          Обновлено: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
                         </div>
                       </div>
-                    </CardContent>
+                    </div>
                   </CollapsibleContent>
                 </Card>
               </Collapsible>;
