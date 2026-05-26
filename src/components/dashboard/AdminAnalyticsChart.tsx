@@ -448,7 +448,7 @@ export function AdminAnalyticsChart({
               }} tickFormatter={value => formatXAxisDate(value, data?.groupFormat || 'day')} interval="preserveStartEnd" minTickGap={24} />
                 <YAxis axisLine={false} tickLine={false} tick={{
                 fontSize: 11, fill: 'hsl(var(--muted-foreground))'
-              }} tickFormatter={value => value >= 1000 ? `${(value/1000).toFixed(value >= 10000 ? 0 : 1)}k` : value.toLocaleString('ru-RU')} width={40} />
+              }} tickFormatter={value => value >= 1000 ? `${(value/1000).toFixed(value >= 10000 ? 0 : 1)}k` : value.toLocaleString('ru-RU')} width={52} tickMargin={6} />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: config.color, strokeOpacity: 0.25, strokeWidth: 1 }} />
                 {/* Линия предыдущего периода */}
                 <Area 
