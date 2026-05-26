@@ -66,7 +66,12 @@ const ResponsiveDialogContent = ({ children, className }: ResponsiveDialogConten
   if (isMobile) {
     return (
       <DrawerContent className="bg-card border-border/50">
-        <div className={cn("max-h-[85dvh] overflow-y-auto px-4 pb-6", className)}>
+        <div
+          className={cn("overflow-y-auto px-4 pb-6", className)}
+          style={{
+            maxHeight: "calc(85dvh - var(--keyboard-inset-height, 0px))",
+          }}
+        >
           {children}
         </div>
       </DrawerContent>
@@ -74,7 +79,7 @@ const ResponsiveDialogContent = ({ children, className }: ResponsiveDialogConten
   }
 
   return (
-    <DialogContent className={cn("max-h-[90vh] overflow-y-auto", className)}>
+    <DialogContent className={cn(className)}>
       {children}
     </DialogContent>
   );
