@@ -254,23 +254,36 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     }
   };
 
-  // Poll for new messages
+  // Poll for new messages (pause when tab hidden, while sending/uploading, or while user is selecting older history)
   useEffect(() => {
     if (!conversationId) return;
-    const interval = setInterval(async () => {
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (loading || uploading) return;
       try {
-        shouldScrollRef.current = true;
         const msgs = await loadMessages(conversationId);
+        if (cancelled) return;
         setMessages(prev => {
-          if (msgs.length !== prev.length || msgs[msgs.length - 1]?.id !== prev[prev.length - 1]?.id) {
-            return msgs;
-          }
-          return prev;
+          const sameLen = msgs.length === prev.length;
+          const sameLast = msgs[msgs.length - 1]?.id === prev[prev.length - 1]?.id;
+          if (sameLen && sameLast) return prev;
+          shouldScrollRef.current = true;
+          return msgs;
         });
       } catch {}
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [conversationId, loadMessages]);
+    };
+    const interval = setInterval(tick, 8000);
+    const onVisible = () => { if (!document.hidden) tick(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [conversationId, loadMessages, loading, uploading]);
+
 
   const getSenderName = (type: string) => {
     switch (type) {
