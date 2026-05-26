@@ -70,24 +70,20 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
   const Icon = type === 'generations' ? Activity : Coins;
 
   const handleCalendarSelect = (range: DateRange | undefined) => {
-    if (!range) {
+    if (!range || !range.from) {
       setPendingRange(undefined);
       setIsSelectingRange(false);
       return;
     }
-    if (!isSelectingRange) {
-      setPendingRange({ from: range.from, to: undefined });
-      setIsSelectingRange(true);
-    } else {
-      const from = pendingRange?.from || range.from;
-      const to = range.to || range.from;
+    if (range.from && range.to) {
+      const finalFrom = range.from <= range.to ? range.from : range.to;
+      const finalTo = range.from <= range.to ? range.to : range.from;
       setPendingRange(undefined);
       setIsSelectingRange(false);
-      if (from && to) {
-        const finalFrom = from <= to ? from : to;
-        const finalTo = from <= to ? to : from;
-        setDateRange({ from: finalFrom, to: finalTo });
-      }
+      setDateRange({ from: finalFrom, to: finalTo });
+    } else {
+      setPendingRange({ from: range.from, to: undefined });
+      setIsSelectingRange(true);
     }
   };
 
