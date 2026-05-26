@@ -370,11 +370,11 @@ export function AdminAnalyticsChart({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0 rounded-xl border-border/60 shadow-xl overflow-hidden" align="end">
-            <div className="px-3 pt-3 pb-1 border-b border-border/40 bg-muted/30">
-              <div className="text-[11px] font-medium text-muted-foreground">
+            <div className="px-3 pt-2 pb-1 border-b border-border/40 bg-muted/30 max-w-[252px]">
+              <div className="text-[10px] leading-tight font-medium text-muted-foreground">
                 {isSelectingRange && pendingRange?.from
-                  ? <>Начало: <span className="text-foreground font-semibold tabular-nums">{format(pendingRange.from, "dd.MM.yy", { locale: ru })}</span> · выберите конец периода</>
-                  : "Кликните дату начала, затем — дату конца периода"}
+                  ? <>Начало: <span className="text-foreground font-semibold tabular-nums">{format(pendingRange.from, "dd.MM.yy", { locale: ru })}</span> · выберите конец</>
+                  : "Выберите начало, затем — конец периода"}
               </div>
             </div>
             <Calendar
