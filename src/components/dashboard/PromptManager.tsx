@@ -605,7 +605,7 @@ export function PromptManager() {
           disabled && "opacity-60 cursor-not-allowed"
         )}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0", accentMap.iconBg)}>
             {icon}
           </div>
@@ -621,7 +621,7 @@ export function PromptManager() {
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
           </div>
           <div className={cn(
-            "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors mt-0.5",
+            "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
             selected ? cn("bg-current", accentMap.dot, "border-transparent") : "border-border"
           )}>
             {selected && <Check className="h-3 w-3 text-background" strokeWidth={3} />}
