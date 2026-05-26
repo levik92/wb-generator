@@ -734,7 +734,7 @@ export const AdminSupport = () => {
   if (isMobile) {
     return (
       <>
-        <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
+        <div className="border border-border/60 rounded-2xl bg-card overflow-hidden h-[calc(100dvh-180px)] min-h-[440px] shadow-sm">
           {selectedConv ? chatViewContent : conversationListContent}
         </div>
         {!selectedConv && aiDefaultsBlock}
