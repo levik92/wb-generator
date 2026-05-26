@@ -360,92 +360,179 @@ export const AdminPartners = () => {
     </div>
 
     {/* Partners List */}
-    <Card className="bg-card border-border/50 rounded-2xl">
-      <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Активные партнеры</CardTitle>
+    <Card className="bg-card border-border/50 rounded-2xl overflow-hidden">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
+        <div className="min-w-0">
+          <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+            Активные партнеры
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+              {partners.length}
+            </span>
+          </CardTitle>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Email или код партнёра…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-9 text-sm bg-background"
+          />
+        </div>
       </CardHeader>
-      <CardContent>
-        {isMobile ? <div className="space-y-4">
-          {partners.map(partner => <Card key={partner.id} className="bg-muted/30">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    {partner.has_pending_withdrawal && <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />}
-                    <p className="font-medium text-sm truncate">{partner.user_email || "—"}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Код: {partner.partner_code} • Ставка: {partner.commission_rate}%</p>
-                </div>
-                <Badge variant={partner.has_pending_withdrawal ? "destructive" : "default"} className="shrink-0">
-                  {partner.has_pending_withdrawal ? "Запрос" : "Активен"}
-                </Badge>
+      <CardContent className="pt-0">
+        {(() => {
+          const q = searchQuery.trim().toLowerCase();
+          const visible = q
+            ? partners.filter(p =>
+                (p.user_email || "").toLowerCase().includes(q) ||
+                (p.partner_code || "").toLowerCase().includes(q))
+            : partners;
+
+          if (visible.length === 0) {
+            return (
+              <div className="py-12 text-center text-sm text-muted-foreground">
+                {q ? "Ничего не найдено" : "Пока нет партнёров"}
               </div>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground">Клиентов</p>
-                  <p className="font-semibold">{partner.invited_clients_count}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Заработано</p>
-                  <p className="font-semibold">{partner.total_earned.toLocaleString()} ₽</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Баланс</p>
-                  <p className="font-semibold text-primary">{partner.current_balance.toLocaleString()} ₽</p>
-                </div>
-                {partner.has_pending_withdrawal && <div>
-                  <p className="text-xs text-muted-foreground">К выплате</p>
-                  <p className="font-semibold text-orange-600">{partner.pending_amount?.toLocaleString()} ₽</p>
-                </div>}
-              </div>
-              
-              <Button size="sm" variant="outline" className="w-full" onClick={() => loadPartnerDetails(partner)}>
-                Подробнее
-              </Button>
-            </CardContent>
-          </Card>)}
-        </div> : <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Код</TableHead>
-                <TableHead>Ставка</TableHead>
-                <TableHead>Клиентов</TableHead>
-                <TableHead>Заработано</TableHead>
-                <TableHead>Баланс</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {partners.map(partner => <TableRow key={partner.id}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    {partner.has_pending_withdrawal && <AlertCircle className="h-4 w-4 text-orange-500" />}
-                    {partner.user_email || "—"}
+            );
+          }
+
+          const initial = (email?: string) => (email?.[0] || "?").toUpperCase();
+
+          return isMobile ? (
+            <div className="space-y-3">
+              {visible.map(partner => (
+                <motion.div
+                  key={partner.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-colors cursor-pointer"
+                  onClick={() => loadPartnerDetails(partner)}
+                >
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
+                        {initial(partner.user_email)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">{partner.user_email || "—"}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                            {partner.partner_code}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">{partner.commission_rate}%</span>
+                        </div>
+                      </div>
+                      {partner.has_pending_withdrawal ? (
+                        <Badge variant="destructive" className="shrink-0 gap-1">
+                          <AlertCircle className="h-3 w-3" />Запрос
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                          Активен
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/40">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Клиентов</p>
+                        <p className="text-sm font-semibold tabular-nums">{partner.invited_clients_count}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Заработано</p>
+                        <p className="text-sm font-semibold tabular-nums">{partner.total_earned.toLocaleString()} ₽</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Баланс</p>
+                        <p className="text-sm font-semibold tabular-nums text-primary">{partner.current_balance.toLocaleString()} ₽</p>
+                      </div>
+                    </div>
+
+                    {partner.has_pending_withdrawal && (
+                      <div className="flex items-center justify-between rounded-lg bg-orange-500/10 border border-orange-500/20 px-3 py-2">
+                        <span className="text-xs text-orange-700 dark:text-orange-400">Запрос на выплату</span>
+                        <span className="text-sm font-semibold text-orange-700 dark:text-orange-400 tabular-nums">
+                          {partner.pending_amount?.toLocaleString()} ₽
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </TableCell>
-                <TableCell>{partner.partner_code}</TableCell>
-                <TableCell>{partner.commission_rate}%</TableCell>
-                <TableCell>{partner.invited_clients_count}</TableCell>
-                <TableCell>{partner.total_earned.toLocaleString()} ₽</TableCell>
-                <TableCell className="font-semibold">{partner.current_balance.toLocaleString()} ₽</TableCell>
-                <TableCell>
-                  <Badge variant={partner.has_pending_withdrawal ? "destructive" : "default"}>
-                    {partner.has_pending_withdrawal ? `Запрос ${partner.pending_amount?.toLocaleString()} ₽` : "Активен"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button size="sm" variant="outline" onClick={() => loadPartnerDetails(partner)}>
-                    Детали
-                  </Button>
-                </TableCell>
-              </TableRow>)}
-            </TableBody>
-          </Table>
-        </div>}
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-x-auto -mx-6 px-6">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent border-border/40">
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium">Партнёр</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium">Код</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium text-center">Ставка</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Клиентов</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Заработано</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Баланс</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium">Статус</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visible.map(partner => (
+                    <TableRow
+                      key={partner.id}
+                      className="cursor-pointer hover:bg-muted/40 border-border/40 group"
+                      onClick={() => loadPartnerDetails(partner)}
+                    >
+                      <TableCell className="font-medium py-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                            {initial(partner.user_email)}
+                          </div>
+                          <span className="truncate max-w-[220px]">{partner.user_email || "—"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                          {partner.partner_code}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center text-sm tabular-nums">{partner.commission_rate}%</TableCell>
+                      <TableCell className="text-right tabular-nums">{partner.invited_clients_count}</TableCell>
+                      <TableCell className="text-right tabular-nums">{partner.total_earned.toLocaleString()} ₽</TableCell>
+                      <TableCell className="text-right font-semibold tabular-nums text-primary">
+                        {partner.current_balance.toLocaleString()} ₽
+                      </TableCell>
+                      <TableCell>
+                        {partner.has_pending_withdrawal ? (
+                          <Badge variant="destructive" className="gap-1">
+                            <AlertCircle className="h-3 w-3" />
+                            {partner.pending_amount?.toLocaleString()} ₽
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                            Активен
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1 opacity-70 group-hover:opacity-100"
+                          onClick={(e) => { e.stopPropagation(); loadPartnerDetails(partner); }}
+                        >
+                          Детали
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
 
