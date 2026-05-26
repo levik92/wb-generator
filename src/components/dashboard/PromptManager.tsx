@@ -475,7 +475,7 @@ export function PromptManager() {
                 )}>
                   <CollapsibleTrigger asChild>
                     <button className="w-full text-left p-4 hover:bg-muted/30 transition-colors">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3">
                         <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", cs.bg)}>
                           <Sparkles className={cn("h-4 w-4", cs.text)} />
                         </div>
@@ -605,7 +605,7 @@ export function PromptManager() {
           disabled && "opacity-60 cursor-not-allowed"
         )}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0", accentMap.iconBg)}>
             {icon}
           </div>
@@ -621,7 +621,7 @@ export function PromptManager() {
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
           </div>
           <div className={cn(
-            "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors mt-0.5",
+            "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
             selected ? cn("bg-current", accentMap.dot, "border-transparent") : "border-border"
           )}>
             {selected && <Check className="h-3 w-3 text-background" strokeWidth={3} />}
@@ -863,7 +863,7 @@ export function PromptManager() {
               </CardHeader>
               <CardContent>
                 <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.04] p-4">
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
                       <Video className="h-4 w-4 text-blue-500" />
                     </div>
@@ -964,7 +964,7 @@ export function PromptManager() {
                     isEditing && "border-primary/50 ring-1 ring-primary/20"
                   )}>
                     <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
                           <Wrench className="h-4 w-4 text-purple-500" />
                         </div>
