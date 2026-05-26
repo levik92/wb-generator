@@ -617,16 +617,116 @@ export function AdminUsers({
                           </ResponsiveDialogContent>
                         </ResponsiveDialog>
 
-                        <Button variant={user.is_blocked ? "default" : "destructive"} size="sm" onClick={() => toggleUserBlock(user.id, user.is_blocked)} className="h-7 w-7 md:h-8 md:w-8 p-0">
-                          {user.is_blocked ? <UserCheck className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>;
-                })}
-              </TableBody>
-            </Table>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={user.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                              onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                              className={`h-8 w-8 p-0 ${user.is_blocked ? 'text-emerald-600 hover:bg-emerald-500/10' : 'text-destructive hover:bg-destructive/10'}`}
+                            >
+                              {user.is_blocked ? <UserCheck className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
+
+          {/* Mobile card list */}
+          <div className="md:hidden space-y-2">
+            {currentUsers.map((user) => {
+              const isPaid = paidUserIds.has(user.id);
+              const thirtyDaysAgo = new Date();
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+              const activityTimestamp = user.last_active_at ?? user.updated_at;
+              const isActive = !user.is_blocked && new Date(activityTimestamp) > thirtyDaysAgo;
+              const initial = (user.full_name || user.email || '?').charAt(0).toUpperCase();
+              return (
+                <div
+                  key={user.id}
+                  className={`rounded-xl border border-border/60 bg-card p-3 space-y-2.5 ${user.is_blocked ? 'opacity-70' : ''}`}
+                >
+                  <div
+                    className="flex items-center gap-2.5 min-w-0"
+                    onClick={() => { setSelectedUser(user); loadUserDetails(user); }}
+                  >
+                    <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-primary-foreground flex items-center justify-center text-sm font-semibold uppercase">
+                      {initial}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{user.email}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        {user.full_name || 'Имя не указано'} · {new Date(user.created_at).toLocaleDateString('ru-RU')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center flex-wrap gap-1.5">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
+                      <Coins className="h-3 w-3" />
+                      {user.tokens_balance}
+                    </span>
+                    {paidDataLoading ? null : isPaid ? (
+                      <Badge className="text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 border-emerald-500/20">Оплачено</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px]">Без оплаты</Badge>
+                    )}
+                    {user.is_blocked ? (
+                      <Badge variant="destructive" className="text-[10px]">Блок</Badge>
+                    ) : isActive ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Активен
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                        <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                        Неактивен
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 pt-1 border-t border-border/50">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 h-8 text-xs gap-1.5"
+                      onClick={() => { setSelectedUser(user); loadUserDetails(user); }}
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Детали
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 h-8 text-xs gap-1.5"
+                      onClick={() => {
+                        setEditingUser(user);
+                        setNewTokenBalance(user.tokens_balance.toString());
+                      }}
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Баланс
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 w-8 p-0 ${user.is_blocked ? 'text-emerald-600' : 'text-destructive'}`}
+                      onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                    >
+                      {user.is_blocked ? <UserCheck className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            {currentUsers.length === 0 && (
+              <div className="text-center py-8 text-sm text-muted-foreground">Пользователи не найдены</div>
+            )}
+          </div>
+
 
           {/* Pagination */}
           {totalPages > 1 && <div className="flex flex-col sm:flex-row items-center justify-between mt-3 md:mt-4 gap-2 px-2">
