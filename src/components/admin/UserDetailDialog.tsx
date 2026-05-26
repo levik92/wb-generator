@@ -95,7 +95,7 @@ function StatCard({
         <Icon className="w-3.5 h-3.5" />
         <span className="truncate">{label}</span>
       </div>
-      <div className="text-base sm:text-xl font-semibold tracking-tight text-foreground truncate">
+      <div className="text-base sm:text-xl font-semibold tracking-tight truncate">
         {value}
       </div>
     </div>
