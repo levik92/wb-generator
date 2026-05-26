@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   ResponsiveDialog,
-  ResponsiveDialogTrigger,
   ResponsiveDialogContent,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
@@ -375,220 +374,219 @@ export function AdminUsers({
           </CardDescription>
         </CardHeader>
         <CardContent className="p-2 md:p-4 min-w-0">
-          <div className="rounded-md border overflow-x-auto max-w-full">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[180px]">Email</TableHead>
-                  <TableHead className="min-w-[100px] hidden lg:table-cell">Имя</TableHead>
-                  <TableHead className="min-w-[70px]">Токены</TableHead>
-                  <TableHead className="min-w-[70px]">Оплата</TableHead>
-                  <TableHead className="min-w-[80px]">Статус</TableHead>
-                  <TableHead className="min-w-[110px] hidden lg:table-cell">Дата регистрации</TableHead>
-                  <TableHead className="min-w-[100px]">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentUsers.map(user => {
-                  const isPaid = paidUserIds.has(user.id);
-                  return <TableRow key={user.id}>
-                    <TableCell className="font-medium cursor-pointer hover:text-primary max-w-[180px] truncate text-xs md:text-sm" onClick={() => {
-                      setSelectedUser(user);
-                      loadUserDetails(user);
-                    }}>
-                      {user.email}
-                    </TableCell>
-                    <TableCell className="max-w-[100px] truncate text-xs hidden lg:table-cell">{user.full_name || 'Не указано'}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">{user.tokens_balance}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={`text-xs ${isPaid ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30' : ''}`}>
-                        {paidDataLoading ? '...' : isPaid ? 'Да' : 'Нет'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {(() => {
-                        if (user.is_blocked) {
-                          return <Badge variant="destructive" className="text-xs">Блок</Badge>;
-                        }
-                        const thirtyDaysAgo = new Date();
-                        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                        const activityTimestamp = user.last_active_at ?? user.updated_at;
-                        const isActive = new Date(activityTimestamp) > thirtyDaysAgo;
-                        return isActive
-                          ? <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30">Актив.</Badge>
-                          : <Badge variant="secondary" className="text-xs">Не актив.</Badge>;
-                      })()}
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell text-xs">
-                      {new Date(user.created_at).toLocaleDateString('ru-RU')}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-0.5 md:gap-1">
-                        <Button variant="outline" size="sm" onClick={() => {
-                          setSelectedUser(user);
-                          loadUserDetails(user);
-                        }} className="h-7 w-7 md:h-8 md:w-8 p-0">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        
-                        <ResponsiveDialog>
-                          <ResponsiveDialogTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => {
-                              setEditingUser(user);
-                              setNewTokenBalance(user.tokens_balance.toString());
-                            }} className="h-7 w-7 md:h-8 md:w-8 p-0">
-                              <Pencil className="h-3 w-3" />
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-xl border border-border/60 overflow-hidden">
+            <div className="overflow-x-auto max-w-full">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/40 hover:bg-muted/40 border-b border-border/60">
+                    <TableHead className="min-w-[240px] text-[11px] uppercase tracking-wide font-semibold text-muted-foreground">Пользователь</TableHead>
+                    <TableHead className="min-w-[80px] text-[11px] uppercase tracking-wide font-semibold text-muted-foreground">Токены</TableHead>
+                    <TableHead className="min-w-[80px] text-[11px] uppercase tracking-wide font-semibold text-muted-foreground">Оплата</TableHead>
+                    <TableHead className="min-w-[90px] text-[11px] uppercase tracking-wide font-semibold text-muted-foreground">Статус</TableHead>
+                    <TableHead className="min-w-[110px] hidden lg:table-cell text-[11px] uppercase tracking-wide font-semibold text-muted-foreground">Регистрация</TableHead>
+                    <TableHead className="min-w-[120px] text-right text-[11px] uppercase tracking-wide font-semibold text-muted-foreground">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentUsers.map((user, idx) => {
+                    const isPaid = paidUserIds.has(user.id);
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    const activityTimestamp = user.last_active_at ?? user.updated_at;
+                    const isActive = !user.is_blocked && new Date(activityTimestamp) > thirtyDaysAgo;
+                    const initial = (user.full_name || user.email || '?').charAt(0).toUpperCase();
+                    return (
+                      <TableRow
+                        key={user.id}
+                        className={`group transition-colors hover:bg-primary/5 ${idx % 2 === 1 ? 'bg-muted/20' : ''} ${user.is_blocked ? 'opacity-70' : ''}`}
+                      >
+                        <TableCell
+                          className="cursor-pointer max-w-[280px] py-2.5"
+                          onClick={() => { setSelectedUser(user); loadUserDetails(user); }}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="h-8 w-8 shrink-0 rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-primary-foreground flex items-center justify-center text-xs font-semibold uppercase">
+                              {initial}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                                {user.email}
+                              </div>
+                              <div className="text-[11px] text-muted-foreground truncate">
+                                {user.full_name || 'Имя не указано'}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-xs font-semibold tabular-nums">
+                            <Coins className="h-3 w-3" />
+                            {user.tokens_balance}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {paidDataLoading ? (
+                            <span className="text-xs text-muted-foreground">…</span>
+                          ) : isPaid ? (
+                            <Badge className="text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 border-emerald-500/20">Оплачено</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-[10px]">Нет</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.is_blocked ? (
+                            <Badge variant="destructive" className="text-[10px]">Заблокирован</Badge>
+                          ) : isActive ? (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Активен
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                              Неактивен
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell text-xs text-muted-foreground tabular-nums">
+                          {new Date(user.created_at).toLocaleDateString('ru-RU')}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Подробнее"
+                              onClick={() => { setSelectedUser(user); loadUserDetails(user); }}
+                              className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
                             </Button>
-                          </ResponsiveDialogTrigger>
-                          <ResponsiveDialogContent className="sm:max-w-md p-0 overflow-hidden">
-                            <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-                              <ResponsiveDialogHeader className="space-y-2">
-                                <div className="flex items-center gap-2.5">
-                                  <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
-                                    <Coins className="h-4 w-4" />
-                                  </div>
-                                  <ResponsiveDialogTitle className="text-base sm:text-lg">
-                                    Изменить баланс
-                                  </ResponsiveDialogTitle>
-                                </div>
-                                <ResponsiveDialogDescription className="text-xs sm:text-sm flex items-center gap-1.5 break-all">
-                                  <Mail className="h-3 w-3 shrink-0 text-muted-foreground" />
-                                  <span className="truncate">{editingUser?.email}</span>
-                                </ResponsiveDialogDescription>
-                              </ResponsiveDialogHeader>
-                            </div>
 
-                            <div className="px-5 sm:px-6 py-4 space-y-4">
-                              {/* Balance comparison */}
-                              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3">
-                                <div className="rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 text-center">
-                                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">Текущий</div>
-                                  <div className="text-base sm:text-lg font-semibold tabular-nums">
-                                    {editingUser?.tokens_balance ?? 0}
-                                  </div>
-                                </div>
-                                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                                <div className="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2.5 text-center">
-                                  <div className="text-[10px] uppercase tracking-wide text-primary/80 mb-0.5">Новый</div>
-                                  <div className="text-base sm:text-lg font-semibold tabular-nums text-primary">
-                                    {newTokenBalance === '' || isNaN(parseInt(newTokenBalance)) ? '—' : parseInt(newTokenBalance)}
-                                  </div>
-                                </div>
-                              </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Изменить баланс"
+                              onClick={() => {
+                                setEditingUser(user);
+                                setNewTokenBalance(user.tokens_balance.toString());
+                              }}
+                              className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
 
-                              {/* Diff badge */}
-                              {(() => {
-                                const cur = editingUser?.tokens_balance ?? 0;
-                                const next = parseInt(newTokenBalance);
-                                if (isNaN(next) || next === cur) return null;
-                                const diff = next - cur;
-                                const positive = diff > 0;
-                                return (
-                                  <div className="flex justify-center">
-                                    <Badge
-                                      variant="secondary"
-                                      className={`text-xs font-medium ${positive ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/15 text-red-600 dark:text-red-400'}`}
-                                    >
-                                      {positive ? '+' : ''}{diff} токенов
-                                    </Badge>
-                                  </div>
-                                );
-                              })()}
-
-                              {/* Input + quick adjust */}
-                              <div className="space-y-2">
-                                <Label htmlFor="tokens" className="text-xs text-muted-foreground">Новый баланс</Label>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 shrink-0"
-                                    onClick={() => {
-                                      const cur = parseInt(newTokenBalance) || 0;
-                                      setNewTokenBalance(String(Math.max(0, cur - 100)));
-                                    }}
-                                    aria-label="Уменьшить на 100"
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </Button>
-                                  <Input
-                                    id="tokens"
-                                    type="number"
-                                    min="0"
-                                    value={newTokenBalance}
-                                    onChange={e => setNewTokenBalance(e.target.value)}
-                                    className="h-10 text-center text-base font-semibold tabular-nums"
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 shrink-0"
-                                    onClick={() => {
-                                      const cur = parseInt(newTokenBalance) || 0;
-                                      setNewTokenBalance(String(cur + 100));
-                                    }}
-                                    aria-label="Увеличить на 100"
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-
-                              {/* Quick presets */}
-                              <div className="space-y-1.5">
-                                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Быстро прибавить</div>
-                                <div className="grid grid-cols-4 gap-1.5">
-                                  {[100, 500, 1000, 5000].map((n) => (
-                                    <Button
-                                      key={n}
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      className="h-8 text-xs"
-                                      onClick={() => {
-                                        const cur = parseInt(newTokenBalance) || 0;
-                                        setNewTokenBalance(String(cur + n));
-                                      }}
-                                    >
-                                      +{n}
-                                    </Button>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-
-                            <ResponsiveDialogFooter className="px-5 sm:px-6 pb-5 sm:pb-6 pt-2 gap-2 sm:gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                  setNewTokenBalance(String(editingUser?.tokens_balance ?? 0));
-                                }}
-                                className="sm:order-1"
-                              >
-                                Сбросить
-                              </Button>
-                              <Button onClick={updateTokenBalance} className="sm:order-2">
-                                Сохранить
-                              </Button>
-                            </ResponsiveDialogFooter>
-                          </ResponsiveDialogContent>
-                        </ResponsiveDialog>
-
-                        <Button variant={user.is_blocked ? "default" : "destructive"} size="sm" onClick={() => toggleUserBlock(user.id, user.is_blocked)} className="h-7 w-7 md:h-8 md:w-8 p-0">
-                          {user.is_blocked ? <UserCheck className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>;
-                })}
-              </TableBody>
-            </Table>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={user.is_blocked ? 'Разблокировать' : 'Заблокировать'}
+                              onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                              className={`h-8 w-8 p-0 ${user.is_blocked ? 'text-emerald-600 hover:bg-emerald-500/10' : 'text-destructive hover:bg-destructive/10'}`}
+                            >
+                              {user.is_blocked ? <UserCheck className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
+
+          {/* Mobile card list */}
+          <div className="md:hidden space-y-2">
+            {currentUsers.map((user) => {
+              const isPaid = paidUserIds.has(user.id);
+              const thirtyDaysAgo = new Date();
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+              const activityTimestamp = user.last_active_at ?? user.updated_at;
+              const isActive = !user.is_blocked && new Date(activityTimestamp) > thirtyDaysAgo;
+              const initial = (user.full_name || user.email || '?').charAt(0).toUpperCase();
+              return (
+                <div
+                  key={user.id}
+                  className={`rounded-xl border border-border/60 bg-card p-3 space-y-2.5 ${user.is_blocked ? 'opacity-70' : ''}`}
+                >
+                  <div
+                    className="flex items-center gap-2.5 min-w-0"
+                    onClick={() => { setSelectedUser(user); loadUserDetails(user); }}
+                  >
+                    <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-primary-foreground flex items-center justify-center text-sm font-semibold uppercase">
+                      {initial}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{user.email}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        {user.full_name || 'Имя не указано'} · {new Date(user.created_at).toLocaleDateString('ru-RU')}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center flex-wrap gap-1.5">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-semibold tabular-nums">
+                      <Coins className="h-3 w-3" />
+                      {user.tokens_balance}
+                    </span>
+                    {paidDataLoading ? null : isPaid ? (
+                      <Badge className="text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 border-emerald-500/20">Оплачено</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-[10px]">Без оплаты</Badge>
+                    )}
+                    {user.is_blocked ? (
+                      <Badge variant="destructive" className="text-[10px]">Блок</Badge>
+                    ) : isActive ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Активен
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                        <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                        Неактивен
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 pt-1 border-t border-border/50">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 h-8 text-xs gap-1.5"
+                      onClick={() => { setSelectedUser(user); loadUserDetails(user); }}
+                    >
+                      <Eye className="h-3.5 w-3.5" /> Детали
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 h-8 text-xs gap-1.5"
+                      onClick={() => {
+                        setEditingUser(user);
+                        setNewTokenBalance(user.tokens_balance.toString());
+                      }}
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Баланс
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-8 w-8 p-0 ${user.is_blocked ? 'text-emerald-600' : 'text-destructive'}`}
+                      onClick={() => toggleUserBlock(user.id, user.is_blocked)}
+                    >
+                      {user.is_blocked ? <UserCheck className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            {currentUsers.length === 0 && (
+              <div className="text-center py-8 text-sm text-muted-foreground">Пользователи не найдены</div>
+            )}
+          </div>
+
 
           {/* Pagination */}
           {totalPages > 1 && <div className="flex flex-col sm:flex-row items-center justify-between mt-3 md:mt-4 gap-2 px-2">
@@ -619,6 +617,147 @@ export function AdminUsers({
         loading={detailsLoading}
         onClose={() => setSelectedUser(null)}
       />
+
+      {/* Edit Token Balance Dialog (controlled, shared by desktop & mobile) */}
+      <ResponsiveDialog
+        open={!!editingUser}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingUser(null);
+            setNewTokenBalance("");
+          }
+        }}
+      >
+        <ResponsiveDialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+            <ResponsiveDialogHeader className="space-y-2">
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <Coins className="h-4 w-4" />
+                </div>
+                <ResponsiveDialogTitle className="text-base sm:text-lg">
+                  Изменить баланс
+                </ResponsiveDialogTitle>
+              </div>
+              <ResponsiveDialogDescription className="text-xs sm:text-sm flex items-center gap-1.5 break-all">
+                <Mail className="h-3 w-3 shrink-0 text-muted-foreground" />
+                <span className="truncate">{editingUser?.email}</span>
+              </ResponsiveDialogDescription>
+            </ResponsiveDialogHeader>
+          </div>
+
+          <div className="px-5 sm:px-6 py-4 space-y-4">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3">
+              <div className="rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5 text-center">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">Текущий</div>
+                <div className="text-base sm:text-lg font-semibold tabular-nums">
+                  {editingUser?.tokens_balance ?? 0}
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="rounded-xl border border-primary/30 bg-primary/10 px-3 py-2.5 text-center">
+                <div className="text-[10px] uppercase tracking-wide text-primary/80 mb-0.5">Новый</div>
+                <div className="text-base sm:text-lg font-semibold tabular-nums text-primary">
+                  {newTokenBalance === '' || isNaN(parseInt(newTokenBalance)) ? '—' : parseInt(newTokenBalance)}
+                </div>
+              </div>
+            </div>
+
+            {(() => {
+              const cur = editingUser?.tokens_balance ?? 0;
+              const next = parseInt(newTokenBalance);
+              if (isNaN(next) || next === cur) return null;
+              const diff = next - cur;
+              const positive = diff > 0;
+              return (
+                <div className="flex justify-center">
+                  <Badge
+                    variant="secondary"
+                    className={`text-xs font-medium ${positive ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/15 text-red-600 dark:text-red-400'}`}
+                  >
+                    {positive ? '+' : ''}{diff} токенов
+                  </Badge>
+                </div>
+              );
+            })()}
+
+            <div className="space-y-2">
+              <Label htmlFor="tokens" className="text-xs text-muted-foreground">Новый баланс</Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 shrink-0"
+                  onClick={() => {
+                    const cur = parseInt(newTokenBalance) || 0;
+                    setNewTokenBalance(String(Math.max(0, cur - 100)));
+                  }}
+                  aria-label="Уменьшить на 100"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  id="tokens"
+                  type="number"
+                  min="0"
+                  value={newTokenBalance}
+                  onChange={(e) => setNewTokenBalance(e.target.value)}
+                  className="h-10 text-center text-base font-semibold tabular-nums"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 shrink-0"
+                  onClick={() => {
+                    const cur = parseInt(newTokenBalance) || 0;
+                    setNewTokenBalance(String(cur + 100));
+                  }}
+                  aria-label="Увеличить на 100"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Быстро прибавить</div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[100, 500, 1000, 5000].map((n) => (
+                  <Button
+                    key={n}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      const cur = parseInt(newTokenBalance) || 0;
+                      setNewTokenBalance(String(cur + n));
+                    }}
+                  >
+                    +{n}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <ResponsiveDialogFooter className="px-5 sm:px-6 pb-5 sm:pb-6 pt-2 gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setNewTokenBalance(String(editingUser?.tokens_balance ?? 0))}
+              className="sm:order-1"
+            >
+              Сбросить
+            </Button>
+            <Button onClick={updateTokenBalance} className="sm:order-2">
+              Сохранить
+            </Button>
+          </ResponsiveDialogFooter>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
 
       {/* Survey Statistics */}
       <SurveyStats />
