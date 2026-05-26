@@ -534,11 +534,16 @@ export function AdminPayments() {
         </TabsContent>
 
         <TabsContent value="invoices">
-          <Card className="bg-card border-border/50 rounded-2xl">
-            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-              <div>
-                <CardTitle className="text-lg">Счета для юр. лиц</CardTitle>
-                <CardDescription>Безналичные оплаты по выставленным счетам ({invoices.length})</CardDescription>
+          <Card className="bg-card border-border/50 rounded-2xl overflow-hidden">
+            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-4">
+              <div className="min-w-0">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  Счета для юр. лиц
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {invoices.length}
+                  </span>
+                </CardTitle>
+                <CardDescription className="text-xs mt-1">Безналичные оплаты по выставленным счетам</CardDescription>
               </div>
               <Button size="sm" className="gap-2 shrink-0" onClick={() => setCreateOpen(true)}>
                 <Plus className="w-4 h-4" />
@@ -547,105 +552,200 @@ export function AdminPayments() {
             </CardHeader>
             <CardContent className="p-0 sm:p-6 sm:pt-0">
               {invoices.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8 px-6">Счетов пока нет</p>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-xs">№ счёта</TableHead>
-                          <TableHead className="text-xs">Email</TableHead>
-                          <TableHead className="text-xs">Организация</TableHead>
-                          <TableHead className="text-xs">ИНН</TableHead>
-                          <TableHead className="text-xs">Тариф</TableHead>
-                          <TableHead className="text-xs">Сумма</TableHead>
-                          <TableHead className="text-xs">Статус</TableHead>
-                          <TableHead className="text-xs">Дата</TableHead>
-                          <TableHead className="text-xs text-right">Действия</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedInvoices.map(inv => (
-                          <TableRow key={inv.id}>
-                            <TableCell className="text-xs font-mono">
-                              <div className="flex items-center gap-1.5">
-                                {inv.invoice_number}
-                                {inv.is_manual && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Ручной</Badge>}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-xs max-w-[150px] truncate">{inv.user_email}</TableCell>
-                            <TableCell className="text-xs max-w-[150px] truncate">{inv.org_name}</TableCell>
-                            <TableCell className="text-xs font-mono">{inv.org_inn}</TableCell>
-                            <TableCell className="text-xs">{inv.package_name}</TableCell>
-                            <TableCell className="text-xs">{inv.amount}₽</TableCell>
-                            <TableCell>{getInvoiceStatusBadge(inv.status)}</TableCell>
-                            <TableCell className="text-xs whitespace-nowrap">
-                              {new Date(inv.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {(inv.status === 'awaiting_confirmation' || inv.status === 'invoice_issued') && (
-                                <div className="flex items-center justify-end gap-1">
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button size="sm" variant="default" className="h-7 w-7 p-0" disabled={processingId === inv.id}>
-                                        <Check className="w-3.5 h-3.5" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Подтвердить оплату?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Будет начислено {inv.tokens_amount} токенов пользователю {inv.user_email}. Счёт #{inv.invoice_number} на сумму {inv.amount}₽.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Отмена</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleInvoiceAction(inv.id, 'approve')}>Подтвердить</AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                <p className="text-center text-muted-foreground py-12 px-6 text-sm">Счетов пока нет</p>
+              ) : isMobile ? (
+                <div className="space-y-2 px-3 pb-3">
+                  {paginatedInvoices.map(inv => {
+                    const isPaid = inv.status === 'paid';
+                    const canAct = inv.status === 'awaiting_confirmation' || inv.status === 'invoice_issued';
+                    return (
+                      <div key={inv.id} className={cn(
+                        "rounded-xl border border-border/60 bg-card p-3 space-y-2.5",
+                        isPaid && "border-emerald-500/20"
+                      )}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">#{inv.invoice_number}</span>
+                              {inv.is_manual && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Ручной</Badge>}
+                            </div>
+                            <p className="text-sm font-medium truncate mt-1">{inv.org_name || inv.user_email}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{inv.user_email}</p>
+                          </div>
+                          {getInvoiceStatusBadge(inv.status)}
+                        </div>
 
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button size="sm" variant="destructive" className="h-7 w-7 p-0" disabled={processingId === inv.id}>
-                                        <X className="w-3.5 h-3.5" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Отклонить счёт?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Счёт #{inv.invoice_number} будет отклонён. Токены не будут начислены.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Отмена</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleInvoiceAction(inv.id, 'reject')} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Отклонить</AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
-                              )}
-                              {inv.status === 'paid' && <span className="text-xs text-muted-foreground">✓</span>}
-                              {inv.status === 'rejected' && <span className="text-xs text-muted-foreground">✗</span>}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  {totalInvoicePages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t">
-                      <span className="text-xs text-muted-foreground">{(invoicesPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(invoicesPage * ITEMS_PER_PAGE, invoices.length)} из {invoices.length}</span>
-                      <div className="flex items-center gap-1">
-                        <Button variant="outline" size="icon" className="h-8 w-8" disabled={invoicesPage === 1} onClick={() => setInvoicesPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-                        <span className="text-sm px-2">{invoicesPage} / {totalInvoicePages}</span>
-                        <Button variant="outline" size="icon" className="h-8 w-8" disabled={invoicesPage >= totalInvoicePages} onClick={() => setInvoicesPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">ИНН</p>
+                            <p className="text-xs font-mono">{inv.org_inn || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Тариф</p>
+                            <p className="text-xs truncate">{inv.package_name}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Сумма</p>
+                            <p className="text-sm font-semibold tabular-nums">{Number(inv.amount).toLocaleString()} ₽</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Токены</p>
+                            <p className="text-sm font-semibold tabular-nums text-primary">{inv.tokens_amount}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          <div className="text-[10px] text-muted-foreground inline-flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(inv.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </div>
+                          {canAct && (
+                            <div className="flex gap-1.5">
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="default" className="h-8 px-3 gap-1" disabled={processingId === inv.id}>
+                                    <Check className="w-3.5 h-3.5" />Принять
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Подтвердить оплату?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Будет начислено {inv.tokens_amount} токенов пользователю {inv.user_email}. Счёт #{inv.invoice_number} на сумму {inv.amount}₽.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleInvoiceAction(inv.id, 'approve')}>Подтвердить</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={processingId === inv.id}>
+                                    <X className="w-3.5 h-3.5" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Отклонить счёт?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Счёт #{inv.invoice_number} будет отклонён. Токены не будут начислены.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleInvoiceAction(inv.id, 'reject')} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Отклонить</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent border-border/40">
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">№ счёта</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Email</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Организация</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">ИНН</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Тариф</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Сумма</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Статус</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium">Дата</TableHead>
+                        <TableHead className="text-[11px] uppercase tracking-wider font-medium text-right">Действия</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedInvoices.map(inv => (
+                        <TableRow key={inv.id} className="border-border/40 hover:bg-muted/40">
+                          <TableCell className="py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">#{inv.invoice_number}</span>
+                              {inv.is_manual && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Ручной</Badge>}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs max-w-[150px] truncate">{inv.user_email}</TableCell>
+                          <TableCell className="text-xs max-w-[180px]">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <Building2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                              <span className="truncate">{inv.org_name || '—'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs font-mono text-muted-foreground">{inv.org_inn || '—'}</TableCell>
+                          <TableCell className="text-xs">{inv.package_name}</TableCell>
+                          <TableCell className="text-xs font-semibold tabular-nums text-right whitespace-nowrap">{Number(inv.amount).toLocaleString()} ₽</TableCell>
+                          <TableCell>{getInvoiceStatusBadge(inv.status)}</TableCell>
+                          <TableCell className="text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
+                            {new Date(inv.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {(inv.status === 'awaiting_confirmation' || inv.status === 'invoice_issued') ? (
+                              <div className="flex items-center justify-end gap-1">
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="default" className="h-7 w-7 p-0" disabled={processingId === inv.id} title="Подтвердить">
+                                      <Check className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Подтвердить оплату?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Будет начислено {inv.tokens_amount} токенов пользователю {inv.user_email}. Счёт #{inv.invoice_number} на сумму {inv.amount}₽.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleInvoiceAction(inv.id, 'approve')}>Подтвердить</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-7 w-7 p-0 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={processingId === inv.id} title="Отклонить">
+                                      <X className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Отклонить счёт?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Счёт #{inv.invoice_number} будет отклонён. Токены не будут начислены.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleInvoiceAction(inv.id, 'reject')} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Отклонить</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+              {totalInvoicePages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
+                  <span className="text-xs text-muted-foreground tabular-nums">{(invoicesPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(invoicesPage * ITEMS_PER_PAGE, invoices.length)} из {invoices.length}</span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="outline" size="icon" className="h-8 w-8" disabled={invoicesPage === 1} onClick={() => setInvoicesPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                    <span className="text-sm px-2 tabular-nums">{invoicesPage} / {totalInvoicePages}</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" disabled={invoicesPage >= totalInvoicePages} onClick={() => setInvoicesPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
