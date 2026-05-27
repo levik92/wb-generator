@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "./effects/NumberTicker";
 import { SpotlightCard } from "./effects/SpotlightCard";
-import illuMagic from "@/assets/landing/illu-magic.png";
+import illuMagic from "@/assets/landing/card-coffee.png";
 
 const steps = [
   {
