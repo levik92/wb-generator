@@ -15,7 +15,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
-import { Plus, Edit, Trash2, Play, Clock, Eye, EyeOff, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, Play, Clock, Eye, EyeOff, GripVertical, GraduationCap, Video, Hash, Link2, Type, AlignLeft, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SortableList, SortableItem } from "./SortableList";
