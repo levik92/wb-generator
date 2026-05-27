@@ -374,19 +374,6 @@ export const AdminBanners = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center gap-3">
-        <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25">
-          <LayoutPanelTop className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Баннеры и статус
-          </h1>
-          <p className="text-sm text-muted-foreground">Управление статусом системы и баннерами личного кабинета</p>
-        </div>
-      </div>
-
       {/* System Status Control */}
       <SystemStatusControl />
 
