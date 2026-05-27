@@ -107,17 +107,17 @@ export const ServiceHero = ({
         {/* Base gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,8%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
         
-        {/* Soft ambient glow - very subtle */}
+        {/* Soft ambient glow - accent-themed */}
         <div 
-          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.06]"
+          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.08]"
           style={{
-            background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)',
+            background: `radial-gradient(circle, ${theme.glowA} 0%, transparent 60%)`,
           }}
         />
         <div 
-          className="absolute w-[900px] h-[900px] top-1/4 -right-1/4 rounded-full opacity-[0.05]"
+          className="absolute w-[900px] h-[900px] top-1/4 -right-1/4 rounded-full opacity-[0.06]"
           style={{
-            background: 'radial-gradient(circle, hsl(280, 60%, 45%) 0%, transparent 60%)',
+            background: `radial-gradient(circle, ${theme.glowB} 0%, transparent 60%)`,
           }}
         />
         
@@ -129,8 +129,11 @@ export const ServiceHero = ({
           }}
         />
         
-        {/* Very subtle gradient line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(268,70%,50%)/15] to-transparent" />
+        {/* Accent gradient line */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: `linear-gradient(to right, transparent, ${theme.glowA}33, transparent)` }}
+        />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
