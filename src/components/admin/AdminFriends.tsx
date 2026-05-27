@@ -222,10 +222,10 @@ export const AdminFriends = () => {
                   <p className="text-xs text-muted-foreground truncate">{friend.short_description}</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(friend)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-violet-500/10 hover:text-violet-600 transition-colors" onClick={() => openEdit(friend)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDelete(friend.id)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-white transition-colors" onClick={() => handleDelete(friend.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
