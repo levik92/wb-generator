@@ -79,19 +79,20 @@ export const HeroSection = () => {
               <span className="text-aurora">работают на клики и продажи</span>
             </h1>
 
-            {/* Subhead (4U: useful + urgent) */}
+            {/* Subhead — нейросеть, алгоритмы, конверсии */}
             <p
               className="text-base sm:text-lg md:text-xl text-white/65 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed animate-fade-in"
               style={{ animationDelay: "160ms" }}
             >
-              AI собирает дизайн карточки за 3 минуты — с фокусом на CTR, рекламу
-              и ранжирование. Можно тестировать варианты пачками,{" "}
-              <span className="text-white/85">без дизайнера и опыта</span>.
+              Наша нейросеть работает на сложнейших алгоритмах и нацелена не
+              только на дизайн высокого уровня, но и на{" "}
+              <span className="text-white/85">рост конверсий и продаж</span> —
+              готовая карточка за 3 минуты, без дизайнера и опыта.
             </p>
 
             {/* CTAs */}
             <div
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 sm:mb-14 animate-fade-in"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 sm:mb-16 animate-fade-in"
               style={{ animationDelay: "240ms" }}
             >
               <Link to="/auth?tab=signup" className="w-full sm:w-auto">
@@ -103,28 +104,19 @@ export const HeroSection = () => {
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <a href="#examples" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto text-[15px] sm:text-base px-7 sm:px-9 py-6 sm:py-7 rounded-xl font-semibold bg-white/[0.03] border-white/15 text-white hover:bg-white/[0.07] hover:border-white/25"
-                >
-                  Посмотреть примеры
-                </Button>
-              </a>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => setIsVideoOpen(true)}
+                className="w-full sm:w-auto text-[15px] sm:text-base px-7 sm:px-9 py-6 sm:py-7 rounded-xl font-semibold bg-white/[0.03] border-white/15 text-white hover:bg-white/[0.07] hover:border-white/25 group"
+              >
+                <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center mr-2 group-hover:border-white/40 transition-colors">
+                  <Play className="w-3 h-3 ml-0.5" />
+                </span>
+                Демо за 60 секунд
+              </Button>
             </div>
 
-            {/* Watch demo (small, secondary) */}
-            <button
-              onClick={() => setIsVideoOpen(true)}
-              className="inline-flex items-center gap-2.5 text-white/55 hover:text-white transition-colors group mb-12 sm:mb-16 animate-fade-in"
-              style={{ animationDelay: "300ms" }}
-            >
-              <span className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center group-hover:border-white/30 group-hover:bg-white/[0.06] transition-all">
-                <Play className="w-3.5 h-3.5 ml-0.5" />
-              </span>
-              <span className="text-sm">Демо за 60 секунд</span>
-            </button>
 
             {/* Trust stats bento strip */}
             <div

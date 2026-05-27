@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles, Zap, Gift } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -34,7 +34,7 @@ export const CTASection = () => {
             {[
               { value: "от 59₽", label: "за карточку", icon: Gift },
               { value: "3 мин", label: "до результата", icon: Zap },
-              { value: "10+ стилей", label: "дизайна на выбор", icon: Sparkles },
+              { value: "+87%", label: "рост CTR", icon: TrendingUp },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -57,7 +57,7 @@ export const CTASection = () => {
                 size="lg"
                 className="w-full sm:w-auto bg-white text-[hsl(263,80%,30%)] hover:bg-white/90 text-base px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/30 group"
               >
-                Попробовать WBGen бесплатно
+                Попробовать WBGen
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -72,10 +72,11 @@ export const CTASection = () => {
             </a>
           </div>
           <p className="text-white/45 text-xs sm:text-sm mt-5">
-            Регистрация за 30 сек · Без привязки карты · Поддержка 7 дней в неделю
+            Регистрация за 30 сек · Результат сразу · Экономия в 12+ раз
           </p>
         </div>
       </div>
     </section>
   );
 };
+
