@@ -566,13 +566,22 @@ export const AdminBonuses = () => {
           </Card>
 
           {/* All Submissions History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">История всех заявок</CardTitle>
+          <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base sm:text-lg font-semibold">История всех заявок</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-0.5">Последние 20 заявок по всем программам</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="p-2 md:p-4">
-              <div className="rounded-md border overflow-x-auto">
+            <CardContent className="p-3 md:p-5">
+              <div className="rounded-xl border border-border/50 overflow-x-auto">
                 <Table>
+
                   <TableHeader>
                     <TableRow>
                       <TableHead>Пользователь</TableHead>
