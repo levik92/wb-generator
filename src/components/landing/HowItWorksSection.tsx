@@ -1,6 +1,8 @@
 import { Image, FileText, Sparkles, Check, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { NumberTicker } from "./effects/NumberTicker";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 const steps = [
   {
@@ -29,6 +31,13 @@ const steps = [
   },
 ];
 
+const metrics = [
+  { value: 120000, suffix: "+", label: "карточек уже создано" },
+  { value: 87, suffix: "%", label: "средний рост CTR" },
+  { value: 3, suffix: " мин", label: "до готовой карточки" },
+  { value: 12, prefix: "x", label: "эффективнее дизайнера" },
+];
+
 export const HowItWorksSection = () => {
   return (
     <section className="section-shell">
@@ -46,30 +55,51 @@ export const HowItWorksSection = () => {
           </p>
         </div>
 
-        {/* Steps grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
-          {steps.map((step, idx) => (
-            <div
-              key={step.number}
-              className="glass-card rounded-3xl p-6 sm:p-7 relative overflow-hidden"
-            >
-              <div className="absolute top-5 right-5 text-[2.75rem] font-bold leading-none bg-gradient-to-br from-white/15 to-white/[0.02] bg-clip-text text-transparent tracking-tight">
-                {step.number}
+        {/* Steps grid with animated beam connectors */}
+        <div className="relative max-w-6xl mx-auto">
+          {/* Animated beam line (desktop only) */}
+          <div className="hidden lg:block absolute top-[88px] left-[12.5%] right-[12.5%] h-px animated-beam pointer-events-none" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative">
+            {steps.map((step) => (
+              <SpotlightCard
+                key={step.number}
+                className="glass-card rounded-3xl p-6 sm:p-7 overflow-hidden"
+              >
+                <div className="absolute top-5 right-5 text-[2.75rem] font-bold leading-none bg-gradient-to-br from-white/15 to-white/[0.02] bg-clip-text text-transparent tracking-tight">
+                  {step.number}
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/25 mb-5 relative z-10">
+                  <step.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 leading-tight">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-white/55 leading-relaxed">
+                  {step.description}
+                </p>
+              </SpotlightCard>
+            ))}
+          </div>
+        </div>
+
+        {/* Animated metrics row */}
+        <div className="mt-14 sm:mt-16 max-w-5xl mx-auto">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {metrics.map((m) => (
+              <div key={m.label} className="text-center sm:text-left">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight leading-none mb-2">
+                  <NumberTicker
+                    value={m.value}
+                    prefix={m.prefix}
+                    suffix={m.suffix}
+                    className="bg-gradient-to-br from-white to-[hsl(263,90%,80%)] bg-clip-text text-transparent"
+                  />
+                </div>
+                <div className="text-xs sm:text-sm text-white/55 leading-snug">{m.label}</div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/25 mb-5">
-                <step.icon className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 leading-tight">
-                {step.title}
-              </h3>
-              <p className="text-sm text-white/55 leading-relaxed">
-                {step.description}
-              </p>
-              {idx < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-1/2 -right-2.5 w-5 h-px bg-gradient-to-r from-white/20 to-transparent" />
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <div className="text-center mt-12 relative z-10">
