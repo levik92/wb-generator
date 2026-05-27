@@ -326,7 +326,7 @@ export const ServiceHero = ({
               </div>
               
               {/* Subtle glow behind */}
-              <div className="absolute -inset-12 bg-gradient-to-br from-[hsl(268,60%,35%)/10] to-[hsl(280,50%,30%)/8] rounded-3xl blur-3xl -z-10" />
+              <div className="absolute -inset-12 rounded-3xl blur-3xl -z-10" style={{ background: `radial-gradient(circle, ${theme.glowA}1a, ${theme.glowB}14)` }} />
             </motion.div>
           )}
         </div>
