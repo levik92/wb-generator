@@ -502,3 +502,123 @@
 .animate-slide-in-left {
   animation: slide-in-left 0.3s ease-out forwards;
 }
+
+/* ============================================
+   Aurora background animations
+   ============================================ */
+@keyframes aurora-spin {
+  0% { transform: translate(-50%, 0) rotate(0deg); }
+  100% { transform: translate(-50%, 0) rotate(360deg); }
+}
+@keyframes aurora-float-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.08); }
+}
+@keyframes aurora-float-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, 25px) scale(1.05); }
+}
+@keyframes aurora-float-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 35px) scale(1.10); }
+}
+
+.aurora-spin { animation: aurora-spin 50s linear infinite; }
+.aurora-float-a { animation: aurora-float-a 14s ease-in-out infinite; }
+.aurora-float-b { animation: aurora-float-b 18s ease-in-out infinite; }
+.aurora-float-c { animation: aurora-float-c 22s ease-in-out infinite; }
+
+@media (max-width: 768px) {
+  /* Замедляем тяжёлые анимации на мобиле */
+  .aurora-spin { animation-duration: 90s; }
+  .aurora-float-a,
+  .aurora-float-b,
+  .aurora-float-c { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-spin,
+  .aurora-float-a,
+  .aurora-float-b,
+  .aurora-float-c { animation: none; }
+}
+
+/* ============================================
+   Spotlight card (cursor-tracking glow)
+   ============================================ */
+.spotlight-card {
+  position: relative;
+  isolation: isolate;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.spotlight-card.magnetic-card {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+}
+.spotlight-card__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    var(--spotlight-color, hsl(263 90% 60% / 0.18)),
+    transparent 55%
+  );
+  z-index: 1;
+}
+.spotlight-card:hover .spotlight-card__glow { opacity: 1; }
+
+/* Тонкая светящаяся рамка при наведении */
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    300px circle at var(--mx, 50%) var(--my, 50%),
+    hsl(263 90% 70% / 0.55),
+    transparent 60%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.spotlight-card:hover::before { opacity: 1; }
+
+/* На сенсорных экранах эффект отключаем */
+@media (hover: none) {
+  .spotlight-card__glow,
+  .spotlight-card::before { display: none; }
+  .spotlight-card.magnetic-card { transform: none; }
+}
+
+/* ============================================
+   Animated beam (steps connectors)
+   ============================================ */
+@keyframes beam-flow {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animated-beam {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(0 0% 100% / 0.10) 30%,
+    hsl(263 90% 70% / 0.9) 50%,
+    hsl(0 0% 100% / 0.10) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: beam-flow 3.5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animated-beam { animation: none; }
+}

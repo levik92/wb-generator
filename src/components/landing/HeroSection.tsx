@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X, Zap, TrendingUp, Clock } from "lucide-react";
+import { AuroraBackground } from "./effects/AuroraBackground";
 
 const VideoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   if (!isOpen) return null;
@@ -45,14 +46,8 @@ export const HeroSection = () => {
   return (
     <>
       <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden pt-28 sm:pt-36 pb-16 sm:pb-24">
-        {/* Layered noir background */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(263_70%_14%)_0%,hsl(0_0%_5%)_55%,hsl(0_0%_4%)_100%)]" />
-        <div className="absolute inset-0 grid-pattern opacity-[0.12]" />
-        {/* Soft violet orbs (no animation for perf) */}
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[700px] h-[700px] max-w-[120vw] bg-[hsl(263,90%,50%)] rounded-full blur-[160px] opacity-[0.18]" />
-        <div className="absolute bottom-0 right-[5%] w-64 sm:w-96 h-64 sm:h-96 bg-[hsl(290,90%,55%)] rounded-full blur-[140px] opacity-[0.12]" />
-        {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-b from-transparent to-[#0d0d0d]" />
+        {/* Animated aurora background */}
+        <AuroraBackground />
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-5xl mx-auto text-center">
