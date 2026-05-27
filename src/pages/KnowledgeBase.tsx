@@ -465,15 +465,16 @@ const KnowledgeBase = () => {
 
             <div className="space-y-6">
               {Object.entries(articleContent).slice(0, 3).map(([id, article]) => (
-                <Link key={id} to={`/baza-znaniy/${id}`} className="block">
-                  <div className="glass-card rounded-xl p-6 hover:bg-white/5 transition-colors">
+                <Link key={id} to={`/baza-znaniy/${id}`} className="block group relative">
+                  <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-xl p-6 border border-white/10 group-hover:border-white/20 transition-colors">
                     <h3 className="text-lg font-semibold text-white mb-3">{article.title}</h3>
                     <div className="text-white/60 text-sm prose prose-invert prose-sm max-w-none">
                       {article.content.split('\n').slice(0, 5).map((line, i) => (
                         <p key={i}>{line.replace(/^#+\s*/, '').replace(/\*\*/g, '')}</p>
                       ))}
                     </div>
-                    <span className="mt-4 text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    <span className="mt-4 text-[hsl(268,83%,72%)] text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                       Читать полностью <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
