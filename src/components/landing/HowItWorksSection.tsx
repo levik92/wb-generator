@@ -44,6 +44,18 @@ export const HowItWorksSection = () => {
     <section className="section-shell">
       <div className="absolute inset-0 grid-pattern opacity-[0.08]" />
 
+      {/* Decorative magic wand illustration */}
+      <img
+        src={illuMagic}
+        alt=""
+        aria-hidden="true"
+        width={1024}
+        height={1024}
+        loading="lazy"
+        decoding="async"
+        className="hidden md:block absolute top-8 right-4 lg:right-12 w-[180px] lg:w-[240px] h-auto object-contain opacity-90 animate-[float_7s_ease-in-out_infinite] drop-shadow-[0_20px_50px_hsl(263,90%,40%,0.35)] pointer-events-none z-[1]"
+      />
+
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="section-header">
           <span className="section-eyebrow">Простой процесс</span>
