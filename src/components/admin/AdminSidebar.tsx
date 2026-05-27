@@ -61,7 +61,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-accent/10 text-muted-foreground hover:text-accent"
+                className="h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-violet-500/10 text-muted-foreground hover:text-violet-600 transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -69,7 +69,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
           ) : (
             <>
               <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 rounded-lg">
+                <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25 rounded-lg">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-sm font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">WBGen</span>
@@ -78,7 +78,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-accent/10 text-muted-foreground hover:text-accent"
+                className="h-9 w-9 p-0 rounded-xl bg-secondary hover:bg-violet-500/10 text-muted-foreground hover:text-violet-600 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
