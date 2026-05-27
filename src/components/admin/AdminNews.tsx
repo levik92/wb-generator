@@ -288,20 +288,8 @@ export const AdminNews = () => {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
-            <Newspaper className="h-5 w-5 text-white" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Управление новостями
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Создавайте и публикуйте новости для пользователей
-            </p>
-          </div>
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+
 
         <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <ResponsiveDialogTrigger asChild>
