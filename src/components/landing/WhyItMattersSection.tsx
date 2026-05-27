@@ -1,4 +1,5 @@
 import { AlertTriangle, MousePointerClick, Wallet, Repeat } from "lucide-react";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 const problems = [
   {
@@ -46,7 +47,7 @@ export const WhyItMattersSection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-5xl mx-auto">
           {problems.map((p) => (
-            <div
+            <SpotlightCard
               key={p.title}
               className="glass-card rounded-2xl p-5 sm:p-6 flex gap-4 sm:gap-5"
             >
@@ -59,7 +60,7 @@ export const WhyItMattersSection = () => {
                 </h3>
                 <p className="text-sm text-white/55 leading-relaxed">{p.text}</p>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </div>

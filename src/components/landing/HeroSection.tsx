@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X, Zap, TrendingUp, Clock } from "lucide-react";
 import { AuroraBackground } from "./effects/AuroraBackground";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 const VideoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   if (!isOpen) return null;
@@ -119,7 +120,7 @@ export const HeroSection = () => {
               style={{ animationDelay: "360ms" }}
             >
               {trustStats.map((s) => (
-                <div
+                <SpotlightCard
                   key={s.label}
                   className="glass-card rounded-2xl p-4 sm:p-5 text-left"
                 >
@@ -130,7 +131,7 @@ export const HeroSection = () => {
                   <div className="text-[11px] sm:text-xs text-white/50 leading-tight">
                     {s.label}
                   </div>
-                </div>
+                </SpotlightCard>
               ))}
             </div>
 

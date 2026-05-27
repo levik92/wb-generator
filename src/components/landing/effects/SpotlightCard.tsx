@@ -1,4 +1,4 @@
-import { useRef, type ReactNode, type MouseEvent } from "react";
+import { useRef, useCallback, type ReactNode, type MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface SpotlightCardProps {
@@ -11,7 +11,8 @@ interface SpotlightCardProps {
 
 /**
  * Карточка с курсорной подсветкой (spotlight) и опциональным magnetic-наклоном.
- * Эффект работает только на устройствах с pointer:fine (десктоп) — на мобиле просто статика.
+ * Оптимизация: requestAnimationFrame-троттлинг + кеш bounding rect.
+ * На устройствах с hover:none эффект автоматически выключается через CSS.
  */
 export const SpotlightCard = ({
   children,
@@ -20,36 +21,60 @@ export const SpotlightCard = ({
   magnetic = false,
 }: SpotlightCardProps) => {
   const ref = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const pendingRef = useRef<{ x: number; y: number } | null>(null);
 
-  const handleMove = (e: MouseEvent<HTMLDivElement>) => {
+  const apply = useCallback(() => {
+    rafRef.current = null;
     const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const pos = pendingRef.current;
+    const rect = rectRef.current;
+    if (!el || !pos || !rect) return;
+
+    const x = pos.x - rect.left;
+    const y = pos.y - rect.top;
     el.style.setProperty("--mx", `${x}px`);
     el.style.setProperty("--my", `${y}px`);
 
     if (magnetic) {
       const cx = rect.width / 2;
       const cy = rect.height / 2;
-      const rx = ((y - cy) / cy) * -3.5;
-      const ry = ((x - cx) / cx) * 3.5;
+      const rx = ((y - cy) / cy) * -3;
+      const ry = ((x - cx) / cx) * 3;
       el.style.setProperty("--rx", `${rx}deg`);
       el.style.setProperty("--ry", `${ry}deg`);
     }
-  };
+  }, [magnetic]);
 
-  const handleLeave = () => {
+  const handleEnter = useCallback((e: MouseEvent<HTMLDivElement>) => {
     const el = ref.current;
     if (!el) return;
+    rectRef.current = el.getBoundingClientRect();
+    pendingRef.current = { x: e.clientX, y: e.clientY };
+    if (rafRef.current === null) rafRef.current = requestAnimationFrame(apply);
+  }, [apply]);
+
+  const handleMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    pendingRef.current = { x: e.clientX, y: e.clientY };
+    if (rafRef.current === null) rafRef.current = requestAnimationFrame(apply);
+  }, [apply]);
+
+  const handleLeave = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     el.style.setProperty("--rx", `0deg`);
     el.style.setProperty("--ry", `0deg`);
-  };
+  }, []);
 
   return (
     <div
       ref={ref}
+      onMouseEnter={handleEnter}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
       className={cn("spotlight-card group/spot", magnetic && "magnetic-card", className)}

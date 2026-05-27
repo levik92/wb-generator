@@ -1,4 +1,5 @@
 import { ShoppingBag, Briefcase, Paintbrush, GraduationCap } from "lucide-react";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 const audiences = [
   {
@@ -51,9 +52,9 @@ export const AudienceSection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-5xl mx-auto">
           {audiences.map((a) => (
-            <div
+            <SpotlightCard
               key={a.title}
-              className="glass-card rounded-2xl p-5 sm:p-7 group"
+              className="glass-card rounded-2xl p-5 sm:p-7"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/25">
@@ -76,7 +77,7 @@ export const AudienceSection = () => {
                   </li>
                 ))}
               </ul>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </div>

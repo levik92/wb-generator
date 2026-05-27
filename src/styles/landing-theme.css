@@ -523,14 +523,14 @@
   50% { transform: translate(-30px, 35px) scale(1.10); }
 }
 
-.aurora-spin { animation: aurora-spin 50s linear infinite; }
-.aurora-float-a { animation: aurora-float-a 14s ease-in-out infinite; }
-.aurora-float-b { animation: aurora-float-b 18s ease-in-out infinite; }
-.aurora-float-c { animation: aurora-float-c 22s ease-in-out infinite; }
+.aurora-spin { animation: aurora-spin 28s linear infinite; }
+.aurora-float-a { animation: aurora-float-a 9s ease-in-out infinite; }
+.aurora-float-b { animation: aurora-float-b 11s ease-in-out infinite; }
+.aurora-float-c { animation: aurora-float-c 13s ease-in-out infinite; }
 
 @media (max-width: 768px) {
-  /* Замедляем тяжёлые анимации на мобиле */
-  .aurora-spin { animation-duration: 90s; }
+  /* На мобиле упрощаем — оставляем только лёгкий спин */
+  .aurora-spin { animation-duration: 50s; }
   .aurora-float-a,
   .aurora-float-b,
   .aurora-float-c { animation: none; }

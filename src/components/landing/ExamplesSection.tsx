@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
 import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 const examples = [
   {
@@ -100,7 +101,7 @@ export const ExamplesSection = () => {
               key={index}
               className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[340px] snap-center"
             >
-              <div className="glass-card rounded-3xl overflow-hidden">
+              <SpotlightCard className="glass-card rounded-3xl overflow-hidden">
                 <div className="p-3 sm:p-4">
                   <BeforeAfterSliderNew
                     beforeImage={example.before}
@@ -142,7 +143,7 @@ export const ExamplesSection = () => {
                     </button>
                   </CaseStudyDialog>
                 </div>
-              </div>
+              </SpotlightCard>
             </div>
           ))}
         </div>

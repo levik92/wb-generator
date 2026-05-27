@@ -1,6 +1,7 @@
 import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 export const CTASection = () => {
   return (
@@ -36,7 +37,7 @@ export const CTASection = () => {
               { value: "3 мин", label: "до результата", icon: Zap },
               { value: "+87%", label: "рост CTR", icon: TrendingUp },
             ].map((stat) => (
-              <div
+              <SpotlightCard
                 key={stat.label}
                 className="glass-card rounded-2xl p-3.5 sm:p-5"
               >
@@ -47,7 +48,7 @@ export const CTASection = () => {
                 <div className="text-[10px] sm:text-xs text-white/55 leading-tight">
                   {stat.label}
                 </div>
-              </div>
+              </SpotlightCard>
             ))}
           </div>
 
