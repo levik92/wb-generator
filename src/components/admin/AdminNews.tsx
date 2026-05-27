@@ -510,7 +510,7 @@ export const AdminNews = () => {
                   const isExpanded = expandedIds.has(item.id);
                   const isLong = item.content.length > 200;
                   return (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div className={`bg-muted/40 border border-border/40 rounded-xl p-3.5 text-sm relative overflow-hidden transition-all ${isExpanded ? '' : 'max-h-28'}`}>
                         <p className="whitespace-pre-wrap leading-relaxed">{item.content}</p>
                         {isLong && !isExpanded && (
@@ -518,17 +518,19 @@ export const AdminNews = () => {
                         )}
                       </div>
                       {isLong && (
-                        <button
-                          type="button"
-                          onClick={() => toggleExpanded(item.id)}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
-                        >
-                          {isExpanded ? (
-                            <>Свернуть <ChevronUp className="w-3.5 h-3.5" /></>
-                          ) : (
-                            <>Развернуть <ChevronDown className="w-3.5 h-3.5" /></>
-                          )}
-                        </button>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => toggleExpanded(item.id)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                          >
+                            {isExpanded ? (
+                              <>Свернуть <ChevronUp className="w-3.5 h-3.5" /></>
+                            ) : (
+                              <>Развернуть <ChevronDown className="w-3.5 h-3.5" /></>
+                            )}
+                          </button>
+                        </div>
                       )}
                     </div>
                   );
