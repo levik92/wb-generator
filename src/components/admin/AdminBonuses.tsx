@@ -449,27 +449,27 @@ export const AdminBonuses = () => {
       </div>
 
       <Tabs defaultValue="submissions" className="space-y-4">
-        <TabsList className="bg-muted/50 p-1 rounded-xl h-auto">
+        <TabsList className="inline-flex h-auto p-1 bg-muted/60 rounded-xl gap-1">
           <TabsTrigger
             value="submissions"
-            className="relative rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/25 transition-all"
+            className="gap-2 px-4 py-1.5 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg"
           >
             Заявки
             {stats.pendingSubmissions > 0 && (
-              <Badge className="ml-2 bg-violet-500 text-white text-[10px] px-1.5 h-4 min-w-[18px] flex items-center justify-center border-0 data-[state=active]:bg-white/95 data-[state=active]:text-violet-600">
+              <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
                 {stats.pendingSubmissions}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger
             value="programs"
-            className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/25 transition-all"
+            className="gap-2 px-4 py-1.5 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg"
           >
             Программы
           </TabsTrigger>
           <TabsTrigger
             value="promocodes"
-            className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/25 transition-all"
+            className="gap-2 px-4 py-1.5 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg"
           >
             Промокоды
           </TabsTrigger>
