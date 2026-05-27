@@ -159,22 +159,25 @@ export const PromoCodeManager = () => {
   if (loading) return <div>Загрузка промокодов...</div>;
 
   return (
-    <Card className="bg-card">
-      <CardHeader>
+    <Card className="bg-card rounded-2xl border-border/60 shadow-sm overflow-hidden">
+      <CardHeader className="bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-lg shrink-0">
-              <Tag className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+              <Tag className="h-5 w-5 text-white" />
             </div>
             <div className="min-w-0">
               <CardTitle className="text-base md:text-lg">Промокоды</CardTitle>
-              <CardDescription className="text-xs md:text-sm">Управление промокодами для пользователей</CardDescription>
+              <CardDescription className="text-xs md:text-sm">
+                Управление промокодами для пользователей
+                {promoCodes.length > 0 && <span className="ml-1.5 text-muted-foreground/70">· {promoCodes.length}</span>}
+              </CardDescription>
             </div>
           </div>
           <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <ResponsiveDialogTrigger asChild>
-              <Button onClick={resetForm} size="sm" className="w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button onClick={resetForm} size="sm" className="w-full sm:w-auto gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+                <Plus className="h-4 w-4" />
                 Создать промокод
               </Button>
             </ResponsiveDialogTrigger>
@@ -186,7 +189,7 @@ export const PromoCodeManager = () => {
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">Код промокода</Label>
-                  <Input id="code" value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })} placeholder="WELCOME2024" />
+                  <Input id="code" value={formData.code} onChange={e => setFormData({ ...formData, code: e.target.value })} placeholder="WELCOME2024" className="font-mono uppercase focus-visible:ring-violet-500/40" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="type">Тип</Label>
@@ -198,7 +201,7 @@ export const PromoCodeManager = () => {
                       maxUsesPerUser: newType === 'tokens_instant' ? '1' : formData.maxUsesPerUser
                     });
                   }}>
-                    <SelectTrigger className="text-base md:text-sm"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="text-base md:text-sm focus:ring-violet-500/40"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {TYPE_OPTIONS.map(opt => (
                         <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -211,11 +214,11 @@ export const PromoCodeManager = () => {
                   <Label htmlFor="value">
                     {formData.type === 'discount' ? 'Размер скидки (%)' : 'Количество токенов'}
                   </Label>
-                  <Input id="value" type="number" value={formData.value} onChange={e => setFormData({ ...formData, value: e.target.value })} placeholder={formData.type === 'discount' ? '10' : '25'} />
+                  <Input id="value" type="number" value={formData.value} onChange={e => setFormData({ ...formData, value: e.target.value })} placeholder={formData.type === 'discount' ? '10' : '25'} className="focus-visible:ring-violet-500/40" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="maxUses">Максимальное количество использований (всего)</Label>
-                  <Input id="maxUses" type="number" value={formData.maxUses} onChange={e => setFormData({ ...formData, maxUses: e.target.value })} placeholder="Пустое = неограниченно" />
+                  <Input id="maxUses" type="number" value={formData.maxUses} onChange={e => setFormData({ ...formData, maxUses: e.target.value })} placeholder="Пустое = неограниченно" className="focus-visible:ring-violet-500/40" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="maxUsesPerUser">Макс. использований на аккаунт</Label>
@@ -226,6 +229,7 @@ export const PromoCodeManager = () => {
                     onChange={e => setFormData({ ...formData, maxUsesPerUser: e.target.value })}
                     placeholder="Пустое = неограниченно"
                     disabled={isInstantType}
+                    className="focus-visible:ring-violet-500/40"
                   />
                   {isInstantType && (
                     <p className="text-xs text-muted-foreground">Для мгновенных промокодов всегда 1 раз на аккаунт</p>
@@ -233,70 +237,172 @@ export const PromoCodeManager = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="validUntil">Действует до</Label>
-                  <Input id="validUntil" type="date" value={formData.validUntil} onChange={e => setFormData({ ...formData, validUntil: e.target.value })} className="w-full min-w-0" />
+                  <Input id="validUntil" type="date" value={formData.validUntil} onChange={e => setFormData({ ...formData, validUntil: e.target.value })} className="w-full min-w-0 focus-visible:ring-violet-500/40" />
                 </div>
               </div>
               <ResponsiveDialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Отмена</Button>
-                <Button onClick={handleSubmit}>{editingPromo ? 'Обновить' : 'Создать'}</Button>
+                <Button onClick={handleSubmit} className="bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+                  {editingPromo ? 'Обновить' : 'Создать'}
+                </Button>
               </ResponsiveDialogFooter>
             </ResponsiveDialogContent>
           </ResponsiveDialog>
         </div>
       </CardHeader>
-      <CardContent className="p-2 md:p-4">
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[90px]">Код</TableHead>
-                <TableHead className="min-w-[70px]">Тип</TableHead>
-                <TableHead className="min-w-[80px]">Значение</TableHead>
-                <TableHead className="min-w-[90px] hidden md:table-cell">Использовано</TableHead>
-                <TableHead className="min-w-[70px]">Статус</TableHead>
-                <TableHead className="min-w-[110px] hidden lg:table-cell">Действует до</TableHead>
-                <TableHead className="min-w-[90px]">Действия</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+
+      <CardContent className="p-3 md:p-4">
+        {promoCodes.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <div className="h-14 w-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4">
+              <Tag className="h-7 w-7 text-violet-500" />
+            </div>
+            <h3 className="font-semibold mb-1">Промокодов пока нет</h3>
+            <p className="text-sm text-muted-foreground mb-4">Создайте первый промокод для пользователей</p>
+            <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} className="gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+              <Plus className="h-4 w-4" />
+              Создать промокод
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Desktop table */}
+            <div className="hidden md:block rounded-xl border border-border/60 overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent bg-muted/30">
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[120px]">Код</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[110px]">Тип</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[90px]">Значение</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[110px]">Использовано</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[90px]">Статус</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[120px] hidden lg:table-cell">Действует до</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground min-w-[100px] text-right">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {promoCodes.map(promo => (
+                    <TableRow key={promo.id} className="transition-colors hover:bg-violet-500/[0.03]">
+                      <TableCell className="font-mono text-sm font-semibold tracking-wide">{promo.code}</TableCell>
+                      <TableCell>
+                        <Badge variant={promo.type === 'tokens_instant' ? 'default' : promo.type === 'tokens' ? 'outline' : 'secondary'} className="text-[10px] font-medium">
+                          {TYPE_LABELS[promo.type] || promo.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm tabular-nums font-medium">
+                        {promo.value}{promo.type === 'discount' ? '%' : ''}
+                      </TableCell>
+                      <TableCell className="text-xs tabular-nums text-muted-foreground">
+                        <span className="text-foreground font-medium">{promo.current_uses}</span> / {promo.max_uses ?? '∞'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={promo.is_active ? 'default' : 'secondary'}
+                          className={`cursor-pointer text-[10px] transition-colors ${promo.is_active ? 'bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-500/30 dark:text-emerald-400' : 'hover:bg-muted'}`}
+                          onClick={() => toggleActive(promo.id, promo.is_active)}
+                        >
+                          {promo.is_active ? 'Активен' : 'Выключен'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-xs text-muted-foreground tabular-nums whitespace-nowrap">
+                        {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : <span className="inline-flex items-center gap-1"><InfinityIcon className="h-3 w-3" /> без срока</span>}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(promo)}
+                            className="h-8 w-8 hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(promo.id)}
+                            className="h-8 w-8 hover:bg-destructive hover:text-white transition-colors"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-2">
               {promoCodes.map(promo => (
-                <TableRow key={promo.id}>
-                  <TableCell className="font-mono text-xs md:text-sm">{promo.code}</TableCell>
-                  <TableCell>
-                    <Badge variant={promo.type === 'tokens_instant' ? 'default' : promo.type === 'tokens' ? 'outline' : 'secondary'} className="text-xs">
-                      {TYPE_LABELS[promo.type] || promo.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs md:text-sm">
-                    {promo.value}{promo.type === 'discount' ? '%' : ''}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-xs">
-                    {promo.current_uses} / {promo.max_uses || '∞'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={promo.is_active ? 'default' : 'secondary'} className="cursor-pointer text-xs" onClick={() => toggleActive(promo.id, promo.is_active)}>
-                      {promo.is_active ? 'Да' : 'Нет'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-xs">
-                    {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '∞'}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-0.5 md:gap-1">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(promo)} className="h-7 w-7 md:h-8 md:w-8 p-0">
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(promo.id)} className="h-7 w-7 md:h-8 md:w-8 p-0">
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                <div
+                  key={promo.id}
+                  className="rounded-xl border border-border/60 bg-card p-3 transition-colors hover:border-violet-500/30"
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-mono text-sm font-semibold tracking-wide truncate">{promo.code}</div>
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <Badge variant={promo.type === 'tokens_instant' ? 'default' : promo.type === 'tokens' ? 'outline' : 'secondary'} className="text-[10px] font-medium">
+                          {TYPE_LABELS[promo.type] || promo.type}
+                        </Badge>
+                        <span className="text-sm tabular-nums font-semibold">
+                          {promo.value}{promo.type === 'discount' ? '%' : ''}
+                        </span>
+                      </div>
                     </div>
-                  </TableCell>
-                </TableRow>
+                    <Badge
+                      variant={promo.is_active ? 'default' : 'secondary'}
+                      className={`cursor-pointer text-[10px] shrink-0 transition-colors ${promo.is_active ? 'bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-500/30 dark:text-emerald-400' : 'hover:bg-muted'}`}
+                      onClick={() => toggleActive(promo.id, promo.is_active)}
+                    >
+                      {promo.is_active ? 'Активен' : 'Выкл'}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground mb-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Users className="h-3 w-3 shrink-0" />
+                      <span className="tabular-nums truncate">
+                        <span className="text-foreground font-medium">{promo.current_uses}</span> / {promo.max_uses ?? '∞'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Calendar className="h-3 w-3 shrink-0" />
+                      <span className="tabular-nums truncate">
+                        {promo.valid_until ? new Date(promo.valid_until).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'без срока'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 pt-2 border-t border-border/40">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(promo)}
+                      className="flex-1 h-8 gap-1.5 text-xs hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                      Изменить
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(promo.id)}
+                      className="flex-1 h-8 gap-1.5 text-xs hover:bg-destructive hover:text-white"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Удалить
+                    </Button>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
 };
+
