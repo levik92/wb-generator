@@ -9,10 +9,11 @@ import {
   Barcode,
   Video,
 } from "lucide-react";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 /**
  * Bento-grid: «Что делает WBGen» + ключевые преимущества в одной композиции.
- * Без перегруза: один заголовок, плитки разной высоты, единый стиль.
+ * Плитки используют SpotlightCard — курсорная подсветка + magnetic-наклон на крупной плитке.
  */
 
 export const FeaturesSection = () => {
@@ -41,8 +42,12 @@ export const FeaturesSection = () => {
         {/* Bento grid */}
         <div className="grid grid-cols-6 auto-rows-[minmax(160px,auto)] gap-3 sm:gap-4 max-w-6xl mx-auto">
           {/* Hero tile - generation */}
-          <div className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-[hsl(263,90%,55%)] rounded-full blur-[100px] opacity-30 group-hover:opacity-40 transition-opacity" />
+          <SpotlightCard
+            magnetic
+            spotlightColor="hsl(263 90% 60% / 0.22)"
+            className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-6 sm:p-8 overflow-hidden"
+          >
+            <div className="absolute -top-24 -right-24 w-72 h-72 bg-[hsl(263,90%,55%)] rounded-full blur-[100px] opacity-30 transition-opacity" />
             <div className="relative">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center mb-5 shadow-lg shadow-[hsl(263,90%,40%)]/30">
                 <ImageIcon className="w-6 h-6 text-white" />
@@ -70,10 +75,10 @@ export const FeaturesSection = () => {
                 ))}
               </ul>
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Speed */}
-          <div className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Zap className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
               3 мин
@@ -81,10 +86,10 @@ export const FeaturesSection = () => {
             <p className="text-xs sm:text-sm text-white/55">
               от загрузки фото до готовой PNG-карточки
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Price */}
-          <div className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Target className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
               от 59₽
@@ -92,10 +97,10 @@ export const FeaturesSection = () => {
             <p className="text-xs sm:text-sm text-white/55">
               за карточку — в десятки раз дешевле дизайнера
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Descriptions */}
-          <div className="col-span-6 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 relative overflow-hidden">
+          <SpotlightCard className="col-span-6 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
             <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-4">
               <FileText className="w-5 h-5 text-[hsl(263,90%,75%)]" />
             </div>
@@ -106,10 +111,10 @@ export const FeaturesSection = () => {
               Продающий текст с ключами под маркетплейсы — помогает карточке
               лучше попадать в выдачу.
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Variants */}
-          <div className="col-span-3 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 relative overflow-hidden">
+          <SpotlightCard className="col-span-3 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
             <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-4">
               <Layers className="w-5 h-5 text-[hsl(263,90%,75%)]" />
             </div>
@@ -120,19 +125,19 @@ export const FeaturesSection = () => {
               Несколько обложек за раз — можно проверять гипотезы по визуалу
               и усиливать рекламные кампании.
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Video covers */}
-          <div className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Video className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <h3 className="text-base font-bold text-white mb-1">Видеообложки</h3>
             <p className="text-xs text-white/55">
               Короткие видео для главной карточки и рекламы
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Labels */}
-          <div className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Barcode className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <h3 className="text-base font-bold text-white mb-1">
               Этикетки и ШК
@@ -140,10 +145,10 @@ export const FeaturesSection = () => {
             <p className="text-xs text-white/55">
               Штрих-коды и QR для отгрузок — бесплатно
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Edits */}
-          <div className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+          <SpotlightCard className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <RefreshCw className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <h3 className="text-base font-bold text-white mb-1">
               Точечные правки
@@ -151,7 +156,7 @@ export const FeaturesSection = () => {
             <p className="text-xs text-white/55">
               Меняйте цвет, текст, элементы — AI-редактор без дизайнера
             </p>
-          </div>
+          </SpotlightCard>
 
           {/* Note */}
           <div className="col-span-6 rounded-3xl border border-dashed border-white/10 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 bg-white/[0.015]">
