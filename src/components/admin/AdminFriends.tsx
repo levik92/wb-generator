@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Upload, X, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Upload, X, ImageIcon, Type, Link2, FileText, AlignLeft, Sparkles, ArrowUpDown, Power } from "lucide-react";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -236,79 +236,191 @@ export const AdminFriends = () => {
       </CardContent>
 
       <ResponsiveDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <ResponsiveDialogContent className="sm:max-w-lg">
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>{editing ? "Редактировать" : "Добавить друга"}</ResponsiveDialogTitle>
-          </ResponsiveDialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1">
-            <div className="space-y-2">
-              <Label>Название *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Название сервиса" />
+        <ResponsiveDialogContent className="sm:max-w-2xl p-0 overflow-hidden">
+          <ResponsiveDialogHeader className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-transparent border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <ResponsiveDialogTitle className="text-base sm:text-lg">
+                  {editing ? "Редактировать друга" : "Добавить друга"}
+                </ResponsiveDialogTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Партнёрский сервис с эксклюзивными условиями
+                </p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Логотип *</Label>
-              {logoPreview ? (
-                <div className="relative w-20 h-20 rounded-xl border border-border bg-muted/30 flex items-center justify-center overflow-hidden group">
-                  <img src={logoPreview} alt="Logo" className="w-14 h-14 object-contain" />
+          </ResponsiveDialogHeader>
+
+          <div className="px-5 sm:px-6 py-5 space-y-5 max-h-[65vh] overflow-y-auto">
+            {/* Логотип + Название */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="space-y-2 shrink-0">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <ImageIcon className="h-3.5 w-3.5 text-violet-500" />
+                  Логотип <span className="text-destructive">*</span>
+                </Label>
+                {logoPreview ? (
+                  <div className="relative w-24 h-24 rounded-xl border border-border bg-muted/30 flex items-center justify-center overflow-hidden group">
+                    <img src={logoPreview} alt="Logo" className="w-16 h-16 object-contain" />
+                    <button
+                      type="button"
+                      onClick={removeLogo}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={removeLogo}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="group w-full sm:w-24 h-24 rounded-xl border-2 border-dashed border-border hover:border-transparent bg-muted/20 hover:bg-gradient-to-br hover:from-violet-500 hover:to-purple-600 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer px-2"
                   >
-                    <X className="w-3 h-3" />
+                    <Upload className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors" />
+                    <span className="text-[10px] leading-tight text-center text-muted-foreground group-hover:text-white transition-colors">до 3 МБ</span>
                   </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="group w-full h-24 rounded-xl border-2 border-dashed border-border hover:border-transparent bg-muted/20 hover:bg-gradient-to-br hover:from-violet-500 hover:to-purple-600 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Upload className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors" />
-                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">Нажмите для загрузки (до 3 МБ)</span>
-                </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+              </div>
 
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
+              <div className="flex-1 space-y-4 min-w-0">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium flex items-center gap-1.5">
+                    <Type className="h-3.5 w-3.5 text-violet-500" />
+                    Название <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="Название сервиса"
+                    className="focus-visible:ring-violet-500/40"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium flex items-center gap-1.5">
+                    <Link2 className="h-3.5 w-3.5 text-violet-500" />
+                    Ссылка на сервис <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    value={form.service_url}
+                    onChange={(e) => setForm({ ...form, service_url: e.target.value })}
+                    placeholder="https://..."
+                    className="focus-visible:ring-violet-500/40"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Ссылка на сервис *</Label>
-              <Input value={form.service_url} onChange={(e) => setForm({ ...form, service_url: e.target.value })} placeholder="https://..." />
+
+            <div className="h-px bg-border/60" />
+
+            {/* Описания */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-violet-500" />
+                  Краткое описание <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  value={form.short_description}
+                  onChange={(e) => setForm({ ...form, short_description: e.target.value })}
+                  placeholder="1-2 предложения для карточки"
+                  rows={2}
+                  className="resize-none focus-visible:ring-violet-500/40"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <AlignLeft className="h-3.5 w-3.5 text-violet-500" />
+                  Детальное описание
+                </Label>
+                <Textarea
+                  value={form.detailed_description}
+                  onChange={(e) => setForm({ ...form, detailed_description: e.target.value })}
+                  placeholder="Подробнее о сервисе..."
+                  rows={4}
+                  className="resize-none focus-visible:ring-violet-500/40"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-violet-500" />
+                  Эксклюзивные условия
+                </Label>
+                <Textarea
+                  value={form.exclusive_conditions}
+                  onChange={(e) => setForm({ ...form, exclusive_conditions: e.target.value })}
+                  placeholder="Скидка, бонус при переходе..."
+                  rows={3}
+                  className="resize-none focus-visible:ring-violet-500/40"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Краткое описание *</Label>
-              <Textarea value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} placeholder="1-2 предложения" rows={2} />
-            </div>
-            <div className="space-y-2">
-              <Label>Детальное описание</Label>
-              <Textarea value={form.detailed_description} onChange={(e) => setForm({ ...form, detailed_description: e.target.value })} placeholder="Подробнее о сервисе..." rows={4} />
-            </div>
-            <div className="space-y-2">
-              <Label>Эксклюзивные условия</Label>
-              <Textarea value={form.exclusive_conditions} onChange={(e) => setForm({ ...form, exclusive_conditions: e.target.value })} placeholder="Скидка, бонус при переходе..." rows={3} />
-            </div>
-            <div className="space-y-2">
-              <Label>Порядок отображения</Label>
-              <Input type="number" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })} />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label>Активен</Label>
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+
+            <div className="h-px bg-border/60" />
+
+            {/* Настройки */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-violet-500" />
+                  Порядок отображения
+                </Label>
+                <Input
+                  type="number"
+                  value={form.display_order}
+                  onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })}
+                  className="focus-visible:ring-violet-500/40"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Power className="h-3.5 w-3.5 text-violet-500" />
+                  Статус
+                </Label>
+                <div className="flex items-center justify-between h-10 px-3 rounded-md border border-input bg-background">
+                  <span className="text-sm text-muted-foreground">
+                    {form.is_active ? "Активен" : "Скрыт"}
+                  </span>
+                  <Switch
+                    checked={form.is_active}
+                    onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+                    className="data-[state=checked]:bg-violet-500"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="pt-4">
-            <Button className="w-full" onClick={handleSave} disabled={saving}>
+
+          <div className="px-5 sm:px-6 py-4 border-t border-border/50 bg-muted/20 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+              disabled={saving}
+              className="sm:w-auto"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="sm:w-auto gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
+            >
               {saving ? "Сохранение..." : editing ? "Сохранить" : "Добавить"}
             </Button>
           </div>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
+
     </Card>
   );
 };
