@@ -825,13 +825,14 @@ export const AdminBonuses = () => {
                           {program.is_active ? 'Активна' : 'Неактивна'}
                         </Badge>
                         <div className="flex gap-1 shrink-0">
-                          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => openEditProgram(program)}>
-                            <Edit className="w-3 h-3" />
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400 transition-colors" onClick={() => openEditProgram(program)}>
+                            <Edit className="w-3.5 h-3.5" />
                           </Button>
-                          <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => handleDeleteProgram(program.id)}>
-                            <Trash2 className="w-3 h-3" />
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-destructive hover:text-white transition-colors" onClick={() => handleDeleteProgram(program.id)}>
+                            <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
+
                       </div>
                     </SortableItem>
                   ))}
