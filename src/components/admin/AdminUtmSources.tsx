@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet, EyeOff, Eye } from "lucide-react";
+import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet, EyeOff, Eye, Tag, Megaphone, Target, Globe, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { publicSiteUrl } from "@/config/runtime";
 import { UtmPaymentsDialog } from "./UtmPaymentsDialog";
@@ -670,79 +670,139 @@ export function AdminUtmSources() {
         setDialogOpen(open);
         if (!open) resetForm();
       }}>
-        <ResponsiveDialogContent>
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>Новый UTM-источник</ResponsiveDialogTitle>
-            <ResponsiveDialogDescription>
-              Создайте ссылку для отслеживания трафика
-            </ResponsiveDialogDescription>
+        <ResponsiveDialogContent className="sm:max-w-lg">
+          <ResponsiveDialogHeader className="pb-2">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/25 shrink-0">
+                <Link2 className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0">
+                <ResponsiveDialogTitle className="text-lg">Новый UTM-источник</ResponsiveDialogTitle>
+                <ResponsiveDialogDescription className="text-xs mt-1">
+                  Создайте ссылку для отслеживания трафика
+                </ResponsiveDialogDescription>
+              </div>
+            </div>
           </ResponsiveDialogHeader>
 
           <div className="space-y-4 py-2">
-            <div>
-              <Label>Название *</Label>
-              <Input 
-                value={formName} 
-                onChange={e => setFormName(e.target.value)} 
-                placeholder="Telegram канал, VK реклама..." 
+            <div className="space-y-1.5">
+              <Label htmlFor="utm-name" className="text-xs font-medium flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5 text-violet-500" />
+                Название <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="utm-name"
+                value={formName}
+                onChange={e => setFormName(e.target.value)}
+                placeholder="Telegram канал, VK реклама..."
+                className="focus-visible:ring-violet-500/40"
               />
             </div>
-            <div>
-              <Label>utm_source *</Label>
-              <Input 
-                value={formSource} 
-                onChange={e => setFormSource(e.target.value)} 
-                placeholder="telegram, vk, google..." 
+
+            <div className="space-y-1.5">
+              <Label htmlFor="utm-source" className="text-xs font-medium flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                utm_source <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="utm-source"
+                value={formSource}
+                onChange={e => setFormSource(e.target.value)}
+                placeholder="telegram, vk, google..."
+                className="focus-visible:ring-violet-500/40 font-mono text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>utm_medium</Label>
-                <Input 
-                  value={formMedium} 
-                  onChange={e => setFormMedium(e.target.value)} 
-                  placeholder="cpc, social, email..." 
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="utm-medium" className="text-xs font-medium flex items-center gap-1.5">
+                  <Megaphone className="w-3.5 h-3.5 text-violet-500" />
+                  utm_medium
+                </Label>
+                <Input
+                  id="utm-medium"
+                  value={formMedium}
+                  onChange={e => setFormMedium(e.target.value)}
+                  placeholder="cpc, social, email..."
+                  className="focus-visible:ring-violet-500/40 font-mono text-sm"
                 />
               </div>
-              <div>
-                <Label>utm_campaign</Label>
-                <Input 
-                  value={formCampaign} 
-                  onChange={e => setFormCampaign(e.target.value)} 
-                  placeholder="spring_2026..." 
+              <div className="space-y-1.5">
+                <Label htmlFor="utm-campaign" className="text-xs font-medium flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5 text-violet-500" />
+                  utm_campaign
+                </Label>
+                <Input
+                  id="utm-campaign"
+                  value={formCampaign}
+                  onChange={e => setFormCampaign(e.target.value)}
+                  placeholder="spring_2026..."
+                  className="focus-visible:ring-violet-500/40 font-mono text-sm"
                 />
               </div>
             </div>
-            <div>
-              <Label>Базовый URL</Label>
-              <Input 
-                value={formBaseUrl} 
-                onChange={e => setFormBaseUrl(e.target.value)} 
+
+            <div className="space-y-1.5">
+              <Label htmlFor="utm-baseurl" className="text-xs font-medium flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-violet-500" />
+                Базовый URL
+              </Label>
+              <Input
+                id="utm-baseurl"
+                value={formBaseUrl}
+                onChange={e => setFormBaseUrl(e.target.value)}
+                className="focus-visible:ring-violet-500/40 font-mono text-sm"
               />
             </div>
 
             {/* Preview */}
             {formSource && (
-              <div className="p-3 rounded-lg bg-muted/50 border border-border/30">
-                <p className="text-[10px] text-muted-foreground mb-1">Превью ссылки:</p>
-                <p className="text-xs break-all text-foreground/80">
-                  {formBaseUrl}?utm_source={formSource}
-                  {formMedium ? `&utm_medium=${formMedium}` : ''}
-                  {formCampaign ? `&utm_campaign=${formCampaign}` : ''}
+              <div className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-purple-500/5 to-transparent p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[10px] font-medium text-violet-600 dark:text-violet-400 uppercase tracking-wide flex items-center gap-1">
+                    <Link2 className="w-3 h-3" />
+                    Превью ссылки
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${formBaseUrl}?utm_source=${formSource}${formMedium ? `&utm_medium=${formMedium}` : ''}${formCampaign ? `&utm_campaign=${formCampaign}` : ''}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success("Ссылка скопирована");
+                    }}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Копировать
+                  </button>
+                </div>
+                <p className="text-xs break-all text-foreground/90 font-mono leading-relaxed">
+                  {formBaseUrl}
+                  <span className="text-violet-600 dark:text-violet-400">?utm_source=</span>{formSource}
+                  {formMedium && <><span className="text-violet-600 dark:text-violet-400">&utm_medium=</span>{formMedium}</>}
+                  {formCampaign && <><span className="text-violet-600 dark:text-violet-400">&utm_campaign=</span>{formCampaign}</>}
                 </p>
               </div>
             )}
           </div>
 
-          <ResponsiveDialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Отмена</Button>
-            <Button onClick={handleCreate} disabled={creating}>
+          <ResponsiveDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="sm:w-auto">
+              Отмена
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              className="sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25 border-0"
+            >
               {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Создать
             </Button>
           </ResponsiveDialogFooter>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
+
 
       <UtmPaymentsDialog
         open={!!paymentsDialog}
