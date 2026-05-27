@@ -504,8 +504,8 @@ export function AdminPricing() {
                         disabled={saving}
                         className="h-9 px-3 flex-shrink-0 bg-violet-500/10 hover:bg-violet-500 text-violet-600 hover:text-white border-0 shadow-none transition-colors"
                       >
-                        <Save className="w-3.5 h-3.5 sm:mr-1.5" />
-                        <span className="hidden sm:inline text-xs font-medium">Сохранить</span>
+                        <Save className="w-3.5 h-3.5 lg:mr-1.5" />
+                        <span className="hidden lg:inline text-xs font-medium">Сохранить</span>
                       </Button>
                     </div>
                   </div>
