@@ -293,8 +293,12 @@ export const AdminNews = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+      <div className="flex flex-row items-center justify-between gap-3">
+        {news.length > 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Показано <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)}</span> из <span className="font-medium text-foreground">{news.length}</span>
+          </p>
+        ) : <span />}
 
 
         <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
