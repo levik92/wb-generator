@@ -59,6 +59,12 @@ export const AdminNews = () => {
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleExpanded = (id: string) => setExpandedIds(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
   const ITEMS_PER_PAGE = 10;
   const [formData, setFormData] = useState({
     title: '',
