@@ -245,7 +245,7 @@ const Promo = () => {
               <Button
                 onClick={goToThanks}
                 size="lg"
-                className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
+                className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 transition-opacity text-white border-0 shadow-lg shadow-[hsl(268,83%,40%)]/40"
               >
                 <span className="sm:hidden">Зарегистрироваться</span>
                 <span className="hidden sm:inline">Зарегистрироваться бесплатно</span>
