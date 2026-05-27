@@ -354,10 +354,7 @@ export const AdminNews = () => {
                   <SelectContent>
                     {availableTags.map((tag) => (
                       <SelectItem key={tag} value={tag}>
-                        <span className="flex items-center gap-2">
-                          <span className={`inline-block w-2 h-2 rounded-full ${(tagColors[tag] || '').split(' ')[0].replace('/10', '')}`} />
-                          {tag}
-                        </span>
+                        {tag}
                       </SelectItem>
                     ))}
                   </SelectContent>
