@@ -285,7 +285,7 @@ export const ServiceHero = ({
               </motion.div>
 
               {/* Decorative glow */}
-              <div className="absolute -bottom-20 right-1/4 w-80 h-80 bg-[hsl(268,83%,55%)]/15 rounded-full blur-3xl -z-10" />
+              <div className="absolute -bottom-20 right-1/4 w-80 h-80 rounded-full blur-3xl -z-10" style={{ background: `${theme.glowA}33` }} />
             </motion.div>
           )}
 
