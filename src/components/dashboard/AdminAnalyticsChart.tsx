@@ -810,15 +810,12 @@ export function AdminLifetimeMetrics() {
 
   return (
     <Card className="animate-fade-in rounded-2xl border-border/60 bg-card shadow-sm overflow-hidden">
-      <CardHeader className="pb-4 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-transparent border-b border-border/50">
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-4 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
             <Activity className="h-4 w-4 text-white" />
-          </div>
-          <div className="min-w-0">
-            <CardTitle className="text-sm sm:text-base">Метрики за всё время</CardTitle>
-            <CardDescription className="text-xs mt-0.5">Ключевые показатели платящих пользователей</CardDescription>
-          </div>
+          </span>
+          <CardTitle className="text-sm font-semibold truncate">Метрики за всё время</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="p-3 sm:p-4">
