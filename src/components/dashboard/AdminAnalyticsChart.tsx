@@ -568,28 +568,37 @@ export function AdminAdditionalMetrics() {
 
   if (loading) {
     return (
-      <Card className="animate-fade-in">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Calculator className="h-4 w-4 text-muted-foreground" />
-            Дополнительные метрики
-          </CardTitle>
+      <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-4 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+              <Calculator className="h-4 w-4 text-white" />
+            </span>
+            <CardTitle className="text-sm font-semibold truncate">Дополнительные метрики</CardTitle>
+          </div>
           <Popover>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-6 px-2 text-xs gap-1"
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors"
               >
                 <CalendarIcon className="h-3 w-3" />
-                {formatDateRange()}
+                <span className="hidden sm:inline">{formatDateRange()}</span>
+                <span className="sm:hidden">Период</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0 rounded-xl border-border/60 shadow-xl overflow-hidden" align="end">
+              <div className="px-3 pt-2 pb-1 border-b border-border/40 bg-muted/30 w-full">
+                <div className="text-[10px] leading-tight font-medium text-muted-foreground text-center">
+                  Выберите начало, затем — конец периода
+                </div>
+              </div>
               <Calendar
                 mode="range"
                 selected={displayedRange}
                 onSelect={handleCalendarSelect}
+                defaultMonth={displayedRange?.from || dateRange?.from}
                 numberOfMonths={1}
                 locale={ru}
                 disabled={(date) => date > new Date()}
@@ -598,10 +607,10 @@ export function AdminAdditionalMetrics() {
             </PopoverContent>
           </Popover>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardContent className="p-4 sm:p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
+              <div key={i} className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px]">
                 <div className="animate-pulse space-y-2">
                   <div className="h-4 w-24 bg-muted rounded" />
                   <div className="h-8 w-16 bg-muted rounded" />
@@ -614,6 +623,7 @@ export function AdminAdditionalMetrics() {
       </Card>
     );
   }
+
 
   return (
     <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
