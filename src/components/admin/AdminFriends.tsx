@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Upload, X, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Upload, X, ImageIcon, Type, Link2, FileText, AlignLeft, Sparkles, ArrowUpDown, Power } from "lucide-react";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
