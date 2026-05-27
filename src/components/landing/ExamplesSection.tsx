@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
 import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
 
-// Optimized images - using smaller/optimized versions where available
 const examples = [
   {
     caseId: 2,
@@ -16,7 +15,6 @@ const examples = [
     ordersChange: "3 → 10",
     designerCost: "1 800₽",
     wbgenCost: "от 59₽",
-    savings: "1 741₽",
   },
   {
     caseId: 11,
@@ -27,7 +25,6 @@ const examples = [
     ordersChange: "4 → 14",
     designerCost: "2 200₽",
     wbgenCost: "от 59₽",
-    savings: "2 141₽",
   },
   {
     caseId: 18,
@@ -38,7 +35,6 @@ const examples = [
     ordersChange: "5 → 14",
     designerCost: "1 400₽",
     wbgenCost: "от 59₽",
-    savings: "1 341₽",
   },
   {
     caseId: 12,
@@ -49,7 +45,6 @@ const examples = [
     ordersChange: "3 → 11",
     designerCost: "2 100₽",
     wbgenCost: "от 59₽",
-    savings: "2 041₽",
   },
 ];
 
@@ -58,73 +53,54 @@ export const ExamplesSection = () => {
 
   const scrollTo = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    const scrollAmount = direction === "left" ? -340 : 340;
-    scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    scrollRef.current.scrollBy({ left: direction === "left" ? -340 : 340, behavior: "smooth" });
   };
 
   return (
-    <section id="examples" className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(240,10%,4%)] via-[hsl(240,8%,6%)] to-[hsl(240,10%,4%)]" />
-      
-      {/* Accent glow - reduced for mobile */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-[hsl(268,83%,40%)] rounded-full blur-[150px] sm:blur-[200px] opacity-5 sm:opacity-10" />
+    <section id="examples" className="section-shell">
+      <div className="spotlight-violet opacity-50" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Section header */}
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-4 sm:mb-6">
-            Реальные результаты
-          </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            До и после генерации
+        <div className="section-header">
+          <span className="section-eyebrow">Реальные результаты</span>
+          <h2 className="section-title">
+            До и после <span className="text-aurora">генерации</span>
           </h2>
-          <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto">
+          <p className="section-subtitle">
             Примеры карточек товаров Wildberries, созданных с помощью WBGen
           </p>
         </div>
 
         {/* Navigation arrows */}
-        <div className="flex justify-center sm:justify-end gap-2 mb-4 sm:mb-6">
+        <div className="flex justify-center sm:justify-end gap-2 mb-5 sm:mb-6 relative z-10">
           <button
             onClick={() => scrollTo("left")}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all active:scale-95"
+            className="w-10 h-10 rounded-full border border-white/15 bg-white/[0.04] flex items-center justify-center text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all active:scale-95"
             aria-label="Предыдущий пример"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scrollTo("right")}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-white/10 transition-all active:scale-95"
+            className="w-10 h-10 rounded-full border border-white/15 bg-white/[0.04] flex items-center justify-center text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all active:scale-95"
             aria-label="Следующий пример"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Mobile scroll hint */}
-        <div className="flex items-center justify-center gap-2 mb-4 sm:hidden">
-          <div className="flex gap-1">
-            <div className="w-2 h-2 rounded-full bg-white/30 animate-pulse" />
-            <div className="w-2 h-2 rounded-full bg-white/20" />
-            <div className="w-2 h-2 rounded-full bg-white/10" />
-          </div>
-          <span className="text-xs text-white/40">Листайте для просмотра</span>
-        </div>
-
-        {/* Examples carousel */}
+        {/* Carousel */}
         <div
           ref={scrollRef}
-          className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6 sm:pb-8 -mx-4 px-4 sm:mx-0 sm:px-0"
+          className="flex gap-4 sm:gap-5 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 relative z-10"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {examples.map((example, index) => (
             <div
               key={index}
-              className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[360px] snap-center"
+              className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[340px] snap-center"
             >
-              <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden">
-                {/* Before/After Slider */}
+              <div className="glass-card rounded-3xl overflow-hidden">
                 <div className="p-3 sm:p-4">
                   <BeforeAfterSliderNew
                     beforeImage={example.before}
@@ -134,40 +110,33 @@ export const ExamplesSection = () => {
                   />
                 </div>
 
-                {/* Stats */}
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
+                <div className="px-4 sm:px-5 pb-5 space-y-3.5">
                   <div className="flex items-center justify-between">
-                    <span className="px-2 sm:px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-white/70">
+                    <span className="px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[11px] text-white/70">
                       {example.category}
                     </span>
-                    <span className="text-xl sm:text-2xl font-bold text-emerald-400">
+                    <span className="text-xl sm:text-2xl font-bold text-[hsl(160,90%,55%)] tracking-tight">
                       {example.conversionGrowth}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-white/5 rounded-lg p-2">
-                      <div className="text-[9px] sm:text-[10px] text-white/40 mb-0.5">Заказы</div>
-                      <div className="text-xs sm:text-sm font-bold text-white">
-                        {example.ordersChange}
-                      </div>
+                    <div className="bg-white/[0.04] border border-white/[0.06] rounded-lg p-2">
+                      <div className="text-[10px] text-white/45 mb-0.5">Заказы</div>
+                      <div className="text-xs sm:text-sm font-bold text-white">{example.ordersChange}</div>
                     </div>
-                    <div className="bg-red-500/10 rounded-lg p-2">
-                      <div className="text-[9px] sm:text-[10px] text-red-400/70 mb-0.5">Дизайнер</div>
-                      <div className="text-xs sm:text-sm font-bold text-red-400 line-through">
-                        {example.designerCost}
-                      </div>
+                    <div className="bg-rose-500/10 border border-rose-500/15 rounded-lg p-2">
+                      <div className="text-[10px] text-rose-300/70 mb-0.5">Дизайнер</div>
+                      <div className="text-xs sm:text-sm font-bold text-rose-300 line-through">{example.designerCost}</div>
                     </div>
-                    <div className="bg-emerald-500/10 rounded-lg p-2">
-                      <div className="text-[9px] sm:text-[10px] text-emerald-400/70 mb-0.5">WBGen</div>
-                      <div className="text-xs sm:text-sm font-bold text-emerald-400">
-                        {example.wbgenCost}
-                      </div>
+                    <div className="bg-[hsl(160,90%,45%)]/10 border border-[hsl(160,90%,45%)]/15 rounded-lg p-2">
+                      <div className="text-[10px] text-[hsl(160,90%,75%)]/80 mb-0.5">WBGen</div>
+                      <div className="text-xs sm:text-sm font-bold text-[hsl(160,90%,75%)]">{example.wbgenCost}</div>
                     </div>
                   </div>
 
                   <CaseStudyDialog caseId={example.caseId}>
-                    <button className="w-full text-center text-xs text-[hsl(268,83%,70%)] hover:text-[hsl(268,83%,80%)] font-medium flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[hsl(268,83%,58%)]/10 hover:bg-[hsl(268,83%,58%)]/15 border border-[hsl(268,83%,58%)]/20 transition-all">
+                    <button className="w-full text-center text-xs text-[hsl(263,90%,78%)] hover:text-white font-medium flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[hsl(263,80%,58%)]/10 hover:bg-[hsl(263,80%,58%)]/20 border border-[hsl(263,80%,58%)]/20 transition-all">
                       Изучить кейс
                       <ArrowRight className="w-3 h-3" />
                     </button>
@@ -178,18 +147,17 @@ export const ExamplesSection = () => {
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="text-center mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
           <button
             onClick={() => window.open("/cases", "_blank")}
-            className="px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base border border-white/20 text-white hover:bg-white/10 transition-all"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold text-[15px] border border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.07] hover:border-white/25 transition-all"
           >
             Посмотреть ещё примеры
           </button>
-          <Link to="/auth?tab=signup">
-            <Button className="btn-premium text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 rounded-xl font-semibold group">
+          <Link to="/auth?tab=signup" className="w-full sm:w-auto">
+            <Button className="btn-premium w-full sm:w-auto text-[15px] px-7 py-6 rounded-xl font-semibold group">
               Получить такие же результаты
-              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
