@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FriendDetailDialog } from "./FriendDetailDialog";
 
@@ -36,81 +35,66 @@ export const FriendsSlider = () => {
   };
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
+    <section className="section-shell">
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Section header */}
-        <div className="text-center mb-16 sm:mb-20">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-sm text-blue-400 mb-6">
-            <BadgeCheck className="w-4 h-4" />
+        <div className="section-header">
+          <span className="section-eyebrow inline-flex items-center gap-1.5">
+            <BadgeCheck className="w-3.5 h-3.5 text-[hsl(263,90%,75%)]" />
             Верифицированные партнёры
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-            Наши друзья
+          <h2 className="section-title">
+            Наши <span className="text-aurora">друзья</span>
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto">
-            Проверенные сервисы с эксклюзивными условиями для пользователей WBGen
+          <p className="section-subtitle">
+            Проверенные сервисы с эксклюзивными условиями для пользователей WBGen.
           </p>
         </div>
 
-        {/* Navigation arrows */}
-        <div className="hidden sm:flex justify-end gap-2 mb-6">
+        <div className="hidden sm:flex justify-end gap-2 mb-5 relative z-10">
           <button
             onClick={() => scroll(-1)}
-            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors"
+            className="w-10 h-10 rounded-full border border-white/15 bg-white/[0.04] flex items-center justify-center text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+            aria-label="Назад"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scroll(1)}
-            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors"
+            className="w-10 h-10 rounded-full border border-white/15 bg-white/[0.04] flex items-center justify-center text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all"
+            aria-label="Вперёд"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Slider — 5 items visible on desktop */}
         <div
           ref={setScrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 snap-x snap-mandatory"
+          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 snap-x snap-mandatory relative z-10"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {friends.map((friend, i) => (
-            <motion.div
+          {friends.map((friend) => (
+            <div
               key={friend.id}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: i * 0.06 }}
               onClick={() => setSelected(friend)}
-              className="snap-start shrink-0 w-[200px] sm:w-[calc((100%-64px)/5)] rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm p-5 hover:border-primary/30 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group"
+              className="snap-start shrink-0 w-[200px] sm:w-[calc((100%-64px)/5)] rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-5 hover:border-[hsl(263,80%,58%)]/40 hover:bg-white/[0.06] transition-all cursor-pointer group"
             >
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border border-white/[0.08] overflow-hidden mb-4 mx-auto">
-                <img
-                  src={friend.logo_url}
-                  alt={friend.name}
-                  className="w-full h-full object-cover"
-                />
+                <img src={friend.logo_url} alt={friend.name} className="w-full h-full object-cover" />
               </div>
-              <h3 className="font-semibold text-white text-sm sm:text-base truncate mb-1.5 group-hover:text-primary transition-colors text-center">
+              <h3 className="font-semibold text-white text-sm sm:text-base truncate mb-1.5 group-hover:text-[hsl(263,90%,78%)] transition-colors text-center">
                 {friend.name}
               </h3>
-              <p className="text-xs sm:text-sm text-white/40 line-clamp-2 leading-relaxed text-center">
+              <p className="text-xs sm:text-sm text-white/45 line-clamp-2 leading-relaxed text-center">
                 {friend.short_description}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Link to full page */}
-        <div className="text-center mt-10">
+        <div className="text-center mt-9 relative z-10">
           <Link
             to="/friends"
-            className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-[hsl(263,90%,75%)] hover:text-white transition-colors"
           >
             Смотреть всех партнёров →
           </Link>

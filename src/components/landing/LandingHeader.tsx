@@ -37,11 +37,14 @@ export const LandingHeader = () => {
 
   return (
     <>
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-[hsl(240,10%,6%)]/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
+          isScrolled
+            ? "bg-[hsl(0,0%,5%)]/85 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)]"
+            : "bg-gradient-to-b from-black/40 to-transparent border-b border-transparent"
         }`}
       >
+
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Mobile: Burger menu on left */}
@@ -54,43 +57,36 @@ export const LandingHeader = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group order-2 lg:order-1">
+            <Link to="/" className="flex items-center gap-2.5 group order-2 lg:order-1">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl flex items-center justify-center shadow-lg">
-                  <Zap className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[hsl(263,90%,62%)] to-[hsl(280,85%,48%)] rounded-xl flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/30 transition-transform group-hover:scale-[1.05]">
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
+                <div className="absolute inset-0 rounded-xl bg-[hsl(263,90%,60%)] blur-xl opacity-30 -z-10" />
               </div>
-              <span className="text-xl font-bold text-white">
-                WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
+              <span className="text-lg sm:text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                WB<span className="text-[hsl(263,90%,72%)]">Gen</span>
               </span>
             </Link>
 
+
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6 order-2">
-              {/* Product Dropdown */}
+            <nav className="hidden lg:flex items-center gap-1 order-2">
               <div className="relative" onMouseEnter={() => handleDropdownEnter("product")} onMouseLeave={handleDropdownLeave}>
-                <button className="flex items-center gap-1 text-sm text-white/70 hover:text-white transition-colors py-2">
+                <button className={`flex items-center gap-1 text-sm px-3 py-2 rounded-lg transition-colors ${openDropdown === "product" ? "text-white bg-white/[0.06]" : "text-white/75 hover:text-white hover:bg-white/[0.04]"}`}>
                   Продукт
                   <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "product" ? "rotate-180" : ""}`} />
                 </button>
                 {openDropdown === "product" && (
-                  <div className="absolute top-full left-0 pt-2 w-72 animate-fade-in">
-                    <div className="bg-[hsl(240,10%,10%)] border border-white/10 rounded-xl p-2 shadow-xl">
+                  <div className="absolute top-full left-0 pt-3 w-80 animate-fade-in">
+                    <div className="bg-[hsl(0,0%,7%)]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/50">
                       {productItems.map(item => (
-                        <Link 
-                          key={item.href} 
-                          to={item.href} 
-                          className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
-                        >
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] flex items-center justify-center flex-shrink-0">
+                        <Link key={item.href} to={item.href} className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.05] transition-colors group">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[hsl(263,90%,55%)] to-[hsl(280,85%,45%)] flex items-center justify-center flex-shrink-0 shadow-md shadow-[hsl(263,90%,40%)]/25">
                             <item.icon className="w-5 h-5 text-white" />
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-white group-hover:text-[hsl(268,83%,65%)] transition-colors">
-                                {item.label}
-                              </span>
-                            </div>
+                            <span className="block text-sm font-semibold text-white group-hover:text-[hsl(263,90%,78%)] transition-colors">{item.label}</span>
                             <span className="text-xs text-white/50">{item.description}</span>
                           </div>
                         </Link>
@@ -100,25 +96,18 @@ export const LandingHeader = () => {
                 )}
               </div>
 
-              {/* Resources Dropdown */}
               <div className="relative" onMouseEnter={() => handleDropdownEnter("resources")} onMouseLeave={handleDropdownLeave}>
-                <button className="flex items-center gap-1 text-sm text-white/70 hover:text-white transition-colors py-2">
+                <button className={`flex items-center gap-1 text-sm px-3 py-2 rounded-lg transition-colors ${openDropdown === "resources" ? "text-white bg-white/[0.06]" : "text-white/75 hover:text-white hover:bg-white/[0.04]"}`}>
                   Ресурсы
                   <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === "resources" ? "rotate-180" : ""}`} />
                 </button>
                 {openDropdown === "resources" && (
-                  <div className="absolute top-full left-0 pt-2 w-48 animate-fade-in">
-                    <div className="bg-[hsl(240,10%,10%)] border border-white/10 rounded-xl p-2 shadow-xl">
+                  <div className="absolute top-full left-0 pt-3 w-56 animate-fade-in">
+                    <div className="bg-[hsl(0,0%,7%)]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/50">
                       {resourceItems.map(item => (
-                        <Link 
-                          key={item.href} 
-                          to={item.href} 
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
-                        >
-                          <item.icon className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
-                          <span className="text-sm text-white/70 group-hover:text-white transition-colors">
-                            {item.label}
-                          </span>
+                        <Link key={item.href} to={item.href} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.05] transition-colors group">
+                          <item.icon className="w-4 h-4 text-white/55 group-hover:text-[hsl(263,90%,78%)] transition-colors" />
+                          <span className="text-sm text-white/80 group-hover:text-white transition-colors">{item.label}</span>
                         </Link>
                       ))}
                     </div>
@@ -126,14 +115,23 @@ export const LandingHeader = () => {
                 )}
               </div>
 
-              {/* Direct Links */}
-              <Link to="/pricing" className="text-sm text-white/70 hover:text-white transition-colors">
-                Тарифы
-              </Link>
-              <Link to="/partners" className="text-sm text-white/70 hover:text-white transition-colors">
-                Партнёрам
-              </Link>
+              {[
+                { to: "/pricing", label: "Тарифы" },
+                { to: "/partners", label: "Партнёрам" },
+              ].map((l) => {
+                const active = location.pathname === l.to;
+                return (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    className={`text-sm px-3 py-2 rounded-lg transition-colors ${active ? "text-white bg-white/[0.06]" : "text-white/75 hover:text-white hover:bg-white/[0.04]"}`}
+                  >
+                    {l.label}
+                  </Link>
+                );
+              })}
             </nav>
+
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-3 order-3">
@@ -148,10 +146,11 @@ export const LandingHeader = () => {
                 </Button>
               </Link>
               <Link to="/auth?tab=signup" className="hidden sm:block">
-                <Button className="bg-gradient-to-r from-[hsl(268,83%,60%)] to-[hsl(268,83%,50%)] hover:from-[hsl(268,83%,55%)] hover:to-[hsl(268,83%,45%)] text-white border-0 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300">
+                <Button className="bg-gradient-to-r from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] hover:brightness-110 text-white border-0 shadow-lg shadow-[hsl(263,90%,40%)]/30 hover:shadow-[hsl(263,90%,40%)]/50 transition-all duration-300 rounded-xl px-5">
                   Начать
                 </Button>
               </Link>
+
             </div>
           </div>
         </div>
