@@ -69,13 +69,18 @@ const Quiz = () => {
         <section className="pt-16 pb-12 sm:pt-24 sm:pb-20">
           <div className="container mx-auto px-4 sm:px-6 text-center max-w-3xl">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <span className="inline-block text-2xl font-bold tracking-tight mb-8 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+              <span className="inline-block text-2xl font-bold tracking-tight mb-6 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
                 WB<span className="text-[hsl(268,83%,60%)]">Gen</span>
               </span>
 
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full bg-gradient-to-r from-[hsl(268,83%,58%)]/15 to-[hsl(290,83%,58%)]/15 border border-[hsl(268,83%,58%)]/25 text-[hsl(268,83%,75%)] text-xs font-medium">
+                <Sparkles className="w-3.5 h-3.5" />
+                Персональный подбор за 60 секунд
+              </div>
+
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6">
                 Подберём решение{" "}
-                <span className="bg-gradient-to-r from-[hsl(268,83%,60%)] to-[hsl(280,70%,55%)] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[hsl(268,83%,72%)] to-[hsl(290,83%,75%)] bg-clip-text text-transparent">
                   под вашу задачу
                 </span>
               </h1>
@@ -87,7 +92,7 @@ const Quiz = () => {
               <Button
                 onClick={openQuiz}
                 size="lg"
-                className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)] hover:opacity-90 transition-opacity text-white border-0"
+                className="h-14 px-10 text-base font-semibold rounded-xl bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] hover:opacity-90 transition-opacity text-white border-0 shadow-lg shadow-[hsl(268,83%,40%)]/40"
               >
                 Хочу попробовать
               </Button>
@@ -99,7 +104,7 @@ const Quiz = () => {
         {/* STATS */}
         <section className="py-10 sm:py-14">
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-            <div className="glass-card rounded-2xl border border-white/5 p-8 sm:p-10 bg-gradient-to-br from-white/[0.03] to-transparent">
+            <div className="glass-card rounded-2xl border border-white/10 p-8 sm:p-10 bg-gradient-to-br from-white/[0.03] to-transparent">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
                 {stats.map((s, i) => (
                   <motion.div
@@ -107,10 +112,10 @@ const Quiz = () => {
                     initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
+                    transition={{ delay: i * 0.06 }}
                     className="text-center"
                   >
-                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">{s.value}</div>
+                    <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-br from-white to-white/70 bg-clip-text text-transparent mb-1">{s.value}</div>
                     <div className="text-white/50 text-sm">{s.label}</div>
                   </motion.div>
                 ))}
