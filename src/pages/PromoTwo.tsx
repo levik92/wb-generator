@@ -208,15 +208,18 @@ const PromoTwo = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="glass-card rounded-2xl border border-white/5 p-6 text-center"
+                  transition={{ delay: i * 0.08 }}
+                  className="group relative"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[hsl(268,70%,50%)] to-[hsl(280,60%,45%)] flex items-center justify-center mx-auto mb-4">
-                    <step.icon className="w-6 h-6 text-white" />
+                  <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-2xl border border-white/10 group-hover:border-white/20 transition-colors p-6 text-center h-full">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,52%)] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[hsl(268,83%,40%)]/30 group-hover:shadow-[hsl(268,83%,60%)]/50 transition-shadow">
+                      <step.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-xs font-bold text-white/30 mb-2">Шаг {i + 1}</div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
+                    <p className="text-sm text-white/50">{step.desc}</p>
                   </div>
-                  <div className="text-xs font-bold text-white/30 mb-2">Шаг {i + 1}</div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
-                  <p className="text-sm text-white/50">{step.desc}</p>
                 </motion.div>
               ))}
             </div>
