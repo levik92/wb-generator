@@ -106,7 +106,10 @@ export const HeroSection = () => {
                 onClick={() => setIsVideoOpen(true)}
                 className="w-full sm:w-auto text-[15px] sm:text-base px-7 sm:px-9 py-6 sm:py-7 rounded-xl font-semibold bg-transparent border-0 text-white hover:bg-transparent hover:text-white/80 group"
               >
-                <Play className="w-4 h-4 mr-2" />
+                <span className="w-7 h-7 rounded-full border border-white/25 flex items-center justify-center mr-2 group-hover:border-white/45 transition-colors">
+                  <Play className="w-3 h-3 ml-0.5" />
+                </span>
+
                 Демо за 60 секунд
               </Button>
 
