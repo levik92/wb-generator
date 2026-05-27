@@ -262,11 +262,12 @@ export const AdminFriends = () => {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-24 rounded-xl border-2 border-dashed border-border hover:border-primary/50 bg-muted/20 flex flex-col items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="group w-full h-24 rounded-xl border-2 border-dashed border-border hover:border-transparent bg-muted/20 hover:bg-gradient-to-br hover:from-violet-500 hover:to-purple-600 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Нажмите для загрузки (до 3 МБ)</span>
+                  <Upload className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors" />
+                  <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">Нажмите для загрузки (до 3 МБ)</span>
                 </button>
+
               )}
               <input
                 ref={fileInputRef}
