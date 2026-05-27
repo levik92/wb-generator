@@ -900,7 +900,9 @@ const Auth = () => {
                 </p>
               </div>
             )}
-          </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     </>
