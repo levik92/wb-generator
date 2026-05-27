@@ -143,7 +143,7 @@ export const ExamplesSection = () => {
                     </button>
                   </CaseStudyDialog>
                 </div>
-              </div>
+              </SpotlightCard>
             </div>
           ))}
         </div>
