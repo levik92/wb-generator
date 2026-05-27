@@ -2,7 +2,6 @@ import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "./effects/SpotlightCard";
-import illuRocket from "@/assets/landing/illu-rocket.png";
 
 export const CTASection = () => {
   return (
