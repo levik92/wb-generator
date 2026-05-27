@@ -37,7 +37,7 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
   const menuItems = [
     { id: 'analytics', label: 'Аналитика', icon: BarChart3 },
     { id: 'users', label: 'Пользователи', icon: Users },
-    { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined, badgeColor: 'bg-primary text-primary-foreground border-primary' },
+    { id: 'support', label: 'Поддержка', icon: Headphones, badge: unreadSupportCount > 0 ? unreadSupportCount.toString() : undefined, badgeColor: 'bg-violet-500 text-white border-violet-500' },
     { id: 'utm', label: 'Трафик', icon: Crosshair },
     { id: 'partners', label: 'Партнеры', icon: Handshake },
     { id: 'payments_admin', label: 'Оплаты', icon: Receipt, badge: pendingInvoicesCount > 0 ? pendingInvoicesCount.toString() : undefined, badgeColor: 'bg-orange-500 text-white border-orange-500' },
