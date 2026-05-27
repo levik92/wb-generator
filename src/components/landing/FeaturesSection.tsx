@@ -45,7 +45,7 @@ export const FeaturesSection = () => {
           {/* Hero tile - generation */}
           <SpotlightCard
             magnetic
-            spotlightColor="hsl(263 90% 60% / 0.22)"
+            spotlightColor="hsl(263 90% 60% / 0.13)"
             className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-6 sm:p-8 overflow-hidden"
           >
             <div className="absolute -top-24 -right-24 w-72 h-72 bg-[hsl(263,90%,55%)] rounded-full blur-[100px] opacity-30 transition-opacity" />
