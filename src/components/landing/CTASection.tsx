@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles, Zap, Gift } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
