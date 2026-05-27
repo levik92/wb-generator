@@ -293,13 +293,17 @@ export const AdminNews = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+      <div className="flex flex-row items-center justify-between gap-3">
+        {news.length > 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Показано <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)}</span> из <span className="font-medium text-foreground">{news.length}</span>
+          </p>
+        ) : <span />}
 
 
         <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <ResponsiveDialogTrigger asChild>
-            <Button onClick={openCreateDialog} className="gap-2 w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+            <Button onClick={openCreateDialog} className="gap-2 w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
               <Plus className="w-4 h-4" />
               Создать новость
             </Button>
@@ -412,11 +416,6 @@ export const AdminNews = () => {
               const paginatedNews = news.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
               return (
                 <>
-                  <div className="flex items-center justify-between px-1">
-                    <p className="text-xs text-muted-foreground">
-                      Показано <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)}</span> из <span className="font-medium text-foreground">{news.length}</span>
-                    </p>
-                  </div>
                   {paginatedNews.map((item) => (
             <Card key={item.id} className={`group rounded-2xl border-border/60 bg-card shadow-sm transition-all hover:border-violet-500/30 hover:shadow-md ${!item.is_published ? 'border-amber-500/30 bg-amber-500/[0.03]' : ''}`}>
               <CardHeader className="pb-3">
