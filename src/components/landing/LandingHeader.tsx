@@ -57,16 +57,18 @@ export const LandingHeader = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group order-2 lg:order-1">
+            <Link to="/" className="flex items-center gap-2.5 group order-2 lg:order-1">
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl flex items-center justify-center shadow-lg">
-                  <Zap className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[hsl(263,90%,62%)] to-[hsl(280,85%,48%)] rounded-xl flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/30 transition-transform group-hover:scale-[1.05]">
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
+                <div className="absolute inset-0 rounded-xl bg-[hsl(263,90%,60%)] blur-xl opacity-30 -z-10" />
               </div>
-              <span className="text-xl font-bold text-white">
-                WB<span className="text-[hsl(268,83%,65%)]">Gen</span>
+              <span className="text-lg sm:text-xl font-bold text-white tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                WB<span className="text-[hsl(263,90%,72%)]">Gen</span>
               </span>
             </Link>
+
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-6 order-2">
