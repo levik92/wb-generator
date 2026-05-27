@@ -453,7 +453,7 @@ export const AdminNews = () => {
                       )}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 md:pt-1 flex-wrap md:flex-nowrap justify-end">
+                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap md:flex-nowrap justify-end">
                     <Button
                       variant="outline"
                       size="sm"
