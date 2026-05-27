@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X, Zap, TrendingUp, Clock } from "lucide-react";
 import { AuroraBackground } from "./effects/AuroraBackground";
+import { SpotlightCard } from "./effects/SpotlightCard";
 
 const VideoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   if (!isOpen) return null;
