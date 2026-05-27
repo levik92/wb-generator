@@ -57,7 +57,7 @@ export const CTASection = () => {
                 size="lg"
                 className="w-full sm:w-auto bg-white text-[hsl(263,80%,30%)] hover:bg-white/90 text-base px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/30 group"
               >
-                Попробовать WBGen бесплатно
+                Попробовать WBGen
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -72,10 +72,11 @@ export const CTASection = () => {
             </a>
           </div>
           <p className="text-white/45 text-xs sm:text-sm mt-5">
-            Регистрация за 30 сек · Без привязки карты · Поддержка 7 дней в неделю
+            Регистрация за 30 сек · Результат сразу · Экономия в 12+ раз
           </p>
         </div>
       </div>
     </section>
   );
 };
+
