@@ -9,6 +9,60 @@ interface Stat {
   label: string;
 }
 
+export type AccentTheme = "violet" | "emerald" | "blue" | "amber";
+
+const ACCENTS: Record<AccentTheme, {
+  titleGradient: string;
+  ctaGradient: string;
+  ctaHover: string;
+  glowA: string;
+  glowB: string;
+  badgeBg: string;
+  badgeText: string;
+  ring: string;
+}> = {
+  violet: {
+    titleGradient: "from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)]",
+    ctaGradient: "from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)]",
+    ctaHover: "hover:from-[hsl(268,83%,50%)] hover:to-[hsl(280,90%,50%)]",
+    glowA: "hsl(268, 70%, 50%)",
+    glowB: "hsl(280, 60%, 45%)",
+    badgeBg: "bg-[hsl(268,83%,55%)]/10",
+    badgeText: "text-[hsl(268,83%,75%)]",
+    ring: "rgba(139, 92, 246, 0.35)",
+  },
+  emerald: {
+    titleGradient: "from-[hsl(150,80%,55%)] to-[hsl(170,80%,55%)]",
+    ctaGradient: "from-[hsl(150,75%,42%)] to-[hsl(170,80%,40%)]",
+    ctaHover: "hover:from-[hsl(150,75%,38%)] hover:to-[hsl(170,80%,36%)]",
+    glowA: "hsl(150, 70%, 45%)",
+    glowB: "hsl(170, 70%, 40%)",
+    badgeBg: "bg-emerald-500/10",
+    badgeText: "text-emerald-300",
+    ring: "rgba(16, 185, 129, 0.30)",
+  },
+  blue: {
+    titleGradient: "from-[hsl(200,90%,65%)] to-[hsl(220,90%,70%)]",
+    ctaGradient: "from-[hsl(210,90%,55%)] to-[hsl(225,90%,58%)]",
+    ctaHover: "hover:from-[hsl(210,90%,50%)] hover:to-[hsl(225,90%,52%)]",
+    glowA: "hsl(210, 80%, 50%)",
+    glowB: "hsl(225, 75%, 50%)",
+    badgeBg: "bg-sky-500/10",
+    badgeText: "text-sky-300",
+    ring: "rgba(56, 189, 248, 0.30)",
+  },
+  amber: {
+    titleGradient: "from-[hsl(38,95%,62%)] to-[hsl(20,90%,62%)]",
+    ctaGradient: "from-[hsl(35,92%,52%)] to-[hsl(20,90%,55%)]",
+    ctaHover: "hover:from-[hsl(35,92%,48%)] hover:to-[hsl(20,90%,50%)]",
+    glowA: "hsl(35, 90%, 50%)",
+    glowB: "hsl(20, 85%, 50%)",
+    badgeBg: "bg-amber-500/10",
+    badgeText: "text-amber-300",
+    ring: "rgba(245, 158, 11, 0.30)",
+  },
+};
+
 interface ServiceHeroProps {
   title: string;
   subtitle: string;
@@ -23,6 +77,8 @@ interface ServiceHeroProps {
   isComingSoon?: boolean;
   heroImage?: string;
   heroImages?: string[];
+  accent?: AccentTheme;
+  signature?: ReactNode;
 }
 
 export const ServiceHero = ({
@@ -39,7 +95,10 @@ export const ServiceHero = ({
   isComingSoon = false,
   heroImage,
   heroImages,
+  accent = "violet",
+  signature,
 }: ServiceHeroProps) => {
+  const theme = ACCENTS[accent];
   return (
     <section className="relative pt-20 pb-16 sm:pt-24 sm:pb-24 lg:pt-28 lg:pb-32 overflow-hidden">
       {/* Subtle gradient background */}
