@@ -434,9 +434,9 @@ const Auth = () => {
     <>
       <div className="min-h-screen bg-[#0d0d0d] landing-dark text-white flex relative overflow-hidden">
         {/* Background effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 -right-32 w-[500px] h-[500px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[140px]" />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/3 -left-40 w-[480px] h-[480px] bg-[hsl(268,83%,58%)]/10 rounded-full blur-[160px]" />
+          <div className="absolute bottom-1/3 -right-40 w-[420px] h-[420px] bg-[hsl(280,83%,58%)]/8 rounded-full blur-[160px]" />
         </div>
         <div className="noise-overlay" />
 
