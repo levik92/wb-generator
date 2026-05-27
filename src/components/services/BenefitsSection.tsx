@@ -112,15 +112,16 @@ export const BenefitsSection = ({
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="group"
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
+                  className="group relative"
                 >
-                  <div className="glass-card rounded-2xl p-8 h-full border border-white/5 hover:border-[hsl(268,83%,55%)]/30 transition-all duration-300 hover:bg-white/[0.02]">
+                  <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/40 via-transparent to-[hsl(290,83%,60%)]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-2xl p-8 h-full border border-white/10 group-hover:border-white/20 transition-colors duration-300">
                     {/* Icon */}
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center mb-6 shadow-lg shadow-[hsl(268,83%,40%)]/20 group-hover:shadow-[hsl(268,83%,60%)]/40 group-hover:scale-105 transition-all duration-300`}>
                       <IconComponent className="w-7 h-7 text-white" />
                     </div>
-                    
+
                     {/* Content */}
                     <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[hsl(268,83%,75%)] transition-colors">
                       {benefit.title}
