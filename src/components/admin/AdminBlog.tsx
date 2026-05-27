@@ -628,98 +628,194 @@ export const AdminBlog = () => {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[200px]">Статья</TableHead>
-                    <TableHead className="min-w-[100px]">Категория</TableHead>
-                    <TableHead className="min-w-[100px]">Статус</TableHead>
-                    <TableHead className="text-center min-w-[80px]">Просмотры</TableHead>
-                    <TableHead className="min-w-[100px] hidden md:table-cell">Дата</TableHead>
-                    <TableHead className="text-right min-w-[120px]">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {posts.map((post) => (
-                    <TableRow key={post.id}>
-                      <TableCell>
-                        <div className="max-w-md">
-                          <p className="font-medium truncate text-sm">{post.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            /blog/{post.slug}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={tagColors[post.tag]}>
-                          {post.tag}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={post.is_published ? "default" : "secondary"}
-                          className={post.is_published ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/10" : ""}
-                        >
-                          {post.is_published ? "Опубликовано" : "Черновик"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                          <Eye className="w-3 h-3" />
-                          {post.views}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
-                        {formatDate(post.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-0.5 md:gap-1">
-                          {post.is_published && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
-                              title="Открыть статью"
-                              className="h-7 w-7 md:h-8 md:w-8 p-0"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => togglePublish(post)}
-                            title={post.is_published ? "Снять с публикации" : "Опубликовать"}
-                            className="h-7 w-7 md:h-8 md:w-8 p-0 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-500"
-                          >
-                            <Eye className={`w-3 h-3 ${post.is_published ? "text-emerald-500" : ""}`} />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditDialog(post)}
-                            title="Редактировать"
-                            className="h-7 w-7 md:h-8 md:w-8 p-0"
-                          >
-                            <Pencil className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDelete(post.id)}
-                            title="Удалить"
-                            className="h-7 w-7 md:h-8 md:w-8 p-0"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            <>
+              {/* Desktop / tablet table */}
+              <div className="hidden md:block rounded-xl border border-border/60 overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/40 hover:bg-muted/40 border-border/60">
+                      <TableHead className="min-w-[260px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Статья</TableHead>
+                      <TableHead className="min-w-[110px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Категория</TableHead>
+                      <TableHead className="min-w-[110px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Статус</TableHead>
+                      <TableHead className="text-center min-w-[90px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Просмотры</TableHead>
+                      <TableHead className="min-w-[110px] hidden lg:table-cell text-xs font-semibold uppercase tracking-wide text-muted-foreground">Дата</TableHead>
+                      <TableHead className="text-right min-w-[150px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Действия</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {posts.map((post) => (
+                      <TableRow key={post.id} className="border-border/40 hover:bg-violet-500/[0.03] transition-colors">
+                        <TableCell className="py-3">
+                          <div className="max-w-md min-w-0">
+                            <p className="font-medium text-sm leading-snug line-clamp-2">{post.title}</p>
+                            <p className="text-[11px] text-muted-foreground truncate mt-0.5 font-mono">
+                              /blog/{post.slug}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={tagColors[post.tag]}>
+                            {post.tag}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {post.is_published ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              Опубликовано
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                              <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                              Черновик
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-1 text-sm tabular-nums text-muted-foreground">
+                            <Eye className="w-3 h-3" />
+                            {post.views}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs hidden lg:table-cell whitespace-nowrap">
+                          {formatDate(post.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-1">
+                            {post.is_published && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+                                title="Открыть статью"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => togglePublish(post)}
+                              title={post.is_published ? "Снять с публикации" : "Опубликовать"}
+                              className={`h-8 w-8 p-0 ${
+                                post.is_published
+                                  ? "text-emerald-500 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400"
+                                  : "text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
+                              }`}
+                            >
+                              {post.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(post)}
+                              title="Редактировать"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(post.id)}
+                              title="Удалить"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:bg-destructive hover:text-white"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-2.5">
+                {posts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="rounded-xl border border-border/60 bg-card p-3 space-y-3 hover:border-violet-500/30 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm leading-snug line-clamp-2">{post.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate mt-1 font-mono">
+                          /blog/{post.slug}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className={`${tagColors[post.tag]} shrink-0 text-[10px]`}>
+                        {post.tag}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs">
+                      {post.is_published ? (
+                        <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Опубликовано
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 font-medium text-muted-foreground">
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                          Черновик
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1 text-muted-foreground tabular-nums">
+                        <Eye className="w-3 h-3" />
+                        {post.views}
+                      </span>
+                      <span className="text-muted-foreground/80 ml-auto text-[11px] whitespace-nowrap">
+                        {formatDate(post.created_at)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1 pt-1 border-t border-border/40">
+                      {post.is_published && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => togglePublish(post)}
+                        className={`h-8 w-8 p-0 ${
+                          post.is_published
+                            ? "text-emerald-500 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400"
+                            : "text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
+                        }`}
+                      >
+                        {post.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(post)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(post.id)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:bg-destructive hover:text-white"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
