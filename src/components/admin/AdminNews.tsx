@@ -16,7 +16,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
-import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2, Newspaper, FileText, Tag as TagIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2, Newspaper, FileText, Tag as TagIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
