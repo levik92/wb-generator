@@ -753,53 +753,155 @@ export function AdminPayments() {
       </Tabs>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Создать счёт вручную</DialogTitle>
-            <DialogDescription>
-              Создайте счёт-заявку для пользователя. После подтверждения токены будут начислены и операция отразится в истории и общей аналитике.
-            </DialogDescription>
+        <DialogContent className="sm:max-w-xl p-0 overflow-hidden gap-0">
+          <DialogHeader className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-transparent border-b border-border/50 space-y-0">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-base sm:text-lg leading-tight">Создать счёт вручную</DialogTitle>
+                <DialogDescription className="text-xs mt-1 leading-snug">
+                  После подтверждения токены будут начислены и операция отразится в истории и аналитике.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Email пользователя *</Label>
-              <Input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="user@example.com" />
+
+          <div className="px-5 sm:px-6 py-5 space-y-5 max-h-[65vh] overflow-y-auto">
+            {/* Пользователь */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-violet-500" />
+                  Email пользователя <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="user@example.com"
+                  className="focus-visible:ring-violet-500/40"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-violet-500" />
+                  Назначение / название тарифа
+                </Label>
+                <Input
+                  value={form.package_name}
+                  onChange={e => setForm(f => ({ ...f, package_name: e.target.value }))}
+                  placeholder="Например: Тариф Pro"
+                  className="focus-visible:ring-violet-500/40"
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Назначение / название тарифа</Label>
-              <Input value={form.package_name} onChange={e => setForm(f => ({ ...f, package_name: e.target.value }))} />
+
+            <div className="h-px bg-border/60" />
+
+            {/* Сумма и токены */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Banknote className="h-3.5 w-3.5 text-violet-500" />
+                  Сумма, ₽ <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.amount}
+                  onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+                  placeholder="0"
+                  className="focus-visible:ring-violet-500/40 tabular-nums"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Coins className="h-3.5 w-3.5 text-violet-500" />
+                  Токены <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.tokens}
+                  onChange={e => setForm(f => ({ ...f, tokens: e.target.value }))}
+                  placeholder="0"
+                  className="focus-visible:ring-violet-500/40 tabular-nums"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Hash className="h-3.5 w-3.5 text-violet-500" />
+                  Номер счёта <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  value={form.invoice_number}
+                  onChange={e => setForm(f => ({ ...f, invoice_number: e.target.value }))}
+                  placeholder="2026-0001"
+                  className="focus-visible:ring-violet-500/40 tabular-nums"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 text-violet-500" />
+                  Дата счёта
+                </Label>
+                <Input
+                  type="date"
+                  value={form.invoice_date}
+                  onChange={e => setForm(f => ({ ...f, invoice_date: e.target.value }))}
+                  className="focus-visible:ring-violet-500/40 tabular-nums"
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Сумма, ₽ *</Label>
-                <Input type="number" min="1" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Токены *</Label>
-                <Input type="number" min="1" value={form.tokens} onChange={e => setForm(f => ({ ...f, tokens: e.target.value }))} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Номер счёта *</Label>
-                <Input value={form.invoice_number} onChange={e => setForm(f => ({ ...f, invoice_number: e.target.value }))} placeholder="2026-0001" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Дата счёта</Label>
-                <Input type="date" value={form.invoice_date} onChange={e => setForm(f => ({ ...f, invoice_date: e.target.value }))} />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Примечание (для админа)</Label>
-              <Textarea rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
+
+            <div className="h-px bg-border/60" />
+
+            <div className="space-y-2">
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5 text-violet-500" />
+                Примечание (для админа)
+              </Label>
+              <Textarea
+                rows={2}
+                value={form.notes}
+                onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                placeholder="Внутренний комментарий..."
+                className="resize-none focus-visible:ring-violet-500/40"
+              />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>Отмена</Button>
-            <Button onClick={handleCreateManual} disabled={creating}>
-              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Создать счёт"}
+
+          <DialogFooter className="px-5 sm:px-6 py-4 border-t border-border/50 bg-muted/20 flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={creating}
+              className="sm:w-auto"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleCreateManual}
+              disabled={creating}
+              className="sm:w-auto gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
+            >
+              {creating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Создание...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Создать счёт
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
