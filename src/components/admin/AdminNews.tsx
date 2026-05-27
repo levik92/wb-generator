@@ -16,7 +16,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
-import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2, Newspaper, FileText, Tag as TagIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -279,68 +279,100 @@ export const AdminNews = () => {
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <p>Загрузка новостей...</p>
+      <div className="flex items-center justify-center py-16">
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <h2 className="text-xl md:text-2xl font-bold">Управление новостями</h2>
-          <p className="text-muted-foreground text-xs md:text-sm">
-            Создавайте и публикуйте новости для пользователей
-          </p>
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+            <Newspaper className="h-5 w-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Управление новостями
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Создавайте и публикуйте новости для пользователей
+            </p>
+          </div>
         </div>
-        
+
         <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <ResponsiveDialogTrigger asChild>
-            <Button onClick={openCreateDialog} size="sm" className="gap-2 w-full sm:w-auto">
+            <Button onClick={openCreateDialog} className="gap-2 w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
               <Plus className="w-4 h-4" />
               Создать новость
             </Button>
           </ResponsiveDialogTrigger>
           <ResponsiveDialogContent className="sm:max-w-2xl">
-            <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>
-                {editingNews ? 'Редактировать новость' : 'Создать новость'}
-              </ResponsiveDialogTitle>
-              <ResponsiveDialogDescription>
-                Заполните информацию для новости. Максимум 1500 символов.
-              </ResponsiveDialogDescription>
+            <ResponsiveDialogHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+                  {editingNews ? <Edit className="h-4 w-4 text-white" /> : <Plus className="h-4 w-4 text-white" />}
+                </div>
+                <div className="min-w-0">
+                  <ResponsiveDialogTitle className="text-lg">
+                    {editingNews ? 'Редактировать новость' : 'Создать новость'}
+                  </ResponsiveDialogTitle>
+                  <ResponsiveDialogDescription className="text-xs mt-0.5">
+                    Заполните информацию. После сохранения новость попадёт в черновики.
+                  </ResponsiveDialogDescription>
+                </div>
+              </div>
             </ResponsiveDialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="title">Заголовок *</Label>
+            <form onSubmit={handleSubmit} className="space-y-5 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="h-3.5 w-3.5 text-violet-500" />
+                  Заголовок <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Введите заголовок новости"
                   required
+                  className="focus-visible:ring-violet-500/40"
                 />
               </div>
-              
-              <div>
-                <Label htmlFor="tag">Тег</Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="tag" className="text-sm font-medium flex items-center gap-2">
+                  <TagIcon className="h-3.5 w-3.5 text-violet-500" />
+                  Тег
+                </Label>
                 <Select value={formData.tag} onValueChange={(value) => setFormData(prev => ({ ...prev, tag: value }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="focus:ring-violet-500/40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {availableTags.map((tag) => (
                       <SelectItem key={tag} value={tag}>
-                        {tag}
+                        <span className="flex items-center gap-2">
+                          <span className={`inline-block w-2 h-2 rounded-full ${(tagColors[tag] || '').split(' ')[0].replace('/10', '')}`} />
+                          {tag}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div>
-                <Label htmlFor="content">Содержание * ({formData.content.length}/1500)</Label>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="content" className="text-sm font-medium">
+                    Содержание <span className="text-destructive">*</span>
+                  </Label>
+                  <span className={`text-xs tabular-nums ${formData.content.length >= 1400 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                    {formData.content.length}/1500
+                  </span>
+                </div>
                 <Textarea
                   id="content"
                   value={formData.content}
@@ -349,14 +381,15 @@ export const AdminNews = () => {
                   rows={8}
                   maxLength={1500}
                   required
+                  className="resize-none focus-visible:ring-violet-500/40"
                 />
               </div>
-              
-              <ResponsiveDialogFooter>
+
+              <ResponsiveDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-border/50">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Отмена
                 </Button>
-                <Button type="submit">
+                <Button type="submit" className="gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
                   {editingNews ? 'Обновить' : 'Создать черновик'}
                 </Button>
               </ResponsiveDialogFooter>
@@ -364,6 +397,7 @@ export const AdminNews = () => {
           </ResponsiveDialogContent>
         </ResponsiveDialog>
       </div>
+
 
       <div className="grid gap-4">
         {news.length === 0 ? (
