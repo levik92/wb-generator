@@ -35,7 +35,7 @@ export const CTASection = () => {
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-2xl mx-auto mb-10 sm:mb-12">
             {[
               { value: "от 59₽", label: "за карточку", icon: Gift },
-              { value: "3 мин", label: "до результата", icon: Zap },
+              { value: "x7", label: "результативнее аналогов", icon: Zap },
               { value: "+87%", label: "рост CTR", icon: TrendingUp },
             ].map((stat) => (
               <SpotlightCard
