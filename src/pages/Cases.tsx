@@ -344,36 +344,10 @@ const Cases = () => {
       {/* Noise overlay for texture */}
       <div className="noise-overlay" />
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="absolute inset-0 bg-[#111111]/80 backdrop-blur-xl border-b border-white/5" />
-        <div className="container mx-auto px-4 sm:px-6 relative">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-medium">Назад</span>
-            </Link>
-            
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] flex items-center justify-center">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-white">WBGen</span>
-            </Link>
+      <LandingHeader />
 
-            <Link to="/dashboard?tab=pricing">
-              <Button className="btn-premium text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold">
-                Попробовать
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <main className="pt-24 sm:pt-28">
 
-      <main className="pt-24 sm:pt-32">
         {/* Hero Section */}
         <section className="relative py-16 sm:py-24 overflow-visible min-h-[70vh] flex flex-col justify-center">
           <div className="absolute -top-[200px] left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
