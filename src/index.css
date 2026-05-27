@@ -519,3 +519,63 @@ body {
     max-height: 100dvh;
   }
 }
+
+/* ============ Admin shell unified styling (violet accent) ============ */
+.admin-shell {
+  --admin-accent: 262 83% 58%; /* violet-500 */
+  --admin-accent-strong: 271 81% 56%; /* purple-600 */
+}
+
+/* Soften card borders and shadows inside admin */
+.admin-shell [class*="rounded-2xl"][class*="border"],
+.admin-shell [class*="rounded-xl"][class*="border"] {
+  border-color: hsl(var(--border) / 0.7);
+}
+
+/* Table row hover — subtle violet tint */
+.admin-shell tbody tr {
+  transition: background-color 0.15s ease;
+}
+.admin-shell tbody tr:hover {
+  background-color: hsl(var(--admin-accent) / 0.05);
+}
+
+/* Outline buttons get violet hover affordance */
+.admin-shell button[class*="border-input"]:hover,
+.admin-shell button[class*="border-border"]:hover:not([class*="bg-violet"]):not([class*="from-violet"]):not([class*="bg-destructive"]) {
+  border-color: hsl(var(--admin-accent) / 0.5);
+  color: hsl(var(--admin-accent));
+}
+
+/* Focus ring violet across admin */
+.admin-shell input:focus-visible,
+.admin-shell textarea:focus-visible,
+.admin-shell select:focus-visible,
+.admin-shell [role="combobox"]:focus-visible {
+  outline: none;
+  border-color: hsl(var(--admin-accent) / 0.6);
+  box-shadow: 0 0 0 3px hsl(var(--admin-accent) / 0.12);
+}
+
+/* Scrollbar in admin sidebar/main — slim and violet on hover */
+.admin-shell ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.admin-shell ::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 999px;
+}
+.admin-shell ::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--admin-accent) / 0.5);
+}
+
+/* Active tabs (shadcn tabs) — violet underline/fill */
+.admin-shell [role="tab"][data-state="active"] {
+  color: hsl(var(--admin-accent));
+}
+
+/* Section heading polish */
+.admin-shell h2 {
+  letter-spacing: -0.01em;
+}
