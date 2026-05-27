@@ -420,7 +420,7 @@ export const AdminNews = () => {
                   {paginatedNews.map((item) => (
             <Card key={item.id} className={`group rounded-2xl border-border/60 bg-card shadow-sm transition-all hover:border-violet-500/30 hover:shadow-md ${!item.is_published ? 'border-amber-500/30 bg-amber-500/[0.03]' : ''}`}>
               <CardHeader className="pb-3">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} border-0 hover:bg-inherit`}>
