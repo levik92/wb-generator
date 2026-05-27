@@ -1,31 +1,73 @@
-/* Liquid Glass Landing Theme - Premium Dark Mode */
+/* Liquid Glass Landing Theme - Premium Dark Mode (Noir & Violet) */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap');
 
 /* Landing-specific CSS variables */
 .landing-dark {
-  /* Deep dark background */
-  --landing-bg: 240 10% 4%;
-  --landing-bg-secondary: 240 8% 8%;
-  --landing-bg-tertiary: 240 6% 12%;
-  
+  /* Deep dark Noir background */
+  --landing-bg: 0 0% 5%;
+  --landing-bg-secondary: 0 0% 7%;
+  --landing-bg-tertiary: 0 0% 10%;
+
   /* Glass effect tokens */
-  --glass-bg: 240 10% 10% / 0.6;
-  --glass-border: 0 0% 100% / 0.1;
-  --glass-border-hover: 0 0% 100% / 0.2;
-  
+  --glass-bg: 0 0% 8% / 0.7;
+  --glass-border: 0 0% 100% / 0.08;
+  --glass-border-hover: 270 70% 70% / 0.35;
+
   /* Neon glow colors */
-  --glow-purple: 268 100% 65%;
+  --glow-purple: 263 90% 65%;
   --glow-blue: 220 100% 65%;
   --glow-green: 160 100% 50%;
   --glow-pink: 330 100% 65%;
-  
+
   /* Text hierarchy */
   --text-primary: 0 0% 100%;
-  --text-secondary: 0 0% 70%;
-  --text-tertiary: 0 0% 50%;
-  
-  /* Accent colors */
-  --accent-purple: 268 83% 60%;
-  --accent-purple-glow: 268 100% 70%;
+  --text-secondary: 0 0% 72%;
+  --text-tertiary: 0 0% 52%;
+
+  /* Accent colors (violet) */
+  --accent-purple: 263 80% 58%;
+  --accent-purple-glow: 270 90% 72%;
+
+  font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'ss01', 'cv11';
+  letter-spacing: -0.005em;
+}
+
+.landing-dark h1,
+.landing-dark h2,
+.landing-dark h3,
+.landing-dark h4,
+.landing-dark h5,
+.landing-dark h6 {
+  font-family: 'Outfit', 'Figtree', system-ui, sans-serif;
+  letter-spacing: -0.022em;
+  font-feature-settings: 'ss01';
+}
+
+/* Aurora gradient text utility */
+.landing-dark .text-aurora {
+  background: linear-gradient(120deg, hsl(270 95% 80%), hsl(263 90% 65%) 45%, hsl(290 90% 75%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Soft section divider line */
+.landing-dark .hairline {
+  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.08), transparent);
+  height: 1px;
+  width: 100%;
+}
+
+/* Subtle violet spotlight used as section background accent */
+.landing-dark .spotlight-violet {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 50% at 50% 0%, hsl(263 90% 50% / 0.18), transparent 60%),
+    radial-gradient(40% 40% at 80% 80%, hsl(290 90% 55% / 0.10), transparent 70%);
+  pointer-events: none;
 }
 
 /* Noise texture overlay */
