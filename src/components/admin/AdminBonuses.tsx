@@ -404,7 +404,22 @@ export const AdminBonuses = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6 p-2 sm:p-4 lg:p-6 w-full min-w-0">
+      {/* Заголовок страницы */}
+      <div className="flex items-start gap-3 px-1">
+        <div className="hidden sm:flex w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25 items-center justify-center shrink-0">
+          <Gift className="w-5 h-5 text-white" />
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Бонусы и промокоды
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            Проверяйте заявки, управляйте программами и выдавайте промокоды
+          </p>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard
@@ -434,33 +449,57 @@ export const AdminBonuses = () => {
       </div>
 
       <Tabs defaultValue="submissions" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="submissions" className="relative">
+        <TabsList className="bg-muted/50 p-1 rounded-xl h-auto">
+          <TabsTrigger
+            value="submissions"
+            className="relative rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/25 transition-all"
+          >
             Заявки
             {stats.pendingSubmissions > 0 && (
-              <Badge className="ml-2 bg-yellow-500 text-white text-xs px-1.5">
+              <Badge className="ml-2 bg-violet-500 text-white text-[10px] px-1.5 h-4 min-w-[18px] flex items-center justify-center border-0 data-[state=active]:bg-white/95 data-[state=active]:text-violet-600">
                 {stats.pendingSubmissions}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="programs">Программы</TabsTrigger>
-          <TabsTrigger value="promocodes">Промокоды</TabsTrigger>
+          <TabsTrigger
+            value="programs"
+            className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/25 transition-all"
+          >
+            Программы
+          </TabsTrigger>
+          <TabsTrigger
+            value="promocodes"
+            className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/25 transition-all"
+          >
+            Промокоды
+          </TabsTrigger>
         </TabsList>
 
         {/* Submissions Tab */}
         <TabsContent value="submissions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Заявки на проверку</CardTitle>
-              <CardDescription>Проверяйте выполнение заданий и начисляйте бонусы</CardDescription>
+          <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base sm:text-lg font-semibold">Заявки на проверку</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-0.5">Проверяйте выполнение заданий и начисляйте бонусы</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="p-2 md:p-4">
+            <CardContent className="p-3 md:p-5">
               {pendingSubmissions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Нет заявок на проверку
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-violet-500/10 text-violet-500 flex items-center justify-center mb-3">
+                    <CheckCircle className="w-7 h-7" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Нет заявок на проверку</p>
+                  <p className="text-xs text-muted-foreground mt-1">Все заявки обработаны — отличная работа</p>
                 </div>
               ) : (
-                <div className="rounded-md border overflow-x-auto">
+                <div className="rounded-xl border border-border/50 overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -468,6 +507,7 @@ export const AdminBonuses = () => {
                         <TableHead>Задание</TableHead>
                         <TableHead className="hidden md:table-cell">Ссылка</TableHead>
                         <TableHead className="hidden md:table-cell">Дата</TableHead>
+
                         <TableHead>Действия</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -526,13 +566,22 @@ export const AdminBonuses = () => {
           </Card>
 
           {/* All Submissions History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">История всех заявок</CardTitle>
+          <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base sm:text-lg font-semibold">История всех заявок</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-0.5">Последние 20 заявок по всем программам</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="p-2 md:p-4">
-              <div className="rounded-md border overflow-x-auto">
+            <CardContent className="p-3 md:p-5">
+              <div className="rounded-xl border border-border/50 overflow-x-auto">
                 <Table>
+
                   <TableHeader>
                     <TableRow>
                       <TableHead>Пользователь</TableHead>
@@ -581,20 +630,30 @@ export const AdminBonuses = () => {
 
         {/* Programs Tab */}
         <TabsContent value="programs" className="space-y-4">
-          <Card>
-            <CardHeader>
+          <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg">Бонусные программы</CardTitle>
-                  <CardDescription>Управляйте заданиями для пользователей</CardDescription>
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+                    <Gift className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-base sm:text-lg font-semibold">Бонусные программы</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm mt-0.5">Управляйте заданиями для пользователей</CardDescription>
+                  </div>
                 </div>
                 <ResponsiveDialog open={programDialogOpen} onOpenChange={setProgramDialogOpen}>
                   <ResponsiveDialogTrigger asChild>
-                    <Button onClick={resetProgramForm} size="sm">
+                    <Button
+                      onClick={resetProgramForm}
+                      size="sm"
+                      className="w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-md shadow-violet-500/25 border-0"
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Добавить
                     </Button>
                   </ResponsiveDialogTrigger>
+
                   <ResponsiveDialogContent className="sm:max-w-md">
                     <ResponsiveDialogHeader>
                       <ResponsiveDialogTitle>
