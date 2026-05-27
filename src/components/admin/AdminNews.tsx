@@ -399,11 +399,19 @@ export const AdminNews = () => {
       </div>
 
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {news.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">Новостей пока нет</p>
+          <Card className="bg-card border-border/60 border-dashed rounded-2xl">
+            <CardContent className="py-16 text-center">
+              <div className="h-14 w-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4">
+                <Newspaper className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+              </div>
+              <p className="text-sm font-medium mb-1">Новостей пока нет</p>
+              <p className="text-xs text-muted-foreground mb-4">Создайте первую новость для пользователей сервиса</p>
+              <Button onClick={openCreateDialog} className="gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+                <Plus className="w-4 h-4" />
+                Создать первую новость
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -413,77 +421,77 @@ export const AdminNews = () => {
               const paginatedNews = news.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
               return (
                 <>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between px-1">
                     <p className="text-xs text-muted-foreground">
-                      Показано {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)} из {news.length}
+                      Показано <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)}</span> из <span className="font-medium text-foreground">{news.length}</span>
                     </p>
                   </div>
                   {paginatedNews.map((item) => (
-            <Card key={item.id} className={`rounded-2xl border-border/50 ${item.is_published ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
+            <Card key={item.id} className={`group rounded-2xl border-border/60 bg-card shadow-sm transition-all hover:border-violet-500/30 hover:shadow-md ${!item.is_published ? 'border-amber-500/30 bg-amber-500/[0.03]' : ''}`}>
               <CardHeader className="pb-3">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} hover:bg-inherit`}>
+                      <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} border-0 hover:bg-inherit`}>
                         {item.tag}
                       </Badge>
                       {item.is_published ? (
-                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/10">
+                        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10">
                           <Eye className="w-3 h-3 mr-1" />
                           Опубликовано
                         </Badge>
                       ) : (
-                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/10">
+                        <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/10">
                           <EyeOff className="w-3 h-3 mr-1" />
                           Черновик
                         </Badge>
                       )}
                     </div>
-                    <CardTitle className="text-base lg:text-lg break-words">{item.title}</CardTitle>
-                    <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 text-xs">
+                    <CardTitle className="text-base lg:text-lg break-words leading-snug">{item.title}</CardTitle>
+                    <CardDescription className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 text-xs">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         Создано: {formatDate(item.created_at)}
                       </span>
                       {item.published_at && (
-                        <span className="hidden sm:inline">
-                          • Опубликовано: {formatDate(item.published_at)}
-                        </span>
-                      )}
-                      {item.published_at && (
-                        <span className="sm:hidden">
-                          Опубликовано: {formatDate(item.published_at)}
+                        <span className="flex items-center gap-1">
+                          <span className="hidden sm:inline">•</span>
+                          <Send className="w-3 h-3" />
+                          {formatDate(item.published_at)}
                         </span>
                       )}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-1 lg:gap-2 shrink-0">
+                  <div className="flex items-center gap-1 lg:gap-1.5 shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => openEditDialog(item)}
-                      className="h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2"
+                      className="h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 dark:hover:text-violet-400"
                     >
-                      <Edit className="w-3 h-3 lg:w-4 lg:h-4" />
-                      <span className="hidden lg:inline ml-2">Изменить</span>
+                      <Edit className="w-3.5 h-3.5" />
+                      <span className="hidden lg:inline ml-1.5">Изменить</span>
                     </Button>
                     <Button
-                      variant={item.is_published ? "outline" : "default"}
                       size="sm"
                       onClick={() => publishNews(item.id, !item.is_published)}
                       disabled={publishingIds.has(item.id)}
-                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2 ${!item.is_published ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                      className={`h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3 ${
+                        item.is_published
+                          ? "bg-card border border-border text-foreground hover:bg-muted"
+                          : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:opacity-90 text-white shadow-sm shadow-emerald-500/25"
+                      }`}
                     >
-                      {publishingIds.has(item.id) ? <Loader2 className="w-3 h-3 lg:w-4 lg:h-4 animate-spin" /> : item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
-                      <span className="hidden lg:inline ml-2">
+                      {publishingIds.has(item.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : item.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
+                      <span className="hidden lg:inline ml-1.5">
                         {publishingIds.has(item.id) ? "Ждите..." : item.is_published ? "Скрыть" : "Опубликовать"}
                       </span>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
-                          <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
-                          <span className="hidden lg:inline ml-2">Удалить</span>
+                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white hover:border-destructive h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3">
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span className="hidden lg:inline ml-1.5">Удалить</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="mx-2">
@@ -495,7 +503,7 @@ export const AdminNews = () => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Отмена</AlertDialogCancel>
-                          <AlertDialogAction 
+                          <AlertDialogAction
                             onClick={() => deleteNews(item.id)}
                             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                           >
@@ -508,31 +516,35 @@ export const AdminNews = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="bg-muted/50 rounded-lg p-3 text-sm max-h-24 overflow-hidden relative">
-                  <p className="whitespace-pre-wrap">{item.content}</p>
+                <div className="bg-muted/40 border border-border/40 rounded-xl p-3.5 text-sm max-h-28 overflow-hidden relative">
+                  <p className="whitespace-pre-wrap leading-relaxed">{item.content}</p>
                   {item.content.length > 200 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-muted/80 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent" />
                   )}
                 </div>
               </CardContent>
             </Card>
                   ))}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2 pt-2">
+                    <div className="flex items-center justify-center flex-wrap gap-1.5 pt-4">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
+                        className="h-9 px-3"
                       >
                         Назад
                       </Button>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <Button
                           key={page}
-                          variant={page === currentPage ? "default" : "outline"}
                           size="sm"
-                          className="w-9 h-9 p-0"
+                          className={`w-9 h-9 p-0 ${
+                            page === currentPage
+                              ? "bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
+                              : "bg-card border border-border hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 text-foreground dark:hover:text-violet-400"
+                          }`}
                           onClick={() => setCurrentPage(page)}
                         >
                           {page}
@@ -543,6 +555,7 @@ export const AdminNews = () => {
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
+                        className="h-9 px-3"
                       >
                         Вперед
                       </Button>
@@ -551,6 +564,7 @@ export const AdminNews = () => {
                 </>
               );
             })()}
+
           </>
         )}
       </div>
