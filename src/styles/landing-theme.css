@@ -528,9 +528,9 @@
 .aurora-float-b { animation: aurora-float-b 11s ease-in-out infinite; }
 .aurora-float-c { animation: aurora-float-c 13s ease-in-out infinite; }
 
-@media (max-width: 768px) {
-  /* На мобиле упрощаем — оставляем только лёгкий спин */
-  .aurora-spin { animation-duration: 50s; }
+@media (max-width: 1024px) {
+  /* На планшетах и мобиле — упрощаем рендер aurora */
+  .aurora-spin { animation-duration: 60s; }
   .aurora-float-a,
   .aurora-float-b,
   .aurora-float-c { animation: none; }
