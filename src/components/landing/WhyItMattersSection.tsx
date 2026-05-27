@@ -32,19 +32,31 @@ export const WhyItMattersSection = () => {
       <div className="absolute top-0 left-0 right-0 hairline" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14">
-          <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[12px] text-white/70 mb-5">
-            Почему это важно
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-[1.05]">
-            Карточка решает,{" "}
-            <span className="text-aurora">купят товар или пройдут мимо</span>
-          </h2>
-          <p className="text-base sm:text-lg text-white/55">
-            На маркетплейсах визуал — это первый продавец. От него зависят клик,
-            цена рекламы и место в выдаче.
-          </p>
+        <div className="grid lg:grid-cols-[1fr_auto] gap-10 items-center max-w-6xl mx-auto mb-12 sm:mb-14">
+          <div className="text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
+            <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[12px] text-white/70 mb-5">
+              Почему это важно
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-[1.05]">
+              Карточка решает,{" "}
+              <span className="text-aurora">купят товар или пройдут мимо</span>
+            </h2>
+            <p className="text-base sm:text-lg text-white/55">
+              На маркетплейсах визуал — это первый продавец. От него зависят клик,
+              цена рекламы и место в выдаче.
+            </p>
+          </div>
+          <img
+            src={illuGrowth}
+            alt="Рост конверсий и продаж"
+            width={1024}
+            height={1024}
+            loading="lazy"
+            decoding="async"
+            className="hidden lg:block w-[280px] h-[280px] object-contain animate-[float_6s_ease-in-out_infinite] drop-shadow-[0_20px_50px_hsl(263,90%,40%,0.35)]"
+          />
         </div>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-5xl mx-auto">
           {problems.map((p) => (
