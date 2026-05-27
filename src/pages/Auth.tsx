@@ -434,9 +434,9 @@ const Auth = () => {
     <>
       <div className="min-h-screen bg-[#0d0d0d] landing-dark text-white flex relative overflow-hidden">
         {/* Background effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 -right-32 w-[500px] h-[500px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[140px]" />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/3 -left-40 w-[480px] h-[480px] bg-[hsl(268,83%,58%)]/10 rounded-full blur-[160px]" />
+          <div className="absolute bottom-1/3 -right-40 w-[420px] h-[420px] bg-[hsl(280,83%,58%)]/8 rounded-full blur-[160px]" />
         </div>
         <div className="noise-overlay" />
 
@@ -500,7 +500,7 @@ const Auth = () => {
           {/* Right form panel */}
           <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 min-h-screen lg:min-h-0">
             <div className="w-full max-w-md mt-12 sm:mt-0">
-              <div className="rounded-3xl p-6 sm:p-8 border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-2xl shadow-black/40">
+              <div className="rounded-3xl p-6 sm:p-8 border border-white/10 bg-[hsl(260,20%,7%)]/95 shadow-2xl shadow-black/40">
             {/* Logo (mobile + tablet only — desktop has it in left panel) */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-3 mb-4 group lg:hidden">
