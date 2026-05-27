@@ -138,6 +138,7 @@ export default function Friends() {
                       </a>
                     </Button>
                   </div>
+                  </div>
                 </motion.div>
               ))}
             </div>
