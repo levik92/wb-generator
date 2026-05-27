@@ -129,17 +129,6 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
         </ul>
       </nav>
 
-      {/* Theme Toggle */}
-      <div className={`p-4 border-t border-border ${isCollapsed ? 'p-2 flex justify-center' : ''}`}>
-        {isCollapsed ? (
-          <ThemeToggle />
-        ) : (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Тема</span>
-            <ThemeToggle />
-          </div>
-        )}
-      </div>
     </div>
   );
 };

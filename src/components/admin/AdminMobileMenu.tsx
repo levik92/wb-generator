@@ -111,13 +111,6 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
             </ul>
           </nav>
 
-          {/* Theme Toggle */}
-          <div className="p-4 border-t border-border">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Тема</span>
-              <ThemeToggle />
-            </div>
-          </div>
         </div>
       </SheetContent>
     </Sheet>
