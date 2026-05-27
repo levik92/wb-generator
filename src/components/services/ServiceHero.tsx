@@ -227,7 +227,7 @@ export const ServiceHero = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                   >
-                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1.5">
+                    <div className={`text-3xl sm:text-4xl font-bold mb-1.5 bg-gradient-to-br ${theme.titleGradient} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                     <div className="text-sm text-white/40">{stat.label}</div>
