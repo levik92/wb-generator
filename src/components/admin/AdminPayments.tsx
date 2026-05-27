@@ -357,7 +357,7 @@ export function AdminPayments() {
                   </div>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-9 gap-2 shrink-0">
+                      <Button variant="outline" size="sm" className="h-9 gap-2 shrink-0 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 transition-colors">
                         <Filter className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Фильтры</span>
                         {activeFiltersCount > 0 && (
