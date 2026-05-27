@@ -90,7 +90,7 @@ export const FeaturesSection = () => {
 
 
           {/* Speed */}
-          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Zap className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
               3 мин
@@ -101,7 +101,7 @@ export const FeaturesSection = () => {
           </SpotlightCard>
 
           {/* Price */}
-          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Target className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
               от 59₽
@@ -112,7 +112,7 @@ export const FeaturesSection = () => {
           </SpotlightCard>
 
           {/* Descriptions */}
-          <SpotlightCard className="col-span-6 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-6 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
             <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-4">
               <FileText className="w-5 h-5 text-[hsl(263,90%,75%)]" />
             </div>
@@ -126,7 +126,7 @@ export const FeaturesSection = () => {
           </SpotlightCard>
 
           {/* Variants */}
-          <SpotlightCard className="col-span-3 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
             <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-4">
               <Layers className="w-5 h-5 text-[hsl(263,90%,75%)]" />
             </div>
@@ -140,7 +140,7 @@ export const FeaturesSection = () => {
           </SpotlightCard>
 
           {/* Video covers */}
-          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Video className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <h3 className="text-base font-bold text-white mb-1">Видеообложки</h3>
             <p className="text-xs text-white/55">
@@ -149,7 +149,7 @@ export const FeaturesSection = () => {
           </SpotlightCard>
 
           {/* Labels */}
-          <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <Barcode className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <h3 className="text-base font-bold text-white mb-1">
               Этикетки и ШК
@@ -160,7 +160,7 @@ export const FeaturesSection = () => {
           </SpotlightCard>
 
           {/* Edits */}
-          <SpotlightCard className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+          <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
             <RefreshCw className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
             <h3 className="text-base font-bold text-white mb-1">
               Точечные правки
