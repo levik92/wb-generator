@@ -210,6 +210,16 @@ const BarcodeGenerator = () => {
         subtitle="для Wildberries — бесплатно"
         description="Создавайте этикетки CODE-128 и QR-коды без ограничений. Готовые PDF для печати на любом принтере. Это бесплатно — наш подарок селлерам."
         badge="🎁 Бесплатно и без лимитов"
+        accent="emerald"
+        signature={(
+          <div className="flex flex-wrap gap-2">
+            {["CODE-128", "QR-код", "PDF к печати", "Без лимитов"].map((tag) => (
+              <span key={tag} className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-xs font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         stats={[
           { value: "0₽", label: "навсегда" },
           { value: "CODE-128", label: "формат WB" },

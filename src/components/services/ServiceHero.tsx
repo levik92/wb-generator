@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,60 @@ interface Stat {
   value: string;
   label: string;
 }
+
+export type AccentTheme = "violet" | "emerald" | "blue" | "amber";
+
+const ACCENTS: Record<AccentTheme, {
+  titleGradient: string;
+  ctaGradient: string;
+  ctaHover: string;
+  glowA: string;
+  glowB: string;
+  badgeBg: string;
+  badgeText: string;
+  ring: string;
+}> = {
+  violet: {
+    titleGradient: "from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)]",
+    ctaGradient: "from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)]",
+    ctaHover: "hover:from-[hsl(268,83%,50%)] hover:to-[hsl(280,90%,50%)]",
+    glowA: "hsl(268, 70%, 50%)",
+    glowB: "hsl(280, 60%, 45%)",
+    badgeBg: "bg-[hsl(268,83%,55%)]/10",
+    badgeText: "text-[hsl(268,83%,75%)]",
+    ring: "rgba(139, 92, 246, 0.35)",
+  },
+  emerald: {
+    titleGradient: "from-[hsl(150,80%,55%)] to-[hsl(170,80%,55%)]",
+    ctaGradient: "from-[hsl(150,75%,42%)] to-[hsl(170,80%,40%)]",
+    ctaHover: "hover:from-[hsl(150,75%,38%)] hover:to-[hsl(170,80%,36%)]",
+    glowA: "hsl(150, 70%, 45%)",
+    glowB: "hsl(170, 70%, 40%)",
+    badgeBg: "bg-emerald-500/10",
+    badgeText: "text-emerald-300",
+    ring: "rgba(16, 185, 129, 0.30)",
+  },
+  blue: {
+    titleGradient: "from-[hsl(200,90%,65%)] to-[hsl(220,90%,70%)]",
+    ctaGradient: "from-[hsl(210,90%,55%)] to-[hsl(225,90%,58%)]",
+    ctaHover: "hover:from-[hsl(210,90%,50%)] hover:to-[hsl(225,90%,52%)]",
+    glowA: "hsl(210, 80%, 50%)",
+    glowB: "hsl(225, 75%, 50%)",
+    badgeBg: "bg-sky-500/10",
+    badgeText: "text-sky-300",
+    ring: "rgba(56, 189, 248, 0.30)",
+  },
+  amber: {
+    titleGradient: "from-[hsl(38,95%,62%)] to-[hsl(20,90%,62%)]",
+    ctaGradient: "from-[hsl(35,92%,52%)] to-[hsl(20,90%,55%)]",
+    ctaHover: "hover:from-[hsl(35,92%,48%)] hover:to-[hsl(20,90%,50%)]",
+    glowA: "hsl(35, 90%, 50%)",
+    glowB: "hsl(20, 85%, 50%)",
+    badgeBg: "bg-amber-500/10",
+    badgeText: "text-amber-300",
+    ring: "rgba(245, 158, 11, 0.30)",
+  },
+};
 
 interface ServiceHeroProps {
   title: string;
@@ -23,6 +78,8 @@ interface ServiceHeroProps {
   isComingSoon?: boolean;
   heroImage?: string;
   heroImages?: string[];
+  accent?: AccentTheme;
+  signature?: ReactNode;
 }
 
 export const ServiceHero = ({
@@ -39,7 +96,10 @@ export const ServiceHero = ({
   isComingSoon = false,
   heroImage,
   heroImages,
+  accent = "violet",
+  signature,
 }: ServiceHeroProps) => {
+  const theme = ACCENTS[accent];
   return (
     <section className="relative pt-20 pb-16 sm:pt-24 sm:pb-24 lg:pt-28 lg:pb-32 overflow-hidden">
       {/* Subtle gradient background */}
@@ -47,17 +107,17 @@ export const ServiceHero = ({
         {/* Base gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,8%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
         
-        {/* Soft ambient glow - very subtle */}
+        {/* Soft ambient glow - accent-themed */}
         <div 
-          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.06]"
+          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.08]"
           style={{
-            background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)',
+            background: `radial-gradient(circle, ${theme.glowA} 0%, transparent 60%)`,
           }}
         />
         <div 
-          className="absolute w-[900px] h-[900px] top-1/4 -right-1/4 rounded-full opacity-[0.05]"
+          className="absolute w-[900px] h-[900px] top-1/4 -right-1/4 rounded-full opacity-[0.06]"
           style={{
-            background: 'radial-gradient(circle, hsl(280, 60%, 45%) 0%, transparent 60%)',
+            background: `radial-gradient(circle, ${theme.glowB} 0%, transparent 60%)`,
           }}
         />
         
@@ -69,8 +129,11 @@ export const ServiceHero = ({
           }}
         />
         
-        {/* Very subtle gradient line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(268,70%,50%)/15] to-transparent" />
+        {/* Accent gradient line */}
+        <div 
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: `linear-gradient(to right, transparent, ${theme.glowA}33, transparent)` }}
+        />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -84,7 +147,8 @@ export const ServiceHero = ({
             className="max-w-2xl lg:pr-8"
           >
             {badge && (
-              <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/60 mb-8">
+              <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${theme.badgeBg} border border-white/10 text-sm ${theme.badgeText} mb-8 backdrop-blur-sm`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                 {badge}
               </span>
             )}
@@ -98,12 +162,12 @@ export const ServiceHero = ({
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
               {title}
               <br />
-              <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)] bg-clip-text text-transparent">
+              <span className={`bg-gradient-to-r ${theme.titleGradient} bg-clip-text text-transparent`}>
                 {subtitle}
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-white/50 mb-10 max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-white/55 mb-10 max-w-xl leading-relaxed">
               {description}
             </p>
 
@@ -113,7 +177,8 @@ export const ServiceHero = ({
                   <Link to={ctaLink}>
                     <Button 
                       size="lg" 
-                      className="w-full sm:w-auto bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] hover:from-[hsl(268,83%,50%)] hover:to-[hsl(280,90%,50%)] text-white border-0 px-8 py-6 text-lg font-semibold"
+                      className={`w-full sm:w-auto bg-gradient-to-r ${theme.ctaGradient} ${theme.ctaHover} text-white border-0 px-8 py-6 text-lg font-semibold shadow-lg`}
+                      style={{ boxShadow: `0 10px 40px -10px ${theme.ring}` }}
                     >
                       {ctaText}
                       <ArrowRight className="ml-2 w-5 h-5" />
@@ -142,13 +207,16 @@ export const ServiceHero = ({
                       placeholder="your@email.com"
                       className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-white/30"
                     />
-                    <Button className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] text-white border-0">
+                    <Button className={`bg-gradient-to-r ${theme.ctaGradient} text-white border-0`}>
                       Подписаться
                     </Button>
                   </div>
                 </div>
               )}
             </div>
+
+            {signature && <div className="mb-10">{signature}</div>}
+
 
             {stats && stats.length > 0 && (
               <div className="flex flex-wrap gap-10 sm:gap-14">
@@ -159,7 +227,7 @@ export const ServiceHero = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                   >
-                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1.5">
+                    <div className={`text-3xl sm:text-4xl font-bold mb-1.5 bg-gradient-to-br ${theme.titleGradient} bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                     <div className="text-sm text-white/40">{stat.label}</div>
@@ -184,7 +252,7 @@ export const ServiceHero = ({
                 whileHover={{ rotate: -5, scale: 1.05, y: -10 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="absolute right-[36%] lg:right-[40%] top-[5%] w-[280px] sm:w-[360px] lg:w-[400px] h-[380px] sm:h-[500px] lg:h-[560px] rounded-3xl overflow-hidden shadow-2xl z-30"
-                style={{ boxShadow: "0 40px 80px -20px rgba(139, 92, 246, 0.35), 0 30px 60px -15px rgba(0, 0, 0, 0.5)" }}
+                style={{ boxShadow: `0 40px 80px -20px ${theme.ring}, 0 30px 60px -15px rgba(0, 0, 0, 0.5)` }}
               >
                 <img src={heroImages[0]} alt="Card 1" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
@@ -217,7 +285,7 @@ export const ServiceHero = ({
               </motion.div>
 
               {/* Decorative glow */}
-              <div className="absolute -bottom-20 right-1/4 w-80 h-80 bg-[hsl(268,83%,55%)]/15 rounded-full blur-3xl -z-10" />
+              <div className="absolute -bottom-20 right-1/4 w-80 h-80 rounded-full blur-3xl -z-10" style={{ background: `${theme.glowA}33` }} />
             </motion.div>
           )}
 
@@ -258,7 +326,7 @@ export const ServiceHero = ({
               </div>
               
               {/* Subtle glow behind */}
-              <div className="absolute -inset-12 bg-gradient-to-br from-[hsl(268,60%,35%)/10] to-[hsl(280,50%,30%)/8] rounded-3xl blur-3xl -z-10" />
+              <div className="absolute -inset-12 rounded-3xl blur-3xl -z-10" style={{ background: `radial-gradient(circle, ${theme.glowA}1a, ${theme.glowB}14)` }} />
             </motion.div>
           )}
         </div>
