@@ -422,18 +422,24 @@ const Avito = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="glass-card rounded-2xl border border-white/5 p-6 text-center"
+                  transition={{ delay: i * 0.08 }}
+                  className="group relative"
                 >
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
-                    style={{ background: `linear-gradient(135deg, ${AVITO}, ${AVITO_LIGHT})` }}
-                  >
-                    <step.icon className="w-6 h-6 text-black" />
+                    className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none"
+                    style={{ background: `linear-gradient(135deg, ${AVITO}44, transparent 60%, ${AVITO_LIGHT}33)` }}
+                  />
+                  <div className="relative glass-card rounded-2xl border border-white/10 group-hover:border-white/20 transition-colors p-6 text-center h-full">
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-105 transition-transform"
+                      style={{ background: `linear-gradient(135deg, ${AVITO}, ${AVITO_LIGHT})`, boxShadow: `0 10px 30px -10px ${AVITO}77` }}
+                    >
+                      <step.icon className="w-6 h-6 text-black" />
+                    </div>
+                    <div className="text-xs font-bold text-white/30 mb-2">Шаг {i + 1}</div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
+                    <p className="text-sm text-white/50">{step.desc}</p>
                   </div>
-                  <div className="text-xs font-bold text-white/30 mb-2">Шаг {i + 1}</div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
-                  <p className="text-sm text-white/50">{step.desc}</p>
                 </motion.div>
               ))}
             </div>
