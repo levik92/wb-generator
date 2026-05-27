@@ -63,14 +63,14 @@ export const FAQSection = () => {
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+          <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[12px] text-white/70 mb-5">
             FAQ
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-            Частые вопросы
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-[1.05]">
+            Частые вопросы про WBGen
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto">
-            Ответы на популярные вопросы о работе сервиса
+          <p className="text-base sm:text-lg text-white/55 max-w-2xl mx-auto">
+            Если ответа нет — напишите в поддержку, отвечаем в рабочее время.
           </p>
         </div>
 
