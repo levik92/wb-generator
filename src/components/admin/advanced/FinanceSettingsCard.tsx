@@ -53,7 +53,7 @@ export function FinanceSettingsCard({ onSaved }: { onSaved?: () => void }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 dark:hover:text-violet-400">
           <SettingsIcon className="w-4 h-4" /> <span className="hidden sm:inline">Фин. настройки</span>
         </Button>
       </PopoverTrigger>
