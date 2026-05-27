@@ -501,19 +501,9 @@ const Auth = () => {
           <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 min-h-screen lg:min-h-0">
             <div className="w-full max-w-md mt-12 sm:mt-0">
               <div className="rounded-3xl p-6 sm:p-8 border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-2xl shadow-black/40">
-                {/* Mobile-only top: tiny logo */}
-                <div className="text-center mb-7 lg:mb-6">
-                  <Link to="/" className="inline-flex items-center gap-2.5 mb-4 lg:hidden">
-                    <div className="w-9 h-9 bg-gradient-to-br from-[hsl(263,90%,62%)] to-[hsl(280,85%,48%)] rounded-xl flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/30">
-                      <Zap className="w-[18px] h-[18px] text-white" />
-                    </div>
-                    <span className="text-lg font-bold" style={{ fontFamily: "'Outfit', sans-serif" }}>
-                      WB<span className="text-[hsl(263,90%,72%)]">Gen</span>
-                    </span>
-                  </Link>
-            {/* Logo */}
+            {/* Logo (mobile + tablet only — desktop has it in left panel) */}
             <div className="text-center mb-8">
-              <Link to="/" className="inline-flex items-center gap-3 mb-4 group">
+              <Link to="/" className="inline-flex items-center gap-3 mb-4 group lg:hidden">
                 <div className="relative">
                   <div className="w-10 h-10 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_hsl(268,83%,60%,0.4)] transition-shadow duration-300">
                     <Zap className="w-5 h-5 text-white" />
