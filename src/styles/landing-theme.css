@@ -575,12 +575,12 @@
 .spotlight-card::before {
   content: "";
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
-  padding: 1px;
+  padding: 0.5px;
   background: radial-gradient(
     300px circle at var(--mx, 50%) var(--my, 50%),
-    hsl(263 90% 70% / 0.55),
+    hsl(263 90% 75% / 0.28),
     transparent 60%
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
