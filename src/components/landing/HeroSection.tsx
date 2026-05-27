@@ -120,7 +120,7 @@ export const HeroSection = () => {
               style={{ animationDelay: "360ms" }}
             >
               {trustStats.map((s) => (
-                <div
+                <SpotlightCard
                   key={s.label}
                   className="glass-card rounded-2xl p-4 sm:p-5 text-left"
                 >
@@ -131,7 +131,7 @@ export const HeroSection = () => {
                   <div className="text-[11px] sm:text-xs text-white/50 leading-tight">
                     {s.label}
                   </div>
-                </div>
+                </SpotlightCard>
               ))}
             </div>
 
