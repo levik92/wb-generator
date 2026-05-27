@@ -526,8 +526,9 @@ export function AdminUtmSources() {
               >
                 <Card className={cn(
                   "overflow-hidden transition-colors",
-                  source.is_pinned && "border-amber-500/40 bg-background"
+                  source.is_pinned && "border-amber-500/40 bg-card shadow-sm"
                 )}>
+
                   <CardContent className="p-4 md:p-5">
                     <div className="flex flex-col gap-4">
                       {/* Top row: name + actions */}
