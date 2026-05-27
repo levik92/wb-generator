@@ -17,7 +17,7 @@ interface SpotlightCardProps {
 export const SpotlightCard = ({
   children,
   className,
-  spotlightColor = "hsl(263 90% 60% / 0.18)",
+  spotlightColor = "hsl(263 90% 60% / 0.10)",
   magnetic = false,
 }: SpotlightCardProps) => {
   const ref = useRef<HTMLDivElement>(null);

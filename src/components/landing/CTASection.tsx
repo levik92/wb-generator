@@ -2,7 +2,6 @@ import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "./effects/SpotlightCard";
-import illuRocket from "@/assets/landing/illu-rocket.png";
 
 export const CTASection = () => {
   return (
@@ -12,27 +11,6 @@ export const CTASection = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] max-w-[100vw] bg-[hsl(263,90%,50%)] rounded-full blur-[160px] opacity-[0.22]" />
       <div className="absolute inset-0 grid-pattern opacity-[0.07]" />
 
-      {/* Decorative rocket illustrations */}
-      <img
-        src={illuRocket}
-        alt=""
-        aria-hidden="true"
-        width={1024}
-        height={1024}
-        loading="lazy"
-        decoding="async"
-        className="hidden lg:block absolute top-12 left-4 xl:left-16 w-[200px] xl:w-[260px] h-auto object-contain opacity-90 animate-[float_8s_ease-in-out_infinite] drop-shadow-[0_30px_60px_hsl(263,90%,40%,0.45)] pointer-events-none -rotate-12"
-      />
-      <img
-        src={illuRocket}
-        alt=""
-        aria-hidden="true"
-        width={1024}
-        height={1024}
-        loading="lazy"
-        decoding="async"
-        className="hidden lg:block absolute bottom-16 right-4 xl:right-16 w-[180px] xl:w-[220px] h-auto object-contain opacity-80 animate-[float_9s_ease-in-out_infinite] drop-shadow-[0_30px_60px_hsl(263,90%,40%,0.4)] pointer-events-none rotate-12 [animation-delay:-2s]"
-      />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
