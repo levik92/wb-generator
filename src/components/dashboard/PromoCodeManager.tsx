@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogTrigger } from "@/components/ui/responsive-dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, Tag } from "lucide-react";
+import { Plus, Edit, Trash2, Tag, Calendar, Users, Infinity as InfinityIcon } from "lucide-react";
 
 type PromoType = 'tokens' | 'discount' | 'tokens_instant';
 
