@@ -1,5 +1,6 @@
 import { ShoppingBag, Briefcase, Paintbrush, GraduationCap } from "lucide-react";
 import { SpotlightCard } from "./effects/SpotlightCard";
+import illuPeople from "@/assets/landing/illu-people.png";
 
 const audiences = [
   {
