@@ -429,27 +429,20 @@ const KnowledgeBase = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-3xl font-bold text-[hsl(268,83%,65%)] mb-2">1</div>
-                <h3 className="font-semibold text-white mb-2">Регистрация</h3>
-                <p className="text-white/60 text-sm">
-                  Создайте аккаунт за 30 секунд через email или Google. Получите бесплатные токены.
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-3xl font-bold text-[hsl(268,83%,65%)] mb-2">2</div>
-                <h3 className="font-semibold text-white mb-2">Загрузка фото</h3>
-                <p className="text-white/60 text-sm">
-                  Загрузите качественное фото товара и укажите категорию с описанием.
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-3xl font-bold text-[hsl(268,83%,65%)] mb-2">3</div>
-                <h3 className="font-semibold text-white mb-2">Генерация</h3>
-                <p className="text-white/60 text-sm">
-                  Выберите стиль и нажмите «Сгенерировать». Через 2-3 минуты карточки готовы.
-                </p>
-              </div>
+              {[
+                { n: 1, title: "Регистрация", text: "Создайте аккаунт за 30 секунд через email или Google. Получите бесплатные токены." },
+                { n: 2, title: "Загрузка фото", text: "Загрузите качественное фото товара и укажите категорию с описанием." },
+                { n: 3, title: "Генерация", text: "Выберите стиль и нажмите «Сгенерировать». Через 2-3 минуты карточки готовы." },
+              ].map((s) => (
+                <div key={s.n} className="group relative">
+                  <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-xl p-6 border border-white/10 group-hover:border-white/20 transition-colors h-full">
+                    <div className="text-3xl font-bold bg-gradient-to-br from-[hsl(268,83%,72%)] to-[hsl(290,83%,72%)] bg-clip-text text-transparent mb-2">{s.n}</div>
+                    <h3 className="font-semibold text-white mb-2">{s.title}</h3>
+                    <p className="text-white/60 text-sm">{s.text}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
