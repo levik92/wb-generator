@@ -37,11 +37,14 @@ export const LandingHeader = () => {
 
   return (
     <>
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "bg-[hsl(240,10%,6%)]/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
+          isScrolled
+            ? "bg-[hsl(0,0%,5%)]/85 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)]"
+            : "bg-gradient-to-b from-black/40 to-transparent border-b border-transparent"
         }`}
       >
+
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Mobile: Burger menu on left */}
