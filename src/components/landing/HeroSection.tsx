@@ -36,7 +36,7 @@ const trustStats = [
   { icon: Clock, value: "3 мин", label: "до готовой карточки" },
   { icon: TrendingUp, value: "от 59₽", label: "вместо 5000₽ дизайнеру" },
   { icon: Sparkles, value: "120 000+", label: "карточек уже создано" },
-  { icon: Zap, value: "10+", label: "стилей и форматов" },
+  { icon: Zap, value: "x12", label: "эффективнее дизайнера" },
 ];
 
 export const HeroSection = () => {
