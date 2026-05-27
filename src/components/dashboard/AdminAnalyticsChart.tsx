@@ -809,71 +809,79 @@ export function AdminLifetimeMetrics() {
   }
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Activity className="h-4 w-4 text-muted-foreground" />
-          Метрики за всё время
-        </CardTitle>
-        <CardDescription>Ключевые показатели платящих пользователей</CardDescription>
+    <Card className="animate-fade-in rounded-2xl border-border/60 bg-card shadow-sm overflow-hidden">
+      <CardHeader className="pb-4 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-transparent border-b border-border/50">
+        <div className="flex items-start gap-3">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+            <Activity className="h-4 w-4 text-white" />
+          </div>
+          <div className="min-w-0">
+            <CardTitle className="text-sm sm:text-base">Метрики за всё время</CardTitle>
+            <CardDescription className="text-xs mt-0.5">Ключевые показатели платящих пользователей</CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {/* LTV */}
-          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Coins className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-xs md:text-sm text-muted-foreground">LTV (дней)</span>
-            </div>
-            <div className="text-xl md:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {metrics?.avgLifetimeDays?.toLocaleString('ru-RU') || 0}
-            </div>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-              Ср. время жизни платного юзера
-            </p>
-          </div>
-
-          {/* Средняя прибыль с клиента */}
-          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <DollarSign className="h-3.5 w-3.5 text-blue-500" />
-              <span className="text-xs md:text-sm text-muted-foreground">Ср. прибыль</span>
-            </div>
-            <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {metrics?.avgRevenuePerCustomer?.toLocaleString('ru-RU') || 0}₽
-            </div>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-              На {metrics?.totalPaidUsers || 0} платящих
-            </p>
-          </div>
-
-          {/* Среднее кол-во транзакций */}
-          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Repeat className="h-3.5 w-3.5 text-violet-500" />
-              <span className="text-xs md:text-sm text-muted-foreground">Ср. транзакций</span>
-            </div>
-            <div className="text-xl md:text-2xl font-bold text-violet-600 dark:text-violet-400">
-              {metrics?.avgTransactionsPerUser || 0}
-            </div>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-              Всего: {metrics?.totalPaymentsCount?.toLocaleString('ru-RU') || 0} оплат
-            </p>
-          </div>
-
-          {/* Максимальная оплата */}
-          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-xs md:text-sm text-muted-foreground">Макс. от юзера</span>
-            </div>
-            <div className="text-xl md:text-2xl font-bold text-amber-600 dark:text-amber-400">
-              {metrics?.maxUserSpent?.toLocaleString('ru-RU') || 0}₽
-            </div>
-            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-              Совокупная сумма оплат
-            </p>
-          </div>
+      <CardContent className="p-3 sm:p-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+          {[
+            {
+              icon: Coins,
+              label: 'LTV (дней)',
+              value: metrics?.avgLifetimeDays?.toLocaleString('ru-RU') || 0,
+              caption: 'Ср. время жизни платного юзера',
+              tint: 'emerald',
+            },
+            {
+              icon: DollarSign,
+              label: 'Ср. прибыль',
+              value: `${metrics?.avgRevenuePerCustomer?.toLocaleString('ru-RU') || 0}₽`,
+              caption: `На ${metrics?.totalPaidUsers || 0} платящих`,
+              tint: 'blue',
+            },
+            {
+              icon: Repeat,
+              label: 'Ср. транзакций',
+              value: metrics?.avgTransactionsPerUser || 0,
+              caption: `Всего: ${metrics?.totalPaymentsCount?.toLocaleString('ru-RU') || 0} оплат`,
+              tint: 'violet',
+            },
+            {
+              icon: TrendingUp,
+              label: 'Макс. от юзера',
+              value: `${metrics?.maxUserSpent?.toLocaleString('ru-RU') || 0}₽`,
+              caption: 'Совокупная сумма оплат',
+              tint: 'amber',
+            },
+          ].map(({ icon: Icon, label, value, caption, tint }) => {
+            const tintMap: Record<string, { bg: string; icon: string; text: string; ring: string }> = {
+              emerald: { bg: 'bg-emerald-500/10', icon: 'text-emerald-500', text: 'text-emerald-600 dark:text-emerald-400', ring: 'hover:border-emerald-500/30' },
+              blue: { bg: 'bg-blue-500/10', icon: 'text-blue-500', text: 'text-blue-600 dark:text-blue-400', ring: 'hover:border-blue-500/30' },
+              violet: { bg: 'bg-violet-500/10', icon: 'text-violet-500', text: 'text-violet-600 dark:text-violet-400', ring: 'hover:border-violet-500/30' },
+              amber: { bg: 'bg-amber-500/10', icon: 'text-amber-500', text: 'text-amber-600 dark:text-amber-400', ring: 'hover:border-amber-500/30' },
+            };
+            const c = tintMap[tint];
+            return (
+              <div
+                key={label}
+                className={`group relative p-3 sm:p-4 rounded-xl bg-card border border-border/60 ${c.ring} shadow-sm hover:shadow-md transition-all`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`h-6 w-6 rounded-lg ${c.bg} flex items-center justify-center shrink-0`}>
+                    <Icon className={`h-3.5 w-3.5 ${c.icon}`} />
+                  </div>
+                  <span className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wide truncate">
+                    {label}
+                  </span>
+                </div>
+                <div className={`text-lg sm:text-2xl font-bold tabular-nums ${c.text} leading-tight`}>
+                  {value}
+                </div>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 leading-snug">
+                  {caption}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>
