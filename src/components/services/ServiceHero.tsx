@@ -252,7 +252,7 @@ export const ServiceHero = ({
                 whileHover={{ rotate: -5, scale: 1.05, y: -10 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="absolute right-[36%] lg:right-[40%] top-[5%] w-[280px] sm:w-[360px] lg:w-[400px] h-[380px] sm:h-[500px] lg:h-[560px] rounded-3xl overflow-hidden shadow-2xl z-30"
-                style={{ boxShadow: "0 40px 80px -20px rgba(139, 92, 246, 0.35), 0 30px 60px -15px rgba(0, 0, 0, 0.5)" }}
+                style={{ boxShadow: `0 40px 80px -20px ${theme.ring}, 0 30px 60px -15px rgba(0, 0, 0, 0.5)` }}
               >
                 <img src={heroImages[0]} alt="Card 1" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
