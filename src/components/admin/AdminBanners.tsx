@@ -411,46 +411,70 @@ export const AdminBanners = () => {
             </Button>
           </ResponsiveDialogTrigger>
           <ResponsiveDialogContent className="sm:max-w-lg">
-            <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>
-                {editingBanner ? "Редактировать баннер" : "Новый баннер"}
-              </ResponsiveDialogTitle>
+            <ResponsiveDialogHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+                  {editingBanner ? <Pencil className="h-4 w-4 text-white" /> : <Plus className="h-4 w-4 text-white" />}
+                </div>
+                <div className="min-w-0">
+                  <ResponsiveDialogTitle className="text-lg">
+                    {editingBanner ? "Редактировать баннер" : "Новый баннер"}
+                  </ResponsiveDialogTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Заполните поля — превью обновляется в реальном времени
+                  </p>
+                </div>
+              </div>
             </ResponsiveDialogHeader>
-            <div className="space-y-4 py-4">
-              {/* Preview */}
-              <div
-                className="rounded-xl p-4 text-white"
-                style={{
-                  background: `linear-gradient(135deg, ${formData.gradient_start} 0%, ${formData.gradient_end} 100%)`,
-                }}
-              >
-                <h4 className="font-semibold text-sm mb-1">
-                  {formData.title || "Заголовок баннера"}
-                </h4>
-                <p className="text-xs opacity-90">
-                  {formData.description || "Описание баннера..."}
-                </p>
+
+            <div className="space-y-5 py-2">
+              {/* Live Preview */}
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Превью</Label>
+                <div
+                  className="relative rounded-2xl p-5 text-white shadow-lg overflow-hidden ring-1 ring-border/40"
+                  style={{
+                    background: `linear-gradient(135deg, ${formData.gradient_start} 0%, ${formData.gradient_end} 100%)`,
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                  <div className="relative">
+                    <h4 className="font-semibold text-base mb-1 line-clamp-2">
+                      {formData.title || "Заголовок баннера"}
+                    </h4>
+                    <p className="text-sm opacity-90 line-clamp-3">
+                      {formData.description || "Описание баннера появится здесь..."}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Title */}
               <div className="space-y-2">
-                <Label htmlFor="title">
-                  Заголовок <span className="text-muted-foreground">({formData.title.length}/100)</span>
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="title" className="text-sm font-medium">Заголовок</Label>
+                  <span className={`text-xs tabular-nums ${formData.title.length >= 90 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                    {formData.title.length}/100
+                  </span>
+                </div>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value.slice(0, 100) }))}
                   placeholder="Введите заголовок"
                   maxLength={100}
+                  className="focus-visible:ring-violet-500/40"
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">
-                  Описание <span className="text-muted-foreground">({formData.description.length}/200)</span>
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description" className="text-sm font-medium">Описание</Label>
+                  <span className={`text-xs tabular-nums ${formData.description.length >= 180 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                    {formData.description.length}/200
+                  </span>
+                </div>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -458,94 +482,110 @@ export const AdminBanners = () => {
                   placeholder="Введите описание"
                   maxLength={200}
                   rows={3}
+                  className="resize-none focus-visible:ring-violet-500/40"
                 />
               </div>
 
               {/* Gradient presets */}
               <div className="space-y-2">
-                <Label>Цвет градиента</Label>
-                <div className="flex flex-wrap gap-2">
-                  {presetGradients.map((preset) => (
-                    <button
-                      key={preset.name}
-                      type="button"
-                      className={`h-8 w-8 rounded-lg border-2 transition-all ${
-                        formData.gradient_start === preset.start && formData.gradient_end === preset.end
-                          ? 'border-foreground scale-110'
-                          : 'border-transparent hover:scale-105'
-                      }`}
-                      style={{
-                        background: `linear-gradient(135deg, ${preset.start}, ${preset.end})`,
-                      }}
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        gradient_start: preset.start,
-                        gradient_end: preset.end,
-                      }))}
-                      title={preset.name}
-                    />
-                  ))}
+                <Label className="text-sm font-medium">Цвет градиента</Label>
+                <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-muted/40 border border-border/50">
+                  {presetGradients.map((preset) => {
+                    const isActive = formData.gradient_start === preset.start && formData.gradient_end === preset.end;
+                    return (
+                      <button
+                        key={preset.name}
+                        type="button"
+                        className={`relative h-10 w-10 rounded-xl transition-all duration-200 ${
+                          isActive
+                            ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-background scale-105 shadow-md'
+                            : 'ring-1 ring-border/40 hover:scale-105 hover:ring-border'
+                        }`}
+                        style={{
+                          background: `linear-gradient(135deg, ${preset.start}, ${preset.end})`,
+                        }}
+                        onClick={() => setFormData(prev => ({
+                          ...prev,
+                          gradient_start: preset.start,
+                          gradient_end: preset.end,
+                        }))}
+                        title={preset.name}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Custom colors */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="gradient_start">Цвет начала</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      id="gradient_start"
-                      value={formData.gradient_start}
-                      onChange={(e) => setFormData(prev => ({ ...prev, gradient_start: e.target.value }))}
-                      className="h-10 w-14 rounded border cursor-pointer"
-                    />
-                    <Input
-                      value={formData.gradient_start}
-                      onChange={(e) => setFormData(prev => ({ ...prev, gradient_start: e.target.value }))}
-                      className="flex-1"
-                    />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Свои цвета</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="gradient_start" className="text-xs text-muted-foreground">Начало</Label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        id="gradient_start"
+                        value={formData.gradient_start}
+                        onChange={(e) => setFormData(prev => ({ ...prev, gradient_start: e.target.value }))}
+                        className="h-10 w-12 rounded-lg border border-border/50 cursor-pointer bg-transparent shrink-0"
+                      />
+                      <Input
+                        value={formData.gradient_start}
+                        onChange={(e) => setFormData(prev => ({ ...prev, gradient_start: e.target.value }))}
+                        className="flex-1 font-mono text-xs uppercase focus-visible:ring-violet-500/40"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="gradient_end">Цвет конца</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      id="gradient_end"
-                      value={formData.gradient_end}
-                      onChange={(e) => setFormData(prev => ({ ...prev, gradient_end: e.target.value }))}
-                      className="h-10 w-14 rounded border cursor-pointer"
-                    />
-                    <Input
-                      value={formData.gradient_end}
-                      onChange={(e) => setFormData(prev => ({ ...prev, gradient_end: e.target.value }))}
-                      className="flex-1"
-                    />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="gradient_end" className="text-xs text-muted-foreground">Конец</Label>
+                    <div className="flex gap-2">
+                      <input
+                        type="color"
+                        id="gradient_end"
+                        value={formData.gradient_end}
+                        onChange={(e) => setFormData(prev => ({ ...prev, gradient_end: e.target.value }))}
+                        className="h-10 w-12 rounded-lg border border-border/50 cursor-pointer bg-transparent shrink-0"
+                      />
+                      <Input
+                        value={formData.gradient_end}
+                        onChange={(e) => setFormData(prev => ({ ...prev, gradient_end: e.target.value }))}
+                        className="flex-1 font-mono text-xs uppercase focus-visible:ring-violet-500/40"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Active toggle */}
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_active">Активный баннер</Label>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-muted/30">
+                <div>
+                  <Label htmlFor="is_active" className="text-sm font-medium cursor-pointer">Активный баннер</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Показывать пользователям сразу после создания</p>
+                </div>
                 <Switch
                   id="is_active"
                   checked={formData.is_active}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                  className="data-[state=checked]:bg-violet-500"
                 />
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-border/50">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="sm:w-auto">
                   Отмена
                 </Button>
-                <Button onClick={handleSubmit} disabled={saving}>
-                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {editingBanner ? "Сохранить" : "Создать"}
+                <Button
+                  onClick={handleSubmit}
+                  disabled={saving}
+                  className="sm:w-auto gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
+                >
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {editingBanner ? "Сохранить" : "Создать баннер"}
                 </Button>
               </div>
+
             </div>
           </ResponsiveDialogContent>
         </ResponsiveDialog>
