@@ -424,19 +424,19 @@ export const AdminVideoLessons = () => {
                             className="data-[state=checked]:bg-violet-500"
                           />
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={() => openEditDialog(lesson)}
-                            className="h-8 w-8 p-0 hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-400"
+                            className="h-8 w-8 p-0 border-0 hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
-                                className="text-destructive hover:bg-destructive hover:text-white h-8 w-8 p-0"
+                                className="h-8 w-8 p-0 border-0 text-destructive hover:bg-destructive hover:text-white transition-colors"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </Button>
