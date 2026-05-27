@@ -92,48 +92,52 @@ const Blog = () => {
                   key={post.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="glass-card rounded-2xl overflow-hidden group"
+                  transition={{ delay: index * 0.06 }}
+                  className="group relative"
                 >
-                  {post.image_url && (
-                    <div className="aspect-video overflow-hidden">
-                      <img 
-                        src={post.image_url} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${tagColors[post.tag] || 'bg-gray-500/20 text-gray-400'}`}>
-                        {post.tag}
-                      </span>
-                      <div className="flex items-center gap-1 text-white/40 text-xs">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(post.published_at || post.created_at)}
+                  <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/40 via-transparent to-[hsl(290,83%,60%)]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-2xl overflow-hidden border border-white/10 group-hover:border-white/20 transition-colors h-full flex flex-col">
+                    {post.image_url && (
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={post.image_url}
+                          alt={post.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
                       </div>
-                    </div>
-                    
-                    <h2 className="text-lg font-bold text-white mb-3 group-hover:text-[hsl(268,83%,65%)] transition-colors line-clamp-2">
-                      {post.title}
-                    </h2>
-                    
-                    <p className="text-white/60 text-sm mb-4 line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-white/40 text-xs">
-                        <Eye className="w-3 h-3" />
-                        {post.views} просмотров
+                    )}
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${tagColors[post.tag] || 'bg-gray-500/20 text-gray-400'}`}>
+                          {post.tag}
+                        </span>
+                        <div className="flex items-center gap-1 text-white/40 text-xs">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(post.published_at || post.created_at)}
+                        </div>
                       </div>
-                      <Link 
-                        to={`/blog/${post.slug}`}
-                        className="text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 hover:gap-2 transition-all"
-                      >
-                        Читать <ArrowRight className="w-4 h-4" />
-                      </Link>
+
+                      <h2 className="text-lg font-bold text-white mb-3 group-hover:text-[hsl(268,83%,72%)] transition-colors line-clamp-2">
+                        {post.title}
+                      </h2>
+
+                      <p className="text-white/60 text-sm mb-4 line-clamp-3 flex-1">
+                        {post.excerpt}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div className="flex items-center gap-1 text-white/40 text-xs">
+                          <Eye className="w-3 h-3" />
+                          {post.views} просмотров
+                        </div>
+                        <Link
+                          to={`/blog/${post.slug}`}
+                          className="text-[hsl(268,83%,72%)] text-sm flex items-center gap-1 hover:gap-2 transition-all"
+                        >
+                          Читать <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </motion.article>
