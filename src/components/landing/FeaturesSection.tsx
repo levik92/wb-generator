@@ -49,14 +49,24 @@ export const FeaturesSection = () => {
             className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-6 sm:p-8 overflow-hidden"
           >
             <div className="absolute -top-24 -right-24 w-72 h-72 bg-[hsl(263,90%,55%)] rounded-full blur-[100px] opacity-30 transition-opacity" />
-            <div className="relative">
+            <img
+              src={illuPhoneCard}
+              alt=""
+              aria-hidden="true"
+              width={1024}
+              height={1024}
+              loading="lazy"
+              decoding="async"
+              className="hidden md:block absolute -right-8 -bottom-8 w-[280px] lg:w-[340px] h-auto object-contain opacity-95 animate-[float_7s_ease-in-out_infinite] drop-shadow-[0_30px_60px_hsl(263,90%,40%,0.45)] pointer-events-none"
+            />
+            <div className="relative md:max-w-[58%]">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center mb-5 shadow-lg shadow-[hsl(263,90%,40%)]/30">
                 <ImageIcon className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">
                 Генерация карточек товара
               </h3>
-              <p className="text-white/60 text-sm sm:text-base max-w-md mb-5 leading-relaxed">
+              <p className="text-white/60 text-sm sm:text-base mb-5 leading-relaxed">
                 AI собирает обложку и инфографику с фокусом на CTR и рекламу.
                 До 6 вариантов за раз — удобно тестировать.
               </p>
@@ -77,6 +87,7 @@ export const FeaturesSection = () => {
               </ul>
             </div>
           </SpotlightCard>
+
 
           {/* Speed */}
           <SpotlightCard className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
