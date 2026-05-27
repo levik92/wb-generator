@@ -810,19 +810,16 @@ export function AdminLifetimeMetrics() {
 
   return (
     <Card className="animate-fade-in rounded-2xl border-border/60 bg-card shadow-sm overflow-hidden">
-      <CardHeader className="pb-4 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-transparent border-b border-border/50">
-        <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-4 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
             <Activity className="h-4 w-4 text-white" />
-          </div>
-          <div className="min-w-0">
-            <CardTitle className="text-sm sm:text-base">Метрики за всё время</CardTitle>
-            <CardDescription className="text-xs mt-0.5">Ключевые показатели платящих пользователей</CardDescription>
-          </div>
+          </span>
+          <CardTitle className="text-sm font-semibold truncate">Метрики за всё время</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-3 sm:p-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+      <CardContent className="p-4 sm:p-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[
             {
               icon: Coins,
@@ -853,17 +850,17 @@ export function AdminLifetimeMetrics() {
               tint: 'amber',
             },
           ].map(({ icon: Icon, label, value, caption, tint }) => {
-            const tintMap: Record<string, { bg: string; icon: string; text: string; ring: string }> = {
-              emerald: { bg: 'bg-emerald-500/10', icon: 'text-emerald-500', text: 'text-emerald-600 dark:text-emerald-400', ring: 'hover:border-emerald-500/30' },
-              blue: { bg: 'bg-blue-500/10', icon: 'text-blue-500', text: 'text-blue-600 dark:text-blue-400', ring: 'hover:border-blue-500/30' },
-              violet: { bg: 'bg-violet-500/10', icon: 'text-violet-500', text: 'text-violet-600 dark:text-violet-400', ring: 'hover:border-violet-500/30' },
-              amber: { bg: 'bg-amber-500/10', icon: 'text-amber-500', text: 'text-amber-600 dark:text-amber-400', ring: 'hover:border-amber-500/30' },
+            const tintMap: Record<string, { bg: string; icon: string; text: string }> = {
+              emerald: { bg: 'bg-emerald-500/10', icon: 'text-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
+              blue: { bg: 'bg-blue-500/10', icon: 'text-blue-500', text: 'text-blue-600 dark:text-blue-400' },
+              violet: { bg: 'bg-violet-500/10', icon: 'text-violet-500', text: 'text-violet-600 dark:text-violet-400' },
+              amber: { bg: 'bg-amber-500/10', icon: 'text-amber-500', text: 'text-amber-600 dark:text-amber-400' },
             };
             const c = tintMap[tint];
             return (
               <div
                 key={label}
-                className={`group relative p-3 sm:p-4 rounded-xl bg-card border border-border/60 ${c.ring} shadow-sm hover:shadow-md transition-all`}
+                className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px] flex flex-col"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`h-6 w-6 rounded-lg ${c.bg} flex items-center justify-center shrink-0`}>
