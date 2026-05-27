@@ -178,7 +178,7 @@ export const PromoCodeManager = () => {
                 Создать промокод
               </Button>
             </ResponsiveDialogTrigger>
-            <ResponsiveDialogContent className="sm:max-w-md !max-w-[calc(100vw-2rem)]">
+            <ResponsiveDialogContent className="sm:max-w-md">
               <ResponsiveDialogHeader>
                 <ResponsiveDialogTitle>{editingPromo ? 'Редактировать промокод' : 'Создать промокод'}</ResponsiveDialogTitle>
                 <ResponsiveDialogDescription>Настройте параметры промокода для пользователей</ResponsiveDialogDescription>
@@ -198,7 +198,7 @@ export const PromoCodeManager = () => {
                       maxUsesPerUser: newType === 'tokens_instant' ? '1' : formData.maxUsesPerUser
                     });
                   }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="text-base md:text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {TYPE_OPTIONS.map(opt => (
                         <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
@@ -206,6 +206,7 @@ export const PromoCodeManager = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="value">
                     {formData.type === 'discount' ? 'Размер скидки (%)' : 'Количество токенов'}
