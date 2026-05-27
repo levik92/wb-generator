@@ -90,17 +90,17 @@ export const AdminMobileMenu = ({ activeTab, onTabChange, unreadSupportCount = 0
                   <li key={item.id}>
                     <Button
                       variant="ghost"
-                      className={`w-full justify-start px-3 h-11 rounded-[17px] transition-all duration-200 ${
+                      className={`group w-full justify-start px-3 h-11 rounded-[14px] transition-all duration-200 ${
                         isActive 
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' 
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                          ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-500 hover:to-purple-600 hover:text-white font-medium shadow-md shadow-violet-500/25' 
+                          : 'text-muted-foreground hover:text-violet-600 hover:bg-violet-500/10'
                       }`}
                       onClick={() => handleTabChange(item.id)}
                     >
-                      <Icon className={`w-[18px] h-[18px] mr-3 ${isActive ? 'text-primary-foreground' : ''}`} />
+                      <Icon className={`w-[18px] h-[18px] mr-3 ${isActive ? 'text-white' : 'group-hover:text-violet-600'}`} />
                       <span className="flex-1 text-left text-sm">{item.label}</span>
                       {(item as any).badge && (
-                        <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/90 text-destructive border-white/90' : 'bg-destructive text-destructive-foreground border-destructive'} rounded-full shadow-sm font-semibold`}>
+                        <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/95 text-violet-600 border-white/95' : 'bg-violet-500 text-white border-violet-500'} rounded-full shadow-sm font-semibold`}>
                           {(item as any).badge}
                         </Badge>
                       )}
