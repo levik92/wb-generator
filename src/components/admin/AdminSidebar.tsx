@@ -100,25 +100,27 @@ export const AdminSidebar = ({ activeTab, onTabChange, unreadSupportCount = 0, p
               <li key={item.id} className="relative">
                 <Button
                   variant="ghost"
-                  className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[17px] transition-all duration-200 ${
-                    isActive ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                  className={`group w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start px-3'} h-11 rounded-[14px] transition-all duration-200 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-500 hover:to-purple-600 hover:text-white font-medium shadow-md shadow-violet-500/25'
+                      : 'text-muted-foreground hover:text-violet-600 hover:bg-violet-500/10'
                   }`}
                   onClick={() => onTabChange(item.id)}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-primary-foreground' : ''}`} />
+                  <Icon className={`w-[18px] h-[18px] ${!isCollapsed ? 'mr-3' : ''} ${isActive ? 'text-white' : 'group-hover:text-violet-600'}`} />
                   {!isCollapsed && <span className="flex-1 text-left text-sm">{item.label}</span>}
                 </Button>
                 {(item as any).badge && !isCollapsed && (
                   <div className="absolute top-1/2 -translate-y-1/2 right-3">
-                    <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/90 text-destructive border-white/90' : (item as any).badgeColor || 'bg-muted text-muted-foreground border-border'} rounded-full shadow-sm pointer-events-none font-semibold`}>
+                    <Badge className={`text-[10px] px-1.5 py-0 h-5 min-w-[20px] flex items-center justify-center ${isActive ? 'bg-white/95 text-violet-600 border-white/95' : (item as any).badgeColor || 'bg-muted text-muted-foreground border-border'} rounded-full shadow-sm pointer-events-none font-semibold`}>
                       {(item as any).badge}
                     </Badge>
                   </div>
                 )}
                 {(item as any).badge && isCollapsed && (
                   <div className="absolute -top-0.5 -right-0.5">
-                    <div className="w-2.5 h-2.5 bg-destructive rounded-full" />
+                    <div className="w-2.5 h-2.5 bg-violet-500 rounded-full ring-2 ring-card" />
                   </div>
                 )}
               </li>
