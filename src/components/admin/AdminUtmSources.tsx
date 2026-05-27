@@ -591,13 +591,13 @@ export function AdminUtmSources() {
                         </div>
                       </div>
 
-                      {/* Funnel stats */}
-                      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 md:gap-3">
+                      {/* Funnel stats — desktop */}
+                      <div className="hidden sm:grid grid-cols-6 gap-3">
                         <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Переходы</p>
                           {renderNum(s.visits, "text-blue-500")}
                         </div>
-                        <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
+                        <div className="p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
                           {renderConv(s.visits, s.registrations)}
                         </div>
@@ -605,7 +605,7 @@ export function AdminUtmSources() {
                           <p className="text-[10px] text-muted-foreground mb-0.5">Регистрации</p>
                           {renderNum(s.registrations, "text-emerald-500")}
                         </div>
-                        <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
+                        <div className="p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
                           {renderConv(s.registrations, s.payments)}
                         </div>
@@ -621,7 +621,7 @@ export function AdminUtmSources() {
                         <button
                           type="button"
                           onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
-                          className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center col-span-2 sm:col-span-1 hover:bg-violet-500/10 transition-colors cursor-pointer"
+                          className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center hover:bg-violet-500/10 transition-colors cursor-pointer"
                           title="Посмотреть оплаты по источнику"
                         >
                           <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
@@ -630,17 +630,52 @@ export function AdminUtmSources() {
                             : <p className="text-base font-bold text-violet-500">{formatRub(s.revenue)}</p>}
                         </button>
                       </div>
-                      
-                      {/* Mobile conversion row */}
-                      <div className="flex sm:hidden gap-2">
-                        <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
-                          <p className="text-[10px] text-muted-foreground">Переход → Рег.</p>
-                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.visits, s.registrations)}</p>}
+
+                      {/* Funnel stats — mobile (compact funnel) */}
+                      <div className="sm:hidden space-y-2">
+                        <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-1.5">
+                          <div className="p-2 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
+                            <p className="text-[9px] text-muted-foreground leading-tight">Переходы</p>
+                            {renderNum(s.visits, "text-blue-500")}
+                          </div>
+                          <div className="flex flex-col items-center justify-center px-0.5">
+                            <ChevronRight className="w-3 h-3 text-muted-foreground/60" />
+                            {isStatLoading
+                              ? <Loader2 className="w-2.5 h-2.5 animate-spin text-muted-foreground" />
+                              : <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{getConversion(s.visits, s.registrations)}</span>}
+                          </div>
+                          <div className="p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-center">
+                            <p className="text-[9px] text-muted-foreground leading-tight">Рег.</p>
+                            {renderNum(s.registrations, "text-emerald-500")}
+                          </div>
+                          <div className="flex flex-col items-center justify-center px-0.5">
+                            <ChevronRight className="w-3 h-3 text-muted-foreground/60" />
+                            {isStatLoading
+                              ? <Loader2 className="w-2.5 h-2.5 animate-spin text-muted-foreground" />
+                              : <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{getConversion(s.registrations, s.payments)}</span>}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
+                            className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center hover:bg-amber-500/10 transition-colors"
+                          >
+                            <p className="text-[9px] text-muted-foreground leading-tight">Оплаты</p>
+                            {renderNum(s.payments, "text-amber-500")}
+                          </button>
                         </div>
-                        <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
-                          <p className="text-[10px] text-muted-foreground">Рег. → Оплата</p>
-                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.registrations, s.payments)}</p>}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
+                          className="w-full flex items-center justify-between gap-3 p-2.5 rounded-lg bg-gradient-to-r from-violet-500/[0.08] to-violet-500/[0.03] border border-violet-500/15 hover:from-violet-500/[0.12] transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Wallet className="w-3.5 h-3.5 text-violet-500" />
+                            <span className="text-xs text-muted-foreground">Сумма оплат</span>
+                          </div>
+                          {isStatLoading
+                            ? <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
+                            : <span className="text-sm font-bold text-violet-500 tabular-nums">{formatRub(s.revenue)}</span>}
+                        </button>
                       </div>
                     </div>
                   </CardContent>
