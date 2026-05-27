@@ -16,7 +16,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
-import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2, Newspaper, FileText, Tag as TagIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2, Newspaper, FileText, Tag as TagIcon, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -59,6 +59,12 @@ export const AdminNews = () => {
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleExpanded = (id: string) => setExpandedIds(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
   const ITEMS_PER_PAGE = 10;
   const [formData, setFormData] = useState({
     title: '',
@@ -414,7 +420,7 @@ export const AdminNews = () => {
                   {paginatedNews.map((item) => (
             <Card key={item.id} className={`group rounded-2xl border-border/60 bg-card shadow-sm transition-all hover:border-violet-500/30 hover:shadow-md ${!item.is_published ? 'border-amber-500/30 bg-amber-500/[0.03]' : ''}`}>
               <CardHeader className="pb-3">
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} border-0 hover:bg-inherit`}>
@@ -447,7 +453,7 @@ export const AdminNews = () => {
                       )}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-1 lg:gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0 md:pt-1 flex-wrap md:flex-nowrap justify-end">
                     <Button
                       variant="outline"
                       size="sm"
@@ -474,7 +480,7 @@ export const AdminNews = () => {
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white hover:border-destructive h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3">
+                        <Button variant="outline" size="sm" className="text-destructive border-border hover:bg-destructive hover:text-white hover:border-transparent h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3 [&_svg]:hover:text-white">
                           <Trash2 className="w-3.5 h-3.5" />
                           <span className="hidden lg:inline ml-1.5">Удалить</span>
                         </Button>
@@ -501,14 +507,36 @@ export const AdminNews = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="bg-muted/40 border border-border/40 rounded-xl p-3.5 text-sm max-h-28 overflow-hidden relative">
-                  <p className="whitespace-pre-wrap leading-relaxed">{item.content}</p>
-                  {item.content.length > 200 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent" />
-                  )}
-                </div>
+                {(() => {
+                  const isExpanded = expandedIds.has(item.id);
+                  const isLong = item.content.length > 200;
+                  return (
+                    <div className="space-y-2">
+                      <div className={`bg-muted/40 border border-border/40 rounded-xl p-3.5 text-sm relative overflow-hidden transition-all ${isExpanded ? '' : 'max-h-28'}`}>
+                        <p className="whitespace-pre-wrap leading-relaxed">{item.content}</p>
+                        {isLong && !isExpanded && (
+                          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+                        )}
+                      </div>
+                      {isLong && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpanded(item.id)}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                        >
+                          {isExpanded ? (
+                            <>Свернуть <ChevronUp className="w-3.5 h-3.5" /></>
+                          ) : (
+                            <>Развернуть <ChevronDown className="w-3.5 h-3.5" /></>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
+
                   ))}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center flex-wrap gap-1.5 pt-4">
