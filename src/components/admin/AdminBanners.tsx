@@ -136,10 +136,10 @@ const SystemStatusControl = () => {
     <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
       <CardHeader className="bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50 pb-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
             <Activity className="h-4 w-4 text-white" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <CardTitle className="text-base">Статус системы</CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">Глобальное уведомление о работоспособности сервиса</p>
           </div>
