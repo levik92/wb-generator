@@ -147,7 +147,8 @@ export const ServiceHero = ({
             className="max-w-2xl lg:pr-8"
           >
             {badge && (
-              <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/60 mb-8">
+              <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full ${theme.badgeBg} border border-white/10 text-sm ${theme.badgeText} mb-8 backdrop-blur-sm`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                 {badge}
               </span>
             )}
@@ -161,12 +162,12 @@ export const ServiceHero = ({
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
               {title}
               <br />
-              <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)] bg-clip-text text-transparent">
+              <span className={`bg-gradient-to-r ${theme.titleGradient} bg-clip-text text-transparent`}>
                 {subtitle}
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-white/50 mb-10 max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-white/55 mb-10 max-w-xl leading-relaxed">
               {description}
             </p>
 
@@ -176,7 +177,8 @@ export const ServiceHero = ({
                   <Link to={ctaLink}>
                     <Button 
                       size="lg" 
-                      className="w-full sm:w-auto bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] hover:from-[hsl(268,83%,50%)] hover:to-[hsl(280,90%,50%)] text-white border-0 px-8 py-6 text-lg font-semibold"
+                      className={`w-full sm:w-auto bg-gradient-to-r ${theme.ctaGradient} ${theme.ctaHover} text-white border-0 px-8 py-6 text-lg font-semibold shadow-lg`}
+                      style={{ boxShadow: `0 10px 40px -10px ${theme.ring}` }}
                     >
                       {ctaText}
                       <ArrowRight className="ml-2 w-5 h-5" />
@@ -205,13 +207,16 @@ export const ServiceHero = ({
                       placeholder="your@email.com"
                       className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-white/30"
                     />
-                    <Button className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] text-white border-0">
+                    <Button className={`bg-gradient-to-r ${theme.ctaGradient} text-white border-0`}>
                       Подписаться
                     </Button>
                   </div>
                 </div>
               )}
             </div>
+
+            {signature && <div className="mb-10">{signature}</div>}
+
 
             {stats && stats.length > 0 && (
               <div className="flex flex-wrap gap-10 sm:gap-14">
