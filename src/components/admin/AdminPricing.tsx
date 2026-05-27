@@ -491,11 +491,11 @@ export function AdminPricing() {
                       </Label>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                      <div className="relative">
+                      <div className="relative flex-1 sm:flex-initial min-w-[7rem]">
                         <Input type="number" min="0" value={price.tokens_cost} onChange={e => {
                           const updated = generationPrices.map(p => p.id === price.id ? { ...p, tokens_cost: parseInt(e.target.value) || 0 } : p);
                           setGenerationPrices(updated);
-                        }} className="w-20 sm:w-24 text-xs sm:text-sm h-9 flex-shrink-0 tabular-nums pr-12" />
+                        }} className="w-full sm:w-28 text-xs sm:text-sm h-9 tabular-nums pr-11" />
                         <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">ток.</span>
                       </div>
                       <Button
