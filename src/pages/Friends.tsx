@@ -86,8 +86,12 @@ export default function Friends() {
                   key={friend.id}
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.08 }}
-                  className="group relative rounded-2xl border border-white/[0.06] bg-[#111111]/60 backdrop-blur-sm p-5 sm:p-6 hover:border-primary/30 hover:bg-[#111111]/80 transition-all duration-300 flex flex-col"
+                  transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.06 }}
+                  className="group relative"
+                >
+                  <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,58%)]/0 via-[hsl(280,83%,58%)]/0 to-[hsl(295,83%,58%)]/0 group-hover:from-[hsl(268,83%,58%)]/25 group-hover:to-[hsl(295,83%,58%)]/25 blur-md opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
+                  <div
+                  className="relative rounded-2xl border border-white/[0.06] bg-[#111111]/60 backdrop-blur-sm p-5 sm:p-6 hover:border-primary/30 hover:bg-[#111111]/80 transition-all duration-300 flex flex-col h-full"
                 >
                   <div
                     className="flex items-center gap-4 mb-4 cursor-pointer"
