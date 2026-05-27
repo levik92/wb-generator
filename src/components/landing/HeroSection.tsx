@@ -102,15 +102,14 @@ export const HeroSection = () => {
               </Link>
               <Button
                 size="lg"
-                variant="outline"
+                variant="ghost"
                 onClick={() => setIsVideoOpen(true)}
-                className="w-full sm:w-auto text-[15px] sm:text-base px-7 sm:px-9 py-6 sm:py-7 rounded-xl font-semibold bg-white/[0.03] border-white/15 text-white hover:bg-white/[0.07] hover:border-white/25 group"
+                className="w-full sm:w-auto text-[15px] sm:text-base px-7 sm:px-9 py-6 sm:py-7 rounded-xl font-semibold bg-transparent border-0 text-white hover:bg-transparent hover:text-white/80 group"
               >
-                <span className="w-7 h-7 rounded-full border border-white/20 flex items-center justify-center mr-2 group-hover:border-white/40 transition-colors">
-                  <Play className="w-3 h-3 ml-0.5" />
-                </span>
+                <Play className="w-4 h-4 mr-2" />
                 Демо за 60 секунд
               </Button>
+
             </div>
 
 
