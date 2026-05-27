@@ -553,30 +553,39 @@ export const AdminBanners = () => {
                         className="flex-1 font-mono text-xs uppercase focus-visible:ring-violet-500/40"
                       />
                     </div>
-
+                  </div>
                 </div>
               </div>
 
               {/* Active toggle */}
-              <div className="flex items-center justify-between">
-                <Label htmlFor="is_active">Активный баннер</Label>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-muted/30">
+                <div>
+                  <Label htmlFor="is_active" className="text-sm font-medium cursor-pointer">Активный баннер</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Показывать пользователям сразу после создания</p>
+                </div>
                 <Switch
                   id="is_active"
                   checked={formData.is_active}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                  className="data-[state=checked]:bg-violet-500"
                 />
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-border/50">
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="sm:w-auto">
                   Отмена
                 </Button>
-                <Button onClick={handleSubmit} disabled={saving}>
-                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {editingBanner ? "Сохранить" : "Создать"}
+                <Button
+                  onClick={handleSubmit}
+                  disabled={saving}
+                  className="sm:w-auto gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
+                >
+                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {editingBanner ? "Сохранить" : "Создать баннер"}
                 </Button>
               </div>
+
             </div>
           </ResponsiveDialogContent>
         </ResponsiveDialog>
