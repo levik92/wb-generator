@@ -31,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, Loader2, ExternalLink, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, ExternalLink, Upload, X, BookOpen, FileText, Tag as TagIcon, Link as LinkIcon, Image as ImageIcon, ListChecks } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface BlogPost {
@@ -52,11 +52,11 @@ interface BlogPost {
 const TAGS = ["Гайд", "Новости", "Советы", "Кейс", "Обновление"];
 
 const tagColors: Record<string, string> = {
-  "Гайд": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  "Новости": "bg-green-500/20 text-green-400 border-green-500/30",
-  "Советы": "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  "Кейс": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  "Обновление": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+  "Гайд": "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+  "Новости": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  "Советы": "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30",
+  "Кейс": "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+  "Обновление": "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/30",
 };
 
 export const AdminBlog = () => {
@@ -332,11 +332,14 @@ export const AdminBlog = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center py-16">
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
       </div>
     );
   }
+
+  const publishedCount = posts.filter(p => p.is_published).length;
+  const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);
 
   return (
     <div className="space-y-6">
