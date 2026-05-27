@@ -119,13 +119,13 @@ const PartnersPage = () => {
 
       {/* Hero Section with Partner Image */}
       <section className="relative pt-28 pb-0 sm:pt-36 overflow-hidden min-h-[80vh] flex items-end">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,8%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
-        <div 
-          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.06]"
-          style={{ background: 'radial-gradient(circle, hsl(268, 70%, 50%) 0%, transparent 60%)' }}
+        {/* Background — unified violet */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,50%,9%)] via-[hsl(260,40%,6%)] to-[hsl(240,30%,4%)]" />
+        <div
+          className="absolute w-[1200px] h-[1200px] -top-1/2 -left-1/4 rounded-full opacity-[0.08]"
+          style={{ background: 'radial-gradient(circle, hsl(263, 90%, 55%) 0%, transparent 60%)' }}
         />
-        
+
         <div className="container mx-auto px-4 sm:px-6 relative z-10 pb-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
             {/* Left Content */}
@@ -135,54 +135,55 @@ const PartnersPage = () => {
               transition={{ duration: 0.8 }}
               className="max-w-xl pb-16 lg:pb-24"
             >
-              <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-sm text-emerald-400 mb-8">
-                💰 Зарабатывайте с WBGen
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-white/70 mb-8">
+                <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                Партнёрская программа · 20% пожизненно
               </span>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1]">
-                Партнёрская
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.05] tracking-tight">
+                Зарабатывайте с
                 <br />
-                <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
-                  программа
+                <span className="bg-gradient-to-r from-[hsl(263,90%,72%)] via-[hsl(280,85%,72%)] to-[hsl(290,90%,75%)] bg-clip-text text-transparent">
+                  WBGen вместе
                 </span>
               </h1>
 
               <p className="text-lg text-white/60 mb-8 leading-relaxed">
-                Приглашайте пользователей в WBGen и получайте <span className="text-emerald-400 font-semibold">20% с каждой их покупки</span>. 
-                Пожизненно. Без лимитов. С прозрачной статистикой.
+                Рекомендуйте сервис селлерам и менеджерам маркетплейсов — получайте{" "}
+                <span className="text-emerald-400 font-semibold">20% с каждой их покупки</span>. Пожизненно. Без лимитов. С прозрачной статистикой.
               </p>
 
               {/* Stats */}
-              <div className="flex gap-8 mb-10">
+              <div className="grid grid-cols-3 gap-6 mb-10 max-w-md">
                 <div>
-                  <div className="text-3xl font-bold text-white">20%</div>
-                  <div className="text-sm text-white/50">комиссия</div>
+                  <div className="text-3xl font-bold text-emerald-400">20%</div>
+                  <div className="text-xs text-white/50 mt-0.5">комиссия</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-white">∞</div>
-                  <div className="text-sm text-white/50">срок действия</div>
+                  <div className="text-xs text-white/50 mt-0.5">срок действия</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-white">5000₽</div>
-                  <div className="text-sm text-white/50">мин. вывод</div>
+                  <div className="text-xs text-white/50 mt-0.5">мин. вывод</div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/auth">
-                  <Button 
-                    size="lg" 
-                    className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white border-0 px-8 py-6 text-lg font-semibold"
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto bg-gradient-to-r from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] hover:brightness-110 text-white border-0 px-8 h-12 text-base font-semibold rounded-xl shadow-lg shadow-[hsl(263,90%,40%)]/30"
                   >
                     Стать партнёром
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                    <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
                 <Link to="/partnerstvo">
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto border-white/20 bg-white/5 text-white hover:bg-white hover:text-black transition-all px-8 py-6 text-lg"
+                    className="w-full sm:w-auto border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08] hover:border-white/25 transition-all px-8 h-12 text-base rounded-xl"
                   >
                     Условия соглашения
                   </Button>
@@ -190,7 +191,7 @@ const PartnersPage = () => {
               </div>
             </motion.div>
 
-            {/* Right - Partner Image - anchored to very bottom */}
+            {/* Right - Partner Image — anchored to very bottom */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -198,11 +199,10 @@ const PartnersPage = () => {
               className="flex justify-center lg:justify-end items-end relative"
             >
               <div className="relative w-full max-w-[380px] lg:max-w-[480px]">
-                {/* Glow behind */}
-                <div className="absolute -inset-6 bg-gradient-to-t from-emerald-500/20 via-purple-500/10 to-transparent rounded-full blur-3xl" />
-                
-                {/* Partner image - anchored to bottom, increased size by 15-20% */}
-                <img 
+                {/* Glow behind — unified violet */}
+                <div className="absolute -inset-6 bg-gradient-to-t from-[hsl(263,90%,55%)]/25 via-[hsl(280,85%,60%)]/10 to-transparent rounded-full blur-3xl" />
+
+                <img
                   src={partnerImage}
                   alt="Партнёр WBGen"
                   className="relative z-10 w-full h-auto object-contain object-bottom"
@@ -241,11 +241,11 @@ const PartnersPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card rounded-2xl p-6 text-center border border-white/5 hover:border-emerald-500/30 transition-all"
+                className="glass-card rounded-2xl p-6 text-center border border-white/5 hover:border-[hsl(263,90%,55%)]/40 transition-all"
               >
                 <div className="text-4xl font-bold text-white mb-2">{example.referrals}</div>
                 <div className="text-white/50 text-sm mb-4">рефералов</div>
-                <div className="text-2xl font-bold text-emerald-400">{example.monthly}</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">{example.monthly}</div>
                 <div className="text-white/40 text-xs mt-1">в месяц*</div>
               </motion.div>
             ))}

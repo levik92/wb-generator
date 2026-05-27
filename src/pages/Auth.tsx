@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSecurityLogger } from "@/hooks/useSecurityLogger";
-import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock, User, Sparkles, Zap } from "lucide-react";
+import { ArrowLeft, Loader2, Eye, EyeOff, Mail, Lock, User, Sparkles, Zap, ShieldCheck, Wand2, Clock, Star } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "@/styles/landing-theme.css";
@@ -424,33 +424,86 @@ const Auth = () => {
 
   const inputClasses = "h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[hsl(268,83%,58%)] focus:ring-[hsl(268,83%,58%)]/20 rounded-xl pl-12";
 
+  const trustPoints = [
+    { icon: Wand2, title: "ИИ-генерация карточек за 3 минуты", desc: "Загрузите фото — получите готовый дизайн" },
+    { icon: Clock, title: "Экономия часов и тысяч рублей", desc: "Без дизайнеров, Photoshop и фрилансеров" },
+    { icon: ShieldCheck, title: "Безопасная оплата и хранение", desc: "Российские карты, СБП, B2B-счета" },
+  ];
+
   return (
     <>
-      <div className="min-h-screen bg-[#111111] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-[#0d0d0d] landing-dark text-white flex relative overflow-hidden">
         {/* Background effects */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px]" />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 -left-32 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
+          <div className="absolute bottom-1/4 -right-32 w-[500px] h-[500px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[140px]" />
         </div>
         <div className="noise-overlay" />
 
         {/* Back to home */}
         <Link
           to="/"
-          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-20"
+          className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2 text-white/50 hover:text-white transition-colors z-30 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 backdrop-blur-md text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Назад</span>
+          <span>На главную</span>
         </Link>
 
-        {/* Auth card */}
-        <div
-          className="relative z-10 w-full max-w-md mx-4 sm:mx-0 mt-16 sm:mt-0"
-        >
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-colors">
-            {/* Logo */}
+        {/* Two-column desktop layout */}
+        <div className="relative z-10 w-full flex flex-col lg:flex-row items-stretch min-h-screen">
+          {/* Left value panel (desktop only) */}
+          <aside className="hidden lg:flex flex-col justify-between w-[44%] xl:w-[42%] px-12 xl:px-16 py-16 border-r border-white/[0.06] bg-gradient-to-br from-[hsl(268,40%,8%)]/40 via-transparent to-transparent">
+            <Link to="/" className="inline-flex items-center gap-2.5 group w-fit">
+              <div className="w-10 h-10 bg-gradient-to-br from-[hsl(263,90%,62%)] to-[hsl(280,85%,48%)] rounded-xl flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/30">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                WB<span className="text-[hsl(263,90%,72%)]">Gen</span>
+              </span>
+            </Link>
+
+            <div className="my-12">
+              <h2 className="text-3xl xl:text-4xl font-bold leading-[1.1] mb-4 tracking-tight">
+                Создавайте <span className="bg-gradient-to-r from-[hsl(263,90%,72%)] to-[hsl(290,85%,75%)] bg-clip-text text-transparent">эффективные карточки</span> для маркетплейсов
+              </h2>
+              <p className="text-white/55 leading-relaxed">
+                AI-сервис, который помогает быстрее тестировать визуал, экономить на дизайне и усиливать кликабельность.
+              </p>
+
+              <ul className="mt-10 space-y-5">
+                {trustPoints.map((p) => (
+                  <li key={p.title} className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
+                      <p.icon className="w-[18px] h-[18px] text-[hsl(263,90%,75%)]" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{p.title}</div>
+                      <div className="text-xs text-white/45 mt-0.5">{p.desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-white/45">
+              <div className="flex -space-x-2">
+                {[0,1,2].map(i => (
+                  <div key={i} className="w-7 h-7 rounded-full border-2 border-[#0d0d0d] bg-gradient-to-br from-[hsl(263,60%,35%)] to-[hsl(280,55%,25%)]" />
+                ))}
+              </div>
+              <span>
+                <span className="text-white/80 font-medium">5 000+ селлеров</span> уже используют WBGen
+              </span>
+            </div>
+          </aside>
+
+          {/* Right form panel */}
+          <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 min-h-screen lg:min-h-0">
+            <div className="w-full max-w-md mt-12 sm:mt-0">
+              <div className="rounded-3xl p-6 sm:p-8 border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-2xl shadow-black/40">
+            {/* Logo (mobile + tablet only — desktop has it in left panel) */}
             <div className="text-center mb-8">
-              <Link to="/" className="inline-flex items-center gap-3 mb-4 group">
+              <Link to="/" className="inline-flex items-center gap-3 mb-4 group lg:hidden">
                 <div className="relative">
                   <div className="w-10 h-10 bg-gradient-to-br from-[hsl(268,83%,60%)] to-[hsl(268,83%,45%)] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-[0_0_20px_hsl(268,83%,60%,0.4)] transition-shadow duration-300">
                     <Zap className="w-5 h-5 text-white" />
@@ -837,7 +890,9 @@ const Auth = () => {
                 </p>
               </div>
             )}
-          </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     </>
