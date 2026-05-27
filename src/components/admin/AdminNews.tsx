@@ -533,7 +533,6 @@ export const AdminNews = () => {
                         </div>
                       )}
                     </div>
-                    </div>
                   );
                 })()}
               </CardContent>
