@@ -303,7 +303,7 @@ export const AdminNews = () => {
 
         <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <ResponsiveDialogTrigger asChild>
-            <Button onClick={openCreateDialog} className="gap-2 w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+            <Button onClick={openCreateDialog} className="gap-2 w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
               <Plus className="w-4 h-4" />
               Создать новость
             </Button>
