@@ -558,6 +558,16 @@ const VideoGeneration = () => {
         subtitle="«Живые» обложки для WB"
         description="Превратите готовую карточку в анимированную обложку до 5 секунд. Нейросеть добавляет движение, эффекты и динамику — карточка выделяется в каталоге и привлекает больше кликов."
         badge="🎬 Видеообложки"
+        accent="amber"
+        signature={(
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-amber-500/[0.06] border border-amber-500/20">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
+            </span>
+            <span className="text-xs text-amber-200/90">Скоро: ранний доступ для подписчиков</span>
+          </div>
+        )}
         stats={[
           { value: "+60%", label: "к CTR" },
           { value: "до 5 сек", label: "хронометраж" },
