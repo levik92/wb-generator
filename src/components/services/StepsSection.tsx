@@ -43,25 +43,26 @@ export const StepsSection = ({ title, subtitle, steps }: StepsSectionProps) => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative"
+                transition={{ duration: 0.5, delay: index * 0.06 }}
+                className="relative group"
               >
                 {/* Connector line */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-[60%] w-full h-px bg-gradient-to-r from-white/20 to-transparent" />
+                  <div className="hidden lg:block absolute top-8 left-[60%] w-full h-px bg-gradient-to-r from-[hsl(268,83%,60%)]/30 via-white/10 to-transparent" />
                 )}
-                
-                <div className="glass-card rounded-2xl p-6 h-full border border-white/5 hover:border-white/10 transition-colors">
+
+                <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                <div className="relative glass-card rounded-2xl p-6 h-full border border-white/10 group-hover:border-white/20 transition-colors">
                   {/* Step number */}
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[hsl(268,70%,50%)] to-[hsl(280,60%,45%)] flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,52%)] flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-[hsl(268,83%,40%)]/30">
                       {step.number}
                     </div>
                     {Icon && (
                       <Icon className="w-5 h-5 text-white/40" />
                     )}
                   </div>
-                  
+
                   <h3 className="text-lg font-semibold text-white mb-2">
                     {step.title}
                   </h3>
