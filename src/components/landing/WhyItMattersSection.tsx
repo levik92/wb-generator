@@ -1,6 +1,6 @@
 import { AlertTriangle, MousePointerClick, Wallet, Repeat } from "lucide-react";
 import { SpotlightCard } from "./effects/SpotlightCard";
-import illuGrowth from "@/assets/landing/illu-growth.png";
+import illuGrowth from "@/assets/landing/card-fashion.png";
 
 const problems = [
   {

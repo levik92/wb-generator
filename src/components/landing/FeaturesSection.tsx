@@ -10,7 +10,7 @@ import {
   Video,
 } from "lucide-react";
 import { SpotlightCard } from "./effects/SpotlightCard";
-import illuPhoneCard from "@/assets/landing/illu-phone-card.png";
+import illuPhoneCard from "@/assets/landing/iphone-mockup.png";
 
 /**
  * Bento-grid: «Что делает WBGen» + ключевые преимущества в одной композиции.
