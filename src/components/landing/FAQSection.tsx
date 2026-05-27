@@ -53,26 +53,18 @@ export const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="relative py-24 sm:py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
-      
-      {/* Top border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
+    <section id="faq" className="section-shell">
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Section header */}
-        <div className="text-center mb-16">
-          <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[12px] text-white/70 mb-5">
-            FAQ
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-[1.05]">
-            Частые вопросы про WBGen
+        <div className="section-header">
+          <span className="section-eyebrow">FAQ</span>
+          <h2 className="section-title">
+            Частые вопросы <span className="text-aurora">про WBGen</span>
           </h2>
-          <p className="text-base sm:text-lg text-white/55 max-w-2xl mx-auto">
+          <p className="section-subtitle">
             Если ответа нет — напишите в поддержку, отвечаем в рабочее время.
           </p>
         </div>
+
 
         {/* FAQ items - CSS-based accordion */}
         <div className="max-w-3xl mx-auto space-y-4">

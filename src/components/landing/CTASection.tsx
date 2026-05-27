@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 
 export const CTASection = () => {
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
+    <section className="section-shell">
       {/* Noir + violet gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(263_70%_18%)_0%,hsl(0_0%_6%)_60%,hsl(0_0%_4%)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(263_70%_18%)_0%,hsl(0_0%_6%)_60%,hsl(0_0%_5%)_100%)]" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] max-w-[100vw] bg-[hsl(263,90%,50%)] rounded-full blur-[160px] opacity-[0.22]" />
       <div className="absolute inset-0 grid-pattern opacity-[0.07]" />
 
@@ -19,7 +19,7 @@ export const CTASection = () => {
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-5 sm:mb-6 leading-[1.05]">
+          <h2 className="font-[Outfit] font-bold text-[2.1rem] sm:text-5xl md:text-6xl lg:text-7xl text-white mb-5 sm:mb-6 leading-[1.02] tracking-tight">
             Соберите первую карточку
             <span className="block text-aurora mt-1">за 3 минуты</span>
           </h2>
@@ -28,6 +28,7 @@ export const CTASection = () => {
             Профессиональный визуал, инфографика и SEO-описание — без
             дизайнера, шаблонов и подписок на ПО.
           </p>
+
 
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-2xl mx-auto mb-10 sm:mb-12">
             {[
