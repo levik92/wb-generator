@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Shield, Loader2 } from "lucide-react";
+import { Shield, Loader2, Mail, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { SmartCaptcha } from "@yandex/smart-captcha";
 
 export default function AdminLogin() {
