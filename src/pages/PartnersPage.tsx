@@ -241,11 +241,11 @@ const PartnersPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card rounded-2xl p-6 text-center border border-white/5 hover:border-emerald-500/30 transition-all"
+                className="glass-card rounded-2xl p-6 text-center border border-white/5 hover:border-[hsl(263,90%,55%)]/40 transition-all"
               >
                 <div className="text-4xl font-bold text-white mb-2">{example.referrals}</div>
                 <div className="text-white/50 text-sm mb-4">рефералов</div>
-                <div className="text-2xl font-bold text-emerald-400">{example.monthly}</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">{example.monthly}</div>
                 <div className="text-white/40 text-xs mt-1">в месяц*</div>
               </motion.div>
             ))}
