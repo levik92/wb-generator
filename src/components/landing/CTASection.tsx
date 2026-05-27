@@ -34,7 +34,7 @@ export const CTASection = () => {
             {[
               { value: "от 59₽", label: "за карточку", icon: Gift },
               { value: "3 мин", label: "до результата", icon: Zap },
-              { value: "10+ стилей", label: "дизайна на выбор", icon: Sparkles },
+              { value: "+87%", label: "рост CTR", icon: TrendingUp },
             ].map((stat) => (
               <div
                 key={stat.label}
