@@ -416,11 +416,6 @@ export const AdminNews = () => {
               const paginatedNews = news.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
               return (
                 <>
-                  <div className="flex items-center justify-between px-1">
-                    <p className="text-xs text-muted-foreground">
-                      Показано <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)}</span> из <span className="font-medium text-foreground">{news.length}</span>
-                    </p>
-                  </div>
                   {paginatedNews.map((item) => (
             <Card key={item.id} className={`group rounded-2xl border-border/60 bg-card shadow-sm transition-all hover:border-violet-500/30 hover:shadow-md ${!item.is_published ? 'border-amber-500/30 bg-amber-500/[0.03]' : ''}`}>
               <CardHeader className="pb-3">
