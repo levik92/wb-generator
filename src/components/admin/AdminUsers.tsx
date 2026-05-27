@@ -629,7 +629,15 @@ export function AdminUsers({
         }}
       >
         <ResponsiveDialogContent className="sm:max-w-md p-0 overflow-hidden">
-          <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+          <div
+            className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 sm:bg-gradient-to-br sm:from-primary/10 sm:via-primary/5 sm:to-transparent"
+            style={{
+              backgroundImage:
+                typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+                  ? 'radial-gradient(circle at 0% 100%, hsl(var(--primary) / 0.18), transparent 55%), radial-gradient(circle at 100% 100%, hsl(var(--primary) / 0.18), transparent 55%)'
+                  : undefined,
+            }}
+          >
             <ResponsiveDialogHeader className="space-y-2">
               <div className="flex items-center gap-2.5">
                 <div className="h-9 w-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
