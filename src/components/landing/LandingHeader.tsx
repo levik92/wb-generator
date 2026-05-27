@@ -146,10 +146,11 @@ export const LandingHeader = () => {
                 </Button>
               </Link>
               <Link to="/auth?tab=signup" className="hidden sm:block">
-                <Button className="bg-gradient-to-r from-[hsl(268,83%,60%)] to-[hsl(268,83%,50%)] hover:from-[hsl(268,83%,55%)] hover:to-[hsl(268,83%,45%)] text-white border-0 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-300">
+                <Button className="bg-gradient-to-r from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] hover:brightness-110 text-white border-0 shadow-lg shadow-[hsl(263,90%,40%)]/30 hover:shadow-[hsl(263,90%,40%)]/50 transition-all duration-300 rounded-xl px-5">
                   Начать
                 </Button>
               </Link>
+
             </div>
           </div>
         </div>
