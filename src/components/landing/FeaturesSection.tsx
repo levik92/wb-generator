@@ -41,12 +41,12 @@ export const FeaturesSection = () => {
         </div>
 
         {/* Bento grid */}
-        <div className="grid grid-cols-6 auto-rows-[minmax(160px,auto)] gap-3 sm:gap-4 max-w-6xl mx-auto">
+        <div className="grid grid-cols-6 auto-rows-[minmax(140px,auto)] gap-2.5 sm:gap-4 max-w-6xl mx-auto">
           {/* Hero tile - generation */}
           <SpotlightCard
             magnetic
             spotlightColor="hsl(263 90% 60% / 0.13)"
-            className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-6 sm:p-8 overflow-hidden"
+            className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-5 sm:p-8 overflow-hidden"
           >
             <div className="absolute -top-24 -right-24 w-72 h-72 bg-[hsl(263,90%,55%)] rounded-full blur-[100px] opacity-30 transition-opacity" />
             <img
@@ -60,17 +60,17 @@ export const FeaturesSection = () => {
               className="hidden md:block absolute -right-8 -bottom-8 w-[280px] lg:w-[340px] h-auto object-contain opacity-95 animate-[float_7s_ease-in-out_infinite] drop-shadow-[0_30px_60px_hsl(263,90%,40%,0.45)] pointer-events-none"
             />
             <div className="relative md:max-w-[58%]">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center mb-5 shadow-lg shadow-[hsl(263,90%,40%)]/30">
-                <ImageIcon className="w-6 h-6 text-white" />
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center mb-4 sm:mb-5 shadow-lg shadow-[hsl(263,90%,40%)]/30">
+                <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight">
+              <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
                 Генерация карточек товара
               </h3>
-              <p className="text-white/60 text-sm sm:text-base mb-5 leading-relaxed">
+              <p className="text-white/60 text-[13px] sm:text-base mb-4 sm:mb-5 leading-relaxed">
                 AI собирает обложку и инфографику с фокусом на CTR и рекламу.
                 До 6 вариантов за раз — удобно тестировать.
               </p>
-              <ul className="flex flex-wrap gap-2">
+              <ul className="flex flex-wrap gap-1.5 sm:gap-2">
                 {[
                   "WB · Ozon · Я.Маркет",
                   "10+ стилей",
@@ -79,7 +79,7 @@ export const FeaturesSection = () => {
                 ].map((t) => (
                   <li
                     key={t}
-                    className="px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/75"
+                    className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[11px] sm:text-xs text-white/75"
                   >
                     {t}
                   </li>
@@ -90,90 +90,90 @@ export const FeaturesSection = () => {
 
 
           {/* Speed */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <Zap className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
-            <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
+            <Zap className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
+            <div className="text-2xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
               3 мин
             </div>
-            <p className="text-xs sm:text-sm text-white/55">
+            <p className="text-[11px] sm:text-sm text-white/55 leading-snug">
               от загрузки фото до готовой PNG-карточки
             </p>
           </SpotlightCard>
 
           {/* Price */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <Target className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
-            <div className="text-3xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
+          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
+            <Target className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
+            <div className="text-2xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
               от 59₽
             </div>
-            <p className="text-xs sm:text-sm text-white/55">
+            <p className="text-[11px] sm:text-sm text-white/55 leading-snug">
               за карточку — в десятки раз дешевле дизайнера
             </p>
           </SpotlightCard>
 
           {/* Descriptions */}
-          <SpotlightCard magnetic className="col-span-6 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
-            <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-4">
+          <SpotlightCard magnetic className="col-span-6 md:col-span-3 glass-card rounded-3xl p-5 sm:p-7 overflow-hidden">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-3 sm:mb-4">
               <FileText className="w-5 h-5 text-[hsl(263,90%,75%)]" />
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
               SEO-описания
             </h3>
-            <p className="text-sm text-white/55 leading-relaxed">
+            <p className="text-[13px] sm:text-sm text-white/55 leading-relaxed">
               Продающий текст с ключами под маркетплейсы — помогает карточке
               лучше попадать в выдачу.
             </p>
           </SpotlightCard>
 
           {/* Variants */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-3 glass-card rounded-3xl p-6 sm:p-7 overflow-hidden">
-            <div className="w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-4">
+          <SpotlightCard magnetic className="col-span-6 md:col-span-3 glass-card rounded-3xl p-5 sm:p-7 overflow-hidden">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-3 sm:mb-4">
               <Layers className="w-5 h-5 text-[hsl(263,90%,75%)]" />
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
               Варианты для A/B-тестов
             </h3>
-            <p className="text-sm text-white/55 leading-relaxed">
+            <p className="text-[13px] sm:text-sm text-white/55 leading-relaxed">
               Несколько обложек за раз — можно проверять гипотезы по визуалу
               и усиливать рекламные кампании.
             </p>
           </SpotlightCard>
 
           {/* Video covers */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <Video className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
+          <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+            <Video className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
             <h3 className="text-base font-bold text-white mb-1">Видеообложки</h3>
-            <p className="text-xs text-white/55">
+            <p className="text-[13px] sm:text-xs text-white/55 leading-snug">
               Короткие видео для главной карточки и рекламы
             </p>
           </SpotlightCard>
 
           {/* Labels */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <Barcode className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
+          <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
+            <Barcode className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
             <h3 className="text-base font-bold text-white mb-1">
               Этикетки и ШК
             </h3>
-            <p className="text-xs text-white/55">
+            <p className="text-[13px] sm:text-xs text-white/55 leading-snug">
               Штрих-коды и QR для отгрузок — бесплатно
             </p>
           </SpotlightCard>
 
           {/* Edits */}
           <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <RefreshCw className="w-5 h-5 text-[hsl(263,90%,75%)] mb-3" />
+            <RefreshCw className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
             <h3 className="text-base font-bold text-white mb-1">
               Точечные правки
             </h3>
-            <p className="text-xs text-white/55">
+            <p className="text-[13px] sm:text-xs text-white/55 leading-snug">
               Меняйте цвет, текст, элементы — AI-редактор без дизайнера
             </p>
           </SpotlightCard>
 
           {/* Note */}
-          <div className="col-span-6 rounded-3xl border border-dashed border-white/10 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 bg-white/[0.015]">
+          <div className="col-span-6 rounded-3xl border border-dashed border-white/10 p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 bg-white/[0.015]">
             <Sparkles className="w-5 h-5 text-[hsl(263,90%,75%)] shrink-0" />
-            <p className="text-sm text-white/60 leading-relaxed">
+            <p className="text-[13px] sm:text-sm text-white/60 leading-relaxed">
               WBGen не обещает «гарантированный рост продаж» — но даёт
               профессиональный визуал, который{" "}
               <span className="text-white/85">
@@ -183,6 +183,7 @@ export const FeaturesSection = () => {
             </p>
           </div>
         </div>
+
       </div>
     </section>
   );
