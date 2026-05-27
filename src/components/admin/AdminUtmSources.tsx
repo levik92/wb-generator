@@ -769,7 +769,7 @@ export function AdminUtmSources() {
                     onClick={() => {
                       const url = `${formBaseUrl}?utm_source=${formSource}${formMedium ? `&utm_medium=${formMedium}` : ''}${formCampaign ? `&utm_campaign=${formCampaign}` : ''}`;
                       navigator.clipboard.writeText(url);
-                      toast({ title: "Скопировано", description: "Ссылка в буфере обмена" });
+                      toast.success("Ссылка скопирована");
                     }}
                     className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                   >
