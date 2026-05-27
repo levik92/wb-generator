@@ -50,17 +50,6 @@ export const AudienceSection = () => {
           </p>
         </div>
 
-        <div className="flex justify-center mb-10 sm:mb-14">
-          <img
-            src={illuPeople}
-            alt="Селлеры, менеджеры, дизайнеры и новички"
-            width={1280}
-            height={853}
-            loading="lazy"
-            decoding="async"
-            className="w-full max-w-3xl h-auto object-contain drop-shadow-[0_30px_60px_hsl(263,90%,40%,0.3)]"
-          />
-        </div>
 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-5xl mx-auto">
