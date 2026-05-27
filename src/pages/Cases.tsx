@@ -1,7 +1,7 @@
 import "@/styles/landing-theme.css";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles, TrendingUp, Zap, ChevronDown } from "lucide-react";
+import { ArrowRight, TrendingUp, Zap, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "@/components/landing/BeforeAfterSliderNew";
