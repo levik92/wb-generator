@@ -500,7 +500,7 @@ const Auth = () => {
           {/* Right form panel */}
           <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 min-h-screen lg:min-h-0">
             <div className="w-full max-w-md mt-12 sm:mt-0">
-              <div className="rounded-3xl p-6 sm:p-8 border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-2xl shadow-black/40">
+              <div className="rounded-3xl p-6 sm:p-8 border border-white/10 bg-[hsl(260,20%,7%)]/95 shadow-2xl shadow-black/40">
             {/* Logo (mobile + tablet only — desktop has it in left panel) */}
             <div className="text-center mb-8">
               <Link to="/" className="inline-flex items-center gap-3 mb-4 group lg:hidden">
