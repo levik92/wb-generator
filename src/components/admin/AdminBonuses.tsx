@@ -630,20 +630,30 @@ export const AdminBonuses = () => {
 
         {/* Programs Tab */}
         <TabsContent value="programs" className="space-y-4">
-          <Card>
-            <CardHeader>
+          <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
+            <CardHeader className="p-4 sm:p-6 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg">Бонусные программы</CardTitle>
-                  <CardDescription>Управляйте заданиями для пользователей</CardDescription>
+                <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+                    <Gift className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-base sm:text-lg font-semibold">Бонусные программы</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm mt-0.5">Управляйте заданиями для пользователей</CardDescription>
+                  </div>
                 </div>
                 <ResponsiveDialog open={programDialogOpen} onOpenChange={setProgramDialogOpen}>
                   <ResponsiveDialogTrigger asChild>
-                    <Button onClick={resetProgramForm} size="sm">
+                    <Button
+                      onClick={resetProgramForm}
+                      size="sm"
+                      className="w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-md shadow-violet-500/25 border-0"
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Добавить
                     </Button>
                   </ResponsiveDialogTrigger>
+
                   <ResponsiveDialogContent className="sm:max-w-md">
                     <ResponsiveDialogHeader>
                       <ResponsiveDialogTitle>
