@@ -235,7 +235,7 @@ export default function Admin() {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="admin-shell min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
           <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />
