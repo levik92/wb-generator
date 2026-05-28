@@ -2284,7 +2284,7 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
             <div className="relative">
-              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
+              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className="rounded-xl border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
               {isIdentifying && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
