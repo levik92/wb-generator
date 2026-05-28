@@ -2231,7 +2231,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/50 shadow-sm bg-card">
+      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
