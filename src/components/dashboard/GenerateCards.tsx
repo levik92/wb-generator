@@ -2283,14 +2283,16 @@ export const GenerateCards = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
-            <div className="relative">
-              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className="rounded-xl border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
-              {isIdentifying && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                  <span className="hidden sm:inline">Определяю...</span>
-                </div>
-              )}
+            <div className={isIdentifying ? "identifying-ring" : "relative"}>
+              <div className="relative">
+                <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className={`rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 ${isIdentifying ? 'pr-32 border-transparent bg-background' : ''}`} />
+                {isIdentifying && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 rounded-md bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/30 px-2 py-1 text-xs font-medium text-violet-700 dark:text-violet-300 animate-fade-in">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Определяю товар</span>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex justify-end text-xs text-muted-foreground">
               <span>{productName.length}/150 символов</span>
