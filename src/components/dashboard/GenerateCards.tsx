@@ -1967,22 +1967,17 @@ export const GenerateCards = ({
         />
         <div className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:gap-5">
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Карточки, которые продают</span>
               </div>
-              <div className="min-w-0 space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Карточки, которые продают</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
-                  Поднимите конверсию карточки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">до +260%</span> за 3 минуты
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  WBGen упаковывает товар как профессиональный дизайнер: продающая композиция, инфографика, тексты-крючки и премиальный вид — всё автоматически.
-                </p>
-              </div>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                Поднимите конверсию карточки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">до +260%</span> за 3 минуты
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                WBGen упаковывает товар как профессиональный дизайнер: продающая композиция, инфографика, тексты-крючки и премиальный вид — всё автоматически.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -2004,7 +1999,7 @@ export const GenerateCards = ({
                     <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">3 минуты вместо 3 дней</p>
+                    <p className="text-sm font-semibold leading-tight">3 мин. вместо 3 дн.</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">без брифов и правок</p>
                   </div>
                 </div>
@@ -2016,8 +2011,8 @@ export const GenerateCards = ({
                     <Coins className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">Экономия до 10 000 ₽</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждой карточке</p>
+                    <p className="text-sm font-semibold leading-tight">Экономия до 12 тыс. ₽</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждом товаре</p>
                   </div>
                 </div>
               </div>
