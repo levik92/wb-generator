@@ -2749,14 +2749,14 @@ export const GenerateCards = ({
                           <Button size="sm" variant="outline" onClick={e => {
                             e.stopPropagation();
                             onNavigateToVideo(displayedImageUrl);
-                          }} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Сделать видеообложку">
+                          }} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Сделать видеообложку">
                             <Video className="w-3.5 h-3.5" />
                             <span className="ml-1 lg:hidden">Видео</span>
                           </Button>
                           <Button size="sm" variant="outline" onClick={e => {
                             e.stopPropagation();
                             openStyleDialog(image);
-                          }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="В таком же стиле">
+                          }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="В таком же стиле">
                             <Sparkles className="w-3.5 h-3.5" />
                             <span className="ml-1 lg:hidden">Стиль</span>
                           </Button>
@@ -2767,7 +2767,7 @@ export const GenerateCards = ({
                         <Button size="sm" variant="outline" onClick={e => {
                           e.stopPropagation();
                           openStyleDialog(image);
-                        }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Создать в таком же стиле">
+                        }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Создать в таком же стиле">
                           <Sparkles className="w-3.5 h-3.5" />
                           <span className="ml-1 lg:hidden">Стиль</span>
                         </Button>
@@ -2777,7 +2777,7 @@ export const GenerateCards = ({
                         e.stopPropagation();
                         const currentUrl = displayedImageUrl;
                         openEditDialog({ ...image, url: currentUrl }, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Редактировать карточку">
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Редактировать карточку">
                         {editingCards.has(`edit_${image.id}_${index}`) ? <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           <span className="ml-1 lg:hidden">Ред…</span>
@@ -2790,7 +2790,7 @@ export const GenerateCards = ({
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Перегенерировать карточку">
+                      }} disabled={isRegenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Перегенерировать карточку">
                         {isRegenerating ? <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           <span className="ml-1 lg:hidden">Перегенерация…</span>
@@ -2803,7 +2803,7 @@ export const GenerateCards = ({
                       <Button size="sm" onClick={async e => {
                         e.stopPropagation();
                         await downloadSingle(index);
-                      }} className="flex-1 lg:flex-initial h-8 px-3 rounded-lg text-xs whitespace-nowrap bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:from-violet-600 hover:to-purple-700 shadow-sm shadow-violet-500/20 transition-all" title="Скачать изображение">
+                      }} className="flex-1 lg:flex-initial h-8 px-3 rounded-md text-xs whitespace-nowrap bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:from-violet-600 hover:to-purple-700 shadow-sm shadow-violet-500/20 transition-all" title="Скачать изображение">
                         <Download className="w-3.5 h-3.5" />
                         <span className="ml-1 lg:hidden">Скачать</span>
                       </Button>
