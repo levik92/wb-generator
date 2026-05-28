@@ -236,28 +236,21 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
         </ul>
       </nav>
 
-      {/* Footer — status button → support */}
-      <div className={`shrink-0 border-t border-border/60 ${isCollapsed ? 'p-3' : 'p-3'}`}>
-        <button
-          onClick={() => onTabChange('support')}
-          className={`w-full group flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} gap-2 px-2 py-2 rounded-xl hover:bg-violet-500/10 transition-colors`}
-          title={status.showLabel ? status.label : 'Поддержка'}
-          aria-label={`Поддержка. ${status.label}`}
-        >
-          <span className="flex items-center gap-2 min-w-0">
-            <span className="relative flex items-center justify-center">
-              <span className={`w-2 h-2 rounded-full ${status.dot} ${status.ring} animate-pulse`} />
+      {/* Footer brand mark */}
+      <div className={`shrink-0 border-t border-border/60 ${isCollapsed ? 'p-3' : 'p-4'}`}>
+        {isCollapsed ? (
+          <div className="flex justify-center">
+            <div className={`w-2 h-2 rounded-full ${status.dot} animate-pulse`} title={status.label} />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground/70">
+            <span className="uppercase tracking-[0.15em] font-medium">© WBGen</span>
+            <span className="flex items-center gap-1" title={status.label}>
+              <span className={`w-1.5 h-1.5 rounded-full ${status.dot} animate-pulse`} />
+              Онлайн
             </span>
-            {!isCollapsed && (
-              <span className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground truncate">
-                {status.showLabel ? status.label : 'Поддержка'}
-              </span>
-            )}
-          </span>
-          {!isCollapsed && (
-            <LifeBuoy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-violet-600 transition-colors shrink-0" />
-          )}
-        </button>
+          </div>
+        )}
       </div>
     </div>
   );
