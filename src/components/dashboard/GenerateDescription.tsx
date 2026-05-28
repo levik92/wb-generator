@@ -329,7 +329,7 @@ export const GenerateDescription = ({
 
       {/* Input Form */}
       <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="dash-card p-4 sm:p-6 space-y-5">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="relative overflow-hidden rounded-2xl border border-border/50 p-6 space-y-5 shadow-sm bg-card">
           <div>
             <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><Settings className="w-4 h-4 shrink-0" />Параметры генерации</h3>
             <p className="text-sm text-muted-foreground">Заполните данные для создания уникального описания</p>
@@ -442,7 +442,7 @@ export const GenerateDescription = ({
         </motion.div>
 
         {/* Generated Result */}
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="dash-card p-4 sm:p-6 space-y-4">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="rounded-2xl border border-border/50 p-6 space-y-4 shadow-sm bg-card">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold mb-1"><FileText className="w-4 h-4 shrink-0" />Готовое описание</h3>

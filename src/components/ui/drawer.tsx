@@ -47,13 +47,12 @@ const DrawerContent = React.forwardRef<
         maxHeight: "calc(100dvh - var(--keyboard-inset-height, 0px) - 1rem)",
       }}
       className={cn(
-        "fixed inset-x-0 z-50 mt-24 flex h-auto flex-col rounded-t-[20px] border-t bg-background transition-[bottom] duration-150 overflow-hidden",
-        "border-[hsl(var(--accent)/0.25)] bg-[linear-gradient(180deg,hsl(var(--accent)/0.06)_0%,hsl(var(--card))_25%,hsl(var(--card))_100%)] shadow-[0_-20px_60px_-10px_rgba(139,92,246,0.25)]",
+        "fixed inset-x-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background transition-[bottom] duration-150 overflow-hidden",
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-[hsl(var(--accent)/0.35)]" />
+      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

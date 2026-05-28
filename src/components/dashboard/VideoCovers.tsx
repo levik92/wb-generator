@@ -640,7 +640,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-        <Card className="dash-card relative">
+        <Card className="relative overflow-hidden">
           {/* Animated radial gradient backgrounds */}
           {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
             <>
@@ -876,7 +876,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           className="space-y-4"
         >
           {/* Block 1: Upload + wishes */}
-          <Card className="dash-card">
+          <Card>
             <CardContent className="p-6 space-y-4">
               {/* Image upload header */}
               <div className="space-y-1">
@@ -994,7 +994,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           </Card>
 
           {/* Block 2: Generate button + hint */}
-          <Card className="dash-card">
+          <Card>
             <CardContent className="p-6 space-y-3">
               <Button
                 onClick={handleGenerate}
