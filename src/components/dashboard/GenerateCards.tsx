@@ -2300,22 +2300,36 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
             <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 transition-colors hover:bg-violet-500/10">
-                <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
-                setAutoDescription(!!checked);
-                if (checked) {
-                  setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
-                } else {
-                  setDescription("");
-                }
-              }} disabled={generating} className="border-violet-500/40 data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500 data-[state=checked]:text-white" />
-                <Label htmlFor="autoDescription" className="text-sm font-normal cursor-pointer text-violet-700 dark:text-violet-300">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <label
+                htmlFor="autoDescription"
+                className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-full border px-2.5 sm:px-3 py-1.5 cursor-pointer select-none transition-all max-w-full ${
+                  autoDescription
+                    ? 'border-violet-500/40 bg-gradient-to-r from-violet-500/15 to-purple-500/10 shadow-sm shadow-violet-500/10'
+                    : 'border-border/60 bg-muted/40 hover:border-violet-500/30 hover:bg-violet-500/[0.06]'
+                } ${generating ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoDescription ? 'text-violet-500' : 'text-muted-foreground'}`} />
+                <span className={`text-xs sm:text-sm font-medium leading-none whitespace-nowrap transition-colors ${autoDescription ? 'text-violet-700 dark:text-violet-300' : 'text-foreground/80'}`}>
                   Придумай сам
-                </Label>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                <span>{description.length}/1200 символов</span>
+                </span>
+                <Switch
+                  id="autoDescription"
+                  checked={autoDescription}
+                  onCheckedChange={checked => {
+                    setAutoDescription(!!checked);
+                    if (checked) {
+                      setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
+                    } else {
+                      setDescription("");
+                    }
+                  }}
+                  disabled={generating}
+                  className="data-[state=checked]:bg-violet-500 scale-75 sm:scale-90 -my-1 shrink-0"
+                />
+              </label>
+              <div className="text-xs text-muted-foreground tabular-nums shrink-0">
+                {description.length}/1200
               </div>
             </div>
           </div>
