@@ -2130,9 +2130,6 @@ export const GenerateCards = ({
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
               <span>Изображения товара</span>
-              <span className="ml-auto text-[10px] font-medium text-violet-700 dark:text-violet-300 border border-violet-500/30 bg-violet-500/5 px-1.5 py-0.5 rounded-md leading-none">
-                Обязательно
-              </span>
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
