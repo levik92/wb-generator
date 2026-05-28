@@ -2763,7 +2763,7 @@ export const GenerateCards = ({
                         e.stopPropagation();
                         const currentUrl = displayedImageUrl;
                         openEditDialog({ ...image, url: currentUrl }, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Редактировать карточку">
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Редактировать карточку">
                         {editingCards.has(`edit_${image.id}_${index}`) ? <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           <span className="ml-1 lg:hidden">Ред…</span>
