@@ -2591,7 +2591,6 @@ export const GenerateCards = ({
                 </div>
               )}
             </div>
-            </div>
 
             {/* Progress bar — full width */}
             <div className="w-full space-y-1.5">
