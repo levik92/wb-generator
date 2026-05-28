@@ -148,17 +148,17 @@ export const LandingHeader = () => {
 
                 {/* CTA Buttons */}
                 <div className="flex items-center gap-2 order-3">
-                  <Link to="/auth?tab=signin" className="lg:hidden">
+                  <Link to={withUtm("/auth?tab=signin")} className="lg:hidden">
                     <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10 w-9 h-9" aria-label="Войти">
                       <LogIn className="w-[18px] h-[18px]" />
                     </Button>
                   </Link>
-                  <Link to="/auth?tab=signin" className="hidden lg:block">
+                  <Link to={withUtm("/auth?tab=signin")} className="hidden lg:block">
                     <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 h-9 px-4">
                       Войти
                     </Button>
                   </Link>
-                  <Link to="/auth?tab=signup" className="hidden sm:block">
+                  <Link to={withUtm("/auth?tab=signup")} className="hidden sm:block">
                     <Button className="bg-gradient-to-r from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] hover:brightness-110 text-white border-0 shadow-lg shadow-[hsl(263,90%,40%)]/30 hover:shadow-[hsl(263,90%,40%)]/50 transition-all duration-300 rounded-lg px-4 h-9">
                       Начать
                     </Button>
@@ -261,13 +261,13 @@ export const LandingHeader = () => {
 
               {/* Footer CTAs */}
               <div className="p-4 border-t border-white/[0.07] space-y-2.5 bg-black/20">
-                <Link to="/auth?tab=signup" onClick={() => setIsMobileMenuOpen(false)} className="block">
+                <Link to={withUtm("/auth?tab=signup")} onClick={() => setIsMobileMenuOpen(false)} className="block">
                   <Button className="w-full bg-gradient-to-r from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] hover:brightness-110 text-white border-0 shadow-lg shadow-[hsl(263,90%,40%)]/30 rounded-xl h-11 font-semibold group">
                     Начать бесплатно
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                   </Button>
                 </Link>
-                <Link to="/auth?tab=signin" onClick={() => setIsMobileMenuOpen(false)} className="block">
+                <Link to={withUtm("/auth?tab=signin")} onClick={() => setIsMobileMenuOpen(false)} className="block">
                   <Button variant="outline" className="w-full bg-white/[0.03] border-white/10 text-white hover:bg-white/[0.08] hover:border-white/20 rounded-xl h-11">
                     Войти
                   </Button>

@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { withUtm } from "@/lib/utm";
 
 interface ServiceCTAProps {
   title?: string;
@@ -57,7 +58,7 @@ export const ServiceCTA = ({
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to={ctaLink} className="w-full sm:w-auto">
+            <Link to={withUtm(ctaLink)} className="w-full sm:w-auto">
               <Button
                 size="lg"
                 className="w-full sm:w-auto bg-white text-[hsl(263,80%,30%)] hover:bg-white/90 text-base px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/30 group"
@@ -67,7 +68,7 @@ export const ServiceCTA = ({
               </Button>
             </Link>
             {secondaryCtaText && secondaryCtaLink && (
-              <Link to={secondaryCtaLink} className="w-full sm:w-auto">
+              <Link to={withUtm(secondaryCtaLink)} className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"

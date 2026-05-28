@@ -476,7 +476,7 @@ const NotifySection = () => (
           ))}
         </div>
         
-        <Link to="/auth">
+        <Link to={withUtm("/auth?tab=signup")}>
           <Button className="h-12 px-10 bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(280,90%,55%)] text-white border-0 text-base">
             Создать видеообложку
             <ArrowRight className="w-5 h-5 ml-2" />

@@ -312,7 +312,7 @@ const BlogArticle = () => {
               <p className="text-white/60 mb-6">
                 Создавайте продающие карточки для Wildberries с помощью ИИ за 3 минуты
               </p>
-              <Link to="/auth">
+              <Link to={withUtm("/auth?tab=signup")}>
                 <Button size="lg" className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)]">
                   Создать карточку
                 </Button>

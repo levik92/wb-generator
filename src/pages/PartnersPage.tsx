@@ -170,7 +170,7 @@ const PartnersPage = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link to="/auth">
+                <Link to={withUtm("/auth?tab=signup")}>
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-gradient-to-r from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] hover:brightness-110 text-white border-0 px-8 h-12 text-base font-semibold rounded-xl shadow-lg shadow-[hsl(263,90%,40%)]/30"
