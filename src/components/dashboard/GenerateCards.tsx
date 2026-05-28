@@ -2197,18 +2197,20 @@ export const GenerateCards = ({
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label 
-                  className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}
+                  className={`group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-violet-500 bg-violet-500/10 cursor-pointer scale-[1.01]' : 'border-border/60 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/50 hover:bg-violet-500/[0.05] cursor-pointer'}`}
                   onDragOver={generating ? undefined : handleRefDragOver}
                   onDragEnter={generating ? undefined : handleRefDragEnter}
                   onDragLeave={generating ? undefined : handleRefDragLeave}
                   onDrop={generating ? undefined : handleRefDrop}
                 >
                   <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className={`w-8 h-8 mb-3 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <div className={`flex items-center justify-center w-12 h-12 mb-3 rounded-xl transition-all ${isRefDragOver ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/40' : 'bg-muted group-hover:bg-violet-500/15'}`}>
+                      <Upload className={`w-5 h-5 transition-colors ${isRefDragOver ? 'text-white' : 'text-muted-foreground group-hover:text-violet-600 dark:group-hover:text-violet-300'}`} />
+                    </div>
+                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-violet-700 dark:text-violet-200' : 'text-foreground/80'}`}>
                       Загрузите референс
                     </p>
-                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-violet-600 dark:text-violet-300' : 'text-muted-foreground'}`}>
                       1 изобр. до 3 МБ
                     </p>
                   </div>
