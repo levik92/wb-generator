@@ -256,11 +256,19 @@ const Dashboard = () => {
         sessionStorage.removeItem('pending_partner_code');
       }
 
-      // Process pending UTM source (from Google OAuth)
-      const pendingUtmSourceId = sessionStorage.getItem('pending_utm_source_id');
+      // Process pending UTM source (from Google OAuth).
+      // Prefer the value from redirect URL (?utm_source_id=…) — survives
+      // cross-tab OAuth flows where sessionStorage would be lost.
+      const urlUtmSourceId = new URLSearchParams(window.location.search).get('utm_source_id');
+      const pendingUtmSourceId = urlUtmSourceId || sessionStorage.getItem('pending_utm_source_id');
       if (pendingUtmSourceId && !profileData.utm_source_id) {
         await supabase.from('profiles').update({ utm_source_id: pendingUtmSourceId }).eq('id', userId);
-        sessionStorage.removeItem('pending_utm_source_id');
+      }
+      sessionStorage.removeItem('pending_utm_source_id');
+      if (urlUtmSourceId) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('utm_source_id');
+        window.history.replaceState({}, '', url.toString());
       }
     } catch (error) {
       console.error('Error processing pending codes:', error);

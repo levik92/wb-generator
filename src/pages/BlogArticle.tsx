@@ -3,6 +3,7 @@ import { ServicePageLayout } from "@/components/services";
 import { motion } from "framer-motion";
 import { Clock, Eye, ArrowLeft, Tag } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -312,7 +313,7 @@ const BlogArticle = () => {
               <p className="text-white/60 mb-6">
                 Создавайте продающие карточки для Wildberries с помощью ИИ за 3 минуты
               </p>
-              <Link to="/auth">
+              <Link to={withUtm("/auth?tab=signup")}>
                 <Button size="lg" className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,70%,50%)]">
                   Создать карточку
                 </Button>

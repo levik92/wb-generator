@@ -480,10 +480,11 @@
   .animate-pulse-slow,
   .animate-float-slow,
   .animate-float-reverse,
-  .animate-pulse-glow {
-    animation: none;
+  .animate-pulse-glow,
+  .animate-ping {
+    animation: none !important;
   }
-  
+
   * {
     transition-duration: 0.01ms !important;
   }
@@ -523,14 +524,30 @@
   50% { transform: translate(-30px, 35px) scale(1.10); }
 }
 
+.aurora-conic {
+  filter: blur(60px);
+  will-change: transform;
+}
+.aurora-orb { will-change: transform; }
+
 .aurora-spin { animation: aurora-spin 28s linear infinite; }
 .aurora-float-a { animation: aurora-float-a 9s ease-in-out infinite; }
 .aurora-float-b { animation: aurora-float-b 11s ease-in-out infinite; }
 .aurora-float-c { animation: aurora-float-c 13s ease-in-out infinite; }
 
 @media (max-width: 1024px) {
-  /* На планшетах и мобиле — упрощаем рендер aurora */
-  .aurora-spin { animation-duration: 60s; }
+  /* На планшетах и мобиле — стопаем тяжёлую анимацию aurora-conic
+     и снимаем will-change, чтобы не держать большие GPU-слои */
+  .aurora-conic {
+    animation: none !important;
+    filter: blur(30px);
+    will-change: auto;
+    opacity: 0.22;
+  }
+  .aurora-orb {
+    will-change: auto;
+    filter: blur(60px);
+  }
   .aurora-float-a,
   .aurora-float-b,
   .aurora-float-c { animation: none; }

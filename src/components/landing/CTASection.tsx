@@ -1,5 +1,6 @@
 import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "./effects/SpotlightCard";
 
@@ -54,7 +55,7 @@ export const CTASection = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/auth?tab=signup" className="w-full sm:w-auto">
+            <Link to={withUtm("/auth?tab=signup")} className="w-full sm:w-auto">
               <Button
                 size="lg"
                 className="w-full sm:w-auto bg-white text-[hsl(263,80%,30%)] hover:bg-white/90 text-base px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/30 group"

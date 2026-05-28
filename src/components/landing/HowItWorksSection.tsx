@@ -1,5 +1,6 @@
 import { Image, FileText, Sparkles, Check, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "./effects/NumberTicker";
 import { SpotlightCard } from "./effects/SpotlightCard";
@@ -104,7 +105,7 @@ export const HowItWorksSection = () => {
         </div>
 
         <div className="text-center mt-12 relative z-10">
-          <Link to="/auth?tab=signup">
+          <Link to={withUtm("/auth?tab=signup")}>
             <Button className="btn-premium text-[15px] sm:text-base px-8 py-6 rounded-xl font-semibold group">
               Попробовать
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

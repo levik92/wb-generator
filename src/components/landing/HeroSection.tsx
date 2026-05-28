@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X, Zap, TrendingUp, Clock } from "lucide-react";
 import { AuroraBackground } from "./effects/AuroraBackground";
@@ -91,7 +92,7 @@ export const HeroSection = () => {
               className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 sm:mb-16 animate-fade-in"
               style={{ animationDelay: "240ms" }}
             >
-              <Link to="/auth?tab=signup" className="w-full sm:w-auto">
+              <Link to={withUtm("/auth?tab=signup")} className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="btn-premium w-full sm:w-auto text-[15px] sm:text-base px-7 sm:px-9 py-6 sm:py-7 rounded-xl font-semibold group"

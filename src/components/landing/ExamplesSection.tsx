@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "./BeforeAfterSliderNew";
 import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
@@ -155,7 +156,7 @@ export const ExamplesSection = () => {
           >
             Посмотреть ещё примеры
           </button>
-          <Link to="/auth?tab=signup" className="w-full sm:w-auto">
+          <Link to={withUtm("/auth?tab=signup")} className="w-full sm:w-auto">
             <Button className="btn-premium w-full sm:w-auto text-[15px] px-7 py-6 rounded-xl font-semibold group">
               Получить такие же результаты
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
