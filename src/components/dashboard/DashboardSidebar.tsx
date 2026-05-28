@@ -90,11 +90,11 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(false)}
-            className="mx-auto h-11 w-11 p-0 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-500 hover:to-purple-600 hover:text-white hover:scale-105 transition-transform"
+            className="mx-auto h-9 w-9 p-0 rounded-xl bg-secondary/60 hover:bg-violet-500/10 text-muted-foreground hover:text-violet-600 transition-colors shrink-0"
             aria-label="Развернуть меню"
             title="Развернуть меню"
           >
-            <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+            <ChevronRight className="w-4 h-4" />
           </Button>
         ) : (
           <div className="flex items-center justify-between w-full pl-2">
