@@ -1955,52 +1955,76 @@ export const GenerateCards = ({
   }, []);
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
 
-      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold">
-                Карточки, которые продают — за 3 минуты
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                WB Генератор оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня. Всё автоматически — просто загрузи фото.
-              </p>
+      {/* Hero — conversion-focused */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
+        />
+        <div className="relative p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0 space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Карточки, которые продают</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                  Поднимите конверсию карточки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">до +260%</span> за 3 минуты
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  WBGen упаковывает товар как профессиональный дизайнер: продающая композиция, инфографика, тексты-крючки и премиальный вид — всё автоматически.
+                </p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Экономия до 10 000 ₽</p>
-                  <p className="text-[10px] text-muted-foreground">на каждой карточке</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Результат за 3 минуты</p>
-                  <p className="text-[10px] text-muted-foreground">вместо 3 дней</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">+260% к CTR</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">больше кликов и заказов</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Gift className="w-4 h-4 text-primary" />
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">3 минуты вместо 3 дней</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">без брифов и правок</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Реферальная программа</p>
-                  <p className="text-[10px] text-muted-foreground">приглашай и зарабатывай</p>
+              </div>
+
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Coins className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">Экономия до 10 000 ₽</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждой карточке</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
 
       {/* Cards Promo Banner */}
