@@ -2337,43 +2337,72 @@ export const GenerateCards = ({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            {CARD_STAGES.map((stage, index) => <div key={index} className={`border rounded-lg p-3 sm:p-4 transition-all ${generating ? 'opacity-60 cursor-not-allowed' : selectedCards.includes(index) ? 'border-primary bg-primary/5 cursor-pointer' : 'border-border hover:border-muted-foreground/50 cursor-pointer'}`} onClick={generating ? undefined : () => handleCardToggle(index)}>
-                <div className="flex items-start gap-3">
-                  <Checkbox checked={selectedCards.includes(index)} onChange={() => handleCardToggle(index)} className="mt-0.5" disabled={generating} />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+            {CARD_STAGES.map((stage, index) => {
+              const isSelected = selectedCards.includes(index);
+              return (
+                <div
+                  key={index}
+                  className={`border rounded-lg p-3 sm:p-4 transition-colors ${
+                    generating
+                      ? 'opacity-60 cursor-not-allowed border-border'
+                      : isSelected
+                        ? 'border-violet-500/50 bg-violet-500/5 cursor-pointer'
+                        : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] cursor-pointer'
+                  }`}
+                  onClick={generating ? undefined : () => handleCardToggle(index)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onChange={() => handleCardToggle(index)}
+                      className="mt-0.5 h-5 w-5 rounded-md border-violet-500/40 data-[state=checked]:bg-gradient-to-br data-[state=checked]:from-violet-500 data-[state=checked]:to-purple-600 data-[state=checked]:border-violet-500 data-[state=checked]:text-white shadow-sm"
+                      disabled={generating}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`font-medium text-sm sm:text-base mb-1 leading-tight transition-colors ${isSelected ? 'text-violet-700 dark:text-violet-300' : ''}`}>{stage.name}</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>)}
+              );
+            })}
           </div>
 
           {/* Unified Styling Toggle */}
-          <div className={`mt-4 border rounded-lg p-3 sm:p-4 transition-all ${
-            selectedCards.length >= 2 
-              ? 'border-primary/30 bg-primary/5' 
-              : 'border-border opacity-50'
-          }`}>
+          <div
+            onClick={() => {
+              if (selectedCards.length < 2 || generating) return;
+              const next = !unifiedStyling;
+              setUnifiedStyling(next);
+              setUnifiedStylingManuallyDisabled(!next);
+            }}
+            role="button"
+            tabIndex={selectedCards.length < 2 || generating ? -1 : 0}
+            className={`mt-4 border rounded-lg p-3 sm:p-4 transition-colors select-none ${
+              selectedCards.length < 2 || generating
+                ? 'opacity-50 cursor-not-allowed border-border'
+                : unifiedStyling
+                  ? 'border-violet-500/50 bg-gradient-to-br from-violet-500/10 to-purple-500/5 cursor-pointer'
+                  : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] cursor-pointer'
+            }`}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none mb-1 sm:hidden">Бета</Badge>
                 <div className="flex items-center gap-2 mb-0.5">
-                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
-                  <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none hidden sm:inline-flex">Бета</Badge>
+                  <Sparkles className={`w-4 h-4 shrink-0 transition-colors ${unifiedStyling ? 'text-violet-600 dark:text-violet-400' : 'text-muted-foreground'}`} />
+                  <h4 className={`font-medium text-sm sm:text-base transition-colors ${unifiedStyling ? 'text-violet-700 dark:text-violet-300' : ''}`}>Единая стилизация</h4>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                          style={{ opacity: 1 }}
-                          onClick={(e) => e.preventDefault()}
+                        <span
+                          role="button"
+                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation inline-flex"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         >
                           <Info className="w-4 h-4" />
-                        </button>
+                        </span>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70" style={{ opacity: 1 }}>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
                         <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
                       </TooltipContent>
                     </Tooltip>
@@ -2383,13 +2412,15 @@ export const GenerateCards = ({
                   Пакет карточек товара будет создан в едином стиле
                 </p>
               </div>
-              <Switch 
+              <Switch
                 checked={unifiedStyling}
                 onCheckedChange={(checked) => {
                   setUnifiedStyling(checked);
                   setUnifiedStylingManuallyDisabled(!checked);
                 }}
+                onClick={(e) => e.stopPropagation()}
                 disabled={selectedCards.length < 2 || generating}
+                className="shrink-0 h-6 w-11 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-violet-500 data-[state=checked]:to-purple-600"
               />
             </div>
           </div>
@@ -2411,7 +2442,7 @@ export const GenerateCards = ({
               return w && h ? `${w} / ${h}` : '3 / 4';
             };
             return (
-              <div className={`mt-4 border border-border bg-muted/30 rounded-lg transition-all ${generating ? 'opacity-60' : ''}`}>
+              <div className={`mt-4 border border-border/60 bg-card rounded-lg transition-colors ${generating ? 'opacity-60' : ''}`}>
                 <button
                   type="button"
                   onClick={() => !generating && setAspectRatioOpen((v) => !v)}
@@ -2421,7 +2452,7 @@ export const GenerateCards = ({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <Images className="w-4 h-4 text-primary shrink-0" />
+                      <Images className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" />
                       <h4 className="font-medium text-sm sm:text-base">Формат изображения</h4>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
@@ -2429,7 +2460,7 @@ export const GenerateCards = ({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5 bg-primary/10 text-primary border-none">
+                    <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5 bg-violet-500/10 text-violet-700 dark:text-violet-300 border-none">
                       {aspectRatio}
                     </Badge>
                     <ChevronDown
@@ -2449,22 +2480,22 @@ export const GenerateCards = ({
                             key={r.value}
                             disabled={generating}
                             onClick={() => setAspectRatio(r.value)}
-                            className={`border rounded-lg p-2.5 sm:p-3 transition-all flex items-start justify-start gap-2.5 text-left sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
+                            className={`border rounded-lg p-2.5 sm:p-3 transition-colors flex items-start justify-start gap-2.5 text-left sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
                               selected
-                                ? 'border-primary bg-primary/10'
-                                : 'border-border hover:border-muted-foreground/50 bg-background'
+                                ? 'border-violet-500/50 bg-violet-500/5'
+                                : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] bg-background'
                             } ${generating ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                           >
                             <div
                               className={`shrink-0 rounded border-2 flex items-center justify-center w-5 sm:w-6 ${
-                                selected ? 'border-primary bg-primary' : 'border-muted-foreground/40 bg-muted/30'
+                                selected ? 'border-violet-500 bg-gradient-to-br from-violet-500 to-purple-600' : 'border-muted-foreground/40 bg-muted/30'
                               }`}
                               style={{ aspectRatio: parseRatio(r.value) }}
                             >
-                              {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-foreground" strokeWidth={3} />}
+                              {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" strokeWidth={3} />}
                             </div>
                             <div className="flex-1 min-w-0 text-left sm:text-center lg:text-left">
-                              <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
+                              <p className={`text-xs sm:text-sm font-medium leading-tight ${selected ? 'text-violet-700 dark:text-violet-300' : ''}`}>{r.label}</p>
                               <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug mt-0.5">
                                 {r.usage}
                               </p>
