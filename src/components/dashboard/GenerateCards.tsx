@@ -2130,7 +2130,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
+        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
@@ -2186,7 +2186,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
+        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
@@ -2328,7 +2328,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="bg-card">
+      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Images className="w-4 h-4 shrink-0" />
@@ -2595,7 +2595,7 @@ export const GenerateCards = ({
       </Dialog>
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="bg-card animate-scale-in">
+      {generatedImages.length > 0 && <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40 animate-scale-in">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
