@@ -51,13 +51,13 @@ const PromoTwo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white landing-dark">
+    <div className="min-h-screen bg-[#111111] text-white landing-dark overflow-x-hidden">
       <div className="noise-overlay" />
 
       {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-25">
         <div
-          className="absolute w-[700px] h-[700px] -top-1/4 left-1/2 -translate-x-1/2 rounded-full"
+          className="absolute w-[700px] h-[700px] max-w-[95vw] max-h-[95vw] -top-1/4 left-1/2 -translate-x-1/2 rounded-full"
           style={{ background: "radial-gradient(circle, hsl(268,50%,30%) 0%, transparent 70%)" }}
         />
       </div>

@@ -57,6 +57,7 @@ export const LandingHeader = () => {
                 ? "bg-[hsl(0,0%,6%)]/80 backdrop-blur-xl border-white/10 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)]"
                 : "bg-[hsl(0,0%,7%)]/40 backdrop-blur-md border-white/[0.06] shadow-[0_8px_30px_-16px_rgba(0,0,0,0.4)]"
             }`}
+            style={{ transform: "translateZ(0)", willChange: "backdrop-filter" }}
           >
             <div className="px-3 sm:px-5 lg:px-6">
               <div className="flex items-center justify-between h-14 sm:h-16">
