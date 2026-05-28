@@ -1999,7 +1999,7 @@ export const GenerateCards = ({
                     <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">3 минуты вместо 3 дней</p>
+                    <p className="text-sm font-semibold leading-tight">3 мин. вместо 3 дн.</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">без брифов и правок</p>
                   </div>
                 </div>
@@ -2011,8 +2011,8 @@ export const GenerateCards = ({
                     <Coins className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">Экономия до 10 000 ₽</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждой карточке</p>
+                    <p className="text-sm font-semibold leading-tight">Экономия до 12 тыс. ₽</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждом товаре</p>
                   </div>
                 </div>
               </div>
