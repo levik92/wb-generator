@@ -2627,7 +2627,7 @@ export const GenerateCards = ({
             const currentVariantIdx = selectedVariant[index] ?? (variants.length - 1);
             const displayedImageUrl = variants[currentVariantIdx]?.url || image.url;
             const isCoverCard = image.stageIndex === 0;
-            return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden animate-fade-in ${isProcessingCard ? 'border-primary/30' : ''}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
+            return <div key={image.id} className={`group/row relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-xl bg-card w-full overflow-hidden animate-fade-in transition-colors ${isProcessingCard ? 'border-violet-500/40 bg-violet-500/[0.02]' : 'border-border/60'}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
                     {isProcessingCard && <>
                       <div className="absolute inset-0 pointer-events-none" style={{
                         background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2638,149 +2638,134 @@ export const GenerateCards = ({
                         animation: 'glow-drift-top 8s ease-in-out infinite alternate',
                       }} />
                     </>}
-                    <div className="relative group/img shrink-0 w-fit mx-auto sm:mx-0 sm:w-auto">
-                      <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200" />
-                      {/* Hover overlay - only on image */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
-                        <ZoomIn className="w-5 h-5 text-white" />
-                      </div>
-                      {/* Click to preview */}
-                      <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
-                      <div className="flex items-center gap-2 justify-center sm:justify-start">
-                        <h3 className="font-medium text-sm sm:text-base truncate">{image.stage}</h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
-                        {CARD_STAGES[image.stageIndex]?.description}
-                      </p>
-                      {/* Variant selector with thumbnails */}
-                      {variants.length > 1 && (
-                        <div className="mt-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-8 text-xs w-full min-w-[160px] bg-muted/60 border-border/60 justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0 border border-border/30" />
-                                  <span className="truncate">{variants[currentVariantIdx]?.label}</span>
-                                  <Badge variant="secondary" className="text-[10px] px-1 py-0 shrink-0">{variants.length}</Badge>
-                                </div>
-                                <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto min-w-[160px] p-1.5" align="start">
-                              <div className="space-y-0.5 max-h-60 overflow-y-auto">
-                                {variants.map((v, vIdx) => (
-                                  <button
-                                    key={vIdx}
-                                    onClick={() => {
-                                      setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
-                                      setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
-                                    }}
-                                    className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground group ${currentVariantIdx === vIdx ? 'bg-accent/25 font-medium' : ''}`}
-                                  >
-                                    <img src={v.url} alt={v.label} className="w-8 h-10 rounded-sm object-cover shrink-0 border border-border/40" />
-                                    <span className="truncate">{v.label}</span>
-                                    {currentVariantIdx === vIdx && (
-                                      <CheckCircle2 className="w-4 h-4 text-primary group-hover:text-white shrink-0 ml-auto mr-1" />
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+
+                    {/* Mobile header: image + title side by side */}
+                    <div className="flex sm:contents items-start gap-3 w-full">
+                      <div className="relative group/img shrink-0">
+                        <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-lg border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-lg pointer-events-none">
+                          <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                      )}
+                        <div className="absolute inset-0 cursor-pointer rounded-lg" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
+                        {isCoverCard && (
+                          <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm">
+                            Главная
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base leading-tight truncate">{image.stage}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                          {CARD_STAGES[image.stageIndex]?.description}
+                        </p>
+                        {variants.length > 1 && (
+                          <div className="mt-2">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-7 text-xs rounded-lg bg-violet-500/5 border-violet-500/20 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/40 justify-between gap-2 px-2 max-w-[200px]">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <img src={variants[currentVariantIdx]?.url} alt="" className="w-4 h-4 rounded-sm object-cover shrink-0" />
+                                    <span className="truncate">{variants[currentVariantIdx]?.label}</span>
+                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 shrink-0 bg-violet-500/15 text-violet-700 dark:text-violet-300 border-none">{variants.length}</Badge>
+                                  </div>
+                                  <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto min-w-[180px] p-1.5 rounded-xl" align="start">
+                                <div className="space-y-0.5 max-h-60 overflow-y-auto">
+                                  {variants.map((v, vIdx) => (
+                                    <button
+                                      key={vIdx}
+                                      onClick={() => {
+                                        setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
+                                        setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
+                                      }}
+                                      className={`flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 text-xs transition-colors hover:bg-violet-500/10 group ${currentVariantIdx === vIdx ? 'bg-violet-500/10 font-medium text-violet-700 dark:text-violet-300' : ''}`}
+                                    >
+                                      <img src={v.url} alt={v.label} className="w-8 h-10 rounded-md object-cover shrink-0 border border-border/40" />
+                                      <span className="truncate">{v.label}</span>
+                                      {currentVariantIdx === vIdx && (
+                                        <CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 ml-auto" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    
-                    <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
-                      {/* Cover card: combined Video+Style dropdown (desktop) or two buttons (mobile) */}
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 w-full sm:w-auto shrink-0 sm:ml-auto">
+                      {/* Cover card extras */}
                       {isCoverCard && onNavigateToVideo && (
                         <>
-                          {/* Mobile: two separate small buttons */}
-                          <div className="flex xs:flex-row gap-2 md:hidden">
-                            <Button size="sm" variant="outline" onClick={e => {
-                              e.stopPropagation();
-                              onNavigateToVideo(image.url);
-                            }} className="flex-1 text-xs whitespace-nowrap border-violet-400/40 text-violet-600 dark:text-violet-400 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-colors">
-                              <Video className="w-3 h-3" />
-                              <span className="ml-1">Видео</span>
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={e => {
-                              e.stopPropagation();
-                              openStyleDialog(image);
-                            }} disabled={!jobData || generating || styleGenerating} className="flex-1 text-xs whitespace-nowrap border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors">
-                              <Sparkles className="w-3 h-3" />
-                              <span className="ml-1">Стиль</span>
-                            </Button>
-                          </div>
-                          {/* Desktop/tablet: dropdown */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="outline" className="hidden md:inline-flex text-xs whitespace-nowrap px-3 border-violet-400/40 text-violet-600 dark:text-violet-400 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-colors" title="Видео и стиль">
-                                <Sparkles className="w-4 h-4" />
-                                <ChevronDown className="w-3 h-3 ml-1" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => onNavigateToVideo(displayedImageUrl)} className="cursor-pointer">
-                                <Video className="w-4 h-4 mr-2" />
-                                Видеообложка
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openStyleDialog(image)} disabled={!jobData || generating || styleGenerating} className="cursor-pointer">
-                                <Sparkles className="w-4 h-4 mr-2" />
-                                В таком же стиле
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button size="sm" variant="outline" onClick={e => {
+                            e.stopPropagation();
+                            onNavigateToVideo(displayedImageUrl);
+                          }} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Сделать видеообложку">
+                            <Video className="w-3.5 h-3.5" />
+                            <span className="ml-1 sm:hidden">Видео</span>
+                            <span className="ml-1 hidden sm:inline lg:hidden">Видео</span>
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={e => {
+                            e.stopPropagation();
+                            openStyleDialog(image);
+                          }} disabled={!jobData || generating || styleGenerating} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="В таком же стиле">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span className="ml-1 sm:hidden">В стиле</span>
+                            <span className="ml-1 hidden sm:inline lg:hidden">Стиль</span>
+                          </Button>
                         </>
                       )}
 
-                      {/* Non-cover cards: style button */}
                       {!isCoverCard && (
                         <Button size="sm" variant="outline" onClick={e => {
                           e.stopPropagation();
                           openStyleDialog(image);
-                        }} disabled={!jobData || generating || styleGenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3 border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors" title="Создать в таком же стиле">
-                          <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
-                          <span className="md:hidden ml-1">В стиле</span>
+                        }} disabled={!jobData || generating || styleGenerating} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Создать в таком же стиле">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span className="ml-1 sm:hidden">В стиле</span>
+                          <span className="ml-1 hidden sm:inline lg:hidden">Стиль</span>
                         </Button>
                       )}
-                      
+
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
-                         const currentUrl = displayedImageUrl;
+                        const currentUrl = displayedImageUrl;
                         openEditDialog({ ...image, url: currentUrl }, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
-                              {editingCards.has(`edit_${image.id}_${index}`) ? <>
-                                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                                  <span className="md:hidden ml-1">Редактируется...</span>
-                                </> : <>
-                                  <Edit className="w-3 h-3 md:w-4 md:h-4" />
-                                  <span className="md:hidden ml-1">Редактировать</span>
-                                </>}
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Редактировать карточку">
+                        {editingCards.has(`edit_${image.id}_${index}`) ? <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span className="ml-1 sm:hidden">Ред…</span>
+                        </> : <>
+                          <Edit className="w-3.5 h-3.5" />
+                          <span className="ml-1 sm:hidden">Редактировать</span>
+                        </>}
                       </Button>
-                      
+
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Перегенерировать карточку">
-                              {isRegenerating ? <>
-                                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                                  <span className="md:hidden ml-1">Перегенерация...</span>
-                                </> : <>
-                                  <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
-                                  <span className="md:hidden ml-1">Перегенерировать</span>
-                                </>}
+                      }} disabled={isRegenerating} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Перегенерировать карточку">
+                        {isRegenerating ? <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span className="ml-1 sm:hidden">Перегенерация…</span>
+                        </> : <>
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span className="ml-1 sm:hidden">Перегенерировать</span>
+                        </>}
                       </Button>
-                      
-                      <Button size="sm" variant="outline" onClick={async e => {
+
+                      <Button size="sm" onClick={async e => {
                         e.stopPropagation();
                         await downloadSingle(index);
-                      }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Скачать изображение">
-                              <Download className="w-3 h-3 md:w-4 md:h-4" />
-                              <span className="md:hidden ml-1">Скачать</span>
+                      }} className="flex-1 sm:flex-initial h-8 px-3 rounded-lg text-xs whitespace-nowrap bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:from-violet-600 hover:to-purple-700 shadow-sm shadow-violet-500/20 transition-all" title="Скачать изображение">
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="ml-1 sm:hidden">Скачать</span>
                       </Button>
                     </div>
                   </div>;
