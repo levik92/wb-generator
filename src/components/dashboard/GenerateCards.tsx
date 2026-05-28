@@ -2125,15 +2125,12 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="md:col-span-3 relative overflow-hidden border-violet-500/30 bg-gradient-to-br from-violet-500/[0.08] via-purple-500/[0.04] to-transparent rounded-2xl shadow-sm shadow-violet-500/10">
-          <div className="pointer-events-none absolute -top-16 -right-16 w-40 h-40 bg-violet-500/15 blur-3xl rounded-full" />
-          <CardHeader className="relative">
-            <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg">
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/30">
-                <Upload className="w-4 h-4 text-white" />
-              </span>
-              <span className="font-semibold">Изображения товара</span>
-              <span className="ml-auto text-[10px] font-medium uppercase tracking-wider text-violet-700 dark:text-violet-300 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">
+        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Upload className="w-4 h-4 shrink-0" />
+              <span>Изображения товара</span>
+              <span className="ml-auto text-[10px] font-medium text-violet-700 dark:text-violet-300 border border-violet-500/30 bg-violet-500/5 px-1.5 py-0.5 rounded-md leading-none">
                 Обязательно
               </span>
               <TooltipProvider delayDuration={0}>
@@ -2141,7 +2138,7 @@ export const GenerateCards = ({
                   <TooltipTrigger asChild>
                     <button 
                       type="button" 
-                      className="text-muted-foreground hover:text-violet-600 dark:hover:text-violet-300 transition-colors touch-manipulation"
+                      className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
                       onClick={(e) => e.preventDefault()}
                     >
                       <Info className="w-4 h-4" />
@@ -2157,18 +2154,16 @@ export const GenerateCards = ({
               Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения, до 3 МБ каждое)
             </CardDescription>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className={`group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-violet-500 bg-violet-500/10 cursor-pointer scale-[1.01]' : 'border-violet-500/25 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/60 hover:bg-violet-500/[0.06] cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
+                <label className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
                   <div className="flex flex-col items-center justify-center text-center">
-                    <div className={`flex items-center justify-center w-12 h-12 mb-3 rounded-xl transition-all ${isDragOver ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/40' : 'bg-violet-500/10 group-hover:bg-violet-500/20'}`}>
-                      <Upload className={`w-5 h-5 transition-colors ${isDragOver ? 'text-white' : 'text-violet-600 dark:text-violet-300'}`} />
-                    </div>
-                    <p className={`text-sm font-semibold ${isDragOver ? 'text-violet-700 dark:text-violet-200' : 'text-foreground/80'}`}>
+                    <Upload className={`w-8 h-8 mb-3 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`text-sm font-semibold ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                       Загрузите изображения товара
                     </p>
-                    <p className={`text-xs mt-1 ${isDragOver ? 'text-violet-600 dark:text-violet-300' : 'text-muted-foreground'}`}>
+                    <p className={`text-xs mt-1 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                       Перетащите или нажмите для выбора. PNG, JPG, JPEG (макс. 3)
                     </p>
                   </div>
@@ -2178,7 +2173,7 @@ export const GenerateCards = ({
               
               {files.length > 0 && <div className="flex flex-wrap gap-2">
                   {files.map((file, index) => <div key={index} className="relative group w-24 h-24">
-                      <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full h-full aspect-square object-cover rounded-lg border-2 border-violet-500/20 shadow-sm" />
+                      <img src={URL.createObjectURL(file)} alt={`Upload ${index + 1}`} className="w-full h-full aspect-square object-cover rounded-lg border" />
                       {!generating && <button onClick={() => removeFile(index)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <X className="w-3 h-3" />
                       </button>}
@@ -2189,14 +2184,12 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="md:col-span-2 relative overflow-hidden border-border/60 bg-gradient-to-br from-muted/40 via-muted/10 to-transparent rounded-2xl">
-          <CardHeader className="relative">
-            <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg">
-              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted border border-border/60">
-                <Sparkles className="w-4 h-4 text-muted-foreground" />
-              </span>
-              <span className="font-semibold">Референс</span>
-              <span className="ml-auto text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-muted/60 border border-border/60 px-2 py-0.5 rounded-full">
+        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Upload className="w-4 h-4 shrink-0" />
+              <span>Референс</span>
+              <span className="ml-auto text-[10px] font-medium text-muted-foreground border border-border bg-muted/40 px-1.5 py-0.5 rounded-md leading-none">
                 Опционально
               </span>
             </CardTitle>
@@ -2204,24 +2197,22 @@ export const GenerateCards = ({
               WBGen может взять за основу прикрепленный дизайн (не обязательно)
             </CardDescription>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label 
-                  className={`group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-violet-500 bg-violet-500/10 cursor-pointer scale-[1.01]' : 'border-border/60 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/50 hover:bg-violet-500/[0.05] cursor-pointer'}`}
+                  className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}
                   onDragOver={generating ? undefined : handleRefDragOver}
                   onDragEnter={generating ? undefined : handleRefDragEnter}
                   onDragLeave={generating ? undefined : handleRefDragLeave}
                   onDrop={generating ? undefined : handleRefDrop}
                 >
                   <div className="flex flex-col items-center justify-center text-center">
-                    <div className={`flex items-center justify-center w-12 h-12 mb-3 rounded-xl transition-all ${isRefDragOver ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/40' : 'bg-muted group-hover:bg-violet-500/15'}`}>
-                      <Upload className={`w-5 h-5 transition-colors ${isRefDragOver ? 'text-white' : 'text-muted-foreground group-hover:text-violet-600 dark:group-hover:text-violet-300'}`} />
-                    </div>
-                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-violet-700 dark:text-violet-200' : 'text-foreground/80'}`}>
+                    <Upload className={`w-8 h-8 mb-3 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                       Загрузите референс
                     </p>
-                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-violet-600 dark:text-violet-300' : 'text-muted-foreground'}`}>
+                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
                       1 изобр. до 3 МБ
                     </p>
                   </div>
@@ -2230,7 +2221,7 @@ export const GenerateCards = ({
               </div>
               
               {referenceImage && <div className="relative group w-24 h-24">
-                  <img src={URL.createObjectURL(referenceImage)} alt="Референс" className="w-full h-full aspect-square object-cover rounded-lg border-2 border-border shadow-sm" />
+                  <img src={URL.createObjectURL(referenceImage)} alt="Референс" className="w-full h-full aspect-square object-cover rounded-lg border" />
                   {!generating && <button onClick={removeReference} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <X className="w-3 h-3" />
                   </button>}
