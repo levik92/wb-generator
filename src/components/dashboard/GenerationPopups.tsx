@@ -86,29 +86,32 @@ export const GenerationPopups = ({
     <>
       {/* Learning popup - After first generation */}
       <ResponsiveDialog open={showLearningPopup} onOpenChange={handleLearningOpenChange}>
-        <ResponsiveDialogContent className="sm:max-w-md">
+        <ResponsiveDialogContent className="sm:max-w-md rounded-2xl border-violet-500/25">
           <ResponsiveDialogHeader>
-            <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <BookOpen className="w-8 h-8 text-emerald-500" />
-              </motion.div>
+            <div className="mx-auto mb-4 relative">
+              <span aria-hidden className="absolute inset-0 rounded-2xl bg-violet-500/30 blur-2xl opacity-60" />
+              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30 flex items-center justify-center">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <BookOpen className="w-8 h-8 text-white" />
+                </motion.div>
+              </div>
             </div>
             <ResponsiveDialogTitle className="text-center text-xl">
               🎉 Поздравляем с первой генерацией!
             </ResponsiveDialogTitle>
             <ResponsiveDialogDescription className="text-center">
-              Хотите делать карточки ещё лучше? Посмотрите обучающие материалы в базе знаний — 
+              Хотите делать карточки ещё лучше? Посмотрите обучающие материалы в базе знаний —
               там мы рассказываем, как получить максимум от генераций.
             </ResponsiveDialogDescription>
           </ResponsiveDialogHeader>
           <ResponsiveDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button variant="outline" onClick={handleLearningClose} className="w-full sm:w-auto">
+            <Button variant="outline" onClick={handleLearningClose} className="w-full sm:w-auto rounded-xl">
               Напомнить позже
             </Button>
-            <Button onClick={handleLearningNavigate} className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600">
+            <Button onClick={handleLearningNavigate} className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all">
               Перейти к обучению
               <BookOpen className="w-4 h-4 ml-2" />
             </Button>
