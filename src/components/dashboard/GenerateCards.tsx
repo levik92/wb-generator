@@ -2417,7 +2417,7 @@ export const GenerateCards = ({
               <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-violet-500/20 blur-3xl" />
             )}
             <div className="relative flex items-center justify-between gap-3">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                   unifiedStyling
                     ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/30'
