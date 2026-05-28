@@ -93,23 +93,27 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       {/* Token Balance */}
       <div className={`pb-4 ${isCollapsed ? 'px-3' : 'px-4'}`}>
         {isCollapsed ? (
-          <div className="flex justify-center">
-            <Button
-              size="sm"
-              className="w-10 h-10 p-0 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-md shadow-violet-500/25"
-              onClick={() => onTabChange('pricing')}
-            >
+          <button
+            onClick={() => onTabChange('pricing')}
+            className="w-full rounded-2xl p-2 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent border border-violet-500/20 flex flex-col items-center justify-center gap-1.5 hover:from-violet-500/15 hover:border-violet-500/30 transition-colors min-h-[104px]"
+            title={`Токены: ${profile.tokens_balance}`}
+          >
+            <span className="text-xs font-bold text-violet-600 dark:text-violet-400 tabular-nums leading-none">
+              {profile.tokens_balance}
+            </span>
+            <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25">
               <Plus className="w-4 h-4" />
-            </Button>
-          </div>
+            </div>
+          </button>
         ) : (
-          <div className="rounded-2xl p-4 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent border border-violet-500/20">
+          <div className="rounded-2xl p-4 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent border border-violet-500/20 min-h-[104px] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-violet-600 dark:text-violet-400">Токены</span>
-              <Badge className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-500 hover:to-purple-600 text-white font-bold px-2.5 py-0.5 text-xs border-0 shadow-sm shadow-violet-500/25">
+              <Badge className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-500 hover:to-purple-600 text-white font-bold px-2.5 py-0.5 text-xs border-0 shadow-sm shadow-violet-500/25 tabular-nums">
                 {profile.tokens_balance}
               </Badge>
             </div>
+
             <Button
               size="sm"
               onClick={() => onTabChange('pricing')}
