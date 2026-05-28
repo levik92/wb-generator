@@ -2692,13 +2692,13 @@ export const GenerateCards = ({
                           <div className="mt-2">
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 text-[11px] rounded-md bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground justify-between gap-1.5 px-1.5 max-w-[200px]">
-                                  <div className="flex items-center gap-1.5 min-w-0">
-                                    <img src={variants[currentVariantIdx]?.url} alt="" className="w-3.5 h-3.5 rounded-sm object-cover shrink-0" />
+                                <Button variant="ghost" size="sm" className="h-8 text-xs rounded-md bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground justify-between gap-2 px-2 max-w-[220px]">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0" />
                                     <span className="truncate">{variants[currentVariantIdx]?.label}</span>
-                                    <Badge variant="secondary" className="text-[9px] px-1 py-0 h-3.5 shrink-0 bg-muted text-muted-foreground border-none font-normal">{variants.length}</Badge>
+                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 shrink-0 bg-muted text-muted-foreground border-none font-normal">{variants.length}</Badge>
                                   </div>
-                                  <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
+                                  <ChevronDown className="w-3.5 h-3.5 shrink-0 opacity-60" />
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto min-w-[180px] p-1.5 rounded-xl" align="start">
