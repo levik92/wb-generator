@@ -123,10 +123,10 @@ export const DashboardHeader = ({
   return (
     <header className="border-b border-border bg-card sticky top-0 z-20">
       <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="min-w-0">
-            <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
-            <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
+        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <h1 className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight">{currentTab.title}</h1>
+            {currentTab.subtitle && <p className="text-xs text-muted-foreground hidden sm:block truncate mt-0.5">{currentTab.subtitle}</p>}
           </div>
           {headerActions && (
             <div className="flex items-center gap-2 shrink-0">
@@ -135,18 +135,18 @@ export const DashboardHeader = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0 ml-2">
           <ThemeToggle />
-          
+
           {/* Notifications */}
           {!isMobile && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-secondary">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 transition-colors">
                   <Bell className="h-[18px] w-[18px] text-muted-foreground" />
                   {unreadCount > 0 && (
-                    <div className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-primary-foreground">{unreadCount}</span>
+                    <div className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40">
+                      <span className="text-[10px] font-bold text-white">{unreadCount}</span>
                     </div>
                   )}
                 </Button>
@@ -155,11 +155,11 @@ export const DashboardHeader = ({
                 <div className="flex items-center justify-between p-3 border-b">
                   <h3 className="font-semibold text-sm">Уведомления</h3>
                   {unreadCount > 0 && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={markAllAsRead} 
-                      className="text-xs h-auto py-1 px-2 hover:bg-primary/10 text-primary hover:text-foreground"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={markAllAsRead}
+                      className="text-xs h-auto py-1 px-2 hover:bg-violet-500/10 text-violet-600 hover:text-violet-600"
                     >
                       Прочитать все
                     </Button>
@@ -171,11 +171,11 @@ export const DashboardHeader = ({
                   </div>
                 ) : (
                   notifications.map(notification => (
-                    <DropdownMenuItem 
-                      key={notification.id} 
-                      className={`group p-3 cursor-pointer border-b last:border-b-0 hover:bg-primary hover:text-primary-foreground ${
-                        !notification.read ? 'bg-primary/5' : ''
-                      } [&:hover_p]:text-primary-foreground [&:hover_span]:text-primary-foreground/80`}
+                    <DropdownMenuItem
+                      key={notification.id}
+                      className={`group p-3 cursor-pointer border-b last:border-b-0 hover:bg-violet-500/10 ${
+                        !notification.read ? 'bg-violet-500/5' : ''
+                      }`}
                       onClick={() => markAsRead(notification.id)}
                     >
                       <div className="flex items-start space-x-3 w-full">
@@ -199,7 +199,7 @@ export const DashboardHeader = ({
                           </p>
                         </div>
                         {!notification.read && (
-                          <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
+                          <div className="w-2 h-2 bg-violet-500 rounded-full flex-shrink-0 mt-2" />
                         )}
                       </div>
                     </DropdownMenuItem>
@@ -208,13 +208,13 @@ export const DashboardHeader = ({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          
+
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className={`relative rounded-xl ${isMobile ? 'h-9 w-9' : 'h-10 w-10'} hover:bg-secondary`}>
+              <Button variant="ghost" className={`relative rounded-xl ${isMobile ? 'h-9 w-9' : 'h-10 w-10'} hover:bg-violet-500/10 transition-colors`}>
                 <Avatar className={isMobile ? 'h-8 w-8' : 'h-9 w-9'}>
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-semibold">
+                  <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold shadow-sm shadow-violet-500/25">
                     <UserIcon className={isMobile ? 'h-4 w-4' : 'h-[18px] w-[18px]'} />
                   </AvatarFallback>
                 </Avatar>
@@ -230,17 +230,17 @@ export const DashboardHeader = ({
                 </p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={() => window.location.href = '/partners/cabinet'}>
+              <DropdownMenuItem className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1" onClick={() => window.location.href = '/partners/cabinet'}>
                 <Users className="mr-2 h-4 w-4" />
                 <span>Партнерам</span>
               </DropdownMenuItem>
               {onNavigateToSupport && (
-                <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSupport}>
+                <DropdownMenuItem className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSupport}>
                   <Headphones className="mr-2 h-4 w-4" />
                   <span>Поддержка</span>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSettings}>
+              <DropdownMenuItem className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSettings}>
                 <User className="mr-2 h-4 w-4" />
                 <span>Настройки</span>
               </DropdownMenuItem>
@@ -256,3 +256,4 @@ export const DashboardHeader = ({
     </header>
   );
 };
+
