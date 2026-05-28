@@ -525,11 +525,11 @@ const VideoGeneration = () => {
         <title>Видео-генерация для карточек Wildberries — AI-создание видеообложек | WBGen</title>
         <meta
           name="description"
-          content="Генерация видеообложек для карточек Wildberries с помощью нейросети. Видеоконтент увеличивает CTR на 60%. Создание роликов за 5 минут. Скоро в WBGen."
+          content="Генерация видеообложек для карточек Wildberries с помощью нейросети. Видеоконтент увеличивает CTR на 60%. От 10₽ за обложку, готовый MP4 за 2 минуты."
         />
         <meta name="keywords" content="видео wildberries, видеообложка карточки, видео для wb, видеоконтент маркетплейс, видеогенерация ии" />
         <meta property="og:title" content="Видео-генерация для Wildberries — AI-создание видеообложек" />
-        <meta property="og:description" content="ИИ-генерация видеообложек для карточек товаров. Увеличьте CTR на 60%. Скоро в WBGen." />
+        <meta property="og:description" content="ИИ-генерация видеообложек для карточек товаров. Увеличьте CTR на 60% — готовый MP4 за 2 минуты." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://wbgen.ru/video-generaciya" />
         <link rel="canonical" href="https://wbgen.ru/video-generaciya" />
