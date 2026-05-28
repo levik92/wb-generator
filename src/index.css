@@ -13,15 +13,25 @@
 
 .identifying-ring {
   position: relative;
-  border-radius: 0.625rem;
-  padding: 1.5px;
-  background: linear-gradient(90deg, hsl(262 83% 65%), hsl(280 90% 70%), hsl(220 90% 65%), hsl(262 83% 65%));
+  border-radius: 0.5rem;
+  padding: 1px;
+  background: linear-gradient(90deg, hsl(262 83% 65% / 0.35), hsl(280 90% 70% / 0.55), hsl(262 83% 65% / 0.2), hsl(280 90% 70% / 0.55), hsl(262 83% 65% / 0.35));
   background-size: 300% 300%;
   animation: identifying-border 2.4s ease-in-out infinite;
 }
 .identifying-ring > * {
-  border-radius: 0.5rem;
+  border-radius: calc(0.5rem - 1px);
 }
+
+/* Soft fade-in without movement for the identifying label */
+@keyframes identifying-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.identifying-fade {
+  animation: identifying-fade 0.35s ease-out both;
+}
+
 
 @layer base {
   :root {
