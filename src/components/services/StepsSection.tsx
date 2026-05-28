@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
+import { SpotlightCard } from "@/components/landing/effects/SpotlightCard";
 
 interface Step {
   number: string;
@@ -12,67 +13,61 @@ interface StepsSectionProps {
   title: string;
   subtitle?: string;
   steps: Step[];
+  eyebrow?: string;
 }
 
-export const StepsSection = ({ title, subtitle, steps }: StepsSectionProps) => {
+export const StepsSection = ({ title, subtitle, steps, eyebrow = "Простой процесс" }: StepsSectionProps) => {
+  const words = title.split(" ");
+  const tail = words.slice(-2).join(" ");
+  const head = words.slice(0, -2).join(" ");
+
   return (
-    <section className="py-16 sm:py-24 relative bg-gradient-to-b from-transparent via-[hsl(268,40%,8%)] to-transparent">
-      <div className="container mx-auto px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12 sm:mb-16"
-        >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-            {title}
+    <section className="section-shell">
+      <div className="absolute inset-0 grid-pattern opacity-[0.08]" />
+
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="section-header">
+          <span className="section-eyebrow">{eyebrow}</span>
+          <h2 className="section-title">
+            {head ? <>{head} <span className="text-aurora">{tail}</span></> : <span className="text-aurora">{title}</span>}
           </h2>
-          {subtitle && (
-            <p className="text-white/60 text-lg max-w-2xl mx-auto">
-              {subtitle}
-            </p>
+          {subtitle && <p className="section-subtitle">{subtitle}</p>}
+        </div>
+
+        <div className="relative max-w-6xl mx-auto">
+          {steps.length === 4 && (
+            <div className="hidden lg:block absolute top-[88px] left-[12.5%] right-[12.5%] h-px animated-beam pointer-events-none" />
           )}
-        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-6xl mx-auto">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.06 }}
-                className="relative group"
-              >
-                {/* Connector line */}
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-[60%] w-full h-px bg-gradient-to-r from-[hsl(268,83%,60%)]/30 via-white/10 to-transparent" />
-                )}
-
-                <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
-                <div className="relative glass-card rounded-2xl p-6 h-full border border-white/10 group-hover:border-white/20 transition-colors">
-                  {/* Step number */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,52%)] flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-[hsl(268,83%,40%)]/30">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 ${steps.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-3 sm:gap-4 relative`}>
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: index * 0.05 }}
+                >
+                  <SpotlightCard className="glass-card rounded-3xl p-6 sm:p-7 h-full overflow-hidden">
+                    <div className="absolute top-5 right-5 text-[2.75rem] font-bold leading-none bg-gradient-to-br from-white/15 to-white/[0.02] bg-clip-text text-transparent tracking-tight">
                       {step.number}
                     </div>
-                    {Icon && (
-                      <Icon className="w-5 h-5 text-white/40" />
-                    )}
-                  </div>
-
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-white/50 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center shadow-lg shadow-[hsl(263,90%,40%)]/25 mb-5 relative z-10">
+                      {Icon && <Icon className="w-5 h-5 text-white" />}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2 leading-tight">
+                      {step.title}
+                    </h3>
+                    <p className="text-sm text-white/55 leading-relaxed">
+                      {step.description}
+                    </p>
+                  </SpotlightCard>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

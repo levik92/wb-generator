@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { LucideIcon } from "lucide-react";
+import { SpotlightCard } from "@/components/landing/effects/SpotlightCard";
 
 interface Feature {
   icon: LucideIcon;
@@ -13,50 +14,59 @@ interface ServiceFeaturesProps {
   title: string;
   subtitle?: string;
   features: Feature[];
+  eyebrow?: string;
 }
 
-export const ServiceFeatures = ({ title, subtitle, features }: ServiceFeaturesProps) => {
+export const ServiceFeatures = ({ title, subtitle, features, eyebrow = "Возможности" }: ServiceFeaturesProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  // Split title on last 2-3 words to apply aurora gradient
+  const words = title.split(" ");
+  const tail = words.slice(-2).join(" ");
+  const head = words.slice(0, -2).join(" ");
+
   return (
-    <section ref={ref} className="py-16 sm:py-24 relative">
-      <div className="container mx-auto px-4 sm:px-6">
+    <section ref={ref} className="section-shell">
+      <div className="spotlight-violet" />
+
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.6 }}
+          className="section-header"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-            {title}
+          <span className="section-eyebrow">{eyebrow}</span>
+          <h2 className="section-title">
+            {head ? <>{head} <span className="text-aurora">{tail}</span></> : <span className="text-aurora">{title}</span>}
           </h2>
-          {subtitle && (
-            <p className="text-white/50 max-w-2xl mx-auto">{subtitle}</p>
-          )}
+          {subtitle && <p className="section-subtitle">{subtitle}</p>}
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-w-6xl mx-auto">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.06 }}
-              className="group relative"
+              transition={{ duration: 0.45, delay: index * 0.05 }}
             >
-              <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/40 via-transparent to-[hsl(290,83%,60%)]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
-              <div className="relative glass-card rounded-2xl p-6 sm:p-8 border border-white/10 group-hover:border-white/20 transition-colors duration-300 h-full">
-                <div
-                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color || 'from-[hsl(268,83%,58%)] to-[hsl(280,83%,52%)]'} flex items-center justify-center mb-5 shadow-lg shadow-[hsl(268,83%,40%)]/20 group-hover:shadow-[hsl(268,83%,60%)]/40 group-hover:scale-105 transition-all duration-300`}
-                >
-                  <feature.icon className="w-7 h-7 text-white" />
+              <SpotlightCard
+                magnetic
+                spotlightColor="hsl(263 90% 60% / 0.13)"
+                className="glass-card rounded-3xl p-6 sm:p-7 h-full overflow-hidden"
+              >
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center mb-4 sm:mb-5 shadow-lg shadow-[hsl(263,90%,40%)]/30">
+                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 leading-tight">
                   {feature.title}
                 </h3>
-                <p className="text-white/50">{feature.description}</p>
-              </div>
+                <p className="text-[13px] sm:text-sm text-white/55 leading-relaxed">
+                  {feature.description}
+                </p>
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>
