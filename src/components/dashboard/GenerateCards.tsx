@@ -2694,13 +2694,13 @@ export const GenerateCards = ({
                           <div className="mt-2">
                             <Popover>
                               <PopoverTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-7 text-xs rounded-lg bg-violet-500/5 border-violet-500/20 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/40 justify-between gap-2 px-2 max-w-[200px]">
+                                <Button variant="ghost" size="sm" className="h-6 text-[11px] rounded-md bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground justify-between gap-1.5 px-1.5 max-w-[200px]">
                                   <div className="flex items-center gap-1.5 min-w-0">
-                                    <img src={variants[currentVariantIdx]?.url} alt="" className="w-4 h-4 rounded-sm object-cover shrink-0" />
+                                    <img src={variants[currentVariantIdx]?.url} alt="" className="w-3.5 h-3.5 rounded-sm object-cover shrink-0" />
                                     <span className="truncate">{variants[currentVariantIdx]?.label}</span>
-                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 shrink-0 bg-violet-500/15 text-violet-700 dark:text-violet-300 border-none">{variants.length}</Badge>
+                                    <Badge variant="secondary" className="text-[9px] px-1 py-0 h-3.5 shrink-0 bg-muted text-muted-foreground border-none font-normal">{variants.length}</Badge>
                                   </div>
-                                  <ChevronDown className="w-3 h-3 shrink-0 opacity-60" />
+                                  <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto min-w-[180px] p-1.5 rounded-xl" align="start">
