@@ -2776,7 +2776,7 @@ export const GenerateCards = ({
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Перегенерировать карточку">
+                      }} disabled={isRegenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Перегенерировать карточку">
                         {isRegenerating ? <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           <span className="ml-1 lg:hidden">Перегенерация…</span>
