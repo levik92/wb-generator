@@ -4,23 +4,20 @@
 
 /* WBGen Premium Design System - Liquid Glass Aesthetic */
 
-/* Animated gradient border for identifying state */
-@keyframes identifying-border {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Animated violet border for identifying state - applied directly to the input */
+@keyframes identifying-border-pulse {
+  0%, 100% {
+    border-color: hsl(262 83% 65% / 0.35);
+    box-shadow: 0 0 0 1px hsl(262 83% 65% / 0.15);
+  }
+  50% {
+    border-color: hsl(280 90% 70% / 0.75);
+    box-shadow: 0 0 0 1px hsl(280 90% 70% / 0.35);
+  }
 }
 
-.identifying-ring {
-  position: relative;
-  border-radius: 0.5rem;
-  padding: 1px;
-  background: linear-gradient(90deg, hsl(262 83% 65% / 0.35), hsl(280 90% 70% / 0.55), hsl(262 83% 65% / 0.2), hsl(280 90% 70% / 0.55), hsl(262 83% 65% / 0.35));
-  background-size: 300% 300%;
-  animation: identifying-border 2.4s ease-in-out infinite;
-}
-.identifying-ring > * {
-  border-radius: calc(0.5rem - 1px);
+.identifying-input {
+  animation: identifying-border-pulse 1.8s ease-in-out infinite;
 }
 
 /* Soft fade-in without movement for the identifying label */
@@ -31,6 +28,7 @@
 .identifying-fade {
   animation: identifying-fade 0.35s ease-out both;
 }
+
 
 
 @layer base {
