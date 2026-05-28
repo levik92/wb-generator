@@ -2263,7 +2263,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="shrink-0 rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
+          }} className="shrink-0 rounded-lg h-8 px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/60 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
