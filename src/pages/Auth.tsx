@@ -403,14 +403,20 @@ const Auth = () => {
       if (referralCode) sessionStorage.setItem('pending_referral_code', referralCode);
       if (partnerCode) sessionStorage.setItem('pending_partner_code', partnerCode);
       
-      // Store UTM source for post-OAuth profile update
+      // Store UTM source for post-OAuth profile update.
+      // Two channels for reliability:
+      //  1. sessionStorage — survives same-tab redirect
+      //  2. URL param on redirectTo — survives cross-tab / restored sessions
       const utmSourceId = getStoredUtmSourceId();
       if (utmSourceId) sessionStorage.setItem('pending_utm_source_id', utmSourceId);
-      
+
+      const redirectUrl = new URL(`${window.location.origin}/dashboard`);
+      if (utmSourceId) redirectUrl.searchParams.set('utm_source_id', utmSourceId);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: redirectUrl.toString(),
           queryParams: { access_type: 'offline', prompt: 'consent' },
         },
       });
