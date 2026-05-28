@@ -2658,7 +2658,7 @@ export const GenerateCards = ({
             const currentVariantIdx = selectedVariant[index] ?? (variants.length - 1);
             const displayedImageUrl = variants[currentVariantIdx]?.url || image.url;
             const isCoverCard = image.stageIndex === 0;
-            return <div key={image.id} className={`group/row relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-xl bg-card w-full overflow-hidden animate-fade-in transition-colors ${isProcessingCard ? 'border-violet-500/40 bg-violet-500/[0.02]' : 'border-border/60'}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
+            return <div key={image.id} className={`group/row relative flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-xl bg-card w-full overflow-hidden animate-fade-in transition-colors ${isProcessingCard ? 'border-violet-500/40 bg-violet-500/[0.02]' : 'border-border/60'}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
                     {isProcessingCard && <>
                       <div className="absolute inset-0 pointer-events-none" style={{
                         background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2671,7 +2671,7 @@ export const GenerateCards = ({
                     </>}
 
                     {/* Mobile header: image + title side by side */}
-                    <div className="flex sm:contents items-start gap-3 w-full">
+                    <div className="flex lg:contents items-start gap-3 w-full">
                       <div className="relative group/img shrink-0">
                         <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-lg border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-lg pointer-events-none">
@@ -2730,25 +2730,23 @@ export const GenerateCards = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 w-full sm:w-auto shrink-0 sm:ml-auto">
+                    <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 w-full lg:w-auto shrink-0 lg:ml-auto">
                       {/* Cover card extras */}
                       {isCoverCard && onNavigateToVideo && (
                         <>
                           <Button size="sm" variant="outline" onClick={e => {
                             e.stopPropagation();
                             onNavigateToVideo(displayedImageUrl);
-                          }} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Сделать видеообложку">
+                          }} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Сделать видеообложку">
                             <Video className="w-3.5 h-3.5" />
-                            <span className="ml-1 sm:hidden">Видео</span>
-                            <span className="ml-1 hidden sm:inline lg:hidden">Видео</span>
+                            <span className="ml-1 lg:hidden">Видео</span>
                           </Button>
                           <Button size="sm" variant="outline" onClick={e => {
                             e.stopPropagation();
                             openStyleDialog(image);
-                          }} disabled={!jobData || generating || styleGenerating} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="В таком же стиле">
+                          }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="В таком же стиле">
                             <Sparkles className="w-3.5 h-3.5" />
-                            <span className="ml-1 sm:hidden">В стиле</span>
-                            <span className="ml-1 hidden sm:inline lg:hidden">Стиль</span>
+                            <span className="ml-1 lg:hidden">Стиль</span>
                           </Button>
                         </>
                       )}
@@ -2757,10 +2755,9 @@ export const GenerateCards = ({
                         <Button size="sm" variant="outline" onClick={e => {
                           e.stopPropagation();
                           openStyleDialog(image);
-                        }} disabled={!jobData || generating || styleGenerating} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Создать в таком же стиле">
+                        }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Создать в таком же стиле">
                           <Sparkles className="w-3.5 h-3.5" />
-                          <span className="ml-1 sm:hidden">В стиле</span>
-                          <span className="ml-1 hidden sm:inline lg:hidden">Стиль</span>
+                          <span className="ml-1 lg:hidden">Стиль</span>
                         </Button>
                       )}
 
@@ -2768,35 +2765,35 @@ export const GenerateCards = ({
                         e.stopPropagation();
                         const currentUrl = displayedImageUrl;
                         openEditDialog({ ...image, url: currentUrl }, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Редактировать карточку">
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Редактировать карточку">
                         {editingCards.has(`edit_${image.id}_${index}`) ? <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span className="ml-1 sm:hidden">Ред…</span>
+                          <span className="ml-1 lg:hidden">Ред…</span>
                         </> : <>
                           <Edit className="w-3.5 h-3.5" />
-                          <span className="ml-1 sm:hidden">Редактировать</span>
+                          <span className="ml-1 lg:hidden">Редактировать</span>
                         </>}
                       </Button>
 
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Перегенерировать карточку">
+                      }} disabled={isRegenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-lg text-xs whitespace-nowrap hover:border-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" title="Перегенерировать карточку">
                         {isRegenerating ? <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span className="ml-1 sm:hidden">Перегенерация…</span>
+                          <span className="ml-1 lg:hidden">Перегенерация…</span>
                         </> : <>
                           <RefreshCw className="w-3.5 h-3.5" />
-                          <span className="ml-1 sm:hidden">Перегенерировать</span>
+                          <span className="ml-1 lg:hidden">Перегенерировать</span>
                         </>}
                       </Button>
 
                       <Button size="sm" onClick={async e => {
                         e.stopPropagation();
                         await downloadSingle(index);
-                      }} className="flex-1 sm:flex-initial h-8 px-3 rounded-lg text-xs whitespace-nowrap bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:from-violet-600 hover:to-purple-700 shadow-sm shadow-violet-500/20 transition-all" title="Скачать изображение">
+                      }} className="flex-1 lg:flex-initial h-8 px-3 rounded-lg text-xs whitespace-nowrap bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:from-violet-600 hover:to-purple-700 shadow-sm shadow-violet-500/20 transition-all" title="Скачать изображение">
                         <Download className="w-3.5 h-3.5" />
-                        <span className="ml-1 sm:hidden">Скачать</span>
+                        <span className="ml-1 lg:hidden">Скачать</span>
                       </Button>
                     </div>
                   </div>;
