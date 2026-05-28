@@ -2301,9 +2301,9 @@ export const GenerateCards = ({
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-xl border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
+            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 rounded-xl border border-violet-500/20 bg-violet-500/5 px-3 py-2 transition-colors hover:bg-violet-500/10">
+              <div className="flex items-center space-x-2 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 transition-colors hover:bg-violet-500/10">
                 <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
                 setAutoDescription(!!checked);
                 if (checked) {
