@@ -7,18 +7,19 @@
 /* Animated violet border for identifying state - applied directly to the input */
 @keyframes identifying-border-pulse {
   0%, 100% {
-    border-color: hsl(262 83% 65% / 0.35);
-    box-shadow: 0 0 0 1px hsl(262 83% 65% / 0.15);
+    border-color: hsl(262 83% 60% / 0.7);
   }
   50% {
-    border-color: hsl(280 90% 70% / 0.75);
-    box-shadow: 0 0 0 1px hsl(280 90% 70% / 0.35);
+    border-color: hsl(280 90% 65% / 1);
   }
 }
 
 .identifying-input {
+  border-width: 1px !important;
+  box-shadow: none !important;
   animation: identifying-border-pulse 1.8s ease-in-out infinite;
 }
+
 
 /* Soft fade-in without movement for the identifying label */
 @keyframes identifying-fade {
