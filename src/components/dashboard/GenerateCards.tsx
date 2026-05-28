@@ -2785,7 +2785,7 @@ export const GenerateCards = ({
             onClick={simulateGeneration}
             disabled={!canGenerate()}
             size="lg"
-            className="gap-2 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-100 disabled:from-violet-500/40 disabled:to-purple-600/40 disabled:shadow-none disabled:cursor-not-allowed"
+            className="gap-2 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none disabled:cursor-not-allowed"
           >
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
