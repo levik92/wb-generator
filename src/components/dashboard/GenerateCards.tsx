@@ -2303,14 +2303,14 @@ export const GenerateCards = ({
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <label
                 htmlFor="autoDescription"
-                className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-lg px-2.5 sm:px-3 h-9 cursor-pointer select-none transition-colors max-w-full ${
+                className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-md px-2.5 sm:px-3 h-10 cursor-pointer select-none transition-colors max-w-full ${
                   autoDescription
                     ? 'bg-gradient-to-r from-violet-500/15 to-purple-500/10 text-violet-700 dark:text-violet-300'
-                    : 'bg-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+                    : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
                 } ${generating ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoDescription ? 'text-violet-500' : ''}`} />
-                <span className="text-xs sm:text-sm font-medium leading-none whitespace-nowrap">
+                <span className="text-[11px] sm:text-xs font-medium leading-none whitespace-nowrap">
                   Придумай сам
                 </span>
                 <Switch
