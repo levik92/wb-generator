@@ -2797,20 +2797,25 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card>
+      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
         <CardContent className="pt-6 space-y-3">
-          <Button onClick={simulateGeneration} disabled={!canGenerate()} className="gap-2 w-full sm:w-auto" size="lg">
+          <Button
+            onClick={simulateGeneration}
+            disabled={!canGenerate()}
+            size="lg"
+            className="gap-2 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:shadow-none"
+          >
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Генерация...
               </> : <>
-                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">
                   Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
                 </span>
                 <span className="sm:hidden">Сгенерировать</span>
-                <Badge variant="secondary" className="ml-1">
-                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} токенов
+                <Badge className="ml-1 bg-white/20 text-white border-white/30 hover:bg-white/20">
+                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </>}
           </Button>
