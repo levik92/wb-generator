@@ -1955,52 +1955,76 @@ export const GenerateCards = ({
   }, []);
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
 
-      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold">
-                Карточки, которые продают — за 3 минуты
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                WB Генератор оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня. Всё автоматически — просто загрузи фото.
-              </p>
+      {/* Hero — conversion-focused */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
+        />
+        <div className="relative p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/30 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="min-w-0 space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Карточки, которые продают</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                  Поднимите конверсию карточки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">до +260%</span> за 3 минуты
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  WBGen упаковывает товар как профессиональный дизайнер: продающая композиция, инфографика, тексты-крючки и премиальный вид — всё автоматически.
+                </p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Экономия до 10 000 ₽</p>
-                  <p className="text-[10px] text-muted-foreground">на каждой карточке</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Результат за 3 минуты</p>
-                  <p className="text-[10px] text-muted-foreground">вместо 3 дней</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">+260% к CTR</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">больше кликов и заказов</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Gift className="w-4 h-4 text-primary" />
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">3 минуты вместо 3 дней</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">без брифов и правок</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Реферальная программа</p>
-                  <p className="text-[10px] text-muted-foreground">приглашай и зарабатывай</p>
+              </div>
+
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Coins className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">Экономия до 10 000 ₽</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждой карточке</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
 
       {/* Cards Promo Banner */}
@@ -2106,7 +2130,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
+        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
@@ -2162,7 +2186,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
+        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
@@ -2207,7 +2231,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/50 shadow-sm bg-card">
+      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
@@ -2304,7 +2328,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="bg-card">
+      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Images className="w-4 h-4 shrink-0" />
@@ -2461,7 +2485,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Progress */}
-      {generating && <Card className="relative overflow-hidden">
+      {generating && <Card className="relative overflow-hidden border-violet-500/25 bg-card rounded-2xl">
           {/* Animated radial gradient background — bottom */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2571,7 +2595,7 @@ export const GenerateCards = ({
       </Dialog>
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="bg-card animate-scale-in">
+      {generatedImages.length > 0 && <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40 animate-scale-in">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -2583,7 +2607,7 @@ export const GenerateCards = ({
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
-              <Button onClick={downloadAll} variant="outline" className="shrink-0 w-full sm:w-auto" size="sm" disabled={downloadingAll}>
+              <Button onClick={downloadAll} className="shrink-0 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all" size="sm" disabled={downloadingAll}>
                 {downloadingAll ? <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     <span className="hidden sm:inline">Создаю ZIP...</span>
@@ -2773,20 +2797,25 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card>
+      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
         <CardContent className="pt-6 space-y-3">
-          <Button onClick={simulateGeneration} disabled={!canGenerate()} className="gap-2 w-full sm:w-auto" size="lg">
+          <Button
+            onClick={simulateGeneration}
+            disabled={!canGenerate()}
+            size="lg"
+            className="gap-2 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:shadow-none"
+          >
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Генерация...
               </> : <>
-                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">
                   Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
                 </span>
                 <span className="sm:hidden">Сгенерировать</span>
-                <Badge variant="secondary" className="ml-1">
-                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} токенов
+                <Badge className="ml-1 bg-white/20 text-white border-white/30 hover:bg-white/20">
+                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </>}
           </Button>
