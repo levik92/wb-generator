@@ -2303,14 +2303,14 @@ export const GenerateCards = ({
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <label
                 htmlFor="autoDescription"
-                className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-full border px-2.5 sm:px-3 py-1.5 cursor-pointer select-none transition-all max-w-full ${
+                className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-lg px-2.5 sm:px-3 h-9 cursor-pointer select-none transition-colors max-w-full ${
                   autoDescription
-                    ? 'border-violet-500/40 bg-gradient-to-r from-violet-500/15 to-purple-500/10 shadow-sm shadow-violet-500/10'
-                    : 'border-border/60 bg-muted/40 hover:border-violet-500/30 hover:bg-violet-500/[0.06]'
+                    ? 'bg-gradient-to-r from-violet-500/15 to-purple-500/10 text-violet-700 dark:text-violet-300'
+                    : 'bg-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                 } ${generating ? 'opacity-50 pointer-events-none' : ''}`}
               >
-                <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoDescription ? 'text-violet-500' : 'text-muted-foreground'}`} />
-                <span className={`text-xs sm:text-sm font-medium leading-none whitespace-nowrap transition-colors ${autoDescription ? 'text-violet-700 dark:text-violet-300' : 'text-foreground/80'}`}>
+                <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoDescription ? 'text-violet-500' : ''}`} />
+                <span className="text-xs sm:text-sm font-medium leading-none whitespace-nowrap">
                   Придумай сам
                 </span>
                 <Switch
