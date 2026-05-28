@@ -2581,7 +2581,7 @@ export const GenerateCards = ({
                 )}
               </div>
               {!isUploading && estimatedTimeRemaining > 0 && (
-                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
+                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/5 border border-violet-500/30 text-violet-700 dark:text-violet-300">
                   <Clock className="h-3.5 w-3.5" />
                   <span className="text-xs sm:text-sm font-bold tabular-nums">
                     {estimatedTimeRemaining >= 60 
@@ -2594,12 +2594,15 @@ export const GenerateCards = ({
 
             {/* Progress bar — full width */}
             <div className="w-full space-y-1.5">
-              <div className="h-2.5 rounded-full bg-muted/60 overflow-hidden shadow-inner">
+              <div className="relative h-2.5 rounded-full bg-muted/60 overflow-hidden shadow-inner">
                 {isUploading ? (
-                  <div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full animate-pulse" style={{ width: "30%" }} />
+                  <div
+                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full shadow-sm shadow-violet-500/40"
+                    style={{ animation: 'indeterminate-slide 1.6s ease-in-out infinite' }}
+                  />
                 ) : (
                   <div
-                    className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-full transition-all duration-1000 ease-linear shadow-sm shadow-violet-500/40"
+                    className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-1000 ease-linear shadow-sm shadow-violet-500/40"
                     style={{ width: `${Math.min(smoothProgress, 95)}%` }}
                   />
                 )}
