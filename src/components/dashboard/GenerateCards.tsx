@@ -2936,47 +2936,52 @@ export const GenerateCards = ({
       {isMobile ? (
         <Drawer open={styleDialogOpen} onOpenChange={setStyleDialogOpen}>
           <DrawerContent className="bg-card border-border/50">
-            <DrawerHeader className="space-y-2">
-              <DrawerTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-violet-500/[0.08] via-purple-500/[0.04] to-transparent pointer-events-none" />
+            <DrawerHeader className="space-y-2 relative">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                Создать в таком же стиле
-              </DrawerTitle>
-              <DrawerDescription className="text-sm text-left">
-                WBGen создаст новые карточки в такой же стилистике как образец ниже
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">Генерация по образцу</p>
+                  <DrawerTitle className="text-base leading-tight">Создать в таком же стиле</DrawerTitle>
+                </div>
+              </div>
+              <DrawerDescription className="text-xs text-left text-muted-foreground">
+                WBGen создаст новые карточки в стилистике выбранного образца
               </DrawerDescription>
             </DrawerHeader>
-            <div className="space-y-4 px-4 pb-2 max-h-[60dvh] overflow-y-auto">
+            <div className="space-y-4 px-4 pb-2 max-h-[60dvh] overflow-y-auto relative">
               {/* Source image preview */}
               {styleSourceImage && (
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-border/50">
-                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-md border" />
-                  <div className="min-w-0">
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-violet-500/[0.08] to-purple-500/[0.04] border border-violet-500/20">
+                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-lg border border-border/50 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-0.5">Образец стиля</p>
                     <p className="text-sm font-medium truncate">{styleSourceImage.stage}</p>
-                    <p className="text-xs text-muted-foreground">Образец стиля</p>
                   </div>
                 </div>
               )}
 
               {/* Card type selection */}
               <div className="space-y-2">
-                <Label className="font-semibold">Выберите типы карточек</Label>
-                <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Типы карточек</Label>
+                <div className="space-y-1.5">
                   {CARD_STAGES.filter((_, i) => i !== styleSourceImage?.stageIndex && i !== 6).map((stage, _) => {
                     const realIndex = CARD_STAGES.indexOf(stage);
+                    const selected = styleSelectedCards.includes(realIndex);
                     return (
                       <div 
                         key={realIndex}
-                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
-                          styleSelectedCards.includes(realIndex) 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border hover:border-muted-foreground/50'
+                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer active:scale-[0.99] ${
+                          selected
+                            ? 'border-violet-500/60 bg-violet-500/[0.08] shadow-sm shadow-violet-500/10' 
+                            : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.03]'
                         }`}
                         onClick={() => handleStyleCardToggle(realIndex)}
                       >
-                        <Checkbox checked={styleSelectedCards.includes(realIndex)} />
-                        <span className="text-sm">{stage.name}</span>
+                        <Checkbox checked={selected} className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500" />
+                        <span className={`text-sm ${selected ? 'font-medium' : ''}`}>{stage.name}</span>
                       </div>
                     );
                   })}
@@ -2985,20 +2990,21 @@ export const GenerateCards = ({
 
               {/* Description field */}
               <div className="space-y-2">
-                <Label className="font-semibold">Описание</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Описание</Label>
                 <Textarea 
                   placeholder="Опишите пожелания для новых карточек..."
                   value={styleDescription}
                   onChange={e => setStyleDescription(e.target.value.slice(0, 1200))}
                   maxLength={1200}
                   disabled={styleAutoDescription}
-                  className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
+                  className="min-h-[100px] bg-background border-border/60 rounded-lg focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
                 />
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className={`flex items-center space-x-2 rounded-lg px-3 py-2 border transition-colors ${styleAutoDescription ? 'bg-violet-500/10 border-violet-500/30' : 'bg-muted/60 border-transparent'}`}>
                     <Checkbox 
                       id="styleAutoDescMobile"
                       checked={styleAutoDescription} 
+                      className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
                       onCheckedChange={(checked) => {
                         setStyleAutoDescription(!!checked);
                         if (checked) {
@@ -3012,22 +3018,22 @@ export const GenerateCards = ({
                       Придумай сам
                     </Label>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    <span>{styleDescription.length}/1200 символов</span>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {styleDescription.length}/1200
                   </div>
                 </div>
               </div>
             </div>
-            <DrawerFooter className="gap-2">
+            <DrawerFooter className="gap-2 pt-3 border-t border-border/50 bg-muted/20">
               <Button 
                 onClick={generateInStyle} 
                 disabled={styleSelectedCards.length === 0 || !styleDescription.trim() || styleGenerating || !activeModel}
-                className="rounded-lg gap-2"
+                className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none h-11"
               >
                 {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
-                <Badge variant="secondary" className="ml-1">
-                  {styleSelectedCards.length * photoGenerationPrice} токенов
+                <span>Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}</span>
+                <Badge variant="secondary" className="ml-auto bg-white/20 text-white border-0 hover:bg-white/20">
+                  {styleSelectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </Button>
               <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
@@ -3038,48 +3044,54 @@ export const GenerateCards = ({
         </Drawer>
       ) : (
         <Dialog open={styleDialogOpen} onOpenChange={setStyleDialogOpen}>
-          <DialogContent className="sm:max-w-[520px] bg-card border-border/50 rounded-lg max-h-[85vh] overflow-y-auto">
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
+          <DialogContent className="sm:max-w-[540px] bg-card border-border/50 rounded-2xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="relative px-6 py-5 bg-gradient-to-br from-violet-500/[0.08] via-transparent to-purple-500/[0.05] border-b border-border/50">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">Генерация по образцу</p>
+                    <DialogTitle className="text-lg leading-tight">Создать в таком же стиле</DialogTitle>
+                  </div>
                 </div>
-                Создать в таком же стиле
-              </DialogTitle>
-              <DialogDescription className="text-sm text-left">
-                WBGen создаст новые карточки в такой же стилистике как образец ниже
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
+                <DialogDescription className="text-sm text-left text-muted-foreground">
+                  WBGen создаст новые карточки в стилистике выбранного образца
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            <div className="space-y-5 px-6 py-5 overflow-y-auto flex-1">
               {/* Source image preview */}
               {styleSourceImage && (
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-border/50">
-                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-md border" />
-                  <div className="min-w-0">
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-violet-500/[0.08] to-purple-500/[0.04] border border-violet-500/20">
+                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-lg border border-border/50 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-0.5">Образец стиля</p>
                     <p className="text-sm font-medium truncate">{styleSourceImage.stage}</p>
-                    <p className="text-xs text-muted-foreground">Образец стиля</p>
                   </div>
                 </div>
               )}
 
               {/* Card type selection */}
               <div className="space-y-2">
-                <Label className="font-semibold">Выберите типы карточек</Label>
-                <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Типы карточек</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {CARD_STAGES.filter((_, i) => i !== styleSourceImage?.stageIndex && i !== 6).map((stage, _) => {
                     const realIndex = CARD_STAGES.indexOf(stage);
+                    const selected = styleSelectedCards.includes(realIndex);
                     return (
                       <div 
                         key={realIndex}
                         className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
-                          styleSelectedCards.includes(realIndex) 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border hover:border-muted-foreground/50'
+                          selected
+                            ? 'border-violet-500/60 bg-violet-500/[0.08] shadow-sm shadow-violet-500/10' 
+                            : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.03]'
                         }`}
                         onClick={() => handleStyleCardToggle(realIndex)}
                       >
-                        <Checkbox checked={styleSelectedCards.includes(realIndex)} />
-                        <span className="text-sm">{stage.name}</span>
+                        <Checkbox checked={selected} className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500" />
+                        <span className={`text-sm leading-tight ${selected ? 'font-medium' : ''}`}>{stage.name}</span>
                       </div>
                     );
                   })}
@@ -3088,20 +3100,21 @@ export const GenerateCards = ({
 
               {/* Description field */}
               <div className="space-y-2">
-                <Label className="font-semibold">Описание</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Описание</Label>
                 <Textarea 
                   placeholder="Опишите пожелания для новых карточек..."
                   value={styleDescription}
                   onChange={e => setStyleDescription(e.target.value.slice(0, 1200))}
                   maxLength={1200}
                   disabled={styleAutoDescription}
-                  className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
+                  className="min-h-[100px] bg-background border-border/60 rounded-lg focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
                 />
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className={`flex items-center space-x-2 rounded-lg px-3 py-2 border transition-colors ${styleAutoDescription ? 'bg-violet-500/10 border-violet-500/30' : 'bg-muted/60 border-transparent'}`}>
                     <Checkbox 
                       id="styleAutoDescDesktop"
                       checked={styleAutoDescription} 
+                      className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
                       onCheckedChange={(checked) => {
                         setStyleAutoDescription(!!checked);
                         if (checked) {
@@ -3115,25 +3128,25 @@ export const GenerateCards = ({
                       Придумай сам
                     </Label>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    <span>{styleDescription.length}/1200 символов</span>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {styleDescription.length}/1200
                   </div>
                 </div>
               </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2 sm:gap-2 px-6 py-4 border-t border-border/50 bg-muted/20">
               <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
                 Отмена
               </Button>
               <Button 
                 onClick={generateInStyle} 
                 disabled={styleSelectedCards.length === 0 || !styleDescription.trim() || styleGenerating || !activeModel}
-                className="rounded-lg gap-2"
+                className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none"
               >
                 {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
-                <Badge variant="secondary" className="ml-1">
-                  {styleSelectedCards.length * photoGenerationPrice} токенов
+                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 hover:bg-white/20">
+                  {styleSelectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </Button>
             </DialogFooter>
