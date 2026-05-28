@@ -185,15 +185,9 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
       </div>
 
       {/* Section label / divider */}
-      {!isCollapsed ? (
-        <div className="shrink-0 px-5 pb-2">
-          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground/70">Меню</span>
-        </div>
-      ) : (
-        <div className="shrink-0 px-3 pb-2">
-          <div className="h-px bg-border/60" />
-        </div>
-      )}
+      <div className={`shrink-0 pb-2 ${isCollapsed ? 'px-3 text-center' : 'px-5'}`}>
+        <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-muted-foreground/70">Меню</span>
+      </div>
 
       {/* Navigation — icons stay locked horizontally between states */}
       <nav className="flex-1 overflow-y-auto px-3 pb-3">
