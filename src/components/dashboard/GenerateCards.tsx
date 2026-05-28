@@ -2540,7 +2540,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Progress */}
-      {generating && <Card className="relative overflow-hidden border-violet-500/25 bg-card rounded-2xl">
+      {generating && <Card className="relative overflow-hidden border-violet-500/30 bg-card rounded-2xl shadow-lg shadow-violet-500/5 animate-fade-in">
           {/* Animated radial gradient background — bottom */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2551,61 +2551,62 @@ export const GenerateCards = ({
             background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
             animation: 'glow-drift-top 8s ease-in-out infinite alternate',
           }} />
-          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
-            {/* Header: Spinner + Title + Status — left aligned */}
-            <div className="flex items-start gap-3 pt-2">
+          <CardContent className="relative z-10 p-4 sm:p-6 space-y-5">
+            {/* Header: Spinner + Title + Status */}
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+                <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-md animate-pulse" />
+                <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
                 {isUploading 
-                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
-                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
+                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
+                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
                 }
               </div>
-              <div className="space-y-0.5">
+              <div className="flex-1 min-w-0 space-y-0.5">
                 {isUploading ? (
                   <>
-                    <p className="font-semibold text-sm">Подготовка к генерации…</p>
-                    <p className="text-xs text-muted-foreground">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
+                    <p className="font-semibold text-sm sm:text-base">Подготовка к генерации…</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
                   </>
                 ) : estimatedTimeRemaining > 0 ? (
                   <>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">Генерация карточек</p>
-                      <div className="flex items-center gap-1 text-primary">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <p className="font-semibold text-sm sm:text-base">Генерация карточек</p>
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
                         <Clock className="h-3.5 w-3.5" />
-                        <span className="text-sm font-bold tabular-nums">
+                        <span className="text-xs sm:text-sm font-bold tabular-nums">
                           {estimatedTimeRemaining >= 60 
                             ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
                             : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">{currentStage} из {selectedCards.length} карточек готово</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{currentStage} из {selectedCards.length} карточек готово</p>
                   </>
                 ) : (
                   <>
-                    <p className="font-semibold text-sm">Генерация карточек</p>
-                    <p className="text-xs text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                    <p className="font-semibold text-sm sm:text-base">Генерация карточек</p>
+                    <p className="text-xs sm:text-sm text-violet-600 dark:text-violet-300">{WAITING_MESSAGES[waitingMessageIndex]}</p>
                   </>
                 )}
               </div>
             </div>
 
             {/* Progress bar — full width */}
-            <div className="w-full space-y-1">
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div className="w-full space-y-1.5">
+              <div className="h-2.5 rounded-full bg-muted/60 overflow-hidden shadow-inner">
                 {isUploading ? (
-                  <div className="h-full bg-primary/60 rounded-full animate-pulse" style={{ width: "30%" }} />
+                  <div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full animate-pulse" style={{ width: "30%" }} />
                 ) : (
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                    className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-full transition-all duration-1000 ease-linear shadow-sm shadow-violet-500/40"
                     style={{ width: `${Math.min(smoothProgress, 95)}%` }}
                   />
                 )}
               </div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
                 <span>{isUploading ? 'Подготовка…' : `${currentStage} из ${selectedCards.length} карточек`}</span>
-                <span>{isUploading ? '' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
+                <span className="tabular-nums">{isUploading ? '' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
               </div>
             </div>
 
@@ -2617,18 +2618,18 @@ export const GenerateCards = ({
                 const currentCardPosition = selectedCards.indexOf(cardIndex);
                 const isCompleted = currentCardPosition < completedCount;
                 const isCurrent = currentCardPosition === completedCount;
-                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-primary/10 border border-primary/20 text-primary' : isCurrent ? 'bg-primary/10 border border-primary/30 text-primary' : 'bg-muted/30 border border-border text-muted-foreground'}`}
+                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-violet-500/10 border border-violet-500/30 text-violet-700 dark:text-violet-300' : isCurrent ? 'bg-violet-500/15 border border-violet-500/40 text-violet-700 dark:text-violet-200 shadow-sm shadow-violet-500/10' : 'bg-muted/40 border border-border/60 text-muted-foreground'}`}
                     style={isCurrent ? { animation: 'border-pulse 2s ease-in-out infinite' } : undefined}>
                     {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : isCurrent ? <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" /> : <Clock className="w-3.5 h-3.5 shrink-0 opacity-40" />}
-                    <span className="truncate">{stage.name}</span>
+                    <span className="truncate font-medium">{stage.name}</span>
                   </div>;
               })}
             </div>
 
             {/* Info hint */}
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
-              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <span className="text-[11px] text-muted-foreground leading-relaxed">
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border/50">
+              <AlertTriangle className="h-4 w-4 text-violet-500/70 shrink-0 mt-0.5" />
+              <span className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
                 Генерация проходит в фоновом режиме. Если результат не понравится или будут ошибки — вы сможете перегенерировать карточку за 1 токен
               </span>
             </div>
