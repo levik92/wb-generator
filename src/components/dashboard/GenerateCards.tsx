@@ -2570,17 +2570,7 @@ export const GenerateCards = ({
                   </>
                 ) : estimatedTimeRemaining > 0 ? (
                   <>
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <p className="font-semibold text-sm sm:text-base">Генерация карточек</p>
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span className="text-xs sm:text-sm font-bold tabular-nums">
-                          {estimatedTimeRemaining >= 60 
-                            ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
-                            : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
-                        </span>
-                      </div>
-                    </div>
+                    <p className="font-semibold text-sm sm:text-base">Генерация карточек</p>
                     <p className="text-xs sm:text-sm text-muted-foreground">{currentStage} из {selectedCards.length} карточек готово</p>
                   </>
                 ) : (
@@ -2590,6 +2580,16 @@ export const GenerateCards = ({
                   </>
                 )}
               </div>
+              {!isUploading && estimatedTimeRemaining > 0 && (
+                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="text-xs sm:text-sm font-bold tabular-nums">
+                    {estimatedTimeRemaining >= 60 
+                      ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
+                      : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Progress bar — full width */}
