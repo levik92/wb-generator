@@ -114,24 +114,41 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
           </button>
 
         ) : (
-          <div className="rounded-2xl p-4 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent border border-violet-500/20 min-h-[104px] flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-violet-600 dark:text-violet-400">Токены</span>
-              <Badge className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-500 hover:to-purple-600 text-white font-bold px-2.5 py-0.5 text-xs border-0 shadow-sm shadow-violet-500/25 tabular-nums">
-                {profile.tokens_balance}
-              </Badge>
+          <div className="group relative rounded-2xl border border-violet-500/25 bg-card overflow-hidden min-h-[104px] flex flex-col transition-all hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/15">
+            {/* Top half — balance display */}
+            <div className="relative px-3.5 pt-3 pb-2.5 bg-gradient-to-br from-violet-500/15 via-purple-500/8 to-transparent">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -top-8 -right-6 w-20 h-20 rounded-full bg-violet-500/25 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity"
+              />
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-violet-500 dark:text-violet-300" />
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-violet-600/80 dark:text-violet-300/80">Баланс</span>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-xl font-extrabold tabular-nums leading-none bg-gradient-to-br from-violet-600 to-purple-600 dark:from-violet-200 dark:to-purple-300 bg-clip-text text-transparent">
+                    {profile.tokens_balance}
+                  </span>
+                  <span className="text-[10px] font-medium text-muted-foreground">ток.</span>
+                </div>
+              </div>
             </div>
 
-            <Button
-              size="sm"
+            {/* Hairline divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+
+            {/* Bottom half — CTA */}
+            <button
               onClick={() => onTabChange('pricing')}
-              className="w-full h-9 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-violet-500/25 transition-all"
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-semibold text-violet-700 dark:text-violet-200 hover:bg-violet-500/10 transition-colors"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
               Пополнить
-            </Button>
+            </button>
           </div>
         )}
+
       </div>
 
       <Separator />
