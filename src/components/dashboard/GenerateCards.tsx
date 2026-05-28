@@ -2154,13 +2154,15 @@ export const GenerateCards = ({
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
+                <label className={`group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-violet-500 bg-violet-500/10 cursor-pointer scale-[1.01]' : 'border-violet-500/25 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/60 hover:bg-violet-500/[0.06] cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
                   <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className={`w-8 h-8 mb-3 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`text-sm font-semibold ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <div className={`flex items-center justify-center w-12 h-12 mb-3 rounded-xl transition-all ${isDragOver ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/40' : 'bg-violet-500/10 group-hover:bg-violet-500/20'}`}>
+                      <Upload className={`w-5 h-5 transition-colors ${isDragOver ? 'text-white' : 'text-violet-600 dark:text-violet-300'}`} />
+                    </div>
+                    <p className={`text-sm font-semibold ${isDragOver ? 'text-violet-700 dark:text-violet-200' : 'text-foreground/80'}`}>
                       Загрузите изображения товара
                     </p>
-                    <p className={`text-xs mt-1 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <p className={`text-xs mt-1 ${isDragOver ? 'text-violet-600 dark:text-violet-300' : 'text-muted-foreground'}`}>
                       Перетащите или нажмите для выбора. PNG, JPG, JPEG (макс. 3)
                     </p>
                   </div>
