@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Image, FileText, History, CreditCard, Gift, Settings, Zap, Plus, ChevronLeft, ChevronRight, Tags, Newspaper, GraduationCap, Video } from "lucide-react";
+import { Image, FileText, History, CreditCard, Gift, Settings, Zap, Plus, ChevronLeft, ChevronRight, Tags, Newspaper, GraduationCap, Video, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -95,16 +95,24 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
         {isCollapsed ? (
           <button
             onClick={() => onTabChange('pricing')}
-            className="w-full rounded-2xl p-2 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent border border-violet-500/20 flex flex-col items-center justify-center gap-1.5 hover:from-violet-500/15 hover:border-violet-500/30 transition-colors min-h-[104px]"
-            title={`Токены: ${profile.tokens_balance}`}
+            className="group relative w-full overflow-hidden rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-500/15 via-purple-500/8 to-transparent flex flex-col items-center justify-between py-3 px-2 min-h-[104px] transition-all hover:border-violet-500/50 hover:from-violet-500/25 hover:shadow-lg hover:shadow-violet-500/20"
+            title={`Токены: ${profile.tokens_balance}. Пополнить`}
+            aria-label={`Токены: ${profile.tokens_balance}. Пополнить баланс`}
           >
-            <span className="text-xs font-bold text-violet-600 dark:text-violet-400 tabular-nums leading-none">
+            {/* Animated halo */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full bg-violet-500/30 blur-2xl opacity-60 group-hover:opacity-100 transition-opacity"
+            />
+            <Sparkles className="relative w-3.5 h-3.5 text-violet-500 dark:text-violet-300" />
+            <span className="relative text-base font-extrabold tabular-nums leading-none bg-gradient-to-br from-violet-600 to-purple-600 dark:from-violet-200 dark:to-purple-300 bg-clip-text text-transparent">
               {profile.tokens_balance}
             </span>
-            <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25">
-              <Plus className="w-4 h-4" />
-            </div>
+            <span className="relative w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/30 transition-transform group-hover:scale-110 group-active:scale-95">
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+            </span>
           </button>
+
         ) : (
           <div className="rounded-2xl p-4 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent border border-violet-500/20 min-h-[104px] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
