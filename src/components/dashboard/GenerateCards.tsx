@@ -2186,9 +2186,6 @@ export const GenerateCards = ({
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
               <span>Референс</span>
-              <span className="ml-auto text-[10px] font-medium text-muted-foreground border border-border bg-muted/40 px-1.5 py-0.5 rounded-md leading-none">
-                Опционально
-              </span>
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               WBGen может взять за основу прикрепленный дизайн (не обязательно)
