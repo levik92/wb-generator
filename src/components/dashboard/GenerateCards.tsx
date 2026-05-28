@@ -2238,7 +2238,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="w-auto" disabled={generating}>
+          }} className="w-auto rounded-xl border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
@@ -2263,7 +2263,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="shrink-0" disabled={generating}>
+          }} className="shrink-0 rounded-xl border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
@@ -2284,7 +2284,7 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
             <div className="relative">
-              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
+              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className="rounded-xl border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
               {isIdentifying && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
@@ -2299,9 +2299,9 @@ export const GenerateCards = ({
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
+            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-xl border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
+              <div className="flex items-center space-x-2 rounded-xl border border-violet-500/20 bg-violet-500/5 px-3 py-2 transition-colors hover:bg-violet-500/10">
                 <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
                 setAutoDescription(!!checked);
                 if (checked) {
@@ -2309,8 +2309,8 @@ export const GenerateCards = ({
                 } else {
                   setDescription("");
                 }
-              }} disabled={generating} />
-                <Label htmlFor="autoDescription" className="text-sm font-normal cursor-pointer">
+              }} disabled={generating} className="border-violet-500/40 data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500 data-[state=checked]:text-white" />
+                <Label htmlFor="autoDescription" className="text-sm font-normal cursor-pointer text-violet-700 dark:text-violet-300">
                   Придумай сам
                 </Label>
               </div>
