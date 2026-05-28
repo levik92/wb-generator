@@ -2442,7 +2442,7 @@ export const GenerateCards = ({
               return w && h ? `${w} / ${h}` : '3 / 4';
             };
             return (
-              <div className={`mt-4 border border-border bg-muted/30 rounded-lg transition-all ${generating ? 'opacity-60' : ''}`}>
+              <div className={`mt-4 border border-border/60 bg-card rounded-lg transition-colors ${generating ? 'opacity-60' : ''}`}>
                 <button
                   type="button"
                   onClick={() => !generating && setAspectRatioOpen((v) => !v)}
@@ -2452,7 +2452,7 @@ export const GenerateCards = ({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <Images className="w-4 h-4 text-primary shrink-0" />
+                      <Images className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" />
                       <h4 className="font-medium text-sm sm:text-base">Формат изображения</h4>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
@@ -2460,7 +2460,7 @@ export const GenerateCards = ({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5 bg-primary/10 text-primary border-none">
+                    <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5 bg-violet-500/10 text-violet-700 dark:text-violet-300 border-none">
                       {aspectRatio}
                     </Badge>
                     <ChevronDown
@@ -2480,22 +2480,22 @@ export const GenerateCards = ({
                             key={r.value}
                             disabled={generating}
                             onClick={() => setAspectRatio(r.value)}
-                            className={`border rounded-lg p-2.5 sm:p-3 transition-all flex items-start justify-start gap-2.5 text-left sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
+                            className={`border rounded-lg p-2.5 sm:p-3 transition-colors flex items-start justify-start gap-2.5 text-left sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
                               selected
-                                ? 'border-primary bg-primary/10'
-                                : 'border-border hover:border-muted-foreground/50 bg-background'
+                                ? 'border-violet-500/50 bg-violet-500/5'
+                                : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] bg-background'
                             } ${generating ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                           >
                             <div
                               className={`shrink-0 rounded border-2 flex items-center justify-center w-5 sm:w-6 ${
-                                selected ? 'border-primary bg-primary' : 'border-muted-foreground/40 bg-muted/30'
+                                selected ? 'border-violet-500 bg-gradient-to-br from-violet-500 to-purple-600' : 'border-muted-foreground/40 bg-muted/30'
                               }`}
                               style={{ aspectRatio: parseRatio(r.value) }}
                             >
-                              {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-foreground" strokeWidth={3} />}
+                              {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" strokeWidth={3} />}
                             </div>
                             <div className="flex-1 min-w-0 text-left sm:text-center lg:text-left">
-                              <p className="text-xs sm:text-sm font-medium leading-tight">{r.label}</p>
+                              <p className={`text-xs sm:text-sm font-medium leading-tight ${selected ? 'text-violet-700 dark:text-violet-300' : ''}`}>{r.label}</p>
                               <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug mt-0.5">
                                 {r.usage}
                               </p>
