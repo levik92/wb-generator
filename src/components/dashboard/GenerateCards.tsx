@@ -2851,38 +2851,38 @@ export const GenerateCards = ({
       {isMobile ? (
         <Drawer open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DrawerContent className="bg-card border-border/50">
-            <DrawerHeader className="space-y-2">
-              <DrawerTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Edit className="w-4 h-4 text-primary" />
+            <DrawerHeader className="space-y-2 text-left">
+              <DrawerTitle className="flex items-center gap-2.5 text-base">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/30 shrink-0">
+                  <Edit className="w-4 h-4 text-white" />
                 </div>
                 Редактировать карточку
               </DrawerTitle>
-              <DrawerDescription className="text-sm text-left">
-                Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
+              <DrawerDescription className="text-xs text-left leading-relaxed">
+                Опишите, что нужно изменить — AI внесёт правки, сохранив общий стиль карточки.
               </DrawerDescription>
             </DrawerHeader>
-            <div className="space-y-4 px-4 pb-2">
+            <div className="space-y-3 px-4 pb-2">
               <div className="space-y-2">
-                <Label htmlFor="edit-instructions-mobile" className="font-semibold">
+                <Label htmlFor="edit-instructions-mobile" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Что нужно изменить?
                 </Label>
-                <Textarea id="edit-instructions-mobile" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+                <Textarea id="edit-instructions-mobile" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[130px] bg-background border-border/60 rounded-lg text-sm focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 resize-none" />
               </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
+                  <Info className="w-3.5 h-3.5 shrink-0" />
                   <span>Стоимость: <span className="font-semibold">{photoEditPrice} {photoEditPrice === 1 ? 'токен' : 'токена'}</span></span>
                 </div>
-                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+                <span className={`text-muted-foreground tabular-nums ${editInstructions.length >= 1200 ? 'text-destructive' : ''}`}>{editInstructions.length}/1200</span>
               </div>
             </div>
             <DrawerFooter className="gap-2">
-              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none">
                 <Sparkles className="w-4 h-4" />
                 Начать редактирование
               </Button>
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg border-border/60">
                 Отмена
               </Button>
             </DrawerFooter>
@@ -2890,38 +2890,40 @@ export const GenerateCards = ({
         </Drawer>
       ) : (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Edit className="w-4 h-4 text-primary" />
-                </div>
-                Редактировать карточку
-              </DialogTitle>
-              <DialogDescription className="text-sm text-left">
-                Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
+          <DialogContent className="sm:max-w-[520px] bg-card border-border/50 rounded-2xl p-0 overflow-hidden">
+            <div className="relative px-6 pt-6 pb-4 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-purple-500/[0.04]">
+              <DialogHeader className="space-y-2 text-left">
+                <DialogTitle className="flex items-center gap-3 text-lg">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
+                    <Edit className="w-4 h-4 text-white" />
+                  </div>
+                  Редактировать карточку
+                </DialogTitle>
+                <DialogDescription className="text-sm text-left leading-relaxed">
+                  Опишите, что нужно изменить — AI внесёт правки, сохранив общий стиль карточки.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            <div className="space-y-3 px-6 py-5">
               <div className="space-y-2">
-                <Label htmlFor="edit-instructions" className="font-semibold">
+                <Label htmlFor="edit-instructions" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Что нужно изменить?
                 </Label>
-                <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+                <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[130px] bg-background border-border/60 rounded-lg text-sm focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 resize-none" />
               </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
+                  <Info className="w-3.5 h-3.5 shrink-0" />
                   <span>Стоимость: <span className="font-semibold">{photoEditPrice} {photoEditPrice === 1 ? 'токен' : 'токена'}</span></span>
                 </div>
-                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+                <span className={`text-muted-foreground tabular-nums ${editInstructions.length >= 1200 ? 'text-destructive' : ''}`}>{editInstructions.length}/1200</span>
               </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
+            <DialogFooter className="px-6 py-4 border-t border-border/50 bg-muted/20 gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg border-border/60">
                 Отмена
               </Button>
-              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none">
                 <Sparkles className="w-4 h-4" />
                 Начать редактирование
               </Button>
