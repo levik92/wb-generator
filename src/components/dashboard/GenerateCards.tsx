@@ -2647,7 +2647,7 @@ export const GenerateCards = ({
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
-              <Button onClick={downloadAll} variant="ghost" className="shrink-0 w-full sm:w-auto rounded-md h-10 px-3 text-xs font-medium bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors" size="sm" disabled={downloadingAll}>
+              <Button onClick={downloadAll} variant="ghost" className="shrink-0 w-full sm:w-auto rounded-md h-10 px-3 text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" size="sm" disabled={downloadingAll}>
                 {downloadingAll ? <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     <span className="hidden sm:inline">Создаю ZIP...</span>
