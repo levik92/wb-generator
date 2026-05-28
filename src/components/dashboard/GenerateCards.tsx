@@ -2715,11 +2715,11 @@ export const GenerateCards = ({
 
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm sm:text-base leading-tight truncate">{image.stage}</h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                        <p className="text-xs text-muted-foreground line-clamp-3 mt-1 leading-relaxed">
                           {CARD_STAGES[image.stageIndex]?.description}
                         </p>
-                        <div className="mt-2">
-                          {variants.length > 1 ? (
+                        {variants.length > 1 && (
+                          <div className="mt-2">
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 text-xs rounded-md bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground justify-between gap-2 px-2 max-w-[220px]">
@@ -2752,13 +2752,8 @@ export const GenerateCards = ({
                                 </div>
                               </PopoverContent>
                             </Popover>
-                          ) : (
-                            <div className="inline-flex items-center gap-1.5 h-8 px-2 rounded-md bg-muted/30 border border-dashed border-border/60 text-[11px] text-muted-foreground/80 max-w-[220px]">
-                              <Layers className="w-3.5 h-3.5 opacity-60" />
-                              <span className="truncate">Вариантов пока нет</span>
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
