@@ -4,6 +4,25 @@
 
 /* WBGen Premium Design System - Liquid Glass Aesthetic */
 
+/* Animated gradient border for identifying state */
+@keyframes identifying-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.identifying-ring {
+  position: relative;
+  border-radius: 0.625rem;
+  padding: 1.5px;
+  background: linear-gradient(90deg, hsl(262 83% 65%), hsl(280 90% 70%), hsl(220 90% 65%), hsl(262 83% 65%));
+  background-size: 300% 300%;
+  animation: identifying-border 2.4s ease-in-out infinite;
+}
+.identifying-ring > * {
+  border-radius: 0.5rem;
+}
+
 @layer base {
   :root {
     /* Core brand colors - Light mode */
