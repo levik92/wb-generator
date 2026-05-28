@@ -2485,7 +2485,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Progress */}
-      {generating && <Card className="relative overflow-hidden">
+      {generating && <Card className="relative overflow-hidden border-violet-500/25 bg-card rounded-2xl">
           {/* Animated radial gradient background — bottom */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
