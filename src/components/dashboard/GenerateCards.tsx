@@ -2834,16 +2834,11 @@ export const GenerateCards = ({
           </div>
           
           {!canGenerate() && !generating && (
-            <div className="group relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-orange-500/10 px-3 py-2.5 sm:px-4 sm:py-3 animate-fade-in">
-              <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-amber-400 to-orange-500" />
-              <div className="flex items-center gap-2.5 sm:gap-3 pl-1.5">
-                <div className="shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500/15 ring-1 ring-amber-500/25">
-                  <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm leading-snug">
-                  {getGuardMessage()}
-                </p>
-              </div>
+            <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 animate-fade-in">
+              <Info className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+              <p className="text-amber-800 dark:text-amber-200 font-medium text-xs leading-snug">
+                {getGuardMessage()}
+              </p>
             </div>
           )}
           
