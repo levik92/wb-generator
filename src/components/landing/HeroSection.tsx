@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Play, X, Zap, TrendingUp, Clock } from "lucide-react";
 import { AuroraBackground } from "./effects/AuroraBackground";

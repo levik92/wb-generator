@@ -3,6 +3,7 @@ import { ServicePageLayout } from "@/components/services";
 import { motion } from "framer-motion";
 import { Clock, Eye, ArrowLeft, Tag } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";

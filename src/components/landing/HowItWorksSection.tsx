@@ -1,5 +1,6 @@
 import { Image, FileText, Sparkles, Check, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { NumberTicker } from "./effects/NumberTicker";
 import { SpotlightCard } from "./effects/SpotlightCard";

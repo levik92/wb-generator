@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { Zap, Menu, X, LogIn, ChevronDown, Image, FileText, Barcode, Video, BookOpen, Newspaper, FolderOpen, Users, ArrowRight } from "lucide-react";
 

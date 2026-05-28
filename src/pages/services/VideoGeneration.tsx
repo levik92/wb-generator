@@ -10,6 +10,7 @@ import {
 } from "@/components/services";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import {
   Video,
   Sparkles,

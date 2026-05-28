@@ -1,5 +1,6 @@
 import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "./effects/SpotlightCard";
 
