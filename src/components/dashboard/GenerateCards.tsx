@@ -2337,43 +2337,72 @@ export const GenerateCards = ({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            {CARD_STAGES.map((stage, index) => <div key={index} className={`border rounded-lg p-3 sm:p-4 transition-all ${generating ? 'opacity-60 cursor-not-allowed' : selectedCards.includes(index) ? 'border-primary bg-primary/5 cursor-pointer' : 'border-border hover:border-muted-foreground/50 cursor-pointer'}`} onClick={generating ? undefined : () => handleCardToggle(index)}>
-                <div className="flex items-start gap-3">
-                  <Checkbox checked={selectedCards.includes(index)} onChange={() => handleCardToggle(index)} className="mt-0.5" disabled={generating} />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+            {CARD_STAGES.map((stage, index) => {
+              const isSelected = selectedCards.includes(index);
+              return (
+                <div
+                  key={index}
+                  className={`border rounded-lg p-3 sm:p-4 transition-colors ${
+                    generating
+                      ? 'opacity-60 cursor-not-allowed border-border'
+                      : isSelected
+                        ? 'border-violet-500/50 bg-violet-500/5 cursor-pointer'
+                        : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] cursor-pointer'
+                  }`}
+                  onClick={generating ? undefined : () => handleCardToggle(index)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onChange={() => handleCardToggle(index)}
+                      className="mt-0.5 h-5 w-5 rounded-md border-violet-500/40 data-[state=checked]:bg-gradient-to-br data-[state=checked]:from-violet-500 data-[state=checked]:to-purple-600 data-[state=checked]:border-violet-500 data-[state=checked]:text-white shadow-sm"
+                      disabled={generating}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`font-medium text-sm sm:text-base mb-1 leading-tight transition-colors ${isSelected ? 'text-violet-700 dark:text-violet-300' : ''}`}>{stage.name}</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>)}
+              );
+            })}
           </div>
 
           {/* Unified Styling Toggle */}
-          <div className={`mt-4 border rounded-lg p-3 sm:p-4 transition-all ${
-            selectedCards.length >= 2 
-              ? 'border-primary/30 bg-primary/5' 
-              : 'border-border opacity-50'
-          }`}>
+          <div
+            onClick={() => {
+              if (selectedCards.length < 2 || generating) return;
+              const next = !unifiedStyling;
+              setUnifiedStyling(next);
+              setUnifiedStylingManuallyDisabled(!next);
+            }}
+            role="button"
+            tabIndex={selectedCards.length < 2 || generating ? -1 : 0}
+            className={`mt-4 border rounded-lg p-3 sm:p-4 transition-colors select-none ${
+              selectedCards.length < 2 || generating
+                ? 'opacity-50 cursor-not-allowed border-border'
+                : unifiedStyling
+                  ? 'border-violet-500/50 bg-gradient-to-br from-violet-500/10 to-purple-500/5 cursor-pointer'
+                  : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] cursor-pointer'
+            }`}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none mb-1 sm:hidden">Бета</Badge>
                 <div className="flex items-center gap-2 mb-0.5">
-                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
-                  <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none hidden sm:inline-flex">Бета</Badge>
+                  <Sparkles className={`w-4 h-4 shrink-0 transition-colors ${unifiedStyling ? 'text-violet-600 dark:text-violet-400' : 'text-muted-foreground'}`} />
+                  <h4 className={`font-medium text-sm sm:text-base transition-colors ${unifiedStyling ? 'text-violet-700 dark:text-violet-300' : ''}`}>Единая стилизация</h4>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                          style={{ opacity: 1 }}
-                          onClick={(e) => e.preventDefault()}
+                        <span
+                          role="button"
+                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation inline-flex"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                         >
                           <Info className="w-4 h-4" />
-                        </button>
+                        </span>
                       </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70" style={{ opacity: 1 }}>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
                         <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
                       </TooltipContent>
                     </Tooltip>
@@ -2383,13 +2412,15 @@ export const GenerateCards = ({
                   Пакет карточек товара будет создан в едином стиле
                 </p>
               </div>
-              <Switch 
+              <Switch
                 checked={unifiedStyling}
                 onCheckedChange={(checked) => {
                   setUnifiedStyling(checked);
                   setUnifiedStylingManuallyDisabled(!checked);
                 }}
+                onClick={(e) => e.stopPropagation()}
                 disabled={selectedCards.length < 2 || generating}
+                className="shrink-0 h-6 w-11 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-violet-500 data-[state=checked]:to-purple-600"
               />
             </div>
           </div>
