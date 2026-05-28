@@ -2125,7 +2125,7 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
+        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
@@ -2181,7 +2181,7 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
+        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
@@ -2226,7 +2226,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
+      <Card className="border-border/60 bg-card rounded-2xl">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
@@ -2323,7 +2323,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
+      <Card className="border-border/60 bg-card rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Images className="w-4 h-4 shrink-0" />
@@ -2590,7 +2590,7 @@ export const GenerateCards = ({
       </Dialog>
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40 animate-scale-in">
+      {generatedImages.length > 0 && <Card className="border-border/60 bg-card rounded-2xl animate-scale-in">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -2602,7 +2602,7 @@ export const GenerateCards = ({
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
-              <Button onClick={downloadAll} className="shrink-0 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all" size="sm" disabled={downloadingAll}>
+              <Button onClick={downloadAll} variant="outline" className="shrink-0 w-full sm:w-auto rounded-xl border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/15 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" size="sm" disabled={downloadingAll}>
                 {downloadingAll ? <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     <span className="hidden sm:inline">Создаю ZIP...</span>
@@ -2792,13 +2792,13 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card className="border-border/60 bg-card rounded-2xl transition-colors hover:border-violet-500/40">
+      <Card className="border-border/60 bg-card rounded-2xl">
         <CardContent className="pt-6 space-y-3">
           <Button
             onClick={simulateGeneration}
             disabled={!canGenerate()}
             size="lg"
-            className="gap-2 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:shadow-none"
+            className="gap-2 w-full sm:w-auto rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-100 disabled:from-violet-500/40 disabled:to-purple-600/40 disabled:shadow-none disabled:cursor-not-allowed"
           >
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
