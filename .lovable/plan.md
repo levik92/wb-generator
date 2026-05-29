@@ -1,67 +1,43 @@
-# План: UTM, фон-эффекты, адаптив
+# Фикс: контент попапов уезжает за клавиатуру на мобилке
 
-Аудит закончен. Ниже только реальные дыры — без переписывания того, что уже работает.
+## Корень проблемы
 
-## 1. UTM-метки
+1. **Dialog** — центрируется через `my-auto` во флекс-overlay. При появлении клавиатуры доступная высота уменьшается, но контент остаётся посередине, поэтому верх диалога уезжает за экран, а сфокусированный input оказывается под клавиатурой. Браузер не делает авто-`scrollIntoView` внутри `overflow:auto` контейнеров на iOS Safari.
+2. **Drawer** (Vaul, мобильный путь `ResponsiveDialog`) — внутренний скролл ограничен `calc(85dvh - var(--keyboard-inset-height))`. База `85dvh` считается от полного экрана, а не от видимой зоны над клавиатурой — поэтому при клавиатуре ~300px часть контента всё равно остаётся ниже видимой области.
+3. **AlertDialog** — вообще не учитывает клавиатуру: `translate(-50%,-50%)` от центра экрана, нет `dvh`, нет `--keyboard-inset-height`.
+4. Нигде нет автоматического скролла сфокусированного `input/textarea` в зону видимости внутри попапа.
 
-**Что работает:** capture в `useUtmTracking.ts` (snapshot до React Router), сохранение в `localStorage`, передача в `raw_user_meta_data` при email-регистрации, триггер пишет в `profiles.utm_source_id`, админка показывает всё (AdminUtmSources, AdminUsers, UserDetailDialog, AdminPayments, MarketingManager).
+## Что меняем
 
-**Что починим:**
+### 1. `src/components/ui/dialog.tsx`
+- Заменить `items-start sm:items-center` + `my-auto` на схему, где на мобиле при появлении клавиатуры контент прижимается к верху (через `items-start` всегда на маленьких экранах либо `items-start [@media(max-height:700px)]:items-start`).
+- Оставить `maxHeight: calc(100dvh - 2rem - var(--keyboard-inset-height,0px))`, но также добавить `paddingBottom` на сам `DialogContent`, чтобы последний input не упирался в край.
+- Добавить эффект на уровне `DialogContent`: слушатель `focusin` на контенте, который вызывает `scrollIntoView({ block: 'center' })` для активного `input/textarea/[contenteditable]` через `requestAnimationFrame` + небольшую задержку (300ms — клавиатура iOS).
 
-1. **Bare `/auth` ссылки теряют `?tab=signup`** — `VideoGeneration.tsx:479`, `PartnersPage.tsx:173`, `KnowledgeArticle.tsx:1654`, `BlogArticle.tsx:315`. Заменим на `/auth?tab=signup`.
-2. **Прокидывание текущих `?utm_*` в CTA** — сделаем хелпер `withUtm(path)` который берёт `window.location.search` и дописывает к ссылке. Применим в:
-   - `CTASection.tsx`, `HeroSection.tsx`, `HowItWorksSection.tsx`, `ExamplesSection.tsx`
-   - `LandingHeader.tsx` (все 5 ссылок на /auth)
-   - `ServiceCTA.tsx` (default ctaLink)
-   - 4 bare-ссылки выше
-   Это нужно чтобы Yandex.Metrika / Meta Pixel видели UTM на странице конверсии.
-3. **Google OAuth дыра** — `pending_utm_source_id` живёт только в sessionStorage и теряется при кросс-таб OAuth. Передадим `utm_source_id` через `redirectTo` query-параметр; `AuthRedirect` / `Dashboard` подхватит из URL и запишет в `profiles` (fallback к sessionStorage остаётся).
+### 2. `src/components/ui/drawer.tsx` + `src/components/ui/responsive-dialog.tsx`
+- В `DrawerContent` (Vaul) уже есть свойство `setBackgroundColorOnScale`, но главное — нужно правильно вычислять высоту скролл-контейнера в `ResponsiveDialogContent`.
+- Заменить `maxHeight: calc(85dvh - var(--keyboard-inset-height))` на формулу относительно видимой области: `maxHeight: calc(100dvh - var(--keyboard-inset-height,0px) - var(--drawer-header-offset, 4rem))`, плюс `paddingBottom: calc(env(safe-area-inset-bottom) + 1rem)`.
+- Добавить такой же `focusin → scrollIntoView` хендлер внутрь `ResponsiveDialogContent` (через `ref` + `useEffect`).
 
-## 2. Фон-эффекты (лаги)
+### 3. `src/components/ui/alert-dialog.tsx`
+- Привести `AlertDialogContent` к той же логике, что и `DialogContent`: добавить overlay-флекс c `items-start sm:items-center`, `maxHeight: calc(100dvh - 2rem - var(--keyboard-inset-height,0px))`, убрать `translate(-50%,-50%)` и использовать тот же паттерн что у Dialog.
+- Подключить тот же `focusin`-скролл.
 
-**Главный виновник:** `AuroraBackground` — `filter: blur(60px)` на элементе `140vw×140vh` + бесконечный spin. На мобилках это самый дорогой кейс.
+### 4. Общий хелпер
+- Создать `src/hooks/useScrollFocusedIntoView.ts` — единый эффект, который вешает `focusin` на переданный `ref` и скроллит активный input в центр контейнера с задержкой (учитывает iOS Safari задержку появления клавиатуры). Использовать в Dialog, Drawer (через ResponsiveDialogContent), AlertDialog.
 
-**Фиксы в `landing-theme.css` и `AuroraBackground.tsx`:**
+### 5. Проверка хука клавиатуры
+- `setupKeyboardInsetTracking` в `src/hooks/useKeyboardInset.ts` уже корректен, убедиться что он подключён в `src/main.tsx` (если нет — подключить один раз при старте).
 
-1. На `@media (max-width:1024px)`:
-   - убрать `animation` у `.aurora-spin` целиком (сейчас только замедление до 60s — слой всё равно композитится каждый кадр)
-   - снизить `filter: blur` до 30px и убрать `will-change` у конического градиента
-   - орбы (`blur-[120px]`) — снизить до `blur-[60px]` и убрать `will-change`
-2. `animate-ping` на бейдже `HeroSection.tsx:59` — добавить в kill-list `prefers-reduced-motion` в `landing-theme.css`.
-3. `.noise-overlay` — поменять `position: fixed` → `position: absolute` внутри своего контейнера (избавит от full-page repaint при скролле на 481–768px).
-4. `LandingHeader` sticky с `backdrop-blur-xl` — добавить `transform: translateZ(0)` чтобы pre-promote слой и не пересчитывать blur каждый scroll-frame на iOS.
-
-## 3. Адаптив (фиксы overflow)
-
-1. `Avito.tsx:142,153,162,174` — фиксированные `w-[700px]` / `w-[600px]` / `w-[420px]` декоративные орбы → обернуть в `max-w-[90vw]` или вынести в контейнер с `overflow-hidden`.
-2. `Promo.tsx:61` — `w-[700px] h-[700px]` глоу-орб → добавить `max-w-[90vw] max-h-[90vw]`.
-3. На корнях `Avito.tsx`, `Promo.tsx`, `PromoTwo.tsx`, `Quiz.tsx` — добавить `overflow-x-hidden` чтобы декоративные absolute-слои не давали горизонтальный скролл.
-4. `CTASection.tsx:38` — `grid-cols-3` тесно на 320px → `text-xs sm:text-sm` на лейблах.
+## Что не трогаем
+- Никаких изменений в бизнес-логике, формах, или конкретных компонентах попапов — фикс централизованный в UI-примитивах.
+- Точечный `onFocus → scrollIntoView` в `AdminUsers.tsx` можно оставить как есть (он не помешает), либо убрать — но это отдельный мелкий вопрос.
 
 ## Технические детали
+- `scrollIntoView({ block: 'center', behavior: 'smooth' })` через `setTimeout(…, 300)` — стандартный паттерн для iOS, чтобы дождаться полной анимации клавиатуры.
+- `--keyboard-inset-height` обновляется через `visualViewport.resize` — уже работает.
+- Использовать только семантические токены, никаких хардкод-цветов.
 
-- `withUtm(path)` хелпер положим в `src/lib/utm.ts`:
-  ```ts
-  export const withUtm = (path: string) => {
-    const s = typeof window !== 'undefined' ? window.location.search : '';
-    if (!s) return path;
-    const sep = path.includes('?') ? '&' : '?';
-    const utm = new URLSearchParams(s);
-    const keep = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
-    const params = new URLSearchParams();
-    keep.forEach(k => { const v = utm.get(k); if (v) params.set(k, v); });
-    const q = params.toString();
-    return q ? `${path}${sep}${q}` : path;
-  };
-  ```
-- OAuth: `signInWithOAuth({ provider:'google', options:{ redirectTo: `${origin}/auth/redirect?utm_source_id=${id}` }})`, читать в `AuthRedirect` и писать в `profiles` если ещё пусто.
-- Все правки только в frontend / CSS, БД и edge-функции не трогаем.
-
-## Чего НЕ делаем
-
-- Не трогаем рабочий capture в `useUtmTracking.ts` (snapshot до React Router — корректно).
-- Не трогаем DB-триггер и таблицу `utm_sources`.
-- Не меняем дизайн страниц, только overflow-фиксы и performance-оптимизации фона.
-- Не добавляем cookie-storage и referrer-fallback (low priority, без запроса пользователя).
-
-Готов реализовать — подтвердите план.
+## Результат
+- На мобилке при фокусе в любом input/textarea внутри Dialog/Drawer/AlertDialog контент не уезжает за клавиатуру, активное поле автоматически оказывается в центре видимой зоны.
+- Десктоп-поведение не меняется (на `sm:` и выше используется старая центровка).
