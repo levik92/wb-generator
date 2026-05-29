@@ -749,7 +749,7 @@ export const GenerateDescription = ({
 
       {/* Processing Card — exact cards-page style */}
       {generating && (
-        <Card className="relative overflow-hidden border-violet-500/30 bg-card rounded-2xl shadow-lg shadow-violet-500/5 animate-fade-in">
+        <Card className="relative overflow-hidden border-violet-500/30 bg-card rounded-2xl animate-fade-in">
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
