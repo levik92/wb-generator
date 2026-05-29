@@ -974,64 +974,44 @@ export const History = ({
 
 
 
-      {/* Hero — History overview */}
+      {/* Compact notice + filter */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card"
+        transition={{ duration: 0.3 }}
+        className="flex flex-col sm:flex-row sm:items-center gap-2.5 rounded-xl border border-violet-500/25 bg-violet-500/[0.06] px-3 py-2.5 sm:py-2"
       >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
-        />
-        <div className="relative p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-              <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
-                <HistoryIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">История</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight break-words">
-                  Ваши <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">генерации</span>
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Скачивайте, редактируйте и повторяйте лучшие результаты. Данные хранятся <span className="font-semibold text-foreground">1 месяц</span> и затем автоматически удаляются — успейте сохранить нужное.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex sm:flex-col sm:items-end gap-2 sm:gap-2 sm:shrink-0">
-              <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-                <SelectTrigger className="h-10 gap-2 px-3 bg-background/60 border-violet-500/20 hover:border-violet-500/40 transition-colors text-xs sm:text-sm rounded-xl w-full sm:w-[180px]">
-                  <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все</SelectItem>
-                  <SelectItem value="cards">Карточки</SelectItem>
-                  <SelectItem value="description">Описания</SelectItem>
-                  <SelectItem value="video">Видеообложки</SelectItem>
-                </SelectContent>
-              </Select>
-              {generations.length > 0 && (
-                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
-                  <Sparkles className="w-3 h-3" />
-                  {generations.length} {generations.length === 1 ? 'генерация' : generations.length < 5 ? 'генерации' : 'генераций'}
-                </div>
-              )}
-            </div>
+        <div className="flex items-start sm:items-center gap-2.5 flex-1 min-w-0">
+          <div className="shrink-0 w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
+            <HistoryIcon className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
           </div>
+          <p className="text-xs sm:text-sm text-foreground/80 leading-snug flex-1 min-w-0">
+            Данные хранятся <span className="font-semibold text-violet-700 dark:text-violet-300">1 месяц</span> и затем автоматически удаляются — успейте сохранить нужное.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 sm:shrink-0">
+          {generations.length > 0 && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
+              <Sparkles className="w-3 h-3" />
+              {generations.length}
+            </span>
+          )}
+          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+            <SelectTrigger className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg flex-1 sm:flex-none sm:w-[170px]">
+              <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="all" className="text-sm">Все</SelectItem>
+              <SelectItem value="cards" className="text-sm">Карточки</SelectItem>
+              <SelectItem value="description" className="text-sm">Описания</SelectItem>
+              <SelectItem value="video" className="text-sm">Видеообложки</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </motion.div>
+
 
       {/* Content */}
       {generations.length === 0 ? <motion.div initial={{
