@@ -630,7 +630,7 @@ export function AdminUsers({
       >
         <ResponsiveDialogContent className="sm:max-w-md p-0 overflow-hidden">
           <div
-            className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 bg-[radial-gradient(circle_at_0%_100%,hsl(var(--primary)/0.22),transparent_55%),radial-gradient(circle_at_100%_100%,hsl(var(--primary)/0.22),transparent_55%)] sm:bg-gradient-to-br sm:from-primary/10 sm:via-primary/5 sm:to-transparent"
+            className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 bg-[radial-gradient(ellipse_60%_50%_at_0%_100%,hsl(var(--primary)/0.18),transparent_70%),radial-gradient(ellipse_60%_50%_at_100%_100%,hsl(var(--primary)/0.18),transparent_70%)]"
           >
             <ResponsiveDialogHeader className="space-y-2">
               <div className="flex items-center gap-2.5">
