@@ -275,45 +275,59 @@ export const Settings = ({
     y: 0
   }} transition={{
     duration: 0.4
-  }} className="space-y-6">
+  }} className="space-y-4 sm:space-y-6 w-full min-w-0">
+
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="relative p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+              <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Аккаунт</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight break-words">
+                Настройки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">профиля</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Управляйте профилем, безопасностью и интеграциями. Поддержка на связи, если что-то пойдёт не так.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Support Block */}
-      <motion.div initial={{
-      opacity: 0,
-      y: 20
-    }} animate={{
-      opacity: 1,
-      y: 0
-    }} transition={{
-      duration: 0.4,
-      delay: 0.1
-    }}>
-        <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
+        <Card className="relative overflow-hidden rounded-2xl border border-blue-500/25 bg-card">
+          <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-blue-500/15 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl" />
           <CardHeader className="relative">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <Headphones className="h-6 w-6 text-white" />
+              <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-md shadow-blue-500/30">
+                <Headphones className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div>
-                <CardTitle className="text-lg">
-                  Поддержка
-                </CardTitle>
-                <CardDescription>
-                  Нужна помощь? Мы всегда готовы помочь!
-                </CardDescription>
+              <div className="min-w-0">
+                <CardTitle className="text-base sm:text-lg">Поддержка 24/7</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Ответим за 5 минут — без ботов, живые люди</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="relative">
-            <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-3">
-              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" asChild>
-                <a href="https://t.me/wbgen_support/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+              <Button className="h-11 rounded-xl gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md shadow-blue-500/20" asChild>
+                <a href="https://t.me/wbgen_support/" target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4" />
                   Телеграм чат
                 </a>
               </Button>
-              <Button className="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200" onClick={() => onNavigateToSupport?.()}>
-                <Headphones className="w-4 h-4 mr-2" />
+              <Button className="h-11 rounded-xl gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white border-0 shadow-md shadow-cyan-500/20" onClick={() => onNavigateToSupport?.()}>
+                <Headphones className="w-4 h-4" />
                 Онлайн чат
               </Button>
             </div>
@@ -322,71 +336,53 @@ export const Settings = ({
       </motion.div>
 
       {/* Theme Settings */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.4, delay: 0.15 }}
-      >
-        <Card className="border border-border/50 bg-card">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>
+        <Card className="rounded-2xl border border-border/60 bg-card transition-colors hover:border-violet-500/30">
           <CardHeader className="py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
                   {mounted && resolvedTheme === 'dark' ? (
-                    <Moon className="w-5 h-5 text-primary" />
+                    <Moon className="w-5 h-5 text-violet-600 dark:text-violet-300" />
                   ) : (
-                    <Sun className="w-5 h-5 text-primary" />
+                    <Sun className="w-5 h-5 text-violet-600 dark:text-violet-300" />
                   )}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CardTitle className="text-base">Тема оформления</CardTitle>
                   <CardDescription className="text-xs">
                     {mounted && resolvedTheme === 'dark' ? 'Тёмная тема' : 'Светлая тема'}
                   </CardDescription>
                 </div>
               </div>
-              
-              {/* Apple-style Theme Switch */}
+
               <button
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                className={`
-                  relative w-16 h-9 rounded-full transition-all duration-300 ease-in-out
-                  ${mounted && resolvedTheme === 'dark' 
-                    ? 'bg-primary shadow-lg shadow-primary/30' 
+                className={`shrink-0 relative w-16 h-9 rounded-full transition-all duration-300 ease-in-out ${
+                  mounted && resolvedTheme === 'dark'
+                    ? 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-md shadow-violet-500/30'
                     : 'bg-muted border border-border'
-                  }
-                `}
+                }`}
                 aria-label="Переключить тему"
               >
-                {/* Track icons */}
                 <div className="absolute inset-0 flex items-center justify-between px-2">
                   <Sun className={`w-3.5 h-3.5 transition-opacity duration-200 ${
-                    mounted && resolvedTheme === 'dark' ? 'opacity-50 text-primary-foreground' : 'opacity-0'
+                    mounted && resolvedTheme === 'dark' ? 'opacity-60 text-white' : 'opacity-0'
                   }`} />
                   <Moon className={`w-3.5 h-3.5 transition-opacity duration-200 ${
                     mounted && resolvedTheme === 'dark' ? 'opacity-0' : 'opacity-50 text-muted-foreground'
                   }`} />
                 </div>
-                
-                {/* Thumb */}
                 <motion.div
-                  className={`
-                    absolute top-1/2 left-1 -translate-y-1/2 w-7 h-7 rounded-full shadow-md
-                    flex items-center justify-center bg-white
-                    ${mounted && resolvedTheme !== 'dark' ? 'border border-border/50' : ''}
-                  `}
-                  animate={{
-                    x: mounted && resolvedTheme === 'dark' ? 28 : 0,
-                  }}
-                  transition={{
-                    type: "tween",
-                    duration: 0.2,
-                    ease: "easeOut",
-                  }}
+                  className={`absolute top-1/2 left-1 -translate-y-1/2 w-7 h-7 rounded-full shadow-md flex items-center justify-center bg-white ${
+                    mounted && resolvedTheme !== 'dark' ? 'border border-border/50' : ''
+                  }`}
+                  animate={{ x: mounted && resolvedTheme === 'dark' ? 28 : 0 }}
+                  transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
                   style={{ y: '-50%' }}
                 >
                   {mounted && resolvedTheme === 'dark' ? (
-                    <Moon className="w-4 h-4 text-primary" />
+                    <Moon className="w-4 h-4 text-violet-600" />
                   ) : (
                     <Sun className="w-4 h-4 text-amber-500" />
                   )}
@@ -397,13 +393,14 @@ export const Settings = ({
         </Card>
       </motion.div>
 
-      <Card className="border border-border/50 bg-card">
+      {/* Profile */}
+      <Card className="rounded-2xl border border-border/60 bg-card transition-colors hover:border-violet-500/30">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <User className="w-5 h-5 text-primary" />
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+              <User className="w-5 h-5 text-violet-600 dark:text-violet-300" />
             </div>
-            <div>
+            <div className="min-w-0">
               <CardTitle className="text-base">Профиль</CardTitle>
               <CardDescription className="text-xs">Основная информация аккаунта</CardDescription>
             </div>
@@ -411,14 +408,23 @@ export const Settings = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Email</Label>
-            <Input value={profile.email} disabled className="input-bordered" />
+            <Label className="text-xs font-medium text-muted-foreground">Email</Label>
+            <Input value={profile.email} disabled className="h-11 rounded-xl bg-muted/40 border-border/60" />
           </div>
           <div className="space-y-2">
-            <Label>Имя</Label>
-            <div className="flex space-x-2">
-              <Input placeholder="Ваше имя" value={fullName} onChange={e => setFullName(e.target.value)} className="input-bordered" />
-              <Button onClick={updateProfile} disabled={updating || !fullName.trim()} size="sm">
+            <Label className="text-xs font-medium text-muted-foreground">Имя</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ваше имя"
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+                className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+              />
+              <Button
+                onClick={updateProfile}
+                disabled={updating || !fullName.trim()}
+                className="h-11 rounded-xl px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
+              >
                 <Save className="w-4 h-4" />
               </Button>
             </div>
@@ -426,13 +432,14 @@ export const Settings = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 bg-card">
+      {/* Email change */}
+      <Card className="rounded-2xl border border-border/60 bg-card transition-colors hover:border-violet-500/30">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <Mail className="w-5 h-5 text-primary" />
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+              <Mail className="w-5 h-5 text-violet-600 dark:text-violet-300" />
             </div>
-            <div>
+            <div className="min-w-0">
               <CardTitle className="text-base">Смена email</CardTitle>
               <CardDescription className="text-xs">Изменить адрес электронной почты</CardDescription>
             </div>
@@ -440,10 +447,20 @@ export const Settings = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Новый email</Label>
-            <div className="flex space-x-2">
-              <Input type="email" placeholder="new@example.com" value={newEmail} onChange={e => setNewEmail(e.target.value)} className="input-bordered" />
-              <Button onClick={updateEmail} disabled={updating || !newEmail.trim()} size="sm">
+            <Label className="text-xs font-medium text-muted-foreground">Новый email</Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="new@example.com"
+                value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+              />
+              <Button
+                onClick={updateEmail}
+                disabled={updating || !newEmail.trim()}
+                className="h-11 rounded-xl px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
+              >
                 <Mail className="w-4 h-4" />
               </Button>
             </div>
@@ -451,13 +468,14 @@ export const Settings = ({
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 bg-card">
+      {/* Password change */}
+      <Card className="rounded-2xl border border-border/60 bg-card transition-colors hover:border-violet-500/30">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <Lock className="w-5 h-5 text-primary" />
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-violet-600 dark:text-violet-300" />
             </div>
-            <div>
+            <div className="min-w-0">
               <CardTitle className="text-base">Смена пароля</CardTitle>
               <CardDescription className="text-xs">Изменить пароль для входа</CardDescription>
             </div>
@@ -465,63 +483,99 @@ export const Settings = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Текущий пароль</Label>
-            <Input type="password" placeholder="Введите текущий пароль" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="input-bordered" />
+            <Label className="text-xs font-medium text-muted-foreground">Текущий пароль</Label>
+            <Input
+              type="password"
+              placeholder="Введите текущий пароль"
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+              className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+            />
           </div>
           <div className="space-y-2">
-            <Label>Новый пароль</Label>
-            <Input type="password" placeholder="••••••••" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="input-bordered" minLength={8} />
-            <p className="text-xs text-muted-foreground">
+            <Label className="text-xs font-medium text-muted-foreground">Новый пароль</Label>
+            <Input
+              type="password"
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+              minLength={8}
+            />
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Минимум 8 символов, должен содержать заглавные и строчные буквы, цифры
             </p>
           </div>
           <div className="space-y-2">
-            <Label>Подтвердите пароль</Label>
-            <Input type="password" placeholder="Повторите новый пароль" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="input-bordered" />
+            <Label className="text-xs font-medium text-muted-foreground">Подтвердите пароль</Label>
+            <Input
+              type="password"
+              placeholder="Повторите новый пароль"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+            />
           </div>
-          <Button onClick={updatePassword} disabled={updating} className="w-full">
-            <Lock className="w-4 h-4 mr-2" />
+          <Button
+            onClick={updatePassword}
+            disabled={updating}
+            className="w-full h-11 rounded-xl gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
+          >
+            <Lock className="w-4 h-4" />
             Изменить пароль
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 relative bg-card">
+      {/* WB API key */}
+      <Card className="relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-colors hover:border-violet-500/30">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                <KeyRound className="w-5 h-5 text-primary" />
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+                <KeyRound className="w-5 h-5 text-violet-600 dark:text-violet-300" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <CardTitle className="text-base">Wildberries API</CardTitle>
                 <CardDescription className="text-xs">Безопасное хранение API ключа для интеграции</CardDescription>
               </div>
             </div>
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+            <Badge variant="outline" className="rounded-full bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/30">
               Скоро
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" disabled className="w-full bg-muted text-muted-foreground border-muted hover:bg-muted hover:text-muted-foreground cursor-not-allowed">
+          <Button
+            variant="outline"
+            disabled
+            className="w-full h-11 rounded-xl bg-muted/40 text-muted-foreground border-border/60 cursor-not-allowed"
+          >
             В разработке
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="border border-border/50 bg-card">
+      {/* Actions */}
+      <Card className="rounded-2xl border border-destructive/30 bg-card transition-colors hover:border-destructive/50">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-red-500/5 border border-red-500/20 flex items-center justify-center">
               <LogOut className="w-5 h-5 text-red-500" />
             </div>
-            <CardTitle className="text-base">Действия</CardTitle>
+            <div className="min-w-0">
+              <CardTitle className="text-base">Действия</CardTitle>
+              <CardDescription className="text-xs">Выход из аккаунта на этом устройстве</CardDescription>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <Button variant="destructive" onClick={onSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
+          <Button
+            variant="destructive"
+            onClick={onSignOut}
+            className="w-full sm:w-auto h-11 rounded-xl gap-2"
+          >
+            <LogOut className="w-4 h-4" />
             Выйти из аккаунта
           </Button>
         </CardContent>
