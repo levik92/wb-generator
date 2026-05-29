@@ -1068,7 +1068,7 @@ export const History = ({
       }} transition={{
         duration: 0.4,
         delay: 0.1 + index * 0.05
-      }} className="group rounded-2xl border backdrop-blur-sm p-4 sm:p-6 transition-all relative overflow-hidden border-border/50 hover:border-primary/30 bg-card"
+      }} className="group rounded-2xl border backdrop-blur-sm p-4 sm:p-5 transition-all relative overflow-hidden border-border/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 bg-card"
       >
               {isEditing && (
                 <>
