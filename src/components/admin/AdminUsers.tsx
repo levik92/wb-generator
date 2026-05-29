@@ -693,18 +693,24 @@ export function AdminUsers({
                   className="h-10 w-10 shrink-0"
                   onClick={() => {
                     const cur = parseInt(newTokenBalance) || 0;
-                    setNewTokenBalance(String(Math.max(0, cur - 100)));
+                    setNewTokenBalance(String(Math.max(0, cur - 10)));
                   }}
-                  aria-label="Уменьшить на 100"
+                  aria-label="Уменьшить на 10"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
                 <Input
                   id="tokens"
                   type="number"
+                  inputMode="numeric"
                   min="0"
                   value={newTokenBalance}
                   onChange={(e) => setNewTokenBalance(e.target.value)}
+                  onFocus={(e) => {
+                    setTimeout(() => {
+                      e.target.scrollIntoView({ block: "center", behavior: "smooth" });
+                    }, 300);
+                  }}
                   className="h-10 text-center text-base font-semibold tabular-nums"
                 />
                 <Button
@@ -714,9 +720,9 @@ export function AdminUsers({
                   className="h-10 w-10 shrink-0"
                   onClick={() => {
                     const cur = parseInt(newTokenBalance) || 0;
-                    setNewTokenBalance(String(cur + 100));
+                    setNewTokenBalance(String(cur + 10));
                   }}
-                  aria-label="Увеличить на 100"
+                  aria-label="Увеличить на 10"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -726,7 +732,7 @@ export function AdminUsers({
             <div className="space-y-1.5">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Быстро прибавить</div>
               <div className="grid grid-cols-4 gap-1.5">
-                {[100, 500, 1000, 5000].map((n) => (
+                {[10, 20, 50, 100].map((n) => (
                   <Button
                     key={n}
                     type="button"
@@ -743,6 +749,7 @@ export function AdminUsers({
                 ))}
               </div>
             </div>
+
           </div>
 
           <ResponsiveDialogFooter className="px-5 sm:px-6 pb-5 sm:pb-6 pt-2 gap-2 sm:gap-2">
