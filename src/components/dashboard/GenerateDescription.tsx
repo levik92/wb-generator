@@ -339,87 +339,89 @@ export const GenerateDescription = ({
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      {/* Promo Banner — same style as cards page */}
+      {/* Hero — conversion-focused (same style as cards page) */}
       <AnimatePresence>
         {isPromoVisible && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={{ opacity: 0, y: -20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl"
+            className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-primary to-fuchsia-500 animate-gradient-x" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
-
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <FileText className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
-              <Sparkles className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
-              <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
-              <TrendingUp className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
-              <FileText className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
-              <Sparkles className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
-            </div>
-
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
+            />
 
             <button
               onClick={handleDismissPromo}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-20"
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-muted/60 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground z-20"
               aria-label="Закрыть"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative p-6 pt-12 sm:pt-12 lg:pt-6">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:pr-8">
-                <div className="flex-shrink-0 hidden lg:block">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <PenLine className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                  </div>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="mb-3 lg:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
+            <div className="relative p-5 sm:p-6">
+              <div className="flex flex-col gap-4 sm:gap-5">
+                <div className="space-y-1.5 pr-8">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                    <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">
+                      Описания, которые продают
                     </span>
                   </div>
-
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
-                    Описания, которые повышают конверсию
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                    Текст карточки, который повышает конверсию{" "}
+                    <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                      за 30 секунд
+                    </span>
                   </h3>
-                  <p className="text-sm text-white/80 line-clamp-2">
-                    Подбор стиля, ключевых слов и эмоциональных акцентов — текст готов за 30 секунд
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    WBGen подбирает стиль, ключевые слова и эмоциональные акценты — готовое описание под ваш товар и аудиторию.
                   </p>
-
-                  <div className="mt-3 hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
-                  <Button className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg" asChild>
-                    <a href="/cases" target="_blank" rel="noopener noreferrer">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Посмотреть
-                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
-                    </a>
-                  </Button>
-                  {onNavigateToBalance && (
-                    <Button
-                      variant="outline"
-                      onClick={onNavigateToBalance}
-                      className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-                    >
-                      <Coins className="w-4 h-4 mr-2" />
-                      Пополнить баланс
-                    </Button>
-                  )}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                    <div className="flex items-center gap-2.5">
+                      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold leading-tight">Выше конверсия</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">SEO + продающие триггеры</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                    <div className="flex items-center gap-2.5">
+                      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold leading-tight">30 сек. вместо часов</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">без копирайтера и правок</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                    <div className="flex items-center gap-2.5">
+                      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                        <ShieldCheck className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold leading-tight">Возврат 100%</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">если не понравится</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
