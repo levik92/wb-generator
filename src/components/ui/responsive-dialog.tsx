@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useScrollFocusedIntoView } from "@/hooks/useScrollFocusedIntoView";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
+
 
 interface ResponsiveDialogProps {
   open?: boolean;
@@ -62,14 +64,23 @@ interface ResponsiveDialogContentProps {
 
 const ResponsiveDialogContent = ({ children, className }: ResponsiveDialogContentProps) => {
   const isMobile = useIsMobile();
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  useScrollFocusedIntoView(scrollRef, isMobile);
 
   if (isMobile) {
     return (
       <DrawerContent className="bg-card border-border/50">
         <div
+          ref={scrollRef}
           className={cn("overflow-y-auto px-4 pb-6", className)}
           style={{
-            maxHeight: "calc(85dvh - var(--keyboard-inset-height, 0px))",
+            // The Drawer is already lifted above the keyboard via its `bottom` offset
+            // (see drawer.tsx). Here we only need to keep the scroll area within the
+            // visible portion of the drawer above the keyboard — reserve room for the
+            // grabber + safe-area, and never exceed visible viewport.
+            maxHeight:
+              "calc(100dvh - var(--keyboard-inset-height, 0px) - 4rem - env(safe-area-inset-bottom, 0px))",
+            paddingBottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))",
           }}
         >
           {children}
@@ -84,6 +95,7 @@ const ResponsiveDialogContent = ({ children, className }: ResponsiveDialogConten
     </DialogContent>
   );
 };
+
 
 const ResponsiveDialogHeader = ({ children, className }: { children: React.ReactNode; className?: string }) => {
   const isMobile = useIsMobile();
