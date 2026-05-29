@@ -495,25 +495,10 @@ export const GenerateDescription = ({
                   disabled={generating}
                   className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 h-11"
                 />
-                <div className="space-y-1.5">
-                  <div className="h-1 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        productName.length > 140
-                          ? "bg-amber-500"
-                          : productName.length > 0
-                          ? "bg-gradient-to-r from-violet-500 to-purple-500"
-                          : "bg-transparent"
-                      }`}
-                      style={{ width: `${Math.min(100, (productName.length / 150) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{productName.length}/150 символов</span>
-                    {productName.length > 140 && (
-                      <span className="text-amber-500">Осталось: {150 - productName.length}</span>
-                    )}
-                  </div>
+                <div className="flex justify-end text-xs text-muted-foreground">
+                  <span className={productName.length > 140 ? "text-amber-500" : ""}>
+                    {productName.length}/150 символов
+                  </span>
                 </div>
               </div>
 
