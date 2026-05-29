@@ -556,25 +556,10 @@ export const GenerateDescription = ({
                   className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 min-h-[110px] resize-none"
                   rows={3}
                 />
-                <div className="space-y-1.5">
-                  <div className="h-1 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${
-                        keywords.length >= 1200
-                          ? "bg-destructive"
-                          : keywords.length > 0
-                          ? "bg-gradient-to-r from-violet-500 to-purple-500"
-                          : "bg-transparent"
-                      }`}
-                      style={{ width: `${Math.min(100, (keywords.length / 1200) * 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Разделяйте запятыми</span>
-                    <span className={keywords.length >= 1200 ? "text-destructive" : ""}>
-                      {keywords.length}/1200
-                    </span>
-                  </div>
+                <div className="flex justify-end text-xs text-muted-foreground">
+                  <span className={keywords.length >= 1200 ? "text-destructive" : ""}>
+                    {keywords.length}/1200
+                  </span>
                 </div>
               </div>
             </CardContent>
