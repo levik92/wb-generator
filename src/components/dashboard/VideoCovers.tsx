@@ -1037,14 +1037,16 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
               </div>
 
               {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
-                <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
-                  <Info className="h-4 w-4" />
-                  <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
+                <div className="flex items-center gap-2.5 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-3 py-2 animate-fade-in">
+                  <div className="shrink-0 flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15">
+                    <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-[13px] leading-snug">
                     {!selectedImage
                       ? "Загрузите карточку товара"
                       : "Напишите пожелания или включите «Придумай сам»"}
-                  </AlertDescription>
-                </Alert>
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
