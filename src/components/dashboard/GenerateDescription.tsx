@@ -602,48 +602,65 @@ export const GenerateDescription = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="border-border/60 bg-card rounded-2xl h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                    <FileText className="w-4 h-4 shrink-0" />
-                    <span>Готовое описание</span>
-                  </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
-                    {generatedText ? `${generatedText.length} символов` : "Результат появится здесь"}
-                  </CardDescription>
+          <Card className="relative overflow-hidden border-violet-500/20 bg-card rounded-2xl h-full">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 -left-16 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
+            />
+            <CardHeader className="relative">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <span>Готовое описание</span>
+                      {generatedText && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Готово
+                        </span>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="text-xs sm:text-sm mt-1">
+                      {generatedText ? `${generatedText.length} символов · можно редактировать` : "Результат появится здесь"}
+                    </CardDescription>
+                  </div>
                 </div>
                 {generatedText && (
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={copyToClipboard}
-                    className="shrink-0 rounded-md h-9 px-3 text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                    className="shrink-0 rounded-lg h-9 px-3 text-sm font-medium bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/20 transition-colors"
                   >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Копировать
+                    <Copy className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Копировать</span>
                   </Button>
                 )}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
               {generatedText ? (
                 <div className="space-y-4">
-                  <Textarea
-                    value={generatedText}
-                    onChange={(e) => setGeneratedText(e.target.value)}
-                    rows={10}
-                    className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 text-sm leading-relaxed"
-                  />
-                  <div className="flex flex-wrap gap-2">
+                  <div className="relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.03] to-transparent p-0.5">
+                    <Textarea
+                      value={generatedText}
+                      onChange={(e) => setGeneratedText(e.target.value)}
+                      rows={10}
+                      className="bg-background border-0 focus-visible:ring-1 focus-visible:ring-violet-500/30 text-sm leading-relaxed rounded-[10px]"
+                    />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-muted-foreground mr-1 hidden sm:inline">Скачать:</span>
                     {(["txt", "docx", "pdf"] as const).map((fmt) => (
                       <Button
                         key={fmt}
                         size="sm"
                         variant="outline"
                         onClick={() => downloadAsFile(fmt)}
-                        className="gap-2 rounded-lg border-border/60 hover:border-violet-500/40 hover:bg-violet-500/[0.06]"
+                        className="gap-2 rounded-lg border-violet-500/20 bg-violet-500/[0.04] text-foreground hover:border-violet-500/50 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 transition-colors"
                       >
                         <Download className="w-4 h-4" />
                         {fmt.toUpperCase()}
@@ -652,22 +669,32 @@ export const GenerateDescription = ({
                   </div>
                 </div>
               ) : (
-                <div className="h-64 flex items-center justify-center rounded-xl border border-dashed border-border/50 bg-background/30">
-                  <div className="text-center text-muted-foreground">
+                <div className="relative h-64 flex items-center justify-center rounded-xl border border-dashed border-violet-500/25 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-purple-500/[0.04] overflow-hidden">
+                  {!generating && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_hsl(var(--primary)/0.08),_transparent_60%)]"
+                    />
+                  )}
+                  <div className="relative text-center text-muted-foreground px-4">
                     {generating ? (
                       <>
-                        <div className="relative w-10 h-10 mx-auto mb-3">
-                          <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-md animate-pulse" />
-                          <div className="relative w-10 h-10 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
+                        <div className="relative w-12 h-12 mx-auto mb-3">
+                          <div className="absolute inset-0 rounded-full bg-violet-500/25 blur-md animate-pulse" />
+                          <div className="relative w-12 h-12 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
                           <FileText className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
                         </div>
-                        <p className="text-sm font-medium">Генерация описания...</p>
-                        <p className="text-xs mt-1">Результат появится здесь автоматически</p>
+                        <p className="text-sm font-semibold text-foreground/80">Создаём описание...</p>
+                        <p className="text-xs mt-1">Подбираем стиль, ключи и продающие акценты</p>
                       </>
                     ) : (
                       <>
-                        <FileText className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">Описание появится после генерации</p>
+                        <div className="relative w-12 h-12 mx-auto mb-3 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-violet-600 dark:text-violet-300" />
+                          <Sparkles className="absolute -top-1 -right-1 w-3.5 h-3.5 text-violet-500 animate-pulse" />
+                        </div>
+                        <p className="text-sm font-semibold text-foreground/80">Описание появится здесь</p>
+                        <p className="text-xs mt-1">Заполните параметры слева и нажмите «Сгенерировать»</p>
                       </>
                     )}
                   </div>
