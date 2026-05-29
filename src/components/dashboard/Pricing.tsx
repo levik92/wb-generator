@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2, ShieldCheck, CreditCard, MoreHorizontal, Wallet, LifeBuoy } from "lucide-react";
+import { Check, Loader2, MessageCircle, AlertCircle, HelpCircle, Building2, ShieldCheck, CreditCard, MoreHorizontal, Wallet, LifeBuoy, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { usePaymentPackages } from "@/hooks/usePaymentPackages";
 import { useGenerationPricing } from "@/hooks/useGenerationPricing";
