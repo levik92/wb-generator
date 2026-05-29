@@ -343,7 +343,7 @@ const Dashboard = () => {
       case 'video':
         return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} onNavigate={handleTabChange} preAttachedImageUrl={pendingVideoImageUrl} onPreAttachedImageConsumed={() => setPendingVideoImageUrl(null)} />;
       case 'description':
-        return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
+        return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} onNavigateToBalance={() => handleTabChange('pricing')} />;
       case 'notifications':
         return <NotificationCenter profile={profile} onMarkAllReadRef={notifMarkAllReadRef} />;
       case 'labels':
