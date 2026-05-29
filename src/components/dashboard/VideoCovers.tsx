@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, Coins, HelpCircle, ShieldCheck } from "lucide-react";
+import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, Coins, HelpCircle, ShieldCheck, ArrowRight, MousePointerClick } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -549,82 +549,91 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
         </div>
       </div>
 
-      {/* Video Promo Banner */}
       <AnimatePresence>
         {isPromoBannerVisible && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="relative overflow-hidden rounded-2xl isolate"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-primary to-fuchsia-500 animate-gradient-x" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
+            {/* Background: rich brand gradient with subtle depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-primary to-fuchsia-500" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_85%_-10%,hsl(0_0%_100%_/_0.22),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_0%_110%,hsl(280_80%_60%_/_0.35),transparent_65%)]" />
 
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <Video className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
-              <Play className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
-              <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
-              <Sparkles className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
-              <Video className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
-              <Play className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
-            </div>
+            {/* One soft shimmer instead of cluttered floating icons */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
 
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-
+            {/* Close */}
             <button
               onClick={handleDismissPromo}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-20"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-white/10 hover:bg-white/25 transition-colors text-white/85 hover:text-white"
               aria-label="Закрыть"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative p-6 pt-12 sm:pt-12 lg:pt-6">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:pr-8">
-                <div className="flex-shrink-0 hidden lg:block">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Video className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            <div className="relative z-10 p-4 sm:p-5 lg:p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
+                {/* Left: icon + copy */}
+                <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 lg:pr-4">
+                  <div className="hidden sm:flex shrink-0 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 items-center justify-center shadow-inner">
+                    <Video className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    {/* Eyebrow badge */}
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 mb-2">
+                      <Sparkles className="w-3 h-3 text-white" />
+                      <span className="text-[10px] sm:text-[11px] font-semibold tracking-wide uppercase text-white">
+                        Видеообложки
+                      </span>
+                    </div>
+
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug">
+                      Живые обложки, которые продают сильнее
+                    </h3>
+                    <p className="text-xs sm:text-sm text-white/85 mt-1 leading-relaxed line-clamp-2">
+                      Посмотрите примеры — как видео в карточке повышает кликабельность.
+                    </p>
+
+                    {/* Benefit chips */}
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/12 border border-white/20 text-[10.5px] sm:text-xs font-medium text-white">
+                        <MousePointerClick className="w-3 h-3" />
+                        +47% к CTR
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/12 border border-white/20 text-[10.5px] sm:text-xs font-medium text-white">
+                        <Clock className="w-3 h-3" />
+                        5 секунд
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/12 border border-white/20 text-[10.5px] sm:text-xs font-medium text-white">
+                        <ShieldCheck className="w-3 h-3" />
+                        Возврат 100%
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="mb-3 lg:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
-                    Посмотрите, какие видеообложки можно создавать
-                  </h3>
-                  <p className="text-sm text-white/80 line-clamp-2">
-                    Примеры работ и возможности нейросети — живые обложки для ваших товаров
-                  </p>
-
-                  <div className="mt-3 hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
-                  <Button className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg" asChild>
+                {/* Right: CTAs */}
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[200px] lg:shrink-0">
+                  <Button
+                    asChild
+                    className="group h-10 sm:h-11 bg-white text-primary hover:bg-white font-semibold shadow-[0_8px_24px_-8px_hsl(0_0%_0%_/_0.35)] hover:shadow-[0_10px_28px_-6px_hsl(0_0%_0%_/_0.45)] transition-all"
+                  >
                     <a href="/video-generaciya" target="_blank" rel="noopener noreferrer">
                       <Eye className="w-4 h-4 mr-2" />
-                      Посмотреть
-                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                      Смотреть примеры
+                      <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
                     </a>
                   </Button>
                   {onNavigate && (
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => onNavigate("pricing")}
-                      className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      className="h-10 sm:h-11 border border-white/25 bg-white/5 text-white hover:bg-white/15 hover:text-white font-medium backdrop-blur-sm"
                     >
                       <Coins className="w-4 h-4 mr-2" />
                       Пополнить баланс
@@ -636,6 +645,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           </motion.div>
         )}
       </AnimatePresence>
+
 
       {/* Processing / Result */}
       <AnimatePresence mode="wait">
