@@ -1043,15 +1043,18 @@ export const History = ({
     }} transition={{
       duration: 0.5,
       delay: 0.2
-    }} className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-8">
-          <div className="text-center py-12">
-            <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+    }} className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card p-8">
+          <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="relative text-center py-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+              <FileText className="w-7 h-7 text-violet-600 dark:text-violet-300" />
+            </div>
             <h3 className="text-lg font-semibold mb-2">История пуста</h3>
-            <p className="text-muted-foreground">
-              {filter === 'all' ? "Начните генерацию, чтобы увидеть историю здесь" : `Нет ${filter === 'cards' ? 'карточек' : 'описаний'} в истории`}
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              {filter === 'all' ? "Начните генерацию, чтобы увидеть здесь свои карточки, описания и видеообложки" : `Нет ${filter === 'cards' ? 'карточек' : filter === 'video' ? 'видеообложек' : 'описаний'} в истории`}
             </p>
           </div>
-        </motion.div> : <div className="grid gap-4">
+        </motion.div> : <div className="grid gap-3 sm:gap-4">
           {generations.map((generation, index) => {
             const isCardEditing = generation.generation_type === 'cards' && generation.output_data?.images?.some((img: any) => editingInProgress.has(img.image_url));
             const isVideoEditing = generation.generation_type === 'video' && videoEditingInProgress.has(generation.id);
