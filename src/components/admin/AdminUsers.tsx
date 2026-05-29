@@ -732,7 +732,7 @@ export function AdminUsers({
             <div className="space-y-1.5">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Быстро прибавить</div>
               <div className="grid grid-cols-4 gap-1.5">
-                {[10, 20, 50, 100].map((n) => (
+                {[50, 100, 250, 500].map((n) => (
                   <Button
                     key={n}
                     type="button"
