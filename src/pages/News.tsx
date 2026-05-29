@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Newspaper, Clock, ChevronLeft, ChevronRight, CheckCheck } from "lucide-react";
+import { Newspaper, Clock, CheckCheck, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -18,21 +18,17 @@ interface NewsItem {
   is_new?: boolean;
 }
 
-interface Profile {
-  id: string;
-}
-
 const NEWS_PER_PAGE = 10;
 
 const tagColors: Record<string, string> = {
-  'Новости': 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400',
-  'Обновления': 'bg-green-500/10 text-green-600 border-green-500/20 dark:bg-green-500/20 dark:text-green-400',
-  'Технические работы': 'bg-orange-500/10 text-orange-600 border-orange-500/20 dark:bg-orange-500/20 dark:text-orange-400',
-  'Исправления': 'bg-red-500/10 text-red-600 border-red-500/20 dark:bg-red-500/20 dark:text-red-400',
-  'Инструкции': 'bg-purple-500/10 text-purple-600 border-purple-500/20 dark:bg-purple-500/20 dark:text-purple-400',
-  'Советы': 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400',
-  'Аналитика': 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20 dark:bg-indigo-500/20 dark:text-indigo-400',
-  'Кейсы': 'bg-pink-500/10 text-pink-600 border-pink-500/20 dark:bg-pink-500/20 dark:text-pink-400',
+  'Новости': 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/15 dark:text-blue-300',
+  'Обновления': 'bg-green-500/10 text-green-600 border-green-500/20 dark:bg-green-500/15 dark:text-green-300',
+  'Технические работы': 'bg-orange-500/10 text-orange-600 border-orange-500/20 dark:bg-orange-500/15 dark:text-orange-300',
+  'Исправления': 'bg-red-500/10 text-red-600 border-red-500/20 dark:bg-red-500/15 dark:text-red-300',
+  'Инструкции': 'bg-violet-500/10 text-violet-700 border-violet-500/20 dark:bg-violet-500/15 dark:text-violet-300',
+  'Советы': 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/15 dark:text-yellow-300',
+  'Аналитика': 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20 dark:bg-indigo-500/15 dark:text-indigo-300',
+  'Кейсы': 'bg-pink-500/10 text-pink-600 border-pink-500/20 dark:bg-pink-500/15 dark:text-pink-300',
 };
 
 interface NewsProps {
@@ -44,6 +40,7 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [readNewsIds, setReadNewsIds] = useState<Set<string>>(new Set());
   const [expandedNewsIds, setExpandedNewsIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
@@ -53,31 +50,24 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
     loadReadNews();
   }, [currentPage]);
 
-  // Expose markAllAsRead to parent via ref
   useEffect(() => {
-    if (onMarkAllReadRef) {
-      onMarkAllReadRef.current = markAllAsRead;
-    }
+    if (onMarkAllReadRef) onMarkAllReadRef.current = markAllAsRead;
     return () => {
-      if (onMarkAllReadRef) {
-        onMarkAllReadRef.current = null;
-      }
+      if (onMarkAllReadRef) onMarkAllReadRef.current = null;
     };
   });
 
   const loadNews = async () => {
     try {
       setLoading(true);
-      
-      // Get total count
       const { count } = await (supabase as any)
         .from('news')
         .select('*', { count: 'exact', head: true })
         .eq('is_published', true);
 
+      setTotalCount(count || 0);
       setTotalPages(Math.ceil((count || 0) / NEWS_PER_PAGE));
 
-      // Get news for current page
       const { data, error } = await (supabase as any)
         .from('news')
         .select('*')
@@ -86,7 +76,6 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
         .range((currentPage - 1) * NEWS_PER_PAGE, currentPage * NEWS_PER_PAGE - 1);
 
       if (error) throw error;
-
       setNews(data || []);
     } catch (error: any) {
       toast({
@@ -107,7 +96,6 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
 
       if (error) throw error;
-
       setReadNewsIds(new Set(data?.map((item: any) => item.news_id) || []));
     } catch (error: any) {
       console.error('Error loading read news:', error);
@@ -116,22 +104,13 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
 
   const markAsRead = async (newsId: string) => {
     if (readNewsIds.has(newsId)) return;
-
     try {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
-
       const { error } = await (supabase as any)
         .from('news_read_status')
-        .insert({
-          news_id: newsId,
-          user_id: user.data.user.id
-        });
-
-      if (error && error.code !== '23505') { // Ignore duplicate key errors
-        throw error;
-      }
-
+        .insert({ news_id: newsId, user_id: user.data.user.id });
+      if (error && error.code !== '23505') throw error;
       setReadNewsIds(prev => new Set([...prev, newsId]));
     } catch (error: any) {
       console.error('Error marking news as read:', error);
@@ -143,44 +122,28 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) return;
 
-      // Получаем ВСЕ опубликованные новости из БД (не только текущую страницу)
       const { data: allNews } = await (supabase as any)
-        .from('news')
-        .select('id')
-        .eq('is_published', true);
-
+        .from('news').select('id').eq('is_published', true);
       if (!allNews || allNews.length === 0) return;
 
-      // Фильтруем только непрочитанные
       const unreadNewsIds = allNews
         .map((item: any) => item.id)
         .filter((id: string) => !readNewsIds.has(id));
 
       if (unreadNewsIds.length === 0) {
-        toast({
-          title: "Готово",
-          description: "Все новости уже прочитаны",
-        });
+        toast({ title: "Готово", description: "Все новости уже прочитаны" });
         return;
       }
 
-      // Создаем записи для всех непрочитанных новостей
       const insertData = unreadNewsIds.map((newsId: string) => ({
-        news_id: newsId,
-        user_id: user.data.user!.id
+        news_id: newsId, user_id: user.data.user!.id
       }));
 
       const { error } = await (supabase as any)
-        .from('news_read_status')
-        .insert(insertData);
+        .from('news_read_status').insert(insertData);
+      if (error && error.code !== '23505') throw error;
 
-      if (error && error.code !== '23505') { // Ignore duplicate key errors
-        throw error;
-      }
-
-      // Обновляем состояние - добавляем все ID в set
       setReadNewsIds(prev => new Set([...prev, ...unreadNewsIds]));
-
       toast({
         title: "Готово",
         description: `Все новости (${unreadNewsIds.length}) отмечены как прочитанные`,
@@ -198,11 +161,8 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
   const toggleExpanded = (newsId: string) => {
     setExpandedNewsIds(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(newsId)) {
-        newSet.delete(newsId);
-      } else {
-        newSet.add(newsId);
-      }
+      if (newSet.has(newsId)) newSet.delete(newsId);
+      else newSet.add(newsId);
       return newSet;
     });
   };
@@ -210,11 +170,8 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   };
 
@@ -225,6 +182,8 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
     return publishedDate > threeDaysAgo;
   };
 
+  const unreadCount = news.filter(n => !readNewsIds.has(n.id)).length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -234,117 +193,155 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-6"
+      className="space-y-4 sm:space-y-6 w-full min-w-0"
     >
-      {/* Mark all as read button */}
-      <div className="flex justify-end">
-        <Button onClick={markAllAsRead} variant="outline" size="sm" className="gap-2 bg-card">
-          <CheckCheck className="w-4 h-4" />
-          Прочитать все
-        </Button>
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="relative p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+              <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+                <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">
+                    Что нового
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight break-words">
+                  Новости и <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">обновления</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Свежие фичи, инструкции и улучшения сервиса. Не пропустите то, что поможет создавать карточки ещё лучше.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex sm:flex-col sm:items-end gap-2 shrink-0">
+              <Button
+                onClick={markAllAsRead}
+                size="sm"
+                className="gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20 w-full sm:w-auto"
+                disabled={unreadCount === 0 && totalCount > 0 && news.every(n => readNewsIds.has(n.id))}
+              >
+                <CheckCheck className="w-4 h-4" />
+                <span className="hidden xs:inline">Прочитать все</span>
+                <span className="xs:hidden">Все прочитано</span>
+              </Button>
+              {totalCount > 0 && (
+                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
+                  <Sparkles className="w-3 h-3" />
+                  {totalCount} {totalCount === 1 ? 'запись' : totalCount < 5 ? 'записи' : 'записей'}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {news.length === 0 ? (
-        <Card className="bg-card/80 backdrop-blur-xl border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-muted-foreground">
-              <Newspaper className="w-5 h-5 opacity-50" />
-              Новостей пока нет
-            </CardTitle>
-            <CardDescription className="text-muted-foreground/70">
-              Здесь будут появляться обновления сервиса
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <div className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card p-8">
+          <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="relative text-center py-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+              <Newspaper className="w-7 h-7 text-violet-600 dark:text-violet-300" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Новостей пока нет</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Здесь будут появляться обновления, инструкции и анонсы новых возможностей сервиса.
+            </p>
+          </div>
+        </div>
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:gap-4">
             {news.map((item, index) => {
               const isRead = readNewsIds.has(item.id);
               const isNew = isNewNews(item.published_at);
-              
+              const isExpanded = expandedNewsIds.has(item.id);
+              const shouldTruncate = item.content.length > 150;
+              const displayContent = shouldTruncate && !isExpanded
+                ? item.content.substring(0, 150) + '...'
+                : item.content;
+
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4) }}
                 >
                   <Card
-                    className={`cursor-pointer transition-all duration-300 bg-card/80 backdrop-blur-xl hover:shadow-lg hover:shadow-primary/5 ${
-                      !isRead ? 'border-primary/30 hover:border-primary/50' : 'border-border/50 hover:border-primary/20'
-                    }`}
                     onClick={() => markAsRead(item.id)}
+                    className={`group cursor-pointer transition-all duration-300 rounded-2xl overflow-hidden bg-card hover:shadow-lg ${
+                      !isRead
+                        ? 'border-violet-500/40 hover:border-violet-500/60 hover:shadow-violet-500/10'
+                        : 'border-border/60 hover:border-violet-500/30 hover:shadow-violet-500/5'
+                    }`}
                   >
-                  <CardHeader>
-                    {/* Mobile: Date above tags */}
-                    <div className="flex md:hidden items-center gap-2 text-sm text-muted-foreground mb-3">
-                      <Clock className="w-4 h-4" />
-                      {formatDate(item.published_at)}
-                    </div>
-                    
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800 border-gray-200'} pointer-events-none`}>
-                            {item.tag}
-                          </Badge>
-                          {isNew && !isRead && (
-                            <Badge className="bg-wb-purple text-white">
-                              Новое
+                    {!isRead && (
+                      <span aria-hidden className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-violet-500 to-purple-600" />
+                    )}
+                    <CardHeader className="pb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800 border-gray-200'} pointer-events-none border font-medium`}>
+                              {item.tag}
                             </Badge>
-                          )}
-                          {!isRead && (
-                            <div className="w-2 h-2 bg-wb-purple rounded-full"></div>
-                          )}
-                        </div>
-                        <CardTitle className="text-lg leading-tight">{item.title}</CardTitle>
-                      </div>
-                      {/* Desktop: Date on the right */}
-                      <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground shrink-0">
-                        <Clock className="w-4 h-4" />
-                        {formatDate(item.published_at)}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {(() => {
-                      const isExpanded = expandedNewsIds.has(item.id);
-                      const shouldTruncate = item.content.length > 150;
-                      const displayContent = shouldTruncate && !isExpanded 
-                        ? item.content.substring(0, 150) + '...'
-                        : item.content;
-                      
-                      return (
-                        <div>
-                          <div 
-                            className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                              isExpanded ? 'max-h-none opacity-100' : shouldTruncate ? 'max-h-20 opacity-90' : 'max-h-none opacity-100'
-                            }`}
-                          >
-                            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                              {displayContent}
-                            </p>
+                            {isNew && !isRead && (
+                              <Badge className="bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0 pointer-events-none gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                Новое
+                              </Badge>
+                            )}
+                            {!isRead && (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                                Не прочитано
+                              </span>
+                            )}
                           </div>
-                          {shouldTruncate && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleExpanded(item.id);
-                              }}
-                              className="text-wb-purple hover:text-wb-purple/80 text-sm font-medium mt-3 transition-all duration-200 hover:translate-x-1"
-                            >
-                              {isExpanded ? 'Свернуть' : 'Читать полностью'}
-                            </button>
-                          )}
+                          <CardTitle className="text-base sm:text-lg leading-tight break-words">
+                            {item.title}
+                          </CardTitle>
                         </div>
-                      );
-                    })()}
-                  </CardContent>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground sm:shrink-0 sm:pt-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span className="whitespace-nowrap">{formatDate(item.published_at)}</span>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div
+                        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                          isExpanded ? 'max-h-[2000px]' : shouldTruncate ? 'max-h-24' : 'max-h-none'
+                        }`}
+                      >
+                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
+                          {displayContent}
+                        </p>
+                      </div>
+                      {shouldTruncate && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleExpanded(item.id); }}
+                          className="inline-flex items-center gap-1 text-violet-700 dark:text-violet-300 hover:text-violet-800 dark:hover:text-violet-200 text-sm font-medium mt-3 transition-all duration-200 group/btn"
+                        >
+                          {isExpanded ? 'Свернуть' : 'Читать полностью'}
+                          {isExpanded
+                            ? <ChevronUp className="w-3.5 h-3.5 transition-transform" />
+                            : <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-y-0.5" />}
+                        </button>
+                      )}
+                    </CardContent>
                   </Card>
                 </motion.div>
               );
@@ -352,16 +349,15 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <PaginationPrevious
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
                   </PaginationItem>
-                  
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <PaginationItem key={page}>
                       <PaginationLink
@@ -373,9 +369,8 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
                       </PaginationLink>
                     </PaginationItem>
                   ))}
-                  
                   <PaginationItem>
-                    <PaginationNext 
+                    <PaginationNext
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                     />
