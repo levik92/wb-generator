@@ -437,40 +437,55 @@ export const GenerateDescription = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card className="border-border/60 bg-card rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Settings className="w-4 h-4 shrink-0" />
-                <span>Параметры генерации</span>
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <Info className="w-4 h-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                      <p>
-                        Чем точнее название и ключевые слова, тем точнее результат. Ссылки на конкурентов
-                        помогают модели подобрать правильную лексику и структуру.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                Заполните данные — нейросеть подберёт стиль, ключи и продающие акценты
-              </CardDescription>
+          <Card className="relative overflow-hidden border-violet-500/20 bg-card rounded-2xl">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+            />
+            <CardHeader className="relative">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <Settings className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <span>Параметры генерации</span>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <Info className="w-4 h-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                          <p>
+                            Чем точнее название и ключевые слова, тем точнее результат. Ссылки на конкурентов
+                            помогают модели подобрать правильную лексику и структуру.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-1">
+                    Заполните данные — нейросеть подберёт стиль, ключи и продающие акценты
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="relative space-y-5">
+              {/* Product name */}
               <div className="space-y-2">
-                <Label htmlFor="productName" className="text-sm font-medium">
-                  Название товара
-                </Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="productName" className="text-sm font-medium flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">1</span>
+                    Название товара
+                    <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                  </Label>
+                </div>
                 <Input
                   id="productName"
                   placeholder="Например: Беспроводные наушники AirPods"
@@ -478,45 +493,74 @@ export const GenerateDescription = ({
                   onChange={(e) => setProductName(e.target.value.slice(0, 150))}
                   maxLength={150}
                   disabled={generating}
-                  className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
+                  className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 h-11"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{productName.length}/150 символов</span>
-                  {productName.length > 140 && (
-                    <span className="text-amber-500">Осталось: {150 - productName.length}</span>
-                  )}
+                <div className="space-y-1.5">
+                  <div className="h-1 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        productName.length > 140
+                          ? "bg-amber-500"
+                          : productName.length > 0
+                          ? "bg-gradient-to-r from-violet-500 to-purple-500"
+                          : "bg-transparent"
+                      }`}
+                      style={{ width: `${Math.min(100, (productName.length / 150) * 100)}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{productName.length}/150 символов</span>
+                    {productName.length > 140 && (
+                      <span className="text-amber-500">Осталось: {150 - productName.length}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Ссылки на конкурентов <span className="text-muted-foreground font-normal">(необязательно)</span>
-                </Label>
+              {/* Competitors */}
+              <div className="space-y-2 rounded-xl border border-border/50 bg-gradient-to-br from-violet-500/[0.03] to-transparent p-3.5">
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="text-sm font-medium flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">2</span>
+                    Ссылки на конкурентов
+                  </Label>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
+                </div>
                 <div className="space-y-2">
                   {[
                     { v: competitor1, set: setCompetitor1, p: "Ссылка на конкурента 1" },
                     { v: competitor2, set: setCompetitor2, p: "Ссылка на конкурента 2" },
                     { v: competitor3, set: setCompetitor3, p: "Ссылка на конкурента 3" },
                   ].map((f, i) => (
-                    <Input
-                      key={i}
-                      placeholder={f.p}
-                      value={f.v}
-                      onChange={(e) => f.set(e.target.value)}
-                      disabled={generating}
-                      className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
-                    />
+                    <div key={i} className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md bg-muted text-[10px] font-bold text-muted-foreground flex items-center justify-center pointer-events-none">
+                        {i + 1}
+                      </span>
+                      <Input
+                        placeholder={f.p}
+                        value={f.v}
+                        onChange={(e) => f.set(e.target.value)}
+                        disabled={generating}
+                        className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 pl-10 h-10"
+                      />
+                    </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed flex items-start gap-1.5">
+                  <Info className="w-3 h-3 mt-0.5 shrink-0 opacity-70" />
                   Нейросеть проанализирует описания конкурентов и выделит важные ключевые слова
                 </p>
               </div>
 
+              {/* Keywords */}
               <div className="space-y-2">
-                <Label htmlFor="keywords" className="text-sm font-medium">
-                  Ключевые слова <span className="text-muted-foreground font-normal">(необязательно)</span>
-                </Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="keywords" className="text-sm font-medium flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">3</span>
+                    Ключевые слова
+                  </Label>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
+                </div>
                 <Textarea
                   id="keywords"
                   placeholder="ключ1, ключ2, ключ3"
@@ -524,14 +568,28 @@ export const GenerateDescription = ({
                   onChange={(e) => setKeywords(e.target.value.slice(0, 1200))}
                   maxLength={1200}
                   disabled={generating}
-                  className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 min-h-[100px] resize-none"
+                  className="bg-background border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 min-h-[110px] resize-none"
                   rows={3}
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Разделяйте запятыми</span>
-                  <span className={keywords.length >= 1200 ? "text-destructive" : ""}>
-                    {keywords.length}/1200
-                  </span>
+                <div className="space-y-1.5">
+                  <div className="h-1 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        keywords.length >= 1200
+                          ? "bg-destructive"
+                          : keywords.length > 0
+                          ? "bg-gradient-to-r from-violet-500 to-purple-500"
+                          : "bg-transparent"
+                      }`}
+                      style={{ width: `${Math.min(100, (keywords.length / 1200) * 100)}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Разделяйте запятыми</span>
+                    <span className={keywords.length >= 1200 ? "text-destructive" : ""}>
+                      {keywords.length}/1200
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
