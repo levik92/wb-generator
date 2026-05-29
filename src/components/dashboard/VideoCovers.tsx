@@ -539,8 +539,9 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                     <Eye className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">Выделение в выдаче</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">среди статичных карточек</p>
+                    <p className="text-sm font-semibold leading-tight">Выделение</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">в выдаче среди других</p>
+
                   </div>
                 </div>
               </div>
