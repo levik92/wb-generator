@@ -603,10 +603,6 @@ export const GenerateDescription = ({
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Card className="relative overflow-hidden border-violet-500/20 bg-card rounded-2xl h-full">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-20 -left-16 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
-            />
             <CardHeader className="relative">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
