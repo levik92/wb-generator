@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ExternalLink, Play, MessageCircle, HelpCircle, Clock, GraduationCap } from "lucide-react";
+import { ExternalLink, Play, MessageCircle, HelpCircle, Clock, GraduationCap, Sparkles, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -66,57 +65,102 @@ const Learning = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-8">
-      {/* Telegram Group Promo */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
-        <Card className="bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-cyan-500/10 border-blue-500/20 overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-transparent" />
-          <CardContent className="p-6 relative">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <MessageCircle className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-foreground">Telegram-канал</h3>
-                  <p className="text-muted-foreground text-xs">Новости и советы</p>
-                </div>
-              </div>
-              <Button onClick={handleTelegramClick} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white gap-2 shadow-lg transition-all duration-300">
-                <ExternalLink className="w-4 h-4" />
-                Присоединиться
-              </Button>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card p-5 sm:p-7">
+        <div className="pointer-events-none absolute -top-20 -right-16 w-72 h-72 rounded-full bg-violet-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
+              <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
-          </CardContent>
-        </Card>
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-700 dark:text-violet-300 mb-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                Обучение
+              </div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
+                База знаний и видеоуроки
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+                Освойте все возможности сервиса и создавайте карточки ТОП-уровня
+              </p>
+            </div>
+          </div>
+          {videoLessons.length > 0 && (
+            <div className="inline-flex items-center gap-2 rounded-xl bg-violet-500/10 border border-violet-500/20 px-3 py-2 text-sm font-medium text-violet-700 dark:text-violet-300 self-start sm:self-auto">
+              <Sparkles className="h-4 w-4" />
+              {videoLessons.length} уроков
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Telegram Promo */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
+        <div className="relative overflow-hidden rounded-2xl border border-blue-500/25 bg-card p-5 sm:p-6">
+          <div className="pointer-events-none absolute -top-16 -right-12 w-56 h-56 rounded-full bg-blue-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-12 w-56 h-56 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <MessageCircle className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Telegram-канал</h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">Новости, советы и обновления сервиса</p>
+              </div>
+            </div>
+            <Button
+              onClick={handleTelegramClick}
+              className="h-11 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white gap-2 shadow-lg shadow-blue-500/20 w-full sm:w-auto"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Присоединиться
+            </Button>
+          </div>
+        </div>
       </motion.div>
 
       {/* Video Lessons */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Play className="w-5 h-5 text-primary" />
-          <h3 className="text-xl sm:text-2xl font-semibold">Видеоуроки</h3>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className="space-y-4">
+        <div className="flex items-center gap-2.5 px-1">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+            <Play className="w-4 h-4 text-white fill-white" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-semibold">Видеоуроки</h2>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+          <div className="flex items-center justify-center py-16 rounded-2xl border border-border/60 bg-card">
+            <div className="w-8 h-8 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
             {videoLessons.map((lesson, index) => (
-              <motion.div key={lesson.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 * index }}>
-                <Card className="overflow-hidden backdrop-blur-xl border-border/50 hover:border-primary/20 transition-all duration-300 h-full bg-card">
+              <motion.div
+                key={lesson.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.05 * index }}
+              >
+                <Card className="overflow-hidden border-border/60 bg-card hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 h-full rounded-2xl">
                   <CardHeader className="pb-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-                        <span className="text-sm font-bold text-primary">{index + 1}</span>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/15 border border-violet-500/20 flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-violet-600 dark:text-violet-300">{index + 1}</span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <CardTitle className="text-base sm:text-lg">{lesson.title}</CardTitle>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 mb-1 flex-wrap">
+                          <CardTitle className="text-base sm:text-lg leading-snug">{lesson.title}</CardTitle>
                           {lesson.duration && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 shrink-0 gap-0.5">
+                            <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 shrink-0 gap-1 bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20">
                               <Clock className="w-2.5 h-2.5" />
                               {lesson.duration}
                             </Badge>
@@ -126,8 +170,8 @@ const Learning = () => {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="rounded-xl overflow-hidden bg-black/5">
+                  <CardContent className="pt-0">
+                    <div className="rounded-xl overflow-hidden bg-black/5 ring-1 ring-border/50">
                       <div style={{ position: 'relative', paddingTop: '67.84%', width: '100%' }}>
                         <iframe
                           src={`https://kinescope.io/embed/${lesson.kinescope_id}`}
@@ -146,27 +190,33 @@ const Learning = () => {
         )}
       </motion.div>
 
-      <Separator className="bg-border/50" />
-
       {/* FAQ Section */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="space-y-6">
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-5 h-5 text-primary" />
-          <h3 className="text-xl sm:text-2xl font-semibold">Часто задаваемые вопросы</h3>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="space-y-4">
+        <div className="flex items-center gap-2.5 px-1">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+            <HelpCircle className="w-4 h-4 text-white" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-semibold">Часто задаваемые вопросы</h2>
         </div>
 
-        <Accordion type="single" collapsible className="w-full space-y-2">
-          {faqItems.map((item, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border border-border/50 rounded-xl px-4 bg-card/50 backdrop-blur-sm data-[state=open]:border-primary/20 transition-all duration-300">
-              <AccordionTrigger className="text-left hover:no-underline py-4 text-sm sm:text-base">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed text-sm pb-4">
-                {item.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <div className="rounded-2xl border border-border/60 bg-card p-2 sm:p-3">
+          <Accordion type="single" collapsible className="w-full space-y-1.5">
+            {faqItems.map((item, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="border border-border/50 rounded-xl px-4 bg-background/40 data-[state=open]:border-violet-500/30 data-[state=open]:bg-violet-500/[0.03] transition-all duration-300"
+              >
+                <AccordionTrigger className="text-left hover:no-underline py-4 text-sm sm:text-base font-medium">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed text-sm pb-4">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
       </motion.div>
     </motion.div>
   );
