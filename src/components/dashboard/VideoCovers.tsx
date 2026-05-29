@@ -11,6 +11,8 @@ import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, Coins, HelpCircle, ShieldCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useActiveAiModel, getVideoEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
@@ -947,13 +949,19 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <Sparkles className="w-4 h-4 shrink-0" />
                 <span>Пожелания к видео</span>
-                <TooltipProvider delayDuration={200}>
+                <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[260px] text-xs">
-                      Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
+                    <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                      <p>Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -968,29 +976,36 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 value={userPrompt}
                 onChange={(e) => setUserPrompt(e.target.value.slice(0, 150))}
                 placeholder="Например: плавное вращение, приближение камеры, эффект дыма…"
-                className="min-h-[88px] rounded-lg"
+                className="min-h-[88px] rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
                 maxLength={600}
                 disabled={isProcessing || autoOptimize}
               />
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = !autoOptimize;
-                    setAutoOptimize(next);
-                    setUserPrompt(next ? AUTO_PROMPT_TEXT : "");
-                  }}
-                  disabled={isProcessing}
-                  className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 ${
+                <label
+                  htmlFor="autoOptimize"
+                  className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-md px-2.5 sm:px-3 h-10 cursor-pointer select-none transition-colors max-w-full ${
                     autoOptimize
-                      ? "bg-violet-500/10 border border-violet-500/30 text-violet-700 dark:text-violet-300"
-                      : "bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                      ? 'bg-gradient-to-r from-violet-500/15 to-purple-500/10 text-violet-700 dark:text-violet-300'
+                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  } ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Придумай сам
-                </button>
-                <span className={`text-xs ${userPrompt.length >= 150 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoOptimize ? 'text-violet-500' : ''}`} />
+                  <span className="text-[11px] sm:text-xs font-medium leading-none whitespace-nowrap">
+                    Придумай сам
+                  </span>
+                  <Switch
+                    id="autoOptimize"
+                    checked={autoOptimize}
+                    onCheckedChange={(checked) => {
+                      const next = !!checked;
+                      setAutoOptimize(next);
+                      setUserPrompt(next ? AUTO_PROMPT_TEXT : "");
+                    }}
+                    disabled={isProcessing}
+                    className="data-[state=checked]:bg-violet-500 scale-75 sm:scale-90 -my-1 shrink-0"
+                  />
+                </label>
+                <span className={`text-xs tabular-nums shrink-0 ${userPrompt.length >= 150 ? 'text-destructive' : 'text-muted-foreground'}`}>
                   {userPrompt.length}/150
                 </span>
               </div>
