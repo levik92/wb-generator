@@ -388,7 +388,7 @@ export default function Pricing({
                   ))}
                 </div>
                 <Button
-                  className={`w-full h-10 rounded-xl font-medium ${
+                  className={`w-full h-10 rounded-lg font-medium ${
                     isPopular
                       ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/30"
                       : "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm"
