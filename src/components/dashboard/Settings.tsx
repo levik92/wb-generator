@@ -296,13 +296,13 @@ export const Settings = ({
           </CardHeader>
           <CardContent className="relative">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-              <Button className="h-11 rounded-xl gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md shadow-blue-500/20" asChild>
+              <Button className="h-11 rounded-lg gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md shadow-blue-500/20" asChild>
                 <a href="https://t.me/wbgen_support/" target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-4 h-4" />
                   Телеграм чат
                 </a>
               </Button>
-              <Button className="h-11 rounded-xl gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white border-0 shadow-md shadow-cyan-500/20" onClick={() => onNavigateToSupport?.()}>
+              <Button className="h-11 rounded-lg gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white border-0 shadow-md shadow-cyan-500/20" onClick={() => onNavigateToSupport?.()}>
                 <Headphones className="w-4 h-4" />
                 Онлайн чат
               </Button>
@@ -385,7 +385,7 @@ export const Settings = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label className="text-xs font-medium text-muted-foreground">Email</Label>
-            <Input value={profile.email} disabled className="h-11 rounded-xl bg-muted/40 border-border/60" />
+            <Input value={profile.email} disabled className="h-11 rounded-lg bg-muted/40 border-border/60" />
           </div>
           <div className="space-y-2">
             <Label className="text-xs font-medium text-muted-foreground">Имя</Label>
@@ -394,12 +394,12 @@ export const Settings = ({
                 placeholder="Ваше имя"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+                className="h-11 rounded-lg bg-background border-border/60 focus-visible:border-violet-500/50"
               />
               <Button
                 onClick={updateProfile}
                 disabled={updating || !fullName.trim()}
-                className="h-11 rounded-xl px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
+                className="h-11 rounded-lg px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
               >
                 <Save className="w-4 h-4" />
               </Button>
@@ -430,12 +430,12 @@ export const Settings = ({
                 placeholder="new@example.com"
                 value={newEmail}
                 onChange={e => setNewEmail(e.target.value)}
-                className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+                className="h-11 rounded-lg bg-background border-border/60 focus-visible:border-violet-500/50"
               />
               <Button
                 onClick={updateEmail}
                 disabled={updating || !newEmail.trim()}
-                className="h-11 rounded-xl px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
+                className="h-11 rounded-lg px-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
               >
                 <Mail className="w-4 h-4" />
               </Button>
@@ -465,7 +465,7 @@ export const Settings = ({
               placeholder="Введите текущий пароль"
               value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)}
-              className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+              className="h-11 rounded-lg bg-background border-border/60 focus-visible:border-violet-500/50"
             />
           </div>
           <div className="space-y-2">
@@ -475,7 +475,7 @@ export const Settings = ({
               placeholder="••••••••"
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
-              className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+              className="h-11 rounded-lg bg-background border-border/60 focus-visible:border-violet-500/50"
               minLength={8}
             />
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -489,13 +489,13 @@ export const Settings = ({
               placeholder="Повторите новый пароль"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
-              className="h-11 rounded-xl bg-background border-border/60 focus-visible:border-violet-500/50"
+              className="h-11 rounded-lg bg-background border-border/60 focus-visible:border-violet-500/50"
             />
           </div>
           <Button
             onClick={updatePassword}
             disabled={updating}
-            className="w-full h-11 rounded-xl gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
+            className="w-full h-11 rounded-lg gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
           >
             <Lock className="w-4 h-4" />
             Изменить пароль
@@ -525,7 +525,7 @@ export const Settings = ({
           <Button
             variant="outline"
             disabled
-            className="w-full h-11 rounded-xl bg-muted/40 text-muted-foreground border-border/60 cursor-not-allowed"
+            className="w-full h-11 rounded-lg bg-muted/40 text-muted-foreground border-border/60 cursor-not-allowed"
           >
             В разработке
           </Button>
@@ -549,7 +549,7 @@ export const Settings = ({
           <Button
             variant="destructive"
             onClick={onSignOut}
-            className="w-full sm:w-auto h-11 rounded-xl gap-2"
+            className="w-full sm:w-auto h-11 rounded-lg gap-2"
           >
             <LogOut className="w-4 h-4" />
             Выйти из аккаунта
