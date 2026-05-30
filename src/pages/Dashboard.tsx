@@ -393,34 +393,52 @@ const Dashboard = () => {
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Mobile Header */}
-         {isMobile && <header className="border-b border-border bg-card fixed top-0 left-0 right-0 z-30">
-            <div className="flex h-[76px] items-center justify-between px-4">
-              <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl border border-border/60 bg-card hover:border-violet-500/50 hover:bg-violet-500/[0.08] hover:text-violet-600 transition-colors shrink-0" onClick={() => setMobileMenuOpen(true)}>
-                  <Menu className="h-5 w-5" />
-                </Button>
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <h1 className="text-lg font-bold tracking-tight truncate">{MOBILE_TAB_TITLES[activeTab] || 'WBGen'}</h1>
-                </div>
-              </div>
+         {isMobile && <header className="border-b border-border/60 bg-card/95 backdrop-blur-md fixed top-0 left-0 right-0 z-30">
+            <div className="flex h-14 items-center gap-2 px-3">
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 active:scale-95 transition-all shrink-0" onClick={() => setMobileMenuOpen(true)} aria-label="Меню">
+                <Menu className="h-5 w-5" />
+              </Button>
+
+              <h1 className="text-[15px] font-semibold tracking-tight truncate flex-1 min-w-0">
+                {MOBILE_TAB_TITLES[activeTab] || 'WBGen'}
+              </h1>
+
+              <button
+                onClick={() => handleTabChange('pricing')}
+                className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/25 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-purple-500/15 active:scale-95 transition-all shrink-0"
+                aria-label="Баланс токенов"
+              >
+                <Zap className="h-3.5 w-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
+                <span className="text-[13px] font-semibold tabular-nums text-foreground leading-none">
+                  {(profile.tokens_balance ?? 0).toLocaleString('ru-RU')}
+                </span>
+              </button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-xl hover:bg-violet-500/10 transition-colors shrink-0 ml-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold shadow-sm shadow-violet-500/25">
-                        <UserIcon className="h-4 w-4" />
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 active:scale-95 transition-all shrink-0 p-0" aria-label="Профиль">
+                    <Avatar className="h-8 w-8 ring-2 ring-violet-500/20">
+                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-xs">
+                        {(profile.full_name?.[0] || profile.email?.[0] || 'U').toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-card border shadow-xl rounded-xl" align="end" forceMount>
-                  <div className="flex flex-col space-y-1 p-3">
-                    <p className="text-sm font-semibold leading-none">
-                      {profile.full_name || 'Пользователь'}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {profile.email}
-                    </p>
+                <DropdownMenuContent className="w-60 bg-card border shadow-xl rounded-xl" align="end" forceMount sideOffset={8}>
+                  <div className="flex items-center gap-3 p-3">
+                    <Avatar className="h-10 w-10 ring-2 ring-violet-500/20">
+                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-sm">
+                        {(profile.full_name?.[0] || profile.email?.[0] || 'U').toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <p className="text-sm font-semibold truncate">
+                        {profile.full_name || 'Пользователь'}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {profile.email}
+                      </p>
+                    </div>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/partners/cabinet')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
@@ -448,7 +466,7 @@ const Dashboard = () => {
         {/* Desktop Header */}
         {!isMobile && <DashboardHeader profile={profile} activeTab={activeTab} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} headerActions={headerActions} />}
 
-        <main className={`flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 ${isMobile ? 'pt-[88px] pb-24' : ''}`}>
+        <main className={`flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 ${isMobile ? 'pt-[68px] pb-24' : ''}`}>
           <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
           <Suspense fallback={<TabLoader />}>
