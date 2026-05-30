@@ -1217,11 +1217,11 @@ export const History = ({
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
                   <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
-                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4]">
+                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted/40">
                         <ProgressiveImage 
                           src={img.image_url} 
                           alt={`Карточка ${imgIndex + 1}`} 
-                          className="w-full h-full object-cover cursor-pointer"
+                          className="w-full h-full object-contain cursor-pointer"
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
@@ -1296,9 +1296,9 @@ export const History = ({
                 {expandedIds.has(generation.id) && generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
                   <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.videos.map((video: any, vidIndex: number) => (
-                      <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4]">
+                      <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted/40">
                         {generation.output_data?.source_image ? (
-                          <ProgressiveImage src={generation.output_data.source_image} alt={`Видео ${vidIndex + 1}`} className="w-full h-full object-cover" />
+                          <ProgressiveImage src={generation.output_data.source_image} alt={`Видео ${vidIndex + 1}`} className="w-full h-full object-contain" />
                         ) : (
                           <div className="w-full h-full bg-primary/10 flex items-center justify-center">
                             <Video className="w-8 h-8 text-primary" />
