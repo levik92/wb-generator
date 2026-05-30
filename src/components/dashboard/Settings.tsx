@@ -277,30 +277,6 @@ export const Settings = ({
     duration: 0.4
   }} className="space-y-4 sm:space-y-6 w-full min-w-0">
 
-      {/* Hero header */}
-      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
-        <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="relative p-4 sm:p-6">
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
-              <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Аккаунт</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight break-words">
-                Настройки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">профиля</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Управляйте профилем, безопасностью и интеграциями. Поддержка на связи, если что-то пойдёт не так.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Support Block */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
