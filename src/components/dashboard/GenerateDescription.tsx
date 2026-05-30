@@ -583,7 +583,7 @@ export const GenerateDescription = ({
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <span>Готовое описание</span>
                       {generatedText && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                        <span className="inline-flex items-center gap-1 px-2 py-0 rounded-full bg-emerald-500/10 text-[10px] leading-4 font-semibold text-emerald-700 dark:text-emerald-300">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           Готово
                         </span>
