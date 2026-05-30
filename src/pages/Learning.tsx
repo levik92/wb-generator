@@ -71,36 +71,6 @@ const Learning = () => {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card p-5 sm:p-7">
-        <div className="pointer-events-none absolute -top-20 -right-16 w-72 h-72 rounded-full bg-violet-500/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-            </div>
-            <div className="min-w-0">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-700 dark:text-violet-300 mb-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                Обучение
-              </div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
-                База знаний и видеоуроки
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                Освойте все возможности сервиса и создавайте карточки ТОП-уровня
-              </p>
-            </div>
-          </div>
-          {videoLessons.length > 0 && (
-            <div className="inline-flex items-center gap-2 rounded-xl bg-violet-500/10 border border-violet-500/20 px-3 py-2 text-sm font-medium text-violet-700 dark:text-violet-300 self-start sm:self-auto">
-              <Sparkles className="h-4 w-4" />
-              {videoLessons.length} уроков
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Telegram Promo */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
