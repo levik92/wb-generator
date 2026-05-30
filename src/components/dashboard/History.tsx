@@ -62,19 +62,33 @@ const HistoryAvatarImage = ({
   src,
   alt,
   onError,
+  onClick,
+  previewWidth = 180,
+  className = "",
 }: {
   src: string;
   alt: string;
   onError?: (event: SyntheticEvent<HTMLImageElement, Event>) => void;
+  onClick?: () => void;
+  previewWidth?: number;
+  className?: string;
 }) => (
-  <ProgressiveImage
-    src={src}
-    alt={alt}
-    previewWidth={180}
-    previewQuality={85}
-    className="w-full h-full object-contain"
-    onError={onError}
-  />
+  <>
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 scale-110 bg-cover bg-center opacity-25 blur-xl"
+      style={{ backgroundImage: `url("${thumbUrl(src)}")` }}
+    />
+    <ProgressiveImage
+      src={src}
+      alt={alt}
+      previewWidth={previewWidth}
+      previewQuality={85}
+      className={`relative z-[1] block w-full h-full object-contain ${className}`}
+      onClick={onClick}
+      onError={onError}
+    />
+  </>
 );
 
 interface Generation {
