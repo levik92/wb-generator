@@ -388,7 +388,7 @@ export default function Pricing({
                   ))}
                 </div>
                 <Button
-                  className={`w-full h-10 rounded-xl font-medium ${
+                  className={`w-full h-10 rounded-lg font-medium ${
                     isPopular
                       ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/30"
                       : "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm"
@@ -402,7 +402,7 @@ export default function Pricing({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full mt-2 h-9 rounded-xl gap-2 text-xs border-border/60 text-muted-foreground hover:bg-violet-500/5 hover:text-violet-700 dark:hover:text-violet-300 hover:border-violet-500/40"
+                    className="w-full mt-2 h-9 rounded-lg gap-2 text-xs border-border/60 text-muted-foreground hover:bg-violet-500/5 hover:text-violet-700 dark:hover:text-violet-300 hover:border-violet-500/40"
                     onClick={() => setAltMethodPackage(plan)}
                     disabled={loading === plan.name}
                   >
