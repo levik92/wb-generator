@@ -199,53 +199,21 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
       transition={{ duration: 0.4 }}
       className="space-y-4 sm:space-y-6 w-full min-w-0"
     >
-      {/* Hero header */}
-      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
-        <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="relative p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-              <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
-                <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">
-                    Что нового
-                  </span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight break-words">
-                  Новости и <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">обновления</span>
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Свежие фичи, инструкции и улучшения сервиса. Не пропустите то, что поможет создавать карточки ещё лучше.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex sm:flex-col sm:items-end gap-2 shrink-0">
-              <Button
-                onClick={markAllAsRead}
-                size="sm"
-                className="gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20 w-full sm:w-auto"
-                disabled={unreadCount === 0 && totalCount > 0 && news.every(n => readNewsIds.has(n.id))}
-              >
-                <CheckCheck className="w-4 h-4" />
-                <span className="hidden xs:inline">Прочитать все</span>
-                <span className="xs:hidden">Все прочитано</span>
-              </Button>
-              {totalCount > 0 && (
-                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
-                  <Sparkles className="w-3 h-3" />
-                  {totalCount} {totalCount === 1 ? 'запись' : totalCount < 5 ? 'записи' : 'записей'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* Mark all as read action */}
+      <div className="flex justify-end">
+        <Button
+          onClick={markAllAsRead}
+          variant="ghost"
+          size="sm"
+          className="shrink-0 w-full sm:w-auto rounded-md h-10 px-3 text-sm font-medium bg-background border border-border text-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 hover:border-violet-500/30 transition-colors"
+          disabled={unreadCount === 0 && totalCount > 0 && news.every(n => readNewsIds.has(n.id))}
+        >
+          <CheckCheck className="w-4 h-4" />
+          <span className="hidden xs:inline">Прочитать все</span>
+          <span className="xs:hidden">Все прочитано</span>
+        </Button>
       </div>
+
 
       {news.length === 0 ? (
         <div className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card p-8">
