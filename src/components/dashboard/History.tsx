@@ -1061,8 +1061,9 @@ export const History = ({
       }} transition={{
         duration: 0.4,
         delay: 0.1 + index * 0.05
-      }} className="group rounded-2xl border backdrop-blur-sm p-4 sm:p-5 transition-all relative overflow-hidden border-border/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/5 bg-card"
+      }} className="group rounded-2xl border p-3.5 sm:p-4 transition-all relative overflow-hidden border-border/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/[0.06] bg-card"
       >
+              <span aria-hidden className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-violet-500/[0.06] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               {isEditing && (
                 <>
                   <div className="absolute inset-0 pointer-events-none z-0" style={{
@@ -1073,7 +1074,7 @@ export const History = ({
                     background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
                     animation: 'glow-drift-top 8s ease-in-out infinite alternate',
                   }} />
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-2 bg-primary/90 text-primary-foreground px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-violet-600/95 text-white px-2.5 py-1 rounded-lg text-[11px] font-medium shadow-lg shadow-violet-500/30">
                     <Loader2 className="w-3 h-3 animate-spin" />
                     <span className="hidden sm:inline">Редактирование...</span>
                   </div>
@@ -1082,9 +1083,9 @@ export const History = ({
               <div className={`flex flex-col gap-3 min-w-0 overflow-hidden ${isEditing ? 'relative z-[1]' : ''}`}>
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 min-w-0">
                   {/* Content */}
-                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                  <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0">
                     {generation.generation_type === 'video' ? <div 
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted"
+                        className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => {
                           if (generation.output_data?.video_url) {
                             setVideoPreviewUrl(generation.output_data.video_url);
@@ -1095,15 +1096,15 @@ export const History = ({
                         {generation.output_data?.source_image ? (
                           <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" />
                         ) : (
-                          <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                            <Video className="w-6 h-6 text-primary" />
+                          <div className="w-full h-full bg-gradient-to-br from-violet-500/15 to-purple-500/5 flex items-center justify-center">
+                            <Video className="w-6 h-6 text-violet-600 dark:text-violet-300" />
                           </div>
                         )}
                         <div className="absolute inset-0 z-10 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted"
+                        className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
                         <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
@@ -1113,51 +1114,59 @@ export const History = ({
                         <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                      </div> : <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center bg-primary/10 flex-shrink-0">
-                        {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
+                      </div> : <div className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex items-center justify-center bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex-shrink-0">
+                        {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-violet-600 dark:text-violet-300" /> : <FileText className="w-6 h-6 text-violet-600 dark:text-violet-300" />}
                       </div>}
                     
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-semibold">
+                      <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+                        <h3 className="font-semibold text-sm sm:text-[15px] leading-tight">
                           {generation.generation_type === 'cards' ? 'Карточки товара' : generation.generation_type === 'video' ? 'Видеообложка' : 'Описание товара'}
                         </h3>
-                        <Badge variant={generation.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                          {generation.status === 'completed' ? 'Готово' : 'В процессе'}
-                        </Badge>
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium ${generation.status === 'completed' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20'}`}>
+                          {generation.status === 'completed' ? '✓ Готово' : 'В процессе'}
+                        </span>
                         {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) > 1 && (
-                          <Badge variant="outline" className="text-xs">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20">
                             {generation.output_data.images.length} изобр.
-                          </Badge>
+                          </span>
                         )}
                         {generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
-                          <Badge variant="outline" className="text-xs">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20">
                             {generation.output_data.videos.length} видео
-                          </Badge>
+                          </span>
                         )}
                       </div>
                       
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                      {generation.input_data?.productName && (
+                        <p className="text-[13px] sm:text-sm font-medium text-foreground/90 truncate mb-1">
+                          {generation.input_data.productName}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] sm:text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {formatDate(generation.created_at)}
                         </span>
-                        <span>{generation.tokens_used} токенов</span>
-                        {generation.input_data?.productName && <span className="truncate max-w-[200px]">• {generation.input_data.productName}</span>}
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-violet-500/70" />
+                          {generation.tokens_used} токенов
+                        </span>
                       </div>
                     </div>
                   </div>
                   
                   {/* Actions */}
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex gap-1.5 flex-shrink-0 flex-wrap lg:flex-nowrap">
                     {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) > 1 && (
                       <Button 
                         onClick={() => toggleExpanded(generation.id)} 
                         size="sm" 
                         variant="outline"
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
                       >
-                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
-                        {expandedIds.has(generation.id) ? 'Свернуть' : 'Все фото'}
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 sm:mr-1" /> : <ChevronDown className="w-4 h-4 sm:mr-1" />}
+                        <span className="hidden sm:inline">{expandedIds.has(generation.id) ? 'Свернуть' : 'Все фото'}</span>
                       </Button>
                     )}
                     {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) === 1 && generation.output_data?.images?.[0]?.image_url && (
@@ -1176,6 +1185,7 @@ export const History = ({
                         variant="outline"
                         disabled={editingInProgress.has(generation.output_data.images[0].image_url)}
                         title={`Редактировать (${editPrice} токенов)`}
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
                       >
                         {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 sm:mr-1" />}
                         <span className="hidden sm:inline">Ред.</span>
@@ -1186,9 +1196,10 @@ export const History = ({
                         onClick={() => toggleExpanded(generation.id)} 
                         size="sm" 
                         variant="outline"
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
                       >
-                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
-                        {expandedIds.has(generation.id) ? 'Свернуть' : 'Все видео'}
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 sm:mr-1" /> : <ChevronDown className="w-4 h-4 sm:mr-1" />}
+                        <span className="hidden sm:inline">{expandedIds.has(generation.id) ? 'Свернуть' : 'Все видео'}</span>
                       </Button>
                     )}
                     {generation.generation_type === 'video' && (
@@ -1198,29 +1209,29 @@ export const History = ({
                         variant="outline"
                         disabled={videoEditingInProgress.has(generation.id)}
                         title={`Редактировать (${videoRegenPrice || 2} токенов)`}
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
                       >
                         {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 sm:mr-1" />}
                         <span className="hidden sm:inline">Ред.</span>
                       </Button>
                     )}
-                    <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="bg-primary hover:bg-primary/90">
+                    <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 text-xs font-medium">
                       {downloadingIds.has(generation.id) ? <>
                           <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
                         </> : generation.generation_type === 'video' ? <>
-                          <Download className="w-4 h-4 sm:mr-2" />
+                          <Download className="w-4 h-4 sm:mr-1.5" />
                           <span className="hidden sm:inline">Скачать</span>
                           <span className="sm:hidden">MP4</span>
                         </> : (generation.output_data?.images?.length || 0) > 1 ? <>
-                          <Archive className="w-4 h-4 sm:mr-2" />
-                          <span className="hidden sm:inline">Скачать ZIP ({generation.output_data.images.length})</span>
-                          <span className="sm:hidden">ZIP ({generation.output_data.images.length})</span>
+                          <Archive className="w-4 h-4 sm:mr-1.5" />
+                          <span>ZIP ({generation.output_data.images.length})</span>
                         </> : <>
-                          <Download className="w-4 h-4 sm:mr-2" />
+                          <Download className="w-4 h-4 sm:mr-1.5" />
                           <span className="hidden sm:inline">Скачать</span>
                           <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
-                    <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation) : deleteGeneration(generation.id)} size="sm" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                    <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation) : deleteGeneration(generation.id)} size="sm" variant="outline" className="h-9 w-9 p-0 rounded-lg border-destructive/25 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:border-destructive">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1376,7 +1387,7 @@ export const History = ({
       duration: 0.5,
       delay: 0.3
     }} className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="w-full sm:w-auto h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04]">
             <ChevronLeft className="w-4 h-4 mr-1" />
             Назад
           </Button>
@@ -1387,13 +1398,13 @@ export const History = ({
         }, (_, i) => {
           const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
           if (pageNum > totalPages) return null;
-          return <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(pageNum)} className={`min-w-[40px] ${currentPage === pageNum ? "bg-primary" : ""}`}>
+          return <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(pageNum)} className={`min-w-[40px] h-9 rounded-lg ${currentPage === pageNum ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20" : "border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04]"}`}>
                   {pageNum}
                 </Button>;
         })}
           </div>
           
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="w-full sm:w-auto h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04]">
             Вперед
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
