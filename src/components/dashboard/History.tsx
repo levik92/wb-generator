@@ -1084,7 +1084,7 @@ export const History = ({
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
                     {generation.generation_type === 'video' ? <div 
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted/40"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted"
                         onClick={() => {
                           if (generation.output_data?.video_url) {
                             setVideoPreviewUrl(generation.output_data.video_url);
@@ -1103,7 +1103,7 @@ export const History = ({
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted/40"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
                         <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
@@ -1230,11 +1230,12 @@ export const History = ({
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
                   <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
-                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted/40">
-                        <ProgressiveImage 
-                          src={img.image_url} 
-                          alt={`Карточка ${imgIndex + 1}`} 
-                          className="w-full h-full object-contain cursor-pointer"
+                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted">
+                        <HistoryAvatarImage
+                          src={img.image_url}
+                          alt={`Карточка ${imgIndex + 1}`}
+                          previewWidth={520}
+                          className="cursor-pointer"
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
