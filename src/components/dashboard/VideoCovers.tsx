@@ -553,90 +553,86 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
       <AnimatePresence>
         {isPromoBannerVisible && (
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl isolate"
+            exit={{ opacity: 0, y: -8, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="group relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
           >
-            {/* Background: rich brand gradient with subtle depth */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-primary to-fuchsia-500" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_85%_-10%,hsl(0_0%_100%_/_0.22),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_0%_110%,hsl(280_80%_60%_/_0.35),transparent_65%)]" />
-
-            {/* One soft shimmer instead of cluttered floating icons */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
+            {/* Subtle ambient accent */}
+            <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-violet-500/[0.08] blur-3xl" />
+            <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-fuchsia-500/[0.06] blur-3xl" />
 
             {/* Close */}
             <button
               onClick={handleDismissPromo}
-              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-full bg-white/10 hover:bg-white/25 transition-colors text-white/85 hover:text-white"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg hover:bg-violet-500/10 transition-colors text-muted-foreground hover:text-foreground"
               aria-label="Закрыть"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative z-10 p-4 sm:p-5 lg:p-6">
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
+            <div className="relative z-10 p-4 sm:p-5">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-5">
                 {/* Left: icon + copy */}
-                <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 lg:pr-4">
-                  <div className="hidden sm:flex shrink-0 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/25 items-center justify-center shadow-inner">
-                    <Video className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+                <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0 lg:pr-4">
+                  <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-violet-500/20 flex items-center justify-center">
+                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600 dark:text-violet-300" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    {/* Eyebrow badge */}
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 mb-2">
-                      <Sparkles className="w-3 h-3 text-white" />
-                      <span className="text-[10px] sm:text-[11px] font-semibold tracking-wide uppercase text-white">
-                        Видеообложки
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                      <h3 className="text-[15px] sm:text-base font-semibold leading-tight">
+                        Видеообложки усиливают карточку
+                      </h3>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Новое
                       </span>
                     </div>
-
-                    <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white leading-snug">
-                      Живые обложки, которые продают сильнее
-                    </h3>
-                    <p className="text-xs sm:text-sm text-white/85 mt-1 leading-relaxed line-clamp-2">
-                      Посмотрите примеры — как видео в карточке повышает кликабельность.
+                    <p className="text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed">
+                      Оживите карточку 5-секундным роликом — клиент задерживает взгляд и чаще кликает.
                     </p>
 
                     {/* Benefit chips */}
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/12 border border-white/20 text-[10.5px] sm:text-xs font-medium text-white">
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
                         <MousePointerClick className="w-3 h-3" />
-                        +47% к CTR
+                        До +47% к CTR
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/12 border border-white/20 text-[10.5px] sm:text-xs font-medium text-white">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300">
                         <Clock className="w-3 h-3" />
-                        5 секунд
+                        Готово за 1 минуту
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/12 border border-white/20 text-[10.5px] sm:text-xs font-medium text-white">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 border border-border/60 text-[11px] font-medium text-foreground/80">
                         <ShieldCheck className="w-3 h-3" />
-                        Возврат 100%
+                        Возврат токенов
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: CTAs */}
-                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[200px] lg:shrink-0">
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[180px] lg:shrink-0">
                   <Button
                     asChild
-                    className="group h-10 sm:h-11 bg-white text-primary hover:bg-white font-semibold shadow-[0_8px_24px_-8px_hsl(0_0%_0%_/_0.35)] hover:shadow-[0_10px_28px_-6px_hsl(0_0%_0%_/_0.45)] transition-all"
+                    size="sm"
+                    className="group/btn h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 font-medium text-xs"
                   >
                     <a href="/video-generaciya" target="_blank" rel="noopener noreferrer">
-                      <Eye className="w-4 h-4 mr-2" />
+                      <Eye className="w-3.5 h-3.5 mr-1.5" />
                       Смотреть примеры
-                      <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
                     </a>
                   </Button>
                   {onNavigate && (
                     <Button
-                      variant="ghost"
+                      variant="outline"
+                      size="sm"
                       onClick={() => onNavigate("pricing")}
-                      className="h-10 sm:h-11 border border-white/25 bg-white/5 text-white hover:bg-white/15 hover:text-white font-medium backdrop-blur-sm"
+                      className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs font-medium"
                     >
-                      <Coins className="w-4 h-4 mr-2" />
+                      <Coins className="w-3.5 h-3.5 mr-1.5" />
                       Пополнить баланс
                     </Button>
                   )}
