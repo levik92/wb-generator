@@ -166,39 +166,39 @@ export default function Balance() {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <Card className="border-border/60 bg-card w-full overflow-hidden rounded-2xl">
-          <CardHeader className="p-5 sm:p-6 pb-3">
+          <CardHeader className="px-4 sm:px-5 pt-4 pb-2">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/20">
                 <Coins className="h-4 w-4 text-white" />
               </div>
-              <div>
-                <CardTitle className="text-base sm:text-lg font-semibold">Стоимость генерации</CardTitle>
-                <CardDescription className="text-xs mt-0.5">Стоимость указана в токенах</CardDescription>
+              <div className="min-w-0">
+                <CardTitle className="text-sm sm:text-base font-semibold leading-tight">Стоимость генерации</CardTitle>
+                <CardDescription className="text-[11px] mt-0.5">Указано в токенах за операцию</CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-5 sm:p-6 pt-0">
+          <CardContent className="px-4 sm:px-5 pb-4 pt-0">
             {pricesLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="w-7 h-7 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {costItems.map((item, idx) => {
                   const Icon = item.icon;
                   return (
                     <div
                       key={idx}
-                      className="group bg-background/40 border border-border/50 rounded-xl p-3 sm:p-3.5 flex items-center gap-3 hover:border-violet-500/40 hover:bg-violet-500/[0.03] transition-all duration-200"
+                      className="group bg-muted/30 rounded-xl p-2.5 sm:p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
-                        <Icon className="h-4.5 w-4.5 text-violet-600 dark:text-violet-300" />
+                      <div className="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                        <Icon className="h-4 w-4 text-violet-600 dark:text-violet-300" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm leading-tight">{item.label}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{item.sub}</div>
+                        <div className="font-medium text-sm leading-tight truncate">{item.label}</div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{item.sub}</div>
                       </div>
-                      <div className="bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300 px-2.5 py-1 rounded-lg font-semibold text-sm shrink-0">
+                      <div className="text-muted-foreground/90 font-semibold text-sm tabular-nums shrink-0 px-1.5">
                         {item.value}
                       </div>
                     </div>
@@ -208,6 +208,7 @@ export default function Balance() {
             )}
           </CardContent>
         </Card>
+
       </motion.div>
 
       {/* Tabs */}
