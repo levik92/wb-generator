@@ -94,44 +94,70 @@ export default function Balance() {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, delay: 0.05 }}
-        className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card p-5 sm:p-7"
+        className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent p-4 sm:p-6"
       >
         <div className="pointer-events-none absolute -top-20 -right-16 w-72 h-72 rounded-full bg-violet-500/15 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-purple-500/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-4 min-w-0">
-            <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <Zap className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+            <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
+              <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <div className="min-w-0">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-700 dark:text-violet-300 mb-1.5">
+            <div className="min-w-0 flex-1">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-violet-700 dark:text-violet-300 mb-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
                 Ваш баланс
               </div>
-              <div className="flex items-baseline gap-2">
-                <div className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent leading-none">
+              <div className="flex items-baseline gap-1.5 flex-wrap">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent leading-none tabular-nums">
                   {balance}
                 </div>
-                <span className="text-sm sm:text-base text-muted-foreground">токенов</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">токенов</span>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                Используйте токены для генерации карточек, описаний и видео
-              </p>
+
+              {/* Capacity hint — conversion-driver */}
+              {!pricesLoading && photoPrice > 0 && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Images className="h-3 w-3 text-violet-500/80" />
+                    ≈ <span className="font-semibold text-foreground">{Math.floor(balance / photoPrice)}</span> изображений
+                  </span>
+                  {descPrice > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                      <FileText className="h-3 w-3 text-violet-500/80" />
+                      ≈ <span className="font-semibold text-foreground">{Math.floor(balance / descPrice)}</span> описаний
+                    </span>
+                  )}
+                  {videoPrice > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                      <Video className="h-3 w-3 text-violet-500/80" />
+                      ≈ <span className="font-semibold text-foreground">{Math.floor(balance / videoPrice)}</span> видео
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          <Button
-            onClick={() => {
-              const pricingElement = document.getElementById('pricing-section');
-              if (pricingElement) pricingElement.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="h-11 rounded-xl px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-lg shadow-violet-500/30 w-full sm:w-auto gap-2"
-          >
-            <Wallet className="h-4 w-4" />
-            Пополнить
-          </Button>
+
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto shrink-0">
+            <Button
+              onClick={() => {
+                const pricingElement = document.getElementById('pricing-section');
+                if (pricingElement) pricingElement.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="h-10 rounded-lg px-4 sm:px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/30 w-full sm:w-auto gap-2 font-medium"
+            >
+              <Wallet className="h-4 w-4" />
+              Пополнить баланс
+            </Button>
+            <p className="text-[10px] text-center sm:text-right text-muted-foreground">
+              Безопасная оплата · СБП · карта
+            </p>
+          </div>
         </div>
       </motion.div>
+
 
       {/* Generation Costs */}
       <motion.div
