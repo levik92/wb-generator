@@ -402,7 +402,7 @@ export default function Pricing({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full mt-2 h-9 rounded-xl gap-2 text-xs border-border/60 text-muted-foreground hover:bg-violet-500/5 hover:text-violet-700 dark:hover:text-violet-300 hover:border-violet-500/40"
+                    className="w-full mt-2 h-9 rounded-lg gap-2 text-xs border-border/60 text-muted-foreground hover:bg-violet-500/5 hover:text-violet-700 dark:hover:text-violet-300 hover:border-violet-500/40"
                     onClick={() => setAltMethodPackage(plan)}
                     disabled={loading === plan.name}
                   >
