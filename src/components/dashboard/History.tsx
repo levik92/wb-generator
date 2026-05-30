@@ -72,8 +72,7 @@ const HistoryAvatarImage = ({
     alt={alt}
     previewWidth={180}
     previewQuality={85}
-    className="absolute left-0 top-1/2 w-full max-w-none -translate-y-1/2 object-fill"
-    style={{ height: "auto", minHeight: "100%" }}
+    className="w-full h-full object-contain"
     onError={onError}
   />
 );
@@ -1071,7 +1070,7 @@ export const History = ({
                   {/* Content */}
                   <div className="flex items-start gap-4 flex-1 min-w-0">
                     {generation.generation_type === 'video' ? <div 
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted/40"
                         onClick={() => {
                           if (generation.output_data?.video_url) {
                             setVideoPreviewUrl(generation.output_data.video_url);
@@ -1090,7 +1089,7 @@ export const History = ({
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden border-2 border-border/50 group-hover:border-primary/30 transition-colors cursor-pointer relative group/preview bg-muted/40"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
                         <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
