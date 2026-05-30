@@ -466,7 +466,7 @@ const Dashboard = () => {
         {/* Desktop Header */}
         {!isMobile && <DashboardHeader profile={profile} activeTab={activeTab} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} headerActions={headerActions} />}
 
-        <main className={`flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 ${isMobile ? 'pt-[88px] pb-24' : ''}`}>
+        <main className={`flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 ${isMobile ? 'pt-[68px] pb-24' : ''}`}>
           <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
           <Suspense fallback={<TabLoader />}>
