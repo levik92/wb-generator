@@ -197,27 +197,42 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-4 sm:space-y-6 w-full min-w-0"
+      className="space-y-5 w-full min-w-0"
     >
-      {/* Mark all as read action */}
-      <div className="flex justify-end">
-        <Button
-          onClick={markAllAsRead}
-          variant="ghost"
-          size="sm"
-          className="shrink-0 w-full sm:w-auto rounded-md h-10 px-3 text-sm font-medium bg-background border border-border text-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 hover:border-violet-500/30 transition-colors"
-          disabled={unreadCount === 0 && totalCount > 0 && news.every(n => readNewsIds.has(n.id))}
-        >
-          <CheckCheck className="w-4 h-4" />
-          <span className="hidden xs:inline">Прочитать все</span>
-          <span className="xs:hidden">Все прочитано</span>
-        </Button>
+      {/* Hero header */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent px-4 py-4 sm:px-6 sm:py-5">
+        <span aria-hidden className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full bg-violet-500/15 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center">
+              <Newspaper className="h-5 w-5 text-violet-600 dark:text-violet-300" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold leading-tight">Новости и обновления</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                {totalCount > 0
+                  ? `Всего ${totalCount} записей${unreadCount > 0 ? ` · непрочитанных ${unreadCount}` : ''}`
+                  : 'Анонсы, обновления и инструкции по сервису'}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={markAllAsRead}
+            size="sm"
+            className="shrink-0 w-full sm:w-auto h-9 px-3 text-sm font-medium bg-background/70 border border-violet-500/25 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:border-violet-500/40 transition-colors"
+            disabled={unreadCount === 0}
+          >
+            <CheckCheck className="w-4 h-4 mr-1.5" />
+            {unreadCount === 0 ? 'Всё прочитано' : 'Прочитать все'}
+          </Button>
+        </div>
       </div>
 
-
       {news.length === 0 ? (
-        <div className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card p-8">
-          <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl" />
+        <div className="relative overflow-hidden rounded-2xl border border-dashed border-border/60 bg-muted/20 p-8">
           <div className="relative text-center py-8">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
               <Newspaper className="w-7 h-7 text-violet-600 dark:text-violet-300" />
@@ -230,7 +245,7 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
         </div>
       ) : (
         <>
-          <div className="grid gap-3 sm:gap-4">
+          <div className="space-y-2.5 sm:space-y-3">
             {news.map((item, index) => {
               const isRead = readNewsIds.has(item.id);
               const isNew = isNewNews(item.published_at);
@@ -243,74 +258,75 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
               return (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4) }}
+                  transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
                 >
-                  <Card
+                  <div
                     onClick={() => markAsRead(item.id)}
-                    className={`group cursor-pointer transition-all duration-300 rounded-2xl overflow-hidden bg-card hover:shadow-lg ${
+                    className={`group relative cursor-pointer rounded-2xl border bg-card p-4 sm:p-5 transition-all duration-200 ${
                       !isRead
-                        ? 'border-violet-500/40 hover:border-violet-500/60 hover:shadow-violet-500/10'
-                        : 'border-border/60 hover:border-violet-500/30 hover:shadow-violet-500/5'
+                        ? 'border-violet-500/35 hover:border-violet-500/55 hover:shadow-md hover:shadow-violet-500/10'
+                        : 'border-border/50 hover:border-violet-500/30 hover:bg-muted/30'
                     }`}
                   >
                     {!isRead && (
-                      <span aria-hidden className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-violet-500 to-purple-600" />
+                      <span
+                        aria-hidden
+                        className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-gradient-to-b from-violet-500 to-purple-600"
+                      />
                     )}
-                    <CardHeader className="pb-3">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800 border-gray-200'} pointer-events-none border font-medium`}>
-                              {item.tag}
-                            </Badge>
-                            {isNew && !isRead && (
-                              <Badge className="bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0 pointer-events-none gap-1">
-                                <Sparkles className="w-3 h-3" />
-                                Новое
-                              </Badge>
-                            )}
-                            {!isRead && (
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
-                                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                                Не прочитано
-                              </span>
-                            )}
-                          </div>
-                          <CardTitle className="text-base sm:text-lg leading-tight break-words">
-                            {item.title}
-                          </CardTitle>
+
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                          <Badge className={`${tagColors[item.tag] || 'bg-muted text-foreground border-border'} pointer-events-none border font-medium text-[10px] px-2 py-0.5 h-auto`}>
+                            {item.tag}
+                          </Badge>
+                          {isNew && !isRead && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white text-[10px] font-semibold">
+                              <Sparkles className="w-2.5 h-2.5" />
+                              Новое
+                            </span>
+                          )}
+                          {!isRead && !isNew && (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                              <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                              Не прочитано
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground sm:shrink-0 sm:pt-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span className="whitespace-nowrap">{formatDate(item.published_at)}</span>
-                        </div>
+                        <h3 className="text-sm sm:text-base font-semibold leading-snug break-words">
+                          {item.title}
+                        </h3>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div
-                        className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                          isExpanded ? 'max-h-[2000px]' : shouldTruncate ? 'max-h-24' : 'max-h-none'
-                        }`}
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground sm:shrink-0 sm:pt-1">
+                        <Clock className="w-3 h-3" />
+                        <span className="whitespace-nowrap">{formatDate(item.published_at)}</span>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                        isExpanded ? 'max-h-[2000px]' : shouldTruncate ? 'max-h-24' : 'max-h-none'
+                      }`}
+                    >
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
+                        {displayContent}
+                      </p>
+                    </div>
+                    {shouldTruncate && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleExpanded(item.id); }}
+                        className="inline-flex items-center gap-1 text-violet-700 dark:text-violet-300 hover:text-violet-800 dark:hover:text-violet-200 text-xs sm:text-sm font-medium mt-3 transition-all duration-200 group/btn"
                       >
-                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
-                          {displayContent}
-                        </p>
-                      </div>
-                      {shouldTruncate && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); toggleExpanded(item.id); }}
-                          className="inline-flex items-center gap-1 text-violet-700 dark:text-violet-300 hover:text-violet-800 dark:hover:text-violet-200 text-sm font-medium mt-3 transition-all duration-200 group/btn"
-                        >
-                          {isExpanded ? 'Свернуть' : 'Читать полностью'}
-                          {isExpanded
-                            ? <ChevronUp className="w-3.5 h-3.5 transition-transform" />
-                            : <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-y-0.5" />}
-                        </button>
-                      )}
-                    </CardContent>
-                  </Card>
+                        {isExpanded ? 'Свернуть' : 'Читать полностью'}
+                        {isExpanded
+                          ? <ChevronUp className="w-3.5 h-3.5 transition-transform" />
+                          : <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover/btn:translate-y-0.5" />}
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               );
             })}
@@ -352,5 +368,6 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
     </motion.div>
   );
 };
+
 
 export default News;
