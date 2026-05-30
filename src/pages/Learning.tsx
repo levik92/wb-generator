@@ -127,15 +127,16 @@ const Learning = () => {
                         <span className="text-sm font-bold text-violet-600 dark:text-violet-300">{index + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start gap-2 mb-1 flex-wrap">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <CardTitle className="text-base sm:text-lg leading-snug">{lesson.title}</CardTitle>
                           {lesson.duration && (
-                            <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 shrink-0 gap-1 bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20">
+                            <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 shrink-0 gap-1 bg-muted text-muted-foreground border-0">
                               <Clock className="w-2.5 h-2.5" />
                               {lesson.duration}
                             </Badge>
                           )}
                         </div>
+
                         <CardDescription className="text-xs sm:text-sm">{lesson.subtitle}</CardDescription>
                       </div>
                     </div>
