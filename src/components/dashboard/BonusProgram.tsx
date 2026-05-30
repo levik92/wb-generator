@@ -283,205 +283,216 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
     );
   }
 
-  return (
-    <div className="space-y-6">
+  const totalEarned = submissions
+    .filter((s) => s.status === 'approved')
+    .reduce((sum, s) => sum + (s.tokens_awarded || 0), 0);
+  const pendingCount = submissions.filter((s) => s.status === 'pending').length;
+  const availableTotal = programs
+    .filter((p) => {
+      const sub = getSubmissionForProgram(p.id);
+      return !sub || sub.status === 'rejected';
+    })
+    .reduce((sum, p) => sum + (p.tokens_reward || 0), 0);
 
-      {/* Main Bonus Program Card - similar to Balance.tsx generation costs */}
-      <Card className="border-border/50 w-full overflow-hidden bg-card">
-        <CardHeader className="p-4 sm:p-6 border-b border-border/50">
-          <div className="flex flex-col gap-4">
-            {/* Social links row */}
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center">
-                  <Instagram className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">Instagram</p>
-                  <a 
-                    href="https://instagram.com/wbgenerator" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-xs flex items-center gap-1"
-                  >
-                    @wbgenerator <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#229ED9] to-[#0088cc] flex items-center justify-center">
-                  <FaTelegram className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">Telegram</p>
-                  <a 
-                    href="https://t.me/wbgen_official" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-xs flex items-center gap-1"
-                  >
-                    @wbgen_official <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
+  return (
+    <div className="space-y-5">
+
+      {/* Hero header — gradient, social CTAs, summary stats */}
+      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-violet-500/5 to-transparent px-4 py-5 sm:px-6 sm:py-6">
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
+
+        <div className="relative flex flex-col gap-5">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            
-            {/* Download button */}
-            <div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = '/downloads/stories-template.png';
-                  link.download = 'stories-template-wbgen.png';
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-              >
-                <Download className="w-4 h-4" />
-                Скачать макет сторис
-              </Button>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base sm:text-lg font-semibold leading-tight">Бонусная программа</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Выполняйте задания, делитесь сервисом и получайте токены на баланс
+              </p>
             </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="p-4 sm:p-6">
-          {/* Bonus Tasks Grid - similar to generation costs */}
-          <div className="grid grid-cols-1 gap-3">
-            {programs.map((program) => {
-              const submission = getSubmissionForProgram(program.id);
-              const Icon = getIcon(program.icon_name);
-              const isCompleted = submission?.status === 'approved';
-              const isPending = submission?.status === 'pending';
-              const isRejected = submission?.status === 'rejected';
-              const canSubmit = !submission || isRejected;
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5">
+              <div className="text-[10px] sm:text-xs text-muted-foreground">Заработано</div>
+              <div className="text-base sm:text-lg font-semibold text-primary">+{totalEarned}</div>
+            </div>
+            <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5">
+              <div className="text-[10px] sm:text-xs text-muted-foreground">На проверке</div>
+              <div className="text-base sm:text-lg font-semibold">{pendingCount}</div>
+            </div>
+            <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5">
+              <div className="text-[10px] sm:text-xs text-muted-foreground">Доступно</div>
+              <div className="text-base sm:text-lg font-semibold text-emerald-600 dark:text-emerald-400">+{availableTotal}</div>
+            </div>
+          </div>
 
-              return (
-                <div 
-                  key={program.id} 
-                  className="bg-muted/30 border border-border/30 rounded-xl p-3 sm:p-4"
-                >
-                  <div className="flex flex-row gap-3">
-                    {/* Icon */}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      program.icon_name === 'instagram' 
-                        ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500'
-                        : program.icon_name === 'telegram'
-                          ? 'bg-gradient-to-br from-[#229ED9] to-[#0088cc]'
-                          : program.icon_name === 'crown'
-                            ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
-                            : program.icon_name === 'flame'
-                              ? 'bg-gradient-to-br from-orange-500 to-red-500'
-                              : 'bg-primary/10'
-                    }`}>
-                      <Icon className={`w-5 h-5 ${
-                        ['instagram', 'telegram', 'crown', 'flame'].includes(program.icon_name)
-                          ? 'text-white'
-                          : 'text-primary'
-                      }`} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <a
+              href="https://instagram.com/wbgenerator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/60 px-3 py-2.5 hover:border-primary/40 hover:bg-background/80 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shrink-0">
+                <Instagram className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] text-muted-foreground leading-none">Instagram</div>
+                <div className="text-sm font-medium truncate">@wbgenerator</div>
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary shrink-0" />
+            </a>
+            <a
+              href="https://t.me/wbgen_official"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/60 px-3 py-2.5 hover:border-primary/40 hover:bg-background/80 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#229ED9] to-[#0088cc] flex items-center justify-center shrink-0">
+                <FaTelegram className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] text-muted-foreground leading-none">Telegram</div>
+                <div className="text-sm font-medium truncate">@wbgen_official</div>
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary shrink-0" />
+            </a>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 w-full sm:w-fit bg-background/60 hover:bg-background"
+            onClick={() => {
+              const link = document.createElement('a');
+              link.href = '/downloads/stories-template.png';
+              link.download = 'stories-template-wbgen.png';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+          >
+            <Download className="w-4 h-4" />
+            Скачать макет для сторис
+          </Button>
+        </div>
+      </div>
+
+      {/* Tasks list */}
+      <div className="space-y-2.5">
+        {programs.map((program) => {
+          const submission = getSubmissionForProgram(program.id);
+          const Icon = getIcon(program.icon_name);
+          const isCompleted = submission?.status === 'approved';
+          const isPending = submission?.status === 'pending';
+          const isRejected = submission?.status === 'rejected';
+
+          const iconBg =
+            program.icon_name === 'instagram'
+              ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500'
+              : program.icon_name === 'telegram'
+                ? 'bg-gradient-to-br from-[#229ED9] to-[#0088cc]'
+                : program.icon_name === 'crown'
+                  ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
+                  : program.icon_name === 'flame'
+                    ? 'bg-gradient-to-br from-orange-500 to-red-500'
+                    : 'bg-primary/15 border border-primary/25';
+          const iconColor = ['instagram', 'telegram', 'crown', 'flame'].includes(program.icon_name)
+            ? 'text-white'
+            : 'text-primary';
+
+          return (
+            <div
+              key={program.id}
+              className={`rounded-xl border p-3 sm:p-4 transition-all ${
+                isCompleted
+                  ? 'border-emerald-500/30 bg-emerald-500/5'
+                  : isPending
+                    ? 'border-amber-500/30 bg-amber-500/5'
+                    : isRejected
+                      ? 'border-red-500/25 bg-red-500/5'
+                      : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30'
+              }`}
+            >
+              <div className="flex gap-3">
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
+                  <Icon className={`w-5 h-5 ${iconColor}`} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-3">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sm leading-tight">{program.title}</div>
+                      <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{program.description}</div>
                     </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-1">
-                        <div>
-                          <div className="font-medium text-sm">{program.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">{program.description}</div>
+                    <div className="shrink-0">
+                      {submission ? (
+                        getStatusBadge(submission.status, submission.tokens_awarded, program.tokens_reward)
+                      ) : program.tokens_reward > 0 ? (
+                        <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                          <Sparkles className="w-3 h-3" />
+                          +{program.tokens_reward}
                         </div>
-                        
-                        {/* Reward Badge OR Status Badge */}
-                        <div className="shrink-0 self-start">
-                          {submission ? (
-                            // Show status badge when user has submitted
-                            getStatusBadge(submission.status, submission.tokens_awarded, program.tokens_reward)
-                          ) : (
-                            // Show token offer when user hasn't participated
-                            program.tokens_reward > 0 ? (
-                              <div className="bg-background/80 border border-border/50 px-2 py-0.5 rounded-md font-medium text-[10px] text-primary">
-                                +{program.tokens_reward} токенов
-                              </div>
-                            ) : (
-                              <div className="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md font-medium text-[10px] text-amber-600 dark:text-amber-400">
-                                Индивидуально
-                              </div>
-                            )
-                          )}
+                      ) : (
+                        <div className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                          Индивидуально
                         </div>
-                      </div>
-
-                      {/* Admin notes & Action */}
-                      <div className="flex flex-col gap-2 mt-2">
-                        {/* Admin notes/message display */}
-                        {submission?.admin_notes && (
-                          <div className="flex items-start gap-2 p-2 rounded-lg text-xs bg-muted/50 text-muted-foreground">
-                            <MessageSquare className="w-3 h-3 shrink-0 mt-0.5" />
-                            <span>{submission.admin_notes}</span>
-                          </div>
-                        )}
-                        
-                        {/* Action buttons */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {program.task_url && (
-                            <Button
-                              asChild
-                              size="sm"
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              <a
-                                href={program.task_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                Перейти к заданию
-                                <ExternalLink className="w-3 h-3 ml-1" />
-                              </a>
-                            </Button>
-                          )}
-                          {!submission && (
-                            <Button 
-                              onClick={() => handleOpenSubmission(program)}
-                              size="sm"
-                              variant="ghost"
-                              className="text-xs bg-primary/20 text-primary hover:bg-primary hover:text-primary-foreground"
-                            >
-                              {program.button_text}
-                            </Button>
-                          )}
-                          
-                          {isRejected && (
-                            <Button 
-                              onClick={() => handleRetrySubmission(program, submission.id)}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs"
-                              disabled={isSubmitting}
-                            >
-                              {isSubmitting ? "Отправка..." : "Повторить попытку"}
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
 
-          {/* Official Disclaimer */}
-          <div className="mt-6 pt-4 border-t border-border/30">
-            <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed">
-              Модераторы сервиса оставляют за собой право принимать решение об одобрении или отклонении заявки по своему усмотрению. 
-              Обработка запроса занимает до 24 часов.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+                  {submission?.admin_notes && (
+                    <div className="flex items-start gap-2 mt-2.5 p-2.5 rounded-lg text-xs bg-background/60 border border-border/40 text-muted-foreground">
+                      <MessageSquare className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{submission.admin_notes}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 flex-wrap mt-3">
+                    {program.task_url && (
+                      <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+                        <a href={program.task_url} target="_blank" rel="noopener noreferrer">
+                          Перейти к заданию
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </a>
+                      </Button>
+                    )}
+                    {!submission && (
+                      <Button
+                        onClick={() => handleOpenSubmission(program)}
+                        size="sm"
+                        className="h-8 text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                      >
+                        {program.button_text}
+                      </Button>
+                    )}
+                    {isRejected && (
+                      <Button
+                        onClick={() => handleRetrySubmission(program, submission.id)}
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Отправка...' : 'Повторить попытку'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed px-4">
+        Модераторы сервиса оставляют за собой право принимать решение об одобрении или отклонении заявки по своему усмотрению.
+        Обработка запроса занимает до 24 часов.
+      </p>
 
       {/* Submission Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
