@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User, UserIcon, Bell, Users, Headphones } from "lucide-react";
+import { LogOut, User, Bell, Users, Headphones, Zap, Image as ImageIcon, FileText, History as HistoryIcon, CreditCard, Gift, Settings as SettingsIcon, Tags, Newspaper, GraduationCap, Video, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -25,19 +25,19 @@ interface Notification {
   created_at: string;
 }
 
-const TAB_TITLES: Record<string, { title: string; subtitle: string }> = {
-  cards: { title: 'Генерация карточек', subtitle: 'Создайте карточки для Wildberries с помощью ИИ' },
-  video: { title: 'Видеообложки', subtitle: 'Создайте видеообложки для карточек' },
-  description: { title: 'Генерация описаний', subtitle: 'Создайте описание товара для Wildberries' },
-  labels: { title: 'Генератор этикеток', subtitle: 'Создание этикеток для товаров' },
-  history: { title: 'История генераций', subtitle: 'Все ваши созданные карточки и описания' },
-  pricing: { title: 'Баланс', subtitle: 'Пополнение и управление токенами' },
-  bonuses: { title: 'Бонусы', subtitle: 'Бонусные и реферальные программы' },
-  settings: { title: 'Настройки', subtitle: 'Управление профилем и подключениями' },
-  notifications: { title: 'Уведомления', subtitle: 'Ваши уведомления' },
-  news: { title: 'Новости', subtitle: 'Последние обновления сервиса' },
-  learning: { title: 'Обучение', subtitle: 'Видеоуроки и материалы' },
-  support: { title: 'Поддержка', subtitle: 'Чат с поддержкой' },
+const TAB_META: Record<string, { title: string; subtitle: string; icon: any }> = {
+  cards:        { title: 'Генерация карточек',   subtitle: 'Создайте карточки для Wildberries с помощью ИИ', icon: ImageIcon },
+  video:        { title: 'Видеообложки',         subtitle: 'Создайте видеообложки для карточек',              icon: Video },
+  description:  { title: 'Генерация описаний',   subtitle: 'Создайте описание товара для Wildberries',        icon: FileText },
+  labels:       { title: 'Генератор этикеток',   subtitle: 'Создание этикеток для товаров',                   icon: Tags },
+  history:      { title: 'История генераций',    subtitle: 'Все ваши созданные карточки и описания',          icon: HistoryIcon },
+  pricing:      { title: 'Баланс',               subtitle: 'Пополнение и управление токенами',                icon: CreditCard },
+  bonuses:      { title: 'Бонусы',               subtitle: 'Бонусные и реферальные программы',                icon: Gift },
+  settings:     { title: 'Настройки',            subtitle: 'Управление профилем и подключениями',             icon: SettingsIcon },
+  notifications:{ title: 'Уведомления',          subtitle: 'Ваши уведомления',                                icon: Bell },
+  news:         { title: 'Новости',              subtitle: 'Последние обновления сервиса',                    icon: Newspaper },
+  learning:     { title: 'Обучение',             subtitle: 'Видеоуроки и материалы',                          icon: GraduationCap },
+  support:      { title: 'Поддержка',            subtitle: 'Чат с поддержкой',                                icon: Headphones },
 };
 
 interface DashboardHeaderProps {
@@ -46,6 +46,7 @@ interface DashboardHeaderProps {
   onSignOut: () => void;
   onNavigateToSettings: () => void;
   onNavigateToSupport?: () => void;
+  onNavigateToBalance?: () => void;
   headerActions?: React.ReactNode;
 }
 
@@ -55,13 +56,15 @@ export const DashboardHeader = ({
   onSignOut,
   onNavigateToSettings,
   onNavigateToSupport,
-  headerActions
+  onNavigateToBalance,
+  headerActions,
 }: DashboardHeaderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const isMobile = useIsMobile();
 
-  const currentTab = TAB_TITLES[activeTab] || TAB_TITLES.cards;
+  const currentTab = TAB_META[activeTab] || TAB_META.cards;
+  const TabIcon = currentTab.icon;
 
   useEffect(() => {
     fetchNotifications();
@@ -88,7 +91,7 @@ export const DashboardHeader = ({
       .eq('id', notificationId);
 
     if (!error) {
-      setNotifications(prev => prev.map(n => 
+      setNotifications(prev => prev.map(n =>
         n.id === notificationId ? { ...n, read: true } : n
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
@@ -120,13 +123,26 @@ export const DashboardHeader = ({
     }
   };
 
+  const initials = (profile.full_name?.[0] || profile.email?.[0] || 'U').toUpperCase();
+  const balanceFormatted = (profile.tokens_balance ?? 0).toLocaleString('ru-RU');
+
   return (
-    <header className="border-b border-border bg-card sticky top-0 z-20">
-      <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
+    <header className="border-b border-border/60 bg-card/85 backdrop-blur-md sticky top-0 z-20">
+      <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
+        {/* Left: tab title + icon */}
+        <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1 overflow-hidden">
+          <div className="hidden sm:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 items-center justify-center">
+            <TabIcon className="w-5 h-5 text-violet-600 dark:text-violet-300" strokeWidth={2.2} />
+          </div>
           <div className="min-w-0 flex-1 overflow-hidden">
-            <h1 className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight">{currentTab.title}</h1>
-            {currentTab.subtitle && <p className="text-xs text-muted-foreground hidden sm:block truncate mt-0.5">{currentTab.subtitle}</p>}
+            <h1 className="text-[15px] md:text-[17px] font-semibold text-foreground truncate tracking-tight leading-tight">
+              {currentTab.title}
+            </h1>
+            {currentTab.subtitle && (
+              <p className="text-[11.5px] md:text-xs text-muted-foreground hidden sm:block truncate mt-0.5">
+                {currentTab.subtitle}
+              </p>
+            )}
           </div>
           {headerActions && (
             <div className="flex items-center gap-2 shrink-0">
@@ -135,7 +151,21 @@ export const DashboardHeader = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3 shrink-0 ml-2">
+        {/* Right: actions */}
+        <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+          {/* Balance pill */}
+          {onNavigateToBalance && (
+            <button
+              onClick={onNavigateToBalance}
+              className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/25 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-purple-500/15 active:scale-[0.97] transition-all"
+              aria-label="Баланс токенов"
+            >
+              <Zap className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" strokeWidth={2.5} />
+              <span className="text-[13px] font-semibold tabular-nums leading-none">{balanceFormatted}</span>
+              <span className="text-[11px] text-muted-foreground leading-none hidden lg:inline">токенов</span>
+            </button>
+          )}
+
           <ThemeToggle />
 
           {/* Notifications */}
@@ -143,67 +173,81 @@ export const DashboardHeader = ({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 transition-colors">
-                  <Bell className="h-[18px] w-[18px] text-muted-foreground" />
+                  <Bell className="h-[18px] w-[18px]" />
                   {unreadCount > 0 && (
-                    <div className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40">
-                      <span className="text-[10px] font-bold text-white">{unreadCount}</span>
-                    </div>
+                    <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40 ring-2 ring-card">
+                      <span className="text-[10px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    </span>
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 max-h-96 overflow-y-auto bg-card border shadow-xl rounded-xl" align="end" forceMount>
-                <div className="flex items-center justify-between p-3 border-b">
-                  <h3 className="font-semibold text-sm">Уведомления</h3>
+              <DropdownMenuContent className="w-[340px] max-h-[420px] overflow-y-auto bg-card border shadow-xl rounded-xl p-0" align="end" sideOffset={8} forceMount>
+                <div className="flex items-center justify-between p-3 border-b border-border/60 sticky top-0 bg-card z-10">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                    <h3 className="font-semibold text-sm">Уведомления</h3>
+                    {unreadCount > 0 && (
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </div>
                   {unreadCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={markAllAsRead}
-                      className="text-xs h-auto py-1 px-2 hover:bg-violet-500/10 text-violet-600 hover:text-violet-600"
+                      className="text-[11px] h-7 px-2 rounded-lg hover:bg-violet-500/10 text-violet-600 hover:text-violet-700 font-medium"
                     >
-                      Прочитать все
+                      Прочитать всё
                     </Button>
                   )}
                 </div>
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-muted-foreground text-sm">
-                    Нет уведомлений
+                  <div className="p-8 text-center">
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex items-center justify-center">
+                      <Bell className="w-5 h-5 text-violet-600 dark:text-violet-300" />
+                    </div>
+                    <p className="text-sm font-medium">Пока пусто</p>
+                    <p className="text-xs text-muted-foreground mt-1">Новые уведомления появятся здесь</p>
                   </div>
                 ) : (
-                  notifications.map(notification => (
-                    <DropdownMenuItem
-                      key={notification.id}
-                      className={`group p-3 cursor-pointer border-b last:border-b-0 hover:bg-violet-500/10 ${
-                        !notification.read ? 'bg-violet-500/5' : ''
-                      }`}
-                      onClick={() => markAsRead(notification.id)}
-                    >
-                      <div className="flex items-start space-x-3 w-full">
-                        <span className="text-lg flex-shrink-0 mt-0.5">
-                          {getNotificationIcon(notification.type)}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate text-foreground">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                            {notification.message}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {new Date(notification.created_at).toLocaleDateString('ru-RU', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
+                  <div className="py-1">
+                    {notifications.map(notification => (
+                      <DropdownMenuItem
+                        key={notification.id}
+                        className={`group p-3 mx-1 my-0.5 rounded-lg cursor-pointer hover:bg-violet-500/[0.07] focus:bg-violet-500/[0.07] ${
+                          !notification.read ? 'bg-violet-500/[0.04]' : ''
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex items-start gap-3 w-full">
+                          <span className="text-lg flex-shrink-0 mt-0.5">
+                            {getNotificationIcon(notification.type)}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-[13px] truncate text-foreground">
+                              {notification.title}
+                            </p>
+                            <p className="text-[12px] text-muted-foreground mt-0.5 line-clamp-2 leading-snug">
+                              {notification.message}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground/80 mt-1">
+                              {new Date(notification.created_at).toLocaleDateString('ru-RU', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                          {!notification.read && (
+                            <span className="w-2 h-2 bg-violet-500 rounded-full flex-shrink-0 mt-1.5 shadow-sm shadow-violet-500/50" />
+                          )}
                         </div>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-violet-500 rounded-full flex-shrink-0 mt-2" />
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  ))
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -212,27 +256,50 @@ export const DashboardHeader = ({
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className={`relative rounded-xl ${isMobile ? 'h-9 w-9' : 'h-10 w-10'} hover:bg-violet-500/10 transition-colors`}>
-                <Avatar className={isMobile ? 'h-8 w-8' : 'h-9 w-9'}>
-                  <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold shadow-sm shadow-violet-500/25">
-                    <UserIcon className={isMobile ? 'h-4 w-4' : 'h-[18px] w-[18px]'} />
+              <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 transition-colors p-0">
+                <Avatar className="h-9 w-9 ring-2 ring-violet-500/20">
+                  <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-sm">
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-card border shadow-xl rounded-xl" align="end" forceMount>
-              <div className="flex flex-col space-y-1 p-3">
-                <p className="text-sm font-semibold leading-none">
-                  {profile.full_name || 'Пользователь'}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {profile.email}
-                </p>
+            <DropdownMenuContent className="w-64 bg-card border shadow-xl rounded-xl" align="end" sideOffset={8} forceMount>
+              <div className="flex items-center gap-3 p-3">
+                <Avatar className="h-10 w-10 ring-2 ring-violet-500/20">
+                  <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-sm">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <p className="text-sm font-semibold truncate">
+                    {profile.full_name || 'Пользователь'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {profile.email}
+                  </p>
+                </div>
               </div>
+              {onNavigateToBalance && (
+                <>
+                  <DropdownMenuSeparator />
+                  <button
+                    onClick={onNavigateToBalance}
+                    className="w-full mx-1 my-0.5 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-violet-500/[0.08] to-purple-500/[0.06] hover:from-violet-500/[0.12] hover:to-purple-500/[0.10] border border-violet-500/15 transition-colors"
+                    style={{ width: 'calc(100% - 8px)' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
+                      <span className="text-xs text-muted-foreground">Баланс</span>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums text-violet-700 dark:text-violet-300">{balanceFormatted}</span>
+                  </button>
+                </>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1" onClick={() => window.location.href = '/partners/cabinet'}>
                 <Users className="mr-2 h-4 w-4" />
-                <span>Партнерам</span>
+                <span>Партнёрам</span>
               </DropdownMenuItem>
               {onNavigateToSupport && (
                 <DropdownMenuItem className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1" onClick={onNavigateToSupport}>
@@ -256,4 +323,3 @@ export const DashboardHeader = ({
     </header>
   );
 };
-
