@@ -1387,7 +1387,7 @@ export const History = ({
       duration: 0.5,
       delay: 0.3
     }} className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="w-full sm:w-auto h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04]">
             <ChevronLeft className="w-4 h-4 mr-1" />
             Назад
           </Button>
@@ -1398,13 +1398,13 @@ export const History = ({
         }, (_, i) => {
           const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
           if (pageNum > totalPages) return null;
-          return <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(pageNum)} className={`min-w-[40px] ${currentPage === pageNum ? "bg-primary" : ""}`}>
+          return <Button key={pageNum} variant={currentPage === pageNum ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(pageNum)} className={`min-w-[40px] h-9 rounded-lg ${currentPage === pageNum ? "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20" : "border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04]"}`}>
                   {pageNum}
                 </Button>;
         })}
           </div>
           
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages} className="w-full sm:w-auto h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04]">
             Вперед
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
