@@ -572,7 +572,7 @@ export const GenerateDescription = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="relative overflow-hidden border-violet-500/20 bg-card rounded-2xl h-full">
+          <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl h-full">
             <CardHeader className="relative">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
@@ -599,7 +599,7 @@ export const GenerateDescription = ({
                     size="sm"
                     variant="ghost"
                     onClick={copyToClipboard}
-                    className="shrink-0 rounded-lg h-9 px-3 text-sm font-medium bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/20 transition-colors"
+                    className="shrink-0 rounded-md h-10 px-3 text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
                   >
                     <Copy className="w-4 h-4 sm:mr-2" />
                     <span className="hidden sm:inline">Копировать</span>
@@ -610,23 +610,21 @@ export const GenerateDescription = ({
             <CardContent className="relative">
               {generatedText ? (
                 <div className="space-y-4">
-                  <div className="relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.03] to-transparent p-0.5">
-                    <Textarea
-                      value={generatedText}
-                      onChange={(e) => setGeneratedText(e.target.value)}
-                      rows={10}
-                      className="bg-background border-0 focus-visible:ring-1 focus-visible:ring-violet-500/30 text-sm leading-relaxed rounded-[10px]"
-                    />
-                  </div>
+                  <Textarea
+                    value={generatedText}
+                    onChange={(e) => setGeneratedText(e.target.value)}
+                    rows={10}
+                    className="bg-background text-sm leading-relaxed rounded-xl"
+                  />
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-muted-foreground mr-1 hidden sm:inline">Скачать:</span>
                     {(["txt", "docx", "pdf"] as const).map((fmt) => (
                       <Button
                         key={fmt}
                         size="sm"
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => downloadAsFile(fmt)}
-                        className="gap-2 rounded-lg border-violet-500/20 bg-violet-500/[0.04] text-foreground hover:border-violet-500/50 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 transition-colors"
+                        className="gap-2 rounded-md h-10 px-3 text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
                       >
                         <Download className="w-4 h-4" />
                         {fmt.toUpperCase()}
