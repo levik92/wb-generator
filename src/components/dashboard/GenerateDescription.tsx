@@ -437,7 +437,7 @@ export const GenerateDescription = ({
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card className="relative overflow-hidden border-violet-500/20 bg-card rounded-2xl">
+          <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
             <span
               aria-hidden
               className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
