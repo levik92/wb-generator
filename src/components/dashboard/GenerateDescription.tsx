@@ -458,7 +458,7 @@ export const GenerateDescription = ({
                   <Label htmlFor="productName" className="text-sm font-medium flex items-center gap-1.5">
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">1</span>
                     Название товара
-                    <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                    <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium">Обязательно</span>
                   </Label>
                 </div>
                 <Input
@@ -484,7 +484,7 @@ export const GenerateDescription = ({
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">2</span>
                     Ссылки на конкурентов
                   </Label>
-                  <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground/50 font-medium">Необязательно</span>
                 </div>
                 <div className="space-y-2">
                   {[
@@ -519,7 +519,7 @@ export const GenerateDescription = ({
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">3</span>
                     Ключевые слова
                   </Label>
-                  <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
+                  <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground/50 font-medium">Необязательно</span>
                 </div>
                 <Textarea
                   id="keywords"

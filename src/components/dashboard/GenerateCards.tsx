@@ -2133,7 +2133,7 @@ export const GenerateCards = ({
               <div className="min-w-0 flex-1">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <span>Изображения товара</span>
-                  <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
+                  <span className="absolute top-2.5 right-3 z-10 text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium pointer-events-none">Обязательно</span>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -2198,7 +2198,7 @@ export const GenerateCards = ({
               <div className="min-w-0 flex-1">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <span>Референс</span>
-                  <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold pointer-events-none">Необязательно</span>
+                  <span className="absolute top-2.5 right-3 z-10 text-[8px] sm:text-[9px] uppercase tracking-wider text-muted-foreground/50 font-medium pointer-events-none">Необязательно</span>
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm mt-1">
                   WBGen может взять за основу прикрепленный дизайн
@@ -2268,7 +2268,7 @@ export const GenerateCards = ({
             <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <span>Информация о товаре</span>
-                <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
+                <span className="absolute top-2.5 right-3 z-10 text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium pointer-events-none">Обязательно</span>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
                 Укажите детали товара для генерации оптимальных карточек
@@ -2354,7 +2354,7 @@ export const GenerateCards = ({
             <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <span>Выбор типа карточек</span>
-                <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
+                <span className="absolute top-2.5 right-3 z-10 text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium pointer-events-none">Обязательно</span>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
                 Выберите какие типы карточек вам нужны
