@@ -69,14 +69,7 @@ export const GenerateDescription = ({
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
   const [waitingMessageIndex, setWaitingMessageIndex] = useState(0);
 
-  const [isPromoVisible, setIsPromoVisible] = useState(() => {
-    return localStorage.getItem("description-promo-dismissed") !== "true";
-  });
-
-  const handleDismissPromo = () => {
-    localStorage.setItem("description-promo-dismissed", "true");
-    setIsPromoVisible(false);
-  };
+  const DESCRIPTION_PROMO_KEY = "description-promo-dismissed";
 
   const { toast } = useToast();
   const { price: descriptionPrice, isLoading: priceLoading } = useGenerationPrice("description_generation");
