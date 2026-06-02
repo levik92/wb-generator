@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil, Video, Play, Sparkles, Edit } from "lucide-react";
+import { Download, FileText, Image, Calendar, Filter, ChevronLeft, ChevronRight, Loader2, Info, Trash2, History as HistoryIcon, X, ZoomIn, ChevronDown, ChevronUp, Archive, Pencil, Video, Play, Sparkles, Edit, Layers } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog as EditDialog, DialogContent as EditDialogContent, DialogHeader as EditDialogHeader, DialogTitle as EditDialogTitle, DialogDescription as EditDialogDescription, DialogFooter as EditDialogFooter } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
@@ -987,42 +987,52 @@ export const History = ({
 
 
 
-      {/* Compact notice + filter */}
+      {/* Notice */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex flex-col sm:flex-row sm:items-center gap-2.5 rounded-xl border border-violet-500/25 bg-violet-500/[0.06] px-3 py-2.5 sm:py-2"
+        className="flex items-start sm:items-center gap-2.5 rounded-xl border border-violet-500/25 bg-violet-500/[0.06] px-3 py-2.5 sm:py-2"
       >
-        <div className="flex items-start sm:items-center gap-2.5 flex-1 min-w-0">
-          <div className="shrink-0 w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
-            <HistoryIcon className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
-          </div>
-          <p className="text-xs sm:text-sm text-foreground/80 leading-snug flex-1 min-w-0">
-            Данные хранятся <span className="font-semibold text-violet-700 dark:text-violet-300">1 месяц</span> и затем автоматически удаляются — успейте сохранить нужное.
-          </p>
+        <div className="shrink-0 w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
+          <HistoryIcon className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
         </div>
+        <p className="text-xs sm:text-sm text-foreground/80 leading-snug flex-1 min-w-0">
+          Данные хранятся <span className="font-semibold text-violet-700 dark:text-violet-300">1 месяц</span> и затем автоматически удаляются — успейте сохранить нужное.
+        </p>
+      </motion.div>
 
-        <div className="flex items-center gap-2 sm:shrink-0">
-          {generations.length > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
-              <Sparkles className="w-3 h-3" />
-              {generations.length}
-            </span>
-          )}
-          <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
-            <SelectTrigger className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg flex-1 sm:flex-none sm:w-[170px]">
-              <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
+      {/* Count + filter */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.05 }}
+        className="flex items-center justify-end gap-2"
+      >
+        {generations.length > 0 && (
+          <span className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
+            <Layers className="w-3.5 h-3.5" />
+            <span>{generations.length}</span>
+            <span className="hidden sm:inline text-muted-foreground/80 font-normal">генераций</span>
+          </span>
+        )}
+        <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+          <SelectTrigger
+            aria-label="Фильтр истории"
+            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-[170px] [&>svg:last-child]:hidden sm:[&>svg:last-child]:block"
+          >
+            <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
+            <span className="hidden sm:block flex-1 text-left truncate">
               <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="all" className="text-sm">Все</SelectItem>
-              <SelectItem value="cards" className="text-sm">Карточки</SelectItem>
-              <SelectItem value="description" className="text-sm">Описания</SelectItem>
-              <SelectItem value="video" className="text-sm">Видеообложки</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            </span>
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            <SelectItem value="all" className="text-sm">Все</SelectItem>
+            <SelectItem value="cards" className="text-sm">Карточки</SelectItem>
+            <SelectItem value="description" className="text-sm">Описания</SelectItem>
+            <SelectItem value="video" className="text-sm">Видеообложки</SelectItem>
+          </SelectContent>
+        </Select>
       </motion.div>
 
 
