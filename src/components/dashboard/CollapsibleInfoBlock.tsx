@@ -103,7 +103,7 @@ export const CollapsibleInfoBlock = ({
                   type="button"
                   onClick={show}
                   aria-label="Показать блок"
-                  className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 my-1 rounded-md text-[11px] leading-none text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50 border border-transparent hover:border-border/50 transition-colors"
+                  className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] leading-none text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50 border border-transparent hover:border-border/50 transition-colors"
                 >
                   <Eye className="w-3 h-3 opacity-70 group-hover:opacity-100 transition-opacity" />
                   <span className="truncate max-w-[60vw]">{collapsedLabel}</span>
