@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { X, Share, PlusSquare, MoreVertical, Download, Smartphone } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface PWAInstallPromptProps {
   userId: string;
@@ -37,30 +36,17 @@ export const PWAInstallPrompt = ({ userId, loginCount }: PWAInstallPromptProps) 
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Show prompt only after the user has done at least 2 generations,
-    // not in PWA mode, on mobile platforms, and not previously dismissed.
+    // Show prompt on first/second login, not in PWA mode
     const dismissed = localStorage.getItem(`pwa_install_dismissed_${userId}`);
-    if (!dismissed && !isStandalone && (ios || android)) {
-      (async () => {
-        try {
-          const { count } = await (supabase as any)
-            .from('generations')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', userId);
-          if ((count ?? 0) >= 2) {
-            setTimeout(() => setIsOpen(true), 1500);
-          }
-        } catch (err) {
-          // Fail silent — never spam the prompt on errors
-          console.warn('PWA prompt: generation count check failed', err);
-        }
-      })();
+    if (!dismissed && !isStandalone && loginCount >= 3 && (ios || android)) {
+      // Small delay to let the page load
+      setTimeout(() => setIsOpen(true), 1500);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [userId]);
+  }, [userId, loginCount]);
 
   const handleInstall = async () => {
     if (deferredPrompt) {

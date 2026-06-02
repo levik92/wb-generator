@@ -43,11 +43,9 @@ const DrawerContent = React.forwardRef<
       style={{
         // Lift the drawer above the on-screen keyboard so focused inputs stay visible
         bottom: "var(--keyboard-inset-height, 0px)",
-        // Ensure the drawer never grows past the visible viewport when the keyboard is open
-        maxHeight: "calc(100dvh - var(--keyboard-inset-height, 0px) - 1rem)",
       }}
       className={cn(
-        "fixed inset-x-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background transition-[bottom] duration-150 overflow-hidden",
+        "fixed inset-x-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background transition-[bottom] duration-150",
         className
       )}
       {...props}

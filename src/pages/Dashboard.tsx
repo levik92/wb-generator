@@ -16,7 +16,6 @@ import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
 import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones, Filter, CheckCheck, Check } from "lucide-react";
-import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mobile components
@@ -257,19 +256,11 @@ const Dashboard = () => {
         sessionStorage.removeItem('pending_partner_code');
       }
 
-      // Process pending UTM source (from Google OAuth).
-      // Prefer the value from redirect URL (?utm_source_id=…) — survives
-      // cross-tab OAuth flows where sessionStorage would be lost.
-      const urlUtmSourceId = new URLSearchParams(window.location.search).get('utm_source_id');
-      const pendingUtmSourceId = urlUtmSourceId || sessionStorage.getItem('pending_utm_source_id');
+      // Process pending UTM source (from Google OAuth)
+      const pendingUtmSourceId = sessionStorage.getItem('pending_utm_source_id');
       if (pendingUtmSourceId && !profileData.utm_source_id) {
         await supabase.from('profiles').update({ utm_source_id: pendingUtmSourceId }).eq('id', userId);
-      }
-      sessionStorage.removeItem('pending_utm_source_id');
-      if (urlUtmSourceId) {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('utm_source_id');
-        window.history.replaceState({}, '', url.toString());
+        sessionStorage.removeItem('pending_utm_source_id');
       }
     } catch (error) {
       console.error('Error processing pending codes:', error);
@@ -320,7 +311,7 @@ const Dashboard = () => {
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
+        <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
       </div>;
   }
   if (!user || !profile) {
@@ -343,7 +334,7 @@ const Dashboard = () => {
       case 'video':
         return <VideoCovers profile={profile} onTokensUpdate={refreshProfile} onNavigate={handleTabChange} preAttachedImageUrl={pendingVideoImageUrl} onPreAttachedImageConsumed={() => setPendingVideoImageUrl(null)} />;
       case 'description':
-        return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} onNavigateToBalance={() => handleTabChange('pricing')} />;
+        return <GenerateDescription profile={profile} onTokensUpdate={refreshProfile} />;
       case 'notifications':
         return <NotificationCenter profile={profile} onMarkAllReadRef={notifMarkAllReadRef} />;
       case 'labels':
@@ -393,98 +384,65 @@ const Dashboard = () => {
       
       <div className="flex-1 flex flex-col min-h-screen md:overflow-y-auto min-w-0 overflow-x-hidden">
         {/* Mobile Header */}
-         {isMobile && <header className="border-b border-border/60 bg-card/95 backdrop-blur-md fixed top-0 left-0 right-0 z-30">
-            <div className="flex h-14 items-center gap-2 px-3">
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 active:scale-95 transition-all shrink-0" onClick={() => setMobileMenuOpen(true)} aria-label="Меню">
-                <Menu className="h-5 w-5" />
-              </Button>
-
-              <h1 className="text-[15px] font-semibold tracking-tight truncate flex-1 min-w-0">
-                {MOBILE_TAB_TITLES[activeTab] || 'WBGen'}
-              </h1>
-
-              <button
-                onClick={() => handleTabChange('pricing')}
-                className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/25 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-purple-500/15 active:scale-95 transition-all shrink-0"
-                aria-label="Баланс токенов"
-              >
-                <Zap className="h-3.5 w-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
-                <span className="text-[13px] font-semibold tabular-nums text-foreground leading-none">
-                  {(profile.tokens_balance ?? 0).toLocaleString('ru-RU')}
-                </span>
-              </button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 active:scale-95 transition-all shrink-0 p-0" aria-label="Профиль">
-                    <Avatar className="h-8 w-8 ring-2 ring-violet-500/20">
-                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-xs">
-                        {(profile.full_name?.[0] || profile.email?.[0] || 'U').toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-60 bg-card border shadow-xl rounded-xl" align="end" forceMount sideOffset={8}>
-                  <div className="flex items-center gap-3 p-3">
-                    <Avatar className="h-10 w-10 ring-2 ring-violet-500/20">
-                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-sm">
-                        {(profile.full_name?.[0] || profile.email?.[0] || 'U').toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <p className="text-sm font-semibold truncate">
-                        {profile.full_name || 'Пользователь'}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {profile.email}
-                      </p>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/partners/cabinet')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
-                    <Handshake className="mr-2 h-4 w-4" />
-                    <span>Партнёрам</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab('settings')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
-                    <UserIconName className="mr-2 h-4 w-4" />
-                    <span>Настройки</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab('support')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
-                    <Headphones className="mr-2 h-4 w-4" />
-                    <span>Поддержка</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Выйти</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-         </header>}
-
+         {isMobile && <div className="flex items-center justify-between p-4 border-b border-border fixed top-0 left-0 right-0 bg-card/80 backdrop-blur-xl z-30">
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-primary/10 hover:bg-primary/20" onClick={() => setMobileMenuOpen(true)}>
+              <Menu className="h-5 w-5 text-primary" />
+            </Button>
+            <span className="text-base font-bold">{MOBILE_TAB_TITLES[activeTab] || 'WBGen'}</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-secondary">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+                      <UserIcon className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-card border shadow-xl rounded-xl" align="end" forceMount>
+                <div className="flex flex-col space-y-1 p-3">
+                  <p className="text-sm font-semibold leading-none">
+                    {profile.full_name || 'Пользователь'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {profile.email}
+                  </p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/partners/cabinet')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
+                  <Handshake className="mr-2 h-4 w-4" />
+                  <span>Партнёрам</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActiveTab('settings')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
+                  <UserIconName className="mr-2 h-4 w-4" />
+                  <span>Настройки</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActiveTab('support')} className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1">
+                  <Headphones className="mr-2 h-4 w-4" />
+                  <span>Поддержка</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Выйти</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>}
+        
         {/* Desktop Header */}
-        {!isMobile && <DashboardHeader profile={profile} activeTab={activeTab} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} onNavigateToBalance={() => handleTabChange('pricing')} headerActions={headerActions} />}
-
-        <main className={`flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 ${isMobile ? 'pt-[68px] pb-24' : ''}`}>
+        {!isMobile && <DashboardHeader profile={profile} activeTab={activeTab} onSignOut={handleSignOut} onNavigateToSettings={() => setActiveTab('settings')} onNavigateToSupport={() => setActiveTab('support')} headerActions={headerActions} />}
+        
+        <main className={`flex-1 p-4 md:p-6 ${isMobile ? 'pt-[88px] pb-24' : ''}`}>
           <SystemStatusBanner />
           <DashboardBanners userId={profile.id} />
           <Suspense fallback={<TabLoader />}>
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-full max-w-full"
-            >
-              {renderContent()}
-            </motion.div>
+            {renderContent()}
           </Suspense>
         </main>
-
+        
         {!isMobile && <Footer />}
       </div>
-
       
       {/* Mobile Tab Bar */}
       {isMobile && <MobileTabBar activeTab={activeTab} onTabChange={handleTabChange} />}

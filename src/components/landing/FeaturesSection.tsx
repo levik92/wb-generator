@@ -1,189 +1,167 @@
 import {
-  Zap,
+  Clock,
+  TrendingUp,
   Target,
   Sparkles,
-  Layers,
-  RefreshCw,
-  ImageIcon,
+  Zap,
+  Users,
+  Image,
   FileText,
-  Barcode,
-  Video,
+  Palette,
+  BarChart3,
 } from "lucide-react";
-import { SpotlightCard } from "./effects/SpotlightCard";
-import illuPhoneCard from "@/assets/landing/iphone-mockup.webp";
 
-/**
- * Bento-grid: «Что делает WBGen» + ключевые преимущества в одной композиции.
- * Плитки используют SpotlightCard — курсорная подсветка + magnetic-наклон на крупной плитке.
- */
+const features = [
+  {
+    icon: Clock,
+    title: "3 минуты",
+    description: "вместо 3 дней работы с дизайнером",
+    color: "from-purple-500 to-violet-600",
+  },
+  {
+    icon: TrendingUp,
+    title: "От 59₽",
+    description: "за карточку вместо 5000-15000₽",
+    color: "from-emerald-500 to-green-600",
+  },
+  {
+    icon: Target,
+    title: "+40% конверсии",
+    description: "благодаря профессиональному дизайну",
+    color: "from-blue-500 to-cyan-600",
+  },
+  {
+    icon: Sparkles,
+    title: "ИИ-технологии",
+    description: "новейшие нейросети для уникального контента",
+    color: "from-pink-500 to-rose-600",
+  },
+  {
+    icon: Zap,
+    title: "Мгновенный старт",
+    description: "регистрация за 30 секунд",
+    color: "from-amber-500 to-orange-600",
+  },
+  {
+    icon: Users,
+    title: "Поддержка 24/7",
+    description: "помогаем решить любые вопросы",
+    color: "from-indigo-500 to-purple-600",
+  },
+];
+
+const capabilities = [
+  {
+    icon: Image,
+    title: "Генерация карточек",
+    description: "Профессиональные карточки с инфографикой для WB, Ozon, Яндекс Маркет",
+    features: ["До 6 вариантов за раз", "Любой стиль дизайна", "Готовые PNG файлы"],
+  },
+  {
+    icon: FileText,
+    title: "SEO-описания",
+    description: "Уникальные продающие тексты с ключевыми словами для роста в поиске",
+    features: ["Анализ конкурентов", "До 1800 символов", "+35% к конверсии"],
+  },
+  {
+    icon: Palette,
+    title: "Стили инфографики",
+    description: "Разнообразие стилей: minimal, premium, bold и другие",
+    features: ["10+ стилей", "Кастомизация", "Трендовый дизайн"],
+  },
+  {
+    icon: BarChart3,
+    title: "Этикетки и коды",
+    description: "Штрих-коды, QR-коды и этикетки для товаров WB бесплатно",
+    features: ["CODE-128", "QR-коды", "Без ограничений"],
+  },
+];
 
 export const FeaturesSection = () => {
   return (
-    <section id="features" className="relative py-20 sm:py-28 overflow-hidden">
-      <div className="absolute inset-0 bg-[#0d0d0d]" />
-      <div className="spotlight-violet" />
-      <div className="absolute top-0 left-0 right-0 hairline" />
+    <section id="features" className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-[hsl(240,10%,4%)]" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section header */}
-        <div className="text-center mb-12 sm:mb-16 max-w-3xl mx-auto">
-          <span className="inline-block px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-[12px] text-white/70 mb-5">
-            Что делает WBGen
+        <div className="text-center mb-16 sm:mb-20">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+            Почему WBGen
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-[1.05]">
-            Один инструмент —{" "}
-            <span className="text-aurora">всё для упаковки товара</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+            Дизайн карточек WB
+            <br />
+            <span className="bg-gradient-to-r from-[hsl(268,83%,65%)] to-[hsl(280,90%,70%)] bg-clip-text text-transparent">
+              без дизайнера
+            </span>
           </h2>
-          <p className="text-base sm:text-lg text-white/55">
-            Дизайн, инфографика, описания и этикетки — собираются за минуты,
-            без дизайнера и подписок на ПО.
+          <p className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto">
+            ИИ-генератор карточек для WB, Ozon и Яндекс Маркет — профессиональный результат за минуты
           </p>
         </div>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-6 auto-rows-[minmax(140px,auto)] gap-2.5 sm:gap-4 max-w-6xl mx-auto">
-          {/* Hero tile - generation */}
-          <SpotlightCard
-            magnetic
-            spotlightColor="hsl(263 90% 60% / 0.13)"
-            className="col-span-6 md:col-span-4 row-span-2 glass-card rounded-3xl p-5 sm:p-8 overflow-hidden"
-          >
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-[hsl(263,90%,55%)] rounded-full blur-[100px] opacity-30 transition-opacity" />
-            <img
-              src={illuPhoneCard}
-              alt=""
-              aria-hidden="true"
-              width={1024}
-              height={1024}
-              loading="lazy"
-              decoding="async"
-              className="hidden md:block absolute -right-8 -bottom-8 w-[280px] lg:w-[340px] h-auto object-contain opacity-95 animate-[float_7s_ease-in-out_infinite] drop-shadow-[0_30px_60px_hsl(263,90%,40%,0.45)] pointer-events-none"
-            />
-            <div className="relative md:max-w-[58%]">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[hsl(263,90%,60%)] to-[hsl(280,85%,50%)] flex items-center justify-center mb-4 sm:mb-5 shadow-lg shadow-[hsl(263,90%,40%)]/30">
-                <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+        {/* Features grid - no framer-motion */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-24">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="glass-card rounded-2xl p-6 sm:p-8 group"
+            >
+              <div
+                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}
+              >
+                <feature.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-xl sm:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
-                Генерация карточек товара
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                {feature.title}
               </h3>
-              <p className="text-white/60 text-[13px] sm:text-base mb-4 sm:mb-5 leading-relaxed">
-                AI собирает обложку и инфографику с фокусом на CTR и рекламу.
-                До 6 вариантов за раз — удобно тестировать.
-              </p>
-              <ul className="flex flex-wrap gap-1.5 sm:gap-2">
-                {[
-                  "WB · Ozon · Я.Маркет",
-                  "10+ стилей",
-                  "PNG готовые к загрузке",
-                  "Тест-сборки пачками",
-                ].map((t) => (
-                  <li
-                    key={t}
-                    className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[11px] sm:text-xs text-white/75"
-                  >
-                    {t}
-                  </li>
-                ))}
-              </ul>
+              <p className="text-white/50">{feature.description}</p>
             </div>
-          </SpotlightCard>
-
-
-          {/* Speed */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
-            <Zap className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
-            <div className="text-2xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
-              3 мин
-            </div>
-            <p className="text-[11px] sm:text-sm text-white/55 leading-snug">
-              от загрузки фото до готовой PNG-карточки
-            </p>
-          </SpotlightCard>
-
-          {/* Price */}
-          <SpotlightCard magnetic className="col-span-3 md:col-span-2 glass-card rounded-3xl p-4 sm:p-6 overflow-hidden">
-            <Target className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
-            <div className="text-2xl sm:text-4xl font-bold text-white mb-1 tracking-tight">
-              от 59₽
-            </div>
-            <p className="text-[11px] sm:text-sm text-white/55 leading-snug">
-              за карточку — в десятки раз дешевле дизайнера
-            </p>
-          </SpotlightCard>
-
-          {/* Descriptions */}
-          <SpotlightCard magnetic className="col-span-6 md:col-span-3 glass-card rounded-3xl p-5 sm:p-7 overflow-hidden">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-3 sm:mb-4">
-              <FileText className="w-5 h-5 text-[hsl(263,90%,75%)]" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-              SEO-описания
-            </h3>
-            <p className="text-[13px] sm:text-sm text-white/55 leading-relaxed">
-              Продающий текст с ключами под маркетплейсы — помогает карточке
-              лучше попадать в выдачу.
-            </p>
-          </SpotlightCard>
-
-          {/* Variants */}
-          <SpotlightCard magnetic className="col-span-6 md:col-span-3 glass-card rounded-3xl p-5 sm:p-7 overflow-hidden">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center mb-3 sm:mb-4">
-              <Layers className="w-5 h-5 text-[hsl(263,90%,75%)]" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-              Варианты для A/B-тестов
-            </h3>
-            <p className="text-[13px] sm:text-sm text-white/55 leading-relaxed">
-              Несколько обложек за раз — можно проверять гипотезы по визуалу
-              и усиливать рекламные кампании.
-            </p>
-          </SpotlightCard>
-
-          {/* Video covers */}
-          <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <Video className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
-            <h3 className="text-base font-bold text-white mb-1">Видеообложки</h3>
-            <p className="text-[13px] sm:text-xs text-white/55 leading-snug">
-              Короткие видео для главной карточки и рекламы
-            </p>
-          </SpotlightCard>
-
-          {/* Labels */}
-          <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <Barcode className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
-            <h3 className="text-base font-bold text-white mb-1">
-              Этикетки и ШК
-            </h3>
-            <p className="text-[13px] sm:text-xs text-white/55 leading-snug">
-              Штрих-коды и QR для отгрузок — бесплатно
-            </p>
-          </SpotlightCard>
-
-          {/* Edits */}
-          <SpotlightCard magnetic className="col-span-6 md:col-span-2 glass-card rounded-3xl p-5 sm:p-6 overflow-hidden">
-            <RefreshCw className="w-5 h-5 text-[hsl(263,90%,75%)] mb-2 sm:mb-3" />
-            <h3 className="text-base font-bold text-white mb-1">
-              Точечные правки
-            </h3>
-            <p className="text-[13px] sm:text-xs text-white/55 leading-snug">
-              Меняйте цвет, текст, элементы — AI-редактор без дизайнера
-            </p>
-          </SpotlightCard>
-
-          {/* Note */}
-          <div className="col-span-6 rounded-3xl border border-dashed border-white/10 p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 bg-white/[0.015]">
-            <Sparkles className="w-5 h-5 text-[hsl(263,90%,75%)] shrink-0" />
-            <p className="text-[13px] sm:text-sm text-white/60 leading-relaxed">
-              WBGen не обещает «гарантированный рост продаж» — но даёт
-              профессиональный визуал, который{" "}
-              <span className="text-white/85">
-                помогает повышать кликабельность и эффективность рекламы
-              </span>{" "}
-              у тысяч селлеров.
-            </p>
-          </div>
+          ))}
         </div>
 
+        {/* Capabilities section */}
+        <div className="text-center mb-12">
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
+            Полный набор инструментов
+          </h3>
+          <p className="text-white/50 max-w-xl mx-auto">
+            Всё, что нужно для создания продающих карточек на маркетплейсах
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {capabilities.map((cap) => (
+            <div
+              key={cap.title}
+              className="glass-card rounded-2xl p-6 sm:p-8"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] flex items-center justify-center flex-shrink-0">
+                  <cap.icon className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-lg sm:text-xl font-bold text-white mb-2">
+                    {cap.title}
+                  </h4>
+                  <p className="text-white/50 text-sm mb-4">{cap.description}</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {cap.features.map((f) => (
+                      <li
+                        key={f}
+                        className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-white/70"
+                      >
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -17,11 +17,14 @@ interface BonusesProps {
 
 export const Bonuses = ({ profile }: BonusesProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Bonus Program Section */}
       <BonusProgram profile={profile} />
-      <Separator className="opacity-50" />
+
+      <Separator className="my-8" />
+      
+      {/* Referral Program Section */}
       <Referrals profile={profile} />
     </div>
   );
 };
-

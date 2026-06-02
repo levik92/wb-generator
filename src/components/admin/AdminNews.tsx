@@ -16,7 +16,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogFooter,
 } from "@/components/ui/responsive-dialog";
-import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2, Newspaper, FileText, Tag as TagIcon, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Edit, Trash2, Send, Clock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -59,12 +59,6 @@ export const AdminNews = () => {
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [publishingIds, setPublishingIds] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const toggleExpanded = (id: string) => setExpandedIds(prev => {
-    const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
-    return next;
-  });
   const ITEMS_PER_PAGE = 10;
   const [formData, setFormData] = useState({
     title: '',
@@ -285,68 +279,54 @@ export const AdminNews = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="w-7 h-7 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
+      <div className="text-center py-8">
+        <p>Загрузка новостей...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-row items-center justify-between gap-3">
-        {news.length > 0 ? (
-          <p className="text-xs text-muted-foreground">
-            Показано <span className="font-medium text-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)}</span> из <span className="font-medium text-foreground">{news.length}</span>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold">Управление новостями</h2>
+          <p className="text-muted-foreground text-xs md:text-sm">
+            Создавайте и публикуйте новости для пользователей
           </p>
-        ) : <span />}
-
-
+        </div>
+        
         <ResponsiveDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <ResponsiveDialogTrigger asChild>
-            <Button onClick={openCreateDialog} className="gap-2 w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+            <Button onClick={openCreateDialog} size="sm" className="gap-2 w-full sm:w-auto">
               <Plus className="w-4 h-4" />
               Создать новость
             </Button>
           </ResponsiveDialogTrigger>
           <ResponsiveDialogContent className="sm:max-w-2xl">
-            <ResponsiveDialogHeader className="pb-2">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
-                  {editingNews ? <Edit className="h-4 w-4 text-white" /> : <Plus className="h-4 w-4 text-white" />}
-                </div>
-                <div className="min-w-0">
-                  <ResponsiveDialogTitle className="text-lg">
-                    {editingNews ? 'Редактировать новость' : 'Создать новость'}
-                  </ResponsiveDialogTitle>
-                  <ResponsiveDialogDescription className="text-xs mt-0.5">
-                    Заполните информацию. После сохранения новость попадёт в черновики.
-                  </ResponsiveDialogDescription>
-                </div>
-              </div>
+            <ResponsiveDialogHeader>
+              <ResponsiveDialogTitle>
+                {editingNews ? 'Редактировать новость' : 'Создать новость'}
+              </ResponsiveDialogTitle>
+              <ResponsiveDialogDescription>
+                Заполните информацию для новости. Максимум 1500 символов.
+              </ResponsiveDialogDescription>
             </ResponsiveDialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-5 py-2">
-              <div className="space-y-2">
-                <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
-                  <FileText className="h-3.5 w-3.5 text-violet-500" />
-                  Заголовок <span className="text-destructive">*</span>
-                </Label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="title">Заголовок *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Введите заголовок новости"
                   required
-                  className="focus-visible:ring-violet-500/40"
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tag" className="text-sm font-medium flex items-center gap-2">
-                  <TagIcon className="h-3.5 w-3.5 text-violet-500" />
-                  Тег
-                </Label>
+              
+              <div>
+                <Label htmlFor="tag">Тег</Label>
                 <Select value={formData.tag} onValueChange={(value) => setFormData(prev => ({ ...prev, tag: value }))}>
-                  <SelectTrigger className="focus:ring-violet-500/40">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -358,16 +338,9 @@ export const AdminNews = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="content" className="text-sm font-medium">
-                    Содержание <span className="text-destructive">*</span>
-                  </Label>
-                  <span className={`text-xs tabular-nums ${formData.content.length >= 1400 ? 'text-amber-600' : 'text-muted-foreground'}`}>
-                    {formData.content.length}/1500
-                  </span>
-                </div>
+              
+              <div>
+                <Label htmlFor="content">Содержание * ({formData.content.length}/1500)</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
@@ -376,15 +349,14 @@ export const AdminNews = () => {
                   rows={8}
                   maxLength={1500}
                   required
-                  className="resize-none focus-visible:ring-violet-500/40"
                 />
               </div>
-
-              <ResponsiveDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-border/50">
+              
+              <ResponsiveDialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Отмена
                 </Button>
-                <Button type="submit" className="gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
+                <Button type="submit">
                   {editingNews ? 'Обновить' : 'Создать черновик'}
                 </Button>
               </ResponsiveDialogFooter>
@@ -393,20 +365,11 @@ export const AdminNews = () => {
         </ResponsiveDialog>
       </div>
 
-
-      <div className="grid gap-3">
+      <div className="grid gap-4">
         {news.length === 0 ? (
-          <Card className="bg-card border-border/60 border-dashed rounded-2xl">
-            <CardContent className="py-16 text-center">
-              <div className="h-14 w-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-4">
-                <Newspaper className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-              </div>
-              <p className="text-sm font-medium mb-1">Новостей пока нет</p>
-              <p className="text-xs text-muted-foreground mb-4">Создайте первую новость для пользователей сервиса</p>
-              <Button onClick={openCreateDialog} className="gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
-                <Plus className="w-4 h-4" />
-                Создать первую новость
-              </Button>
+          <Card>
+            <CardContent className="text-center py-8">
+              <p className="text-muted-foreground">Новостей пока нет</p>
             </CardContent>
           </Card>
         ) : (
@@ -416,72 +379,77 @@ export const AdminNews = () => {
               const paginatedNews = news.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
               return (
                 <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Показано {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, news.length)} из {news.length}
+                    </p>
+                  </div>
                   {paginatedNews.map((item) => (
-            <Card key={item.id} className={`group rounded-2xl border-border/60 bg-card shadow-sm transition-all hover:border-violet-500/30 hover:shadow-md ${!item.is_published ? 'border-amber-500/30 bg-amber-500/[0.03]' : ''}`}>
+            <Card key={item.id} className={`rounded-2xl border-border/50 ${item.is_published ? 'bg-card/80' : 'border-amber-500/20 bg-amber-500/5'}`}>
               <CardHeader className="pb-3">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} border-0 hover:bg-inherit`}>
+                      <Badge className={`${tagColors[item.tag] || 'bg-gray-100 text-gray-800'} hover:bg-inherit`}>
                         {item.tag}
                       </Badge>
                       {item.is_published ? (
-                        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10">
+                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/10">
                           <Eye className="w-3 h-3 mr-1" />
                           Опубликовано
                         </Badge>
                       ) : (
-                        <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/10">
+                        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/10">
                           <EyeOff className="w-3 h-3 mr-1" />
                           Черновик
                         </Badge>
                       )}
                     </div>
-                    <CardTitle className="text-base lg:text-lg break-words leading-snug">{item.title}</CardTitle>
-                    <CardDescription className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 text-xs">
+                    <CardTitle className="text-base lg:text-lg break-words">{item.title}</CardTitle>
+                    <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 text-xs">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         Создано: {formatDate(item.created_at)}
                       </span>
                       {item.published_at && (
-                        <span className="flex items-center gap-1">
-                          <span className="hidden sm:inline">•</span>
-                          <Send className="w-3 h-3" />
-                          {formatDate(item.published_at)}
+                        <span className="hidden sm:inline">
+                          • Опубликовано: {formatDate(item.published_at)}
+                        </span>
+                      )}
+                      {item.published_at && (
+                        <span className="sm:hidden">
+                          Опубликовано: {formatDate(item.published_at)}
                         </span>
                       )}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap md:flex-nowrap justify-end">
+                  <div className="flex items-center gap-1 lg:gap-2 shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => openEditDialog(item)}
-                      className="h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 dark:hover:text-violet-400"
+                      className="h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2"
                     >
-                      <Edit className="w-3.5 h-3.5" />
-                      <span className="hidden lg:inline ml-1.5">Изменить</span>
+                      <Edit className="w-3 h-3 lg:w-4 lg:h-4" />
+                      <span className="hidden lg:inline ml-2">Изменить</span>
                     </Button>
                     <Button
+                      variant={item.is_published ? "outline" : "default"}
                       size="sm"
                       onClick={() => publishNews(item.id, !item.is_published)}
                       disabled={publishingIds.has(item.id)}
-                      className={`h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3 ${
-                        item.is_published
-                          ? "bg-card border border-border text-foreground hover:bg-muted"
-                          : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:opacity-90 text-white shadow-sm shadow-emerald-500/25"
-                      }`}
+                      className={`h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2 ${!item.is_published ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
                     >
-                      {publishingIds.has(item.id) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : item.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-                      <span className="hidden lg:inline ml-1.5">
+                      {publishingIds.has(item.id) ? <Loader2 className="w-3 h-3 lg:w-4 lg:h-4 animate-spin" /> : item.is_published ? <EyeOff className="w-3 h-3 lg:w-4 lg:h-4" /> : <Send className="w-3 h-3 lg:w-4 lg:h-4" />}
+                      <span className="hidden lg:inline ml-2">
                         {publishingIds.has(item.id) ? "Ждите..." : item.is_published ? "Скрыть" : "Опубликовать"}
                       </span>
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-destructive border-border hover:bg-destructive hover:text-white hover:border-transparent h-8 w-8 p-0 lg:h-9 lg:w-auto lg:px-3 [&_svg]:hover:text-white">
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span className="hidden lg:inline ml-1.5">Удалить</span>
+                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-white h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-4 lg:py-2">
+                          <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
+                          <span className="hidden lg:inline ml-2">Удалить</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent className="mx-2">
@@ -493,7 +461,7 @@ export const AdminNews = () => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Отмена</AlertDialogCancel>
-                          <AlertDialogAction
+                          <AlertDialogAction 
                             onClick={() => deleteNews(item.id)}
                             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                           >
@@ -506,59 +474,31 @@ export const AdminNews = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                {(() => {
-                  const isExpanded = expandedIds.has(item.id);
-                  const isLong = item.content.length > 200;
-                  return (
-                    <div className="space-y-3">
-                      <div className={`bg-muted/40 border border-border/40 rounded-xl p-3.5 text-sm relative overflow-hidden transition-all ${isExpanded ? '' : 'max-h-28'}`}>
-                        <p className="whitespace-pre-wrap leading-relaxed">{item.content}</p>
-                        {isLong && !isExpanded && (
-                          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card to-transparent pointer-events-none" />
-                        )}
-                      </div>
-                      {isLong && (
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() => toggleExpanded(item.id)}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
-                          >
-                            {isExpanded ? (
-                              <>Свернуть <ChevronUp className="w-3.5 h-3.5" /></>
-                            ) : (
-                              <>Развернуть <ChevronDown className="w-3.5 h-3.5" /></>
-                            )}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
+                <div className="bg-muted/50 rounded-lg p-3 text-sm max-h-24 overflow-hidden relative">
+                  <p className="whitespace-pre-wrap">{item.content}</p>
+                  {item.content.length > 200 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-muted/80 to-transparent" />
+                  )}
+                </div>
               </CardContent>
             </Card>
-
                   ))}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center flex-wrap gap-1.5 pt-4">
+                    <div className="flex items-center justify-center gap-2 pt-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="h-9 px-3"
                       >
                         Назад
                       </Button>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <Button
                           key={page}
+                          variant={page === currentPage ? "default" : "outline"}
                           size="sm"
-                          className={`w-9 h-9 p-0 ${
-                            page === currentPage
-                              ? "bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
-                              : "bg-card border border-border hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 text-foreground dark:hover:text-violet-400"
-                          }`}
+                          className="w-9 h-9 p-0"
                           onClick={() => setCurrentPage(page)}
                         >
                           {page}
@@ -569,7 +509,6 @@ export const AdminNews = () => {
                         size="sm"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="h-9 px-3"
                       >
                         Вперед
                       </Button>
@@ -578,7 +517,6 @@ export const AdminNews = () => {
                 </>
               );
             })()}
-
           </>
         )}
       </div>

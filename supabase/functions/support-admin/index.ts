@@ -74,25 +74,61 @@ serve(async (req) => {
         const pageSize = reqLimit || 10;
         const pageOffset = offset || 0;
 
-        const { data, error } = await supabase.rpc("get_admin_conversations", {
-          _enc_key: encryptionKey,
-          _offset: pageOffset,
-          _limit: pageSize,
-        });
+        const { data: conversations, error, count: totalCount } = await supabase
+          .from("support_conversations")
+          .select("*", { count: "exact" })
+          .order("updated_at", { ascending: false })
+          .range(pageOffset, pageOffset + pageSize - 1);
 
         if (error) throw error;
 
-        const conversations = (data?.conversations as any[]) || [];
-        const total = (data?.total as number) || 0;
+        const enriched = [];
+        for (const conv of conversations || []) {
+          const { data: lastMsg } = await supabase
+            .from("support_messages")
+            .select("*")
+            .eq("conversation_id", conv.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        return new Response(
-          JSON.stringify({
-            conversations,
-            total,
-            hasMore: pageOffset + pageSize < total,
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+          let lastMessageText = "";
+          if (lastMsg) {
+            const { data: decrypted } = await supabase.rpc("decrypt_support_message_edge", {
+              encrypted: lastMsg.encrypted_content,
+              enc_key: encryptionKey,
+            });
+            lastMessageText = decrypted || "";
+          }
+
+          let userEmail = null;
+          if (conv.user_id) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("email, full_name")
+              .eq("id", conv.user_id)
+              .single();
+            userEmail = profile?.email;
+          }
+
+          const { count: msgCount } = await supabase
+            .from("support_messages")
+            .select("id", { count: "exact", head: true })
+            .eq("conversation_id", conv.id);
+
+          enriched.push({
+            ...conv,
+            last_message: lastMessageText,
+            last_message_sender: lastMsg?.sender_type,
+            last_message_at: lastMsg?.created_at,
+            user_email: userEmail,
+            message_count: msgCount || 0,
+          });
+        }
+
+        return new Response(JSON.stringify({ conversations: enriched, total: totalCount || 0, hasMore: (pageOffset + pageSize) < (totalCount || 0) }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       case "get_messages": {

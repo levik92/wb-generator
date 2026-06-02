@@ -397,19 +397,6 @@ const CardDesign = () => {
         subtitle="за 3 минуты с ИИ"
         description="Загрузите фото товара — получите профессиональный комплект карточек с инфографикой для WB, Ozon и Яндекс Маркет. ИИ создаёт уникальный дизайн, увеличивающий CTR и продажи."
         badge="🚀 120 000+ карточек создано"
-        accent="violet"
-        signature={(
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-sm">
-            <div className="flex -space-x-2">
-              {["#a78bfa", "#f472b6", "#60a5fa"].map((c) => (
-                <span key={c} className="w-6 h-6 rounded-full border-2 border-[hsl(260,20%,7%)]" style={{ background: c }} />
-              ))}
-            </div>
-            <div className="text-xs text-white/60">
-              <span className="text-white font-semibold">22 000+</span> селлеров уже создают карточки с WBGen
-            </div>
-          </div>
-        )}
         stats={[
           { value: "от 59₽", label: "за карточку" },
           { value: "3 мин", label: "на комплект" },

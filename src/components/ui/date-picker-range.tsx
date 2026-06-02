@@ -26,27 +26,24 @@ export function DatePickerWithRange({
           <Button
             id="date"
             variant="outline"
-            size="sm"
             className={cn(
               "justify-start text-left font-normal",
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">
-              {date?.from ? (
-                date.to ? (
-                  <>
-                    {format(date.from, "LLL dd, y", { locale: ru })} -{" "}
-                    {format(date.to, "LLL dd, y", { locale: ru })}
-                  </>
-                ) : (
-                  format(date.from, "LLL dd, y", { locale: ru })
-                )
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {date?.from ? (
+              date.to ? (
+                <>
+                  {format(date.from, "LLL dd, y", { locale: ru })} -{" "}
+                  {format(date.to, "LLL dd, y", { locale: ru })}
+                </>
               ) : (
-                "Выберите период"
-              )}
-            </span>
+                format(date.from, "LLL dd, y", { locale: ru })
+              )
+            ) : (
+              <span>Выберите период</span>
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">

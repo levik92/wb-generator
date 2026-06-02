@@ -50,10 +50,6 @@ const Promo = lazy(() => import("./pages/Promo"));
 const PromoThanks = lazy(() => import("./pages/PromoThanks"));
 const PromoTwo = lazy(() => import("./pages/PromoTwo"));
 const PromoTwoThanks = lazy(() => import("./pages/PromoTwoThanks"));
-const Avito = lazy(() => import("./pages/Avito"));
-const AvitoThanks = lazy(() => import("./pages/AvitoThanks"));
-const Quiz = lazy(() => import("./pages/Quiz"));
-const QuizThanks = lazy(() => import("./pages/QuizThanks"));
 
 const queryClient = new QueryClient();
 
@@ -67,7 +63,7 @@ const PageLoader = () => (
 const SupportWidgetWrapper = () => {
   const location = useLocation();
   const path = location.pathname;
-  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet') || path.startsWith('/quiz') || path.startsWith('/promo') || path.startsWith('/avito');
+  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet');
   if (isHidden) return null;
   return (
     <Suspense fallback={null}>
@@ -153,10 +149,6 @@ const App = () => {
             <Route path="/promo/thanks" element={<PromoThanks />} />
             <Route path="/promotwo" element={<PromoTwo />} />
             <Route path="/promotwo/thanks" element={<PromoTwoThanks />} />
-            <Route path="/avito" element={<Avito />} />
-            <Route path="/avito/thanks" element={<AvitoThanks />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/quiz/thanks" element={<QuizThanks />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

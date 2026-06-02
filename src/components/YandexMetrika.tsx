@@ -32,12 +32,6 @@ const reachGoal = (goal: string): Promise<void> => {
 const ROUTE_GOALS: Record<string, string> = {
   "/promo": "promo_loaded",
   "/promo/thanks": "promo_thanks_loaded",
-  "/promotwo": "promotwo_loaded",
-  "/promotwo/thanks": "promotwo_thanks_loaded",
-  "/avito": "avito_loaded",
-  "/avito/thanks": "avito_thanks_loaded",
-  "/quiz": "quiz_loaded",
-  "/quiz/thanks": "quiz_thanks_loaded",
 };
 
 /**

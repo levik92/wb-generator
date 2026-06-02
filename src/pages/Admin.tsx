@@ -4,8 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { forceSignOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { LogOut, Download, Loader2, ArrowLeft } from "lucide-react";
-import { useAdminHeaderOverride } from "@/stores/adminHeaderOverride";
+import { LogOut, Download, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -219,23 +218,20 @@ export default function Admin() {
     }
   };
 
-  const currentTab = TAB_TITLES[activeTab];
-  const headerOverride = useAdminHeaderOverride();
-  const headerTitle = headerOverride?.title ?? currentTab.title;
-  const headerSubtitle = headerOverride?.subtitle ?? currentTab.subtitle;
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
+        <div className="w-8 h-8 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
       </div>
     );
   }
 
   if (!isAdmin) return null;
 
+  const currentTab = TAB_TITLES[activeTab];
+
   return (
-    <div className="admin-shell min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex">
       {!isMobile && (
         <div className="sticky top-0 h-screen">
           <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />
@@ -248,18 +244,9 @@ export default function Admin() {
           <div className="flex h-[76px] items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1 overflow-hidden">
               {isMobile && <AdminMobileMenu activeTab={activeTab} onTabChange={handleTabChange} unreadSupportCount={unreadSupportCount} pendingInvoicesCount={pendingInvoicesCount} pendingBonusesCount={pendingBonusesCount} />}
-              {headerOverride?.onBack && (
-                <button
-                  onClick={headerOverride.onBack}
-                  aria-label="Назад"
-                  className="w-10 h-10 rounded-xl border border-border/60 bg-card hover:border-violet-500/50 hover:bg-violet-500/[0.08] hover:text-violet-600 flex items-center justify-center transition-colors shrink-0"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-              )}
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h1 className="text-lg md:text-xl font-bold text-foreground truncate tracking-tight">{headerTitle}</h1>
-                {headerSubtitle && <p className="text-xs text-muted-foreground hidden sm:block truncate mt-0.5">{headerSubtitle}</p>}
+                <h1 className="text-lg md:text-xl font-bold text-foreground truncate">{currentTab.title}</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentTab.subtitle}</p>
               </div>
             </div>
 
@@ -267,16 +254,16 @@ export default function Admin() {
               <ThemeToggle />
               
               <DataExportDialog>
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 transition-colors">
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-secondary">
                   <Download className="h-[18px] w-[18px] text-muted-foreground" />
                 </Button>
               </DataExportDialog>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className={`relative rounded-xl ${isMobile ? 'h-9 w-9' : 'h-10 w-10'} hover:bg-violet-500/10 transition-colors`}>
+                  <Button variant="ghost" className={`relative rounded-xl ${isMobile ? 'h-9 w-9' : 'h-10 w-10'} hover:bg-secondary`}>
                     <Avatar className={isMobile ? 'h-8 w-8' : 'h-9 w-9'}>
-                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold shadow-sm shadow-violet-500/25">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-semibold">
                         <UserIcon className={isMobile ? 'h-4 w-4' : 'h-[18px] w-[18px]'} />
                       </AvatarFallback>
                     </Avatar>
@@ -288,7 +275,7 @@ export default function Admin() {
                     <p className="text-xs leading-none text-muted-foreground">{adminEmail}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1" onClick={() => navigate('/dashboard')}>
+                  <DropdownMenuItem className="hover:bg-primary/5 cursor-pointer rounded-lg mx-1" onClick={() => navigate('/dashboard')}>
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Дашборд</span>
                   </DropdownMenuItem>
@@ -306,7 +293,7 @@ export default function Admin() {
         <main className="flex-1 p-3 md:p-4 lg:p-6 overflow-x-hidden min-w-0 pt-[88px] md:pt-4 lg:pt-6">
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[calc(100vh-200px)] md:min-h-[calc(100vh-180px)]">
-              <div className="w-7 h-7 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
+              <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
             </div>
           }>
             <motion.div

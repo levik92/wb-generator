@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Loader2, MessageCircle, Bot, BotOff, User, Headphones, X, ChevronLeft, AlertTriangle, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -7,8 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { getProxiedPublicUrl } from "@/lib/storage";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { compressImage } from "@/lib/imageCompression";
-import { buildChatTimeline, bubbleRoundingClasses, type ChatMessage } from "@/lib/groupMessages";
-import { formatChatDateSeparator, formatChatTime } from "@/lib/formatChatDate";
 
 interface Conversation {
   id: string;
@@ -110,10 +108,22 @@ export const AdminSupport = () => {
       });
       const incoming = convs || [];
 
+      // Sort: needs_admin_attention first, then by last_message_at descending
+      const sortConvs = (list: Conversation[]) =>
+        [...list].sort((a, b) => {
+          // Attention-needed conversations always on top
+          if (a.needs_admin_attention && !b.needs_admin_attention) return -1;
+          if (!a.needs_admin_attention && b.needs_admin_attention) return 1;
+          // Then by last message time, newest first
+          const timeA = a.last_message_at ? new Date(a.last_message_at).getTime() : new Date(a.updated_at).getTime();
+          const timeB = b.last_message_at ? new Date(b.last_message_at).getTime() : new Date(b.updated_at).getTime();
+          return timeB - timeA;
+        });
+
       if (append) {
-        setConversations((prev) => [...prev, ...incoming]);
+        setConversations(prev => sortConvs([...prev, ...incoming]));
       } else {
-        setConversations(incoming);
+        setConversations(sortConvs(incoming));
       }
       setHasMoreConvs(hasMore);
     } catch (e) {
@@ -126,22 +136,9 @@ export const AdminSupport = () => {
 
   useEffect(() => {
     loadConversations();
-    let cancelled = false;
-    const tick = () => {
-      if (cancelled) return;
-      if (typeof document !== "undefined" && document.hidden) return;
-      loadConversations(false);
-    };
-    const interval = setInterval(tick, 15000);
-    const onVisible = () => { if (!document.hidden) tick(); };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
+    const interval = setInterval(() => loadConversations(false), 15000);
+    return () => clearInterval(interval);
   }, [callApi]);
-
 
   // Load AI defaults
   useEffect(() => {
@@ -205,37 +202,23 @@ export const AdminSupport = () => {
     }
   }, [loadMessages]);
 
-  // Poll messages for selected conversation (skip when hidden, closed, sending, or uploading)
+  // Poll messages for selected conversation
   useEffect(() => {
     if (!selectedConv) return;
-    if (selectedConv.status === "closed") return;
-    let cancelled = false;
-    const tick = async () => {
-      if (cancelled) return;
-      if (typeof document !== "undefined" && document.hidden) return;
-      if (sending || uploading) return;
+    const interval = setInterval(async () => {
       try {
+        shouldScrollRef.current = true;
         const msgs = await loadMessages(selectedConv.id);
-        if (cancelled) return;
         setMessages(prev => {
-          const sameLen = msgs.length === prev.length;
-          const sameLast = msgs[msgs.length - 1]?.id === prev[prev.length - 1]?.id;
-          if (sameLen && sameLast) return prev;
-          shouldScrollRef.current = true;
-          return msgs;
+          if (msgs.length !== prev.length || msgs[msgs.length - 1]?.id !== prev[prev.length - 1]?.id) {
+            return msgs;
+          }
+          return prev;
         });
       } catch {}
-    };
-    const interval = setInterval(tick, 8000);
-    const onVisible = () => { if (!document.hidden) tick(); };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [selectedConv?.id, selectedConv?.status, loadMessages, sending, uploading]);
-
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [selectedConv?.id, loadMessages]);
 
   useEffect(() => {
     if (!shouldScrollRef.current) return;
@@ -439,95 +422,62 @@ export const AdminSupport = () => {
 
   const attentionCount = conversations.filter((c) => c.needs_admin_attention).length;
 
-  const senderLabel = (type: string) => {
-    if (type === "user") return { icon: <User className="w-3 h-3" />, label: "Пользователь" };
-    if (type === "ai") return { icon: <Bot className="w-3 h-3" />, label: "AI" };
-    if (type === "admin") return { icon: <Headphones className="w-3 h-3" />, label: "Вы" };
-    return { icon: <AlertTriangle className="w-3 h-3" />, label: "Система" };
-  };
-
-  const timeline = useMemo(() => buildChatTimeline(messages), [messages]);
-
-  const renderTimeline = () =>
-    timeline.map((item) => {
-      if (item.type === "date") {
-        return (
-          <div key={item.key} className="flex items-center justify-center py-1">
-            <span className="text-[10px] text-muted-foreground bg-muted/40 px-2.5 py-0.5 rounded-full">
-              {formatChatDateSeparator(item.date)}
-            </span>
-          </div>
-        );
-      }
-      const group = item.group;
-      const isOwn = group.sender_type === "admin";
-      const { icon, label } = senderLabel(group.sender_type);
-      return (
-        <div
-          key={group.key}
-          className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"} animate-fade-in`}
-        >
-          <span className="text-[10px] text-muted-foreground mb-0.5 flex items-center gap-1 px-1 font-medium">
-            {icon}
-            {label}
-          </span>
-          {group.items.map(({ msg, position }) => (
-            <div
-              key={msg.id}
-              className={`max-w-[85%] sm:max-w-[75%] px-3.5 py-2 text-sm leading-relaxed shadow-sm ${
-                bubbleRoundingClasses(isOwn ? "own" : "other", position)
-              } ${
-                msg.sender_type === "admin"
-                  ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-violet-500/20"
-                  : msg.sender_type === "user"
-                  ? "bg-secondary/80 text-secondary-foreground border border-border/40"
-                  : msg.sender_type === "system"
-                  ? "bg-muted/50 text-muted-foreground italic text-xs"
-                  : "bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20"
-              }`}
-            >
-              {msg.attachment_url && (
-                <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
-                  <img
-                    src={msg.attachment_url}
-                    alt="Вложение"
-                    className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
-                    loading="lazy"
-                  />
-                </button>
-              )}
-              {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
-            </div>
-          ))}
-          <span className="text-[10px] text-muted-foreground/70 mt-0.5 px-1 tabular-nums">
-            {formatChatTime(group.endedAt)}
-          </span>
-        </div>
-      );
-    });
-
-  const getAvatarInitial = (conv: Conversation) => {
-    const src = conv.user_email || conv.visitor_id || "А";
-    return src.trim().charAt(0).toUpperCase();
-  };
+  const renderMessageBubble = (msg: Message) => (
+    <div
+      key={msg.id}
+      className={`flex flex-col ${msg.sender_type === "admin" ? "items-end" : "items-start"}`}
+    >
+      <span className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+        {msg.sender_type === "user" && <User className="w-3 h-3" />}
+        {msg.sender_type === "ai" && <Bot className="w-3 h-3" />}
+        {msg.sender_type === "admin" && <Headphones className="w-3 h-3" />}
+        {msg.sender_type === "system" && <AlertTriangle className="w-3 h-3" />}
+        {msg.sender_type === "user" ? "Пользователь" : msg.sender_type === "ai" ? "AI" : msg.sender_type === "admin" ? "Вы" : "Система"}
+      </span>
+      <div
+        className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+          msg.sender_type === "admin"
+            ? "bg-primary text-primary-foreground rounded-br-md"
+            : msg.sender_type === "user"
+            ? "bg-secondary text-secondary-foreground rounded-bl-md"
+            : msg.sender_type === "system"
+            ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
+            : "bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-bl-md border border-blue-500/20"
+        }`}
+      >
+        {msg.attachment_url && (
+          <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
+            <img
+              src={msg.attachment_url}
+              alt="Вложение"
+              className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
+              loading="lazy"
+            />
+          </button>
+        )}
+        {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+      </div>
+      <span className="text-[10px] text-muted-foreground mt-0.5">
+        {new Date(msg.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+      </span>
+    </div>
+  );
 
   const conversationListContent = (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-4 border-b border-border/60 bg-gradient-to-br from-violet-500/[0.05] via-card to-card">
-        <div className="flex items-center justify-between mb-1.5">
-          <h3 className="text-base font-bold flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/20">
-              <Headphones className="w-3.5 h-3.5 text-white" strokeWidth={2.2} />
-            </span>
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <Headphones className="w-5 h-5 text-primary" />
             Поддержка
           </h3>
           {attentionCount > 0 && (
-            <Badge className="bg-destructive text-destructive-foreground text-[10px] px-2 h-5 rounded-full animate-pulse">
-              {attentionCount} {attentionCount === 1 ? "нов." : "нов."}
+            <Badge className="bg-destructive text-destructive-foreground text-xs">
+              {attentionCount}
             </Badge>
           )}
         </div>
-        <p className="text-[11px] text-muted-foreground">Управление обращениями пользователей</p>
+        <p className="text-xs text-muted-foreground">Управление обращениями пользователей</p>
       </div>
       <div ref={convsContainerRef} className="flex-1 overflow-y-auto" onScroll={handleConvsScroll}>
         {loading ? (
@@ -536,73 +486,45 @@ export const AdminSupport = () => {
           </div>
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-muted/40 flex items-center justify-center mb-3">
-              <MessageCircle className="w-6 h-6 text-muted-foreground/40" />
-            </div>
+            <MessageCircle className="w-10 h-10 text-muted-foreground/30 mb-3" />
             <p className="text-sm text-muted-foreground">Обращений пока нет</p>
           </div>
         ) : (
           <>
-            {conversations.map((conv) => {
-              const isSelected = selectedConv?.id === conv.id;
-              const isAttention = conv.needs_admin_attention;
-              return (
-                <button
-                  key={conv.id}
-                  onClick={() => selectConversation(conv)}
-                  className={`relative w-full text-left px-3 py-3 border-b border-border/40 transition-all hover:bg-secondary/40 ${
-                    isSelected ? "bg-violet-500/[0.06]" : ""
-                  } ${isAttention ? "bg-amber-500/[0.04]" : ""}`}
-                >
-                  {isSelected && (
-                    <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-violet-500 to-purple-600" />
-                  )}
-                  <div className="flex items-start gap-2.5">
-                    <div className="relative shrink-0">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold ${
-                        isAttention
-                          ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white"
-                          : conv.user_id
-                          ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white"
-                          : "bg-gradient-to-br from-slate-400 to-slate-600 text-white"
-                      }`}>
-                        {getAvatarInitial(conv)}
-                      </div>
-                      {isAttention && (
-                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-card animate-pulse" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-0.5">
-                        <span className="text-xs sm:text-sm font-medium truncate flex-1 min-w-0">
-                          {conv.user_email || conv.visitor_id?.slice(0, 8) || "Аноним"}
-                        </span>
-                        {getStatusBadge(conv)}
-                      </div>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 rounded font-normal border-border/60 text-muted-foreground">
-                          {getChannelLabel(conv.channel)}
-                        </Badge>
-                        <span className="text-[10px] text-muted-foreground/70 tabular-nums">
-                          · {conv.message_count}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground truncate leading-snug">
-                        {conv.last_message_sender === "admin" && <span className="text-violet-500/80">Вы: </span>}
-                        {conv.last_message || "Нет сообщений"}
-                      </p>
-                      <span className="text-[10px] text-muted-foreground/60 tabular-nums mt-1 inline-block">
-                        {conv.last_message_at
-                          ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
-                              day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
-                            })
-                          : ""}
-                      </span>
-                    </div>
+            {conversations.map((conv) => (
+              <button
+                key={conv.id}
+                onClick={() => selectConversation(conv)}
+                className={`w-full text-left p-4 border-b border-border/50 hover:bg-secondary/50 transition-colors ${
+                  selectedConv?.id === conv.id ? "bg-primary/5" : ""
+                } ${conv.needs_admin_attention ? "bg-destructive/5" : ""}`}
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium truncate max-w-[160px]">
+                      {conv.user_email || conv.visitor_id?.slice(0, 8) || "Аноним"}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] px-1.5">
+                      {getChannelLabel(conv.channel)}
+                    </Badge>
                   </div>
-                </button>
-              );
-            })}
+                  {getStatusBadge(conv)}
+                </div>
+                <p className="text-xs text-muted-foreground truncate mt-1">
+                  {conv.last_message || "Нет сообщений"}
+                </p>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-[10px] text-muted-foreground">{conv.message_count} сообщ.</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {conv.last_message_at
+                      ? new Date(conv.last_message_at).toLocaleString("ru-RU", {
+                          day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+                        })
+                      : ""}
+                  </span>
+                </div>
+              </button>
+            ))}
             {loadingMoreConvs && (
               <div className="flex justify-center p-3">
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -653,59 +575,49 @@ export const AdminSupport = () => {
 
   const chatViewContent = (
     <div className="flex flex-col h-full">
-      {/* Chat header */}
-      <div className="px-3 sm:px-4 py-3 border-b border-border/60 bg-gradient-to-br from-violet-500/[0.04] via-card to-card flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="p-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2">
           {(isMobile || !selectedConv) && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg shrink-0"
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg"
               onClick={() => { setSelectedConv(null); setMessages([]); }}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
           )}
-          {selectedConv && (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
-              {getAvatarInitial(selectedConv)}
-            </div>
-          )}
-          <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">
+          <div>
+            <p className="text-sm font-medium">
               {selectedConv?.user_email || selectedConv?.visitor_id?.slice(0, 8) || "Аноним"}
             </p>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 rounded font-normal border-border/60 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground">
                 {selectedConv && getChannelLabel(selectedConv.channel)}
-              </Badge>
+              </span>
               {selectedConv?.ai_enabled && (
-                <span className="text-[10px] text-violet-500 flex items-center gap-0.5 font-medium">
+                <span className="text-[10px] text-primary flex items-center gap-0.5">
                   <Bot className="w-3 h-3" /> AI активен
                 </span>
-              )}
-              {selectedConv?.status === "closed" && (
-                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 rounded">Закрыт</Badge>
               )}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <Button variant="ghost" size="icon" className={`h-8 w-8 rounded-lg ${selectedConv?.ai_enabled ? "text-violet-500 bg-violet-500/10" : "text-muted-foreground"}`}
-            onClick={handleToggleAI}
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg" onClick={handleToggleAI}
             title={selectedConv?.ai_enabled ? "Выключить AI" : "Включить AI"}>
             {selectedConv?.ai_enabled ? <BotOff className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"
-            onClick={handleCloseConv} title="Закрыть диалог">
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-lg text-destructive hover:text-destructive" onClick={handleCloseConv}>
             <X className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
 
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3 bg-gradient-to-b from-muted/15 via-card to-card" onScroll={handleMsgsScroll}>
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3" onScroll={handleMsgsScroll}>
+        {/* Load more indicator */}
         {hasMoreMsgs && (
           <div className="flex justify-center py-2">
             {loadingMoreMsgs ? (
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
             ) : (
-              <button onClick={loadOlderMessages} className="text-xs text-violet-500 hover:text-violet-600 hover:underline font-medium">
+              <button onClick={loadOlderMessages} className="text-xs text-primary hover:underline">
                 Загрузить ранние сообщения
               </button>
             )}
@@ -716,18 +628,18 @@ export const AdminSupport = () => {
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          renderTimeline()
+          messages.map(renderMessageBubble)
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Pending file preview */}
       {pendingPreview && (
-        <div className="px-3 sm:px-4 pb-2 pt-1 border-t border-border/40 bg-muted/20">
-          <div className="relative inline-block animate-fade-in">
-            <img src={pendingPreview} alt="Превью" className="h-16 w-16 rounded-xl object-cover border border-border/60 shadow-sm" />
+        <div className="px-3 pb-2">
+          <div className="relative inline-block">
+            <img src={pendingPreview} alt="Превью" className="h-16 w-16 rounded-lg object-cover border border-border" />
             <button onClick={clearPendingFile}
-              className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md hover:scale-110 transition-transform">
+              className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs">
               <X className="w-3 h-3" />
             </button>
           </div>
@@ -735,20 +647,20 @@ export const AdminSupport = () => {
       )}
 
       {selectedConv?.status !== "closed" && (
-        <div className="border-t border-border/60 p-3 bg-card/95">
+        <div className="border-t border-border p-3">
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex items-center gap-2">
             <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleFileSelect} />
-            <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-full shrink-0 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 transition-colors"
-              onClick={() => fileInputRef.current?.click()} disabled={sending || uploading} aria-label="Прикрепить файл">
+            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 rounded-xl shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10 opacity-40 hover:opacity-100 transition-all"
+              onClick={() => fileInputRef.current?.click()} disabled={sending || uploading}>
               <Paperclip className="w-4 h-4" />
             </Button>
             <input
               ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)}
               placeholder="Ответить пользователю..."
-              className="flex-1 min-w-0 bg-muted/50 border border-border/60 rounded-full px-4 py-2.5 text-sm outline-none focus:border-violet-500/60 focus:bg-card focus:ring-2 focus:ring-violet-500/20 placeholder:text-muted-foreground/70 transition-all"
+              className="flex-1 bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
               disabled={sending || uploading} maxLength={2000}
             />
-            <Button type="submit" size="icon" className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
+            <Button type="submit" size="icon" className="h-9 w-9 rounded-xl shrink-0"
               disabled={(!input.trim() && !pendingFile) || sending || uploading}>
               {sending || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
@@ -761,7 +673,7 @@ export const AdminSupport = () => {
   if (isMobile) {
     return (
       <>
-        <div className="border border-border/60 rounded-2xl bg-card overflow-hidden h-[calc(100dvh-180px)] min-h-[440px] shadow-sm">
+        <div className="border border-border rounded-2xl bg-card overflow-hidden h-[calc(100vh-200px)] min-h-[400px]">
           {selectedConv ? chatViewContent : conversationListContent}
         </div>
         {!selectedConv && aiDefaultsBlock}
@@ -780,20 +692,14 @@ export const AdminSupport = () => {
 
   return (
     <>
-      <div className="border border-border/60 rounded-2xl bg-card overflow-hidden flex h-[calc(100dvh-180px)] min-h-[520px] shadow-sm">
-        <div className="w-80 border-r border-border/60 flex-shrink-0">{conversationListContent}</div>
-        <div className="flex-1 flex flex-col bg-gradient-to-br from-muted/10 via-card to-card">
+      <div className="border border-border rounded-2xl bg-card overflow-hidden flex h-[calc(100vh-200px)] min-h-[500px]">
+        <div className="w-80 border-r border-border flex-shrink-0">{conversationListContent}</div>
+        <div className="flex-1 flex flex-col">
           {selectedConv ? chatViewContent : (
             <div className="flex-1 flex items-center justify-center text-center px-8">
               <div>
-                <div className="relative w-16 h-16 mx-auto mb-4">
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 rotate-6" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/15 flex items-center justify-center">
-                    <MessageCircle className="w-7 h-7 text-violet-500/70" strokeWidth={2} />
-                  </div>
-                </div>
-                <p className="text-sm font-medium text-foreground mb-1">Выберите диалог</p>
-                <p className="text-xs text-muted-foreground">Откройте обращение слева, чтобы начать общение</p>
+                <MessageCircle className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Выберите диалог для просмотра</p>
               </div>
             </div>
           )}

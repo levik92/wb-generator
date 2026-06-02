@@ -6,8 +6,6 @@ import { HeroSection } from "@/components/landing/HeroSection";
 
 // Lazy load below-the-fold sections for better performance
 const FeaturesSection = lazy(() => import("@/components/landing/FeaturesSection").then(m => ({ default: m.FeaturesSection })));
-const WhyItMattersSection = lazy(() => import("@/components/landing/WhyItMattersSection").then(m => ({ default: m.WhyItMattersSection })));
-const AudienceSection = lazy(() => import("@/components/landing/AudienceSection").then(m => ({ default: m.AudienceSection })));
 const ExamplesSection = lazy(() => import("@/components/landing/ExamplesSection").then(m => ({ default: m.ExamplesSection })));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection").then(m => ({ default: m.HowItWorksSection })));
 const ComparisonSection = lazy(() => import("@/components/landing/ComparisonSection").then(m => ({ default: m.ComparisonSection })));
@@ -57,9 +55,6 @@ const Landing = () => {
         <main>
           <HeroSection />
           <Suspense fallback={<SectionLoader />}>
-            <WhyItMattersSection />
-          </Suspense>
-          <Suspense fallback={<SectionLoader />}>
             <FeaturesSection />
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
@@ -67,9 +62,6 @@ const Landing = () => {
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
             <HowItWorksSection />
-          </Suspense>
-          <Suspense fallback={<SectionLoader />}>
-            <AudienceSection />
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
             <ComparisonSection />

@@ -1,85 +1,80 @@
-import { ArrowRight, Sparkles, Zap, Gift, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, Gift } from "lucide-react";
 import { Link } from "react-router-dom";
-import { withUtm } from "@/lib/utm";
 import { Button } from "@/components/ui/button";
-import { SpotlightCard } from "./effects/SpotlightCard";
 
 export const CTASection = () => {
   return (
-    <section className="section-shell">
-      {/* Noir + violet gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(263_70%_18%)_0%,hsl(0_0%_6%)_60%,hsl(0_0%_5%)_100%)]" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] max-w-[100vw] bg-[hsl(263,90%,50%)] rounded-full blur-[160px] opacity-[0.22]" />
-      <div className="absolute inset-0 grid-pattern opacity-[0.07]" />
-
+    <section className="relative py-24 sm:py-32 overflow-hidden">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[hsl(268,83%,25%)] via-[hsl(268,70%,20%)] to-[hsl(240,10%,6%)]" />
+      
+      {/* Static orbs - no animation for mobile performance */}
+      <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-[hsl(268,83%,50%)] rounded-full blur-[120px] sm:blur-[150px] opacity-20 sm:opacity-30" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 sm:w-[500px] h-80 sm:h-[500px] bg-[hsl(220,100%,50%)] rounded-full blur-[140px] sm:blur-[180px] opacity-15 sm:opacity-20" />
+      
+      {/* Grid pattern - reduced on mobile */}
+      <div className="absolute inset-0 grid-pattern opacity-5 sm:opacity-10" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/15 mb-7">
-            <Sparkles className="w-3.5 h-3.5 text-[hsl(263,90%,75%)]" />
-            <span className="text-[12px] sm:text-sm text-white/85">
-              Тысячи селлеров уже собирают карточки в WBGen
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
+            <Sparkles className="w-4 h-4 text-[hsl(268,83%,70%)]" />
+            <span className="text-sm text-white/90">
+              Присоединяйтесь к тысячам продавцов
             </span>
           </div>
 
-          <h2 className="font-[Outfit] font-bold text-[2.1rem] sm:text-5xl md:text-6xl lg:text-7xl text-white mb-5 sm:mb-6 leading-[1.02] tracking-tight">
-            Соберите первую карточку
-            <span className="block text-aurora mt-1">за 3 минуты</span>
+          {/* Heading */}
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+            Начните
+            <span className="block bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
+              прямо сейчас
+            </span>
           </h2>
 
-          <p className="text-base sm:text-lg md:text-xl text-white/65 mb-10 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
-            Профессиональный визуал, инфографика и SEO-описание — без
-            дизайнера, шаблонов и подписок на ПО.
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto">
+            Замените дизайнера за 5000₽ на ИИ от 59₽. Профессиональные карточки за 3 минуты.
           </p>
 
-
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-2xl mx-auto mb-10 sm:mb-12">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-2xl mx-auto mb-12">
             {[
-              { value: "от 59₽", label: "за карточку", icon: Gift },
-              { value: "x7", label: "результативнее аналогов", icon: Zap },
-              { value: "+87%", label: "рост CTR", icon: TrendingUp },
+              { value: "от 59₽", label: "За карточку", icon: Gift },
+              { value: "3 мин", label: "До результата", icon: Zap },
+              { value: "+40%", label: "Рост продаж", icon: Sparkles },
             ].map((stat) => (
-              <SpotlightCard
+              <div
                 key={stat.label}
-                className="glass-card rounded-2xl p-3.5 sm:p-5"
+                className="glass-card rounded-2xl p-4 sm:p-6"
               >
-                <stat.icon className="w-4 h-4 text-[hsl(263,90%,75%)] mx-auto mb-2" />
-                <div className="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-0.5 leading-tight">
+                <stat.icon className="w-5 h-5 text-[hsl(268,83%,70%)] mx-auto mb-2" />
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
                   {stat.value}
                 </div>
-                <div className="text-[10px] sm:text-xs text-white/55 leading-tight">
-                  {stat.label}
-                </div>
-              </SpotlightCard>
+                <div className="text-[10px] sm:text-xs text-white/50 leading-tight">{stat.label}</div>
+              </div>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to={withUtm("/auth?tab=signup")} className="w-full sm:w-auto">
+          {/* CTA Button */}
+          <div>
+            <Link to="/auth?tab=signup">
               <Button
                 size="lg"
-                className="w-full sm:w-auto bg-white text-[hsl(263,80%,30%)] hover:bg-white/90 text-base px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/30 group"
+                className="bg-white text-[hsl(268,83%,40%)] hover:bg-white/90 text-sm sm:text-base md:text-lg px-8 sm:px-10 py-5 sm:py-7 rounded-xl font-bold shadow-2xl shadow-black/20 group max-w-full"
               >
-                Попробовать WBGen
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                <span className="truncate">Создать первую карточку</span>
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
               </Button>
             </Link>
-            <a href="#examples" className="w-full sm:w-auto">
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto bg-white/[0.04] border-white/15 text-white hover:bg-white/[0.1] text-base px-8 sm:px-10 py-6 sm:py-7 rounded-xl font-semibold"
-              >
-                Посмотреть примеры
-              </Button>
-            </a>
+            <p className="text-white/50 text-sm mt-6">
+              Регистрация за 30 сек • Результат за 3 мин • От 59₽ за карточку
+            </p>
           </div>
-          <p className="text-white/45 text-xs sm:text-sm mt-5">
-            Регистрация за 30 сек · Результат сразу · Экономия в 12+ раз
-          </p>
         </div>
       </div>
     </section>
   );
 };
-

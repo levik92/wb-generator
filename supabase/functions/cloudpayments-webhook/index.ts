@@ -104,31 +104,17 @@ serve(async (req) => {
     const status = webhookData.Status;
     const dataJson = webhookData.Data || webhookData.JsonData;
     const userId = webhookData.AccountId;
-    // CloudPayments may send legacy InvoiceId or new ExternalId; both map to our externalPaymentId
-    const invoiceId = webhookData.InvoiceId || webhookData.ExternalId || webhookData.externalId;
+    const invoiceId = webhookData.InvoiceId; // maps to externalId from widget.start()
     
     let metadata: any = {};
     try {
-      if (dataJson) {
-        metadata = typeof dataJson === 'string' ? JSON.parse(dataJson) : dataJson;
-        // Sometimes wrapped twice
-        if (typeof metadata === 'string') {
-          try { metadata = JSON.parse(metadata); } catch { /* ignore */ }
-        }
-      }
+      metadata = dataJson ? (typeof dataJson === 'string' ? JSON.parse(dataJson) : dataJson) : {};
     } catch {
       console.warn('Failed to parse Data field:', dataJson);
     }
     
-    // Resolve external_payment_id from any known source
-    const externalPaymentId =
-      metadata?.external_payment_id ||
-      metadata?.externalId ||
-      metadata?.ExternalId ||
-      invoiceId ||
-      null;
-    
-    console.log(`[cloudpayments-webhook] resolved externalPaymentId=${externalPaymentId}, invoiceId=${invoiceId}, hasMetadata=${!!metadata}`);
+    // Get external_payment_id: first from metadata, then fallback to InvoiceId (externalId from widget)
+    const externalPaymentId = metadata.external_payment_id || invoiceId || null;
     
     const url = new URL(req.url);
     const notificationType = url.searchParams.get('type') || 'pay';
@@ -182,24 +168,35 @@ serve(async (req) => {
       
     } else if (notificationType === 'fail') {
       console.log(`Processing failed CloudPayments payment: ${transactionId}`);
-
-      // CRITICAL: CloudPayments may send `fail` for the first card-decline
-      // (e.g. DoNotHonor / InsufficientFunds) and then `pay` for the user's
-      // successful retry on the same InvoiceId. If we flip status to 'failed'
-      // here, the subsequent `pay` webhook's process_payment_success() — which
-      // requires status='pending' — will silently no-op and tokens won't be
-      // credited. We therefore keep the record as 'pending' and let:
-      //   (a) a successful retry credit it normally, or
-      //   (b) cleanup-stale-payments mark it failed after 30 minutes.
-      // No user notification here either — would conflict with a later success.
+      
+      // Update payment status if we have external_payment_id
       if (externalPaymentId) {
+        // Get payment record to find user_id for notification
         const { data: failedPayment } = await supabaseServiceRole
           .from('payments')
-          .select('status')
+          .select('user_id, package_name')
           .eq('external_payment_id', externalPaymentId)
           .single();
 
-        console.log(`Fail webhook for ${externalPaymentId} (current status=${failedPayment?.status}, reason=${webhookData.Reason}). Keeping pending to allow retry.`);
+        await supabaseServiceRole
+          .from('payments')
+          .update({
+            status: 'failed',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('external_payment_id', externalPaymentId);
+
+        // Send notification to user about failed payment
+        if (failedPayment?.user_id) {
+          await supabaseServiceRole
+            .from('notifications')
+            .insert({
+              user_id: failedPayment.user_id,
+              title: 'Оплата не прошла',
+              message: `Платёж за "${failedPayment.package_name || 'пакет'}" не был завершён. Причина: ${webhookData.Reason || 'неизвестна'}`,
+              type: 'payment_failed',
+            });
+        }
       }
       
       const forwardedFor = req.headers.get('x-forwarded-for');

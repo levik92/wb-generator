@@ -12,74 +12,71 @@ interface ServiceFAQProps {
   subtitle?: string;
   items: FAQItem[];
   schemaType?: string;
-  eyebrow?: string;
 }
 
-export const ServiceFAQ = ({
-  title = "Часто задаваемые вопросы",
+export const ServiceFAQ = ({ 
+  title = "Часто задаваемые вопросы", 
   subtitle,
   items,
-  schemaType = "FAQPage",
-  eyebrow = "FAQ",
+  schemaType = "FAQPage"
 }: ServiceFAQProps) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  // Generate JSON-LD for SEO
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": schemaType,
-    mainEntity: items.map((item) => ({
+    "mainEntity": items.map(item => ({
       "@type": "Question",
-      name: item.question,
-      acceptedAnswer: { "@type": "Answer", text: item.answer },
-    })),
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
   };
 
-  const words = title.split(" ");
-  const tail = words.slice(-2).join(" ");
-  const head = words.slice(0, -2).join(" ");
-
   return (
-    <section ref={ref} className="section-shell">
+    <section ref={ref} className="py-16 sm:py-24 relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
-      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+      
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="section-header"
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
         >
-          <span className="section-eyebrow">{eyebrow}</span>
-          <h2 className="section-title">
-            {head ? <>{head} <span className="text-aurora">{tail}</span></> : <span className="text-aurora">{title}</span>}
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
+            {title}
           </h2>
-          {subtitle && <p className="section-subtitle">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-white/50 max-w-2xl mx-auto">{subtitle}</p>
+          )}
         </motion.div>
 
-        <div className="max-w-3xl mx-auto space-y-3">
+        <div className="max-w-3xl mx-auto space-y-4">
           {items.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="glass-card rounded-2xl overflow-hidden"
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="glass-card rounded-xl overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full flex items-center justify-between p-5 sm:p-6 text-left group"
+                className="w-full flex items-center justify-between p-5 text-left"
               >
-                <span className="font-semibold text-white pr-4 group-hover:text-[hsl(263,90%,80%)] transition-colors">
-                  {item.question}
-                </span>
-                <ChevronDown
+                <span className="font-semibold text-white pr-4">{item.question}</span>
+                <ChevronDown 
                   className={`w-5 h-5 text-white/50 flex-shrink-0 transition-transform duration-300 ${
-                    openIndex === index ? "rotate-180 text-[hsl(263,90%,75%)]" : ""
+                    openIndex === index ? 'rotate-180' : ''
                   }`}
                 />
               </button>
@@ -92,7 +89,7 @@ export const ServiceFAQ = ({
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-white/65 leading-relaxed border-t border-white/10 pt-4">
+                    <div className="px-5 pb-5 text-white/60 border-t border-white/10 pt-4">
                       {item.answer}
                     </div>
                   </motion.div>

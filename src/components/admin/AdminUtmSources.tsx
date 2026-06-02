@@ -8,10 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { ResponsiveDialog, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter } from "@/components/ui/responsive-dialog";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus, Wallet, EyeOff, Eye, Tag, Megaphone, Target, Globe, Sparkles, ChevronRight } from "lucide-react";
+import { Plus, Copy, Trash2, Link2, Users, CreditCard, MousePointerClick, Loader2, ExternalLink, Pin, PinOff, CopyPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { publicSiteUrl } from "@/config/runtime";
-import { UtmPaymentsDialog } from "./UtmPaymentsDialog";
 
 interface UtmSource {
   id: string;
@@ -28,28 +27,9 @@ interface UtmStats {
   visits: number;
   registrations: number;
   payments: number;
-  revenue: number;
 }
 
 const PAGE_SIZE = 20;
-const HIDDEN_STORAGE_KEY = "admin_utm_hidden_ids";
-
-const loadHiddenIds = (): Set<string> => {
-  try {
-    const raw = localStorage.getItem(HIDDEN_STORAGE_KEY);
-    if (!raw) return new Set();
-    const arr = JSON.parse(raw);
-    return new Set(Array.isArray(arr) ? arr : []);
-  } catch {
-    return new Set();
-  }
-};
-
-const saveHiddenIds = (ids: Set<string>) => {
-  try {
-    localStorage.setItem(HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(ids)));
-  } catch {}
-};
 
 export function AdminUtmSources() {
   const [sources, setSources] = useState<UtmSource[]>([]);
@@ -60,9 +40,6 @@ export function AdminUtmSources() {
   const [hasMore, setHasMore] = useState(true);
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(() => loadHiddenIds());
-  const [showHidden, setShowHidden] = useState(false);
-  const [paymentsDialog, setPaymentsDialog] = useState<{ id: string; name: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   
   // Form
@@ -81,8 +58,7 @@ export function AdminUtmSources() {
   };
 
   const fetchStatsForOne = async (source: UtmSource): Promise<UtmStats> => {
-    // Visits and registrations: exact counts via head requests
-    const [visitsRes, regsRes] = await Promise.all([
+    const [visitsRes, regsRes, utmProfilesRes] = await Promise.all([
       supabase
         .from('utm_visits')
         .select('id', { count: 'exact', head: true })
@@ -91,62 +67,28 @@ export function AdminUtmSources() {
         .from('profiles')
         .select('id', { count: 'exact', head: true })
         .eq('utm_source_id', source.id),
-    ]);
-
-    // Fetch ALL attributed profile ids (paginate to bypass 1000-row Supabase limit)
-    const PROFILE_PAGE = 1000;
-    const userIds: string[] = [];
-    const expected = regsRes.count ?? null;
-    for (let offset = 0; ; offset += PROFILE_PAGE) {
-      const { data, error } = await supabase
+      supabase
         .from('profiles')
         .select('id')
-        .eq('utm_source_id', source.id)
-        .order('id', { ascending: true })
-        .range(offset, offset + PROFILE_PAGE - 1);
-      if (error) {
-        console.error('UTM profile ids fetch error:', error);
-        break;
-      }
-      const chunk = (data || []).map((p: any) => p.id);
-      userIds.push(...chunk);
-      if (chunk.length < PROFILE_PAGE) break;
-      if (expected !== null && userIds.length >= expected) break;
-    }
+        .eq('utm_source_id', source.id),
+    ]);
 
     let paymentsCount = 0;
-    let revenue = 0;
-    if (userIds.length > 0) {
-      const CHUNK = 100;
-      const PAY_PAGE = 1000;
-      for (let i = 0; i < userIds.length; i += CHUNK) {
-        const chunk = userIds.slice(i, i + CHUNK);
-        // Paginate payments per chunk in case > 1000 rows
-        for (let payOffset = 0; ; payOffset += PAY_PAGE) {
-          const { data: paid, error: payErr } = await supabase
-            .from('payments')
-            .select('amount')
-            .in('user_id', chunk)
-            .eq('status', 'succeeded')
-            .order('created_at', { ascending: false })
-            .range(payOffset, payOffset + PAY_PAGE - 1);
-          if (payErr) {
-            console.error('UTM payments fetch error:', payErr);
-            break;
-          }
-          const rows = paid || [];
-          paymentsCount += rows.length;
-          revenue += rows.reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
-          if (rows.length < PAY_PAGE) break;
-        }
-      }
+    const utmProfiles = utmProfilesRes.data;
+    if (utmProfiles && utmProfiles.length > 0) {
+      const userIds = utmProfiles.map(p => p.id);
+      const { count } = await supabase
+        .from('payments')
+        .select('id', { count: 'exact', head: true })
+        .in('user_id', userIds)
+        .eq('status', 'succeeded');
+      paymentsCount = count || 0;
     }
 
     return {
       visits: visitsRes.count || 0,
       registrations: regsRes.count || 0,
       payments: paymentsCount,
-      revenue,
     };
   };
 
@@ -173,7 +115,7 @@ export function AdminUtmSources() {
           setStats(prev => ({ ...prev, [source.id]: s }));
         } catch (e) {
           console.error('UTM stats fetch error:', e);
-          results[source.id] = { visits: 0, registrations: 0, payments: 0, revenue: 0 };
+          results[source.id] = { visits: 0, registrations: 0, payments: 0 };
           setStats(prev => ({ ...prev, [source.id]: results[source.id] }));
         } finally {
           setStatsLoading(prev => ({ ...prev, [source.id]: false }));
@@ -309,31 +251,6 @@ export function AdminUtmSources() {
     }
   };
 
-  const handleHide = (id: string) => {
-    setHiddenIds(prev => {
-      const next = new Set(prev);
-      next.add(id);
-      saveHiddenIds(next);
-      return next;
-    });
-    toast.success("Источник скрыт со страницы");
-  };
-
-  const handleUnhide = (id: string) => {
-    setHiddenIds(prev => {
-      const next = new Set(prev);
-      next.delete(id);
-      saveHiddenIds(next);
-      return next;
-    });
-  };
-
-  const handleUnhideAll = () => {
-    setHiddenIds(new Set());
-    saveHiddenIds(new Set());
-    toast.success("Скрытые источники показаны");
-  };
-
   const handleDuplicate = (source: UtmSource) => {
     setFormName(source.name + " (копия)");
     setFormSource(source.utm_source);
@@ -386,8 +303,6 @@ export function AdminUtmSources() {
     return ((to / from) * 100).toFixed(1) + '%';
   };
 
-  const formatRub = (val: number) => `${Math.round(val).toLocaleString('ru-RU')} ₽`;
-
   if (loading && sources.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
@@ -395,10 +310,6 @@ export function AdminUtmSources() {
       </div>
     );
   }
-
-  const visibleSources = showHidden ? sources : sources.filter(s => !hiddenIds.has(s.id));
-  const hiddenCount = sources.reduce((n, s) => n + (hiddenIds.has(s.id) ? 1 : 0), 0);
-  const visibleStats = Object.entries(stats).filter(([id]) => showHidden || !hiddenIds.has(id)).map(([, v]) => v);
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -409,57 +320,34 @@ export function AdminUtmSources() {
             Создавайте UTM-ссылки и отслеживайте эффективность каналов
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {hiddenCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowHidden(v => !v)}
-              className="gap-2"
-              title={showHidden ? "Спрятать скрытые" : "Показать скрытые"}
-            >
-              {showHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              {showHidden ? "Скрыть" : `Скрытые (${hiddenCount})`}
-            </Button>
-          )}
-          {hiddenCount > 0 && showHidden && (
-            <Button variant="ghost" size="sm" onClick={handleUnhideAll}>
-              Сбросить
-            </Button>
-          )}
-          <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Добавить источник
-          </Button>
-        </div>
+        <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="gap-2">
+          <Plus className="w-4 h-4" />
+          Добавить источник
+        </Button>
       </div>
 
       {/* Summary stats */}
-      {visibleSources.length > 0 && (() => {
+      {sources.length > 0 && (() => {
         const anyLoading = Object.values(statsLoading).some(Boolean);
-        const sumVisits = visibleStats.reduce((s, v) => s + v.visits, 0);
-        const sumRegs = visibleStats.reduce((s, v) => s + v.registrations, 0);
-        const sumPay = visibleStats.reduce((s, v) => s + v.payments, 0);
-        const sumRevenue = visibleStats.reduce((s, v) => s + (v.revenue || 0), 0);
+        const sumVisits = Object.values(stats).reduce((s, v) => s + v.visits, 0);
+        const sumRegs = Object.values(stats).reduce((s, v) => s + v.registrations, 0);
+        const sumPay = Object.values(stats).reduce((s, v) => s + v.payments, 0);
         const summaryNum = (val: number) => anyLoading
           ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           : <p className="text-xl font-bold">{val.toLocaleString('ru-RU')}</p>;
-        const summaryRub = (val: number) => anyLoading
-          ? <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-          : <p className="text-xl font-bold">{formatRub(val)}</p>;
         return (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3"
         >
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
               <Link2 className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground">Источников</span>
             </div>
-            <p className="text-xl font-bold">{visibleSources.length}</p>
+            <p className="text-xl font-bold">{sources.length}</p>
           </div>
           <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30">
             <div className="flex items-center gap-2 mb-1">
@@ -482,34 +370,23 @@ export function AdminUtmSources() {
             </div>
             {summaryNum(sumPay)}
           </div>
-          <div className="p-3 md:p-4 rounded-xl bg-card border border-border/30 col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Wallet className="w-4 h-4 text-violet-500" />
-              <span className="text-xs text-muted-foreground">Сумма оплат</span>
-            </div>
-            {summaryRub(sumRevenue)}
-          </div>
         </motion.div>
         );
       })()}
 
       {/* Sources list */}
-      {visibleSources.length === 0 ? (
+      {sources.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Link2 className="w-12 h-12 text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground text-sm">
-              {sources.length === 0 ? "Нет UTM-источников" : "Все источники скрыты"}
-            </p>
-            <p className="text-muted-foreground/60 text-xs mt-1">
-              {sources.length === 0 ? "Создайте первый источник для отслеживания трафика" : "Нажмите «Скрытые», чтобы их показать"}
-            </p>
+            <p className="text-muted-foreground text-sm">Нет UTM-источников</p>
+            <p className="text-muted-foreground/60 text-xs mt-1">Создайте первый источник для отслеживания трафика</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {visibleSources.map((source, index) => {
-            const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0, revenue: 0 };
+          {sources.map((source, index) => {
+            const s = stats[source.id] || { visits: 0, registrations: 0, payments: 0 };
             const isStatLoading = !!statsLoading[source.id];
             const renderNum = (val: number, color: string) => isStatLoading
               ? <Loader2 className={cn("w-4 h-4 mx-auto animate-spin", color)} />
@@ -526,9 +403,8 @@ export function AdminUtmSources() {
               >
                 <Card className={cn(
                   "overflow-hidden transition-colors",
-                  source.is_pinned && "border-amber-500/40 bg-card shadow-sm"
+                  source.is_pinned && "border-amber-500/40 bg-amber-500/[0.03]"
                 )}>
-
                   <CardContent className="p-4 md:p-5">
                     <div className="flex flex-col gap-4">
                       {/* Top row: name + actions */}
@@ -561,7 +437,7 @@ export function AdminUtmSources() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={cn("h-8 w-8", source.is_pinned && "text-amber-500 hover:bg-orange-500 hover:text-white")}
+                            className={cn("h-8 w-8", source.is_pinned && "text-amber-500 hover:text-amber-600")}
                             onClick={() => handleTogglePin(source)}
                             title={source.is_pinned ? "Открепить" : "Закрепить наверх"}
                           >
@@ -576,28 +452,19 @@ export function AdminUtmSources() {
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => window.open(buildUtmUrl(source), '_blank')} title="Открыть">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </Button>
-                          {hiddenIds.has(source.id) ? (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleUnhide(source.id)} title="Показать">
-                              <Eye className="w-3.5 h-3.5" />
-                            </Button>
-                          ) : (
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleHide(source.id)} title="Скрыть со страницы">
-                              <EyeOff className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => handleDelete(source.id)} title="Удалить">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(source.id)} title="Удалить">
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
                       </div>
 
-                      {/* Funnel stats — desktop */}
-                      <div className="hidden sm:grid grid-cols-6 gap-3">
+                      {/* Funnel stats */}
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-3">
                         <div className="p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Переходы</p>
                           {renderNum(s.visits, "text-blue-500")}
                         </div>
-                        <div className="p-2.5 rounded-lg bg-muted/30 text-center">
+                        <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
                           {renderConv(s.visits, s.registrations)}
                         </div>
@@ -605,77 +472,26 @@ export function AdminUtmSources() {
                           <p className="text-[10px] text-muted-foreground mb-0.5">Регистрации</p>
                           {renderNum(s.registrations, "text-emerald-500")}
                         </div>
-                        <div className="p-2.5 rounded-lg bg-muted/30 text-center">
+                        <div className="hidden sm:block p-2.5 rounded-lg bg-muted/30 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">→ Conv.</p>
                           {renderConv(s.registrations, s.payments)}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
-                          className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center hover:bg-amber-500/10 transition-colors cursor-pointer"
-                          title="Посмотреть оплаты по источнику"
-                        >
+                        <div className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
                           <p className="text-[10px] text-muted-foreground mb-0.5">Оплаты</p>
                           {renderNum(s.payments, "text-amber-500")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
-                          className="p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center hover:bg-violet-500/10 transition-colors cursor-pointer"
-                          title="Посмотреть оплаты по источнику"
-                        >
-                          <p className="text-[10px] text-muted-foreground mb-0.5">Сумма оплат</p>
-                          {isStatLoading
-                            ? <Loader2 className="w-4 h-4 mx-auto animate-spin text-violet-500" />
-                            : <p className="text-base font-bold text-violet-500">{formatRub(s.revenue)}</p>}
-                        </button>
-                      </div>
-
-                      {/* Funnel stats — mobile (compact funnel) */}
-                      <div className="sm:hidden space-y-2">
-                        <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-1.5">
-                          <div className="p-2 rounded-lg bg-blue-500/5 border border-blue-500/10 text-center">
-                            <p className="text-[9px] text-muted-foreground leading-tight">Переходы</p>
-                            {renderNum(s.visits, "text-blue-500")}
-                          </div>
-                          <div className="flex flex-col items-center justify-center px-0.5">
-                            <ChevronRight className="w-3 h-3 text-muted-foreground/60" />
-                            {isStatLoading
-                              ? <Loader2 className="w-2.5 h-2.5 animate-spin text-muted-foreground" />
-                              : <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{getConversion(s.visits, s.registrations)}</span>}
-                          </div>
-                          <div className="p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-center">
-                            <p className="text-[9px] text-muted-foreground leading-tight">Рег.</p>
-                            {renderNum(s.registrations, "text-emerald-500")}
-                          </div>
-                          <div className="flex flex-col items-center justify-center px-0.5">
-                            <ChevronRight className="w-3 h-3 text-muted-foreground/60" />
-                            {isStatLoading
-                              ? <Loader2 className="w-2.5 h-2.5 animate-spin text-muted-foreground" />
-                              : <span className="text-[9px] font-medium text-muted-foreground tabular-nums">{getConversion(s.registrations, s.payments)}</span>}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
-                            className="p-2 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center hover:bg-amber-500/10 transition-colors"
-                          >
-                            <p className="text-[9px] text-muted-foreground leading-tight">Оплаты</p>
-                            {renderNum(s.payments, "text-amber-500")}
-                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setPaymentsDialog({ id: source.id, name: source.name })}
-                          className="w-full flex items-center justify-between gap-3 p-2.5 rounded-lg bg-gradient-to-r from-violet-500/[0.08] to-violet-500/[0.03] border border-violet-500/15 hover:from-violet-500/[0.12] transition-colors"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Wallet className="w-3.5 h-3.5 text-violet-500" />
-                            <span className="text-xs text-muted-foreground">Сумма оплат</span>
-                          </div>
-                          {isStatLoading
-                            ? <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
-                            : <span className="text-sm font-bold text-violet-500 tabular-nums">{formatRub(s.revenue)}</span>}
-                        </button>
+                      </div>
+                      
+                      {/* Mobile conversion row */}
+                      <div className="flex sm:hidden gap-2">
+                        <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
+                          <p className="text-[10px] text-muted-foreground">Переход → Рег.</p>
+                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.visits, s.registrations)}</p>}
+                        </div>
+                        <div className="flex-1 p-2 rounded-lg bg-muted/30 text-center">
+                          <p className="text-[10px] text-muted-foreground">Рег. → Оплата</p>
+                          {isStatLoading ? <Loader2 className="w-3 h-3 mx-auto animate-spin text-muted-foreground" /> : <p className="text-xs font-semibold">{getConversion(s.registrations, s.payments)}</p>}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -705,146 +521,79 @@ export function AdminUtmSources() {
         setDialogOpen(open);
         if (!open) resetForm();
       }}>
-        <ResponsiveDialogContent className="sm:max-w-lg">
-          <ResponsiveDialogHeader className="pb-2">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/25 shrink-0">
-                <Link2 className="h-5 w-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <ResponsiveDialogTitle className="text-lg">Новый UTM-источник</ResponsiveDialogTitle>
-                <ResponsiveDialogDescription className="text-xs mt-1">
-                  Создайте ссылку для отслеживания трафика
-                </ResponsiveDialogDescription>
-              </div>
-            </div>
+        <ResponsiveDialogContent>
+          <ResponsiveDialogHeader>
+            <ResponsiveDialogTitle>Новый UTM-источник</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>
+              Создайте ссылку для отслеживания трафика
+            </ResponsiveDialogDescription>
           </ResponsiveDialogHeader>
 
           <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="utm-name" className="text-xs font-medium flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5 text-violet-500" />
-                Название <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="utm-name"
-                value={formName}
-                onChange={e => setFormName(e.target.value)}
-                placeholder="Telegram канал, VK реклама..."
-                className="focus-visible:ring-violet-500/40"
+            <div>
+              <Label>Название *</Label>
+              <Input 
+                value={formName} 
+                onChange={e => setFormName(e.target.value)} 
+                placeholder="Telegram канал, VK реклама..." 
               />
             </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="utm-source" className="text-xs font-medium flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-violet-500" />
-                utm_source <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="utm-source"
-                value={formSource}
-                onChange={e => setFormSource(e.target.value)}
-                placeholder="telegram, vk, google..."
-                className="focus-visible:ring-violet-500/40 font-mono text-sm"
+            <div>
+              <Label>utm_source *</Label>
+              <Input 
+                value={formSource} 
+                onChange={e => setFormSource(e.target.value)} 
+                placeholder="telegram, vk, google..." 
               />
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="utm-medium" className="text-xs font-medium flex items-center gap-1.5">
-                  <Megaphone className="w-3.5 h-3.5 text-violet-500" />
-                  utm_medium
-                </Label>
-                <Input
-                  id="utm-medium"
-                  value={formMedium}
-                  onChange={e => setFormMedium(e.target.value)}
-                  placeholder="cpc, social, email..."
-                  className="focus-visible:ring-violet-500/40 font-mono text-sm"
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>utm_medium</Label>
+                <Input 
+                  value={formMedium} 
+                  onChange={e => setFormMedium(e.target.value)} 
+                  placeholder="cpc, social, email..." 
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="utm-campaign" className="text-xs font-medium flex items-center gap-1.5">
-                  <Target className="w-3.5 h-3.5 text-violet-500" />
-                  utm_campaign
-                </Label>
-                <Input
-                  id="utm-campaign"
-                  value={formCampaign}
-                  onChange={e => setFormCampaign(e.target.value)}
-                  placeholder="spring_2026..."
-                  className="focus-visible:ring-violet-500/40 font-mono text-sm"
+              <div>
+                <Label>utm_campaign</Label>
+                <Input 
+                  value={formCampaign} 
+                  onChange={e => setFormCampaign(e.target.value)} 
+                  placeholder="spring_2026..." 
                 />
               </div>
             </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="utm-baseurl" className="text-xs font-medium flex items-center gap-1.5">
-                <Globe className="w-3.5 h-3.5 text-violet-500" />
-                Базовый URL
-              </Label>
-              <Input
-                id="utm-baseurl"
-                value={formBaseUrl}
-                onChange={e => setFormBaseUrl(e.target.value)}
-                className="focus-visible:ring-violet-500/40 font-mono text-sm"
+            <div>
+              <Label>Базовый URL</Label>
+              <Input 
+                value={formBaseUrl} 
+                onChange={e => setFormBaseUrl(e.target.value)} 
               />
             </div>
 
             {/* Preview */}
             {formSource && (
-              <div className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-purple-500/5 to-transparent p-3">
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-[10px] font-medium text-violet-600 dark:text-violet-400 uppercase tracking-wide flex items-center gap-1">
-                    <Link2 className="w-3 h-3" />
-                    Превью ссылки
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const url = `${formBaseUrl}?utm_source=${formSource}${formMedium ? `&utm_medium=${formMedium}` : ''}${formCampaign ? `&utm_campaign=${formCampaign}` : ''}`;
-                      navigator.clipboard.writeText(url);
-                      toast.success("Ссылка скопирована");
-                    }}
-                    className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
-                  >
-                    <Copy className="w-3 h-3" />
-                    Копировать
-                  </button>
-                </div>
-                <p className="text-xs break-all text-foreground/90 font-mono leading-relaxed">
-                  {formBaseUrl}
-                  <span className="text-violet-600 dark:text-violet-400">?utm_source=</span>{formSource}
-                  {formMedium && <><span className="text-violet-600 dark:text-violet-400">&utm_medium=</span>{formMedium}</>}
-                  {formCampaign && <><span className="text-violet-600 dark:text-violet-400">&utm_campaign=</span>{formCampaign}</>}
+              <div className="p-3 rounded-lg bg-muted/50 border border-border/30">
+                <p className="text-[10px] text-muted-foreground mb-1">Превью ссылки:</p>
+                <p className="text-xs break-all text-foreground/80">
+                  {formBaseUrl}?utm_source={formSource}
+                  {formMedium ? `&utm_medium=${formMedium}` : ''}
+                  {formCampaign ? `&utm_campaign=${formCampaign}` : ''}
                 </p>
               </div>
             )}
           </div>
 
-          <ResponsiveDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setDialogOpen(false)} className="sm:w-auto">
-              Отмена
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={creating}
-              className="sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25 border-0"
-            >
+          <ResponsiveDialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Отмена</Button>
+            <Button onClick={handleCreate} disabled={creating}>
               {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Создать
             </Button>
           </ResponsiveDialogFooter>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
-
-
-      <UtmPaymentsDialog
-        open={!!paymentsDialog}
-        onOpenChange={(v) => !v && setPaymentsDialog(null)}
-        utmSourceId={paymentsDialog?.id || null}
-        sourceName={paymentsDialog?.name || ""}
-      />
     </div>
   );
 }

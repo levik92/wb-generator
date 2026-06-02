@@ -109,7 +109,7 @@ export function UserFiltersPopover({
             )}
           </Button>
         ) : (
-          <Button variant="outline" size="sm" className="gap-1.5 shrink-0 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/30 transition-colors">
+          <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
             <Filter className="h-3.5 w-3.5" />
             Фильтры
             {totalActive > 0 && (

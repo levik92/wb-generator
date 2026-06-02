@@ -5,7 +5,6 @@ import {
   SUPABASE_SERVICE_ROLE_KEY,
   SUPABASE_ANON_KEY,
   YOOKASSA_SECRET_KEY,
-  YOOKASSA_SHOP_ID,
   PUBLIC_SITE_URL,
 } from "../_shared/runtime-config.ts";
 
@@ -19,7 +18,6 @@ interface PaymentRequest {
   amount?: number;
   tokens?: number;
   promoCode?: string;
-  provider?: 'yookassa' | 'cloudpayments';
 }
 
 // Custom fetch with timeout using AbortController
@@ -139,7 +137,7 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
     
-    const activeProvider = body.provider || providerSettings?.active_provider || 'yookassa';
+    const activeProvider = providerSettings?.active_provider || 'yookassa';
     
     if (activeProvider === 'cloudpayments') {
       // For CloudPayments, we create a pending payment record and return widget data
@@ -182,30 +180,6 @@ serve(async (req) => {
       
       const originUrl = req.headers.get("origin") || PUBLIC_SITE_URL;
       
-      const receiptItem = {
-        label: `Токены для WB Генератор: ${body.packageName}`,
-        price: finalAmount,
-        quantity: 1.00,
-        amount: finalAmount,
-        vat: null,
-        method: 4,
-        object: 4,
-        measurementUnit: 'шт',
-      };
-
-      const receipt = {
-        items: [receiptItem],
-        taxationSystem: 1,
-        email: user.email,
-        isBso: false,
-        amounts: {
-          electronic: finalAmount,
-          advancePayment: 0,
-          credit: 0,
-          provision: 0,
-        },
-      };
-
       return new Response(JSON.stringify({
         provider: 'cloudpayments',
         intentParams: {
@@ -213,22 +187,10 @@ serve(async (req) => {
           description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
           amount: finalAmount,
           currency: 'RUB',
-          culture: 'ru-RU',
           paymentSchema: 'Single',
           externalId: externalPaymentId,
           skin: 'modern',
           autoClose: 3,
-          retryPayment: true,
-          receiptEmail: user.email,
-          receipt,
-          items: [
-            {
-              id: externalPaymentId,
-              name: `Пакет токенов: ${body.packageName}`,
-              count: 1,
-              price: finalAmount,
-            },
-          ],
           userInfo: {
             accountId: user.id,
             email: user.email,
@@ -241,17 +203,28 @@ serve(async (req) => {
             promo_type: appliedPromo?.type || '',
             promo_value: appliedPromo?.value?.toString() || '',
             external_payment_id: externalPaymentId,
-            // legacy compatibility for older webhook integrations
             cloudPayments: {
               CustomerReceipt: {
-                Items: [receiptItem],
+                Items: [
+                  {
+                    label: `Токены для WB Генератор: ${body.packageName}`,
+                    price: finalAmount,
+                    quantity: 1.00,
+                    amount: finalAmount,
+                    vat: null,
+                    method: 4,
+                    object: 4,
+                  }
+                ],
                 taxationSystem: 1,
                 email: user.email,
                 isBso: false,
-                amounts: { electronic: finalAmount },
+                amounts: {
+                  electronic: finalAmount,
+                },
                 Inn: '9724238597',
-              },
-            },
+              }
+            }
           },
           successRedirectUrl: `${originUrl}/dashboard?payment=success`,
           failRedirectUrl: `${originUrl}/dashboard?payment=failed`,
@@ -325,7 +298,7 @@ serve(async (req) => {
           {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${btoa(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`)}`,
+              'Authorization': `Basic ${btoa(`1267489:${YOOKASSA_SECRET_KEY}`)}`,
               'Content-Type': 'application/json',
               'Idempotence-Key': idempotenceKey,
               'Connection': 'close',

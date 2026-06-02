@@ -392,16 +392,6 @@ const SeoDescriptions = () => {
         subtitle="с ключевыми словами"
         description="Генерируйте продающие описания по формуле AIDA за 30 секунд. ИИ анализирует конкурентов и подбирает ключевые слова."
         badge="📝 50 000+ описаний создано"
-        accent="blue"
-        signature={(
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-white/70 font-mono">AIDA</span>
-            <span className="text-white/30">→</span>
-            <span className="px-2.5 py-1 rounded-md bg-sky-500/10 border border-sky-500/20 text-sky-200 font-mono">+keywords</span>
-            <span className="text-white/30">→</span>
-            <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 font-mono">конверсия +35%</span>
-          </div>
-        )}
         breadcrumbs={[
           { label: "Продукт" },
           { label: "SEO-описания" },

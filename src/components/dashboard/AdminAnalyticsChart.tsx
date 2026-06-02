@@ -5,14 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
-import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator, CalendarIcon, ExternalLink, PieChart } from "lucide-react";
+import { Users, Activity, Coins, DollarSign, TrendingUp, TrendingDown, Minus, CreditCard, Repeat, Calculator, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
-import { PaidUsersDetailDialog } from "@/components/admin/PaidUsersDetailDialog";
 
 interface ChartData {
   date: string;
@@ -153,25 +152,30 @@ export function AdminAnalyticsChart({
   const effectiveDateRange = dateRange ?? internalDateRange;
   const setEffectiveDateRange = onDateRangeChange ?? setInternalDateRange;
 
-  // Обработчик выбора даты: первый клик — начало, второй — конец
+  // Обработчик выбора даты в календаре
   const handleCalendarSelect = (range: DateRange | undefined) => {
-    if (!range || !range.from) {
+    if (!range) {
       setPendingRange(undefined);
       setIsSelectingRange(false);
       return;
     }
 
-    if (range.from && range.to && range.from.getTime() !== range.to.getTime()) {
-      // Полный диапазон выбран — нормализуем порядок
-      const finalFrom = range.from <= range.to ? range.from : range.to;
-      const finalTo = range.from <= range.to ? range.to : range.from;
-      setPendingRange(undefined);
-      setIsSelectingRange(false);
-      setEffectiveDateRange({ from: finalFrom, to: finalTo });
-    } else {
-      // Только начало — ждём второго клика
+    if (!isSelectingRange) {
+      // Первый клик — запоминаем начало диапазона, ждём второй клик
       setPendingRange({ from: range.from, to: undefined });
       setIsSelectingRange(true);
+    } else {
+      // Второй клик — диапазон выбран
+      const from = pendingRange?.from || range.from;
+      const to = range.to || range.from;
+      setPendingRange(undefined);
+      setIsSelectingRange(false);
+      if (from && to) {
+        // Убеждаемся что from < to
+        const finalFrom = from <= to ? from : to;
+        const finalTo = from <= to ? to : from;
+        setEffectiveDateRange({ from: finalFrom, to: finalTo });
+      }
     }
   };
 
@@ -310,20 +314,16 @@ export function AdminAnalyticsChart({
       const prevValue = typeof prevEntry?.value === 'number' ? prevEntry.value : 0;
       
       return (
-        <div className="bg-popover/95 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-2.5 shadow-xl">
-          <p className="text-[11px] font-medium text-muted-foreground mb-1.5">
+        <div className="bg-background border rounded-lg p-3 shadow-lg">
+          <p className="text-sm font-medium text-foreground mb-1">
             {formatXAxisDate(label, data?.groupFormat || 'day')}
           </p>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
-            <span className="text-muted-foreground">Текущий:</span>
-            <span className="font-semibold tabular-nums text-foreground">{config.formatTooltip(currentValue)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm mt-0.5">
-            <span className="w-2 h-2 rounded-full opacity-40" style={{ backgroundColor: config.color }} />
-            <span className="text-muted-foreground">Прошлый:</span>
-            <span className="font-medium tabular-nums text-muted-foreground">{config.formatTooltip(prevValue)}</span>
-          </div>
+          <p className="text-sm text-foreground">
+            <span className="font-medium">Текущий:</span> {config.formatTooltip(currentValue)}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium">Прошлый:</span> {config.formatTooltip(prevValue)}
+          </p>
         </div>
       );
     }
@@ -331,58 +331,43 @@ export function AdminAnalyticsChart({
   };
 
   if (loading) {
-    return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-5">
+    return <Card className="animate-fade-in bg-card">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <span className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${config.color}1a`, color: config.color }}>
-              <Icon className="h-4 w-4" />
-            </span>
+            <Icon className="h-4 w-4" />
             {config.title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-5 pt-0">
-          <div className="flex items-center justify-center h-[180px] sm:h-[220px]">
+        <CardContent>
+          <div className="flex items-center justify-center h-[200px]">
             <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
         </CardContent>
       </Card>;
   }
 
-  return <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-0">
-
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${config.color}1a`, color: config.color }}>
-            <Icon className="h-4 w-4" />
-          </span>
-          <CardTitle className="text-sm font-semibold truncate">{config.title}</CardTitle>
+  return <Card className="animate-fade-in">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">{config.title}</CardTitle>
         </div>
         <Popover>
           <PopoverTrigger asChild>
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors"
+              className="h-6 px-2 text-xs gap-1"
             >
               <CalendarIcon className="h-3 w-3" />
-              <span className="hidden sm:inline">{formatDateRange()}</span>
-              <span className="sm:hidden">Период</span>
+              {formatDateRange()}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 rounded-xl border-border/60 shadow-xl overflow-hidden" align="end">
-            <div className="px-3 pt-2 pb-1 border-b border-border/40 bg-muted/30 w-full">
-              <div className="text-[10px] leading-tight font-medium text-muted-foreground text-center">
-
-                {isSelectingRange && pendingRange?.from
-                  ? <>Начало: <span className="text-foreground font-semibold tabular-nums">{format(pendingRange.from, "dd.MM.yy", { locale: ru })}</span> · выберите конец</>
-                  : "Выберите начало, затем — конец периода"}
-              </div>
-            </div>
+          <PopoverContent className="w-auto p-0" align="end">
             <Calendar
               mode="range"
               selected={displayedRange}
               onSelect={handleCalendarSelect}
-              defaultMonth={displayedRange?.from || effectiveDateRange?.from}
               numberOfMonths={1}
               locale={ru}
               disabled={(date) => date > new Date()}
@@ -392,26 +377,26 @@ export function AdminAnalyticsChart({
         </Popover>
       </CardHeader>
       
-      <CardContent className="p-4 sm:p-5 pt-0">
-        <div className="space-y-3 sm:space-y-4">
+      <CardContent>
+        <div className="space-y-4">
           {/* Total Value */}
-          <div className="flex items-end justify-between gap-2 flex-wrap">
-            <div className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">
               {data ? config.formatValue(data.totals[type]) : '---'}
             </div>
-            {trend.trend !== 'neutral' && <Badge variant="outline" className={`gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${trend.trend === 'up' ? 'text-emerald-600 border-emerald-500/30 bg-emerald-500/10 dark:text-emerald-400' : 'text-red-600 border-red-500/30 bg-red-500/10 dark:text-red-400'}`}>
+            {trend.trend !== 'neutral' && <Badge variant="outline" className={`gap-1 ${trend.trend === 'up' ? 'text-green-600 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800' : 'text-red-600 border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800'}`}>
                 {trend.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {trend.percentage.toFixed(1)}%
               </Badge>}
           </div>
 
           {/* Chart */}
-          <div className="h-[180px] sm:h-[220px] w-full">
+          <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={combinedChartData} margin={{ top: 4, right: 4, left: -4, bottom: 0 }}>
+              <AreaChart data={combinedChartData}>
                 <defs>
                   <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.35} />
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purplePrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -419,7 +404,7 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="violetGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.35} />
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="violetPrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -427,7 +412,7 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleTokenGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.35} />
+                    <stop offset="5%" stopColor="#9333ea" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleTokenPrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -435,7 +420,7 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleRevenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.35} />
+                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="purpleRevenuePrevGradient" x1="0" y1="0" x2="0" y2="1">
@@ -443,20 +428,20 @@ export function AdminAnalyticsChart({
                     <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-20" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{
-                fontSize: 11, fill: 'hsl(var(--muted-foreground))'
-              }} tickFormatter={value => formatXAxisDate(value, data?.groupFormat || 'day')} interval="preserveStartEnd" minTickGap={24} />
+                fontSize: 12
+              }} tickFormatter={value => formatXAxisDate(value, data?.groupFormat || 'day')} interval="preserveStartEnd" />
                 <YAxis axisLine={false} tickLine={false} tick={{
-                fontSize: 11, fill: 'hsl(var(--muted-foreground))'
-              }} tickFormatter={value => value >= 1000 ? `${(value/1000).toFixed(value >= 10000 ? 0 : 1)}k` : value.toLocaleString('ru-RU')} width={52} tickMargin={6} />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: config.color, strokeOpacity: 0.25, strokeWidth: 1 }} />
-                {/* Линия предыдущего периода */}
+                fontSize: 12
+              }} tickFormatter={value => value.toLocaleString('ru-RU')} />
+                <Tooltip content={<CustomTooltip />} />
+                {/* Линия предыдущего периода - полупрозрачная, на заднем плане */}
                 <Area 
                   type="monotone" 
                   dataKey="prevValue" 
                   stroke={config.prevColor} 
-                  strokeOpacity={0.35}
+                  strokeOpacity={0.3}
                   strokeDasharray="4 4"
                   fillOpacity={1} 
                   fill={config.prevGradient} 
@@ -464,14 +449,14 @@ export function AdminAnalyticsChart({
                   animationDuration={1500} 
                   animationEasing="ease-out" 
                 />
-                {/* Линия текущего периода */}
+                {/* Линия текущего периода - основная */}
                 <Area 
                   type="monotone" 
                   dataKey="value" 
                   stroke={config.color} 
                   fillOpacity={1} 
                   fill={config.gradient} 
-                  strokeWidth={2.25} 
+                  strokeWidth={2} 
                   animationDuration={1500} 
                   animationEasing="ease-out" 
                 />
@@ -480,7 +465,7 @@ export function AdminAnalyticsChart({
           </div>
 
           {/* Period Description */}
-          <p className="text-[11px] text-muted-foreground text-center tabular-nums">
+          <p className="text-xs text-muted-foreground text-center">
             {formatDateRange()}
           </p>
         </div>
@@ -499,7 +484,6 @@ export function AdminAdditionalMetrics() {
   });
   const [isSelectingRange, setIsSelectingRange] = useState(false);
   const [pendingRange, setPendingRange] = useState<DateRange | undefined>(undefined);
-  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     // Загружаем данные только когда выбран полный диапазон и мы не в процессе выбора
@@ -568,37 +552,28 @@ export function AdminAdditionalMetrics() {
 
   if (loading) {
     return (
-      <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-4 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
-              <Calculator className="h-4 w-4 text-white" />
-            </span>
-            <CardTitle className="text-sm font-semibold truncate">Дополнительные метрики</CardTitle>
-          </div>
+      <Card className="animate-fade-in">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Calculator className="h-4 w-4 text-muted-foreground" />
+            Дополнительные метрики
+          </CardTitle>
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors"
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-6 px-2 text-xs gap-1"
               >
                 <CalendarIcon className="h-3 w-3" />
-                <span className="hidden sm:inline">{formatDateRange()}</span>
-                <span className="sm:hidden">Период</span>
+                {formatDateRange()}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 rounded-xl border-border/60 shadow-xl overflow-hidden" align="end">
-              <div className="px-3 pt-2 pb-1 border-b border-border/40 bg-muted/30 w-full">
-                <div className="text-[10px] leading-tight font-medium text-muted-foreground text-center">
-                  Выберите начало, затем — конец периода
-                </div>
-              </div>
+            <PopoverContent className="w-auto p-0" align="end">
               <Calendar
                 mode="range"
                 selected={displayedRange}
                 onSelect={handleCalendarSelect}
-                defaultMonth={displayedRange?.from || dateRange?.from}
                 numberOfMonths={1}
                 locale={ru}
                 disabled={(date) => date > new Date()}
@@ -607,10 +582,10 @@ export function AdminAdditionalMetrics() {
             </PopoverContent>
           </Popover>
         </CardHeader>
-        <CardContent className="p-4 sm:p-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px]">
+              <div key={i} className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
                 <div className="animate-pulse space-y-2">
                   <div className="h-4 w-24 bg-muted rounded" />
                   <div className="h-8 w-16 bg-muted rounded" />
@@ -624,39 +599,29 @@ export function AdminAdditionalMetrics() {
     );
   }
 
-
   return (
-    <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-4 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
-            <Calculator className="h-4 w-4 text-white" />
-          </span>
-          <CardTitle className="text-sm font-semibold truncate">Дополнительные метрики</CardTitle>
-        </div>
+    <Card className="animate-fade-in">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Calculator className="h-4 w-4 text-muted-foreground" />
+          Дополнительные метрики
+        </CardTitle>
         <Popover>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors"
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-6 px-2 text-xs gap-1"
             >
               <CalendarIcon className="h-3 w-3" />
-              <span className="hidden sm:inline">{formatDateRange()}</span>
-              <span className="sm:hidden">Период</span>
+              {formatDateRange()}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 rounded-xl border-border/60 shadow-xl overflow-hidden" align="end">
-            <div className="px-3 pt-2 pb-1 border-b border-border/40 bg-muted/30 w-full">
-              <div className="text-[10px] leading-tight font-medium text-muted-foreground text-center">
-                Выберите начало, затем — конец периода
-              </div>
-            </div>
+          <PopoverContent className="w-auto p-0" align="end">
             <Calendar
               mode="range"
               selected={displayedRange}
               onSelect={handleCalendarSelect}
-              defaultMonth={displayedRange?.from || dateRange?.from}
               numberOfMonths={1}
               locale={ru}
               disabled={(date) => date > new Date()}
@@ -665,89 +630,70 @@ export function AdminAdditionalMetrics() {
           </PopoverContent>
         </Popover>
       </CardHeader>
-      <CardContent className="p-4 sm:p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Платные пользователи */}
-          <div className="group relative p-4 pr-14 rounded-xl bg-muted/40 border border-border/60 min-h-[110px] flex flex-col transition-colors hover:border-violet-500/30 hover:bg-muted/60">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
-              <span className="h-7 w-7 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                <CreditCard className="h-3.5 w-3.5 text-green-500" />
-              </span>
-              <span className="text-xs font-medium text-muted-foreground truncate">Платные пользователи</span>
+              <CreditCard className="h-4 w-4 text-green-500" />
+              <span className="text-sm text-muted-foreground">Платные пользователи</span>
             </div>
-            <div className="text-2xl font-bold tabular-nums tracking-tight text-green-600 dark:text-green-400">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {metrics?.paidUsers?.toLocaleString('ru-RU') || 0}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Всего: <span className="tabular-nums font-medium text-foreground/80">{metrics?.paidUsersTotal?.toLocaleString('ru-RU') || 0}</span>
+            <p className="text-xs text-muted-foreground mt-1">
+              Всего: {metrics?.paidUsersTotal?.toLocaleString('ru-RU') || 0}
             </p>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg bg-violet-500/10 hover:bg-gradient-to-br hover:from-violet-500 hover:to-purple-600 text-violet-600 dark:text-violet-400 hover:text-white shadow-sm hover:shadow-violet-500/25 transition-all"
-              onClick={() => setDetailOpen(true)}
-              title="Подробнее: новые и повторные"
-            >
-              <PieChart className="h-4 w-4" />
-            </Button>
           </div>
 
           {/* Средний чек */}
-          <div className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px] transition-colors hover:border-violet-500/30 hover:bg-muted/60">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
-              <span className="h-7 w-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                <DollarSign className="h-3.5 w-3.5 text-blue-500" />
-              </span>
-              <span className="text-xs font-medium text-muted-foreground truncate">Средний чек</span>
+              <DollarSign className="h-4 w-4 text-blue-500" />
+              <span className="text-sm text-muted-foreground">Средний чек</span>
             </div>
-            <div className="text-2xl font-bold tabular-nums tracking-tight text-blue-600 dark:text-blue-400">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {metrics?.averageCheck?.toLocaleString('ru-RU') || 0}₽
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Общий: <span className="tabular-nums font-medium text-foreground/80">{metrics?.averageCheckTotal?.toLocaleString('ru-RU') || 0}₽</span>
+            <p className="text-xs text-muted-foreground mt-1">
+              Общий: {metrics?.averageCheckTotal?.toLocaleString('ru-RU') || 0}₽
             </p>
           </div>
 
           {/* Повторные оплаты */}
-          <div className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px] transition-colors hover:border-violet-500/30 hover:bg-muted/60">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
-              <span className="h-7 w-7 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                <Repeat className="h-3.5 w-3.5 text-purple-500" />
-              </span>
-              <span className="text-xs font-medium text-muted-foreground truncate">Повторные оплаты</span>
+              <Repeat className="h-4 w-4 text-purple-500" />
+              <span className="text-sm text-muted-foreground">Повторные оплаты</span>
             </div>
-            <div className="text-2xl font-bold tabular-nums tracking-tight text-purple-600 dark:text-purple-400">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {metrics?.repeatPaymentRate || 0}%
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              <span className="tabular-nums font-medium text-foreground/80">{metrics?.periodRepeatPaymentUsers || 0}</span> из <span className="tabular-nums font-medium text-foreground/80">{metrics?.paidUsers || 0}</span> польз.
+            <p className="text-xs text-muted-foreground mt-1">
+              {metrics?.periodRepeatPaymentUsers || 0} из {metrics?.paidUsers || 0} польз.
               <span className="text-muted-foreground/70"> (всего: {metrics?.repeatPaymentRateTotal || 0}%)</span>
             </p>
           </div>
 
           {/* Конверсия в оплату */}
-          <div className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px] transition-colors hover:border-violet-500/30 hover:bg-muted/60">
+          <div className="p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[100px]">
             <div className="flex items-center gap-2 mb-2">
-              <span className="h-7 w-7 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-                <TrendingUp className="h-3.5 w-3.5 text-orange-500" />
-              </span>
-              <span className="text-xs font-medium text-muted-foreground truncate">Конверсия в оплату</span>
+              <TrendingUp className="h-4 w-4 text-orange-500" />
+              <span className="text-sm text-muted-foreground">Конверсия в оплату</span>
             </div>
-            <div className="text-2xl font-bold tabular-nums tracking-tight text-orange-600 dark:text-orange-400">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
               {metrics?.conversionRate || 0}%
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              <span className="tabular-nums font-medium text-foreground/80">{metrics?.firstTimePaidInPeriod || 0}</span> перв. оплат из <span className="tabular-nums font-medium text-foreground/80">{metrics?.periodUsersTotal || 0}</span> рег.
+            <p className="text-xs text-muted-foreground mt-1">
+              {metrics?.firstTimePaidInPeriod || 0} перв. оплат из {metrics?.periodUsersTotal || 0} рег.
               <span className="text-muted-foreground/70"> (всего: {metrics?.conversionRateTotal || 0}%)</span>
             </p>
           </div>
         </div>
       </CardContent>
-      <PaidUsersDetailDialog open={detailOpen} onOpenChange={setDetailOpen} dateRange={dateRange} />
     </Card>
   );
 }
-
 
 // Компонент для метрик за всё время (LTV, средняя прибыль и т.д.)
 export function AdminLifetimeMetrics() {
@@ -809,76 +755,71 @@ export function AdminLifetimeMetrics() {
   }
 
   return (
-    <Card className="animate-fade-in rounded-2xl border-border/60 bg-card shadow-sm overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-4 bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
-            <Activity className="h-4 w-4 text-white" />
-          </span>
-          <CardTitle className="text-sm font-semibold truncate">Метрики за всё время</CardTitle>
-        </div>
+    <Card className="animate-fade-in">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Activity className="h-4 w-4 text-muted-foreground" />
+          Метрики за всё время
+        </CardTitle>
+        <CardDescription>Ключевые показатели платящих пользователей</CardDescription>
       </CardHeader>
-      <CardContent className="p-4 sm:p-5">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {[
-            {
-              icon: Coins,
-              label: 'LTV (дней)',
-              value: metrics?.avgLifetimeDays?.toLocaleString('ru-RU') || 0,
-              caption: 'Ср. время жизни платного юзера',
-              tint: 'emerald',
-            },
-            {
-              icon: DollarSign,
-              label: 'Ср. прибыль',
-              value: `${metrics?.avgRevenuePerCustomer?.toLocaleString('ru-RU') || 0}₽`,
-              caption: `На ${metrics?.totalPaidUsers || 0} платящих`,
-              tint: 'blue',
-            },
-            {
-              icon: Repeat,
-              label: 'Ср. транзакций',
-              value: metrics?.avgTransactionsPerUser || 0,
-              caption: `Всего: ${metrics?.totalPaymentsCount?.toLocaleString('ru-RU') || 0} оплат`,
-              tint: 'violet',
-            },
-            {
-              icon: TrendingUp,
-              label: 'Макс. от юзера',
-              value: `${metrics?.maxUserSpent?.toLocaleString('ru-RU') || 0}₽`,
-              caption: 'Совокупная сумма оплат',
-              tint: 'amber',
-            },
-          ].map(({ icon: Icon, label, value, caption, tint }) => {
-            const tintMap: Record<string, { bg: string; icon: string; text: string }> = {
-              emerald: { bg: 'bg-emerald-500/10', icon: 'text-emerald-500', text: 'text-emerald-600 dark:text-emerald-400' },
-              blue: { bg: 'bg-blue-500/10', icon: 'text-blue-500', text: 'text-blue-600 dark:text-blue-400' },
-              violet: { bg: 'bg-violet-500/10', icon: 'text-violet-500', text: 'text-violet-600 dark:text-violet-400' },
-              amber: { bg: 'bg-amber-500/10', icon: 'text-amber-500', text: 'text-amber-600 dark:text-amber-400' },
-            };
-            const c = tintMap[tint];
-            return (
-              <div
-                key={label}
-                className="p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[110px] flex flex-col"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`h-6 w-6 rounded-lg ${c.bg} flex items-center justify-center shrink-0`}>
-                    <Icon className={`h-3.5 w-3.5 ${c.icon}`} />
-                  </div>
-                  <span className="text-[11px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wide truncate">
-                    {label}
-                  </span>
-                </div>
-                <div className={`text-lg sm:text-2xl font-bold tabular-nums ${c.text} leading-tight`}>
-                  {value}
-                </div>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 leading-snug">
-                  {caption}
-                </p>
-              </div>
-            );
-          })}
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {/* LTV */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Coins className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">LTV (дней)</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {metrics?.avgLifetimeDays?.toLocaleString('ru-RU') || 0}
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              Ср. время жизни платного юзера
+            </p>
+          </div>
+
+          {/* Средняя прибыль с клиента */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <DollarSign className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">Ср. прибыль</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {metrics?.avgRevenuePerCustomer?.toLocaleString('ru-RU') || 0}₽
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              На {metrics?.totalPaidUsers || 0} платящих
+            </p>
+          </div>
+
+          {/* Среднее кол-во транзакций */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Repeat className="h-3.5 w-3.5 text-violet-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">Ср. транзакций</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-violet-600 dark:text-violet-400">
+              {metrics?.avgTransactionsPerUser || 0}
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              Всего: {metrics?.totalPaymentsCount?.toLocaleString('ru-RU') || 0} оплат
+            </p>
+          </div>
+
+          {/* Максимальная оплата */}
+          <div className="p-3 md:p-4 rounded-lg bg-muted/50 border border-border/50 min-h-[90px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs md:text-sm text-muted-foreground">Макс. от юзера</span>
+            </div>
+            <div className="text-xl md:text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {metrics?.maxUserSpent?.toLocaleString('ru-RU') || 0}₽
+            </div>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+              Совокупная сумма оплат
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

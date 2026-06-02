@@ -91,20 +91,6 @@ serve(async (req) => {
 
     console.log('Tokens spent successfully');
 
-    // Inherit aspect_ratio from source job if available
-    let inheritedAspectRatio = '3:4';
-    if (sourceGenerationId) {
-      const { data: sourceJob } = await supabase
-        .from('generation_jobs')
-        .select('aspect_ratio')
-        .eq('id', sourceGenerationId)
-        .maybeSingle();
-      if ((sourceJob as any)?.aspect_ratio) {
-        inheritedAspectRatio = (sourceJob as any).aspect_ratio;
-        console.log(`[Edit] Inheriting aspect_ratio: ${inheritedAspectRatio}`);
-      }
-    }
-
     // Create job with product_images - this is what process-google-task expects
     const { data: job, error: jobError } = await supabase
       .from('generation_jobs')
@@ -118,7 +104,6 @@ serve(async (req) => {
         status: 'pending',
         total_cards: 1,
         tokens_cost: tokensCost,
-        aspect_ratio: inheritedAspectRatio,
         product_images: [{
           url: sourceImageUrl,
           name: 'edit_source',

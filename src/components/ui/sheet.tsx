@@ -54,25 +54,12 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, style, ...props }, ref) => (
+>(({ side = "right", className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
-      style={{
-        // Lift bottom sheets above the on-screen keyboard
-        ...(side === "bottom"
-          ? { bottom: "var(--keyboard-inset-height, 0px)" }
-          : {}),
-        // Cap height so the sheet always fits within visible viewport
-        maxHeight:
-          side === "left" || side === "right"
-            ? "calc(100dvh - var(--keyboard-inset-height, 0px))"
-            : "calc(100dvh - var(--keyboard-inset-height, 0px) - 1rem)",
-        overflowY: "auto",
-        ...style,
-      }}
-      className={cn(sheetVariants({ side }), "transition-[bottom] duration-150", className)}
+      className={cn(sheetVariants({ side }), className)}
       {...props}
     >
       {children}

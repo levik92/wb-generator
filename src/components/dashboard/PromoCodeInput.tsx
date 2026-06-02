@@ -128,79 +128,63 @@ export const PromoCodeInput = ({ onPromoApplied }: PromoCodeInputProps) => {
   };
 
   return (
-    <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
-      <div className="pointer-events-none absolute -top-16 -right-12 w-48 h-48 rounded-full bg-violet-500/10 blur-3xl" />
-      <CardHeader className="relative pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
-            <Gift className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <CardTitle className="text-base sm:text-lg">Промокод</CardTitle>
-            <CardDescription className="text-xs mt-0.5">Активируйте промокод для скидки или токенов</CardDescription>
-          </div>
+    <Card className="bg-card">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Gift className="w-5 h-5 text-wb-purple" />
+          <CardTitle>Промокод</CardTitle>
         </div>
+        <CardDescription>Активируйте промокод для получения скидки или токенов</CardDescription>
       </CardHeader>
-      <CardContent className="relative space-y-4">
+      <CardContent className="space-y-4">
         {!validPromo && !instantResult ? (
           <>
             <div className="space-y-2">
-              <Label htmlFor="promoCode" className="text-xs font-medium text-muted-foreground">Промокод</Label>
+              <Label htmlFor="promoCode">Промокод</Label>
               <div className="flex gap-2">
-                <Input
-                  id="promoCode"
-                  placeholder="ВВЕДИТЕ ПРОМОКОД"
-                  value={promoCode}
-                  onChange={e => setPromoCode(e.target.value.toUpperCase())}
-                  onKeyDown={e => e.key === 'Enter' && !validating && promoCode.trim() && validatePromoCode()}
-                  className="flex-1 h-11 rounded-xl border-border/60 bg-background/60 focus-visible:ring-violet-500/40 focus-visible:border-violet-500/50 tracking-wider font-medium"
-                />
-                <Button
-                  onClick={validatePromoCode}
-                  disabled={validating || !promoCode.trim()}
-                  className="h-11 rounded-xl px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/20"
-                >
+                <Input id="promoCode" placeholder="Введите промокод" value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())} onKeyDown={e => e.key === 'Enter' && !validating && promoCode.trim() && validatePromoCode()} className="flex-1" />
+                <Button onClick={validatePromoCode} disabled={validating || !promoCode.trim()} className="bg-wb-purple hover:bg-wb-purple-dark">
                   {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Применить"}
                 </Button>
               </div>
             </div>
             {error && (
-              <Alert className="border-destructive/30 bg-destructive/10 rounded-xl flex items-center [&>svg]:static [&>svg]:translate-y-0 [&>svg]:mr-3 [&>svg]:text-destructive [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
+              <Alert className="border-destructive/30 bg-destructive/10 flex items-center [&>svg]:static [&>svg]:translate-y-0 [&>svg]:mr-3 [&>svg]:text-destructive [&>svg~*]:pl-0 [&>svg+div]:translate-y-0">
                 <XCircle className="h-4 w-4 flex-shrink-0" />
                 <AlertDescription className="text-destructive">{error}</AlertDescription>
               </Alert>
             )}
           </>
         ) : instantResult ? (
-          <Alert className="border-emerald-500/30 bg-emerald-500/10 rounded-xl">
-            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            <AlertDescription className="text-emerald-700 dark:text-emerald-300">
-              <div className="flex items-center justify-between gap-2">
+          <Alert className="border-green-500/30 bg-green-500/10">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              <div className="flex items-center justify-between">
                 <div>
                   <strong>Промокод активирован!</strong>
-                  <div className="mt-1 text-sm">{instantResult.message}</div>
+                  <div className="mt-1">{instantResult.message}</div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={clearPromo} className="text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors rounded-lg">
+                <Button variant="ghost" size="sm" onClick={clearPromo} className="text-green-700 hover:bg-green-800 hover:text-white transition-colors">
                   Ввести другой
                 </Button>
               </div>
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert className="border-emerald-500/30 bg-emerald-500/10 rounded-xl">
-            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            <AlertDescription className="text-emerald-700 dark:text-emerald-300">
-              <div className="flex items-center justify-between gap-2">
+          <Alert className="border-green-500/30 bg-green-500/10">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              <div className="flex items-center justify-between">
                 <div>
                   <strong>Промокод активирован!</strong>
-                  <div className="mt-1 text-sm">
+                  <div className="mt-1">
                     {validPromo!.type === 'discount'
-                      ? <>Скидка <Badge className="bg-emerald-600 hover:bg-emerald-600">{validPromo!.value}%</Badge> будет применена при оплате</>
-                      : <>Вы получите <Badge className="bg-emerald-600 hover:bg-emerald-600">+{validPromo!.value}</Badge> бонусных токенов после оплаты</>
+                      ? <>Скидка <Badge className="bg-green-600 hover:bg-green-600">{validPromo!.value}%</Badge> будет применена при оплате</>
+                      : <>Вы получите <Badge className="bg-green-600 hover:bg-green-600">+{validPromo!.value}</Badge> бонусных токенов после оплаты</>
                     }
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={clearPromo} className="text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors rounded-lg">
+                <Button variant="ghost" size="sm" onClick={clearPromo} className="text-green-700 hover:bg-green-800 hover:text-white transition-colors">
                   Отменить
                 </Button>
               </div>
