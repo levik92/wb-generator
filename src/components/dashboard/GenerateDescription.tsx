@@ -510,8 +510,8 @@ export const GenerateDescription = ({
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed flex items-start gap-1.5">
-                  <Info className="w-3 h-3 mt-0.5 shrink-0 opacity-70" />
+                <p className="text-xs text-muted-foreground leading-relaxed flex items-center gap-1.5">
+                  <Info className="w-3 h-3 shrink-0 opacity-70" />
                   Нейросеть проанализирует описания конкурентов и выделит важные ключевые слова
                 </p>
               </div>
