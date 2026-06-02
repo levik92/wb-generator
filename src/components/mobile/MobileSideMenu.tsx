@@ -171,7 +171,7 @@ export const MobileSideMenu = ({
               </div>
 
               {/* Menu Items */}
-              <nav className="flex-1 overflow-y-auto px-3 pb-6 [scrollbar-width:thin]">
+              <nav className="flex-1 overflow-y-auto px-3 pb-32 [scrollbar-width:thin]">
                 {sections.map((section, sIdx) => (
                   <div key={sIdx} className={sIdx === 0 ? '' : 'mt-4'}>
                     {section.title && (
