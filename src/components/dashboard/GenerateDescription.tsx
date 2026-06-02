@@ -593,7 +593,7 @@ export const GenerateDescription = ({
                     value={generatedText}
                     onChange={(e) => setGeneratedText(e.target.value)}
                     rows={10}
-                    className="bg-background text-sm leading-relaxed rounded-xl"
+                    className="bg-background text-sm leading-relaxed rounded-md"
                   />
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-muted-foreground mr-1 hidden sm:inline">Скачать:</span>
