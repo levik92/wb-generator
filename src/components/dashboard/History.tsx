@@ -65,6 +65,8 @@ const HistoryAvatarImage = ({
   onClick,
   previewWidth = 180,
   className = "",
+  fit = "contain",
+  showBackdrop = true,
 }: {
   src: string;
   alt: string;
@@ -72,19 +74,23 @@ const HistoryAvatarImage = ({
   onClick?: () => void;
   previewWidth?: number;
   className?: string;
+  fit?: "contain" | "cover";
+  showBackdrop?: boolean;
 }) => (
   <>
-    <div
-      aria-hidden="true"
-      className="absolute inset-0 scale-110 bg-cover bg-center opacity-25 blur-xl"
-      style={{ backgroundImage: `url("${thumbUrl(src)}")` }}
-    />
+    {showBackdrop && (
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 scale-110 bg-cover bg-center opacity-25 blur-xl"
+        style={{ backgroundImage: `url("${thumbUrl(src)}")` }}
+      />
+    )}
     <ProgressiveImage
       src={src}
       alt={alt}
       previewWidth={previewWidth}
       previewQuality={85}
-      className={`relative z-[1] block w-full h-full object-contain ${className}`}
+      className={`relative z-[1] block w-full h-full ${fit === "cover" ? "object-cover" : "object-contain"} ${className}`}
       onClick={onClick}
       onError={onError}
     />
@@ -1094,7 +1100,7 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" />
+                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" fit="cover" showBackdrop={false} />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-violet-500/15 to-purple-500/5 flex items-center justify-center">
                             <Video className="w-6 h-6 text-violet-600 dark:text-violet-300" />
@@ -1107,10 +1113,11 @@ export const History = ({
                         className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
-                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
+                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" fit="cover" showBackdrop={false} onError={e => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
+
                         <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
@@ -1241,7 +1248,7 @@ export const History = ({
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
                   <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
-                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[9/16] bg-muted">
+                      <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted">
                         <HistoryAvatarImage
                           src={img.image_url}
                           alt={`Карточка ${imgIndex + 1}`}
@@ -1250,7 +1257,7 @@ export const History = ({
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
                           <Button 
                             size="icon" 
                             variant="ghost" 
@@ -1291,7 +1298,8 @@ export const History = ({
                           </Button>
                         </div>
                         {(img.is_edited || img.is_regenerated || img.is_styled) && (
-                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
+                          <div className="absolute top-1 left-1 z-10 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
+
                             {(() => {
                               if (img.is_styled) {
                                 const styledOfSameType = generation.output_data.images.filter((i: any) => 
@@ -1309,7 +1317,7 @@ export const History = ({
                             })()}
                           </div>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
+                        <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
                           {getCardTypeLabel(img.type) || `Карточка ${imgIndex + 1}`}
                         </div>
                       </div>
@@ -1319,9 +1327,10 @@ export const History = ({
 
                 {/* Expanded videos grid */}
                 {expandedIds.has(generation.id) && generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
-                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 pt-3 border-t border-border/30">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.videos.map((video: any, vidIndex: number) => (
-                      <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[9/16] bg-muted">
+                      <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted">
+
                         {generation.output_data?.source_image ? (
                           <HistoryAvatarImage src={generation.output_data.source_image} alt={`Видео ${vidIndex + 1}`} previewWidth={520} />
                         ) : (
@@ -1329,7 +1338,7 @@ export const History = ({
                             <Video className="w-8 h-8 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
                           <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
                             onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
                             <Play className="w-4 h-4" />
