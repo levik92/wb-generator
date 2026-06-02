@@ -485,65 +485,68 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
 
       {/* Hero — conversion-focused */}
-      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
-        <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
-        <div className="relative p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:gap-5">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Видео, которое продаёт</span>
+      <CollapsibleInfoBlock storageKey={VIDEO_HERO_KEY} collapsedLabel="Подробнее о видеообложках">
+        <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+          <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
+          <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
+          <div className="relative p-5 sm:p-6 pr-12 sm:pr-14">
+            <div className="flex flex-col gap-4 sm:gap-5">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Видео, которое продаёт</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                  Живые обложки с <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">+35% к CTR</span> за 2 минуты
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Загрузите фото товара — ИИ создаст плавную 5-секундную анимацию премиального уровня, которая выделит карточку в выдаче маркетплейса.
+                </p>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
-                Живые обложки с <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">+35% к CTR</span> за 2 минуты
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Загрузите фото товара — ИИ создаст плавную 5-секундную анимацию премиального уровня, которая выделит карточку в выдаче маркетплейса.
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
-                <div className="flex items-center gap-2.5">
-                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">+35% к CTR</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">за счёт анимации</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">+35% к CTR</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">за счёт анимации</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
-                <div className="flex items-center gap-2.5">
-                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">~2 минуты</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">вместо часов работы</p>
+                <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">~2 минуты</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">вместо часов работы</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
-                <div className="flex items-center gap-2.5">
-                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                    <Eye className="w-4 h-4 text-violet-600 dark:text-violet-300" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-tight">Выделение</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">в выдаче среди других</p>
+                <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <Eye className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">Выделение</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">в выдаче среди других</p>
 
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </CollapsibleInfoBlock>
+
 
       <AnimatePresence>
         {isPromoBannerVisible && (
