@@ -409,9 +409,9 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
           return (
             <div
               key={program.id}
-              className={`rounded-xl border p-3 sm:p-4 transition-all ${
+              className={`relative overflow-hidden rounded-xl border p-3 sm:p-4 transition-all ${
                 isCompleted
-                  ? 'border-emerald-500/30 bg-emerald-500/5'
+                  ? 'border-emerald-500/60 bg-card'
                   : isPending
                     ? 'border-amber-500/30 bg-amber-500/5'
                     : isRejected
@@ -419,6 +419,14 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                       : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30'
               }`}
             >
+              {isCompleted && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-16 -right-16 w-48 h-48 rounded-full"
+                  style={{ background: 'radial-gradient(circle, hsl(142 76% 45% / 0.22) 0%, transparent 70%)' }}
+                />
+              )}
+              <div className="relative">
               <div className="flex gap-3">
                 <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
                   <Icon className={`w-5 h-5 ${iconColor}`} />
@@ -484,6 +492,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                     )}
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           );
