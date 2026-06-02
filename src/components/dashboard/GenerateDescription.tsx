@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { CollapsibleInfoBlock } from "@/components/dashboard/CollapsibleInfoBlock";
 
 interface Profile {
   id: string;
