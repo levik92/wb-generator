@@ -334,94 +334,79 @@ export const GenerateDescription = ({
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
       {/* Hero — conversion-focused (same style as cards page) */}
-      <AnimatePresence>
-        {isPromoVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.98 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card"
-          >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
-            />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
-            />
+      <CollapsibleInfoBlock storageKey={DESCRIPTION_PROMO_KEY} collapsedLabel="Подробнее о генерации описаний">
+        <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
+          />
 
-            <button
-              onClick={handleDismissPromo}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-muted/60 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground z-20"
-              aria-label="Закрыть"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          <div className="relative p-5 sm:p-6 pr-12 sm:pr-14">
+            <div className="flex flex-col gap-4 sm:gap-5">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">
+                    Описания, которые продают
+                  </span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                  Текст карточки, который повышает конверсию{" "}
+                  <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                    за 30 секунд
+                  </span>
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  WBGen подбирает стиль, ключевые слова и эмоциональные акценты — готовое описание под ваш товар и аудиторию.
+                </p>
+              </div>
 
-            <div className="relative p-5 sm:p-6">
-              <div className="flex flex-col gap-4 sm:gap-5">
-                <div className="space-y-1.5 pr-8">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                    <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">
-                      Описания, которые продают
-                    </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">Выше конверсия</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">SEO + продающие триггеры</p>
+                    </div>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
-                    Текст карточки, который повышает конверсию{" "}
-                    <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                      за 30 секунд
-                    </span>
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    WBGen подбирает стиль, ключевые слова и эмоциональные акценты — готовое описание под ваш товар и аудиторию.
-                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
-                    <div className="flex items-center gap-2.5">
-                      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold leading-tight">Выше конверсия</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">SEO + продающие триггеры</p>
-                      </div>
+                <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">30 сек. вместо часов</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">без копирайтера и правок</p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
-                    <div className="flex items-center gap-2.5">
-                      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                        <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold leading-tight">30 сек. вместо часов</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">без копирайтера и правок</p>
-                      </div>
+                <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <ShieldCheck className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                     </div>
-                  </div>
-
-                  <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
-                    <div className="flex items-center gap-2.5">
-                      <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                        <ShieldCheck className="w-4 h-4 text-violet-600 dark:text-violet-300" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold leading-tight">Возврат 100%</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">если не понравится</p>
-                      </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">Возврат 100%</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">если не понравится</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      </CollapsibleInfoBlock>
+
 
       {/* Two-column: form + result */}
       <div className="grid gap-6 grid-cols-1 xl:grid-cols-2">
