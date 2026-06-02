@@ -2018,7 +2018,7 @@ export const GenerateCards = ({
       </div>
       </CollapsibleInfoBlock>
 
-      </div>
+
 
 
       {/* Cards Promo Banner */}
