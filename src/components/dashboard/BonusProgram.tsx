@@ -301,8 +301,8 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
       <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full"
-          style={{ background: 'radial-gradient(circle, hsl(268 83% 60% / 0.10) 0%, transparent 70%)' }}
+          className="pointer-events-none absolute -top-48 -right-40 w-[520px] h-[520px] rounded-full"
+          style={{ background: 'radial-gradient(circle, hsl(268 83% 60% / 0.07) 0%, transparent 70%)' }}
         />
 
 
