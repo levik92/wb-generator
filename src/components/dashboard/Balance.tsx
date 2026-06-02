@@ -218,13 +218,16 @@ export default function Balance() {
               value="pricing"
               className="flex items-center gap-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-violet-700 dark:data-[state=active]:text-violet-200"
             >
-              Пополнить баланс
+              <span className="sm:hidden">Баланс</span>
+              <span className="hidden sm:inline">Пополнить баланс</span>
             </TabsTrigger>
             <TabsTrigger
               value="history"
               className="flex items-center gap-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-violet-700 dark:data-[state=active]:text-violet-200"
             >
-              История пополнений
+              <span className="sm:hidden">История</span>
+              <span className="hidden sm:inline">История пополнений</span>
+
             </TabsTrigger>
           </TabsList>
 
