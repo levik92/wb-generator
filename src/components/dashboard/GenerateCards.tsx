@@ -2268,7 +2268,6 @@ export const GenerateCards = ({
             <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <span>Информация о товаре</span>
-                <span className="absolute top-2.5 right-3 z-10 text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium pointer-events-none">Обязательно</span>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
                 Укажите детали товара для генерации оптимальных карточек
@@ -2290,7 +2289,10 @@ export const GenerateCards = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="productName">Название товара</Label>
+            <Label htmlFor="productName" className="flex items-center gap-1.5">
+              Название товара
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium">Обязательно</span>
+            </Label>
             <div className="relative">
               <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className={`rounded-md border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 ${isIdentifying ? 'pr-9 sm:pr-32 identifying-input' : ''}`} />
               {isIdentifying && (
@@ -2306,7 +2308,10 @@ export const GenerateCards = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Описание и пожелания</Label>
+            <Label htmlFor="description" className="flex items-center gap-1.5">
+              Описание и пожелания
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-violet-600/50 dark:text-violet-300/50 font-medium">Обязательно</span>
+            </Label>
             <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-md border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <label
