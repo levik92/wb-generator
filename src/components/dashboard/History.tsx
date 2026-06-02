@@ -1317,7 +1317,7 @@ export const History = ({
                             })()}
                           </div>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
+                        <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs px-2 py-2 pt-5 text-center truncate">
                           {getCardTypeLabel(img.type) || `Карточка ${imgIndex + 1}`}
                         </div>
                       </div>
