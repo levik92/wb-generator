@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Zap, Image, FileText, History, CreditCard, Gift, Settings, Tags, Newspaper, GraduationCap, Video, X, ChevronRight, Sparkles, ArrowUpRight } from "lucide-react";
+import { Zap, Image, FileText, History, CreditCard, Gift, Settings, Tags, Newspaper, GraduationCap, Video, X, Sparkles, Plus } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -90,8 +90,6 @@ export const MobileSideMenu = ({
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  const initials = (profile.full_name?.[0] || profile.email?.[0] || 'U').toUpperCase();
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -134,8 +132,8 @@ export const MobileSideMenu = ({
                     <Zap className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
                   </div>
                   <div className="flex flex-col leading-tight">
-                    <span className="text-[15px] font-bold tracking-tight">WB Генератор</span>
-                    <span className="text-[10px] text-muted-foreground font-medium">AI для маркетплейсов</span>
+                    <span className="text-[15px] font-bold tracking-tight">WBGen</span>
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-medium mt-0.5">AI Studio</span>
                   </div>
                 </div>
                 <button
@@ -147,23 +145,9 @@ export const MobileSideMenu = ({
                 </button>
               </div>
 
-              {/* Profile + balance card */}
+              {/* Balance card */}
               <div className="px-4 pb-4">
-                <button
-                  onClick={() => handleTabChange('settings')}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-violet-500/[0.06] active:scale-[0.99] transition-all text-left"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-sm flex items-center justify-center ring-2 ring-violet-500/20 shrink-0">
-                    {initials}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold truncate">{profile.full_name || 'Пользователь'}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{profile.email}</p>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                </button>
-
-                <div className="mt-2 relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.08] via-card to-fuchsia-500/[0.06] p-3">
+                <div className="relative overflow-hidden rounded-xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.08] via-card to-fuchsia-500/[0.06] p-3">
                   <span aria-hidden className="pointer-events-none absolute -top-8 -right-6 w-24 h-24 rounded-full bg-violet-500/15 blur-2xl" />
                   <div className="relative flex items-center justify-between gap-3">
                     <div className="min-w-0">
@@ -175,14 +159,13 @@ export const MobileSideMenu = ({
                         {(profile.tokens_balance ?? 0).toLocaleString('ru-RU')}
                       </p>
                     </div>
-                    <Button
-                      size="sm"
+                    <button
                       onClick={() => handleTabChange('pricing')}
-                      className="h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/25 text-xs font-medium px-3 shrink-0"
+                      aria-label="Пополнить баланс"
+                      className="w-9 h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/25 flex items-center justify-center active:scale-95 transition-all shrink-0"
                     >
-                      Пополнить
-                      <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-                    </Button>
+                      <Plus className="w-4 h-4" strokeWidth={2.5} />
+                    </button>
                   </div>
                 </div>
               </div>
