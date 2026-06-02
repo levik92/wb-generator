@@ -2193,15 +2193,26 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Upload className="w-4 h-4 shrink-0" />
-              <span>Референс</span>
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              WBGen может взять за основу прикрепленный дизайн (не обязательно)
-            </CardDescription>
+        <Card className="md:col-span-2 relative overflow-hidden border-border/60 bg-card rounded-2xl">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+          />
+          <CardHeader className="relative">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <span>Референс</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">Необязательно</span>
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm mt-1">
+                  WBGen может взять за основу прикрепленный дизайн
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
