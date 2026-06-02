@@ -961,31 +961,42 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           </Card>
 
           {/* Block 2: User wishes */}
-          <Card className="border-border/60 bg-card rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Sparkles className="w-4 h-4 shrink-0" />
-                <span>Пожелания к видео</span>
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <Info className="w-4 h-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                      <p>Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Опишите, какую анимацию вы хотите получить, или доверьте параметры нейросети.
-              </p>
+          <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+            />
+            <CardHeader className="relative">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <span>Пожелания к видео</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">Необязательно</span>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <Info className="w-4 h-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                          <p>Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-1">
+                    Опишите, какую анимацию вы хотите получить, или доверьте параметры нейросети.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2">
               <Textarea
