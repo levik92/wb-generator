@@ -85,8 +85,9 @@ export const Referrals = ({ profile }: ReferralsProps) => {
   return (
     <div className="space-y-5">
       <Tabs defaultValue="program" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-xl border border-border/50 h-auto">
-          <TabsTrigger value="program" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm py-2">
+        <TabsList className="grid w-full grid-cols-2 h-11 bg-muted/40 border border-border/60 rounded-xl p-1">
+          <TabsTrigger value="program" className="flex items-center gap-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-violet-700 dark:data-[state=active]:text-violet-200">
+
             Программа
           </TabsTrigger>
           <TabsTrigger value="invited" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm py-2">
