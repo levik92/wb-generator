@@ -548,7 +548,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
       </CollapsibleInfoBlock>
 
 
-      <CollapsibleInfoBlock storageKey={VIDEO_PROMO_KEY} collapsedLabel="Посмотреть примеры генераций">
+      <CollapsibleInfoBlock storageKey={VIDEO_PROMO_KEY} mode="dismiss" collapsedLabel="Посмотреть примеры генераций">
         <div
           className="group relative isolate overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
         >
