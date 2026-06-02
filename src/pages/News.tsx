@@ -199,37 +199,26 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
       transition={{ duration: 0.4 }}
       className="space-y-5 w-full min-w-0"
     >
-      {/* Hero header */}
-      <div className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent px-4 py-4 sm:px-6 sm:py-5">
-        <span aria-hidden className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full bg-violet-500/15 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
+      {/* Minimal header */}
+      <div className="flex items-center justify-between gap-3 px-1">
+        <p className="text-xs sm:text-sm text-muted-foreground min-w-0 truncate">
+          {totalCount > 0
+            ? `Всего ${totalCount} записей${unreadCount > 0 ? ` · непрочитанных ${unreadCount}` : ''}`
+            : 'Анонсы, обновления и инструкции по сервису'}
+        </p>
 
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="shrink-0 w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center">
-              <Newspaper className="h-5 w-5 text-violet-600 dark:text-violet-300" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-base sm:text-lg font-semibold leading-tight">Новости и обновления</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                {totalCount > 0
-                  ? `Всего ${totalCount} записей${unreadCount > 0 ? ` · непрочитанных ${unreadCount}` : ''}`
-                  : 'Анонсы, обновления и инструкции по сервису'}
-              </p>
-            </div>
-          </div>
-
-          <Button
-            onClick={markAllAsRead}
-            size="sm"
-            className="shrink-0 w-full sm:w-auto h-9 px-3 text-sm font-medium bg-background/70 border border-violet-500/25 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:border-violet-500/40 transition-colors"
-            disabled={unreadCount === 0}
-          >
-            <CheckCheck className="w-4 h-4 mr-1.5" />
-            {unreadCount === 0 ? 'Всё прочитано' : 'Прочитать все'}
-          </Button>
-        </div>
+        <Button
+          onClick={markAllAsRead}
+          size="sm"
+          variant="ghost"
+          className="shrink-0 h-8 px-2.5 text-xs font-medium text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 transition-colors"
+          disabled={unreadCount === 0}
+        >
+          <CheckCheck className="w-3.5 h-3.5 mr-1.5" />
+          {unreadCount === 0 ? 'Всё прочитано' : 'Прочитать все'}
+        </Button>
       </div>
+
 
       {news.length === 0 ? (
         <div className="relative overflow-hidden rounded-2xl border border-dashed border-border/60 bg-muted/20 p-8">
