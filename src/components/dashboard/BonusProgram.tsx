@@ -426,7 +426,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                 <span
                   aria-hidden
                   className="pointer-events-none absolute -bottom-16 -right-16 w-48 h-48 rounded-full"
-                  style={{ background: 'radial-gradient(circle, hsl(142 76% 45% / 0.22) 0%, transparent 70%)' }}
+                  style={{ background: 'radial-gradient(circle, hsl(142 76% 45% / 0.12) 0%, transparent 70%)' }}
                 />
               )}
               <div className="relative">
