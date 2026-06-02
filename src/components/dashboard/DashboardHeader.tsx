@@ -161,8 +161,8 @@ export const DashboardHeader = ({
                 <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 transition-colors">
                   <Bell className="h-[18px] w-[18px]" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40 ring-2 ring-card">
-                      <span className="text-[10px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] px-1 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40">
+                      <span className="text-[9px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
                     </span>
                   )}
                 </Button>
