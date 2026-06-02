@@ -1174,8 +1174,8 @@ export const History = ({
                         variant="outline"
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
-                        <span>{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;фото</span></>}</span>
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" /> : <ChevronDown className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;фото</span></>}</span>
                       </Button>
                     )}
                     {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) === 1 && generation.output_data?.images?.[0]?.image_url && (
@@ -1196,8 +1196,8 @@ export const History = ({
                         title={`Редактировать (${editPrice} токенов)`}
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1" />}
-                        <span>Ред.</span>
+                        {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">Ред.</span>
                       </Button>
                     )}
                     {generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
@@ -1207,8 +1207,8 @@ export const History = ({
                         variant="outline"
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
-                        <span>{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;видео</span></>}</span>
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" /> : <ChevronDown className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;видео</span></>}</span>
                       </Button>
                     )}
                     {generation.generation_type === 'video' && (
@@ -1220,26 +1220,27 @@ export const History = ({
                         title={`Редактировать (${videoRegenPrice || 2} токенов)`}
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1" />}
-                        <span>Ред.</span>
+                        {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">Ред.</span>
                       </Button>
                     )}
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 text-xs font-medium">
                       {downloadingIds.has(generation.id) ? <>
-                          <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
+                          <Loader2 className="w-4 h-4 sm:mr-2 md:mr-0 lg:mr-2 animate-spin" />
                         </> : generation.generation_type === 'video' ? <>
-                          <Download className="w-4 h-4 sm:mr-1.5" />
-                          <span className="hidden sm:inline">Скачать</span>
+                          <Download className="w-4 h-4 sm:mr-1.5 md:mr-0 lg:mr-1.5" />
+                          <span className="hidden sm:inline md:hidden lg:inline">Скачать</span>
                           <span className="sm:hidden">MP4</span>
                         </> : (generation.output_data?.images?.length || 0) > 1 ? <>
-                          <Archive className="w-4 h-4 sm:mr-1.5" />
-                          <span>ZIP ({generation.output_data.images.length})</span>
+                          <Archive className="w-4 h-4 sm:mr-1.5 md:mr-0 lg:mr-1.5" />
+                          <span className="md:hidden lg:inline">ZIP ({generation.output_data.images.length})</span>
                         </> : <>
-                          <Download className="w-4 h-4 sm:mr-1.5" />
-                          <span className="hidden sm:inline">Скачать</span>
+                          <Download className="w-4 h-4 sm:mr-1.5 md:mr-0 lg:mr-1.5" />
+                          <span className="hidden sm:inline md:hidden lg:inline">Скачать</span>
                           <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
+
                     <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation) : deleteGeneration(generation.id)} size="sm" variant="outline" className="h-9 w-9 p-0 rounded-lg border-destructive/25 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:border-destructive">
                       <Trash2 className="w-4 h-4" />
                     </Button>
