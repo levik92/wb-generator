@@ -1338,7 +1338,7 @@ export const History = ({
                             <Video className="w-8 h-8 text-primary" />
                           </div>
                         )}
-                        <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/vid:opacity-100 transition-opacity">
                           <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full bg-white/20 text-white hover:bg-white/40"
                             onClick={() => { if (video.url) { setVideoPreviewUrl(video.url); setVideoPreviewOpen(true); } }}>
                             <Play className="w-4 h-4" />
