@@ -218,20 +218,21 @@ export default function Balance() {
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <Tabs defaultValue="pricing" className="space-y-4 w-full overflow-hidden">
-          <TabsList className="grid w-full grid-cols-2 bg-card p-1 rounded-xl border border-border/60 h-11">
+          <TabsList className="grid w-full grid-cols-2 h-11 bg-muted/40 border border-border/60 rounded-xl p-1">
             <TabsTrigger
               value="pricing"
-              className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/20 transition-all"
+              className="flex items-center gap-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-violet-700 dark:data-[state=active]:text-violet-200"
             >
               Пополнить баланс
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="text-xs sm:text-sm rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/20 transition-all"
+              className="flex items-center gap-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-violet-700 dark:data-[state=active]:text-violet-200"
             >
               История пополнений
             </TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="pricing" id="pricing-section" className="space-y-5 sm:space-y-6 mt-4">
             <Pricing appliedPromo={appliedPromo} />
