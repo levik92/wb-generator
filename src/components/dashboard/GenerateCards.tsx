@@ -2292,7 +2292,7 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
             <div className="relative">
-              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className={`rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 ${isIdentifying ? 'pr-9 sm:pr-32 identifying-input' : ''}`} />
+              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className={`rounded-md border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 ${isIdentifying ? 'pr-9 sm:pr-32 identifying-input' : ''}`} />
               {isIdentifying && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-300 identifying-fade pointer-events-none">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -2307,7 +2307,7 @@ export const GenerateCards = ({
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
+            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-md border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <label
                 htmlFor="autoDescription"
