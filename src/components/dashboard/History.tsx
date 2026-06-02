@@ -1113,10 +1113,11 @@ export const History = ({
                         className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
-                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
+                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" fit="cover" showBackdrop={false} onError={e => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
+
                         <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
