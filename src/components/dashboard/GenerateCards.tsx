@@ -2125,19 +2125,15 @@ export const GenerateCards = ({
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
         <Card className="md:col-span-3 relative overflow-hidden border-border/60 bg-card rounded-2xl">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-          />
           <CardHeader className="relative">
             <div className="flex items-start gap-3">
-              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+              <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                 <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
               </div>
               <div className="min-w-0 flex-1">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <span>Изображения товара</span>
-                  <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                  <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -2194,19 +2190,15 @@ export const GenerateCards = ({
 
         {/* Reference Image - Takes 2/5 width on desktop */}
         <Card className="md:col-span-2 relative overflow-hidden border-border/60 bg-card rounded-2xl">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-          />
           <CardHeader className="relative">
             <div className="flex items-start gap-3">
-              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+              <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                 <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
               </div>
               <div className="min-w-0 flex-1">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <span>Референс</span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">Необязательно</span>
+                  <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold pointer-events-none">Необязательно</span>
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm mt-1">
                   WBGen может взять за основу прикрепленный дизайн
@@ -2252,10 +2244,6 @@ export const GenerateCards = ({
 
       {/* Product Details */}
       <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-        />
         <CardHeader className="relative">
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
@@ -2274,13 +2262,13 @@ export const GenerateCards = ({
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+            <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
               <Info className="w-4 h-4 text-violet-600 dark:text-violet-300" />
             </div>
             <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <span>Информация о товаре</span>
-                <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
                 Укажите детали товара для генерации оптимальных карточек
@@ -2358,19 +2346,15 @@ export const GenerateCards = ({
 
       {/* Card Selection */}
       <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-        />
         <CardHeader className="relative">
           <div className="flex items-start gap-3">
-            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+            <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
               <Images className="w-4 h-4 text-violet-600 dark:text-violet-300" />
             </div>
             <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <span>Выбор типа карточек</span>
-                <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
                 Выберите какие типы карточек вам нужны

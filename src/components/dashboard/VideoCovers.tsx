@@ -881,19 +881,15 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
         >
           {/* Block 1: Upload */}
           <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-            />
             <CardHeader className="relative">
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                   <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <span>Карточка товара</span>
-                    <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                    <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold pointer-events-none">Обязательно</span>
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -962,19 +958,15 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
           {/* Block 2: User wishes */}
           <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-            />
             <CardHeader className="relative">
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                   <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <span>Пожелания к видео</span>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">Необязательно</span>
+                    <span className="absolute top-2.5 right-3 z-10 text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold pointer-events-none">Необязательно</span>
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
