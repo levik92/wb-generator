@@ -2124,31 +2124,42 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Upload className="w-4 h-4 shrink-0" />
-              <span>Изображения товара</span>
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      type="button" 
-                      className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <Info className="w-4 h-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                    <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте фото без водяных знаков.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения, до 3 МБ каждое)
-            </CardDescription>
+        <Card className="md:col-span-3 relative overflow-hidden border-border/60 bg-card rounded-2xl">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+          />
+          <CardHeader className="relative">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <span>Изображения товара</span>
+                  <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                        <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте фото без водяных знаков.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm mt-1">
+                  Загрузите качественные фотографии вашего товара с разных ракурсов (максимум 3 изображения, до 3 МБ каждое)
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -2182,15 +2193,26 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Upload className="w-4 h-4 shrink-0" />
-              <span>Референс</span>
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              WBGen может взять за основу прикрепленный дизайн (не обязательно)
-            </CardDescription>
+        <Card className="md:col-span-2 relative overflow-hidden border-border/60 bg-card rounded-2xl">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+          />
+          <CardHeader className="relative">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <span>Референс</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold">Необязательно</span>
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm mt-1">
+                  WBGen может взять за основу прикрепленный дизайн
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -2229,58 +2251,53 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/60 bg-card rounded-2xl">
-        <CardHeader>
+      <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+        />
+        <CardHeader className="relative">
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
             <Button variant="outline" size="sm" onClick={() => {
-            setFiles([]);
-            setReferenceImage(null);
-            setProductName("");
-            setCategory("");
-            setDescription("");
-            setAutoDescription(false);
-            setSelectedCards([0]);
-          }} className="w-auto rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
+              setFiles([]);
+              setReferenceImage(null);
+              setProductName("");
+              setCategory("");
+              setDescription("");
+              setAutoDescription(false);
+              setSelectedCards([0]);
+            }} className="w-auto rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
           </div>
-          
-          {/* Desktop/Tablet layout */}
-          <div className="hidden sm:flex sm:items-start sm:justify-between gap-2">
-            <div className="flex-1 space-y-1.5">
+
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+              <Info className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+            </div>
+            <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Info className="w-4 h-4 shrink-0" />
-                Информация о товаре
+                <span>Информация о товаре</span>
+                <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardDescription className="text-xs sm:text-sm mt-1">
                 Укажите детали товара для генерации оптимальных карточек
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={() => {
-            setFiles([]);
-            setReferenceImage(null);
-            setProductName("");
-            setCategory("");
-            setDescription("");
-            setAutoDescription(false);
-            setSelectedCards([0]);
-          }} className="shrink-0 rounded-lg h-8 px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/60 transition-colors" disabled={generating}>
+              setFiles([]);
+              setReferenceImage(null);
+              setProductName("");
+              setCategory("");
+              setDescription("");
+              setAutoDescription(false);
+              setSelectedCards([0]);
+            }} className="hidden sm:inline-flex shrink-0 rounded-lg h-8 px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/60 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
-          </div>
-          
-          {/* Mobile title - below clear button */}
-          <div className="sm:hidden space-y-1.5">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Info className="w-4 h-4 shrink-0" />
-              Информация о товаре
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              Укажите детали товара для генерации оптимальных карточек
-            </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -2340,15 +2357,26 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="border-border/60 bg-card rounded-2xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Images className="w-4 h-4 shrink-0" />
-            Выбор типа карточек
-          </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
-            Выберите какие типы карточек вам нужны
-          </CardDescription>
+      <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+        />
+        <CardHeader className="relative">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+              <Images className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <span>Выбор типа карточек</span>
+                <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm mt-1">
+                Выберите какие типы карточек вам нужны
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
