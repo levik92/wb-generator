@@ -419,7 +419,7 @@ export const GenerateDescription = ({
           <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
             <CardHeader className="relative">
               <div className="flex items-start gap-3">
-                <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+                <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                   <Settings className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -551,7 +551,7 @@ export const GenerateDescription = ({
             <CardHeader className="relative">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+                  <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                     <FileText className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0 flex-1">
