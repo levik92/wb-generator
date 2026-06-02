@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Tooltip,
@@ -13,19 +13,23 @@ interface CollapsibleInfoBlockProps {
   collapsedLabel?: string;
   children: ReactNode;
   className?: string;
+  /**
+   * "collapse" — toggleable: when hidden shows a compact stub to re-open (default).
+   * "dismiss"  — one-way close: when hidden renders nothing, persists per account.
+   */
+  mode?: "collapse" | "dismiss";
 }
 
 /**
  * Wraps an informational/promo block with a persistent hide/show toggle.
- * - When visible: renders children + small "Скрыть" (EyeOff) button in top-right.
- * - When hidden: collapses to a compact muted "Show" stub aligned to the right.
- * - State persisted in localStorage under `storageKey`.
+ * State persisted in localStorage under `storageKey`.
  */
 export const CollapsibleInfoBlock = ({
   storageKey,
   collapsedLabel = "Подробнее о разделе",
   children,
   className,
+  mode = "collapse",
 }: CollapsibleInfoBlockProps) => {
   const [visible, setVisible] = useState<boolean>(() => {
     try {
@@ -49,6 +53,10 @@ export const CollapsibleInfoBlock = ({
     setVisible(true);
   };
 
+  const isDismiss = mode === "dismiss";
+  const ToggleIcon = isDismiss ? X : EyeOff;
+  const tooltipLabel = isDismiss ? "Закрыть" : "Скрыть";
+
   return (
     <AnimatePresence mode="wait" initial={false}>
       {visible ? (
@@ -66,20 +74,20 @@ export const CollapsibleInfoBlock = ({
                 <button
                   type="button"
                   onClick={hide}
-                  aria-label="Скрыть блок"
-                  className="absolute top-2 right-2 z-40 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-background/75 backdrop-blur-sm border border-border/60 text-muted-foreground hover:text-foreground hover:bg-background hover:border-border transition-colors"
+                  aria-label={`${tooltipLabel} блок`}
+                  className="group absolute top-2 right-2 z-40 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-border/60 text-muted-foreground hover:border-violet-400 hover:shadow-sm transition-all"
                 >
-                  <EyeOff className="w-4 h-4" />
+                  <ToggleIcon className="w-4 h-4 text-slate-600 group-hover:text-violet-600 transition-colors" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="left" sideOffset={6} className="text-xs">
-                Скрыть
+                {tooltipLabel}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           {children}
         </motion.div>
-      ) : (
+      ) : isDismiss ? null : (
         <motion.div
           key="collapsed"
           initial={{ opacity: 0 }}
@@ -95,9 +103,9 @@ export const CollapsibleInfoBlock = ({
                   type="button"
                   onClick={show}
                   aria-label="Показать блок"
-                  className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] text-muted-foreground/70 hover:text-foreground hover:bg-muted/60 border border-transparent hover:border-border/60 transition-colors"
+                  className="group inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] leading-none text-muted-foreground/60 hover:text-violet-600 hover:bg-white border border-transparent hover:border-violet-200 transition-colors"
                 >
-                  <Eye className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100" />
+                  <Eye className="w-3 h-3 opacity-70 group-hover:opacity-100 group-hover:text-violet-600 transition-colors" />
                   <span className="truncate max-w-[60vw]">{collapsedLabel}</span>
                 </button>
               </TooltipTrigger>
