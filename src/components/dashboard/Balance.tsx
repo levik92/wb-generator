@@ -94,69 +94,64 @@ export default function Balance() {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, delay: 0.05 }}
-        className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent p-4 sm:p-6"
+        className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-4 sm:p-6"
       >
-        <div className="pointer-events-none absolute -top-20 -right-16 w-72 h-72 rounded-full bg-violet-500/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(circle, hsl(268 83% 60% / 0.08) 0%, transparent 70%)' }} />
+        <div className="pointer-events-none absolute -bottom-32 -left-24 w-[420px] h-[420px] rounded-full" style={{ background: 'radial-gradient(circle, hsl(280 75% 60% / 0.06) 0%, transparent 70%)' }} />
 
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-            <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30">
-              <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-violet-700 dark:text-violet-300 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+              Ваш баланс
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] sm:text-[11px] font-medium text-violet-700 dark:text-violet-300 mb-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                Ваш баланс
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent leading-none tabular-nums">
+                {balance}
               </div>
-              <div className="flex items-baseline gap-1.5 flex-wrap">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent leading-none tabular-nums">
-                  {balance}
-                </div>
-                <span className="text-xs sm:text-sm text-muted-foreground">токенов</span>
-              </div>
+              <span className="text-xs sm:text-sm text-muted-foreground">токенов</span>
+            </div>
 
-              {/* Capacity hint — conversion-driver */}
-              {!pricesLoading && photoPrice > 0 && (
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-muted-foreground">
+            {!pricesLoading && photoPrice > 0 && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <Images className="h-3 w-3 text-violet-500/80" />
+                  ≈ <span className="font-semibold text-foreground">{Math.floor(balance / photoPrice)}</span> изображений
+                </span>
+                {descPrice > 0 && (
                   <span className="inline-flex items-center gap-1">
-                    <Images className="h-3 w-3 text-violet-500/80" />
-                    ≈ <span className="font-semibold text-foreground">{Math.floor(balance / photoPrice)}</span> изображений
+                    <FileText className="h-3 w-3 text-violet-500/80" />
+                    ≈ <span className="font-semibold text-foreground">{Math.floor(balance / descPrice)}</span> описаний
                   </span>
-                  {descPrice > 0 && (
-                    <span className="inline-flex items-center gap-1">
-                      <FileText className="h-3 w-3 text-violet-500/80" />
-                      ≈ <span className="font-semibold text-foreground">{Math.floor(balance / descPrice)}</span> описаний
-                    </span>
-                  )}
-                  {videoPrice > 0 && (
-                    <span className="inline-flex items-center gap-1">
-                      <Video className="h-3 w-3 text-violet-500/80" />
-                      ≈ <span className="font-semibold text-foreground">{Math.floor(balance / videoPrice)}</span> видео
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+                {videoPrice > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <Video className="h-3 w-3 text-violet-500/80" />
+                    ≈ <span className="font-semibold text-foreground">{Math.floor(balance / videoPrice)}</span> видео
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto shrink-0">
+          <div className="flex flex-col items-center gap-1.5 w-full md:w-auto shrink-0">
             <Button
               onClick={() => {
                 const pricingElement = document.getElementById('pricing-section');
                 if (pricingElement) pricingElement.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="h-10 rounded-lg px-4 sm:px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-md shadow-violet-500/30 w-full sm:w-auto gap-2 font-medium"
+              className="h-10 rounded-lg px-4 sm:px-5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 w-full md:w-auto gap-2 font-medium"
             >
               <Wallet className="h-4 w-4" />
               Пополнить баланс
             </Button>
-            <p className="text-[10px] text-center sm:text-right text-muted-foreground">
+            <p className="text-[10px] text-center text-muted-foreground">
               Безопасная оплата · СБП · карта
             </p>
           </div>
         </div>
       </motion.div>
+
 
 
       {/* Generation Costs */}
