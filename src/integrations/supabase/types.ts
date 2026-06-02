@@ -390,8 +390,83 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          channel_id: string | null
+          created_at: string
+          created_by: string | null
+          expense_date: string
+          id: string
+          name: string
+          notes: string | null
+          tag: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          channel_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          name: string
+          notes?: string | null
+          tag?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          channel_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          tag?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_settings: {
+        Row: {
+          id: string
+          payment_fee_rate: number
+          starting_cash: number
+          tax_rate: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          payment_fee_rate?: number
+          starting_cash?: number
+          tax_rate?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          payment_fee_rate?: number
+          starting_cash?: number
+          tax_rate?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       generation_jobs: {
         Row: {
+          aspect_ratio: string
           category: string
           completed_at: string | null
           completed_cards: number | null
@@ -413,6 +488,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          aspect_ratio?: string
           category: string
           completed_at?: string | null
           completed_cards?: number | null
@@ -434,6 +510,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          aspect_ratio?: string
           category?: string
           completed_at?: string | null
           completed_cards?: number | null
@@ -620,11 +697,14 @@ export type Database = {
           admin_notes: string | null
           amount: number
           created_at: string
+          created_by: string | null
           id: string
           invoice_date: string
           invoice_number: string
-          organization_id: string
-          package_id: string
+          is_manual: boolean
+          notes: string | null
+          organization_id: string | null
+          package_id: string | null
           package_name: string
           payment_purpose: string
           reviewed_at: string | null
@@ -640,11 +720,14 @@ export type Database = {
           admin_notes?: string | null
           amount: number
           created_at?: string
+          created_by?: string | null
           id?: string
           invoice_date?: string
           invoice_number: string
-          organization_id: string
-          package_id: string
+          is_manual?: boolean
+          notes?: string | null
+          organization_id?: string | null
+          package_id?: string | null
           package_name: string
           payment_purpose: string
           reviewed_at?: string | null
@@ -660,11 +743,14 @@ export type Database = {
           admin_notes?: string | null
           amount?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           invoice_date?: string
           invoice_number?: string
-          organization_id?: string
-          package_id?: string
+          is_manual?: boolean
+          notes?: string | null
+          organization_id?: string | null
+          package_id?: string | null
           package_name?: string
           payment_purpose?: string
           reviewed_at?: string | null
@@ -689,6 +775,107 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "payment_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_channel_utm_sources: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          utm_source_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          utm_source_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          utm_source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_channel_utm_sources_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_channel_utm_sources_utm_source_id_fkey"
+            columns: ["utm_source_id"]
+            isOneToOne: false
+            referencedRelation: "utm_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_channels: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          sort_order: number
+          tag: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          sort_order?: number
+          tag?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          sort_order?: number
+          tag?: string | null
+        }
+        Relationships: []
+      }
+      marketing_revenues: {
+        Row: {
+          amount: number
+          channel_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          period_month: string
+        }
+        Insert: {
+          amount: number
+          channel_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_month: string
+        }
+        Update: {
+          amount?: number
+          channel_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_month?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_revenues_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_channels"
             referencedColumns: ["id"]
           },
         ]
@@ -1243,6 +1430,7 @@ export type Database = {
           login_count: number
           referral_code: string | null
           referred_by: string | null
+          telegram_username: string | null
           tokens_balance: number
           updated_at: string
           utm_source_id: string | null
@@ -1258,6 +1446,7 @@ export type Database = {
           login_count?: number
           referral_code?: string | null
           referred_by?: string | null
+          telegram_username?: string | null
           tokens_balance?: number
           updated_at?: string
           utm_source_id?: string | null
@@ -1273,6 +1462,7 @@ export type Database = {
           login_count?: number
           referral_code?: string | null
           referred_by?: string | null
+          telegram_username?: string | null
           tokens_balance?: number
           updated_at?: string
           utm_source_id?: string | null
@@ -2000,6 +2190,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_manual_invoice: {
+        Args: {
+          p_amount: number
+          p_email: string
+          p_invoice_date: string
+          p_invoice_number: string
+          p_notes?: string
+          p_package_name: string
+          p_tokens: number
+        }
+        Returns: string
+      }
       admin_get_all_users: {
         Args: never
         Returns: {
@@ -2066,6 +2268,10 @@ export type Database = {
       generate_partner_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_active_ai_model: { Args: never; Returns: string }
+      get_admin_conversations: {
+        Args: { _enc_key: string; _limit?: number; _offset?: number }
+        Returns: Json
+      }
       get_payment_summary: {
         Args: { payment_ids: string[] }
         Returns: {
