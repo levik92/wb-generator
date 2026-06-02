@@ -417,13 +417,9 @@ export const GenerateDescription = ({
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
-            />
             <CardHeader className="relative">
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                   <Settings className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -462,7 +458,7 @@ export const GenerateDescription = ({
                   <Label htmlFor="productName" className="text-sm font-medium flex items-center gap-1.5">
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">1</span>
                     Название товара
-                    <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                    <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
                   </Label>
                 </div>
                 <Input
@@ -488,7 +484,7 @@ export const GenerateDescription = ({
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">2</span>
                     Ссылки на конкурентов
                   </Label>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
                 </div>
                 <div className="space-y-2">
                   {[
@@ -523,7 +519,7 @@ export const GenerateDescription = ({
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-500/15 text-[10px] font-bold text-violet-600 dark:text-violet-300">3</span>
                     Ключевые слова
                   </Label>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Необязательно</span>
                 </div>
                 <Textarea
                   id="keywords"
@@ -555,7 +551,7 @@ export const GenerateDescription = ({
             <CardHeader className="relative">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                     <FileText className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                   </div>
                   <div className="min-w-0 flex-1">
