@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useActiveAiModel, getVideoEdgeFunctionName } from "@/hooks/useActiveAiModel";
+import { CollapsibleInfoBlock } from "@/components/dashboard/CollapsibleInfoBlock";
 
 interface Profile {
   id: string;
