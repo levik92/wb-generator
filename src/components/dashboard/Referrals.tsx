@@ -131,9 +131,10 @@ export const Referrals = ({ profile }: ReferralsProps) => {
                   />
                   <Button
                     onClick={copyReferralLink}
-                    className="h-10 px-3 sm:px-4 shrink-0 bg-violet-600 hover:bg-violet-700 text-white shadow-sm"
+                    className="h-10 px-3 sm:px-4 shrink-0 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 border-0"
                   >
                     <Copy className="h-4 w-4 sm:mr-2" />
+
                     <span className="hidden sm:inline">Копировать</span>
                   </Button>
                 </div>
