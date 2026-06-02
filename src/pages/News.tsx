@@ -264,10 +264,8 @@ const News = ({ onMarkAllReadRef }: NewsProps = {}) => {
                 >
                   <div
                     onClick={() => markAsRead(item.id)}
-                    className={`group relative cursor-pointer rounded-2xl border bg-card p-4 sm:p-5 transition-all duration-200 ${
-                      !isRead
-                        ? 'border-violet-500/35 hover:border-violet-500/55 hover:shadow-md hover:shadow-violet-500/10'
-                        : 'border-border/50 hover:border-violet-500/30 hover:bg-muted/30'
+                    className={`group relative cursor-pointer rounded-2xl border bg-card p-4 sm:p-5 transition-colors duration-200 ${
+                      !isRead ? 'border-violet-500/35' : 'border-border/50'
                     }`}
                   >
                     {!isRead && (
