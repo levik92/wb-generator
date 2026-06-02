@@ -2026,83 +2026,99 @@ export const GenerateCards = ({
       <AnimatePresence>
         {isCardsPromoVisible && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="group relative isolate overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-primary to-fuchsia-500 animate-gradient-x" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
+            {/* Ambient drifting accents */}
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 -right-16 w-64 h-64 rounded-full bg-violet-500/[0.10] blur-3xl"
+              animate={{ x: [0, 18, 0], y: [0, 10, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-fuchsia-500/[0.08] blur-3xl"
+              animate={{ x: [0, -14, 0], y: [0, -8, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent animate-shimmer"
+            />
 
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <Images className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
-              <Sparkles className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
-              <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
-              <TrendingUp className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
-              <Images className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
-              <Sparkles className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
-            </div>
-
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-
+            {/* Close */}
             <button
               onClick={handleDismissCardsPromo}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-20"
+              className="absolute top-2 right-2 z-30 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-background/70 backdrop-blur-sm border border-border/60 text-muted-foreground hover:text-foreground hover:bg-background hover:border-border transition-colors"
               aria-label="Закрыть"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative p-6 pt-12 sm:pt-12 lg:pt-6">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:pr-8">
-                <div className="flex-shrink-0 hidden lg:block">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Images className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            <div className="relative z-10 p-4 sm:p-5 pr-12 sm:pr-14">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-5">
+                {/* Left: copy (icon hidden on mobile) */}
+                <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0 lg:pr-4">
+                  <div className="shrink-0 hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-violet-500/20 items-center justify-center">
+                    <Eye className="w-5 h-5 text-violet-600 dark:text-violet-300" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                      <h3 className="text-[15px] sm:text-base font-semibold leading-tight">
+                        Посмотреть примеры генераций
+                      </h3>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Полезно
+                      </span>
+                    </div>
+                    <p className="text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed">
+                      Перед пополнением баланса и генерацией — посмотрите реальные карточки пользователей и результаты, которых они достигают.
+                    </p>
+
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                        <TrendingUp className="w-3 h-3" />
+                        Рост конверсии до +260%
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300">
+                        <Clock className="w-3 h-3" />
+                        30 секунд на просмотр
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 border border-border/60 text-[11px] font-medium text-foreground/80">
+                        <ShieldCheck className="w-3 h-3" />
+                        Без обязательств
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="mb-3 lg:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
-                    Посмотрите кейсы — карточки, которые продают
-                  </h3>
-                  <p className="text-sm text-white/80 line-clamp-2">
-                    Реальные примеры роста конверсии до +260% после создания карточек на WBGen
-                  </p>
-
-                  <div className="mt-3 hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
+                {/* Right: CTAs */}
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[200px] lg:shrink-0">
                   <Button
-                    className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                     asChild
+                    size="sm"
+                    className="group/btn h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 font-medium text-xs"
                   >
                     <a href="/cases" target="_blank" rel="noopener noreferrer">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Посмотреть
-                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                      <Eye className="w-3.5 h-3.5 mr-1.5" />
+                      Посмотреть примеры
+                      <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
                     </a>
                   </Button>
                   {onNavigateToBalance && (
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={onNavigateToBalance}
-                      className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      className="h-9 rounded-lg border-violet-500/25 bg-transparent hover:bg-violet-500/[0.06] hover:border-violet-500/45 hover:text-foreground text-xs font-medium"
                     >
-                      <Coins className="w-4 h-4 mr-2" />
+                      <Coins className="w-3.5 h-3.5 mr-1.5" />
                       Пополнить баланс
                     </Button>
                   )}
