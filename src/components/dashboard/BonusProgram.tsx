@@ -297,15 +297,16 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
   return (
     <div className="space-y-5">
 
-      {/* Hero header — gradient, social CTAs, summary stats */}
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-violet-500/5 to-transparent px-4 py-5 sm:px-6 sm:py-6">
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
+      {/* Hero header — white card with radial green glows from corners */}
+      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
+        <span aria-hidden className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-28 -left-24 w-[420px] h-[420px] rounded-full bg-emerald-400/10 blur-[120px]" />
+        <span aria-hidden className="pointer-events-none absolute top-1/2 -right-32 w-40 h-40 rounded-full bg-teal-400/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5">
           <div className="flex items-start gap-3">
-            <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary" />
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-base sm:text-lg font-semibold leading-tight">Бонусная программа</h2>
@@ -316,17 +317,17 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
           </div>
 
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5">
+            <div className="rounded-xl border border-border/60 bg-background/70 px-3 py-2.5">
               <div className="text-[10px] sm:text-xs text-muted-foreground">Заработано</div>
-              <div className="text-base sm:text-lg font-semibold text-primary">+{totalEarned}</div>
+              <div className="text-base sm:text-lg font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">+{totalEarned}</div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5">
+            <div className="rounded-xl border border-border/60 bg-background/70 px-3 py-2.5">
               <div className="text-[10px] sm:text-xs text-muted-foreground">На проверке</div>
-              <div className="text-base sm:text-lg font-semibold">{pendingCount}</div>
+              <div className="text-base sm:text-lg font-semibold tabular-nums">{pendingCount}</div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2.5">
+            <div className="rounded-xl border border-border/60 bg-background/70 px-3 py-2.5">
               <div className="text-[10px] sm:text-xs text-muted-foreground">Доступно</div>
-              <div className="text-base sm:text-lg font-semibold text-emerald-600 dark:text-emerald-400">+{availableTotal}</div>
+              <div className="text-base sm:text-lg font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">+{availableTotal}</div>
             </div>
           </div>
 
@@ -335,7 +336,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
               href="https://instagram.com/wbgenerator"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/60 px-3 py-2.5 hover:border-primary/40 hover:bg-background/80 transition-colors"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 hover:border-emerald-500/40 transition-colors"
             >
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shrink-0">
                 <Instagram className="w-4 h-4 text-white" />
@@ -344,13 +345,13 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                 <div className="text-[11px] text-muted-foreground leading-none">Instagram</div>
                 <div className="text-sm font-medium truncate">@wbgenerator</div>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary shrink-0" />
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-emerald-600 shrink-0" />
             </a>
             <a
               href="https://t.me/wbgen_official"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/60 px-3 py-2.5 hover:border-primary/40 hover:bg-background/80 transition-colors"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 hover:border-emerald-500/40 transition-colors"
             >
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#229ED9] to-[#0088cc] flex items-center justify-center shrink-0">
                 <FaTelegram className="w-4 h-4 text-white" />
@@ -359,14 +360,14 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                 <div className="text-[11px] text-muted-foreground leading-none">Telegram</div>
                 <div className="text-sm font-medium truncate">@wbgen_official</div>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary shrink-0" />
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-emerald-600 shrink-0" />
             </a>
           </div>
 
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 w-full sm:w-fit bg-background/60 hover:bg-background"
+            className="gap-2 w-full sm:w-fit bg-background/70 hover:bg-background border-border/60"
             onClick={() => {
               const link = document.createElement('a');
               link.href = '/downloads/stories-template.png';
