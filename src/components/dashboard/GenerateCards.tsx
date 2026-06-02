@@ -160,6 +160,7 @@ export const GenerateCards = ({
 
   // Cards promo banner dismissal
   const CARDS_PROMO_KEY = `cards_promo_banner_dismissed_${profile.id}`;
+  const CARDS_HERO_KEY = `cards_hero_block_hidden_${profile.id}`;
   const [isDragOver, setIsDragOver] = useState(false);
   const [isRefDragOver, setIsRefDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
