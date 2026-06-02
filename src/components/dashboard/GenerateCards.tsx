@@ -160,13 +160,6 @@ export const GenerateCards = ({
 
   // Cards promo banner dismissal
   const CARDS_PROMO_KEY = `cards_promo_banner_dismissed_${profile.id}`;
-  const [isCardsPromoVisible, setIsCardsPromoVisible] = useState(() => {
-    return localStorage.getItem(CARDS_PROMO_KEY) !== "true";
-  });
-  const handleDismissCardsPromo = () => {
-    localStorage.setItem(CARDS_PROMO_KEY, "true");
-    setIsCardsPromoVisible(false);
-  };
   const [isDragOver, setIsDragOver] = useState(false);
   const [isRefDragOver, setIsRefDragOver] = useState(false);
   const [hasCheckedJobs, setHasCheckedJobs] = useState(false);
