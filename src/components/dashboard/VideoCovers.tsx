@@ -918,7 +918,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 <label
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
-                  className="group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all border-violet-500/25 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/60 hover:bg-violet-500/[0.06] cursor-pointer"
+                  className="group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-md p-6 sm:p-8 transition-all border-violet-500/25 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/60 hover:bg-violet-500/[0.06] cursor-pointer"
                 >
                   <div className="flex items-center justify-center w-12 h-12 mb-3 rounded-xl bg-violet-500/10 group-hover:bg-violet-500/20 transition-all">
                     <Upload className="w-5 h-5 text-violet-600 dark:text-violet-300" />
