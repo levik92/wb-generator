@@ -1298,7 +1298,8 @@ export const History = ({
                           </Button>
                         </div>
                         {(img.is_edited || img.is_regenerated || img.is_styled) && (
-                          <div className="absolute top-1 left-1 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
+                          <div className="absolute top-1 left-1 z-10 bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-lg font-medium">
+
                             {(() => {
                               if (img.is_styled) {
                                 const styledOfSameType = generation.output_data.images.filter((i: any) => 
