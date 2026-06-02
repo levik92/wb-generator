@@ -75,9 +75,9 @@ export const CollapsibleInfoBlock = ({
                   type="button"
                   onClick={hide}
                   aria-label={`${tooltipLabel} блок`}
-                  className="group absolute top-2 right-2 z-40 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-border/60 text-muted-foreground hover:border-violet-400 hover:shadow-sm transition-all"
+                  className="group absolute top-2 right-2 z-40 inline-flex items-center justify-center w-9 h-9 sm:w-9 sm:h-9 rounded-lg bg-white border border-border/60 text-muted-foreground hover:border-violet-400 hover:shadow-sm transition-all"
                 >
-                  <ToggleIcon className="w-4 h-4 text-slate-600 group-hover:text-violet-600 transition-colors" />
+                  <ToggleIcon className="w-[18px] h-[18px] text-slate-600 group-hover:text-violet-600 transition-colors" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="left" sideOffset={6} className="text-xs">
