@@ -1015,13 +1015,14 @@ export const History = ({
         <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
           <SelectTrigger
             aria-label="Фильтр истории"
-            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-[170px] shrink-0 [&>svg:last-child]:hidden sm:[&>svg:last-child]:block"
+            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-9 lg:w-[170px] shrink-0 [&>svg:last-child]:hidden lg:[&>svg:last-child]:block"
           >
             <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
-            <span className="hidden sm:block flex-1 text-left truncate">
+            <span className="hidden lg:block flex-1 text-left truncate">
               <SelectValue />
             </span>
           </SelectTrigger>
+
           <SelectContent className="rounded-xl">
             <SelectItem value="all" className="text-sm">Все</SelectItem>
             <SelectItem value="cards" className="text-sm">Карточки</SelectItem>
@@ -1091,7 +1092,7 @@ export const History = ({
                   {/* Content */}
                   <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0">
                     {generation.generation_type === 'video' ? <div 
-                        className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
+                        className="w-[60px] h-20 sm:w-[66px] sm:h-[88px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => {
                           if (generation.output_data?.video_url) {
                             setVideoPreviewUrl(generation.output_data.video_url);
@@ -1100,30 +1101,31 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" fit="cover" showBackdrop={false} />
+                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-violet-500/15 to-purple-500/5 flex items-center justify-center">
                             <Video className="w-6 h-6 text-violet-600 dark:text-violet-300" />
                           </div>
                         )}
-                        <div className="absolute inset-0 z-10 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-20 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
-                        className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
+                        className="w-[60px] h-20 sm:w-[66px] sm:h-[88px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
-                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" fit="cover" showBackdrop={false} onError={e => {
+                        <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
                         }} />
 
-                        <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                      </div> : <div className="w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-xl flex items-center justify-center bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex-shrink-0">
+                      </div> : <div className="w-[60px] h-20 sm:w-[66px] sm:h-[88px] rounded-xl flex items-center justify-center bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex-shrink-0">
                         {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-violet-600 dark:text-violet-300" /> : <FileText className="w-6 h-6 text-violet-600 dark:text-violet-300" />}
                       </div>}
+
                     
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
@@ -1172,8 +1174,8 @@ export const History = ({
                         variant="outline"
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
-                        <span>{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;фото</span></>}</span>
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" /> : <ChevronDown className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;фото</span></>}</span>
                       </Button>
                     )}
                     {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) === 1 && generation.output_data?.images?.[0]?.image_url && (
@@ -1194,8 +1196,8 @@ export const History = ({
                         title={`Редактировать (${editPrice} токенов)`}
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1" />}
-                        <span>Ред.</span>
+                        {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">Ред.</span>
                       </Button>
                     )}
                     {generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
@@ -1205,8 +1207,8 @@ export const History = ({
                         variant="outline"
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1" /> : <ChevronDown className="w-4 h-4 mr-1" />}
-                        <span>{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;видео</span></>}</span>
+                        {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" /> : <ChevronDown className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">{expandedIds.has(generation.id) ? 'Свернуть' : <>Все<span className="hidden lg:inline">&nbsp;видео</span></>}</span>
                       </Button>
                     )}
                     {generation.generation_type === 'video' && (
@@ -1218,26 +1220,27 @@ export const History = ({
                         title={`Редактировать (${videoRegenPrice || 2} токенов)`}
                         className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
-                        {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1" />}
-                        <span>Ред.</span>
+                        {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 mr-1 md:mr-0 lg:mr-1" />}
+                        <span className="md:hidden lg:inline">Ред.</span>
                       </Button>
                     )}
                     <Button onClick={() => downloadGeneration(generation)} size="sm" disabled={downloadingIds.has(generation.id)} className="h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 text-xs font-medium">
                       {downloadingIds.has(generation.id) ? <>
-                          <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
+                          <Loader2 className="w-4 h-4 sm:mr-2 md:mr-0 lg:mr-2 animate-spin" />
                         </> : generation.generation_type === 'video' ? <>
-                          <Download className="w-4 h-4 sm:mr-1.5" />
-                          <span className="hidden sm:inline">Скачать</span>
+                          <Download className="w-4 h-4 sm:mr-1.5 md:mr-0 lg:mr-1.5" />
+                          <span className="hidden sm:inline md:hidden lg:inline">Скачать</span>
                           <span className="sm:hidden">MP4</span>
                         </> : (generation.output_data?.images?.length || 0) > 1 ? <>
-                          <Archive className="w-4 h-4 sm:mr-1.5" />
-                          <span>ZIP ({generation.output_data.images.length})</span>
+                          <Archive className="w-4 h-4 sm:mr-1.5 md:mr-0 lg:mr-1.5" />
+                          <span className="md:hidden lg:inline">ZIP ({generation.output_data.images.length})</span>
                         </> : <>
-                          <Download className="w-4 h-4 sm:mr-1.5" />
-                          <span className="hidden sm:inline">Скачать</span>
+                          <Download className="w-4 h-4 sm:mr-1.5 md:mr-0 lg:mr-1.5" />
+                          <span className="hidden sm:inline md:hidden lg:inline">Скачать</span>
                           <span className="sm:hidden">PNG</span>
                         </>}
                     </Button>
+
                     <Button onClick={() => generation.generation_type === 'video' ? deleteVideoGeneration(generation) : deleteGeneration(generation.id)} size="sm" variant="outline" className="h-9 w-9 p-0 rounded-lg border-destructive/25 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:border-destructive">
                       <Trash2 className="w-4 h-4" />
                     </Button>
