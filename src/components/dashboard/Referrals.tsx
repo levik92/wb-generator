@@ -90,7 +90,7 @@ export const Referrals = ({ profile }: ReferralsProps) => {
 
             Программа
           </TabsTrigger>
-          <TabsTrigger value="invited" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm py-2">
+          <TabsTrigger value="invited" className="flex items-center gap-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-violet-700 dark:data-[state=active]:text-violet-200">
             Приглашённые
             <span className="ml-1.5 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary/15 text-primary text-[10px] font-semibold">
               {referredUsers.length}
