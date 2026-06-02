@@ -129,11 +129,8 @@ export const DashboardHeader = ({
   return (
     <header className="border-b border-border/60 bg-card/85 backdrop-blur-md sticky top-0 z-20">
       <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
-        {/* Left: tab title + icon */}
+        {/* Left: tab title */}
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1 overflow-hidden">
-          <div className="hidden sm:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 items-center justify-center">
-            <TabIcon className="w-5 h-5 text-violet-600 dark:text-violet-300" strokeWidth={2.2} />
-          </div>
           <div className="min-w-0 flex-1 overflow-hidden">
             <h1 className="text-[15px] md:text-[17px] font-semibold text-foreground truncate tracking-tight leading-tight">
               {currentTab.title}
@@ -153,18 +150,7 @@ export const DashboardHeader = ({
 
         {/* Right: actions */}
         <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
-          {/* Balance pill */}
-          {onNavigateToBalance && (
-            <button
-              onClick={onNavigateToBalance}
-              className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/25 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-purple-500/15 active:scale-[0.97] transition-all"
-              aria-label="Баланс токенов"
-            >
-              <Zap className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" strokeWidth={2.5} />
-              <span className="text-[13px] font-semibold tabular-nums leading-none">{balanceFormatted}</span>
-              <span className="text-[11px] text-muted-foreground leading-none hidden lg:inline">токенов</span>
-            </button>
-          )}
+
 
           <ThemeToggle />
 
