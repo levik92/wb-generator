@@ -2251,58 +2251,53 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/60 bg-card rounded-2xl">
-        <CardHeader>
+      <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+        />
+        <CardHeader className="relative">
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
             <Button variant="outline" size="sm" onClick={() => {
-            setFiles([]);
-            setReferenceImage(null);
-            setProductName("");
-            setCategory("");
-            setDescription("");
-            setAutoDescription(false);
-            setSelectedCards([0]);
-          }} className="w-auto rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
+              setFiles([]);
+              setReferenceImage(null);
+              setProductName("");
+              setCategory("");
+              setDescription("");
+              setAutoDescription(false);
+              setSelectedCards([0]);
+            }} className="w-auto rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
           </div>
-          
-          {/* Desktop/Tablet layout */}
-          <div className="hidden sm:flex sm:items-start sm:justify-between gap-2">
-            <div className="flex-1 space-y-1.5">
+
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+              <Info className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+            </div>
+            <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Info className="w-4 h-4 shrink-0" />
-                Информация о товаре
+                <span>Информация о товаре</span>
+                <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
+              <CardDescription className="text-xs sm:text-sm mt-1">
                 Укажите детали товара для генерации оптимальных карточек
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={() => {
-            setFiles([]);
-            setReferenceImage(null);
-            setProductName("");
-            setCategory("");
-            setDescription("");
-            setAutoDescription(false);
-            setSelectedCards([0]);
-          }} className="shrink-0 rounded-lg h-8 px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/60 transition-colors" disabled={generating}>
+              setFiles([]);
+              setReferenceImage(null);
+              setProductName("");
+              setCategory("");
+              setDescription("");
+              setAutoDescription(false);
+              setSelectedCards([0]);
+            }} className="hidden sm:inline-flex shrink-0 rounded-lg h-8 px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/60 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
-          </div>
-          
-          {/* Mobile title - below clear button */}
-          <div className="sm:hidden space-y-1.5">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Info className="w-4 h-4 shrink-0" />
-              Информация о товаре
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              Укажите детали товара для генерации оптимальных карточек
-            </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
