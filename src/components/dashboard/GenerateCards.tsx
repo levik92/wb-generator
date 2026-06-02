@@ -2357,15 +2357,26 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="border-border/60 bg-card rounded-2xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Images className="w-4 h-4 shrink-0" />
-            Выбор типа карточек
-          </CardTitle>
-          <CardDescription className="text-xs sm:text-sm">
-            Выберите какие типы карточек вам нужны
-          </CardDescription>
+      <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+        />
+        <CardHeader className="relative">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+              <Images className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <span>Выбор типа карточек</span>
+                <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm mt-1">
+                Выберите какие типы карточек вам нужны
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
