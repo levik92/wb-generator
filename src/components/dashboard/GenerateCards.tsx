@@ -2666,9 +2666,9 @@ export const GenerateCards = ({
 
       {/* Generated Images */}
       {generatedImages.length > 0 && <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl animate-scale-in">
-          <CardHeader className="relative">
-            <span className="absolute top-2.5 right-3 z-10 inline-flex items-center gap-1 text-[8px] sm:text-[9px] uppercase tracking-wider font-medium text-emerald-600/60 dark:text-emerald-300/60 pointer-events-none">
-              <span className="w-1 h-1 rounded-full bg-emerald-500/70" />
+          <CardHeader className="relative pr-16 sm:pr-20">
+            <span className="absolute top-2.5 right-3 z-10 inline-flex items-center gap-1 text-[8px] sm:text-[9px] uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-300 pointer-events-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Готово
             </span>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
