@@ -2665,17 +2665,25 @@ export const GenerateCards = ({
       </Dialog>
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="border-border/60 bg-card rounded-2xl animate-scale-in">
-          <CardHeader>
+      {generatedImages.length > 0 && <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl animate-scale-in">
+          <CardHeader className="relative">
+            <span className="absolute top-2.5 right-3 z-10 inline-flex items-center gap-1 text-[8px] sm:text-[9px] uppercase tracking-wider font-medium text-emerald-600/60 dark:text-emerald-300/60 pointer-events-none">
+              <span className="w-1 h-1 rounded-full bg-emerald-500/70" />
+              Готово
+            </span>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <Images className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Готовые карточки ({generatedImages.length}/{generatedImages.length + Object.values(imageVariants).reduce((sum, variants) => sum + Math.max(0, variants.length - 1), 0)})</span>
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Ваши сгенерированные карточки готовы к скачиванию
-                </CardDescription>
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+                  <Images className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <span className="truncate">Готовые карточки ({generatedImages.length}/{generatedImages.length + Object.values(imageVariants).reduce((sum, variants) => sum + Math.max(0, variants.length - 1), 0)})</span>
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-1">
+                    Ваши сгенерированные карточки готовы к скачиванию
+                  </CardDescription>
+                </div>
               </div>
               <Button onClick={downloadAll} variant="ghost" className="shrink-0 w-full sm:w-auto rounded-md h-10 px-3 text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" size="sm" disabled={downloadingAll}>
                 {downloadingAll ? <>
