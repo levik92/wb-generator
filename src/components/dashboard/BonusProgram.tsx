@@ -297,11 +297,14 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
   return (
     <div className="space-y-5">
 
-      {/* Hero header — white card with radial green glows from corners */}
+      {/* Hero header — white card with subtle violet radial glow */}
       <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
-        <span aria-hidden className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-500/20 blur-3xl" />
-        <span aria-hidden className="pointer-events-none absolute -bottom-28 -left-24 w-[420px] h-[420px] rounded-full bg-emerald-400/10 blur-[120px]" />
-        <span aria-hidden className="pointer-events-none absolute top-1/2 -right-32 w-40 h-40 rounded-full bg-teal-400/10 blur-3xl" />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full"
+          style={{ background: 'radial-gradient(circle, hsl(268 83% 60% / 0.10) 0%, transparent 70%)' }}
+        />
+
 
         <div className="relative flex flex-col gap-5">
           <div className="flex items-start gap-3">
@@ -336,7 +339,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
               href="https://instagram.com/wbgenerator"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 hover:border-emerald-500/40 transition-colors"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 hover:border-violet-500/40 transition-colors"
             >
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shrink-0">
                 <Instagram className="w-4 h-4 text-white" />
@@ -345,13 +348,13 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                 <div className="text-[11px] text-muted-foreground leading-none">Instagram</div>
                 <div className="text-sm font-medium truncate">@wbgenerator</div>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-emerald-600 shrink-0" />
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-violet-600 shrink-0" />
             </a>
             <a
               href="https://t.me/wbgen_official"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 hover:border-emerald-500/40 transition-colors"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-3 py-2.5 hover:border-violet-500/40 transition-colors"
             >
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#229ED9] to-[#0088cc] flex items-center justify-center shrink-0">
                 <FaTelegram className="w-4 h-4 text-white" />
@@ -360,14 +363,14 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                 <div className="text-[11px] text-muted-foreground leading-none">Telegram</div>
                 <div className="text-sm font-medium truncate">@wbgen_official</div>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-emerald-600 shrink-0" />
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-violet-600 shrink-0" />
             </a>
           </div>
 
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 w-full sm:w-fit bg-background/70 hover:bg-background border-border/60"
+            className="gap-2 w-full sm:w-fit bg-background/70 border-border/60 hover:bg-violet-500/10 hover:text-violet-600 hover:border-violet-500/40"
             onClick={() => {
               const link = document.createElement('a');
               link.href = '/downloads/stories-template.png';
