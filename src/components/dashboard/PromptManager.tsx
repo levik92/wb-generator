@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Save, X, ChevronDown, ChevronRight } from "lucide-react";
+import { Pencil, Save, X, ChevronDown, ChevronRight, Image as ImageIcon, Video, Wrench, Sparkles, Zap, Cpu, Check, Settings2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdminImageSettings } from "@/components/admin/AdminImageSettings";
 import { AdminProxySettings } from "@/components/admin/AdminProxySettings";
+import { cn } from "@/lib/utils";
 interface Prompt {
   id: string;
   prompt_type: string;
@@ -452,64 +453,84 @@ export function PromptManager() {
           </CardContent>
         </Card>;
     }
-    return <div className="space-y-3 md:space-y-4">
+    const categoryStyle = (cat: string) => {
+      if (cat === 'Описание') return { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20', dot: 'bg-blue-500' };
+      if (cat === 'Технический') return { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20', dot: 'bg-purple-500' };
+      return { bg: 'bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/20', dot: 'bg-emerald-500' };
+    };
+    return <div className="space-y-2.5">
         {[...filteredPrompts].sort((a, b) => {
         const order = ['description', 'edit-card', 'cover', 'features', 'macro', 'beforeAfter', 'bundle', 'guarantee', 'lifestyle', 'mainEdit'];
         return order.indexOf(a.prompt_type) - order.indexOf(b.prompt_type);
       }).map(prompt => {
-        const {
-          name,
-          description,
-          category
-        } = getPromptDisplayName(prompt.prompt_type);
+        const { name, description, category } = getPromptDisplayName(prompt.prompt_type);
         const isEditing = editingPrompt === prompt.id;
-        return <Collapsible key={prompt.id} open={openPrompts.has(prompt.id)} onOpenChange={() => togglePrompt(prompt.id)}>
-                <Card className="overflow-hidden bg-card">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <CollapsibleTrigger className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-1 text-left">
-                        {openPrompts.has(prompt.id) ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
+        const isOpen = openPrompts.has(prompt.id);
+        const cs = categoryStyle(category);
+        return <Collapsible key={prompt.id} open={isOpen} onOpenChange={() => togglePrompt(prompt.id)}>
+                <Card className={cn(
+                  "overflow-hidden bg-card border-border/60 transition-all",
+                  isOpen && "border-primary/30 shadow-sm",
+                  isEditing && "border-primary/50 ring-1 ring-primary/20"
+                )}>
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full text-left p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", cs.bg)}>
+                          <Sparkles className={cn("h-4 w-4", cs.text)} />
+                        </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <CardTitle className="text-base lg:text-lg break-words">{name}</CardTitle>
-                            <Badge variant="secondary" className="text-xs">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold text-sm sm:text-base truncate">{name}</h4>
+                            <Badge variant="outline" className={cn("text-[10px] font-medium", cs.bg, cs.text, cs.border)}>
                               {category}
                             </Badge>
                           </div>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
                         </div>
-                      </CollapsibleTrigger>
-                      <Button variant="ghost" size="icon" onClick={() => startEdit(prompt)} className="shrink-0 h-8 w-8">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <CardDescription className="text-sm break-words ml-6 my-[16px] mt-0 pb-[16px] mb-0">{description}</CardDescription>
-                  </CardHeader>
-                  
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => { e.stopPropagation(); startEdit(prompt); }}
+                            className="h-8 w-8"
+                            title="Редактировать"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <div className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground">
+                            {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+
                   <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      <div className="space-y-4">
+                    <div className="px-4 pb-4 pt-0 border-t border-border/40">
+                      <div className="space-y-3 pt-3">
                         {isEditing ? <>
-                            <Textarea value={editValue} onChange={e => setEditValue(e.target.value)} className="min-h-[250px] lg:min-h-[300px] font-mono text-sm resize-none" placeholder="Введите промт..." />
+                            <Textarea value={editValue} onChange={e => setEditValue(e.target.value)} className="min-h-[260px] lg:min-h-[320px] font-mono text-xs sm:text-sm resize-y bg-background" placeholder="Введите промт..." />
                             <div className="flex flex-col sm:flex-row gap-2">
                               <Button onClick={() => savePrompt(prompt.id)} disabled={saving} className="gap-2 flex-1 sm:flex-none">
                                 <Save className="h-4 w-4" />
-                                {saving ? "Сохранение..." : "Сохранить"}
+                                {saving ? "Сохранение…" : "Сохранить"}
                               </Button>
                               <Button variant="outline" onClick={cancelEdit} disabled={saving} className="gap-2 flex-1 sm:flex-none">
-                                <X className="h-4 w-4" />
-                                Отмена
+                                <X className="h-4 w-4" />Отмена
                               </Button>
                             </div>
-                          </> : <div className="bg-muted p-3 lg:p-4 rounded-lg overflow-x-auto">
-                            <pre className="whitespace-pre-wrap text-xs lg:text-sm text-muted-foreground break-words">
+                          </> : <div className="rounded-lg bg-muted/50 border border-border/40 p-3 sm:p-4 max-h-[320px] overflow-auto">
+                            <pre className="whitespace-pre-wrap text-[11px] sm:text-xs text-muted-foreground break-words font-mono leading-relaxed">
                               {prompt.prompt_template}
                             </pre>
                           </div>}
-                        <div className="text-xs text-muted-foreground">
-                          Последнее обновление: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
+                        <div className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          Обновлено: {new Date(prompt.updated_at).toLocaleString('ru-RU')}
                         </div>
                       </div>
-                    </CardContent>
+                    </div>
                   </CollapsibleContent>
                 </Card>
               </Collapsible>;
@@ -558,213 +579,321 @@ export function PromptManager() {
     }
   };
 
-  return <div className="space-y-4 md:space-y-6 overflow-x-hidden">
+  // Helper: selectable option card (provider/model picker)
+  const OptionCard = ({
+    selected, onClick, disabled, icon, title, description, accent = 'primary',
+  }: {
+    selected: boolean; onClick: () => void; disabled?: boolean;
+    icon: React.ReactNode; title: string; description: string;
+    accent?: 'primary' | 'emerald' | 'blue' | 'purple';
+  }) => {
+    const accentMap = {
+      primary: { ring: 'ring-primary/40 border-primary/40', bg: 'bg-primary/[0.04]', dot: 'text-primary', iconBg: 'bg-primary/10' },
+      emerald: { ring: 'ring-emerald-500/40 border-emerald-500/40', bg: 'bg-emerald-500/[0.04]', dot: 'text-emerald-500', iconBg: 'bg-emerald-500/10' },
+      blue: { ring: 'ring-blue-500/40 border-blue-500/40', bg: 'bg-blue-500/[0.04]', dot: 'text-blue-500', iconBg: 'bg-blue-500/10' },
+      purple: { ring: 'ring-purple-500/40 border-purple-500/40', bg: 'bg-purple-500/[0.04]', dot: 'text-purple-500', iconBg: 'bg-purple-500/10' },
+    }[accent];
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className={cn(
+          "relative w-full text-left rounded-xl border bg-card p-4 transition-all",
+          "hover:border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+          selected ? cn("ring-1", accentMap.ring, accentMap.bg) : "border-border/60 hover:bg-muted/30",
+          disabled && "opacity-60 cursor-not-allowed"
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0", accentMap.iconBg)}>
+            {icon}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-sm sm:text-base">{title}</span>
+              {selected && (
+                <Badge variant="secondary" className={cn("text-[10px] gap-1 border", accentMap.bg, accentMap.dot)}>
+                  <Check className="h-2.5 w-2.5" />Активен
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
+          </div>
+          <div className={cn(
+            "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+            selected ? cn("bg-current", accentMap.dot, "border-transparent") : "border-border"
+          )}>
+            {selected && <Check className="h-3 w-3 text-background" strokeWidth={3} />}
+          </div>
+        </div>
+      </button>
+    );
+  };
+
+  const PageHeader = ({ icon, title, description, tone = 'primary' }: {
+    icon: React.ReactNode; title: string; description: string;
+    tone?: 'primary' | 'blue' | 'purple';
+  }) => {
+    const toneMap = {
+      primary: 'from-primary/10 via-primary/5',
+      blue: 'from-blue-500/10 via-blue-500/5',
+      purple: 'from-purple-500/10 via-purple-500/5',
+    }[tone];
+    const iconBg = {
+      primary: 'bg-primary/15 text-primary',
+      blue: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
+      purple: 'bg-purple-500/15 text-purple-600 dark:text-purple-400',
+    }[tone];
+    return (
+      <div className={cn(
+        "rounded-2xl border border-border/50 p-4 sm:p-5 bg-gradient-to-br to-transparent",
+        toneMap
+      )}>
+        <div className="flex items-center gap-3">
+          <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", iconBg)}>
+            {icon}
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold leading-tight">{title}</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{description}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const SectionLabel = ({ icon, children, count }: { icon: React.ReactNode; children: React.ReactNode; count?: number }) => (
+    <div className="flex items-center gap-2 mb-3">
+      <span className="text-muted-foreground">{icon}</span>
+      <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{children}</h3>
+      {count !== undefined && (
+        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground tabular-nums">
+          {count}
+        </span>
+      )}
+      <div className="flex-1 h-px bg-border/40" />
+    </div>
+  );
+
+  const SavingIndicator = ({ show, label = "Сохранение настроек…" }: { show: boolean; label?: string }) => show ? (
+    <div className="mt-3 text-xs text-muted-foreground flex items-center gap-2">
+      <div className="w-3.5 h-3.5 rounded-full border-[2px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
+      {label}
+    </div>
+  ) : null;
+
+  return <div className="space-y-5 md:space-y-6 overflow-x-hidden">
       {/* Top-level tabs: Images / Video / Technical */}
-      <Tabs defaultValue="images">
-        <TabsList className="grid w-full max-w-[420px] sm:max-w-md grid-cols-3 mb-6">
-          <TabsTrigger value="images">Изображения</TabsTrigger>
-          <TabsTrigger value="video">Видео</TabsTrigger>
-          <TabsTrigger value="technical">Технические</TabsTrigger>
+      <Tabs defaultValue="images" className="space-y-5">
+        <TabsList className="inline-flex h-auto w-full sm:w-auto p-1 bg-muted/60 rounded-xl gap-1">
+          <TabsTrigger value="images" className="gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg">
+            <ImageIcon className="h-3.5 w-3.5" />
+            <span>Изображения</span>
+          </TabsTrigger>
+          <TabsTrigger value="video" className="gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg">
+            <Video className="h-3.5 w-3.5" />
+            <span>Видео</span>
+          </TabsTrigger>
+          <TabsTrigger value="technical" className="gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg">
+            <Wrench className="h-3.5 w-3.5" />
+            <span>Технические</span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="images">
-          <div className="space-y-4 md:space-y-6">
-            <div className="flex flex-col gap-4">
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold">Управление промтами и моделями</h2>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Переключение между моделями генерации и редактирование промтов
-                </p>
-              </div>
+        {/* ====================== IMAGES ====================== */}
+        <TabsContent value="images" className="space-y-5 md:space-y-6 mt-0">
+          <PageHeader
+            icon={<ImageIcon className="h-5 w-5" />}
+            title="Управление промтами и моделями"
+            description="Переключение между моделями генерации и редактирование промтов"
+          />
 
-              {/* API Provider Selection */}
-              <Card className="bg-card border-primary/20">
-                <CardHeader>
-                  <CardTitle className="text-lg">API Провайдер</CardTitle>
-                  <CardDescription>
-                    Выберите способ подключения к AI моделям. Polza AI — альтернативный провайдер с единым API.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RadioGroup value={apiProvider} onValueChange={value => saveApiProvider(value as 'direct' | 'polza')} disabled={savingProvider} className="space-y-3">
-                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="direct" id="provider-direct" />
-                      <Label htmlFor="provider-direct" className="flex-1 cursor-pointer">
-                        <div className="font-semibold mb-[6px]">Прямое подключение (Direct API)</div>
-                        <div className="text-xs text-muted-foreground">
-                          Прямые вызовы к Google Gemini и Kling AI через их официальные API
-                        </div>
-                      </Label>
-                      {apiProvider === 'direct' && <Badge variant="default">Активен</Badge>}
-                    </div>
-                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="polza" id="provider-polza" />
-                      <Label htmlFor="provider-polza" className="flex-1 cursor-pointer">
-                        <div className="font-semibold mb-[6px]">Польза AI (Polza)</div>
-                        <div className="text-xs text-muted-foreground">
-                          Единый API-провайдер для всех моделей (Gemini, Kling и другие) через polza.ai
-                        </div>
-                      </Label>
-                      {apiProvider === 'polza' && <Badge variant="default">Активен</Badge>}
-                    </div>
-                  </RadioGroup>
-                  {savingProvider && <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full border-[2px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
-                      Сохранение настроек...
-                    </div>}
-                </CardContent>
-              </Card>
+          {/* Provider + Model picker */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-base">API провайдер</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Способ подключения к AI моделям
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                <OptionCard
+                  selected={apiProvider === 'direct'}
+                  onClick={() => apiProvider !== 'direct' && saveApiProvider('direct')}
+                  disabled={savingProvider}
+                  icon={<Zap className="h-4 w-4 text-primary" />}
+                  title="Прямое подключение"
+                  description="Прямые вызовы к Google Gemini и Kling AI через официальные API"
+                />
+                <OptionCard
+                  selected={apiProvider === 'polza'}
+                  onClick={() => apiProvider !== 'polza' && saveApiProvider('polza')}
+                  disabled={savingProvider}
+                  icon={<Sparkles className="h-4 w-4 text-purple-500" />}
+                  title="Польза AI (Polza)"
+                  description="Единый API-провайдер для всех моделей через polza.ai"
+                  accent="purple"
+                />
+                <SavingIndicator show={savingProvider} />
+              </CardContent>
+            </Card>
 
-              {/* Model Selection */}
-              <Card className="bg-card">
-                <CardHeader>
-                  <CardTitle className="text-lg">Активная модель генерации</CardTitle>
-                  <CardDescription>
-                    Выберите модель для генерации описаний и изображений. Изменение применяется ко всем новым генерациям.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RadioGroup value={activeModel} onValueChange={value => saveActiveModel(value as 'openai' | 'google')} disabled={savingModel} className="space-y-3">
-                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="openai" id="openai" />
-                      <Label htmlFor="openai" className="flex-1 cursor-pointer">
-                        <div className="font-semibold mb-[6px]">OpenAI (GPT)</div>
-                        <div className="text-xs text-muted-foreground">
-                          Версия 2.0 - использует модель gpt-image-1 для генерации изображений
-                        </div>
-                      </Label>
-                      {activeModel === 'openai' && <Badge variant="default">Активна</Badge>}
-                    </div>
-                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
-                      <RadioGroupItem value="google" id="google" />
-                      <Label htmlFor="google" className="flex-1 cursor-pointer">
-                        <div className="font-semibold mb-[6px]">Nanabanana Pro (Gemini)</div>
-                        <div className="text-xs text-muted-foreground">
-                          Использует gemini-3.1-pro для описаний и gemini-3-pro-image для изображений
-                        </div>
-                      </Label>
-                      {activeModel === 'google' && <Badge variant="default">Активна</Badge>}
-                    </div>
-                  </RadioGroup>
-                  {savingModel && <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full border-[2px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
-                      Сохранение настроек...
-                    </div>}
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-base">Активная модель</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Модель применяется ко всем новым генерациям
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                <OptionCard
+                  selected={activeModel === 'openai'}
+                  onClick={() => activeModel !== 'openai' && saveActiveModel('openai')}
+                  disabled={savingModel}
+                  icon={<Sparkles className="h-4 w-4 text-emerald-500" />}
+                  title="OpenAI (GPT)"
+                  description="Версия 2.0 — модель gpt-image-1 для генерации изображений"
+                  accent="emerald"
+                />
+                <OptionCard
+                  selected={activeModel === 'google'}
+                  onClick={() => activeModel !== 'google' && saveActiveModel('google')}
+                  disabled={savingModel}
+                  icon={<Sparkles className="h-4 w-4 text-blue-500" />}
+                  title="Nanabanana Pro (Gemini)"
+                  description="gemini-3.1-pro для описаний и gemini-3-pro-image для изображений"
+                  accent="blue"
+                />
+                <SavingIndicator show={savingModel} />
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Prompts Tabs */}
-            <Tabs value={activeTab} onValueChange={v => setActiveTab(v as 'openai' | 'google')}>
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="openai" className="gap-2">
+          {/* Prompts section */}
+          <div>
+            <SectionLabel icon={<Sparkles className="h-3.5 w-3.5" />}>Промты по моделям</SectionLabel>
+            <Tabs value={activeTab} onValueChange={v => setActiveTab(v as 'openai' | 'google')} className="space-y-4">
+              <TabsList className="inline-flex h-auto p-1 bg-muted/60 rounded-xl gap-1">
+                <TabsTrigger value="openai" className="gap-2 px-4 py-1.5 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg">
                   OpenAI
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
                     {prompts.filter(p => p.model_type === 'openai').length}
                   </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="google" className="gap-2">
+                <TabsTrigger value="google" className="gap-2 px-4 py-1.5 text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-lg">
                   Gemini
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
                     {prompts.filter(p => p.model_type === 'google').length}
                   </Badge>
                 </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="openai" className="mt-6">
-                {renderPrompts('openai')}
-              </TabsContent>
-
-              <TabsContent value="google" className="mt-6">
-                {renderPrompts('google')}
-              </TabsContent>
+              <TabsContent value="openai" className="mt-0">{renderPrompts('openai')}</TabsContent>
+              <TabsContent value="google" className="mt-0">{renderPrompts('google')}</TabsContent>
             </Tabs>
+          </div>
 
-            {/* Настройки генерации изображений */}
+          {/* Image settings + proxy */}
+          <div className="space-y-4">
+            <SectionLabel icon={<Settings2 className="h-3.5 w-3.5" />}>Дополнительные настройки</SectionLabel>
             <AdminImageSettings />
-
-            {/* Настройки прокси */}
             <AdminProxySettings />
           </div>
         </TabsContent>
 
-        <TabsContent value="video">
-          <div className="space-y-4 md:space-y-6">
-            <div>
-              <h2 className="text-xl md:text-2xl font-bold">Видеогенерация</h2>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Настройки модели и промта для генерации видеообложек
-              </p>
-            </div>
+        {/* ====================== VIDEO ====================== */}
+        <TabsContent value="video" className="space-y-5 md:space-y-6 mt-0">
+          <PageHeader
+            icon={<Video className="h-5 w-5" />}
+            title="Видеогенерация"
+            description="Настройки модели и промта для генерации видеообложек"
+            tone="blue"
+          />
 
-            {/* Video API Provider Selection */}
-            <Card className="bg-card border-primary/20">
-              <CardHeader>
-                <CardTitle className="text-lg">API Провайдер видео</CardTitle>
-                <CardDescription>
-                  Отдельный переключатель провайдера для видеогенерации. Можно использовать другой провайдер, чем для изображений.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-blue-500" />
+                  <CardTitle className="text-base">API провайдер видео</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Можно использовать другой провайдер, чем для изображений
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2.5">
+                <OptionCard
+                  selected={videoApiProvider === 'direct'}
+                  onClick={() => videoApiProvider !== 'direct' && saveVideoApiProvider('direct')}
+                  disabled={savingVideoProvider}
+                  icon={<Zap className="h-4 w-4 text-blue-500" />}
+                  title="Прямое подключение (Kling)"
+                  description="Прямые вызовы к Kling AI. Формат 3:4, модель kling-v2-6"
+                  accent="blue"
+                />
+                <OptionCard
+                  selected={videoApiProvider === 'polza'}
+                  onClick={() => videoApiProvider !== 'polza' && saveVideoApiProvider('polza')}
+                  disabled={savingVideoProvider}
+                  icon={<Sparkles className="h-4 w-4 text-purple-500" />}
+                  title="Польза AI (Polza)"
+                  description="Видеогенерация через Polza AI. Модель kling/v3, формат 9:16"
+                  accent="purple"
+                />
+                <SavingIndicator show={savingVideoProvider} />
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 text-blue-500" />
+                  <CardTitle className="text-base">Модель видеогенерации</CardTitle>
+                </div>
+                <CardDescription className="text-xs">
+                  Текущая модель зависит от выбранного провайдера
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={videoApiProvider} onValueChange={value => saveVideoApiProvider(value as 'direct' | 'polza')} disabled={savingVideoProvider} className="space-y-3">
-                  <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
-                    <RadioGroupItem value="direct" id="video-provider-direct" />
-                    <Label htmlFor="video-provider-direct" className="flex-1 cursor-pointer">
-                      <div className="font-semibold mb-[6px]">Прямое подключение (Kling API)</div>
-                      <div className="text-xs text-muted-foreground">
-                        Прямые вызовы к Kling AI через официальный API. Формат 3:4, модель kling-v2-6.
+                <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.04] p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+                      <Video className="h-4 w-4 text-blue-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm sm:text-base">
+                          {videoApiProvider === 'polza' ? 'Kling 3.0 (через Polza)' : 'Kling AI v2.6 (Direct)'}
+                        </span>
+                        <Badge variant="secondary" className="text-[10px] gap-1 bg-blue-500/[0.04] text-blue-500 border border-blue-500/40">
+                          <Check className="h-2.5 w-2.5" />Активна
+                        </Badge>
                       </div>
-                    </Label>
-                    {videoApiProvider === 'direct' && <Badge variant="default">Активен</Badge>}
-                  </div>
-                  <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/10 transition-colors">
-                    <RadioGroupItem value="polza" id="video-provider-polza" />
-                    <Label htmlFor="video-provider-polza" className="flex-1 cursor-pointer">
-                      <div className="font-semibold mb-[6px]">Польза AI (Polza)</div>
-                      <div className="text-xs text-muted-foreground">
-                        Видеогенерация через Polza AI. Модель kling/v3, формат 9:16.
-                      </div>
-                    </Label>
-                    {videoApiProvider === 'polza' && <Badge variant="default">Активен</Badge>}
-                  </div>
-                </RadioGroup>
-                {savingVideoProvider && <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full border-[2px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
-                    Сохранение настроек...
-                  </div>}
-              </CardContent>
-            </Card>
-
-            {/* Video Model Info */}
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Модель видеогенерации</CardTitle>
-                <CardDescription>Текущая модель зависит от выбранного провайдера</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-3 rounded-lg border p-4 bg-accent/5">
-                  <div className="flex-1">
-                    <div className="font-semibold mb-1">{videoApiProvider === 'polza' ? 'Kling 3.0 (через Polza)' : 'Kling AI v2.6 (Direct)'}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {videoApiProvider === 'polza'
-                        ? 'Image-to-video, 5 секунд, формат 9:16, режим std'
-                        : 'Image-to-video, 5 секунд, формат 3:4, режим std'}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {videoApiProvider === 'polza'
+                          ? 'Image-to-video, 5 секунд, формат 9:16, режим std'
+                          : 'Image-to-video, 5 секунд, формат 3:4, режим std'}
+                      </p>
                     </div>
                   </div>
-                  <Badge variant="default">Активна</Badge>
                 </div>
               </CardContent>
             </Card>
+          </div>
 
-            {/* Video Prompts */}
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Промт для видеообложек</CardTitle>
-                <CardDescription>Промт, который отправляется в Kling AI при генерации видео</CardDescription>
-              </CardHeader>
-              <CardContent>
+          <div>
+            <SectionLabel icon={<Sparkles className="h-3.5 w-3.5" />}>Промт для видеообложек</SectionLabel>
+            <Card className="border-border/50">
+              <CardContent className="p-4 sm:p-5">
                 {videoPrompts.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">Промт для видео не найден</p>
+                  <p className="text-muted-foreground text-sm py-6 text-center">Промт для видео не найден</p>
                 ) : (
                   videoPrompts.map(vp => (
                     <div key={vp.id} className="space-y-3">
@@ -773,29 +902,30 @@ export function PromptManager() {
                           <Textarea
                             value={videoEditValue}
                             onChange={e => setVideoEditValue(e.target.value)}
-                            className="min-h-[200px] font-mono text-sm"
+                            className="min-h-[220px] font-mono text-xs sm:text-sm bg-background resize-y"
                           />
-                          <div className="flex gap-2">
-                            <Button onClick={() => saveVideoPrompt(vp.id)} disabled={savingVideoPrompt} className="gap-2">
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button onClick={() => saveVideoPrompt(vp.id)} disabled={savingVideoPrompt} className="gap-2 flex-1 sm:flex-none">
                               <Save className="h-4 w-4" />
-                              {savingVideoPrompt ? "Сохранение..." : "Сохранить"}
+                              {savingVideoPrompt ? "Сохранение…" : "Сохранить"}
                             </Button>
-                            <Button variant="outline" onClick={() => setEditingVideoPrompt(null)}>
-                              <X className="h-4 w-4 mr-1" /> Отмена
+                            <Button variant="outline" onClick={() => setEditingVideoPrompt(null)} className="gap-2 flex-1 sm:flex-none">
+                              <X className="h-4 w-4" />Отмена
                             </Button>
                           </div>
                         </>
                       ) : (
                         <>
-                          <div className="bg-muted p-4 rounded-lg">
-                            <pre className="whitespace-pre-wrap text-sm text-muted-foreground">{vp.prompt_template}</pre>
+                          <div className="rounded-lg bg-muted/50 border border-border/40 p-3 sm:p-4 max-h-[320px] overflow-auto">
+                            <pre className="whitespace-pre-wrap text-[11px] sm:text-xs text-muted-foreground font-mono leading-relaxed">{vp.prompt_template}</pre>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
                               Обновлено: {new Date(vp.updated_at).toLocaleString('ru-RU')}
                             </span>
-                            <Button variant="ghost" size="sm" onClick={() => { setEditingVideoPrompt(vp.id); setVideoEditValue(vp.prompt_template); }}>
-                              <Pencil className="h-4 w-4 mr-1" /> Редактировать
+                            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setEditingVideoPrompt(vp.id); setVideoEditValue(vp.prompt_template); }}>
+                              <Pencil className="h-3.5 w-3.5" />Редактировать
                             </Button>
                           </div>
                         </>
@@ -808,68 +938,84 @@ export function PromptManager() {
           </div>
         </TabsContent>
 
-        <TabsContent value="technical">
-          <div className="space-y-4 md:space-y-6">
-            <div>
-              <h2 className="text-xl md:text-2xl font-bold">Технические промты</h2>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Системные промты для вспомогательных функций платформы
-              </p>
-            </div>
+        {/* ====================== TECHNICAL ====================== */}
+        <TabsContent value="technical" className="space-y-5 md:space-y-6 mt-0">
+          <PageHeader
+            icon={<Wrench className="h-5 w-5" />}
+            title="Технические промты"
+            description="Системные промты для вспомогательных функций платформы"
+            tone="purple"
+          />
 
-            {technicalPrompts.length === 0 ? (
-              <Card className="bg-card">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  <p>Технические промты не найдены</p>
-                </CardContent>
-              </Card>
-            ) : (
-              technicalPrompts.map(tp => (
-                <Card key={tp.id} className="bg-card">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{getPromptDisplayName(tp.prompt_type).name}</CardTitle>
-                    <CardDescription>{getPromptDisplayName(tp.prompt_type).description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {editingTechPrompt === tp.id ? (
-                        <>
-                          <Textarea
-                            value={techEditValue}
-                            onChange={e => setTechEditValue(e.target.value)}
-                            className="min-h-[200px] font-mono text-sm"
-                          />
-                          <div className="flex gap-2">
-                            <Button onClick={() => saveTechPrompt(tp.id)} disabled={savingTechPrompt} className="gap-2">
-                              <Save className="h-4 w-4" />
-                              {savingTechPrompt ? "Сохранение..." : "Сохранить"}
-                            </Button>
-                            <Button variant="outline" onClick={() => setEditingTechPrompt(null)}>
-                              <X className="h-4 w-4 mr-1" /> Отмена
-                            </Button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="bg-muted p-4 rounded-lg">
-                            <pre className="whitespace-pre-wrap text-sm text-muted-foreground">{tp.prompt_template}</pre>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
-                              Обновлено: {new Date(tp.updated_at).toLocaleString('ru-RU')}
-                            </span>
-                            <Button variant="ghost" size="sm" onClick={() => { setEditingTechPrompt(tp.id); setTechEditValue(tp.prompt_template); }}>
-                              <Pencil className="h-4 w-4 mr-1" /> Редактировать
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+          {technicalPrompts.length === 0 ? (
+            <Card className="border-border/50">
+              <CardContent className="py-12 text-center text-muted-foreground text-sm">
+                Технические промты не найдены
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {technicalPrompts.map(tp => {
+                const { name, description } = getPromptDisplayName(tp.prompt_type);
+                const isEditing = editingTechPrompt === tp.id;
+                return (
+                  <Card key={tp.id} className={cn(
+                    "border-border/60 transition-all",
+                    isEditing && "border-primary/50 ring-1 ring-primary/20"
+                  )}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                          <Wrench className="h-4 w-4 text-purple-500" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <CardTitle className="text-base">{name}</CardTitle>
+                          <CardDescription className="text-xs mt-1">{description}</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
+                        {isEditing ? (
+                          <>
+                            <Textarea
+                              value={techEditValue}
+                              onChange={e => setTechEditValue(e.target.value)}
+                              className="min-h-[220px] font-mono text-xs sm:text-sm bg-background resize-y"
+                            />
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Button onClick={() => saveTechPrompt(tp.id)} disabled={savingTechPrompt} className="gap-2 flex-1 sm:flex-none">
+                                <Save className="h-4 w-4" />
+                                {savingTechPrompt ? "Сохранение…" : "Сохранить"}
+                              </Button>
+                              <Button variant="outline" onClick={() => setEditingTechPrompt(null)} className="gap-2 flex-1 sm:flex-none">
+                                <X className="h-4 w-4" />Отмена
+                              </Button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="rounded-lg bg-muted/50 border border-border/40 p-3 sm:p-4 max-h-[280px] overflow-auto">
+                              <pre className="whitespace-pre-wrap text-[11px] sm:text-xs text-muted-foreground font-mono leading-relaxed">{tp.prompt_template}</pre>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                Обновлено: {new Date(tp.updated_at).toLocaleString('ru-RU')}
+                              </span>
+                              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setEditingTechPrompt(tp.id); setTechEditValue(tp.prompt_template); }}>
+                                <Pencil className="h-3.5 w-3.5" />Редактировать
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>;

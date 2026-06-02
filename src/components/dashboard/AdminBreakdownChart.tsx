@@ -70,24 +70,20 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
   const Icon = type === 'generations' ? Activity : Coins;
 
   const handleCalendarSelect = (range: DateRange | undefined) => {
-    if (!range) {
+    if (!range || !range.from) {
       setPendingRange(undefined);
       setIsSelectingRange(false);
       return;
     }
-    if (!isSelectingRange) {
-      setPendingRange({ from: range.from, to: undefined });
-      setIsSelectingRange(true);
-    } else {
-      const from = pendingRange?.from || range.from;
-      const to = range.to || range.from;
+    if (range.from && range.to) {
+      const finalFrom = range.from <= range.to ? range.from : range.to;
+      const finalTo = range.from <= range.to ? range.to : range.from;
       setPendingRange(undefined);
       setIsSelectingRange(false);
-      if (from && to) {
-        const finalFrom = from <= to ? from : to;
-        const finalTo = from <= to ? to : from;
-        setDateRange({ from: finalFrom, to: finalTo });
-      }
+      setDateRange({ from: finalFrom, to: finalTo });
+    } else {
+      setPendingRange({ from: range.from, to: undefined });
+      setIsSelectingRange(true);
     }
   };
 
@@ -155,11 +151,13 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
     ? (totals?.generationsCards || 0) + (totals?.generationsDescriptions || 0) + (totals?.generationsVideo || 0)
     : (totals?.tokensCards || 0) + (totals?.tokensDescriptions || 0) + (totals?.tokensVideo || 0);
 
+  const accentColor = type === 'generations' ? COLORS.cards : COLORS.video;
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-background border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-medium text-foreground mb-2">
+        <div className="bg-popover/95 backdrop-blur-sm border border-border/60 rounded-xl px-3 py-2.5 shadow-xl">
+          <p className="text-[11px] font-medium text-muted-foreground mb-1.5">
             {formatXAxisDate(label)}
           </p>
           {(['cards', 'descriptions', 'video'] as const).map(key => {
@@ -169,7 +167,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
               <div key={key} className="flex items-center gap-2 text-sm">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[key] }} />
                 <span className="text-muted-foreground">{LABELS[key]}:</span>
-                <span className="font-medium">{val.toLocaleString('ru-RU')}</span>
+                <span className="font-semibold tabular-nums text-foreground ml-auto">{val.toLocaleString('ru-RU')}</span>
               </div>
             );
           })}
@@ -181,15 +179,17 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
 
   if (loading) {
     return (
-      <Card className="animate-fade-in bg-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-5">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Icon className="h-4 w-4" />
+            <span className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${accentColor}1a`, color: accentColor }}>
+              <Icon className="h-4 w-4" />
+            </span>
             {title}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[200px]">
+        <CardContent className="p-4 sm:p-5 pt-0">
+          <div className="flex items-center justify-center h-[180px] sm:h-[220px]">
             <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
           </div>
         </CardContent>
@@ -198,24 +198,35 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
   }
 
   return (
-    <Card className="animate-fade-in">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+    <Card className="animate-fade-in rounded-2xl border-border/60 bg-card overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 gap-2 p-4 sm:px-5 sm:pt-5 sm:pb-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accentColor}1a`, color: accentColor }}>
+            <Icon className="h-4 w-4" />
+          </span>
+          <CardTitle className="text-sm font-semibold truncate">{title}</CardTitle>
         </div>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-6 px-2 text-xs gap-1">
+            <Button variant="outline" size="sm" className="h-7 px-2.5 text-[11px] gap-1 rounded-full bg-muted/40 hover:bg-violet-500/10 hover:text-violet-500 hover:border-violet-500/40 border-border/60 shrink-0 transition-colors">
               <CalendarIcon className="h-3 w-3" />
-              {formatDateRange()}
+              <span className="hidden sm:inline">{formatDateRange()}</span>
+              <span className="sm:hidden">Период</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="end">
+          <PopoverContent className="w-auto p-0 rounded-xl border-border/60 shadow-xl overflow-hidden" align="end">
+            <div className="px-3 pt-3 pb-1 border-b border-border/40 bg-muted/30">
+              <div className="text-[11px] font-medium text-muted-foreground">
+                {isSelectingRange && pendingRange?.from
+                  ? <>Начало: <span className="text-foreground font-semibold tabular-nums">{format(pendingRange.from, "dd.MM.yy", { locale: ru })}</span> · выберите конец периода</>
+                  : "Кликните дату начала, затем — дату конца периода"}
+              </div>
+            </div>
             <Calendar
               mode="range"
               selected={displayedRange}
               onSelect={handleCalendarSelect}
+              defaultMonth={displayedRange?.from || dateRange?.from}
               numberOfMonths={1}
               locale={ru}
               disabled={(date) => date > new Date()}
@@ -225,53 +236,56 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
         </Popover>
       </CardHeader>
 
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-4 sm:p-5 pt-0">
+        <div className="space-y-3 sm:space-y-4">
           {/* Total */}
-          <div className="text-2xl font-bold">
+          <div className="text-2xl sm:text-3xl font-bold tabular-nums tracking-tight">
             {totalValue.toLocaleString('ru-RU')}
           </div>
 
           {/* Chart */}
-          <div className="h-[200px] w-full">
+          <div className="h-[180px] sm:h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={combinedData}>
+              <AreaChart data={combinedData} margin={{ top: 4, right: 4, left: -4, bottom: 0 }}>
                 <defs>
                   <linearGradient id={`grad-cards-${type}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.cards} stopOpacity={0.2} />
+                    <stop offset="5%" stopColor={COLORS.cards} stopOpacity={0.28} />
                     <stop offset="95%" stopColor={COLORS.cards} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id={`grad-desc-${type}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.descriptions} stopOpacity={0.2} />
+                    <stop offset="5%" stopColor={COLORS.descriptions} stopOpacity={0.28} />
                     <stop offset="95%" stopColor={COLORS.descriptions} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id={`grad-video-${type}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.video} stopOpacity={0.2} />
+                    <stop offset="5%" stopColor={COLORS.video} stopOpacity={0.28} />
                     <stop offset="95%" stopColor={COLORS.video} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <CartesianGrid strokeDasharray="3 3" className="opacity-20" vertical={false} />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                   tickFormatter={formatXAxisDate}
                   interval="preserveStartEnd"
+                  minTickGap={24}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12 }}
-                  tickFormatter={v => v.toLocaleString('ru-RU')}
+                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(v >= 10000 ? 0 : 1)}k` : v.toLocaleString('ru-RU')}
+                  width={52}
+                  tickMargin={6}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: accentColor, strokeOpacity: 0.25, strokeWidth: 1 }} />
                 <Area
                   type="monotone"
                   dataKey="cards"
                   stroke={COLORS.cards}
                   fill={`url(#grad-cards-${type})`}
-                  strokeWidth={2}
+                  strokeWidth={2.25}
                   animationDuration={1500}
                 />
                 <Area
@@ -279,7 +293,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
                   dataKey="descriptions"
                   stroke={COLORS.descriptions}
                   fill={`url(#grad-desc-${type})`}
-                  strokeWidth={2}
+                  strokeWidth={2.25}
                   animationDuration={1500}
                 />
                 <Area
@@ -287,7 +301,7 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
                   dataKey="video"
                   stroke={COLORS.video}
                   fill={`url(#grad-video-${type})`}
-                  strokeWidth={2}
+                  strokeWidth={2.25}
                   animationDuration={1500}
                 />
               </AreaChart>
@@ -295,17 +309,17 @@ export function AdminBreakdownChart({ type }: AdminBreakdownChartProps) {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11px]">
             {(['cards', 'descriptions', 'video'] as const).map(key => (
-              <div key={key} className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[key] }} />
-                <span>{LABELS[key]}</span>
+              <div key={key} className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/50">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[key] }} />
+                <span className="text-muted-foreground">{LABELS[key]}</span>
               </div>
             ))}
           </div>
 
           {/* Period */}
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-[11px] text-muted-foreground text-center tabular-nums">
             {formatDateRange()}
           </p>
         </div>

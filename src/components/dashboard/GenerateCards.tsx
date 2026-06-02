@@ -18,7 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn, ExternalLink, Coins, ShieldCheck } from "lucide-react";
+import { Info, Images, Loader2, Upload, X, AlertCircle, Download, Zap, RefreshCw, Clock, CheckCircle2, Eye, Sparkles, TrendingUp, Gift, ArrowRight, Edit, AlertTriangle, Video, ChevronDown, ZoomIn, ExternalLink, Coins, ShieldCheck, Check, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GenerationPopups } from "./GenerationPopups";
@@ -139,6 +139,8 @@ export const GenerateCards = ({
   const [selectedCards, setSelectedCards] = useState<number[]>([]); // По умолчанию ничего не выбрано
   const [unifiedStyling, setUnifiedStyling] = useState(false);
   const [unifiedStylingManuallyDisabled, setUnifiedStylingManuallyDisabled] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<string>('3:4');
+  const [aspectRatioOpen, setAspectRatioOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
@@ -1138,7 +1140,8 @@ export const GenerateCards = ({
           productImages: productImagesData,
           referenceImageUrl,
           selectedCards: selectedCards,
-          unifiedStyling: unifiedStyling && selectedCards.length >= 2
+          unifiedStyling: unifiedStyling && selectedCards.length >= 2,
+          aspectRatio
         }
       });
       if (error) {
@@ -1952,52 +1955,71 @@ export const GenerateCards = ({
   }, []);
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
 
-      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold">
-                Карточки, которые продают — за 3 минуты
+      {/* Hero — conversion-focused */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl"
+        />
+        <div className="relative p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Карточки, которые продают</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                Поднимите конверсию карточки <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">до +260%</span> за 3 минуты
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                WB Генератор оформляет товары как профессиональный дизайнер: выравнивает композицию, подбирает фон, добавляет тексты и делает изображение премиального уровня. Всё автоматически — просто загрузи фото.
+                WBGen упаковывает товар как профессиональный дизайнер: продающая композиция, инфографика, тексты-крючки и премиальный вид — всё автоматически.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Экономия до 10 000 ₽</p>
-                  <p className="text-[10px] text-muted-foreground">на каждой карточке</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Результат за 3 минуты</p>
-                  <p className="text-[10px] text-muted-foreground">вместо 3 дней</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">+260% к CTR</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">больше кликов и заказов</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Gift className="w-4 h-4 text-primary" />
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">3 мин. вместо 3 дн.</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">без брифов и правок</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Реферальная программа</p>
-                  <p className="text-[10px] text-muted-foreground">приглашай и зарабатывай</p>
+              </div>
+
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Coins className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">Экономия до 12 тыс. ₽</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">на каждом товаре</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
 
       {/* Cards Promo Banner */}
@@ -2103,17 +2125,17 @@ export const GenerateCards = ({
       {/* File Upload - Horizontal layout on desktop/tablet */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Product Images - Takes 3/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-3 shadow-sm bg-card">
+        <Card className="md:col-span-3 border-border/60 bg-card rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
-              Изображения товара
+              <span>Изображения товара</span>
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button 
                       type="button" 
-                      className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                      className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
                       onClick={(e) => e.preventDefault()}
                     >
                       <Info className="w-4 h-4" />
@@ -2132,13 +2154,15 @@ export const GenerateCards = ({
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
+                <label className={`group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isDragOver ? 'border-violet-500 bg-violet-500/10 cursor-pointer scale-[1.01]' : 'border-violet-500/25 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/60 hover:bg-violet-500/[0.06] cursor-pointer'}`} onDragOver={generating ? undefined : handleDragOver} onDragEnter={generating ? undefined : handleDragEnter} onDragLeave={generating ? undefined : handleDragLeave} onDrop={generating ? undefined : handleDrop}>
                   <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className={`w-8 h-8 mb-3 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`text-sm font-semibold ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <div className={`flex items-center justify-center w-12 h-12 mb-3 rounded-xl transition-all ${isDragOver ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/40' : 'bg-violet-500/10 group-hover:bg-violet-500/20'}`}>
+                      <Upload className={`w-5 h-5 transition-colors ${isDragOver ? 'text-white' : 'text-violet-600 dark:text-violet-300'}`} />
+                    </div>
+                    <p className={`text-sm font-semibold ${isDragOver ? 'text-violet-700 dark:text-violet-200' : 'text-foreground/80'}`}>
                       Загрузите изображения товара
                     </p>
-                    <p className={`text-xs mt-1 ${isDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <p className={`text-xs mt-1 ${isDragOver ? 'text-violet-600 dark:text-violet-300' : 'text-muted-foreground'}`}>
                       Перетащите или нажмите для выбора. PNG, JPG, JPEG (макс. 3)
                     </p>
                   </div>
@@ -2159,11 +2183,11 @@ export const GenerateCards = ({
         </Card>
 
         {/* Reference Image - Takes 2/5 width on desktop */}
-        <Card className="border-border/50 md:col-span-2 shadow-sm bg-card">
+        <Card className="md:col-span-2 border-border/60 bg-card rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Upload className="w-4 h-4 shrink-0" />
-              Референс
+              <span>Референс</span>
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               WBGen может взять за основу прикрепленный дизайн (не обязательно)
@@ -2173,18 +2197,20 @@ export const GenerateCards = ({
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label 
-                  className={`flex flex-col items-center justify-center w-full border border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-primary bg-primary/10 hover:bg-primary/20 cursor-pointer' : 'border-border/50 bg-muted/30 hover:border-primary/50 hover:bg-primary/5 cursor-pointer'}`}
+                  className={`group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all ${generating ? 'border-muted-foreground/20 bg-muted/20 cursor-not-allowed opacity-60' : isRefDragOver ? 'border-violet-500 bg-violet-500/10 cursor-pointer scale-[1.01]' : 'border-border/60 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/50 hover:bg-violet-500/[0.05] cursor-pointer'}`}
                   onDragOver={generating ? undefined : handleRefDragOver}
                   onDragEnter={generating ? undefined : handleRefDragEnter}
                   onDragLeave={generating ? undefined : handleRefDragLeave}
                   onDrop={generating ? undefined : handleRefDrop}
                 >
                   <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className={`w-8 h-8 mb-3 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <div className={`flex items-center justify-center w-12 h-12 mb-3 rounded-xl transition-all ${isRefDragOver ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/40' : 'bg-muted group-hover:bg-violet-500/15'}`}>
+                      <Upload className={`w-5 h-5 transition-colors ${isRefDragOver ? 'text-white' : 'text-muted-foreground group-hover:text-violet-600 dark:group-hover:text-violet-300'}`} />
+                    </div>
+                    <p className={`text-sm font-semibold ${isRefDragOver ? 'text-violet-700 dark:text-violet-200' : 'text-foreground/80'}`}>
                       Загрузите референс
                     </p>
-                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <p className={`text-xs mt-1 ${isRefDragOver ? 'text-violet-600 dark:text-violet-300' : 'text-muted-foreground'}`}>
                       1 изобр. до 3 МБ
                     </p>
                   </div>
@@ -2204,7 +2230,7 @@ export const GenerateCards = ({
       </div>
 
       {/* Product Details */}
-      <Card className="border-border/50 shadow-sm bg-card">
+      <Card className="border-border/60 bg-card rounded-2xl">
         <CardHeader>
           {/* Mobile clear button - above title */}
           <div className="flex justify-start mb-2 sm:hidden">
@@ -2216,7 +2242,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="w-auto" disabled={generating}>
+          }} className="w-auto rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-200 hover:border-violet-500/50 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
@@ -2241,7 +2267,7 @@ export const GenerateCards = ({
             setDescription("");
             setAutoDescription(false);
             setSelectedCards([0]);
-          }} className="shrink-0" disabled={generating}>
+          }} className="shrink-0 rounded-lg h-8 px-2.5 text-xs font-normal text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/60 transition-colors" disabled={generating}>
               <X className="w-4 h-4 mr-1" />
               Очистить
             </Button>
@@ -2262,11 +2288,11 @@ export const GenerateCards = ({
           <div className="space-y-2">
             <Label htmlFor="productName">Название товара</Label>
             <div className="relative">
-              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} />
+              <Input id="productName" placeholder="Например: Спортивная куртка для зимнего бега" value={productName} onChange={e => setProductName(e.target.value.slice(0, 150))} maxLength={150} disabled={generating} className={`rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 ${isIdentifying ? 'pr-9 sm:pr-32 identifying-input' : ''}`} />
               {isIdentifying && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                  <span className="hidden sm:inline">Определяю...</span>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-300 identifying-fade pointer-events-none">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span className="hidden sm:inline">Определяю товар</span>
                 </div>
               )}
             </div>
@@ -2277,23 +2303,37 @@ export const GenerateCards = ({
           
           <div className="space-y-2">
             <Label htmlFor="description">Описание и пожелания</Label>
-            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} />
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
-                <Checkbox id="autoDescription" checked={autoDescription} onCheckedChange={checked => {
-                setAutoDescription(!!checked);
-                if (checked) {
-                  setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
-                } else {
-                  setDescription("");
-                }
-              }} disabled={generating} />
-                <Label htmlFor="autoDescription" className="text-sm font-normal cursor-pointer">
+            <Textarea id="description" placeholder="Опишите ваши пожелания по дизайну, как бы вы это писали дизайнеру. Укажите какие нюансы или преимущества о вашем товаре нужно написать в карточке либо учесть при их создании..." value={description} onChange={e => setDescription(e.target.value.slice(0, 1200))} rows={4} maxLength={1200} disabled={generating || autoDescription} className="rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20" />
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <label
+                htmlFor="autoDescription"
+                className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-md px-2.5 sm:px-3 h-10 cursor-pointer select-none transition-colors max-w-full ${
+                  autoDescription
+                    ? 'bg-gradient-to-r from-violet-500/15 to-purple-500/10 text-violet-700 dark:text-violet-300'
+                    : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                } ${generating ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoDescription ? 'text-violet-500' : ''}`} />
+                <span className="text-[11px] sm:text-xs font-medium leading-none whitespace-nowrap">
                   Придумай сам
-                </Label>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                <span>{description.length}/1200 символов</span>
+                </span>
+                <Switch
+                  id="autoDescription"
+                  checked={autoDescription}
+                  onCheckedChange={checked => {
+                    setAutoDescription(!!checked);
+                    if (checked) {
+                      setDescription("Самостоятельно придумай и определи наилучшие параметры для достижения результата.");
+                    } else {
+                      setDescription("");
+                    }
+                  }}
+                  disabled={generating}
+                  className="data-[state=checked]:bg-violet-500 scale-75 sm:scale-90 -my-1 shrink-0"
+                />
+              </label>
+              <div className="text-xs text-muted-foreground tabular-nums shrink-0">
+                {description.length}/1200
               </div>
             </div>
           </div>
@@ -2301,7 +2341,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Card Selection */}
-      <Card className="bg-card">
+      <Card className="border-border/60 bg-card rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Images className="w-4 h-4 shrink-0" />
@@ -2313,67 +2353,194 @@ export const GenerateCards = ({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            {CARD_STAGES.map((stage, index) => <div key={index} className={`border rounded-lg p-3 sm:p-4 transition-all ${generating ? 'opacity-60 cursor-not-allowed' : selectedCards.includes(index) ? 'border-primary bg-primary/5 cursor-pointer' : 'border-border hover:border-muted-foreground/50 cursor-pointer'}`} onClick={generating ? undefined : () => handleCardToggle(index)}>
-                <div className="flex items-start gap-3">
-                  <Checkbox checked={selectedCards.includes(index)} onChange={() => handleCardToggle(index)} className="mt-0.5" disabled={generating} />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm sm:text-base mb-1 leading-tight">{stage.name}</h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+            {CARD_STAGES.map((stage, index) => {
+              const isSelected = selectedCards.includes(index);
+              return (
+                <div
+                  key={index}
+                  className={`border rounded-lg p-3 sm:p-4 transition-colors ${
+                    generating
+                      ? 'opacity-60 cursor-not-allowed border-border'
+                      : isSelected
+                        ? 'border-violet-500/50 bg-violet-500/5 cursor-pointer'
+                        : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] cursor-pointer'
+                  }`}
+                  onClick={generating ? undefined : () => handleCardToggle(index)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onChange={() => handleCardToggle(index)}
+                      className="mt-0.5 h-5 w-5 rounded-md border-violet-500/40 data-[state=checked]:bg-gradient-to-br data-[state=checked]:from-violet-500 data-[state=checked]:to-purple-600 data-[state=checked]:border-violet-500 data-[state=checked]:text-white shadow-sm"
+                      disabled={generating}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`font-medium text-sm sm:text-base mb-1 leading-tight transition-colors ${isSelected ? 'text-violet-700 dark:text-violet-300' : ''}`}>{stage.name}</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>)}
+              );
+            })}
           </div>
 
           {/* Unified Styling Toggle */}
-          <div className={`mt-4 border rounded-lg p-3 sm:p-4 transition-all ${
-            selectedCards.length >= 2 
-              ? 'border-primary/30 bg-primary/5' 
-              : 'border-border opacity-50'
-          }`}>
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none mb-1 sm:hidden">Бета</Badge>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <Sparkles className="w-4 h-4 text-primary shrink-0" />
-                  <h4 className="font-medium text-sm sm:text-base">Единая стилизация</h4>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-none hidden sm:inline-flex">Бета</Badge>
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                          style={{ opacity: 1 }}
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <Info className="w-4 h-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70" style={{ opacity: 1 }}>
-                        <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+          <div
+            onClick={() => {
+              if (selectedCards.length < 2 || generating) return;
+              const next = !unifiedStyling;
+              setUnifiedStyling(next);
+              setUnifiedStylingManuallyDisabled(!next);
+            }}
+            role="button"
+            tabIndex={selectedCards.length < 2 || generating ? -1 : 0}
+            className={`group relative mt-4 overflow-hidden border rounded-xl p-3 sm:p-4 transition-all select-none ${
+              selectedCards.length < 2 || generating
+                ? 'opacity-50 cursor-not-allowed border-border'
+                : unifiedStyling
+                  ? 'border-violet-500/40 bg-gradient-to-br from-violet-500/[0.12] via-purple-500/[0.06] to-transparent shadow-sm shadow-violet-500/10 cursor-pointer'
+                  : 'border-border/60 bg-muted/30 hover:border-violet-500/30 hover:bg-violet-500/[0.04] cursor-pointer'
+            }`}
+          >
+            {unifiedStyling && (
+              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-violet-500/20 blur-3xl" />
+            )}
+            <div className="relative flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className={`shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                  unifiedStyling
+                    ? 'bg-gradient-to-br from-violet-500 to-purple-600 shadow-md shadow-violet-500/30'
+                    : 'bg-muted'
+                }`}>
+                  <Sparkles className={`w-4 h-4 transition-colors ${unifiedStyling ? 'text-white' : 'text-muted-foreground'}`} />
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Пакет карточек товара будет создан в едином стиле
-                </p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <h4 className={`font-semibold text-sm sm:text-base transition-colors ${unifiedStyling ? 'text-violet-700 dark:text-violet-300' : ''}`}>Единая стилизация</h4>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span
+                            role="button"
+                            className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation inline-flex"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                          >
+                            <Info className="w-3.5 h-3.5" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                          <p>Сервис создаст карточки в едином стиле. Генерация карточек в едином стиле занимает немного больше времени.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    Пакет карточек товара будет создан в едином стиле
+                  </p>
+                </div>
               </div>
-              <Switch 
+              <Switch
                 checked={unifiedStyling}
                 onCheckedChange={(checked) => {
                   setUnifiedStyling(checked);
                   setUnifiedStylingManuallyDisabled(!checked);
                 }}
+                onClick={(e) => e.stopPropagation()}
                 disabled={selectedCards.length < 2 || generating}
+                className="shrink-0 h-6 w-11 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-violet-500 data-[state=checked]:to-purple-600"
               />
             </div>
           </div>
+
+          {/* Aspect Ratio (collapsible) */}
+          {(() => {
+            const ASPECT_RATIOS: Array<{ value: string; label: string; usage: string }> = [
+              { value: '3:4', label: '3:4 вертикаль', usage: 'Wildberries, Ozon — карточка товара' },
+              { value: '1:1', label: '1:1 квадрат', usage: 'Avito, Instagram, превью' },
+              { value: '4:5', label: '4:5 портрет', usage: 'Instagram пост, Pinterest' },
+              { value: '9:16', label: '9:16 вертикаль', usage: 'Stories, Reels, TikTok, VK Клипы' },
+              { value: '16:9', label: '16:9 горизонталь', usage: 'Баннеры, обложки каналов' },
+              { value: '4:3', label: '4:3 классика', usage: 'Доски объявлений, посты и прочее' },
+              { value: '2:3', label: '2:3 портрет', usage: 'Постеры, Pinterest' },
+              { value: '3:2', label: '3:2 альбом', usage: 'Фото, обложки' },
+            ];
+            const parseRatio = (v: string) => {
+              const [w, h] = v.split(':').map(Number);
+              return w && h ? `${w} / ${h}` : '3 / 4';
+            };
+            return (
+              <div className={`mt-4 border border-border/60 bg-card rounded-lg transition-colors ${generating ? 'opacity-60' : ''}`}>
+                <button
+                  type="button"
+                  onClick={() => !generating && setAspectRatioOpen((v) => !v)}
+                  disabled={generating}
+                  className="w-full flex items-center justify-between gap-3 p-3 sm:p-4 text-left"
+                  aria-expanded={aspectRatioOpen}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <Images className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" />
+                      <h4 className="font-medium text-sm sm:text-base">Формат изображения</h4>
+                    </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                      Нажмите, чтобы выбрать соотношение сторон под маркетплейс или площадку
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="secondary" className="text-[11px] px-2 py-0 h-5 bg-violet-500/10 text-violet-700 dark:text-violet-300 border-none">
+                      {aspectRatio}
+                    </Badge>
+                    <ChevronDown
+                      className={`w-4 h-4 text-muted-foreground transition-transform ${aspectRatioOpen ? 'rotate-180' : ''}`}
+                    />
+                  </div>
+                </button>
+
+                {aspectRatioOpen && (
+                  <div className="px-3 pb-3 sm:px-4 sm:pb-4 pt-0">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                      {ASPECT_RATIOS.map((r) => {
+                        const selected = aspectRatio === r.value;
+                        return (
+                          <button
+                            type="button"
+                            key={r.value}
+                            disabled={generating}
+                            onClick={() => setAspectRatio(r.value)}
+                            className={`border rounded-lg p-2.5 sm:p-3 transition-colors flex items-start justify-start gap-2.5 text-left sm:flex-col sm:items-center sm:justify-center sm:gap-2 sm:text-center lg:flex-row lg:items-start lg:justify-start lg:gap-2.5 lg:text-left ${
+                              selected
+                                ? 'border-violet-500/50 bg-violet-500/5'
+                                : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.02] bg-background'
+                            } ${generating ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            <div
+                              className={`shrink-0 rounded border-2 flex items-center justify-center w-5 sm:w-6 ${
+                                selected ? 'border-violet-500 bg-gradient-to-br from-violet-500 to-purple-600' : 'border-muted-foreground/40 bg-muted/30'
+                              }`}
+                              style={{ aspectRatio: parseRatio(r.value) }}
+                            >
+                              {selected && <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" strokeWidth={3} />}
+                            </div>
+                            <div className="flex-1 min-w-0 text-left sm:text-center lg:text-left">
+                              <p className={`text-xs sm:text-sm font-medium leading-tight ${selected ? 'text-violet-700 dark:text-violet-300' : ''}`}>{r.label}</p>
+                              <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug mt-0.5">
+                                {r.usage}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 
       {/* Progress */}
-      {generating && <Card className="relative overflow-hidden">
+      {generating && <Card className="relative overflow-hidden border-violet-500/30 bg-card rounded-2xl shadow-lg shadow-violet-500/5 animate-fade-in">
           {/* Animated radial gradient background — bottom */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2384,61 +2551,65 @@ export const GenerateCards = ({
             background: 'radial-gradient(ellipse 70% 45% at var(--glow-x2, 70%) 0%, hsl(280 80% 70% / 0.10) 0%, transparent 65%)',
             animation: 'glow-drift-top 8s ease-in-out infinite alternate',
           }} />
-          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
-            {/* Header: Spinner + Title + Status — left aligned */}
-            <div className="flex items-start gap-3 pt-2">
+          <CardContent className="relative z-10 p-4 sm:p-6 space-y-5">
+            {/* Header: Spinner + Title + Status */}
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+                <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-md animate-pulse" />
+                <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
                 {isUploading 
-                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
-                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3.5 w-3.5 text-primary" />
+                  ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
+                  : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
                 }
               </div>
-              <div className="space-y-0.5">
+              <div className="flex-1 min-w-0 space-y-0.5">
                 {isUploading ? (
                   <>
-                    <p className="font-semibold text-sm">Подготовка к генерации…</p>
-                    <p className="text-xs text-muted-foreground">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
+                    <p className="font-semibold text-sm sm:text-base">Подготовка к генерации…</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">{jobStatus?.toLowerCase() || 'Загружаем изображения и рассчитываем параметры'}</p>
                   </>
                 ) : estimatedTimeRemaining > 0 ? (
                   <>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">Генерация карточек</p>
-                      <div className="flex items-center gap-1 text-primary">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span className="text-sm font-bold tabular-nums">
-                          {estimatedTimeRemaining >= 60 
-                            ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
-                            : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{currentStage} из {selectedCards.length} карточек готово</p>
+                    <p className="font-semibold text-sm sm:text-base">Генерация карточек</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{currentStage} из {selectedCards.length} карточек готово</p>
                   </>
                 ) : (
                   <>
-                    <p className="font-semibold text-sm">Генерация карточек</p>
-                    <p className="text-xs text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                    <p className="font-semibold text-sm sm:text-base">Генерация карточек</p>
+                    <p className="text-xs sm:text-sm text-violet-600 dark:text-violet-300">{WAITING_MESSAGES[waitingMessageIndex]}</p>
                   </>
                 )}
               </div>
+              {!isUploading && estimatedTimeRemaining > 0 && (
+                <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/5 border border-violet-500/30 text-violet-700 dark:text-violet-300">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="text-xs sm:text-sm font-bold tabular-nums">
+                    {estimatedTimeRemaining >= 60 
+                      ? `${Math.floor(estimatedTimeRemaining / 60)}:${String(estimatedTimeRemaining % 60).padStart(2, '0')}` 
+                      : `0:${String(estimatedTimeRemaining).padStart(2, '0')}`}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Progress bar — full width */}
-            <div className="w-full space-y-1">
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <div className="w-full space-y-1.5">
+              <div className="relative h-2.5 rounded-full bg-muted/60 overflow-hidden shadow-inner">
                 {isUploading ? (
-                  <div className="h-full bg-primary/60 rounded-full animate-pulse" style={{ width: "30%" }} />
+                  <div
+                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full shadow-sm shadow-violet-500/40"
+                    style={{ animation: 'indeterminate-slide 1.6s ease-in-out infinite' }}
+                  />
                 ) : (
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                    className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-1000 ease-linear shadow-sm shadow-violet-500/40"
                     style={{ width: `${Math.min(smoothProgress, 95)}%` }}
                   />
                 )}
               </div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
                 <span>{isUploading ? 'Подготовка…' : `${currentStage} из ${selectedCards.length} карточек`}</span>
-                <span>{isUploading ? '' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
+                <span className="tabular-nums">{isUploading ? '' : estimatedTimeRemaining <= 0 ? 'Финализация…' : `${Math.round(smoothProgress)}%`}</span>
               </div>
             </div>
 
@@ -2450,18 +2621,18 @@ export const GenerateCards = ({
                 const currentCardPosition = selectedCards.indexOf(cardIndex);
                 const isCompleted = currentCardPosition < completedCount;
                 const isCurrent = currentCardPosition === completedCount;
-                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-primary/10 border border-primary/20 text-primary' : isCurrent ? 'bg-primary/10 border border-primary/30 text-primary' : 'bg-muted/30 border border-border text-muted-foreground'}`}
+                return <div key={cardIndex} className={`flex items-center gap-2 text-xs p-2.5 rounded-lg transition-all duration-300 ${isCompleted ? 'bg-violet-500/10 border border-violet-500/30 text-violet-700 dark:text-violet-300' : isCurrent ? 'bg-violet-500/15 border border-violet-500/40 text-violet-700 dark:text-violet-200 shadow-sm shadow-violet-500/10' : 'bg-muted/40 border border-border/60 text-muted-foreground'}`}
                     style={isCurrent ? { animation: 'border-pulse 2s ease-in-out infinite' } : undefined}>
                     {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : isCurrent ? <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" /> : <Clock className="w-3.5 h-3.5 shrink-0 opacity-40" />}
-                    <span className="truncate">{stage.name}</span>
+                    <span className="truncate font-medium">{stage.name}</span>
                   </div>;
               })}
             </div>
 
             {/* Info hint */}
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
-              <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-              <span className="text-[11px] text-muted-foreground leading-relaxed">
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border/50">
+              <AlertTriangle className="h-4 w-4 text-violet-500/70 shrink-0 mt-0.5" />
+              <span className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
                 Генерация проходит в фоновом режиме. Если результат не понравится или будут ошибки — вы сможете перегенерировать карточку за 1 токен
               </span>
             </div>
@@ -2483,7 +2654,7 @@ export const GenerateCards = ({
       </Dialog>
 
       {/* Generated Images */}
-      {generatedImages.length > 0 && <Card className="bg-card animate-scale-in">
+      {generatedImages.length > 0 && <Card className="border-border/60 bg-card rounded-2xl animate-scale-in">
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -2495,7 +2666,7 @@ export const GenerateCards = ({
                   Ваши сгенерированные карточки готовы к скачиванию
                 </CardDescription>
               </div>
-              <Button onClick={downloadAll} variant="outline" className="shrink-0 w-full sm:w-auto" size="sm" disabled={downloadingAll}>
+              <Button onClick={downloadAll} variant="ghost" className="shrink-0 w-full sm:w-auto rounded-md h-10 px-3 text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 transition-colors" size="sm" disabled={downloadingAll}>
                 {downloadingAll ? <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     <span className="hidden sm:inline">Создаю ZIP...</span>
@@ -2518,7 +2689,7 @@ export const GenerateCards = ({
             const currentVariantIdx = selectedVariant[index] ?? (variants.length - 1);
             const displayedImageUrl = variants[currentVariantIdx]?.url || image.url;
             const isCoverCard = image.stageIndex === 0;
-            return <div key={image.id} className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-lg bg-muted/30 w-full overflow-hidden animate-fade-in ${isProcessingCard ? 'border-primary/30' : ''}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
+            return <div key={image.id} className={`group/row relative flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 p-3 sm:p-4 border rounded-xl bg-card w-full overflow-hidden animate-fade-in transition-colors ${isProcessingCard ? 'border-violet-500/40 bg-violet-500/[0.02]' : 'border-border/60'}`} style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'backwards' }}>
                     {isProcessingCard && <>
                       <div className="absolute inset-0 pointer-events-none" style={{
                         background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2529,149 +2700,131 @@ export const GenerateCards = ({
                         animation: 'glow-drift-top 8s ease-in-out infinite alternate',
                       }} />
                     </>}
-                    <div className="relative group/img shrink-0 w-fit mx-auto sm:mx-0 sm:w-auto">
-                      <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-24 h-28 sm:w-20 sm:h-24 object-cover rounded-md border cursor-pointer transition-all duration-200" />
-                      {/* Hover overlay - only on image */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
-                        <ZoomIn className="w-5 h-5 text-white" />
-                      </div>
-                      {/* Click to preview */}
-                      <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0 w-full sm:w-auto px-2 sm:px-0">
-                      <div className="flex items-center gap-2 justify-center sm:justify-start">
-                        <h3 className="font-medium text-sm sm:text-base truncate">{image.stage}</h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left line-clamp-2 mt-1">
-                        {CARD_STAGES[image.stageIndex]?.description}
-                      </p>
-                      {/* Variant selector with thumbnails */}
-                      {variants.length > 1 && (
-                        <div className="mt-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-8 text-xs w-full min-w-[160px] bg-muted/60 border-border/60 justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0 border border-border/30" />
-                                  <span className="truncate">{variants[currentVariantIdx]?.label}</span>
-                                  <Badge variant="secondary" className="text-[10px] px-1 py-0 shrink-0">{variants.length}</Badge>
-                                </div>
-                                <ChevronDown className="w-3 h-3 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto min-w-[160px] p-1.5" align="start">
-                              <div className="space-y-0.5 max-h-60 overflow-y-auto">
-                                {variants.map((v, vIdx) => (
-                                  <button
-                                    key={vIdx}
-                                    onClick={() => {
-                                      setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
-                                      setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
-                                    }}
-                                    className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-1.5 text-xs transition-colors hover:bg-accent hover:text-accent-foreground group ${currentVariantIdx === vIdx ? 'bg-accent/25 font-medium' : ''}`}
-                                  >
-                                    <img src={v.url} alt={v.label} className="w-8 h-10 rounded-sm object-cover shrink-0 border border-border/40" />
-                                    <span className="truncate">{v.label}</span>
-                                    {currentVariantIdx === vIdx && (
-                                      <CheckCircle2 className="w-4 h-4 text-primary group-hover:text-white shrink-0 ml-auto mr-1" />
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+
+                    {/* Mobile header: image + title side by side */}
+                    <div className="flex lg:contents items-start gap-3 w-full">
+                      <div className="relative group/img shrink-0">
+                        <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-lg border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-lg pointer-events-none">
+                          <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                      )}
+                        <div className="absolute inset-0 cursor-pointer rounded-lg" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
+                        {isCoverCard && (
+                          <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm">
+                            Главная
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base leading-tight truncate">{image.stage}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-3 mt-1 leading-relaxed">
+                          {CARD_STAGES[image.stageIndex]?.description}
+                        </p>
+                        {variants.length > 1 && (
+                          <div className="mt-2">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 text-xs rounded-md bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground justify-between gap-2 px-2 max-w-[220px]">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <img src={variants[currentVariantIdx]?.url} alt="" className="w-5 h-5 rounded-sm object-cover shrink-0" />
+                                    <span className="truncate">{variants[currentVariantIdx]?.label}</span>
+                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 shrink-0 bg-muted text-muted-foreground border-none font-normal">{variants.length}</Badge>
+                                  </div>
+                                  <ChevronDown className="w-3.5 h-3.5 shrink-0 opacity-60" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-auto min-w-[180px] p-1.5 rounded-xl" align="start">
+                                <div className="space-y-0.5 max-h-60 overflow-y-auto">
+                                  {variants.map((v, vIdx) => (
+                                    <button
+                                      key={vIdx}
+                                      onClick={() => {
+                                        setSelectedVariant(prev => ({ ...prev, [index]: vIdx }));
+                                        setGeneratedImages(prev => prev.map((img, i) => i === index ? { ...img, url: v.url } : img));
+                                      }}
+                                      className={`flex items-center gap-2.5 w-full rounded-lg px-2 py-1.5 text-xs transition-colors hover:bg-violet-500/10 group ${currentVariantIdx === vIdx ? 'bg-violet-500/10 font-medium text-violet-700 dark:text-violet-300' : ''}`}
+                                    >
+                                      <img src={v.url} alt={v.label} className="w-8 h-10 rounded-md object-cover shrink-0 border border-border/40" />
+                                      <span className="truncate">{v.label}</span>
+                                      {currentVariantIdx === vIdx && (
+                                        <CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0 ml-auto" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    
-                    <div className="flex flex-col xs:flex-row sm:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto shrink-0">
-                      {/* Cover card: combined Video+Style dropdown (desktop) or two buttons (mobile) */}
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap lg:flex-nowrap items-center gap-1.5 w-full lg:w-auto shrink-0 lg:ml-auto">
+                      {/* Cover card extras */}
                       {isCoverCard && onNavigateToVideo && (
                         <>
-                          {/* Mobile: two separate small buttons */}
-                          <div className="flex xs:flex-row gap-2 md:hidden">
-                            <Button size="sm" variant="outline" onClick={e => {
-                              e.stopPropagation();
-                              onNavigateToVideo(image.url);
-                            }} className="flex-1 text-xs whitespace-nowrap border-violet-400/40 text-violet-600 dark:text-violet-400 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-colors">
-                              <Video className="w-3 h-3" />
-                              <span className="ml-1">Видео</span>
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={e => {
-                              e.stopPropagation();
-                              openStyleDialog(image);
-                            }} disabled={!jobData || generating || styleGenerating} className="flex-1 text-xs whitespace-nowrap border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors">
-                              <Sparkles className="w-3 h-3" />
-                              <span className="ml-1">Стиль</span>
-                            </Button>
-                          </div>
-                          {/* Desktop/tablet: dropdown */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="outline" className="hidden md:inline-flex text-xs whitespace-nowrap px-3 border-violet-400/40 text-violet-600 dark:text-violet-400 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-colors" title="Видео и стиль">
-                                <Sparkles className="w-4 h-4" />
-                                <ChevronDown className="w-3 h-3 ml-1" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => onNavigateToVideo(displayedImageUrl)} className="cursor-pointer">
-                                <Video className="w-4 h-4 mr-2" />
-                                Видеообложка
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openStyleDialog(image)} disabled={!jobData || generating || styleGenerating} className="cursor-pointer">
-                                <Sparkles className="w-4 h-4 mr-2" />
-                                В таком же стиле
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button size="sm" variant="outline" onClick={e => {
+                            e.stopPropagation();
+                            onNavigateToVideo(displayedImageUrl);
+                          }} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Сделать видеообложку">
+                            <Video className="w-3.5 h-3.5" />
+                            <span className="ml-1 lg:hidden">Видео</span>
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={e => {
+                            e.stopPropagation();
+                            openStyleDialog(image);
+                          }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="В таком же стиле">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span className="ml-1 lg:hidden">Стиль</span>
+                          </Button>
                         </>
                       )}
 
-                      {/* Non-cover cards: style button */}
                       {!isCoverCard && (
                         <Button size="sm" variant="outline" onClick={e => {
                           e.stopPropagation();
                           openStyleDialog(image);
-                        }} disabled={!jobData || generating || styleGenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3 border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors" title="Создать в таком же стиле">
-                          <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
-                          <span className="md:hidden ml-1">В стиле</span>
+                        }} disabled={!jobData || generating || styleGenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50 transition-colors" title="Создать в таком же стиле">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span className="ml-1 lg:hidden">Стиль</span>
                         </Button>
                       )}
-                      
+
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
-                         const currentUrl = displayedImageUrl;
+                        const currentUrl = displayedImageUrl;
                         openEditDialog({ ...image, url: currentUrl }, index);
-                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Редактировать карточку">
-                              {editingCards.has(`edit_${image.id}_${index}`) ? <>
-                                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                                  <span className="md:hidden ml-1">Редактируется...</span>
-                                </> : <>
-                                  <Edit className="w-3 h-3 md:w-4 md:h-4" />
-                                  <span className="md:hidden ml-1">Редактировать</span>
-                                </>}
+                      }} disabled={editingCards.has(`edit_${image.id}_${index}`)} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Редактировать карточку">
+                        {editingCards.has(`edit_${image.id}_${index}`) ? <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span className="ml-1 lg:hidden">Ред…</span>
+                        </> : <>
+                          <Edit className="w-3.5 h-3.5" />
+                          <span className="ml-1 lg:hidden">Редактировать</span>
+                        </>}
                       </Button>
-                      
+
                       <Button size="sm" variant="outline" onClick={e => {
                         e.stopPropagation();
                         regenerateCard(image, index);
-                      }} disabled={isRegenerating} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Перегенерировать карточку">
-                              {isRegenerating ? <>
-                                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" />
-                                  <span className="md:hidden ml-1">Перегенерация...</span>
-                                </> : <>
-                                  <RefreshCw className="w-3 h-3 md:w-4 md:h-4" />
-                                  <span className="md:hidden ml-1">Перегенерировать</span>
-                                </>}
+                      }} disabled={isRegenerating} className="flex-1 lg:flex-initial h-8 px-2.5 rounded-md text-xs whitespace-nowrap hover:bg-violet-500 hover:border-violet-500 hover:text-white dark:hover:text-white transition-colors" title="Перегенерировать карточку">
+                        {isRegenerating ? <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span className="ml-1 lg:hidden">Перегенерация…</span>
+                        </> : <>
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span className="ml-1 lg:hidden">Перегенерировать</span>
+                        </>}
                       </Button>
-                      
-                      <Button size="sm" variant="outline" onClick={async e => {
+
+                      <Button size="sm" onClick={async e => {
                         e.stopPropagation();
                         await downloadSingle(index);
-                      }} className="w-full xs:w-auto md:w-auto text-xs whitespace-nowrap md:px-3" title="Скачать изображение">
-                              <Download className="w-3 h-3 md:w-4 md:h-4" />
-                              <span className="md:hidden ml-1">Скачать</span>
+                      }} className="flex-1 lg:flex-initial h-8 px-3 rounded-md text-xs whitespace-nowrap bg-gradient-to-r from-violet-500 to-purple-600 text-white border-0 hover:from-violet-600 hover:to-purple-700 shadow-sm shadow-violet-500/20 transition-all" title="Скачать изображение">
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="ml-1 lg:hidden">Скачать</span>
                       </Button>
                     </div>
                   </div>;
@@ -2685,20 +2838,25 @@ export const GenerateCards = ({
         </Card>}
 
       {/* Generate Button */}
-      <Card>
+      <Card className="border-border/60 bg-card rounded-2xl">
         <CardContent className="pt-6 space-y-3">
-          <Button onClick={simulateGeneration} disabled={!canGenerate()} className="gap-2 w-full sm:w-auto" size="lg">
+          <Button
+            onClick={simulateGeneration}
+            disabled={!canGenerate()}
+            size="lg"
+            className="gap-2 w-full sm:w-auto rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none disabled:cursor-not-allowed"
+          >
             {generating ? <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Генерация...
               </> : <>
-                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">
                   Сгенерировать {selectedCards.length} {selectedCards.length === 1 ? 'изображение' : selectedCards.length < 5 ? 'изображения' : 'изображений'}
                 </span>
                 <span className="sm:hidden">Сгенерировать</span>
-                <Badge variant="secondary" className="ml-1">
-                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} токенов
+                <Badge className="ml-1 bg-white/20 text-white border-white/30 hover:bg-white/20">
+                  {priceLoading ? '...' : selectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </>}
           </Button>
@@ -2709,12 +2867,14 @@ export const GenerateCards = ({
           </div>
           
           {!canGenerate() && !generating && (
-            <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
-              <Info className="h-4 w-4" />
-              <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
+            <div className="flex items-center gap-2.5 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-3 py-2 animate-fade-in">
+              <div className="shrink-0 flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15">
+                <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-[13px] leading-snug">
                 {getGuardMessage()}
-              </AlertDescription>
-            </Alert>
+              </p>
+            </div>
           )}
           
         </CardContent>
@@ -2724,38 +2884,38 @@ export const GenerateCards = ({
       {isMobile ? (
         <Drawer open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DrawerContent className="bg-card border-border/50">
-            <DrawerHeader className="space-y-2">
-              <DrawerTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Edit className="w-4 h-4 text-primary" />
+            <DrawerHeader className="space-y-2 text-left">
+              <DrawerTitle className="flex items-center gap-2.5 text-base">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/30 shrink-0">
+                  <Edit className="w-4 h-4 text-white" />
                 </div>
                 Редактировать карточку
               </DrawerTitle>
-              <DrawerDescription className="text-sm text-left">
-                Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
+              <DrawerDescription className="text-xs text-left leading-relaxed">
+                Опишите, что нужно изменить — AI внесёт правки, сохранив общий стиль карточки.
               </DrawerDescription>
             </DrawerHeader>
-            <div className="space-y-4 px-4 pb-2">
+            <div className="space-y-3 px-4 pb-2">
               <div className="space-y-2">
-                <Label htmlFor="edit-instructions-mobile" className="font-semibold">
+                <Label htmlFor="edit-instructions-mobile" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Что нужно изменить?
                 </Label>
-                <Textarea id="edit-instructions-mobile" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+                <Textarea id="edit-instructions-mobile" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[130px] bg-background border-border/60 rounded-lg text-sm focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 resize-none" />
               </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
+                  <Info className="w-3.5 h-3.5 shrink-0" />
                   <span>Стоимость: <span className="font-semibold">{photoEditPrice} {photoEditPrice === 1 ? 'токен' : 'токена'}</span></span>
                 </div>
-                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+                <span className={`text-muted-foreground tabular-nums ${editInstructions.length >= 1200 ? 'text-destructive' : ''}`}>{editInstructions.length}/1200</span>
               </div>
             </div>
             <DrawerFooter className="gap-2">
-              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none">
                 <Sparkles className="w-4 h-4" />
                 Начать редактирование
               </Button>
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg border-border/60">
                 Отмена
               </Button>
             </DrawerFooter>
@@ -2763,38 +2923,40 @@ export const GenerateCards = ({
         </Drawer>
       ) : (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] bg-card border-border/50 rounded-lg">
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Edit className="w-4 h-4 text-primary" />
-                </div>
-                Редактировать карточку
-              </DialogTitle>
-              <DialogDescription className="text-sm text-left">
-                Опишите, что нужно изменить в изображении. AI внесёт изменения, сохраняя общий стиль карточки.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
+          <DialogContent className="sm:max-w-[520px] bg-card border-border/50 rounded-2xl p-0 overflow-hidden">
+            <div className="relative px-6 pt-6 pb-4 border-b border-border/50 bg-gradient-to-br from-violet-500/[0.06] via-transparent to-purple-500/[0.04]">
+              <DialogHeader className="space-y-2 text-left">
+                <DialogTitle className="flex items-center gap-3 text-lg">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
+                    <Edit className="w-4 h-4 text-white" />
+                  </div>
+                  Редактировать карточку
+                </DialogTitle>
+                <DialogDescription className="text-sm text-left leading-relaxed">
+                  Опишите, что нужно изменить — AI внесёт правки, сохранив общий стиль карточки.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            <div className="space-y-3 px-6 py-5">
               <div className="space-y-2">
-                <Label htmlFor="edit-instructions" className="font-semibold">
+                <Label htmlFor="edit-instructions" className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Что нужно изменить?
                 </Label>
-                <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[120px] bg-background/50 border-border/50 rounded-lg focus:border-primary/50" />
+                <Textarea id="edit-instructions" placeholder="Например: изменить цвет фона на синий, добавить больше света, убрать тени..." value={editInstructions} onChange={e => { if (e.target.value.length <= 1200) setEditInstructions(e.target.value); }} maxLength={1200} className="min-h-[130px] bg-background border-border/60 rounded-lg text-sm focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20 resize-none" />
               </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 w-fit">
-                  <Info className="w-3.5 h-3.5 shrink-0 text-primary" />
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-700 dark:text-violet-300">
+                  <Info className="w-3.5 h-3.5 shrink-0" />
                   <span>Стоимость: <span className="font-semibold">{photoEditPrice} {photoEditPrice === 1 ? 'токен' : 'токена'}</span></span>
                 </div>
-                <span className={editInstructions.length >= 1200 ? 'text-destructive' : ''}>{editInstructions.length}/1200</span>
+                <span className={`text-muted-foreground tabular-nums ${editInstructions.length >= 1200 ? 'text-destructive' : ''}`}>{editInstructions.length}/1200</span>
               </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg">
+            <DialogFooter className="px-6 py-4 border-t border-border/50 bg-muted/20 gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="rounded-lg border-border/60">
                 Отмена
               </Button>
-              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2">
+              <Button onClick={editCard} disabled={!editInstructions.trim() || editInstructions.length > 1200} className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none">
                 <Sparkles className="w-4 h-4" />
                 Начать редактирование
               </Button>
@@ -2807,47 +2969,52 @@ export const GenerateCards = ({
       {isMobile ? (
         <Drawer open={styleDialogOpen} onOpenChange={setStyleDialogOpen}>
           <DrawerContent className="bg-card border-border/50">
-            <DrawerHeader className="space-y-2">
-              <DrawerTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-violet-500/[0.08] via-purple-500/[0.04] to-transparent pointer-events-none" />
+            <DrawerHeader className="space-y-2 relative">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
+                  <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                Создать в таком же стиле
-              </DrawerTitle>
-              <DrawerDescription className="text-sm text-left">
-                WBGen создаст новые карточки в такой же стилистике как образец ниже
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">Генерация по образцу</p>
+                  <DrawerTitle className="text-base leading-tight">Создать в таком же стиле</DrawerTitle>
+                </div>
+              </div>
+              <DrawerDescription className="text-xs text-left text-muted-foreground">
+                WBGen создаст новые карточки в стилистике выбранного образца
               </DrawerDescription>
             </DrawerHeader>
-            <div className="space-y-4 px-4 pb-2 max-h-[60dvh] overflow-y-auto">
+            <div className="space-y-4 px-4 pb-2 max-h-[60dvh] overflow-y-auto relative">
               {/* Source image preview */}
               {styleSourceImage && (
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-border/50">
-                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-md border" />
-                  <div className="min-w-0">
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-violet-500/[0.08] to-purple-500/[0.04] border border-violet-500/20">
+                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-lg border border-border/50 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-0.5">Образец стиля</p>
                     <p className="text-sm font-medium truncate">{styleSourceImage.stage}</p>
-                    <p className="text-xs text-muted-foreground">Образец стиля</p>
                   </div>
                 </div>
               )}
 
               {/* Card type selection */}
               <div className="space-y-2">
-                <Label className="font-semibold">Выберите типы карточек</Label>
-                <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Типы карточек</Label>
+                <div className="space-y-1.5">
                   {CARD_STAGES.filter((_, i) => i !== styleSourceImage?.stageIndex && i !== 6).map((stage, _) => {
                     const realIndex = CARD_STAGES.indexOf(stage);
+                    const selected = styleSelectedCards.includes(realIndex);
                     return (
                       <div 
                         key={realIndex}
-                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
-                          styleSelectedCards.includes(realIndex) 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border hover:border-muted-foreground/50'
+                        className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer active:scale-[0.99] ${
+                          selected
+                            ? 'border-violet-500/60 bg-violet-500/[0.08] shadow-sm shadow-violet-500/10' 
+                            : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.03]'
                         }`}
                         onClick={() => handleStyleCardToggle(realIndex)}
                       >
-                        <Checkbox checked={styleSelectedCards.includes(realIndex)} />
-                        <span className="text-sm">{stage.name}</span>
+                        <Checkbox checked={selected} className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500" />
+                        <span className={`text-sm ${selected ? 'font-medium' : ''}`}>{stage.name}</span>
                       </div>
                     );
                   })}
@@ -2856,20 +3023,21 @@ export const GenerateCards = ({
 
               {/* Description field */}
               <div className="space-y-2">
-                <Label className="font-semibold">Описание</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Описание</Label>
                 <Textarea 
                   placeholder="Опишите пожелания для новых карточек..."
                   value={styleDescription}
                   onChange={e => setStyleDescription(e.target.value.slice(0, 1200))}
                   maxLength={1200}
                   disabled={styleAutoDescription}
-                  className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
+                  className="min-h-[100px] bg-background border-border/60 rounded-lg focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
                 />
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className={`flex items-center space-x-2 rounded-lg px-3 py-2 border transition-colors ${styleAutoDescription ? 'bg-violet-500/10 border-violet-500/30' : 'bg-muted/60 border-transparent'}`}>
                     <Checkbox 
                       id="styleAutoDescMobile"
                       checked={styleAutoDescription} 
+                      className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
                       onCheckedChange={(checked) => {
                         setStyleAutoDescription(!!checked);
                         if (checked) {
@@ -2883,22 +3051,22 @@ export const GenerateCards = ({
                       Придумай сам
                     </Label>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    <span>{styleDescription.length}/1200 символов</span>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {styleDescription.length}/1200
                   </div>
                 </div>
               </div>
             </div>
-            <DrawerFooter className="gap-2">
+            <DrawerFooter className="gap-2 pt-3 border-t border-border/50 bg-muted/20">
               <Button 
                 onClick={generateInStyle} 
                 disabled={styleSelectedCards.length === 0 || !styleDescription.trim() || styleGenerating || !activeModel}
-                className="rounded-lg gap-2"
+                className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none h-11"
               >
                 {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
-                <Badge variant="secondary" className="ml-1">
-                  {styleSelectedCards.length * photoGenerationPrice} токенов
+                <span>Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}</span>
+                <Badge variant="secondary" className="ml-auto bg-white/20 text-white border-0 hover:bg-white/20">
+                  {styleSelectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </Button>
               <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
@@ -2909,48 +3077,54 @@ export const GenerateCards = ({
         </Drawer>
       ) : (
         <Dialog open={styleDialogOpen} onOpenChange={setStyleDialogOpen}>
-          <DialogContent className="sm:max-w-[520px] bg-card border-border/50 rounded-lg max-h-[85vh] overflow-y-auto">
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
+          <DialogContent className="sm:max-w-[540px] bg-card border-border/50 rounded-2xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="relative px-6 py-5 bg-gradient-to-br from-violet-500/[0.08] via-transparent to-purple-500/[0.05] border-b border-border/50">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/30 shrink-0">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">Генерация по образцу</p>
+                    <DialogTitle className="text-lg leading-tight">Создать в таком же стиле</DialogTitle>
+                  </div>
                 </div>
-                Создать в таком же стиле
-              </DialogTitle>
-              <DialogDescription className="text-sm text-left">
-                WBGen создаст новые карточки в такой же стилистике как образец ниже
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
+                <DialogDescription className="text-sm text-left text-muted-foreground">
+                  WBGen создаст новые карточки в стилистике выбранного образца
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            <div className="space-y-5 px-6 py-5 overflow-y-auto flex-1">
               {/* Source image preview */}
               {styleSourceImage && (
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 border border-border/50">
-                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-md border" />
-                  <div className="min-w-0">
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-gradient-to-r from-violet-500/[0.08] to-purple-500/[0.04] border border-violet-500/20">
+                  <img src={styleSourceImage.url} alt="Исходная карточка" className="w-14 h-[70px] object-cover rounded-lg border border-border/50 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-0.5">Образец стиля</p>
                     <p className="text-sm font-medium truncate">{styleSourceImage.stage}</p>
-                    <p className="text-xs text-muted-foreground">Образец стиля</p>
                   </div>
                 </div>
               )}
 
               {/* Card type selection */}
               <div className="space-y-2">
-                <Label className="font-semibold">Выберите типы карточек</Label>
-                <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Типы карточек</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {CARD_STAGES.filter((_, i) => i !== styleSourceImage?.stageIndex && i !== 6).map((stage, _) => {
                     const realIndex = CARD_STAGES.indexOf(stage);
+                    const selected = styleSelectedCards.includes(realIndex);
                     return (
                       <div 
                         key={realIndex}
                         className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${
-                          styleSelectedCards.includes(realIndex) 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border hover:border-muted-foreground/50'
+                          selected
+                            ? 'border-violet-500/60 bg-violet-500/[0.08] shadow-sm shadow-violet-500/10' 
+                            : 'border-border/60 hover:border-violet-500/30 hover:bg-violet-500/[0.03]'
                         }`}
                         onClick={() => handleStyleCardToggle(realIndex)}
                       >
-                        <Checkbox checked={styleSelectedCards.includes(realIndex)} />
-                        <span className="text-sm">{stage.name}</span>
+                        <Checkbox checked={selected} className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500" />
+                        <span className={`text-sm leading-tight ${selected ? 'font-medium' : ''}`}>{stage.name}</span>
                       </div>
                     );
                   })}
@@ -2959,20 +3133,21 @@ export const GenerateCards = ({
 
               {/* Description field */}
               <div className="space-y-2">
-                <Label className="font-semibold">Описание</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Описание</Label>
                 <Textarea 
                   placeholder="Опишите пожелания для новых карточек..."
                   value={styleDescription}
                   onChange={e => setStyleDescription(e.target.value.slice(0, 1200))}
                   maxLength={1200}
                   disabled={styleAutoDescription}
-                  className="min-h-[80px] bg-background/50 border-border/50 rounded-lg"
+                  className="min-h-[100px] bg-background border-border/60 rounded-lg focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
                 />
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2 bg-muted/70 rounded-md px-3 py-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className={`flex items-center space-x-2 rounded-lg px-3 py-2 border transition-colors ${styleAutoDescription ? 'bg-violet-500/10 border-violet-500/30' : 'bg-muted/60 border-transparent'}`}>
                     <Checkbox 
                       id="styleAutoDescDesktop"
                       checked={styleAutoDescription} 
+                      className="data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
                       onCheckedChange={(checked) => {
                         setStyleAutoDescription(!!checked);
                         if (checked) {
@@ -2986,25 +3161,25 @@ export const GenerateCards = ({
                       Придумай сам
                     </Label>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    <span>{styleDescription.length}/1200 символов</span>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {styleDescription.length}/1200
                   </div>
                 </div>
               </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2 sm:gap-2 px-6 py-4 border-t border-border/50 bg-muted/20">
               <Button variant="outline" onClick={() => setStyleDialogOpen(false)} className="rounded-lg">
                 Отмена
               </Button>
               <Button 
                 onClick={generateInStyle} 
                 disabled={styleSelectedCards.length === 0 || !styleDescription.trim() || styleGenerating || !activeModel}
-                className="rounded-lg gap-2"
+                className="rounded-lg gap-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none"
               >
                 {styleGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                 Создать {styleSelectedCards.length} {styleSelectedCards.length === 1 ? 'карточку' : styleSelectedCards.length < 5 ? 'карточки' : 'карточек'}
-                <Badge variant="secondary" className="ml-1">
-                  {styleSelectedCards.length * photoGenerationPrice} токенов
+                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 hover:bg-white/20">
+                  {styleSelectedCards.length * photoGenerationPrice} ток.
                 </Badge>
               </Button>
             </DialogFooter>

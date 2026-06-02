@@ -41,8 +41,14 @@ serve(async (req) => {
       selectedCards = [0, 1, 2, 3, 4, 5], // Default all cards
       unifiedStyling = false,
       styleSourceImageUrl = null,
-      sourceJobId = null
+      sourceJobId = null,
+      aspectRatio = '3:4'
     } = requestBody;
+
+    const ALLOWED_ASPECT_RATIOS = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
+    const requestedAspectRatio = typeof aspectRatio === 'string' ? aspectRatio.trim() : '';
+    const safeAspectRatio = ALLOWED_ASPECT_RATIOS.includes(requestedAspectRatio) ? requestedAspectRatio : '3:4';
+    console.log(`[create-generation-job-banana] aspectRatio requested="${requestedAspectRatio}" -> saved="${safeAspectRatio}"`);
 
     // Validate input
     if (!productName || !description || !userId) {
@@ -152,7 +158,8 @@ serve(async (req) => {
       total_cards: selectedCards.length,
       tokens_cost: tokensRequired,
       unified_styling: unifiedStyling,
-      style_source_image_url: styleSourceImageUrl
+      style_source_image_url: styleSourceImageUrl,
+      aspect_ratio: safeAspectRatio
     };
     if (sourceJobId) {
       jobInsert.source_job_id = sourceJobId;

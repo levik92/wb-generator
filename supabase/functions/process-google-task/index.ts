@@ -123,11 +123,14 @@ async function callGeminiApi(
   contentParts: any[],
   keyName: string,
   imageResolution: string = '2K',
-  proxySettings?: any
+  proxySettings?: any,
+  aspectRatio: string = '3:4'
 ): Promise<{ ok: boolean; data?: any; status?: number; error?: string }> {
   const modelName = 'gemini-3-pro-image-preview';
   const normalizedRes = (imageResolution || '2K').toUpperCase() === '1K' ? '1K' : '2K';
-  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: 3:4`);
+  const ALLOWED = ['3:4', '1:1', '4:5', '9:16', '16:9', '4:3', '2:3', '3:2'];
+  const ar = ALLOWED.includes(aspectRatio) ? aspectRatio : '3:4';
+  console.log(`Calling Google Gemini API (${modelName}) with ${keyName}, imageSize: ${normalizedRes}, aspectRatio: ${ar}`);
   
   const proxiedFetch = createProxiedFetch(proxySettings);
   
@@ -147,7 +150,7 @@ async function callGeminiApi(
             responseModalities: ["IMAGE", "TEXT"],
             imageConfig: {
               imageSize: normalizedRes,
-              aspectRatio: "3:4"
+              aspectRatio: ar
             }
           }
         }),
@@ -174,7 +177,7 @@ serve(async (req) => {
   }
 
   try {
-    const { taskId, sourceImageUrl, prompt } = await req.json();
+    const { taskId, sourceImageUrl, prompt, aspectRatio: bodyAspectRatio } = await req.json();
 
     if (!taskId || !sourceImageUrl || !prompt) {
       return new Response(
@@ -320,7 +323,8 @@ serve(async (req) => {
     
     const imageResolution = modelSettings?.image_resolution || '2K';
     const proxySettings = modelSettings;
-    console.log(`Using image resolution: ${imageResolution}, proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
+    const aspectRatio = bodyAspectRatio || (task.job as any)?.aspect_ratio || '3:4';
+    console.log(`Using image resolution: ${imageResolution}, aspectRatio: ${aspectRatio} (body=${bodyAspectRatio}, job=${(task.job as any)?.aspect_ratio}), proxy: ${modelSettings?.proxy_enabled ? 'ON' : 'OFF'}`);
 
     // Build content parts for Google Gemini API
     const contentParts: any[] = [];
@@ -363,7 +367,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
     }
 
     // Try primary API key first
-    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution, proxySettings);
+    let aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY', imageResolution, proxySettings, aspectRatio);
     
     // Retryable statuses (including 400 which can be transient with Gemini)
     const RETRYABLE_STATUSES = [400, 403, 429, 500, 503];
@@ -373,7 +377,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
       if (geminiApiKey2) {
         console.log(`Primary API key returned ${aiResult.status}, waiting ${FALLBACK_DELAY_MS}ms before trying fallback API key...`);
         await new Promise(resolve => setTimeout(resolve, FALLBACK_DELAY_MS));
-        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY', imageResolution, proxySettings);
+        aiResult = await callGeminiApi(geminiApiKey2, contentParts, 'FALLBACK_KEY', imageResolution, proxySettings, aspectRatio);
         
         if (aiResult.ok) {
           console.log('Fallback API key succeeded!');
@@ -381,7 +385,7 @@ ${referenceBase64 ? `2. Последнее изображение (рефере�
           // Fallback also failed, wait 10 seconds and try primary key one more time
           console.log(`Fallback API key also returned ${aiResult.status}, waiting ${FINAL_RETRY_DELAY_MS}ms before final retry on primary key...`);
           await new Promise(resolve => setTimeout(resolve, FINAL_RETRY_DELAY_MS));
-          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY', imageResolution, proxySettings);
+          aiResult = await callGeminiApi(geminiApiKey1, contentParts, 'PRIMARY_KEY_FINAL_RETRY', imageResolution, proxySettings, aspectRatio);
           
           if (aiResult.ok) {
             console.log('Final retry on primary API key succeeded!');

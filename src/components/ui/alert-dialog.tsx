@@ -3,6 +3,8 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { useScrollFocusedIntoView } from "@/hooks/useScrollFocusedIntoView"
+
 
 const AlertDialog = AlertDialogPrimitive.Root
 
@@ -28,19 +30,32 @@ AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <AlertDialogPortal>
-    <AlertDialogOverlay />
-    <AlertDialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-        className
-      )}
-      {...props}
-    />
-  </AlertDialogPortal>
-))
+>(({ className, ...props }, ref) => {
+  const innerRef = React.useRef<HTMLDivElement | null>(null)
+  React.useImperativeHandle(ref, () => innerRef.current as HTMLDivElement)
+  useScrollFocusedIntoView(innerRef)
+  return (
+    <AlertDialogPortal>
+      <AlertDialogOverlay
+        className="flex items-start sm:items-center justify-center p-4 overflow-y-auto"
+        style={{
+          paddingBottom: "calc(1rem + var(--keyboard-inset-height, 0px))",
+        }}
+      />
+      <AlertDialogPrimitive.Content
+        ref={innerRef}
+        style={{
+          maxHeight: "calc(100dvh - 2rem - var(--keyboard-inset-height, 0px))",
+        }}
+        className={cn(
+          "fixed left-[50%] top-4 sm:top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] sm:translate-y-[-50%] gap-4 overflow-y-auto border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+          className
+        )}
+        {...props}
+      />
+    </AlertDialogPortal>
+  )
+})
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 const AlertDialogHeader = ({

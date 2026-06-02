@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { withUtm } from "@/lib/utm";
 import { Helmet } from "react-helmet-async";
 import { ServicePageLayout } from "@/components/services";
 import { motion } from "framer-motion";
@@ -1651,7 +1652,7 @@ const KnowledgeArticle = () => {
               <div className="mt-8 glass-card rounded-2xl p-8 sm:p-10 border border-[hsl(268,83%,55%)]/30 bg-gradient-to-br from-[hsl(268,83%,55%)]/10 to-[hsl(280,90%,55%)]/5">
                 <h3 className="text-xl font-bold text-white mb-3">Готовы попробовать?</h3>
                 <p className="text-white/60 mb-6">Зарегистрируйтесь и получите токены для тестирования</p>
-                <Link to="/auth">
+                <Link to={withUtm("/auth?tab=signup")}>
                   <Button className="bg-gradient-to-r from-[hsl(268,83%,55%)] to-[hsl(280,90%,55%)] text-white border-0">
                     Начать
                   </Button>

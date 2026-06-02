@@ -1,146 +1,87 @@
 import { Check, X, Minus } from "lucide-react";
 
 const comparisonData = [
-  {
-    feature: "Время на 1 карточку",
-    wbgen: "3 минуты",
-    designer: "1-3 дня",
-    constructor: "1-2 часа",
-  },
-  {
-    feature: "Стоимость карточки",
-    wbgen: "от 59₽",
-    designer: "5 000-15 000₽",
-    constructor: "от 990₽*",
-  },
-  {
-    feature: "Проф. дизайн",
-    wbgen: true,
-    designer: true,
-    constructor: false,
-  },
-  {
-    feature: "Уникальность",
-    wbgen: true,
-    designer: true,
-    constructor: false,
-  },
-  {
-    feature: "Инфографика",
-    wbgen: true,
-    designer: true,
-    constructor: "partial",
-  },
-  {
-    feature: "SEO-описания",
-    wbgen: true,
-    designer: false,
-    constructor: false,
-  },
-  {
-    feature: "Правки бесплатно",
-    wbgen: true,
-    designer: false,
-    constructor: true,
-  },
-  {
-    feature: "Не нужен опыт",
-    wbgen: true,
-    designer: true,
-    constructor: false,
-  },
+  { feature: "Время на 1 карточку", wbgen: "3 минуты", designer: "1-3 дня", constructor: "1-2 часа" },
+  { feature: "Стоимость карточки", wbgen: "от 59₽", designer: "5 000-15 000₽", constructor: "от 990₽*" },
+  { feature: "Профессиональный дизайн", wbgen: true, designer: true, constructor: false },
+  { feature: "Уникальность", wbgen: true, designer: true, constructor: false },
+  { feature: "Инфографика", wbgen: true, designer: true, constructor: "partial" },
+  { feature: "SEO-описания", wbgen: true, designer: false, constructor: false },
+  { feature: "Правки бесплатно", wbgen: true, designer: false, constructor: true },
+  { feature: "Не нужен опыт", wbgen: true, designer: true, constructor: false },
 ];
 
 const renderValue = (value: boolean | string) => {
-  if (value === true) {
+  if (value === true)
     return (
-      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-        <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[hsl(160,90%,45%)]/15 border border-[hsl(160,90%,45%)]/25 flex items-center justify-center mx-auto">
+        <Check className="w-3.5 h-3.5 text-[hsl(160,90%,65%)]" />
       </div>
     );
-  }
-  if (value === false) {
+  if (value === false)
     return (
-      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-500/20 flex items-center justify-center">
-        <X className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-500/15 border border-rose-500/25 flex items-center justify-center mx-auto">
+        <X className="w-3.5 h-3.5 text-rose-300" />
       </div>
     );
-  }
-  if (value === "partial") {
+  if (value === "partial")
     return (
-      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-        <Minus className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400" />
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center justify-center mx-auto">
+        <Minus className="w-3.5 h-3.5 text-amber-300" />
       </div>
     );
-  }
-  return <span className="text-xs sm:text-sm text-white/70 text-center">{value}</span>;
+  return <span className="text-xs sm:text-sm text-white/75 text-center block">{value}</span>;
 };
 
 export const ComparisonSection = () => {
   return (
-    <section className="relative py-16 sm:py-24 md:py-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(240,10%,4%)] via-[hsl(240,8%,6%)] to-[hsl(240,10%,4%)]" />
-
+    <section className="section-shell">
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
-        {/* Section header */}
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-4 sm:mb-6">
-            Сравнение
-          </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            WBGen vs альтернативы
+        <div className="section-header">
+          <span className="section-eyebrow">Сравнение</span>
+          <h2 className="section-title">
+            WBGen vs <span className="text-aurora">альтернативы</span>
           </h2>
-          <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto">
-            Объективное сравнение способов создания карточек для Wildberries
+          <p className="section-subtitle">
+            Объективное сравнение способов создания карточек для маркетплейсов.
           </p>
         </div>
 
-        {/* Comparison table */}
-        <div className="max-w-4xl mx-auto">
-          <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-auto">
-            {/* Header */}
-            <div className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 border-b border-white/10 min-w-[400px]">
-              <div className="text-xs sm:text-sm text-white/40 font-medium">Критерий</div>
+        <div className="max-w-5xl mx-auto">
+          <div className="glass-card rounded-3xl overflow-hidden overflow-x-auto">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4 p-4 sm:p-6 border-b border-white/10 min-w-[480px] items-center">
+              <div className="text-xs sm:text-sm text-white/45 font-medium uppercase tracking-wider">
+                Критерий
+              </div>
               <div className="text-center">
-                <div className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)]">
-                  <span className="text-xs sm:text-sm font-bold text-white">WBGen</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[hsl(263,90%,55%)] to-[hsl(280,85%,55%)] shadow-md shadow-[hsl(263,90%,40%)]/30">
+                  <span className="text-xs sm:text-sm font-bold text-white tracking-tight">WBGen</span>
                 </div>
               </div>
-              <div className="text-center text-xs sm:text-sm text-white/60 font-medium">
-                Дизайнер
-              </div>
-              <div className="text-center text-xs sm:text-sm text-white/60 font-medium">
-                Конструктор
-              </div>
+              <div className="text-center text-xs sm:text-sm text-white/60 font-medium">Дизайнер</div>
+              <div className="text-center text-xs sm:text-sm text-white/60 font-medium">Конструктор</div>
             </div>
 
-            {/* Rows */}
-            <div className="divide-y divide-white/5 min-w-[400px]">
+            <div className="divide-y divide-white/5 min-w-[480px]">
               {comparisonData.map((row) => (
                 <div
                   key={row.feature}
-                  className="grid grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-6 items-center hover:bg-white/[0.02] transition-colors"
+                  className="grid grid-cols-4 gap-2 sm:gap-4 p-3.5 sm:p-5 items-center"
                 >
-                  <div className="text-xs sm:text-sm text-white/70">{row.feature}</div>
+                  <div className="text-xs sm:text-sm text-white/75">{row.feature}</div>
                   <div className="flex justify-center">
-                    <div className="comparison-highlight rounded-lg px-2 sm:px-3 py-1 sm:py-2">
+                    <div className="comparison-highlight rounded-xl px-2.5 py-1.5">
                       {renderValue(row.wbgen)}
                     </div>
                   </div>
-                  <div className="flex justify-center">
-                    {renderValue(row.designer)}
-                  </div>
-                  <div className="flex justify-center">
-                    {renderValue(row.constructor)}
-                  </div>
+                  <div className="flex justify-center">{renderValue(row.designer)}</div>
+                  <div className="flex justify-center">{renderValue(row.constructor)}</div>
                 </div>
               ))}
             </div>
 
-            {/* Footer note */}
-            <div className="p-3 sm:p-6 border-t border-white/10 bg-white/[0.02]">
-              <p className="text-[10px] sm:text-xs text-white/40 text-center">
+            <div className="p-4 sm:p-5 border-t border-white/10 bg-white/[0.02]">
+              <p className="text-[11px] sm:text-xs text-white/45 text-center">
                 * Подписка в месяц. Бесплатные конструкторы ограничены в функционале и не дают профессионального результата.
               </p>
             </div>

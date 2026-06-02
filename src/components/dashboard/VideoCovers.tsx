@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/hooks/use-toast";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
-import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, CreditCard, Coins, HelpCircle, ShieldCheck } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Upload, Video, Download, Loader2, AlertTriangle, X, Play, Clock, Sparkles, TrendingUp, Zap, Eye, Info, RefreshCw, ExternalLink, Coins, HelpCircle, ShieldCheck, ArrowRight, MousePointerClick } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useActiveAiModel, getVideoEdgeFunctionName } from "@/hooks/useActiveAiModel";
 
 interface Profile {
@@ -487,139 +487,152 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
   const hasActiveJob = currentJob && (currentJob.status === "processing" || currentJob.status === "pending");
 
   return (
-    <div className="space-y-6">
-      {/* Benefits block */}
-      <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-        <CardContent className="pt-4 sm:pt-5 pb-4 sm:pb-5">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-bold">
-                Живые обложки, которые привлекают внимание
+    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
+
+      {/* Hero — conversion-focused */}
+      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
+        <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="relative p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Видео, которое продаёт</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+                Живые обложки с <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">+35% к CTR</span> за 2 минуты
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Анимированные обложки увеличивают CTR карточек на маркетплейсах. Просто загрузите фото товара — ИИ создаст плавную 5-секундную анимацию премиального уровня.
+                Загрузите фото товара — ИИ создаст плавную 5-секундную анимацию премиального уровня, которая выделит карточку в выдаче маркетплейса.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Рост CTR до +35%</p>
-                  <p className="text-[10px] text-muted-foreground">за счёт анимации</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Готово за ~2 минуты</p>
-                  <p className="text-[10px] text-muted-foreground">вместо часов работы</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">+35% к CTR</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">за счёт анимации</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-background/60 border border-primary/20">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
-                  <Eye className="w-4 h-4 text-primary" />
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">~2 минуты</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">вместо часов работы</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium">Выделение в выдаче</p>
-                  <p className="text-[10px] text-muted-foreground">среди статичных карточек</p>
+              </div>
+
+              <div className="group/stat relative rounded-xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-3 transition-colors hover:border-violet-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                    <Eye className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight">Выделение</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">в выдаче среди других</p>
+
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Video Promo Banner */}
       <AnimatePresence>
         {isPromoBannerVisible && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-2xl"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="group relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
           >
-            {/* Animated gradient background — video-themed blue-purple */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-primary to-fuchsia-500 animate-gradient-x" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
+            {/* Subtle ambient accent */}
+            <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-violet-500/[0.08] blur-3xl" />
+            <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-fuchsia-500/[0.06] blur-3xl" />
 
-            {/* Floating video icons */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <Video className="absolute top-3 left-[8%] w-4 h-4 text-white/25 animate-float-slow" />
-              <Play className="absolute top-6 left-[28%] w-5 h-5 text-white/20 animate-float-medium rotate-12" />
-              <Zap className="absolute top-4 right-[22%] w-4 h-4 text-white/30 animate-float-fast -rotate-12" />
-              <Sparkles className="absolute bottom-3 left-[18%] w-3 h-3 text-white/20 animate-float-medium rotate-6" />
-              <Video className="absolute bottom-5 right-[12%] w-5 h-5 text-white/15 animate-float-slow -rotate-6" />
-              <Play className="absolute top-1/2 left-[50%] w-3 h-3 text-white/15 animate-float-fast rotate-45" />
-            </div>
-
-            {/* Shimmer */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-
+            {/* Close */}
             <button
               onClick={handleDismissPromo}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white/80 hover:text-white z-20"
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg hover:bg-violet-500/10 transition-colors text-muted-foreground hover:text-foreground"
               aria-label="Закрыть"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative p-6 pt-12 sm:pt-12 lg:pt-6">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:pr-8">
-                <div className="flex-shrink-0 hidden lg:block">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Video className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            <div className="relative z-10 p-4 sm:p-5">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-5">
+                {/* Left: icon + copy */}
+                <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0 lg:pr-4">
+                  <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-violet-500/20 flex items-center justify-center">
+                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600 dark:text-violet-300" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                      <h3 className="text-[15px] sm:text-base font-semibold leading-tight">
+                        Видеообложки усиливают карточку
+                      </h3>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        Новое
+                      </span>
+                    </div>
+                    <p className="text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed">
+                      Оживите карточку 5-секундным роликом — клиент задерживает взгляд и чаще кликает.
+                    </p>
+
+                    {/* Benefit chips */}
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                        <MousePointerClick className="w-3 h-3" />
+                        До +47% к CTR
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300">
+                        <Clock className="w-3 h-3" />
+                        Готово за 1 минуту
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 border border-border/60 text-[11px] font-medium text-foreground/80">
+                        <ShieldCheck className="w-3 h-3" />
+                        Возврат токенов
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="mb-3 lg:hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
-                    Посмотрите, какие видеообложки можно создавать
-                  </h3>
-                  <p className="text-sm text-white/80 line-clamp-2">
-                    Примеры работ и возможности нейросети — живые обложки для ваших товаров
-                  </p>
-
-                  <div className="mt-3 hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/20">
-                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-                    <span className="text-xs sm:text-sm font-medium text-white">
-                      100% гарантия возврата средств, если не понравится
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 w-full lg:w-auto lg:flex-shrink-0">
+                {/* Right: CTAs */}
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[180px] lg:shrink-0">
                   <Button
-                    className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
                     asChild
+                    size="sm"
+                    className="group/btn h-9 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 font-medium text-xs"
                   >
                     <a href="/video-generaciya" target="_blank" rel="noopener noreferrer">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Посмотреть
-                      <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+                      <Eye className="w-3.5 h-3.5 mr-1.5" />
+                      Смотреть примеры
+                      <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
                     </a>
                   </Button>
                   {onNavigate && (
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => onNavigate("pricing")}
-                      className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs font-medium"
                     >
-                      <Coins className="w-4 h-4 mr-2" />
+                      <Coins className="w-3.5 h-3.5 mr-1.5" />
                       Пополнить баланс
                     </Button>
                   )}
@@ -630,7 +643,8 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
         )}
       </AnimatePresence>
 
-      {/* Processing states */}
+
+      {/* Processing / Result */}
       <AnimatePresence mode="wait">
       {(isProcessing || currentJob) && (
         <motion.div
@@ -640,8 +654,11 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-        <Card className="relative overflow-hidden">
-          {/* Animated radial gradient backgrounds */}
+        <Card className={`relative overflow-hidden rounded-2xl ${
+          (isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed")
+            ? "border-violet-500/30 bg-card shadow-lg shadow-violet-500/5"
+            : "border-border/60 bg-card"
+        }`}>
           {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
             <>
               <div className="absolute inset-0 pointer-events-none" style={{
@@ -654,97 +671,75 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
               }} />
             </>
           )}
-          <CardContent className="relative z-10 p-4 sm:p-6 space-y-4">
-            {/* Unified processing area - visible during all processing phases */}
+          <CardContent className="relative z-10 p-4 sm:p-6 space-y-5">
+            {/* Active processing (upload OR generation) */}
             {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
-              <div className="min-h-[280px] flex flex-col items-center justify-center">
-                <AnimatePresence mode="wait">
-                  {/* Upload/preparation phase — covers upload AND the gap before job is created */}
-                  {(isUploading || (isGenerating && !hasActiveJob)) && (
-                    <motion.div
-                      key="uploading"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex flex-col items-center gap-4 py-8 w-full"
-                    >
-                      <div className="relative">
-                        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                        <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                      </div>
-                      <div className="text-center space-y-2">
-                        <p className="font-medium">Подготовка к генерации…</p>
-                        <p className="text-sm text-muted-foreground">Загружаем изображение и рассчитываем параметры обработки</p>
-                      </div>
-                      <div className="w-full max-w-xs">
-                        <div className="h-2 rounded-full bg-muted overflow-hidden">
-                          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "30%" }} />
-                        </div>
-                      </div>
-                    </motion.div>
+              <>
+                {/* Header: spinner + title + timer */}
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="relative shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-md animate-pulse" />
+                    <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
+                    {(isUploading || (isGenerating && !hasActiveJob))
+                      ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
+                      : <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-0.5">
+                    {(isUploading || (isGenerating && !hasActiveJob)) ? (
+                      <>
+                        <p className="font-semibold text-sm sm:text-base">Подготовка к генерации…</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">Загружаем изображение и рассчитываем параметры</p>
+                      </>
+                    ) : !isInExtendedWait ? (
+                      <>
+                        <p className="font-semibold text-sm sm:text-base">Генерация видеообложки</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Можно переключиться на другие вкладки — мы продолжим в фоне</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-semibold text-sm sm:text-base">Генерация видеообложки</p>
+                        <p className="text-xs sm:text-sm text-violet-600 dark:text-violet-300">{WAITING_MESSAGES[waitingMessageIndex]}</p>
+                      </>
+                    )}
+                  </div>
+                  {hasActiveJob && !isUploading && !isInExtendedWait && (
+                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/5 border border-violet-500/30 text-violet-700 dark:text-violet-300">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="text-xs sm:text-sm font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
+                    </div>
                   )}
+                </div>
 
-                  {/* Active job progress */}
-                  {hasActiveJob && !isUploading && (
-                    <motion.div
-                      key="generating"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex flex-col items-center gap-4 py-8 w-full"
-                    >
-                      <div className="relative">
-                        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                        <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-primary" />
-                      </div>
-                      <div className="text-center space-y-2">
-                        {!isInExtendedWait ? (
-                          <>
-                            <p className="font-medium">Генерация видеообложки…</p>
-                            <div className="flex items-center justify-center gap-2 text-primary">
-                              <Clock className="h-4 w-4" />
-                              <span className="text-lg font-bold tabular-nums">{formatTime(remainingSeconds)}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Расчётное время 1-2 минуты. Можете переключиться на другие вкладки.
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="font-medium text-primary">{WAITING_MESSAGES[waitingMessageIndex]}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Генерация занимает немного больше времени, чем обычно
-                            </p>
-                          </>
-                        )}
-                      </div>
-                      <div className="w-full max-w-xs">
-                        <div className="h-2 rounded-full bg-muted overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                            style={{ width: `${Math.min(progressPercent, 95)}%` }}
-                          />
-                        </div>
-                        <p className="text-[10px] text-muted-foreground text-center mt-1">
-                          {isInExtendedWait ? "Финализация…" : `${Math.round(progressPercent)}%`}
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+                {/* Progress bar */}
+                <div className="w-full space-y-1.5">
+                  <div className="relative h-2.5 rounded-full bg-muted/60 overflow-hidden shadow-inner">
+                    {(isUploading || (isGenerating && !hasActiveJob)) ? (
+                      <div
+                        className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full shadow-sm shadow-violet-500/40"
+                        style={{ animation: 'indeterminate-slide 1.6s ease-in-out infinite' }}
+                      />
+                    ) : (
+                      <div
+                        className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-1000 ease-linear shadow-sm shadow-violet-500/40"
+                        style={{ width: `${Math.min(progressPercent, 95)}%` }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+                    <span>{(isUploading || (isGenerating && !hasActiveJob)) ? 'Подготовка…' : 'Создаём анимацию'}</span>
+                    <span className="tabular-nums">{(isUploading || (isGenerating && !hasActiveJob)) ? '' : isInExtendedWait ? 'Финализация…' : `${Math.round(progressPercent)}%`}</span>
+                  </div>
+                </div>
 
-            {/* Warning during processing */}
-            {isProcessing && (
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/20 backdrop-blur-sm border border-border/50">
-                <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <span className="text-xs text-muted-foreground leading-relaxed">
-                  Результат создаёт нейросеть. В случае неудовлетворительного результата токены не возвращаются. Пожалуйста, внимательно составляйте описание и пожелания к генерации.
-                </span>
-              </div>
+                {/* Info hint */}
+                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border/50">
+                  <AlertTriangle className="h-4 w-4 text-violet-500/70 shrink-0 mt-0.5" />
+                  <span className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+                    Генерация проходит в фоновом режиме. Если результат не понравится — вы сможете перегенерировать видео за {regenCost} токенов.
+                  </span>
+                </div>
+              </>
             )}
 
             {/* Completed video */}
@@ -753,14 +748,14 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary z-10"
+                  className="absolute -top-1 right-0 h-8 w-8 rounded-full hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 z-10"
                   onClick={() => setCurrentJob(null)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
-                <div className="flex items-center gap-2 text-primary">
+                <div className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
                   <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="font-medium text-sm sm:text-base">Видео готово! 🎬</span>
+                  <span className="font-semibold text-sm sm:text-base">Видео готово</span>
                 </div>
                 <video
                   src={currentJob.video_url}
@@ -772,11 +767,19 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                   style={{ aspectRatio: "3/4" }}
                 />
                 <div className="flex flex-col xs:flex-row justify-center gap-2 sm:gap-3">
-                  <Button onClick={() => downloadVideo(currentJob.video_url!)} className="gap-2 w-full xs:w-auto">
+                  <Button
+                    onClick={() => downloadVideo(currentJob.video_url!)}
+                    size="lg"
+                    className="gap-2 w-full xs:w-auto rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all"
+                  >
                     <Download className="h-4 w-4" />
                     Скачать видео
                   </Button>
-                  <Button variant="outline" onClick={() => setCurrentJob(null)} className="gap-2 w-full xs:w-auto">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentJob(null)}
+                    className="gap-2 w-full xs:w-auto rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50"
+                  >
                     <Video className="h-4 w-4" />
                     Сгенерировать новое
                   </Button>
@@ -786,10 +789,10 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 </p>
 
                 {/* Regeneration block */}
-                <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border border-border bg-muted/30 space-y-3">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border border-border/60 bg-muted/20 space-y-3">
                   <div className="space-y-1">
                     <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <RefreshCw className="h-4 w-4 text-primary" />
+                      <RefreshCw className="h-4 w-4 text-violet-600 dark:text-violet-300" />
                       Не нравится результат?
                     </h4>
                     <p className="text-xs text-muted-foreground">
@@ -801,42 +804,40 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                       value={regenPrompt}
                       onChange={(e) => { if (e.target.value.length <= 150) setRegenPrompt(e.target.value); }}
                       placeholder="Опишите пожелания к анимации"
-                      className="min-h-[60px] text-sm"
+                      className="min-h-[60px] text-sm rounded-lg"
                       maxLength={150}
                       disabled={isRegenerating || regenAutoOptimize}
                     />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
-                        <Checkbox
-                          id="regenAutoOptimize"
-                          checked={regenAutoOptimize}
-                          onCheckedChange={(checked) => {
-                            const isChecked = checked === true;
-                            setRegenAutoOptimize(isChecked);
-                            if (isChecked) {
-                              setRegenPrompt(AUTO_PROMPT_TEXT);
-                            } else {
-                              setRegenPrompt("");
-                            }
-                          }}
-                          disabled={isRegenerating}
-                        />
-                        <Label htmlFor="regenAutoOptimize" className="text-sm font-normal cursor-pointer">
-                          Придумай сам
-                        </Label>
-                      </div>
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = !regenAutoOptimize;
+                          setRegenAutoOptimize(next);
+                          setRegenPrompt(next ? AUTO_PROMPT_TEXT : "");
+                        }}
+                        disabled={isRegenerating}
+                        className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-xs font-medium transition-colors disabled:opacity-50 ${
+                          regenAutoOptimize
+                            ? "bg-violet-500/10 border border-violet-500/30 text-violet-700 dark:text-violet-300"
+                            : "bg-muted/40 border border-border/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Придумай сам
+                      </button>
                       <span className={`text-xs ${regenPrompt.length >= 150 ? 'text-destructive' : 'text-muted-foreground'}`}>{regenPrompt.length}/150</span>
                     </div>
                     <Button
                       onClick={handleRegenerate}
                       disabled={isRegenerating || (!regenPrompt.trim() && !regenAutoOptimize)}
-                      variant="outline"
-                      className="gap-2 w-full sm:w-auto"
+                      size="lg"
+                      className="gap-2 w-full sm:w-auto rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none disabled:cursor-not-allowed"
                     >
                       {isRegenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                       Перегенерировать
-                      <Badge variant="secondary" className="ml-1">
-                        {regenCost} токенов
+                      <Badge className="ml-1 bg-white/20 text-white border-white/30 hover:bg-white/20">
+                        {regenCost} ток.
                       </Badge>
                     </Button>
                   </div>
@@ -854,7 +855,11 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                   <p className="text-xs text-muted-foreground mt-1">Токены возвращены на баланс</p>
                 </div>
                 <div className="flex justify-center">
-                  <Button variant="outline" onClick={() => setCurrentJob(null)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentJob(null)}
+                    className="rounded-lg border-violet-500/30 bg-violet-500/5 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/50"
+                  >
                     Попробовать снова
                   </Button>
                 </div>
@@ -873,50 +878,50 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
-          className="space-y-4"
+          className="space-y-4 sm:space-y-6"
         >
-          {/* Block 1: Upload + wishes */}
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              {/* Image upload header */}
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4 shrink-0" />
-                  <span className="font-semibold text-base sm:text-lg">Карточка товара</span>
-                  <TooltipProvider delayDuration={0}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="ml-1 text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <Info className="w-4 h-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                        <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Загрузите карточку товара для создания видеообложки (до 5 МБ)
-                </p>
-              </div>
-
-              {/* Image upload zone */}
+          {/* Block 1: Upload */}
+          <Card className="border-border/60 bg-card rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Upload className="w-4 h-4 shrink-0" />
+                <span>Карточка товара</span>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                      <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Загрузите готовую карточку товара для создания видеообложки (до 5 МБ, формат 3:4)
+              </p>
+            </CardHeader>
+            <CardContent>
               {!selectedImage ? (
-                <div
+                <label
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border border-dashed border-border/50 rounded-xl p-6 sm:p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all bg-muted/30"
+                  className="group flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all border-violet-500/25 bg-white/40 dark:bg-white/[0.02] hover:border-violet-500/60 hover:bg-violet-500/[0.06] cursor-pointer"
                 >
-                  <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-muted-foreground">Загрузите карточку товара</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Перетащите или нажмите для выбора. До 5 МБ, формат 3:4.
+                  <div className="flex items-center justify-center w-12 h-12 mb-3 rounded-xl bg-violet-500/10 group-hover:bg-violet-500/20 transition-all">
+                    <Upload className="w-5 h-5 text-violet-600 dark:text-violet-300" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground/80">
+                    Загрузите карточку товара
+                  </p>
+                  <p className="text-xs mt-1 text-muted-foreground text-center">
+                    Перетащите или нажмите для выбора. PNG, JPG. До 5 МБ, формат 3:4.
                   </p>
                   <input
                     ref={fileInputRef}
@@ -925,7 +930,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                     onChange={handleFileChange}
                     className="hidden"
                   />
-                </div>
+                </label>
               ) : (
                 <div className="relative inline-block">
                   <img
@@ -935,96 +940,120 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                   />
                   <button
                     onClick={removeImage}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg"
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-lg hover:scale-105 transition-transform"
+                    aria-label="Удалить"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               )}
+            </CardContent>
+          </Card>
 
-              {/* User wishes field */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="font-semibold text-base sm:text-lg">Пожелания к видео</span>
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-[260px] text-xs">
-                        Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <Textarea
-                  id="userPrompt"
-                  value={userPrompt}
-                  onChange={(e) => setUserPrompt(e.target.value.slice(0, 150))}
-                  placeholder="Опишите ваши пожелания по анимации, например: плавное вращение, приближение камеры, эффект дыма…"
-                  className="min-h-[80px]"
-                  maxLength={600}
-                  disabled={isProcessing || autoOptimize}
-                />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
-                    <Checkbox
-                      id="autoOptimizeVideo"
-                      checked={autoOptimize}
-                      onCheckedChange={(checked) => {
-                        const isChecked = checked === true;
-                        setAutoOptimize(isChecked);
-                        if (isChecked) {
-                          setUserPrompt(AUTO_PROMPT_TEXT);
-                        } else {
-                          setUserPrompt("");
-                        }
-                      }}
-                      disabled={isProcessing}
-                    />
-                    <Label htmlFor="autoOptimizeVideo" className="text-sm font-normal cursor-pointer">
-                      Придумай сам
-                    </Label>
-                  </div>
-                  <span className={`text-xs ${userPrompt.length >= 150 ? 'text-red-500' : 'text-muted-foreground'}`}>{userPrompt.length}/150 символов</span>
-                </div>
+          {/* Block 2: User wishes */}
+          <Card className="border-border/60 bg-card rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>Пожелания к видео</span>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                      <p>Не знаете, как описать задачу? Включите «Придумай сам» — нейросеть подберёт оптимальные параметры для лучшего результата.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Опишите, какую анимацию вы хотите получить, или доверьте параметры нейросети.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Textarea
+                id="userPrompt"
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value.slice(0, 150))}
+                placeholder="Например: плавное вращение, приближение камеры, эффект дыма…"
+                className="min-h-[88px] rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
+                maxLength={600}
+                disabled={isProcessing || autoOptimize}
+              />
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <label
+                  htmlFor="autoOptimize"
+                  className={`group inline-flex items-center gap-2 sm:gap-2.5 rounded-md px-2.5 sm:px-3 h-10 cursor-pointer select-none transition-colors max-w-full ${
+                    autoOptimize
+                      ? 'bg-gradient-to-r from-violet-500/15 to-purple-500/10 text-violet-700 dark:text-violet-300'
+                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                  } ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                  <Sparkles className={`w-3.5 h-3.5 shrink-0 transition-colors ${autoOptimize ? 'text-violet-500' : ''}`} />
+                  <span className="text-[11px] sm:text-xs font-medium leading-none whitespace-nowrap">
+                    Придумай сам
+                  </span>
+                  <Switch
+                    id="autoOptimize"
+                    checked={autoOptimize}
+                    onCheckedChange={(checked) => {
+                      const next = !!checked;
+                      setAutoOptimize(next);
+                      setUserPrompt(next ? AUTO_PROMPT_TEXT : "");
+                    }}
+                    disabled={isProcessing}
+                    className="data-[state=checked]:bg-violet-500 scale-75 sm:scale-90 -my-1 shrink-0"
+                  />
+                </label>
+                <span className={`text-xs tabular-nums shrink-0 ${userPrompt.length >= 150 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {userPrompt.length}/150
+                </span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Block 2: Generate button + hint */}
-          <Card>
-            <CardContent className="p-6 space-y-3">
+          {/* Block 3: Generate button + hint */}
+          <Card className="border-border/60 bg-card rounded-2xl">
+            <CardContent className="pt-6 space-y-3">
               <Button
                 onClick={handleGenerate}
                 disabled={!selectedImage || priceLoading || (!userPrompt.trim() && !autoOptimize)}
-                className="gap-2 w-full sm:w-auto"
                 size="lg"
+                className="gap-2 w-full sm:w-auto rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-600 hover:to-purple-700 hover:shadow-violet-500/40 transition-all disabled:opacity-60 disabled:grayscale-[40%] disabled:shadow-none disabled:cursor-not-allowed"
               >
-                <Video className="h-5 w-5" />
-                <span className="sm:hidden">Сгенерировать</span>
+                <Video className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">Сгенерировать видеообложку</span>
-                <Badge variant="secondary" className="ml-1">
-                  {videoCost} токенов
+                <span className="sm:hidden">Сгенерировать</span>
+                <Badge className="ml-1 bg-white/20 text-white border-white/30 hover:bg-white/20">
+                  {priceLoading ? '...' : videoCost} ток.
                 </Badge>
               </Button>
 
               <div className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed mt-1">
                 <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                <p>Видео генерирует нейросеть. Внимательно относитесь к описанию пожеланий. Если результат не устраивает, видео можно перегенерировать в 5 раз дешевле.</p>
+                <p>
+                  Стоимость: <strong>{priceLoading ? '...' : videoCost} токенов</strong> за 1 видео. Не понравилось либо есть ошибки? Перегенерация в 5 раз дешевле!
+                </p>
               </div>
 
-              {/* Guard message */}
               {(!selectedImage || (!userPrompt.trim() && !autoOptimize)) && (
-                <Alert className="bg-amber-500/10 border-amber-500/30 rounded-xl [&>svg]:!text-amber-600 dark:[&>svg]:!text-amber-400 [&>svg+div]:translate-y-0 items-center [&>svg]:!top-1/2 [&>svg]:!-translate-y-1/2">
-                  <Info className="h-4 w-4" />
-                  <AlertDescription className="text-amber-700 dark:text-amber-300 font-medium text-xs sm:text-sm">
+                <div className="flex items-center gap-2.5 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 px-3 py-2 animate-fade-in">
+                  <div className="shrink-0 flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15">
+                    <Info className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-[13px] leading-snug">
                     {!selectedImage
                       ? "Загрузите карточку товара"
                       : "Напишите пожелания или включите «Придумай сам»"}
-                  </AlertDescription>
-                </Alert>
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>

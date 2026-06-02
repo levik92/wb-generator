@@ -31,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, Loader2, ExternalLink, Upload, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2, ExternalLink, Upload, X, BookOpen, FileText, Tag as TagIcon, Link as LinkIcon, Image as ImageIcon, ListChecks } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface BlogPost {
@@ -52,11 +52,11 @@ interface BlogPost {
 const TAGS = ["Гайд", "Новости", "Советы", "Кейс", "Обновление"];
 
 const tagColors: Record<string, string> = {
-  "Гайд": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  "Новости": "bg-green-500/20 text-green-400 border-green-500/30",
-  "Советы": "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  "Кейс": "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  "Обновление": "bg-pink-500/20 text-pink-400 border-pink-500/30",
+  "Гайд": "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+  "Новости": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+  "Советы": "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30",
+  "Кейс": "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+  "Обновление": "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/30",
 };
 
 export const AdminBlog = () => {
@@ -332,63 +332,95 @@ export const AdminBlog = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center py-16">
+        <div className="w-7 h-7 rounded-full border-[2.5px] border-violet-500/30 border-t-violet-500 animate-[spin_0.7s_linear_infinite]" />
       </div>
     );
   }
 
+  const publishedCount = posts.filter(p => p.is_published).length;
+  const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);
+
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-xl md:text-2xl font-bold">Управление блогом</h2>
-          <p className="text-sm text-muted-foreground">Создавайте и редактируйте статьи для SEO</p>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+            <BookOpen className="h-5 w-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Управление блогом
+            </h1>
+            <p className="text-sm text-muted-foreground">Создавайте и редактируйте статьи для SEO</p>
+          </div>
         </div>
         <ResponsiveDialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
         }}>
           <ResponsiveDialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 w-full sm:w-auto bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25">
               <Plus className="w-4 h-4" />
               Новая статья
             </Button>
           </ResponsiveDialogTrigger>
           <ResponsiveDialogContent className="sm:max-w-3xl">
-            <ResponsiveDialogHeader>
-              <ResponsiveDialogTitle>
-                {editingPost ? "Редактирование статьи" : "Новая статья"}
-              </ResponsiveDialogTitle>
+            <ResponsiveDialogHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25 shrink-0">
+                  {editingPost ? <Pencil className="h-4 w-4 text-white" /> : <Plus className="h-4 w-4 text-white" />}
+                </div>
+                <div className="min-w-0">
+                  <ResponsiveDialogTitle className="text-lg">
+                    {editingPost ? "Редактирование статьи" : "Новая статья"}
+                  </ResponsiveDialogTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Заполните данные — статья появится в блоге после публикации
+                  </p>
+                </div>
+              </div>
             </ResponsiveDialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-5 py-2">
               <div className="space-y-2">
-                <Label htmlFor="title">Заголовок *</Label>
+                <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="h-3.5 w-3.5 text-violet-500" />
+                  Заголовок <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder="Как создать продающую карточку товара"
+                  className="focus-visible:ring-violet-500/40"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="slug">URL-адрес (slug) *</Label>
+                  <Label htmlFor="slug" className="text-sm font-medium flex items-center gap-2">
+                    <LinkIcon className="h-3.5 w-3.5 text-violet-500" />
+                    URL-адрес (slug) <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="slug"
                     value={formData.slug}
                     onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                     placeholder="kak-sozdat-kartochku"
+                    className="font-mono text-xs focus-visible:ring-violet-500/40"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tag">Категория</Label>
+                  <Label htmlFor="tag" className="text-sm font-medium flex items-center gap-2">
+                    <TagIcon className="h-3.5 w-3.5 text-violet-500" />
+                    Категория
+                  </Label>
                   <Select
                     value={formData.tag}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, tag: value }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="focus:ring-violet-500/40">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -403,7 +435,10 @@ export const AdminBlog = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Изображение статьи (опционально)</Label>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <ImageIcon className="h-3.5 w-3.5 text-violet-500" />
+                  Изображение статьи <span className="text-muted-foreground font-normal">(опционально)</span>
+                </Label>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -411,46 +446,46 @@ export const AdminBlog = () => {
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                
+
                 {imagePreview || formData.image_url ? (
-                  <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-primary/20 bg-muted/30">
-                    <img 
-                      src={imagePreview || formData.image_url} 
-                      alt="Preview" 
+                  <div className="relative w-full h-48 rounded-xl overflow-hidden border border-border/60 bg-muted/30 ring-1 ring-violet-500/20">
+                    <img
+                      src={imagePreview || formData.image_url}
+                      alt="Preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     <Button
                       type="button"
                       variant="destructive"
                       size="icon"
-                      className="absolute top-3 right-3 h-8 w-8 shadow-lg"
+                      className="absolute top-3 right-3 h-8 w-8 shadow-lg rounded-lg"
                       onClick={removeImage}
                     >
                       <X className="w-4 h-4" />
                     </Button>
-                    <div className="absolute bottom-3 left-3 text-xs text-white/80 bg-black/40 px-2 py-1 rounded">
+                    <div className="absolute bottom-3 left-3 text-xs text-white bg-black/50 px-2.5 py-1 rounded-md">
                       Изображение загружено
                     </div>
                   </div>
                 ) : (
-                  <div 
+                  <div
                     onClick={() => !uploading && fileInputRef.current?.click()}
                     className={`w-full h-40 border-2 border-dashed rounded-xl transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${
-                      uploading 
-                        ? 'border-muted-foreground/30 bg-muted/20 cursor-wait' 
-                        : 'border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 hover:border-primary/50 hover:bg-primary/15'
+                      uploading
+                        ? 'border-muted-foreground/30 bg-muted/20 cursor-wait'
+                        : 'border-violet-500/30 bg-gradient-to-br from-violet-500/5 to-purple-500/5 hover:border-violet-500/50 hover:from-violet-500/10 hover:to-purple-500/10'
                     }`}
                   >
                     {uploading ? (
                       <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
                         <span className="text-sm text-muted-foreground">Загрузка...</span>
                       </div>
                     ) : (
                       <>
-                        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <Upload className="w-6 h-6 text-primary" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shadow-violet-500/25">
+                          <Upload className="w-5 h-5 text-white" />
                         </div>
                         <div className="text-center">
                           <p className="text-sm font-medium text-foreground">
@@ -467,53 +502,64 @@ export const AdminBlog = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="excerpt">Краткое описание (для превью) *</Label>
+                <Label htmlFor="excerpt" className="text-sm font-medium">
+                  Краткое описание <span className="text-muted-foreground font-normal">(для превью)</span> <span className="text-destructive">*</span>
+                </Label>
                 <Textarea
                   id="excerpt"
                   value={formData.excerpt}
                   onChange={(e) => setFormData((prev) => ({ ...prev, excerpt: e.target.value }))}
                   placeholder="Разбираем ключевые элементы успешной карточки..."
                   rows={2}
+                  className="resize-none focus-visible:ring-violet-500/40"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Содержание статьи *</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="content" className="text-sm font-medium">
+                    Содержание статьи <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-xs text-muted-foreground">Поддерживается Markdown</span>
+                </div>
                 <Textarea
                   id="content"
                   value={formData.content}
                   onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
                   placeholder="Полный текст статьи... Поддерживается Markdown"
                   rows={12}
-                  className="font-mono text-sm"
+                  className="font-mono text-sm resize-none focus-visible:ring-violet-500/40"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Поддерживается Markdown разметка
-                </p>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Опубликовать сразу</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Статья будет видна на сайте
+              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 bg-muted/30">
+                <div>
+                  <Label htmlFor="publish" className="text-sm font-medium cursor-pointer">Опубликовать сразу</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Статья станет видна на сайте
                   </p>
                 </div>
                 <Switch
+                  id="publish"
                   checked={formData.is_published}
                   onCheckedChange={(checked) =>
                     setFormData((prev) => ({ ...prev, is_published: checked }))
                   }
+                  className="data-[state=checked]:bg-violet-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-border/50">
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Отмена
                 </Button>
-                <Button onClick={handleSave} disabled={saving}>
-                  {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {editingPost ? "Сохранить" : "Создать"}
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:opacity-90 text-white shadow-sm shadow-violet-500/25"
+                >
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {editingPost ? "Сохранить" : "Создать статью"}
                 </Button>
               </div>
             </div>
@@ -521,12 +567,56 @@ export const AdminBlog = () => {
         </ResponsiveDialog>
       </div>
 
-      <Card className="bg-card border-border/50 rounded-2xl">
-        <CardHeader>
-          <CardTitle>Статьи блога</CardTitle>
-          <CardDescription>
-            Всего статей: {posts.length} | Опубликовано: {posts.filter(p => p.is_published).length}
-          </CardDescription>
+      {/* Stats strip */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="bg-card border-border/60 rounded-2xl shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+              <FileText className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Всего статей</p>
+              <p className="text-lg font-semibold tabular-nums">{posts.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border/60 rounded-2xl shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <ListChecks className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Опубликовано</p>
+              <p className="text-lg font-semibold tabular-nums">{publishedCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-card border-border/60 rounded-2xl shadow-sm">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Eye className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Просмотры</p>
+              <p className="text-lg font-semibold tabular-nums">{totalViews}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="bg-card border-border/60 rounded-2xl shadow-sm overflow-hidden">
+        <CardHeader className="bg-gradient-to-br from-violet-500/[0.04] via-transparent to-transparent border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+              <BookOpen className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Статьи блога</CardTitle>
+              <CardDescription className="text-xs">
+                Управление всеми материалами блога
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-2 md:p-4">
           {posts.length === 0 ? (
@@ -538,98 +628,194 @@ export const AdminBlog = () => {
               </Button>
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[200px]">Статья</TableHead>
-                    <TableHead className="min-w-[100px]">Категория</TableHead>
-                    <TableHead className="min-w-[100px]">Статус</TableHead>
-                    <TableHead className="text-center min-w-[80px]">Просмотры</TableHead>
-                    <TableHead className="min-w-[100px] hidden md:table-cell">Дата</TableHead>
-                    <TableHead className="text-right min-w-[120px]">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {posts.map((post) => (
-                    <TableRow key={post.id}>
-                      <TableCell>
-                        <div className="max-w-md">
-                          <p className="font-medium truncate text-sm">{post.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            /blog/{post.slug}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={tagColors[post.tag]}>
-                          {post.tag}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={post.is_published ? "default" : "secondary"}
-                          className={post.is_published ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/10" : ""}
-                        >
-                          {post.is_published ? "Опубликовано" : "Черновик"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                          <Eye className="w-3 h-3" />
-                          {post.views}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
-                        {formatDate(post.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-0.5 md:gap-1">
-                          {post.is_published && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
-                              title="Открыть статью"
-                              className="h-7 w-7 md:h-8 md:w-8 p-0"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => togglePublish(post)}
-                            title={post.is_published ? "Снять с публикации" : "Опубликовать"}
-                            className="h-7 w-7 md:h-8 md:w-8 p-0 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-500"
-                          >
-                            <Eye className={`w-3 h-3 ${post.is_published ? "text-emerald-500" : ""}`} />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditDialog(post)}
-                            title="Редактировать"
-                            className="h-7 w-7 md:h-8 md:w-8 p-0"
-                          >
-                            <Pencil className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDelete(post.id)}
-                            title="Удалить"
-                            className="h-7 w-7 md:h-8 md:w-8 p-0"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            <>
+              {/* Desktop / tablet table */}
+              <div className="hidden md:block rounded-xl border border-border/60 overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/40 hover:bg-muted/40 border-border/60">
+                      <TableHead className="min-w-[260px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Статья</TableHead>
+                      <TableHead className="min-w-[110px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Категория</TableHead>
+                      <TableHead className="min-w-[110px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Статус</TableHead>
+                      <TableHead className="text-center min-w-[90px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Просмотры</TableHead>
+                      <TableHead className="min-w-[110px] hidden lg:table-cell text-xs font-semibold uppercase tracking-wide text-muted-foreground">Дата</TableHead>
+                      <TableHead className="text-right min-w-[150px] text-xs font-semibold uppercase tracking-wide text-muted-foreground">Действия</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {posts.map((post) => (
+                      <TableRow key={post.id} className="border-border/40 hover:bg-violet-500/[0.03] transition-colors">
+                        <TableCell className="py-3">
+                          <div className="max-w-md min-w-0">
+                            <p className="font-medium text-sm leading-snug line-clamp-2">{post.title}</p>
+                            <p className="text-[11px] text-muted-foreground truncate mt-0.5 font-mono">
+                              /blog/{post.slug}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={tagColors[post.tag]}>
+                            {post.tag}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {post.is_published ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              Опубликовано
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                              <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                              Черновик
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center gap-1 text-sm tabular-nums text-muted-foreground">
+                            <Eye className="w-3 h-3" />
+                            {post.views}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs hidden lg:table-cell whitespace-nowrap">
+                          {formatDate(post.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-1">
+                            {post.is_published && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+                                title="Открыть статью"
+                                className="h-8 w-8 p-0 text-muted-foreground hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => togglePublish(post)}
+                              title={post.is_published ? "Снять с публикации" : "Опубликовать"}
+                              className={`h-8 w-8 p-0 ${
+                                post.is_published
+                                  ? "text-emerald-500 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400"
+                                  : "text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
+                              }`}
+                            >
+                              {post.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(post)}
+                              title="Редактировать"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(post.id)}
+                              title="Удалить"
+                              className="h-8 w-8 p-0 text-muted-foreground hover:bg-destructive hover:text-white"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-2.5">
+                {posts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="rounded-xl border border-border/60 bg-card p-3 space-y-3 hover:border-violet-500/30 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm leading-snug line-clamp-2">{post.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate mt-1 font-mono">
+                          /blog/{post.slug}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className={`${tagColors[post.tag]} shrink-0 text-[10px]`}>
+                        {post.tag}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs">
+                      {post.is_published ? (
+                        <span className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          Опубликовано
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 font-medium text-muted-foreground">
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                          Черновик
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1 text-muted-foreground tabular-nums">
+                        <Eye className="w-3 h-3" />
+                        {post.views}
+                      </span>
+                      <span className="text-muted-foreground/80 ml-auto text-[11px] whitespace-nowrap">
+                        {formatDate(post.created_at)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1 pt-1 border-t border-border/40">
+                      {post.is_published && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => togglePublish(post)}
+                        className={`h-8 w-8 p-0 ${
+                          post.is_published
+                            ? "text-emerald-500 hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400"
+                            : "text-muted-foreground hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
+                        }`}
+                      >
+                        {post.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(post)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(post.id)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:bg-destructive hover:text-white"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

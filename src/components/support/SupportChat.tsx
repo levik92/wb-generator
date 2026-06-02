@@ -1,17 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Send, Loader2, Headphones, MessageCircle, ShieldCheck, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { getProxiedPublicUrl } from "@/lib/storage";
 import { compressImage } from "@/lib/imageCompression";
+import { buildChatTimeline, bubbleRoundingClasses, type ChatMessage } from "@/lib/groupMessages";
+import { formatChatDateSeparator, formatChatTime } from "@/lib/formatChatDate";
 
-interface Message {
-  id: string;
+interface Message extends ChatMessage {
   sender_type: "user" | "ai" | "admin" | "system";
-  content: string;
-  created_at: string;
-  attachment_url?: string | null;
 }
 
 interface SupportChatProps {
@@ -256,31 +254,47 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
     }
   };
 
-  // Poll for new messages
+  // Poll for new messages (pause when tab hidden, while sending/uploading, or while user is selecting older history)
   useEffect(() => {
     if (!conversationId) return;
-    const interval = setInterval(async () => {
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (loading || uploading) return;
       try {
-        shouldScrollRef.current = true;
         const msgs = await loadMessages(conversationId);
+        if (cancelled) return;
         setMessages(prev => {
-          if (msgs.length !== prev.length || msgs[msgs.length - 1]?.id !== prev[prev.length - 1]?.id) {
-            return msgs;
-          }
-          return prev;
+          const sameLen = msgs.length === prev.length;
+          const sameLast = msgs[msgs.length - 1]?.id === prev[prev.length - 1]?.id;
+          if (sameLen && sameLast) return prev;
+          shouldScrollRef.current = true;
+          return msgs;
         });
       } catch {}
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [conversationId, loadMessages]);
+    };
+    const interval = setInterval(tick, 8000);
+    const onVisible = () => { if (!document.hidden) tick(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [conversationId, loadMessages, loading, uploading]);
+
 
   const getSenderName = (type: string) => {
     switch (type) {
       case "admin": return "Менеджер";
+      case "ai": return "Ассистент";
       case "system": return "Система";
       default: return "Вы";
     }
   };
+
+  const timeline = useMemo(() => buildChatTimeline(messages), [messages]);
 
   if (initialLoading) {
     return (
@@ -298,104 +312,133 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
 
   return (
     <div className="w-full max-w-full px-1">
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Headphones className="w-5 h-5 text-primary" />
-            Поддержка
-          </h2>
-          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
+      {/* Header card */}
+      <div className="mb-5 rounded-2xl border border-border/60 bg-gradient-to-br from-violet-500/[0.06] via-card to-card p-4 sm:p-5">
+        <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative shrink-0">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/25">
+                <Headphones className="w-5 h-5 text-white" strokeWidth={2.2} />
+              </div>
+              <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-card ${
+                isOnline ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/50"
+              }`} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold leading-tight truncate">Поддержка</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 leading-snug">
+                {isOnline
+                  ? "Менеджер ответит вам в ближайшее время"
+                  : "Сейчас офлайн — 09:00–22:00 МСК. Оставьте сообщение"}
+              </p>
+            </div>
+          </div>
+          <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full shrink-0 ${
             isOnline
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-              : "bg-muted text-muted-foreground"
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+              : "bg-muted text-muted-foreground border border-border/60"
           }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/50"}`} />
             {isOnline ? "Онлайн" : "Офлайн"}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          {isOnline
-            ? "Напишите нам, и менеджер ответит вам в ближайшее время"
-            : "Сейчас мы офлайн (09:00–22:00 МСК), но вы можете оставить сообщение"}
-        </p>
       </div>
 
-      <div className="border border-border rounded-2xl bg-card overflow-hidden flex flex-col h-[calc(100vh-280px)] min-h-[400px] max-h-[600px]">
+      <div className="border border-border/60 rounded-2xl bg-card overflow-hidden flex flex-col h-[calc(100dvh-260px)] min-h-[440px] max-h-[680px] shadow-sm">
         {/* Messages */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-3"
+          className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3 bg-gradient-to-b from-muted/15 via-card to-card"
           onScroll={handleScroll}
         >
-          {/* Load more indicator */}
           {hasMoreMessages && (
             <div className="flex justify-center py-2">
               {loadingMore ? (
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               ) : (
-                <button onClick={loadOlderMessages} className="text-xs text-primary hover:underline">
+                <button onClick={loadOlderMessages} className="text-xs text-violet-500 hover:text-violet-600 hover:underline font-medium">
                   Загрузить ранние сообщения
                 </button>
               )}
             </div>
           )}
-          
+
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-8">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <MessageCircle className="w-7 h-7 text-primary" />
+            <div className="flex flex-col items-center justify-center h-full text-center px-6">
+              <div className="relative w-16 h-16 mb-4">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/15 to-purple-500/15 rotate-6" />
+                <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
+                  <MessageCircle className="w-7 h-7 text-violet-500" strokeWidth={2} />
+                </div>
               </div>
-              <p className="text-base font-medium text-foreground mb-2">Напишите нам</p>
-              <p className="text-sm text-muted-foreground">
-                Опишите вашу проблему или задайте вопрос. Менеджер ответит в ближайшее время.
+              <p className="text-base font-semibold text-foreground mb-1.5">Напишите нам</p>
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                Опишите вашу проблему или задайте вопрос. Прикрепите скриншот, если нужно.
               </p>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex flex-col ${msg.sender_type === "user" ? "items-end" : "items-start"}`}
-              >
-                <span className="text-[10px] text-muted-foreground mb-1">
-                  {getSenderName(msg.sender_type)}
-                </span>
+            timeline.map((item) => {
+              if (item.type === "date") {
+                return (
+                  <div key={item.key} className="flex items-center justify-center py-1">
+                    <span className="text-[10px] text-muted-foreground bg-muted/60 px-2.5 py-0.5 rounded-full font-medium">
+                      {formatChatDateSeparator(item.date)}
+                    </span>
+                  </div>
+                );
+              }
+              const group = item.group;
+              const isOwn = group.sender_type === "user";
+              return (
                 <div
-                  className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                    msg.sender_type === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : msg.sender_type === "system"
-                      ? "bg-muted/50 text-muted-foreground italic rounded-bl-md text-xs"
-                      : "bg-secondary text-secondary-foreground rounded-bl-md"
-                  }`}
+                  key={group.key}
+                  className={`flex flex-col gap-0.5 ${isOwn ? "items-end" : "items-start"} animate-fade-in`}
                 >
-                  {msg.attachment_url && (
-                    <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
-                      <img
-                        src={msg.attachment_url}
-                        alt="Вложение"
-                        className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
-                        loading="lazy"
-                      />
-                    </button>
+                  {!isOwn && (
+                    <span className="text-[10px] text-muted-foreground mb-0.5 px-1 font-medium">
+                      {getSenderName(group.sender_type)}
+                    </span>
                   )}
-                  {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+                  {group.items.map(({ msg, position }) => (
+                    <div
+                      key={msg.id}
+                      className={`max-w-[85%] sm:max-w-[75%] px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
+                        bubbleRoundingClasses(isOwn ? "own" : "other", position)
+                      } ${
+                        msg.sender_type === "user"
+                          ? "bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-violet-500/20"
+                          : msg.sender_type === "system"
+                          ? "bg-muted/50 text-muted-foreground italic text-xs"
+                          : "bg-secondary/80 text-secondary-foreground border border-border/40"
+                      }`}
+                    >
+                      {msg.attachment_url && (
+                        <button onClick={() => setPreviewImage(msg.attachment_url!)} className="block mb-1.5 cursor-zoom-in">
+                          <img
+                            src={msg.attachment_url}
+                            alt="Вложение"
+                            className="max-w-[240px] max-h-[180px] rounded-lg object-cover border border-border/30 hover:opacity-90 transition-opacity"
+                            loading="lazy"
+                          />
+                        </button>
+                      )}
+                      {msg.content && !(msg.content === "📎 Изображение" && msg.attachment_url) && msg.content}
+                    </div>
+                  ))}
+                  <span className="text-[10px] text-muted-foreground/70 mt-0.5 px-1 tabular-nums">
+                    {formatChatTime(group.endedAt)}
+                  </span>
                 </div>
-                <span className="text-[10px] text-muted-foreground mt-0.5">
-                  {new Date(msg.created_at).toLocaleTimeString("ru-RU", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            ))
+              );
+            })
           )}
           {aiTyping && (
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] text-muted-foreground mb-1">Ассистент</span>
-              <div className="bg-secondary text-secondary-foreground rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:150ms]" />
-                <span className="w-1.5 h-1.5 bg-muted-foreground/60 rounded-full animate-bounce [animation-delay:300ms]" />
+            <div className="flex flex-col items-start animate-fade-in">
+              <span className="text-[10px] text-muted-foreground mb-1 px-1 font-medium">Ассистент</span>
+              <div className="bg-secondary/80 border border-border/40 text-secondary-foreground rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1 shadow-sm">
+                <span className="w-1.5 h-1.5 bg-violet-500/60 rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 bg-violet-500/60 rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-violet-500/60 rounded-full animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
           )}
@@ -404,12 +447,13 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
 
         {/* Pending file preview */}
         {pendingPreview && (
-          <div className="px-4 pb-2">
-            <div className="relative inline-block">
-              <img src={pendingPreview} alt="Превью" className="h-20 w-20 rounded-lg object-cover border border-border" />
+          <div className="px-3 sm:px-4 pb-2 pt-1 border-t border-border/40 bg-muted/20">
+            <div className="relative inline-block animate-fade-in">
+              <img src={pendingPreview} alt="Превью" className="h-20 w-20 rounded-xl object-cover border border-border/60 shadow-sm" />
               <button
                 onClick={clearPendingFile}
-                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md hover:scale-110 transition-transform"
+                aria-label="Убрать вложение"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -418,7 +462,7 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
         )}
 
         {/* Input */}
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border/60 p-3 sm:p-4 bg-card/95">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -437,11 +481,12 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
               type="button"
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-xl shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/5 opacity-60 hover:opacity-100 transition-opacity"
+              className="h-10 w-10 rounded-full shrink-0 text-muted-foreground hover:text-violet-500 hover:bg-violet-500/10 transition-colors"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || uploading}
+              aria-label="Прикрепить файл"
             >
-              <Paperclip className="w-4.5 h-4.5" />
+              <Paperclip className="w-4 h-4" />
             </Button>
             <input
               ref={inputRef}
@@ -449,20 +494,20 @@ export const SupportChat = ({ profile }: SupportChatProps) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Напишите сообщение..."
-              className="flex-1 bg-secondary/50 border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+              className="flex-1 min-w-0 bg-muted/50 border border-border/60 rounded-full px-4 py-2.5 text-sm outline-none focus:border-violet-500/60 focus:bg-card focus:ring-2 focus:ring-violet-500/20 placeholder:text-muted-foreground/70 transition-all"
               disabled={loading || uploading}
               maxLength={2000}
             />
             <Button
               type="submit"
               size="icon"
-              className="h-10 w-10 rounded-xl shrink-0"
+              className="h-10 w-10 rounded-full shrink-0 bg-gradient-to-br from-violet-500 to-purple-600 hover:from-violet-400 hover:to-purple-500 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 disabled:shadow-none transition-all"
               disabled={(!input.trim() && !pendingFile) || loading || uploading}
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </form>
-          <p className="text-[10px] text-muted-foreground mt-2 flex items-center justify-center gap-1">
+          <p className="text-[10px] text-muted-foreground/80 mt-2 flex items-center justify-center gap-1">
             <ShieldCheck className="w-3 h-3" />
             Все сообщения зашифрованы и безопасны
           </p>

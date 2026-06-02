@@ -381,24 +381,26 @@ const KnowledgeBase = () => {
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
                 id={cat.id}
+                className="group relative"
               >
-                <div className="glass-card rounded-2xl p-6 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(268,83%,50%)] to-[hsl(268,83%,40%)] flex items-center justify-center mb-4">
+                <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[hsl(268,83%,60%)]/40 via-transparent to-[hsl(290,83%,60%)]/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                <div className="relative glass-card rounded-2xl p-6 h-full border border-white/10 group-hover:border-white/20 transition-colors duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,52%)] flex items-center justify-center mb-4 shadow-lg shadow-[hsl(268,83%,40%)]/20 group-hover:shadow-[hsl(268,83%,60%)]/40 transition-shadow">
                     <cat.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">{cat.title}</h3>
                   <p className="text-white/50 text-sm mb-4">{cat.description}</p>
-                  
+
                   <ul className="space-y-2">
                     {cat.articles.map((article, articleIndex) => (
                       <li key={articleIndex}>
-                        <Link 
+                        <Link
                           to={`/baza-znaniy/${article.id}`}
-                          className="text-sm text-white/70 hover:text-[hsl(268,83%,65%)] transition-colors flex items-center gap-2"
+                          className="text-sm text-white/70 hover:text-[hsl(268,83%,72%)] transition-colors flex items-center gap-2 group/link"
                         >
-                          <ArrowRight className="w-3 h-3" />
+                          <ArrowRight className="w-3 h-3 transition-transform group-hover/link:translate-x-0.5" />
                           {article.title}
                         </Link>
                       </li>
@@ -427,27 +429,20 @@ const KnowledgeBase = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-3xl font-bold text-[hsl(268,83%,65%)] mb-2">1</div>
-                <h3 className="font-semibold text-white mb-2">Регистрация</h3>
-                <p className="text-white/60 text-sm">
-                  Создайте аккаунт за 30 секунд через email или Google. Получите бесплатные токены.
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-3xl font-bold text-[hsl(268,83%,65%)] mb-2">2</div>
-                <h3 className="font-semibold text-white mb-2">Загрузка фото</h3>
-                <p className="text-white/60 text-sm">
-                  Загрузите качественное фото товара и укажите категорию с описанием.
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-3xl font-bold text-[hsl(268,83%,65%)] mb-2">3</div>
-                <h3 className="font-semibold text-white mb-2">Генерация</h3>
-                <p className="text-white/60 text-sm">
-                  Выберите стиль и нажмите «Сгенерировать». Через 2-3 минуты карточки готовы.
-                </p>
-              </div>
+              {[
+                { n: 1, title: "Регистрация", text: "Создайте аккаунт за 30 секунд через email или Google. Получите бесплатные токены." },
+                { n: 2, title: "Загрузка фото", text: "Загрузите качественное фото товара и укажите категорию с описанием." },
+                { n: 3, title: "Генерация", text: "Выберите стиль и нажмите «Сгенерировать». Через 2-3 минуты карточки готовы." },
+              ].map((s) => (
+                <div key={s.n} className="group relative">
+                  <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-xl p-6 border border-white/10 group-hover:border-white/20 transition-colors h-full">
+                    <div className="text-3xl font-bold bg-gradient-to-br from-[hsl(268,83%,72%)] to-[hsl(290,83%,72%)] bg-clip-text text-transparent mb-2">{s.n}</div>
+                    <h3 className="font-semibold text-white mb-2">{s.title}</h3>
+                    <p className="text-white/60 text-sm">{s.text}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -470,15 +465,16 @@ const KnowledgeBase = () => {
 
             <div className="space-y-6">
               {Object.entries(articleContent).slice(0, 3).map(([id, article]) => (
-                <Link key={id} to={`/baza-znaniy/${id}`} className="block">
-                  <div className="glass-card rounded-xl p-6 hover:bg-white/5 transition-colors">
+                <Link key={id} to={`/baza-znaniy/${id}`} className="block group relative">
+                  <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-[hsl(268,83%,60%)]/30 to-[hsl(290,83%,60%)]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl pointer-events-none" />
+                  <div className="relative glass-card rounded-xl p-6 border border-white/10 group-hover:border-white/20 transition-colors">
                     <h3 className="text-lg font-semibold text-white mb-3">{article.title}</h3>
                     <div className="text-white/60 text-sm prose prose-invert prose-sm max-w-none">
                       {article.content.split('\n').slice(0, 5).map((line, i) => (
                         <p key={i}>{line.replace(/^#+\s*/, '').replace(/\*\*/g, '')}</p>
                       ))}
                     </div>
-                    <span className="mt-4 text-[hsl(268,83%,65%)] text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    <span className="mt-4 text-[hsl(268,83%,72%)] text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                       Читать полностью <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>

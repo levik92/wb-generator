@@ -1,67 +1,45 @@
-## Проблема
+## Аудит UTM-системы и данных
 
-После недавних правок (storage / картинки) в production bundle жёстко зашит прямой адрес Supabase: `https://xguiyabpngjkavyosbza.supabase.co`. Поэтому ВСЯ фронтовая работа клиента `@supabase/supabase-js` (login, getSession, REST-запросы к таблицам, realtime, `supabase.functions.invoke`, `supabase.storage.getPublicUrl`) идёт напрямую на `.supabase.co`, который заблокирован Роскомнадзором. Без VPN пользователи в РФ не могут ни войти, ни запустить генерацию.
+### Что работает корректно
 
-## Корневая причина
+**Сбор данных (за всё время / 30 дней):**
+- 23 активных источника, 16 927 визитов, 15 130 уникальных visitor_id (соотношение 1.12 — нормальное).
+- 1 783 визита за 7 дней, дневные значения стабильны (150–490/день, без провалов и пиков).
+- 1 129 регистраций с привязкой к UTM за 30 дней / 2 236 всех регистраций → **атрибуция ~50.5 %** — это здоровый показатель для рекламы (остальные — органика, прямые заходы, поисковики без меток).
 
-В файле `.env` сейчас:
-```
-SUPABASE_URL="https://api.wbgen.ru"             ← это для Edge Functions (Deno.env), фронт это НЕ читает
-VITE_SUPABASE_URL="https://xguiyabpngjkavyosbza.supabase.co"   ← это читает Vite, и это пошло в bundle
-```
+**Архитектура и поток данных:**
+- `useUtmTracking` захватывает `utm_source/medium/campaign` + pathname на module-level (до того, как React Router их «съест»), хранит `wbgen_utm_source_id` в localStorage. Это правильно.
+- Алгоритм scoring подбирает лучший кандидат среди записей с одинаковым `utm_source`, учитывая medium/campaign/pathname. Работает корректно (видно по различению `avito/rabota` vs `avito/seller/banner1` — каждая разводится на свою запись).
+- `withUtm()` пробрасывает метки через SPA-переходы для Я.Метрики / Meta Pixel.
+- При регистрации (email): `Auth.tsx` кладёт `utm_source_id` в `user_metadata`, триггер `handle_new_user` записывает его в `profiles.utm_source_id`. Проверено в коде функции.
+- При OAuth (Google): id передаётся через `sessionStorage` + redirect URL `?utm_source_id=`, `Dashboard.tsx` дописывает в профиль после логина.
+- RLS: `utm_sources` — public SELECT; `utm_visits` — public INSERT, admin SELECT; `profiles` — пользователь видит/редактирует только себя, админ — все. Всё в порядке.
 
-`src/config/runtime.ts` корректно построен:
-```ts
-export const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL || "https://api.wbgen.ru";
-```
-Но fallback срабатывает только когда переменная пустая. Сейчас она задана с прямым значением, поэтому fallback на прокси игнорируется.
+**Топ источников по конверсии в регистрацию (визиты → signups):**
+- `yandex/(пусто)/wbgen.ru` — 4 285 → 729 (**17 %**) — основной канал.
+- `yandex/(пусто)/promo` — 758 → 168 (**22 %**) — лучшая конверсия.
+- `instagramVTKRGZ` — 1 494 → 93 (6.2 %); `instagramVTKZ` — 1 391 → 74 (5.3 %).
+- `avito/rabota` — 3 734 → 64 (1.7 %) — низкая конверсия, но это ожидаемо для холодного трафика.
 
-Подтверждение: в `https://wbgen.ru/assets/index-*.js` лежит строка `tl="https://xguiyabpngjkavyosbza.supabase.co"` — клиент `createClient(tl, ...)` инициализируется именно ей.
+### Найденные слабые места (не критичны, но можно улучшить)
 
-Edge Functions, RPC и REST через прямой supabase.co с РФ IP без VPN не отвечают → у пользователя пустой ответ или таймаут → "не могу войти", "не работает генерация", хотя в `auth_logs` мы видим успешные логины только тех, у кого VPN или сговорчивый провайдер.
+1. **`utm_visits` хранит только `utm_source_id` + `visitor_id`** — теряется landing pathname, поэтому в админке нельзя посмотреть «по каким страницам шли визиты внутри одного источника». Если нужна страничная разбивка, надо добавить колонки `landing_path`, `referrer`, `user_agent`.
 
-## План исправления
+2. **Нет дедупа визитов в `useUtmTracking`** — нет `useRef`-guard от React StrictMode. В dev это приводит к двойным INSERT'ам. В production влияния нет (StrictMode отключён), но визитов могло насчитаться на ~2 % больше за тестовые периоды. Можно добавить `initialized.current` guard как в `AuthRedirect`.
 
-### 1. Поменять `VITE_SUPABASE_URL` обратно на прокси
+3. **Источник `sale` (`/avito` landing)**: 328 визитов, 0 регистраций — стоит проверить саму страницу (или это просто холодный аудит-трафик).
 
-В `.env` заменить:
-```
-VITE_SUPABASE_URL="https://xguiyabpngjkavyosbza.supabase.co"
-```
-на:
-```
-VITE_SUPABASE_URL="https://api.wbgen.ru"
-```
+4. **Источники `avito/baza`, `avito/pohozh`, `avito/shirokaya`** имеют 0 регистраций при десятках визитов — низкокачественный трафик, но это маркетинговый, а не технический вопрос.
 
-`SUPABASE_URL` (без префикса `VITE_`) оставляем как есть — она для эдж-функций.
+5. **`recordVisit` пишет визит при каждом полном открытии страницы с UTM-меткой**, включая возвраты того же пользователя. Это by design (нужно для аналитики), но «уникальные посетители» считаются по `visitor_id` из localStorage — при очистке кеша один человек получит новый id. Это стандартный лимит, не баг.
 
-### 2. Защититься на будущее: fallback в коде
+### Вывод
 
-В `src/config/runtime.ts` сделать так, чтобы при попадании прямого `.supabase.co` в `VITE_SUPABASE_URL` он автоматически переписывался на прокси (на случай, если кто-то снова перезапишет .env или авто-инструмент Lovable Cloud вернёт прямой URL):
+Система работает корректно: метки захватываются, визиты пишутся, атрибуция к регистрациям проходит через `user_metadata` → триггер → `profiles.utm_source_id`, OAuth-флоу обрабатывается отдельно через redirect. Данные в админке (`AdminUtmSources`, `UtmPaymentsDialog`, `AdminPayments` с фильтром по UTM) опираются на корректные таблицы.
 
-```ts
-const raw = import.meta.env.VITE_SUPABASE_URL || "https://api.wbgen.ru";
-export const supabaseUrl = /\.supabase\.co$/i.test(new URL(raw).hostname)
-  ? "https://api.wbgen.ru"
-  : raw;
-```
+**Рекомендую к действию (по желанию):**
+- (a) Добавить колонку `landing_path` в `utm_visits` + писать её из хука — даст разбивку по лендингам в админке.
+- (b) Добавить StrictMode-guard в `useUtmTracking` — мелкая чистка кода.
+- (c) Проверить страницу `/avito` (источник `sale`) — почему 0 конверсий из 328 визитов.
 
-Это страховка — даже если `.env` снова перезапишется, фронт всегда пойдёт через прокси.
-
-### 3. Проверка после публикации
-
-После деплоя:
-- открыть `https://wbgen.ru/`, найти основной JS bundle и убедиться, что в нём НЕТ строки `xguiyabpngjkavyosbza.supabase.co` (только `api.wbgen.ru`);
-- проверить вход и генерацию с РФ IP без VPN;
-- убедиться, что Caddy/Nginx на `api.wbgen.ru` корректно проксирует не только `/storage/*`, но и `/auth/v1/*`, `/rest/v1/*`, `/realtime/v1/*`, `/functions/v1/*` (в логах уже видны успешные `/token`, `/user`, `/verify`, `/callback` через прокси — значит большинство путей уже настроено правильно).
-
-## Что НЕ меняем
-
-- Edge Functions (там `SUPABASE_URL` уже корректно настроена и не должна перезаписываться).
-- Логика storage URL rewrite (`src/lib/storage.ts`, `supabase/functions/_shared/storage-url.ts`) — она правильная и нужна для старых записей в БД.
-- Архитектуру «фронт через wb-gen.lovable.app + Caddy на wbgen.ru» — она работает, проблема только в одной env-переменной.
-
-## Эффект
-
-После исправления (1 строка в `.env` + 3-строчная защита в `runtime.ts`) и публикации bundle будет содержать `https://api.wbgen.ru` вместо `https://xguiyabpngjkavyosbza.supabase.co`. Российские пользователи смогут логиниться и пользоваться сервисом без VPN, как было раньше.
+Если хочешь — скажи, какие пункты выполнять, и я подготовлю изменения.

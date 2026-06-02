@@ -1,12 +1,14 @@
 import "@/styles/landing-theme.css";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles, TrendingUp, Zap, ChevronDown } from "lucide-react";
+import { ArrowRight, TrendingUp, Zap, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSliderNew } from "@/components/landing/BeforeAfterSliderNew";
+import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { CaseStudyDialog } from "@/components/cases/CaseStudyDialog";
+
 
 // Все кейсы с изображениями до/после
 const allCases = [
@@ -344,40 +346,14 @@ const Cases = () => {
       {/* Noise overlay for texture */}
       <div className="noise-overlay" />
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="absolute inset-0 bg-[#111111]/80 backdrop-blur-xl border-b border-white/5" />
-        <div className="container mx-auto px-4 sm:px-6 relative">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-medium">Назад</span>
-            </Link>
-            
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)] flex items-center justify-center">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-white">WBGen</span>
-            </Link>
+      <LandingHeader />
 
-            <Link to="/dashboard?tab=pricing">
-              <Button className="btn-premium text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold">
-                Попробовать
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <main className="pt-24 sm:pt-28">
 
-      <main className="pt-24 sm:pt-32">
         {/* Hero Section */}
-        <section className="relative py-16 sm:py-24 overflow-visible min-h-[70vh] flex flex-col justify-center">
-          <div className="absolute -top-[200px] left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px]" />
+        <section className="relative py-12 sm:py-20 overflow-visible flex flex-col justify-center">
+          <div className="absolute -top-[200px] left-1/4 w-[600px] h-[600px] bg-[hsl(268,83%,58%)]/15 rounded-full blur-[150px] pointer-events-none" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[hsl(280,83%,58%)]/10 rounded-full blur-[120px] pointer-events-none" />
 
           <div className="container mx-auto px-4 sm:px-6 relative z-10">
             <motion.div
@@ -385,46 +361,39 @@ const Cases = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isHeaderInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="text-center max-w-4xl mx-auto mb-16 sm:mb-20"
+              className="text-center max-w-4xl mx-auto mb-12 sm:mb-16"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 mb-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-400/20 text-sm text-emerald-300/90 mb-6 backdrop-blur-sm">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
-                Реальные результаты для селлеров
+                Реальные результаты селлеров
               </span>
-              
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
                 Примеры генерации
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[hsl(268,83%,58%)] to-[hsl(280,83%,58%)]">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[hsl(268,83%,68%)] via-[hsl(280,83%,65%)] to-[hsl(295,83%,68%)]">
                   на сервисе WBGen
                 </span>
               </h1>
-              
-              <p className="text-base sm:text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10">
-                Карточки для Wildberries, Ozon и Яндекс Маркет — смотрите результаты наших клиентов
+
+              <p className="text-base sm:text-lg md:text-xl text-white/55 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Карточки для Wildberries, Ozon и Яндекс Маркет — посмотрите, как меняется конверсия наших клиентов
               </p>
 
-              {/* Stats - simplified, no individual animations */}
-              <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-xl mx-auto">
+              {/* Stats — premium glass cards */}
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-2xl mx-auto">
                 {stats.map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
+                  <div
+                    key={index}
+                    className="relative rounded-xl sm:rounded-2xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-sm px-2 py-3 sm:px-4 sm:py-5 hover:border-white/15 hover:bg-white/[0.04] transition-all duration-300"
+                  >
+                    <div className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-br from-white to-white/70 bg-clip-text text-transparent mb-1 tabular-nums leading-tight">
                       {stat.value}
                     </div>
-                    <div className="text-xs sm:text-sm text-white/50">{stat.label}</div>
+                    <div className="text-[10px] sm:text-xs text-white/45 leading-tight">{stat.label}</div>
                   </div>
                 ))}
               </div>
             </motion.div>
-          </div>
-
-          {/* Scroll indicator - simplified */}
-          <div
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
-            onClick={scrollToContent}
-          >
-            <div className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5">
-              <div className="w-1 h-2 bg-white/40 rounded-full" />
-            </div>
           </div>
         </section>
 
@@ -438,9 +407,10 @@ const Cases = () => {
               {visibleCases.map((caseItem) => (
                 <div
                   key={caseItem.id}
-                  className="group"
+                  className="group relative"
                 >
-                  <div className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden h-full flex flex-col">
+                  <div className="absolute -inset-px rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[hsl(268,83%,58%)]/0 via-[hsl(280,83%,58%)]/0 to-[hsl(295,83%,58%)]/0 group-hover:from-[hsl(268,83%,58%)]/30 group-hover:via-[hsl(280,83%,58%)]/20 group-hover:to-[hsl(295,83%,58%)]/30 blur-md opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none" />
+                  <div className="relative glass-card rounded-2xl sm:rounded-3xl overflow-hidden h-full flex flex-col group-hover:border-white/15 transition-colors duration-300">
                     {/* Before/After Slider */}
                     <div className="p-3 sm:p-4">
                       <BeforeAfterSliderNew
