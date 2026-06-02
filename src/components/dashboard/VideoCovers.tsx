@@ -88,15 +88,9 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
   const { data: aiModelData } = useActiveAiModel();
   const provider = aiModelData?.videoProvider;
 
-  // Video promo banner dismissal
+  // localStorage keys for collapsible info blocks (persisted hide/show)
+  const VIDEO_HERO_KEY = `video_hero_block_hidden_${profile.id}`;
   const VIDEO_PROMO_KEY = `video_promo_banner_dismissed_${profile.id}`;
-  const [isPromoBannerVisible, setIsPromoBannerVisible] = useState(() => {
-    return localStorage.getItem(VIDEO_PROMO_KEY) !== "true";
-  });
-  const handleDismissPromo = () => {
-    localStorage.setItem(VIDEO_PROMO_KEY, "true");
-    setIsPromoBannerVisible(false);
-  };
 
   // Load history and resume active jobs on mount
   useEffect(() => {
