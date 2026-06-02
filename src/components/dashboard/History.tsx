@@ -1163,7 +1163,7 @@ export const History = ({
                         onClick={() => toggleExpanded(generation.id)} 
                         size="sm" 
                         variant="outline"
-                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
                         {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 sm:mr-1" /> : <ChevronDown className="w-4 h-4 sm:mr-1" />}
                         <span className="hidden sm:inline">{expandedIds.has(generation.id) ? 'Свернуть' : 'Все фото'}</span>
@@ -1185,7 +1185,7 @@ export const History = ({
                         variant="outline"
                         disabled={editingInProgress.has(generation.output_data.images[0].image_url)}
                         title={`Редактировать (${editPrice} токенов)`}
-                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
                         {editingInProgress.has(generation.output_data.images[0].image_url) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 sm:mr-1" />}
                         <span className="hidden sm:inline">Ред.</span>
@@ -1196,7 +1196,7 @@ export const History = ({
                         onClick={() => toggleExpanded(generation.id)} 
                         size="sm" 
                         variant="outline"
-                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
                         {expandedIds.has(generation.id) ? <ChevronUp className="w-4 h-4 sm:mr-1" /> : <ChevronDown className="w-4 h-4 sm:mr-1" />}
                         <span className="hidden sm:inline">{expandedIds.has(generation.id) ? 'Свернуть' : 'Все видео'}</span>
@@ -1209,7 +1209,7 @@ export const History = ({
                         variant="outline"
                         disabled={videoEditingInProgress.has(generation.id)}
                         title={`Редактировать (${videoRegenPrice || 2} токенов)`}
-                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs"
+                        className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] hover:text-violet-700 dark:hover:text-violet-300 text-xs transition-colors"
                       >
                         {videoEditingInProgress.has(generation.id) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4 sm:mr-1" />}
                         <span className="hidden sm:inline">Ред.</span>
