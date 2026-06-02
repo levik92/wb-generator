@@ -1015,13 +1015,14 @@ export const History = ({
         <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
           <SelectTrigger
             aria-label="Фильтр истории"
-            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-[170px] shrink-0 [&>svg:last-child]:hidden sm:[&>svg:last-child]:block"
+            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-9 lg:w-[170px] shrink-0 [&>svg:last-child]:hidden lg:[&>svg:last-child]:block"
           >
             <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
-            <span className="hidden sm:block flex-1 text-left truncate">
+            <span className="hidden lg:block flex-1 text-left truncate">
               <SelectValue />
             </span>
           </SelectTrigger>
+
           <SelectContent className="rounded-xl">
             <SelectItem value="all" className="text-sm">Все</SelectItem>
             <SelectItem value="cards" className="text-sm">Карточки</SelectItem>
