@@ -1951,6 +1951,7 @@ export const GenerateCards = ({
   return <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden px-2 sm:px-0">
 
       {/* Hero — conversion-focused */}
+      <CollapsibleInfoBlock storageKey={CARDS_HERO_KEY} collapsedLabel="Подробнее о генерации карточек">
       <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
         <span
           aria-hidden
@@ -1962,7 +1963,7 @@ export const GenerateCards = ({
         />
         <div className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:gap-5">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 pr-10">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
                 <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-violet-700 dark:text-violet-300">Карточки, которые продают</span>
@@ -2014,6 +2015,9 @@ export const GenerateCards = ({
             </div>
           </div>
         </div>
+      </div>
+      </CollapsibleInfoBlock>
+
       </div>
 
 
