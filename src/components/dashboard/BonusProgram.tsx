@@ -419,7 +419,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                     ? 'border-amber-500/30 bg-amber-500/5'
                     : isRejected
                       ? 'border-red-500/25 bg-red-500/5'
-                      : 'border-border/50 bg-card hover:border-primary/30 hover:bg-muted/30'
+                      : 'border-border/50 bg-card'
               }`}
             >
               {isCompleted && (
@@ -466,7 +466,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
 
                   <div className="flex items-center gap-2 flex-wrap mt-3">
                     {program.task_url && (
-                      <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+                      <Button asChild size="sm" className="h-8 text-xs bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 border-0">
                         <a href={program.task_url} target="_blank" rel="noopener noreferrer">
                           Перейти к заданию
                           <ExternalLink className="w-3 h-3 ml-1" />
