@@ -101,9 +101,8 @@ export const Referrals = ({ profile }: ReferralsProps) => {
         <TabsContent value="program" className="space-y-4 mt-4">
           {/* Hero — white card with subtle violet/pink radial glows */}
           <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
-            <span aria-hidden className="pointer-events-none absolute -top-24 -right-20 w-72 h-72 rounded-full bg-violet-500/15 blur-3xl" />
-            <span aria-hidden className="pointer-events-none absolute -bottom-28 -left-24 w-[420px] h-[420px] rounded-full bg-pink-400/10 blur-[120px]" />
-            <span aria-hidden className="pointer-events-none absolute top-1/2 -right-32 w-40 h-40 rounded-full bg-fuchsia-400/10 blur-3xl" />
+            <span aria-hidden className="pointer-events-none absolute -bottom-40 -left-40 w-[520px] h-[520px] rounded-full" style={{ background: 'radial-gradient(circle, hsl(330 80% 65% / 0.07) 0%, transparent 70%)' }} />
+
 
             <div className="relative flex flex-col gap-5">
               <div className="flex items-start gap-3">
@@ -132,9 +131,10 @@ export const Referrals = ({ profile }: ReferralsProps) => {
                   />
                   <Button
                     onClick={copyReferralLink}
-                    className="h-10 px-3 sm:px-4 shrink-0 bg-violet-600 hover:bg-violet-700 text-white shadow-sm"
+                    className="h-10 px-3 sm:px-4 shrink-0 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white shadow-sm shadow-violet-500/20 border-0"
                   >
                     <Copy className="h-4 w-4 sm:mr-2" />
+
                     <span className="hidden sm:inline">Копировать</span>
                   </Button>
                 </div>
