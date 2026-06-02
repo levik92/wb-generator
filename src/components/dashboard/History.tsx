@@ -1257,7 +1257,7 @@ export const History = ({
                           onClick={() => openImagePreview(img.image_url)}
                           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                        <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity">
                           <Button 
                             size="icon" 
                             variant="ghost" 
