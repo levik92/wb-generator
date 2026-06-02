@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { getProxiedPublicUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -880,31 +880,42 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
           className="space-y-4 sm:space-y-6"
         >
           {/* Block 1: Upload */}
-          <Card className="border-border/60 bg-card rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Upload className="w-4 h-4 shrink-0" />
-                <span>Карточка товара</span>
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <Info className="w-4 h-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
-                      <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Загрузите готовую карточку товара для создания видеообложки (до 5 МБ, формат 3:4)
-              </p>
+          <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 rounded-full bg-violet-500/10 blur-3xl"
+            />
+            <CardHeader className="relative">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <span>Карточка товара</span>
+                    <span className="text-[10px] uppercase tracking-wider text-violet-600/80 dark:text-violet-300/80 font-semibold">Обязательно</span>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="text-muted-foreground hover:text-foreground transition-colors touch-manipulation"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            <Info className="w-4 h-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs font-normal text-foreground/70">
+                          <p>Сервис не генерирует контент с нарушением авторских прав или откровенного характера. Загружайте карточку без водяных знаков.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm mt-1">
+                    Загрузите готовую карточку товара для создания видеообложки (до 5 МБ, формат 3:4)
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {!selectedImage ? (
