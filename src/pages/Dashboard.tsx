@@ -405,13 +405,14 @@ const Dashboard = () => {
 
               <button
                 onClick={() => handleTabChange('pricing')}
-                className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/25 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-purple-500/15 active:scale-95 transition-all shrink-0"
+                className="group inline-flex items-center gap-1.5 h-9 px-2.5 rounded-xl bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-transparent border border-violet-500/25 hover:border-violet-500/50 active:scale-95 transition-all shrink-0"
                 aria-label="Баланс токенов"
               >
-                <Zap className="h-3.5 w-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
-                <span className="text-[13px] font-semibold tabular-nums text-foreground leading-none">
+                <Sparkles className="h-3.5 w-3.5 text-violet-500 dark:text-violet-300 shrink-0" />
+                <span className="text-[13px] font-extrabold tabular-nums leading-none bg-gradient-to-br from-violet-600 to-purple-600 dark:from-violet-200 dark:to-purple-300 bg-clip-text text-transparent">
                   {(profile.tokens_balance ?? 0).toLocaleString('ru-RU')}
                 </span>
+                <span className="text-[10px] font-medium text-muted-foreground leading-none">ток.</span>
               </button>
 
               <DropdownMenu>
