@@ -65,6 +65,8 @@ const HistoryAvatarImage = ({
   onClick,
   previewWidth = 180,
   className = "",
+  fit = "contain",
+  showBackdrop = true,
 }: {
   src: string;
   alt: string;
@@ -72,19 +74,23 @@ const HistoryAvatarImage = ({
   onClick?: () => void;
   previewWidth?: number;
   className?: string;
+  fit?: "contain" | "cover";
+  showBackdrop?: boolean;
 }) => (
   <>
-    <div
-      aria-hidden="true"
-      className="absolute inset-0 scale-110 bg-cover bg-center opacity-25 blur-xl"
-      style={{ backgroundImage: `url("${thumbUrl(src)}")` }}
-    />
+    {showBackdrop && (
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 scale-110 bg-cover bg-center opacity-25 blur-xl"
+        style={{ backgroundImage: `url("${thumbUrl(src)}")` }}
+      />
+    )}
     <ProgressiveImage
       src={src}
       alt={alt}
       previewWidth={previewWidth}
       previewQuality={85}
-      className={`relative z-[1] block w-full h-full object-contain ${className}`}
+      className={`relative z-[1] block w-full h-full ${fit === "cover" ? "object-cover" : "object-contain"} ${className}`}
       onClick={onClick}
       onError={onError}
     />
