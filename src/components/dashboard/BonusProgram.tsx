@@ -493,6 +493,7 @@ export const BonusProgram = ({ profile }: BonusProgramProps) => {
                   </div>
                 </div>
               </div>
+              </div>
             </div>
           );
         })}
