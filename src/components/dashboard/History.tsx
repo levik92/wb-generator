@@ -1100,7 +1100,7 @@ export const History = ({
                         }}
                       >
                         {generation.output_data?.source_image ? (
-                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" />
+                          <HistoryAvatarImage src={generation.output_data.source_image} alt="Превью" fit="cover" showBackdrop={false} />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-violet-500/15 to-purple-500/5 flex items-center justify-center">
                             <Video className="w-6 h-6 text-violet-600 dark:text-violet-300" />
