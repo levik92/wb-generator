@@ -15,7 +15,7 @@ import { NotificationCenter } from "@/components/dashboard/NotificationCenter";
 import Footer from "@/components/Footer";
 import { DashboardBanners } from "@/components/dashboard/DashboardBanners";
 import { SystemStatusBanner } from "@/components/dashboard/SystemStatusBanner";
-import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones, Filter, CheckCheck, Check } from "lucide-react";
+import { Loader2, Zap, UserIcon, User as UserIconName, LogOut, Handshake, Menu, Headphones, Filter, CheckCheck, Check, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -424,7 +424,7 @@ const Dashboard = () => {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-60 bg-card border shadow-xl rounded-xl" align="end" forceMount sideOffset={8}>
+                <DropdownMenuContent className="w-64 bg-card border shadow-xl rounded-xl" align="end" forceMount sideOffset={8}>
                   <div className="flex items-center gap-3 p-3">
                     <Avatar className="h-10 w-10 ring-2 ring-violet-500/20">
                       <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-semibold text-sm">
@@ -441,17 +441,31 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
+                  <button
+                    onClick={() => handleTabChange('pricing')}
+                    className="w-full mx-1 my-0.5 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-violet-500/[0.08] to-purple-500/[0.06] hover:from-violet-500/[0.12] hover:to-purple-500/[0.10] border border-violet-500/15 transition-colors"
+                    style={{ width: 'calc(100% - 8px)' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
+                      <span className="text-xs text-muted-foreground">Баланс</span>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums text-violet-700 dark:text-violet-300">
+                      {(profile.tokens_balance ?? 0).toLocaleString('ru-RU')}
+                    </span>
+                  </button>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/partners/cabinet')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
                     <Handshake className="mr-2 h-4 w-4" />
                     <span>Партнёрам</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveTab('settings')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
-                    <UserIconName className="mr-2 h-4 w-4" />
-                    <span>Настройки</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setActiveTab('support')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
                     <Headphones className="mr-2 h-4 w-4" />
                     <span>Поддержка</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setActiveTab('settings')} className="hover:bg-violet-500/10 hover:text-violet-600 focus:bg-violet-500/10 focus:text-violet-600 cursor-pointer rounded-lg mx-1">
+                    <UserIconName className="mr-2 h-4 w-4" />
+                    <span>Настройки</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="hover:bg-destructive/10 text-destructive cursor-pointer rounded-lg mx-1">
@@ -459,6 +473,7 @@ const Dashboard = () => {
                     <span>Выйти</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
+
               </DropdownMenu>
             </div>
          </header>}
