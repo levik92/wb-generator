@@ -996,7 +996,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 value={userPrompt}
                 onChange={(e) => setUserPrompt(e.target.value.slice(0, 150))}
                 placeholder="Например: плавное вращение, приближение камеры, эффект дыма…"
-                className="min-h-[88px] rounded-lg border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
+                className="min-h-[88px] rounded-md border-border/60 focus-visible:border-violet-500/60 focus-visible:ring-violet-500/20"
                 maxLength={600}
                 disabled={isProcessing || autoOptimize}
               />
