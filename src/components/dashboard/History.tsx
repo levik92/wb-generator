@@ -987,12 +987,12 @@ export const History = ({
 
 
 
-      {/* Notice */}
+      {/* Notice + count + filter */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex items-start sm:items-center gap-2.5 rounded-xl border border-violet-500/25 bg-violet-500/[0.06] px-3 py-2.5 sm:py-2"
+        className="flex items-center gap-2 sm:gap-2.5 rounded-xl border border-violet-500/25 bg-violet-500/[0.06] px-3 py-2 sm:py-2"
       >
         <div className="shrink-0 w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
           <HistoryIcon className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300" />
@@ -1000,26 +1000,16 @@ export const History = ({
         <p className="text-xs sm:text-sm text-foreground/80 leading-snug flex-1 min-w-0">
           Данные хранятся <span className="font-semibold text-violet-700 dark:text-violet-300">1 месяц</span> и затем автоматически удаляются — успейте сохранить нужное.
         </p>
-      </motion.div>
-
-      {/* Count + filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.05 }}
-        className="flex items-center justify-end gap-2"
-      >
         {generations.length > 0 && (
-          <span className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-700 dark:text-violet-300 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 h-9 px-2 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs font-semibold text-violet-700 dark:text-violet-300 whitespace-nowrap shrink-0 tabular-nums">
             <Layers className="w-3.5 h-3.5" />
             <span>{generations.length}</span>
-            <span className="hidden sm:inline text-muted-foreground/80 font-normal">генераций</span>
           </span>
         )}
         <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
           <SelectTrigger
             aria-label="Фильтр истории"
-            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-[170px] [&>svg:last-child]:hidden sm:[&>svg:last-child]:block"
+            className="h-9 gap-1.5 px-2.5 bg-background border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] focus:ring-violet-500/30 transition-colors text-xs sm:text-sm rounded-lg w-9 sm:w-[170px] shrink-0 [&>svg:last-child]:hidden sm:[&>svg:last-child]:block"
           >
             <Filter className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" />
             <span className="hidden sm:block flex-1 text-left truncate">
@@ -1091,7 +1081,7 @@ export const History = ({
                 </>
               )}
               <div className={`flex flex-col gap-3 min-w-0 overflow-hidden ${isEditing ? 'relative z-[1]' : ''}`}>
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 min-w-0">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 min-w-0">
                   {/* Content */}
                   <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0">
                     {generation.generation_type === 'video' ? <div 
@@ -1167,7 +1157,7 @@ export const History = ({
                   </div>
                   
                   {/* Actions */}
-                  <div className="flex gap-1.5 flex-shrink-0 flex-wrap lg:flex-nowrap">
+                  <div className="flex gap-1.5 flex-shrink-0 flex-wrap md:flex-nowrap md:justify-end">
                     {generation.generation_type === 'cards' && (generation.output_data?.images?.length || 0) > 1 && (
                       <Button 
                         onClick={() => toggleExpanded(generation.id)} 
@@ -1249,7 +1239,7 @@ export const History = ({
 
                 {/* Expanded images grid */}
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
-                  <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
                       <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[9/16] bg-muted">
                         <HistoryAvatarImage
