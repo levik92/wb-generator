@@ -2127,7 +2127,7 @@ export const GenerateCards = ({
         <Card className="md:col-span-3 relative overflow-hidden border-border/60 bg-card rounded-2xl">
           <CardHeader className="relative">
             <div className="flex items-start gap-3">
-              <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+              <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                 <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
               </div>
               <div className="min-w-0 flex-1">
@@ -2192,7 +2192,7 @@ export const GenerateCards = ({
         <Card className="md:col-span-2 relative overflow-hidden border-border/60 bg-card rounded-2xl">
           <CardHeader className="relative">
             <div className="flex items-start gap-3">
-              <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+              <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                 <Upload className="w-4 h-4 text-violet-600 dark:text-violet-300" />
               </div>
               <div className="min-w-0 flex-1">
@@ -2262,7 +2262,7 @@ export const GenerateCards = ({
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+            <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
               <Info className="w-4 h-4 text-violet-600 dark:text-violet-300" />
             </div>
             <div className="min-w-0 flex-1">
@@ -2353,7 +2353,7 @@ export const GenerateCards = ({
       <Card className="relative overflow-hidden border-border/60 bg-card rounded-2xl">
         <CardHeader className="relative">
           <div className="flex items-start gap-3">
-            <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+            <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
               <Images className="w-4 h-4 text-violet-600 dark:text-violet-300" />
             </div>
             <div className="min-w-0 flex-1">
@@ -2674,7 +2674,7 @@ export const GenerateCards = ({
           <CardHeader>
             <div className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3 min-w-0 flex-1">
-                <div className="hidden md:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
+                <div className="hidden lg:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 items-center justify-center">
                   <Images className="w-4 h-4 text-violet-600 dark:text-violet-300" />
                 </div>
                 <div className="min-w-0 flex-1">
