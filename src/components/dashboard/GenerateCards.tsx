@@ -27,6 +27,7 @@ import exampleBefore1 from "@/assets/example-before-after-1.jpg";
 import exampleAfter1 from "@/assets/example-after-1.jpg";
 import { useGenerationPrice } from "@/hooks/useGenerationPricing";
 import { useActiveAiModel, getImageEdgeFunctionName, getIdentifyFunctionName } from "@/hooks/useActiveAiModel";
+import { CollapsibleInfoBlock } from "@/components/dashboard/CollapsibleInfoBlock";
 import { compressImage, compressImages } from "@/lib/imageCompression";
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 interface Profile {
