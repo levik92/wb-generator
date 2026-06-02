@@ -557,63 +557,78 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8, height: 0, marginTop: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="group relative overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
+            className="group relative isolate overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
           >
-            {/* Subtle ambient accent */}
-            <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full bg-violet-500/[0.08] blur-3xl" />
-            <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-fuchsia-500/[0.06] blur-3xl" />
+            {/* Ambient drifting accents (stay inside bounds via overflow-hidden) */}
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute -top-20 -right-16 w-64 h-64 rounded-full bg-violet-500/[0.10] blur-3xl"
+              animate={{ x: [0, 18, 0], y: [0, 10, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-fuchsia-500/[0.08] blur-3xl"
+              animate={{ x: [0, -14, 0], y: [0, -8, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {/* Soft shimmer sweep, clipped by parent */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent animate-shimmer"
+            />
 
-            {/* Close */}
+            {/* Close — high z, safe inset, never overlapped */}
             <button
               onClick={handleDismissPromo}
-              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg hover:bg-violet-500/10 transition-colors text-muted-foreground hover:text-foreground"
+              className="absolute top-2 right-2 z-30 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-background/70 backdrop-blur-sm border border-border/60 text-muted-foreground hover:text-foreground hover:bg-background hover:border-border transition-colors"
               aria-label="Закрыть"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative z-10 p-4 sm:p-5">
+            <div className="relative z-10 p-4 sm:p-5 pr-12 sm:pr-14">
               <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-5">
-                {/* Left: icon + copy */}
+                {/* Left: copy (icon hidden on mobile) */}
                 <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0 lg:pr-4">
-                  <div className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-violet-500/20 flex items-center justify-center">
-                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600 dark:text-violet-300" />
+                  <div className="shrink-0 hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-violet-500/20 items-center justify-center">
+                    <Eye className="w-5 h-5 text-violet-600 dark:text-violet-300" />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                       <h3 className="text-[15px] sm:text-base font-semibold leading-tight">
-                        Видеообложки усиливают карточку
+                        Посмотреть примеры генераций
                       </h3>
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-700 dark:text-violet-300">
                         <Sparkles className="w-2.5 h-2.5" />
-                        Новое
+                        Полезно
                       </span>
                     </div>
                     <p className="text-[12.5px] sm:text-sm text-muted-foreground leading-relaxed">
-                      Оживите карточку 5-секундным роликом — клиент задерживает взгляд и чаще кликает.
+                      Перед пополнением баланса и генерацией — посмотрите реальные работы пользователей и результаты, которых они достигают.
                     </p>
 
                     {/* Benefit chips */}
                     <div className="flex flex-wrap gap-1.5 mt-2.5">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
-                        <MousePointerClick className="w-3 h-3" />
-                        До +47% к CTR
+                        <TrendingUp className="w-3 h-3" />
+                        Реальные кейсы
                       </span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-[11px] font-medium text-violet-700 dark:text-violet-300">
                         <Clock className="w-3 h-3" />
-                        Готово за 1 минуту
+                        30 секунд на просмотр
                       </span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/60 border border-border/60 text-[11px] font-medium text-foreground/80">
                         <ShieldCheck className="w-3 h-3" />
-                        Возврат токенов
+                        Без обязательств
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Right: CTAs */}
-                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[180px] lg:shrink-0">
+                <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-auto lg:min-w-[200px] lg:shrink-0">
                   <Button
                     asChild
                     size="sm"
@@ -621,7 +636,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                   >
                     <a href="/video-generaciya" target="_blank" rel="noopener noreferrer">
                       <Eye className="w-3.5 h-3.5 mr-1.5" />
-                      Смотреть примеры
+                      Посмотреть примеры
                       <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
                     </a>
                   </Button>
@@ -630,7 +645,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                       variant="outline"
                       size="sm"
                       onClick={() => onNavigate("pricing")}
-                      className="h-9 rounded-lg border-violet-500/25 hover:border-violet-500/50 hover:bg-violet-500/[0.04] text-xs font-medium"
+                      className="h-9 rounded-lg border-violet-500/25 bg-transparent hover:bg-violet-500/[0.06] hover:border-violet-500/45 hover:text-foreground text-xs font-medium"
                     >
                       <Coins className="w-3.5 h-3.5 mr-1.5" />
                       Пополнить баланс
