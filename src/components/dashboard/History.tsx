@@ -1061,7 +1061,7 @@ export const History = ({
       }} transition={{
         duration: 0.4,
         delay: 0.1 + index * 0.05
-      }} className="group rounded-2xl border p-3.5 sm:p-4 transition-all relative overflow-hidden border-border/60 hover:border-violet-500/40 hover:shadow-lg hover:shadow-violet-500/[0.06] bg-card"
+      }} className="group rounded-2xl border p-3.5 sm:p-4 transition-all relative overflow-hidden border-border/60 hover:border-violet-500/40 bg-card"
       >
               <span aria-hidden className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-violet-500/[0.06] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               {isEditing && (
