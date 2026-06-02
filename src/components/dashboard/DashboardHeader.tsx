@@ -129,11 +129,8 @@ export const DashboardHeader = ({
   return (
     <header className="border-b border-border/60 bg-card/85 backdrop-blur-md sticky top-0 z-20">
       <div className="flex h-16 items-center justify-between gap-3 px-4 md:px-6">
-        {/* Left: tab title + icon */}
+        {/* Left: tab title */}
         <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1 overflow-hidden">
-          <div className="hidden sm:flex shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 items-center justify-center">
-            <TabIcon className="w-5 h-5 text-violet-600 dark:text-violet-300" strokeWidth={2.2} />
-          </div>
           <div className="min-w-0 flex-1 overflow-hidden">
             <h1 className="text-[15px] md:text-[17px] font-semibold text-foreground truncate tracking-tight leading-tight">
               {currentTab.title}
@@ -153,18 +150,7 @@ export const DashboardHeader = ({
 
         {/* Right: actions */}
         <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
-          {/* Balance pill */}
-          {onNavigateToBalance && (
-            <button
-              onClick={onNavigateToBalance}
-              className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/25 hover:border-violet-500/50 hover:from-violet-500/15 hover:to-purple-500/15 active:scale-[0.97] transition-all"
-              aria-label="Баланс токенов"
-            >
-              <Zap className="w-3.5 h-3.5 text-violet-600 dark:text-violet-300 shrink-0" strokeWidth={2.5} />
-              <span className="text-[13px] font-semibold tabular-nums leading-none">{balanceFormatted}</span>
-              <span className="text-[11px] text-muted-foreground leading-none hidden lg:inline">токенов</span>
-            </button>
-          )}
+
 
           <ThemeToggle />
 
@@ -175,8 +161,8 @@ export const DashboardHeader = ({
                 <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-violet-500/10 hover:text-violet-600 transition-colors">
                   <Bell className="h-[18px] w-[18px]" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40 ring-2 ring-card">
-                      <span className="text-[10px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] px-1 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm shadow-violet-500/40">
+                      <span className="text-[9px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
                     </span>
                   )}
                 </Button>
