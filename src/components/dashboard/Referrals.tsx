@@ -98,15 +98,16 @@ export const Referrals = ({ profile }: ReferralsProps) => {
         </TabsList>
 
         <TabsContent value="program" className="space-y-4 mt-4">
-          {/* Hero */}
-          <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-blue-500/5 to-transparent px-4 py-5 sm:px-6 sm:py-6">
-            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -left-16 w-56 h-56 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+          {/* Hero — white card with subtle violet/pink radial glows */}
+          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
+            <span aria-hidden className="pointer-events-none absolute -top-24 -right-20 w-72 h-72 rounded-full bg-violet-500/15 blur-3xl" />
+            <span aria-hidden className="pointer-events-none absolute -bottom-28 -left-24 w-[420px] h-[420px] rounded-full bg-pink-400/10 blur-[120px]" />
+            <span aria-hidden className="pointer-events-none absolute top-1/2 -right-32 w-40 h-40 rounded-full bg-fuchsia-400/10 blur-3xl" />
 
             <div className="relative flex flex-col gap-5">
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center">
-                  <UserPlus className="h-5 w-5 text-primary" />
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/25 flex items-center justify-center">
+                  <UserPlus className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-base sm:text-lg font-semibold leading-tight">Реферальная программа</h2>
@@ -130,7 +131,7 @@ export const Referrals = ({ profile }: ReferralsProps) => {
                   />
                   <Button
                     onClick={copyReferralLink}
-                    className="h-10 px-3 sm:px-4 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                    className="h-10 px-3 sm:px-4 shrink-0 bg-violet-600 hover:bg-violet-700 text-white shadow-sm"
                   >
                     <Copy className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Копировать</span>
@@ -140,15 +141,15 @@ export const Referrals = ({ profile }: ReferralsProps) => {
 
               {/* Rewards */}
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 px-3 py-3 sm:px-4">
-                  <div className="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400 leading-none">+15</div>
-                  <div className="text-[11px] sm:text-xs text-emerald-700/80 dark:text-emerald-300/80 font-medium mt-1.5 leading-tight">
+                <div className="rounded-xl border border-border/60 bg-background/70 px-3 py-3 sm:px-4">
+                  <div className="text-2xl sm:text-3xl font-bold text-violet-600 dark:text-violet-400 leading-none tabular-nums">+15</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-1.5 leading-tight">
                     токенов вам после первой оплаты друга
                   </div>
                 </div>
-                <div className="rounded-xl border border-blue-500/25 bg-blue-500/5 px-3 py-3 sm:px-4">
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 leading-none">+15</div>
-                  <div className="text-[11px] sm:text-xs text-blue-700/80 dark:text-blue-300/80 font-medium mt-1.5 leading-tight">
+                <div className="rounded-xl border border-border/60 bg-background/70 px-3 py-3 sm:px-4">
+                  <div className="text-2xl sm:text-3xl font-bold text-pink-600 dark:text-pink-400 leading-none tabular-nums">+15</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-1.5 leading-tight">
                     токенов другу после его первой оплаты
                   </div>
                 </div>
@@ -156,33 +157,61 @@ export const Referrals = ({ profile }: ReferralsProps) => {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Stats — refined, with icons and conversion */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            <div className="rounded-xl border border-border/50 bg-card px-3 py-3">
-              <div className="text-[10px] sm:text-xs text-muted-foreground">Приглашено</div>
-              <div className="text-base sm:text-lg font-semibold mt-0.5">{referredUsers.length}</div>
+            <div className="rounded-xl border border-border/60 bg-card px-3 py-3 shadow-sm">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
+                <Users className="w-3 h-3" />
+                <span>Приглашено</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold mt-1 tabular-nums">{referredUsers.length}</div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-card px-3 py-3">
-              <div className="text-[10px] sm:text-xs text-muted-foreground">Оплатили</div>
-              <div className="text-base sm:text-lg font-semibold mt-0.5">{completedCount}</div>
+            <div className="rounded-xl border border-border/60 bg-card px-3 py-3 shadow-sm">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
+                <UserPlus className="w-3 h-3" />
+                <span>Оплатили</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold mt-1 tabular-nums">
+                {completedCount}
+                {referredUsers.length > 0 && (
+                  <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                    · {Math.round((completedCount / referredUsers.length) * 100)}%
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="rounded-xl border border-border/50 bg-card px-3 py-3">
-              <div className="text-[10px] sm:text-xs text-muted-foreground">Заработано</div>
-              <div className="text-base sm:text-lg font-semibold text-primary mt-0.5">+{totalReferralTokens}</div>
+            <div className="rounded-xl border border-border/60 bg-card px-3 py-3 shadow-sm">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground">
+                <Gift className="w-3 h-3" />
+                <span>Заработано</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-semibold text-violet-600 dark:text-violet-400 mt-1 tabular-nums">+{totalReferralTokens}</div>
             </div>
           </div>
 
-          {/* How it works */}
-          <div className="rounded-xl border border-border/50 bg-muted/30 p-4">
-            <div className="text-sm font-semibold mb-2 flex items-center gap-2">
-              <Gift className="h-4 w-4 text-primary" />
+          {/* How it works — white card, step-by-step layout */}
+          <div className="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm">
+            <div className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Gift className="h-4 w-4 text-violet-600 dark:text-violet-400" />
               Как это работает
             </div>
-            <ol className="space-y-1.5 text-xs sm:text-sm text-muted-foreground list-decimal list-inside leading-relaxed">
-              <li>Скопируйте свою реферальную ссылку</li>
-              <li>Поделитесь с друзьями, коллегами или подписчиками</li>
-              <li>После первой оплаты друга вы оба получаете по 15 токенов</li>
-            </ol>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { n: 1, t: 'Скопируйте ссылку', d: 'Нажмите «Копировать» рядом со ссылкой выше' },
+                { n: 2, t: 'Поделитесь', d: 'Отправьте друзьям, коллегам или подписчикам' },
+                { n: 3, t: 'Получите бонусы', d: 'После первой оплаты друга вы оба получаете +15 токенов' },
+              ].map((s) => (
+                <div key={s.n} className="flex sm:flex-col gap-3 sm:gap-2 items-start">
+                  <div className="shrink-0 w-7 h-7 rounded-full bg-violet-500/10 border border-violet-500/25 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-semibold">
+                    {s.n}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium leading-tight">{s.t}</div>
+                    <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{s.d}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </TabsContent>
 
@@ -192,61 +221,81 @@ export const Referrals = ({ profile }: ReferralsProps) => {
               <div className="w-7 h-7 rounded-full border-[2.5px] border-primary/30 border-t-primary animate-[spin_0.7s_linear_infinite]" />
             </div>
           ) : referredUsers.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-dashed border-border/60 bg-muted/20">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Users className="w-7 h-7 text-primary" />
+            <div className="text-center py-12 rounded-2xl border border-dashed border-border/60 bg-card">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                <Users className="w-7 h-7 text-violet-600 dark:text-violet-400" />
               </div>
               <h3 className="text-base font-semibold mb-1">Пока никто не зарегистрировался</h3>
               <p className="text-sm text-muted-foreground px-6">
                 Поделитесь реферальной ссылкой — и первый бонус не заставит себя ждать
               </p>
+              <Button
+                onClick={copyReferralLink}
+                size="sm"
+                variant="outline"
+                className="mt-4 h-9 gap-2"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                Скопировать ссылку
+              </Button>
             </div>
           ) : (
-            <div className="space-y-2">
-              {referredUsers.map(user => {
-                const isCompleted = user.status === 'completed' && user.tokens_awarded;
-                const initial = (user.referred_user_email?.[0] || 'U').toUpperCase();
-                return (
-                  <div
-                    key={user.id}
-                    className={`flex items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border transition-colors ${
-                      isCompleted
-                        ? 'border-emerald-500/25 bg-emerald-500/5'
-                        : 'border-border/50 bg-card hover:bg-muted/30'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-semibold ${
-                        isCompleted
-                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25'
-                          : 'bg-primary/10 text-primary border border-primary/20'
-                      }`}>
-                        {initial}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-medium text-sm truncate">{user.referred_user_email}</div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
-                          <Calendar className="w-3 h-3" />
-                          <span>{formatDate(user.created_at)}</span>
+            <>
+              {/* Compact summary */}
+              <div className="flex items-center justify-between gap-3 px-1 text-xs text-muted-foreground">
+                <span>
+                  Всего <span className="font-semibold text-foreground tabular-nums">{referredUsers.length}</span>
+                  {' · '}
+                  оплатили <span className="font-semibold text-foreground tabular-nums">{completedCount}</span>
+                </span>
+                <span className="hidden sm:inline">
+                  Заработано <span className="font-semibold text-violet-600 dark:text-violet-400 tabular-nums">+{totalReferralTokens}</span>
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {referredUsers.map(user => {
+                  const isCompleted = user.status === 'completed' && user.tokens_awarded;
+                  const initial = (user.referred_user_email?.[0] || 'U').toUpperCase();
+                  return (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between gap-3 p-3 sm:p-4 rounded-xl border border-border/60 bg-card shadow-sm transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-semibold ${
+                          isCompleted
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25'
+                            : 'bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20'
+                        }`}>
+                          {initial}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm truncate">{user.referred_user_email}</div>
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+                            <Calendar className="w-3 h-3" />
+                            <span>{formatDate(user.created_at)}</span>
+                          </div>
                         </div>
                       </div>
+                      <div className="shrink-0">
+                        {isCompleted ? (
+                          <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                            <Gift className="w-3 h-3" />
+                            +{user.tokens_awarded}
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1 rounded-full bg-muted border border-border/50 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            Ожидает оплаты
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="shrink-0">
-                      {isCompleted ? (
-                        <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                          <Gift className="w-3 h-3" />
-                          +{user.tokens_awarded}
-                        </div>
-                      ) : (
-                        <div className="inline-flex items-center rounded-full bg-muted border border-border/50 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                          Ожидает оплаты
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </TabsContent>
       </Tabs>
