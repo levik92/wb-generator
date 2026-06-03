@@ -18,6 +18,8 @@ interface ProgressiveImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>
   loadFull?: boolean;
   /** rootMargin for IntersectionObserver — how early to start loading. */
   rootMargin?: string;
+  /** How Supabase image transform should resize: 'cover' (crop, default) or 'contain'. */
+  resize?: "cover" | "contain";
 }
 
 /**
@@ -37,6 +39,7 @@ export function ProgressiveImage({
   previewQuality = 75,
   loadFull = false,
   rootMargin = "200px",
+  resize,
   className,
   alt = "",
   onError,
@@ -46,10 +49,12 @@ export function ProgressiveImage({
   const lowSrc = optimizeStorageImage(src, {
     width: lowQualityWidth,
     quality: lowQualityQuality,
+    resize,
   });
   const previewSrc = optimizeStorageImage(src, {
     width: previewWidth,
     quality: previewQuality,
+    resize,
   });
   const wantFull = loadFull || !!fullSrc;
   const fullResolved = rewriteStorageUrl(fullSrc ?? src);
