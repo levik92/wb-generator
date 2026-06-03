@@ -655,7 +655,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
         >
         <Card className={`relative overflow-hidden rounded-2xl ${
           (isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed")
-            ? "border-violet-500/30 bg-card shadow-lg shadow-violet-500/5"
+            ? "border-violet-500/30 bg-card"
             : "border-border/60 bg-card"
         }`}>
           {(isProcessing || hasActiveJob) && !(currentJob?.status === "completed" || currentJob?.status === "failed") && (
