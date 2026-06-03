@@ -1331,7 +1331,7 @@ export const History = ({
 
                 {/* Expanded videos grid */}
                 {expandedIds.has(generation.id) && generation.generation_type === 'video' && (generation.output_data?.videos?.length || 0) > 1 && (
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 border-t border-border/30">
+                  <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.videos.map((video: any, vidIndex: number) => (
                       <div key={video.id || vidIndex} className="relative group/vid rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted">
 
