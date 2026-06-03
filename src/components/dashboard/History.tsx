@@ -1250,7 +1250,7 @@ export const History = ({
 
                 {/* Expanded images grid */}
                 {expandedIds.has(generation.id) && generation.output_data?.images?.length > 1 && (
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3 border-t border-border/30">
+                  <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 pt-3 border-t border-border/30">
                     {generation.output_data.images.map((img: any, imgIndex: number) => (
                       <div key={imgIndex} className="relative group/img rounded-lg overflow-hidden border-2 border-transparent hover:border-primary/40 transition-colors aspect-[3/4] bg-muted">
                         <HistoryAvatarImage
