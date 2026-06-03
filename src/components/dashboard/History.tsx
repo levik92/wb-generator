@@ -90,6 +90,7 @@ const HistoryAvatarImage = ({
       alt={alt}
       previewWidth={previewWidth}
       previewQuality={85}
+      resize={fit === "cover" ? "cover" : "contain"}
       className={`relative z-[1] block w-full h-full ${fit === "cover" ? "object-cover" : "object-contain"} ${className}`}
       onClick={onClick}
       onError={onError}
