@@ -325,6 +325,7 @@ const Dashboard = () => {
   };
   const refreshProfile = () => {
     if (user) {
+      loadedProfileForRef.current = null;
       loadProfile(user.id);
     }
   };
