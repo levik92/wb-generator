@@ -678,7 +678,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
                 <div className="flex items-center gap-3 sm:gap-4">
                   <div className="relative shrink-0">
                     <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-md animate-pulse" />
-                    <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
+                    <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/20 border-t-violet-500 animate-spin" />
                     {(isUploading || (isGenerating && !hasActiveJob))
                       ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
                       : <Video className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
