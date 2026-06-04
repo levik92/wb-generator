@@ -145,12 +145,14 @@ const Dashboard = () => {
   }, [searchParams, setSearchParams]);
 
 
+  const profileLoadingRef = useRef<string | null>(null);
+  const loadedProfileForRef = useRef<string | null>(null);
+  const profileMissingToastShown = useRef(false);
+
   useEffect(() => {
-    supabase.auth.getSession().then(({
-      data: {
-        session
-      }
-    }) => {
+    let cancelled = false;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
       if (!session?.user) {
         navigate("/auth");
         return;
@@ -164,17 +166,25 @@ const Dashboard = () => {
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session?.user) {
-        navigate("/auth");
+        if (event === 'SIGNED_OUT') navigate("/auth");
         return;
       }
-      setUser(session.user);
-      setTimeout(() => {
-        loadProfile(session.user.id);
-      }, 0);
+      setUser(prev => {
+        if (prev?.id === session.user.id) return prev;
+        setTimeout(() => loadProfile(session.user.id), 0);
+        return session.user;
+      });
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
-  const loadProfile = async (userId: string) => {
+  const loadProfile = async (userId: string, attempt = 0) => {
+    // Prevent concurrent loads for same user
+    if (attempt === 0 && profileLoadingRef.current === userId) return;
+    if (attempt === 0 && loadedProfileForRef.current === userId) return;
+    profileLoadingRef.current = userId;
     try {
       const {
         data,
@@ -182,13 +192,28 @@ const Dashboard = () => {
       } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       if (error) throw error;
       if (!data) {
+        if (attempt < 5) {
+          if (!profileMissingToastShown.current) {
+            profileMissingToastShown.current = true;
+            toast({
+              title: "Профиль загружается",
+              description: "Подождите немного, профиль создаётся..."
+            });
+          }
+          setTimeout(() => loadProfile(userId, attempt + 1), 2000);
+          return;
+        }
         toast({
-          title: "Профиль загружается",
-          description: "Подождите немного, профиль создаётся..."
+          title: "Не удалось загрузить профиль",
+          description: "Обновите страницу или напишите в поддержку",
+          variant: "destructive"
         });
-        setTimeout(() => loadProfile(userId), 2000);
+        setLoading(false);
+        profileLoadingRef.current = null;
         return;
       }
+      profileMissingToastShown.current = false;
+      loadedProfileForRef.current = userId;
       const currentLoginCount = data.login_count || 0;
       if (currentLoginCount < 3) {
         await supabase.from('profiles').update({
@@ -207,6 +232,7 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+      profileLoadingRef.current = null;
     }
   };
   const processPendingCodes = async (userId: string, profileData: any) => {
