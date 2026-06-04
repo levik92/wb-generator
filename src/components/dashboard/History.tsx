@@ -1109,7 +1109,7 @@ export const History = ({
                   {/* Content */}
                   <div className="flex items-start gap-3 sm:gap-3.5 flex-1 min-w-0">
                     {generation.generation_type === 'video' ? <div 
-                        className="w-[60px] h-20 sm:w-[66px] sm:h-[88px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
+                        className="w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-md flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => {
                           if (generation.output_data?.video_url) {
                             setVideoPreviewUrl(generation.output_data.video_url);
@@ -1128,7 +1128,7 @@ export const History = ({
                           <Play className="w-5 h-5 text-white" />
                         </div>
                       </div> : generation.generation_type === 'cards' && generation.output_data?.images?.[0]?.image_url ? <div
-                        className="w-[60px] h-20 sm:w-[66px] sm:h-[88px] rounded-xl flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
+                        className="w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-md flex-shrink-0 overflow-hidden border border-border/60 group-hover:border-violet-500/40 transition-colors cursor-pointer relative group/preview bg-muted shadow-sm"
                         onClick={() => openImagePreview(generation.output_data.images[0].image_url)}
                       >
                         <HistoryAvatarImage src={generation.output_data.images[0].image_url} alt="Превью" onError={e => {
@@ -1139,7 +1139,7 @@ export const History = ({
                         <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                      </div> : <div className="w-[60px] h-20 sm:w-[66px] sm:h-[88px] rounded-xl flex items-center justify-center bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex-shrink-0">
+                      </div> : <div className="w-20 h-20 sm:w-[88px] sm:h-[88px] rounded-md flex items-center justify-center bg-gradient-to-br from-violet-500/15 to-purple-500/5 border border-violet-500/20 flex-shrink-0">
                         {generation.generation_type === 'cards' ? <Image className="w-6 h-6 text-violet-600 dark:text-violet-300" /> : <FileText className="w-6 h-6 text-violet-600 dark:text-violet-300" />}
                       </div>}
 

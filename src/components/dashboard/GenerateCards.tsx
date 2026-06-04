@@ -2724,11 +2724,11 @@ export const GenerateCards = ({
                     {/* Mobile header: image + title side by side */}
                     <div className="flex lg:contents items-start gap-3 w-full">
                       <div className="relative group/img shrink-0">
-                        <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-lg border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-lg pointer-events-none">
+                        <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-md border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                        <div className="absolute inset-0 cursor-pointer rounded-lg" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
+                        <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
                         {isCoverCard && (
                           <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm">
                             Главная
