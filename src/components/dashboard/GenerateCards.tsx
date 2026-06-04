@@ -2556,7 +2556,7 @@ export const GenerateCards = ({
       </Card>
 
       {/* Progress */}
-      {generating && <Card className="relative overflow-hidden border-violet-500/30 bg-card rounded-2xl shadow-lg shadow-violet-500/5 animate-fade-in">
+      {generating && <Card className="relative overflow-hidden border-violet-500/30 bg-card rounded-2xl animate-fade-in">
           {/* Animated radial gradient background — bottom */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'radial-gradient(ellipse 80% 50% at var(--glow-x, 30%) 100%, hsl(var(--primary) / 0.12) 0%, transparent 70%)',
@@ -2572,7 +2572,7 @@ export const GenerateCards = ({
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="relative shrink-0">
                 <div className="absolute inset-0 rounded-full bg-violet-500/20 blur-md animate-pulse" />
-                <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/15 border-t-violet-500 border-r-violet-500/70 animate-spin" />
+                <div className="relative w-11 h-11 rounded-full border-[3px] border-violet-500/20 border-t-violet-500 animate-spin" />
                 {isUploading 
                   ? <Upload className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
                   : <Images className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-violet-600 dark:text-violet-300" />
@@ -2724,11 +2724,11 @@ export const GenerateCards = ({
                     {/* Mobile header: image + title side by side */}
                     <div className="flex lg:contents items-start gap-3 w-full">
                       <div className="relative group/img shrink-0">
-                        <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-lg border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-lg pointer-events-none">
+                        <img src={displayedImageUrl} alt={`Generated card ${index + 1}`} className="w-20 h-24 sm:w-[72px] sm:h-[88px] object-cover rounded-md border border-border/60 cursor-pointer transition-all duration-200 group-hover/row:border-violet-500/40" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 bg-black/50 rounded-md pointer-events-none">
                           <ZoomIn className="w-5 h-5 text-white" />
                         </div>
-                        <div className="absolute inset-0 cursor-pointer rounded-lg" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
+                        <div className="absolute inset-0 cursor-pointer rounded-md" onClick={() => setFullscreenImage({ ...image, url: displayedImageUrl })} />
                         {isCoverCard && (
                           <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm">
                             Главная
