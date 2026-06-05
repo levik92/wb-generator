@@ -230,7 +230,7 @@ export const AdminMobileMenu = ({
                                 `}
                               >
                                 <Icon
-                                  className={`w-4 h-4 ${isActive ? "text-violet-600 dark:text-violet-300" : "text-muted-foreground"}`}
+                                  className={`w-4 h-4 ${isActive ? "text-violet-600 dark:text-violet-300" : "text-muted-foreground group-hover:text-white"}`}
                                   strokeWidth={isActive ? 2.4 : 2}
                                 />
                               </div>
