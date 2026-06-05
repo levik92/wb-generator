@@ -115,7 +115,7 @@ export const MobileSideMenu = ({
             dragConstraints={{ left: -MENU_WIDTH, right: 0 }}
             dragElastic={0.08}
             onDragEnd={handleDragEnd}
-            className="fixed left-0 top-0 bottom-0 z-50 w-[296px] md:hidden"
+            className="fixed left-0 top-0 bottom-0 z-50 w-[296px] md:hidden overflow-hidden"
             style={{ touchAction: 'pan-y' }}
           >
             {/* Background */}
