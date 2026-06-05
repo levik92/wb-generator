@@ -149,11 +149,11 @@ export const AdminSidebar = ({
                       onClick={() => onTabChange(item.id)}
                       title={isCollapsed ? item.label : undefined}
                       className={`
-                        relative w-full flex items-center gap-3 ${isCollapsed ? "justify-center px-2" : "px-2.5"} py-2.5 rounded-xl text-left
+                        group relative w-full flex items-center gap-3 ${isCollapsed ? "justify-center px-2" : "px-2.5"} py-2.5 rounded-xl text-left
                         transition-all duration-200 active:scale-[0.98]
                         ${isActive
                           ? "bg-violet-500/10 text-violet-700 dark:text-violet-200"
-                          : "text-foreground/85 hover:bg-violet-500/[0.05] hover:text-foreground"}
+                          : "text-foreground/85 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white"}
                       `}
                     >
                       {isActive && !isCollapsed && (
