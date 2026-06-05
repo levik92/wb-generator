@@ -168,11 +168,11 @@ export const AdminSidebar = ({
                           w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200
                           ${isActive
                             ? "bg-gradient-to-br from-violet-500/20 to-purple-500/10 border border-violet-500/25"
-                            : "bg-muted/40 border border-transparent"}
+                            : "bg-muted/40 border border-transparent group-hover:bg-white/15 group-hover:border-white/20"}
                         `}
                       >
                         <Icon
-                          className={`w-4 h-4 ${isActive ? "text-violet-600 dark:text-violet-300" : "text-muted-foreground"}`}
+                          className={`w-4 h-4 ${isActive ? "text-violet-600 dark:text-violet-300" : "text-muted-foreground group-hover:text-white"}`}
                           strokeWidth={isActive ? 2.4 : 2}
                         />
                       </div>
