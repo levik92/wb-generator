@@ -97,7 +97,7 @@ export const AdminSidebar = ({
 
   return (
     <div
-      className={`${isCollapsed ? "w-20" : "w-64"} shrink-0 relative hidden md:flex flex-col transition-all duration-300 h-screen overflow-hidden`}
+      className={`${isCollapsed ? "w-20" : "w-64"} shrink-0 relative hidden md:flex flex-col transition-[width] duration-300 h-screen overflow-hidden sticky top-0`}
     >
       {/* Background */}
       <div className="absolute inset-0 bg-card border-r border-border/60" />
@@ -131,11 +131,14 @@ export const AdminSidebar = ({
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 overflow-y-auto ${isCollapsed ? "px-2" : "px-3"} pb-6 [scrollbar-width:thin]`}>
+        <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-2" : "px-3"} pb-6 [scrollbar-width:thin] [scrollbar-gutter:stable]`}>
           {sections.map((section, sIdx) => (
             <div key={sIdx} className={sIdx === 0 ? "" : "mt-4"}>
-              {section.title && !isCollapsed && (
-                <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              {section.title && (
+                <p
+                  className={`pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 truncate ${isCollapsed ? "px-1 text-center tracking-normal" : "px-3"}`}
+                  title={section.title}
+                >
                   {section.title}
                 </p>
               )}
