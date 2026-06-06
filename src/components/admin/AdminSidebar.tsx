@@ -131,11 +131,14 @@ export const AdminSidebar = ({
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 overflow-y-auto ${isCollapsed ? "px-2" : "px-3"} pb-6 [scrollbar-width:thin]`}>
+        <nav className={`flex-1 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-2" : "px-3"} pb-6 [scrollbar-width:thin] [scrollbar-gutter:stable]`}>
           {sections.map((section, sIdx) => (
             <div key={sIdx} className={sIdx === 0 ? "" : "mt-4"}>
-              {section.title && !isCollapsed && (
-                <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+              {section.title && (
+                <p
+                  className={`pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 truncate ${isCollapsed ? "px-1 text-center tracking-normal" : "px-3"}`}
+                  title={section.title}
+                >
                   {section.title}
                 </p>
               )}
