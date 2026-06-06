@@ -493,7 +493,7 @@ export function PromptManager() {
                             variant="ghost"
                             size="icon"
                             onClick={(e) => { e.stopPropagation(); startEdit(prompt); }}
-                            className="h-8 w-8"
+                            className="h-8 w-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white"
                             title="Редактировать"
                           >
                             <Pencil className="h-3.5 w-3.5" />
