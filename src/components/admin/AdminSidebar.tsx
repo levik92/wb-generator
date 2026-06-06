@@ -97,7 +97,7 @@ export const AdminSidebar = ({
 
   return (
     <div
-      className={`${isCollapsed ? "w-20" : "w-64"} shrink-0 relative hidden md:flex flex-col transition-all duration-300 h-screen overflow-hidden`}
+      className={`${isCollapsed ? "w-20" : "w-64"} shrink-0 relative hidden md:flex flex-col transition-[width] duration-300 h-screen overflow-hidden sticky top-0`}
     >
       {/* Background */}
       <div className="absolute inset-0 bg-card border-r border-border/60" />
