@@ -594,14 +594,14 @@ export function AdminUsers({
                 Показано {startIndex + 1}-{Math.min(endIndex, filteredUsers.length)} из {filteredUsers.length}
               </div>
               <div className="flex items-center gap-1 md:gap-2 order-1 sm:order-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="h-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white hover:border-transparent">
                   <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
                   <span className="hidden md:inline ml-1">Назад</span>
                 </Button>
                 <span className="text-xs md:text-sm px-1 md:px-2 whitespace-nowrap">
                   {currentPage} / {totalPages}
                 </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="h-8">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="h-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white hover:border-transparent">
                   <span className="hidden md:inline mr-1">Вперед</span>
                   <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
