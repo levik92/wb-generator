@@ -151,11 +151,11 @@ export const DashboardSidebar = ({ activeTab, onTabChange, profile }: DashboardS
             </button>
           </div>
         ) : (
-          <div className="group relative rounded-2xl border border-violet-500/25 bg-card overflow-hidden min-h-[104px] flex flex-col transition-colors hover:border-violet-500/50">
+          <div className="relative rounded-2xl border border-violet-500/25 bg-card overflow-hidden min-h-[104px] flex flex-col transition-colors hover:border-violet-500/50">
             <div className="relative px-3.5 pt-3 pb-2.5 bg-gradient-to-br from-violet-500/15 via-purple-500/8 to-transparent">
               <span
                 aria-hidden
-                className="pointer-events-none absolute -top-8 -right-6 w-20 h-20 rounded-full bg-violet-500/25 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity"
+                className="pointer-events-none absolute -top-8 -right-6 w-20 h-20 rounded-full bg-violet-500/25 blur-2xl opacity-70"
               />
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
