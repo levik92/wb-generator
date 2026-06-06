@@ -523,9 +523,9 @@ export function AdminPayments() {
                 <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
                   <span className="text-xs text-muted-foreground tabular-nums">{(paymentsPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(paymentsPage * ITEMS_PER_PAGE, filteredPayments.length)} из {filteredPayments.length}</span>
                   <div className="flex items-center gap-1">
-                    <Button variant="outline" size="icon" className="h-8 w-8" disabled={paymentsPage === 1} onClick={() => setPaymentsPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white hover:border-transparent" disabled={paymentsPage === 1} onClick={() => setPaymentsPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
                     <span className="text-sm px-2 tabular-nums">{paymentsPage} / {totalPaymentPages}</span>
-                    <Button variant="outline" size="icon" className="h-8 w-8" disabled={paymentsPage >= totalPaymentPages} onClick={() => setPaymentsPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white hover:border-transparent" disabled={paymentsPage >= totalPaymentPages} onClick={() => setPaymentsPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
                   </div>
                 </div>
               )}
@@ -741,9 +741,9 @@ export function AdminPayments() {
                 <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
                   <span className="text-xs text-muted-foreground tabular-nums">{(invoicesPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(invoicesPage * ITEMS_PER_PAGE, invoices.length)} из {invoices.length}</span>
                   <div className="flex items-center gap-1">
-                    <Button variant="outline" size="icon" className="h-8 w-8" disabled={invoicesPage === 1} onClick={() => setInvoicesPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white hover:border-transparent" disabled={invoicesPage === 1} onClick={() => setInvoicesPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
                     <span className="text-sm px-2 tabular-nums">{invoicesPage} / {totalInvoicePages}</span>
-                    <Button variant="outline" size="icon" className="h-8 w-8" disabled={invoicesPage >= totalInvoicePages} onClick={() => setInvoicesPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gradient-to-r hover:from-violet-500 hover:to-purple-600 hover:text-white hover:border-transparent" disabled={invoicesPage >= totalInvoicePages} onClick={() => setInvoicesPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
                   </div>
                 </div>
               )}
