@@ -189,7 +189,10 @@ export default function Pricing({
                   title: "Оплата прошла успешно!",
                   description: `Начислено ${data.tokens || finalTokens} токенов`,
                 });
-                setTimeout(() => { window.location.href = '/dashboard?payment=success'; }, 600);
+                const tk = data.tokens || finalTokens;
+                setTimeout(() => {
+                  window.location.href = `/payment/thanks?amount=${finalAmount}&tokens=${tk}`;
+                }, 600);
               },
               onFail: (reason: any) => {
                 console.warn('[CloudPayments] onFail:', reason);

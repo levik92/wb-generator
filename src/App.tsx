@@ -54,6 +54,7 @@ const Avito = lazy(() => import("./pages/Avito"));
 const AvitoThanks = lazy(() => import("./pages/AvitoThanks"));
 const Quiz = lazy(() => import("./pages/Quiz"));
 const QuizThanks = lazy(() => import("./pages/QuizThanks"));
+const PaymentThanks = lazy(() => import("./pages/PaymentThanks"));
 
 const queryClient = new QueryClient();
 
@@ -67,7 +68,7 @@ const PageLoader = () => (
 const SupportWidgetWrapper = () => {
   const location = useLocation();
   const path = location.pathname;
-  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet') || path.startsWith('/quiz') || path.startsWith('/promo') || path.startsWith('/avito');
+  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet') || path.startsWith('/quiz') || path.startsWith('/promo') || path.startsWith('/avito') || path.startsWith('/payment');
   if (isHidden) return null;
   return (
     <Suspense fallback={null}>
@@ -157,6 +158,7 @@ const App = () => {
             <Route path="/avito/thanks" element={<AvitoThanks />} />
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/quiz/thanks" element={<QuizThanks />} />
+            <Route path="/payment/thanks" element={<PaymentThanks />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

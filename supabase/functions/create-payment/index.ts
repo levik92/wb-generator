@@ -253,7 +253,7 @@ serve(async (req) => {
               },
             },
           },
-          successRedirectUrl: `${originUrl}/dashboard?payment=success`,
+          successRedirectUrl: `${originUrl}/payment/thanks?amount=${finalAmount}&tokens=${finalTokens}`,
           failRedirectUrl: `${originUrl}/dashboard?payment=failed`,
         },
         tokens: finalTokens,
@@ -273,7 +273,7 @@ serve(async (req) => {
       },
       confirmation: {
         type: 'redirect',
-        return_url: `${req.headers.get("origin") || PUBLIC_SITE_URL}/dashboard?payment=success`
+        return_url: `${req.headers.get("origin") || PUBLIC_SITE_URL}/payment/thanks?amount=${finalAmount}&tokens=${finalTokens}`
       },
       capture: true,
       description: `Пополнение баланса: ${body.packageName} (${finalTokens} токенов)`,
