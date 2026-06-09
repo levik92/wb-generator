@@ -253,7 +253,7 @@ serve(async (req) => {
               },
             },
           },
-          successRedirectUrl: `${originUrl}/dashboard?payment=success`,
+          successRedirectUrl: `${originUrl}/payment/thanks?amount=${finalAmount}&tokens=${finalTokens}`,
           failRedirectUrl: `${originUrl}/dashboard?payment=failed`,
         },
         tokens: finalTokens,
