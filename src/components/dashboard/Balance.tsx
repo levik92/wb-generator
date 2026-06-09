@@ -184,7 +184,7 @@ export default function Balance() {
                   return (
                     <div
                       key={idx}
-                      className="group bg-muted/30 rounded-xl p-2.5 sm:p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors"
+                      className="bg-muted/30 rounded-xl p-2.5 sm:p-3 flex items-center gap-3"
                     >
                       <div className="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
                         <Icon className="h-4 w-4 text-violet-600 dark:text-violet-300" />
