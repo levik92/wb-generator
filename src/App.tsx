@@ -68,7 +68,7 @@ const PageLoader = () => (
 const SupportWidgetWrapper = () => {
   const location = useLocation();
   const path = location.pathname;
-  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet') || path.startsWith('/quiz') || path.startsWith('/promo') || path.startsWith('/avito');
+  const isHidden = path.startsWith('/dashboard') || path.startsWith('/admin') || path.startsWith('/partners/cabinet') || path.startsWith('/quiz') || path.startsWith('/promo') || path.startsWith('/avito') || path.startsWith('/payment');
   if (isHidden) return null;
   return (
     <Suspense fallback={null}>
