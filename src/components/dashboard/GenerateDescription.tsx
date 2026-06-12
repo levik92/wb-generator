@@ -335,7 +335,7 @@ export const GenerateDescription = ({
     <div className="space-y-6 max-w-full overflow-hidden">
       {/* Hero — conversion-focused (same style as cards page) */}
       <CollapsibleInfoBlock storageKey={DESCRIPTION_PROMO_KEY} collapsedLabel="Подробнее о генерации описаний">
-        <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card">
           <span
             aria-hidden
             className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"

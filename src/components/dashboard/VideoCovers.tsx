@@ -486,7 +486,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
       {/* Hero — conversion-focused */}
       <CollapsibleInfoBlock storageKey={VIDEO_HERO_KEY} collapsedLabel="Подробнее о видеообложках">
-        <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+        <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card">
           <span aria-hidden className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl" />
           <span aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-purple-500/10 blur-3xl" />
           <div className="relative p-5 sm:p-6 pr-12 sm:pr-14">
@@ -550,7 +550,7 @@ export function VideoCovers({ profile, onTokensUpdate, onNavigate, preAttachedIm
 
       <CollapsibleInfoBlock storageKey={VIDEO_PROMO_KEY} mode="dismiss" collapsedLabel="Посмотреть примеры генераций">
         <div
-          className="group relative isolate overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors"
+          className="group relative isolate overflow-hidden rounded-2xl border border-border/50 bg-card transition-colors"
         >
           {/* Ambient drifting accents (stay inside bounds via overflow-hidden) */}
           <motion.span

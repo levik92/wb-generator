@@ -1952,7 +1952,7 @@ export const GenerateCards = ({
 
       {/* Hero — conversion-focused */}
       <CollapsibleInfoBlock storageKey={CARDS_HERO_KEY} collapsedLabel="Подробнее о генерации карточек">
-      <div className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-card">
+      <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card">
         <span
           aria-hidden
           className="pointer-events-none absolute -top-16 -right-10 w-64 h-64 rounded-full bg-violet-500/15 blur-3xl"
@@ -2023,7 +2023,7 @@ export const GenerateCards = ({
 
       {/* Cards Promo Banner */}
       <CollapsibleInfoBlock storageKey={CARDS_PROMO_KEY} mode="dismiss" collapsedLabel="Посмотреть примеры генераций">
-        <div className="group relative isolate overflow-hidden rounded-2xl border border-violet-500/20 bg-card hover:border-violet-500/35 transition-colors">
+        <div className="group relative isolate overflow-hidden rounded-2xl border border-border/50 bg-card transition-colors">
           {/* Ambient drifting accents */}
           <motion.span
             aria-hidden
