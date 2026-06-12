@@ -174,26 +174,12 @@ export const DashboardBanners = ({ userId }: DashboardBannersProps) => {
           }}
         >
           <div className="relative flex flex-col gap-3 p-4 pr-12 sm:p-5 sm:pr-14 md:flex-row md:items-center md:gap-5 md:p-6 md:pr-20 lg:pr-24">
-            {/* Icon badge */}
-            <div className="hidden sm:flex shrink-0 h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md border border-white/25 shadow-inner ring-1 ring-white/10">
-              <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-white drop-shadow" />
-            </div>
-
             {/* Text */}
             <div
               key={currentBanner.id}
               className="flex-1 min-w-0 animate-fade-in"
               aria-live="polite"
             >
-              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-white/25 px-2.5 py-0.5 backdrop-blur-md">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-white/70 opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
-                </span>
-                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.12em] text-white/95">
-                  Новое
-                </span>
-              </div>
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-white leading-snug break-words drop-shadow-sm">
                 {currentBanner.title}
               </h3>
@@ -201,6 +187,7 @@ export const DashboardBanners = ({ userId }: DashboardBannersProps) => {
                 {currentBanner.description}
               </p>
             </div>
+
 
             {/* Desktop nav arrows */}
             {hasMultiple && (
