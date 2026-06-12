@@ -139,7 +139,7 @@ export const DashboardBanners = ({ userId }: DashboardBannersProps) => {
       onMouseLeave={() => setIsPaused(false)}
     >
       <div
-        className="group relative w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-white/15 shadow-[0_8px_30px_-12px_rgba(76,29,149,0.35)] transition-[background] duration-700 ease-out"
+        className="group relative w-full overflow-hidden rounded-xl border border-white/15 shadow-[0_8px_30px_-12px_rgba(76,29,149,0.35)] transition-[background] duration-700 ease-out"
         style={{
           background: `linear-gradient(125deg, ${currentBanner.gradient_start} 0%, ${currentBanner.gradient_end} 100%)`,
         }}
